@@ -97,6 +97,7 @@ export const SIDEBAR_ITEMS = [
         subItems: [
           { title: "Database", path: "/system/database" },
           { title: "Permissions", path: "/system/permissions" },
+          { title: "Import & Export", path: "/system/import-export" },
         ],
       },
     ],

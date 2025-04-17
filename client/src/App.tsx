@@ -18,6 +18,7 @@ import ReportsIndex from "@/pages/reports/index";
 import SystemIndex from "@/pages/system/index";
 import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions";
+import ImportExport from "@/pages/system/import-export";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
 import { useEffect } from "react";
@@ -70,6 +71,7 @@ function App() {
         <Route path="/system" component={SystemIndex} />
         <Route path="/system/database" component={Database} />
         <Route path="/system/permissions" component={Permissions} />
+        <Route path="/system/import-export" component={ImportExport} />
         <Route component={NotFound} />
       </Switch>
     </MainLayout>
