@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { JobOrder, CreateRoll } from "@shared/schema";
+import { JobOrder, CreateRoll, Roll } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
+import { API_ENDPOINTS } from "@/lib/constants";
 
 interface RollDialogProps {
   open: boolean;
@@ -17,31 +19,46 @@ interface RollDialogProps {
   isLoading: boolean;
 }
 
-const formSchema = z.object({
-  extrudingQty: z.coerce.number().positive("Quantity must be greater than 0"),
-  jobOrderId: z.number().positive(),
-});
-
 export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }: RollDialogProps) {
   const [stage] = useState<string>("extrusion");
+
+  // Fetch existing rolls for this job order to calculate remaining quantity
+  const { data: existingRolls = [] } = useQuery<Roll[]>({
+    queryKey: [jobOrder ? `${API_ENDPOINTS.JOB_ORDERS}/${jobOrder.id}/rolls` : null],
+    enabled: !!jobOrder,
+  });
+
+  // Calculate remaining quantity
+  const totalExtrudedQty = existingRolls.reduce((total, roll) => 
+    total + (roll.extrudingQty || 0), 0);
+  const remainingQty = jobOrder ? Math.max(0, jobOrder.quantity - totalExtrudedQty) : 0;
+
+  // Dynamic schema based on remaining quantity
+  const formSchema = z.object({
+    extrudingQty: z.coerce
+      .number()
+      .positive("Quantity must be greater than 0")
+      .max(remainingQty, `Cannot exceed remaining quantity of ${remainingQty} kg`),
+    jobOrderId: z.number().positive(),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      extrudingQty: 0,
+      extrudingQty: remainingQty > 0 ? remainingQty : 0, // Default to the remaining quantity
       jobOrderId: jobOrder?.id || 0,
     },
   });
 
-  // Update form values when jobOrder changes
+  // Update form values when jobOrder or remaining quantity changes
   useEffect(() => {
     if (jobOrder) {
       form.reset({
-        extrudingQty: 0,
+        extrudingQty: remainingQty > 0 ? remainingQty : 0,
         jobOrderId: jobOrder.id
       });
     }
-  }, [jobOrder, form]);
+  }, [jobOrder, remainingQty, form]);
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
     console.log("Form submitted with values:", values);
@@ -82,17 +99,36 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
                   <div className="text-sm">#{jobOrder.id}</div>
                 </div>
 
+                <div className="grid gap-1 bg-secondary-50 p-3 rounded-md">
+                  <div className="text-sm font-medium">Job Order Details</div>
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    <div>
+                      <div className="text-xs text-secondary-500">Total Quantity</div>
+                      <div className="text-sm font-medium">{jobOrder.quantity} kg</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-secondary-500">Already Extruded</div>
+                      <div className="text-sm font-medium">{totalExtrudedQty} kg</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-secondary-500">Remaining Quantity</div>
+                      <div className="text-sm font-medium text-primary-600">{remainingQty} kg</div>
+                    </div>
+                  </div>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="extrudingQty"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantity (kg)</FormLabel>
+                      <FormLabel>Roll Quantity (kg)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           step="0.01"
                           min="0"
+                          max={remainingQty}
                           placeholder="Enter quantity"
                           {...field}
                         />
@@ -101,11 +137,6 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
                     </FormItem>
                   )}
                 />
-
-                <div className="grid gap-1">
-                  <div className="text-sm font-medium">Remaining for Job Order</div>
-                  <div className="text-sm">{jobOrder.quantity} kg</div>
-                </div>
               </div>
 
               <DialogFooter>
@@ -116,7 +147,10 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  disabled={isLoading || remainingQty <= 0}
+                >
                   {isLoading ? "Creating..." : "Create Roll"}
                 </Button>
               </DialogFooter>
