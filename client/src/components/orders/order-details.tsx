@@ -20,7 +20,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDateString, calculateProgress } from "@/lib/utils";
-import { Order, Customer, JobOrder, CustomerProduct, Roll } from "@shared/schema";
+import { Order, Customer, JobOrder, CustomerProduct, Roll, Item, MasterBatch } from "@shared/schema";
 import { toast } from "@/hooks/use-toast";
 
 interface OrderDetailsProps {
@@ -54,6 +54,16 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   
   const { data: rolls } = useQuery<Roll[]>({
     queryKey: [API_ENDPOINTS.ROLLS],
+  });
+  
+  // Fetch items to get their names
+  const { data: items } = useQuery<Item[]>({
+    queryKey: [API_ENDPOINTS.ITEMS],
+  });
+  
+  // Fetch master batches to get their names
+  const { data: masterBatches } = useQuery<MasterBatch[]>({
+    queryKey: [API_ENDPOINTS.MASTER_BATCHES],
   });
   
   // Mutation to update order status
@@ -211,14 +221,20 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
       // Convert yes/no to Y/N for printed
       const printedValue = product?.printed ? (product.printed === "yes" ? "Y" : "N") : "N";
       
+      // Get item name
+      const item = items?.find(i => i.id === product?.itemId);
+      
+      // Get master batch name
+      const masterBatch = masterBatches?.find(mb => mb.id === product?.masterBatchId);
+      
       return `
         <tr>
           <td>${index + 1}</td>
-          <td>${product?.itemId || "N/A"}</td>
+          <td>${item?.name || "N/A"}</td>
           <td>${product?.sizeCaption || "N/A"}</td>
           <td>${product?.thickness || "N/A"}</td>
           <td>${product?.rawMaterial || "N/A"}</td>
-          <td>${product?.masterBatchId || "N/A"}</td>
+          <td>${masterBatch?.name || "N/A"}</td>
           <td>${jobOrder.quantity}</td>
           <td>${printedValue}</td>
           <td>${product?.printingCylinder || "0"}</td>
@@ -236,11 +252,12 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
     const rollRows = orderRolls.map(roll => {
       const jobOrder = jobOrders?.find(jo => jo.id === roll.jobOrderId);
       const product = jobOrder ? getCustomerProduct(jobOrder) : null;
+      const item = items?.find(i => i.id === product?.itemId);
       
       return `
         <tr>
           <td>${roll.id}</td>
-          <td>${product?.itemId || "N/A"}</td>
+          <td>${item?.name || "N/A"}</td>
           <td>${roll.extrudingQty || 0}</td>
           <td>${roll.printingQty || 0}</td>
           <td>${roll.cuttingQty || 0}</td>
@@ -513,13 +530,18 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
                 <tbody className="text-secondary-800">
                   {jobOrders?.map(jobOrder => {
                     const product = getCustomerProduct(jobOrder);
+                    // Get item name
+                    const item = items?.find(i => i.id === product?.itemId);
+                    // Get master batch name
+                    const masterBatch = masterBatches?.find(mb => mb.id === product?.masterBatchId);
+                    
                     return (
                       <tr key={jobOrder.id} className="border-b border-secondary-100">
-                        <td className="py-3 px-4">{product?.itemId || "N/A"}</td>
+                        <td className="py-3 px-4">{item?.name || "N/A"}</td>
                         <td className="py-3 px-4">{product?.sizeCaption || "N/A"}</td>
                         <td className="py-3 px-4">{product?.thickness || "N/A"}</td>
                         <td className="py-3 px-4">{product?.rawMaterial || "N/A"}</td>
-                        <td className="py-3 px-4">{product?.masterBatchId || "N/A"}</td>
+                        <td className="py-3 px-4">{masterBatch?.name || "N/A"}</td>
                         <td className="py-3 px-4">{jobOrder.quantity}</td>
                         <td className="py-3 px-4">{product?.printed || "N/A"}</td>
                         <td className="py-3 px-4">{product?.printingCylinder || "0"}</td>
@@ -564,11 +586,13 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
                       const product = jobOrder 
                         ? getCustomerProduct(jobOrder)
                         : null;
+                      // Get item name
+                      const item = items?.find(i => i.id === product?.itemId);
                       
                       return (
                         <tr key={roll.id} className="border-b border-secondary-100">
                           <td className="py-3 px-4">{roll.id}</td>
-                          <td className="py-3 px-4">{product?.itemId || "N/A"}</td>
+                          <td className="py-3 px-4">{item?.name || "N/A"}</td>
                           <td className="py-3 px-4">{roll.extrudingQty || 0}</td>
                           <td className="py-3 px-4">{roll.printingQty || 0}</td>
                           <td className="py-3 px-4">{roll.cuttingQty || 0}</td>
