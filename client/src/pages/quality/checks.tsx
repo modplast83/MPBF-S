@@ -294,8 +294,8 @@ export default function QualityChecks() {
                       <FormItem>
                         <FormLabel>Roll ID</FormLabel>
                         <Select 
-                          onValueChange={(value) => field.onChange(value || null)} 
-                          defaultValue={field.value || undefined}
+                          onValueChange={(value) => field.onChange(value === "none" ? null : value)} 
+                          defaultValue={field.value || "none"}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -303,7 +303,7 @@ export default function QualityChecks() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">None</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
                             {rolls && rolls.map((roll: Roll) => (
                               <SelectItem key={roll.id} value={roll.id}>
                                 {roll.id} - {roll.currentStage}
@@ -323,8 +323,8 @@ export default function QualityChecks() {
                       <FormItem>
                         <FormLabel>Job Order ID</FormLabel>
                         <Select 
-                          onValueChange={(value) => field.onChange(value ? parseInt(value) : null)} 
-                          defaultValue={field.value?.toString() || undefined}
+                          onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))} 
+                          defaultValue={field.value?.toString() || "none"}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -332,7 +332,7 @@ export default function QualityChecks() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">None</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
                             {jobOrders && jobOrders.map((jobOrder: JobOrder) => (
                               <SelectItem key={jobOrder.id} value={jobOrder.id.toString()}>
                                 Job Order #{jobOrder.id}
@@ -408,7 +408,7 @@ export default function QualityChecks() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
                           <SelectItem value="minor">Minor</SelectItem>
                           <SelectItem value="major">Major</SelectItem>
                           <SelectItem value="critical">Critical</SelectItem>
