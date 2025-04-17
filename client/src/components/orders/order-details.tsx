@@ -22,7 +22,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { formatDateString, calculateProgress } from "@/lib/utils";
 import { Order, Customer, JobOrder, CustomerProduct, Roll, Item, MasterBatch } from "@shared/schema";
 import { toast } from "@/hooks/use-toast";
-import { OrderSms } from "./order-sms";
 
 interface OrderDetailsProps {
   orderId: number;
@@ -513,7 +512,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
           {/* SMS Messages */}
           {customer && order && (
             <div className="mt-8 mb-8">
-              <OrderSms order={order} customer={customer} />
+              {/* SMS Management has been moved to the System Settings page */}
             </div>
           )}
           

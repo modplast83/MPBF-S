@@ -52,7 +52,7 @@ export default function SystemIndex() {
         <h1 className="text-2xl font-bold text-secondary-900">System Settings</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <SettingCard
           title="Database Management"
           description="Backup, restore, and manage database operations"
@@ -65,6 +65,20 @@ export default function SystemIndex() {
           description="Configure user roles and access permissions"
           icon="admin_panel_settings"
           path="/system/permissions"
+        />
+
+        <SettingCard
+          title="SMS Management"
+          description="Send and manage SMS messages, track status"
+          icon="message"
+          path="/system/sms-management"
+        />
+        
+        <SettingCard
+          title="Import & Export"
+          description="Import and export data for your factory system"
+          icon="import_export"
+          path="/system/import-export"
         />
       </div>
 

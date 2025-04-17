@@ -19,6 +19,7 @@ import SystemIndex from "@/pages/system/index";
 import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions";
 import ImportExport from "@/pages/system/import-export";
+import SmsManagement from "@/pages/system/sms-management";
 import QualityIndex from "@/pages/quality/index";
 import QualityCheckTypes from "@/pages/quality/check-types";
 import QualityChecks from "@/pages/quality/checks";
@@ -99,6 +100,7 @@ function App() {
             <Route path="/system/database" component={Database} />
             <Route path="/system/permissions" component={Permissions} />
             <Route path="/system/import-export" component={ImportExport} />
+            <Route path="/system/sms-management" component={SmsManagement} />
             <Route component={NotFound} />
           </Switch>
         </MainLayout>
