@@ -34,11 +34,11 @@ export default function Sidebar() {
   return (
     <aside 
       className={cn(
-        "bg-blue-800 text-white h-screen fixed left-0 top-0 z-50 overflow-y-auto transition-all duration-300",
+        "bg-black text-white h-screen fixed left-0 top-0 z-50 overflow-y-auto transition-all duration-300",
         expanded ? "w-[250px]" : "w-[64px]"
       )}
     >
-      <div className="p-4 flex justify-between items-center border-b border-blue-700">
+      <div className="p-4 flex justify-between items-center border-b border-gray-800">
         <div className="flex items-center space-x-3">
           <img 
             src="/assets/company-logo.png" 
@@ -61,7 +61,7 @@ export default function Sidebar() {
         {SIDEBAR_ITEMS.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {expanded && (
-              <div className="px-4 py-2 text-blue-200 text-xs font-semibold uppercase">
+              <div className="px-4 py-2 text-gray-400 text-xs font-semibold uppercase">
                 {section.title}
               </div>
             )}
@@ -75,8 +75,8 @@ export default function Sidebar() {
                   >
                     <CollapsibleTrigger
                       className={cn(
-                        "flex items-center px-4 py-3 w-full hover:bg-blue-700 text-white",
-                        isActive(item.path) && "bg-blue-600"
+                        "flex items-center px-4 py-3 w-full hover:bg-gray-900 text-white",
+                        isActive(item.path) && "bg-gray-800"
                       )}
                     >
                       <span className="material-icons mr-3">{item.icon}</span>
@@ -97,8 +97,8 @@ export default function Sidebar() {
                             key={subIndex} 
                             href={subItem.path}
                             className={cn(
-                              "flex items-center pl-11 py-2 hover:bg-blue-700 text-white",
-                              isActive(subItem.path) && "bg-blue-600"
+                              "flex items-center pl-11 py-2 hover:bg-gray-900 text-white",
+                              isActive(subItem.path) && "bg-gray-800"
                             )}
                           >
                             {subItem.title}
@@ -111,8 +111,8 @@ export default function Sidebar() {
                   <Link 
                     href={item.path}
                     className={cn(
-                      "flex items-center px-4 py-3 hover:bg-blue-700 text-white",
-                      isActive(item.path) && "bg-blue-600"
+                      "flex items-center px-4 py-3 hover:bg-gray-900 text-white",
+                      isActive(item.path) && "bg-gray-800"
                     )}
                   >
                     <span className="material-icons mr-3">{item.icon}</span>
@@ -123,21 +123,21 @@ export default function Sidebar() {
             ))}
             
             {sectionIndex < SIDEBAR_ITEMS.length - 1 && (
-              <Separator className="my-2 bg-blue-700 opacity-50" />
+              <Separator className="my-2 bg-gray-800 opacity-50" />
             )}
           </div>
         ))}
       </nav>
       
-      <div className="absolute bottom-0 w-full border-t border-blue-700 p-4">
+      <div className="absolute bottom-0 w-full border-t border-gray-800 p-4">
         <div className="flex items-center">
-          <div className="h-9 w-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+          <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold">
             A
           </div>
           {expanded && (
             <div className="ml-3">
               <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-blue-300">Administrator</p>
+              <p className="text-xs text-gray-400">Administrator</p>
             </div>
           )}
         </div>
