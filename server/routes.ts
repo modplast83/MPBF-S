@@ -962,6 +962,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Job order not found" });
       }
       
+      // For status updates, we'll accept a simpler object
+      if (req.body && typeof req.body === 'object' && 'status' in req.body) {
+        const statusSchema = z.object({
+          status: z.enum(["pending", "in_progress", "extrusion_completed", "completed", "cancelled"]),
+        });
+        
+        try {
+          const { status } = statusSchema.parse(req.body);
+          const updatedJobOrder = await storage.updateJobOrder(parseInt(req.params.id), { status });
+          return res.json(updatedJobOrder);
+        } catch (statusError) {
+          // Not a valid status update, continue with full validation
+        }
+      }
+      
       const validatedData = insertJobOrderSchema.parse(req.body);
       
       // Verify order exists

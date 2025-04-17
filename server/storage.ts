@@ -544,7 +544,23 @@ export class MemStorage implements IStorage {
 
   async createJobOrder(jobOrder: InsertJobOrder): Promise<JobOrder> {
     const id = this.currentJobOrderId++;
-    const newJobOrder: JobOrder = { ...jobOrder, id };
+    
+    // Extract the customerId from the related customer product if not provided
+    let customerId = jobOrder.customerId;
+    if (!customerId) {
+      const customerProduct = this.customerProducts.get(jobOrder.customerProductId);
+      if (customerProduct) {
+        customerId = customerProduct.customerId;
+      }
+    }
+    
+    const newJobOrder: JobOrder = { 
+      ...jobOrder, 
+      id,
+      status: jobOrder.status || "pending", 
+      customerId 
+    };
+    
     this.jobOrders.set(id, newJobOrder);
     
     // Update order status to processing when a job order is created
