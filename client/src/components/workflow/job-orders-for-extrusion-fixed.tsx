@@ -56,6 +56,17 @@ export function JobOrdersForExtrusion() {
   const { data: extrusionRolls = [] } = useQuery<Roll[]>({
     queryKey: [`${API_ENDPOINTS.ROLLS}/stage/extrusion`],
   });
+  
+  const { data: printingRolls = [] } = useQuery<Roll[]>({
+    queryKey: [`${API_ENDPOINTS.ROLLS}/stage/printing`],
+  });
+  
+  const { data: cuttingRolls = [] } = useQuery<Roll[]>({
+    queryKey: [`${API_ENDPOINTS.ROLLS}/stage/cutting`],
+  });
+  
+  // Combine all rolls for tracking progress across stages
+  const allRolls = [...extrusionRolls, ...printingRolls, ...cuttingRolls];
 
   // Mutation for creating a roll
   const createRollMutation = useMutation({
@@ -65,7 +76,10 @@ export function JobOrdersForExtrusion() {
     onSuccess: (_data, variables) => {
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${variables.jobOrderId}/rolls`] });
+      // Invalidate rolls in all stages to ensure proper progress calculation
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/extrusion`] });
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/printing`] });
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/cutting`] });
       
       // Show success toast
       toast({
@@ -125,18 +139,18 @@ export function JobOrdersForExtrusion() {
     }
   };
 
-  // Calculate the progress percentage for a job order using the extrusionRolls array
+  // Calculate the progress percentage for a job order using rolls from all stages
   const calculateProgress = (jobOrder: JobOrder): number => {
-    const jobOrderRolls = extrusionRolls.filter(roll => roll.jobOrderId === jobOrder.id);
+    const jobOrderRolls = allRolls.filter(roll => roll.jobOrderId === jobOrder.id);
     if (!jobOrderRolls.length) return 0;
     
     const totalExtrudedQty = jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
     return Math.min(Math.round((totalExtrudedQty / jobOrder.quantity) * 100), 100);
   };
 
-  // Check if job order is fully extruded using the extrusionRolls array
+  // Check if job order is fully extruded using rolls from all stages
   const isJobOrderFullyExtruded = (jobOrder: JobOrder): boolean => {
-    const jobOrderRolls = extrusionRolls.filter(roll => roll.jobOrderId === jobOrder.id);
+    const jobOrderRolls = allRolls.filter(roll => roll.jobOrderId === jobOrder.id);
     if (!jobOrderRolls.length) return false;
     
     const totalExtrudedQty = jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
@@ -148,7 +162,7 @@ export function JobOrdersForExtrusion() {
     const jobOrder = jobOrders.find(jo => jo.id === jobOrderId);
     if (!jobOrder) return;
 
-    const jobOrderRolls = extrusionRolls.filter(roll => roll.jobOrderId === jobOrderId);
+    const jobOrderRolls = allRolls.filter(roll => roll.jobOrderId === jobOrderId);
     if (!jobOrderRolls.length) return;
     
     const totalExtrudedQty = jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
