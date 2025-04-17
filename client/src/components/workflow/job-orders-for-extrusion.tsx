@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import {
@@ -26,6 +26,8 @@ import { API_ENDPOINTS } from "@/lib/constants";
 
 export function JobOrdersForExtrusion() {
   const [expandedOrders, setExpandedOrders] = useState<number[]>([]);
+  const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
+  const [isRollDialogOpen, setIsRollDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -44,17 +46,26 @@ export function JobOrdersForExtrusion() {
     queryKey: [API_ENDPOINTS.CUSTOMERS],
   });
 
-  // Fetch rolls by job order when expanded
-  const fetchRollsByJobOrder = (jobOrderId: number) => {
-    return useQuery<Roll[]>({
-      queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${jobOrderId}/rolls`],
-      enabled: expandedOrders.includes(jobOrderId),
-    });
-  };
+  // Hooks must be called at the top level, not in a function
+  // For each job order, create a separate query
+  const rollsQueries = useMemo(() => {
+    if (!jobOrders) return {};
+    
+    return jobOrders.reduce<Record<number, ReturnType<typeof useQuery<Roll[]>>>>(
+      (acc, jobOrder) => {
+        acc[jobOrder.id] = useQuery<Roll[]>({
+          queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${jobOrder.id}/rolls`],
+          enabled: expandedOrders.includes(jobOrder.id),
+        });
+        return acc;
+      },
+      {}
+    );
+  }, [jobOrders, expandedOrders]);
 
   // Mutation for creating a roll
   const createRollMutation = useMutation({
-    mutationFn: (data: Omit<InsertRoll, "id" | "serialNumber">) => {
+    mutationFn: (data: CreateRoll) => {
       return apiRequest(`${API_ENDPOINTS.ROLLS}`, "POST", data);
     },
     onSuccess: (_data, variables) => {
@@ -102,21 +113,19 @@ export function JobOrdersForExtrusion() {
 
   // Handle creating a new roll for a job order
   const handleCreateRoll = (jobOrder: JobOrder) => {
-    const newRoll: Omit<InsertRoll, "id" | "serialNumber"> = {
-      jobOrderId: jobOrder.id,
-      extrudingQty: 0, // Will be filled in by user in dialog
-      printingQty: 0,  // Will be automatically set equal to extrudingQty
-      cuttingQty: 0,   // Will be filled in later in cutting stage
-      currentStage: "extrusion",
-      status: "pending",
-    };
-
-    createRollMutation.mutate(newRoll);
+    setSelectedJobOrder(jobOrder);
+    setIsRollDialogOpen(true);
+  };
+  
+  // Handle roll dialog submission
+  const handleRollDialogSubmit = (data: CreateRoll) => {
+    createRollMutation.mutate(data);
+    setIsRollDialogOpen(false);
     
     // Update job order status to in_progress if it's pending
-    if (jobOrder.status === "pending") {
+    if (selectedJobOrder && selectedJobOrder.status === "pending") {
       updateJobOrderStatusMutation.mutate({
-        id: jobOrder.id,
+        id: selectedJobOrder.id,
         status: "in_progress",
       });
     }
@@ -124,19 +133,19 @@ export function JobOrdersForExtrusion() {
 
   // Check if all rolls for a job order meet the total quantity requirement
   const isJobOrderFullyExtruded = (jobOrder: JobOrder): boolean => {
-    const { data: rolls } = fetchRollsByJobOrder(jobOrder.id);
-    if (!rolls || rolls.length === 0) return false;
+    const query = rollsQueries[jobOrder.id];
+    if (!query || !query.data || query.data.length === 0) return false;
     
-    const totalExtrudedQty = rolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
+    const totalExtrudedQty = query.data.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
     return totalExtrudedQty >= jobOrder.quantity;
   };
 
   // Calculate the progress percentage for a job order
   const calculateProgress = (jobOrder: JobOrder): number => {
-    const { data: rolls } = fetchRollsByJobOrder(jobOrder.id);
-    if (!rolls || rolls.length === 0) return 0;
+    const query = rollsQueries[jobOrder.id];
+    if (!query || !query.data || query.data.length === 0) return 0;
     
-    const totalExtrudedQty = rolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
+    const totalExtrudedQty = query.data.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
     return Math.min(Math.round((totalExtrudedQty / jobOrder.quantity) * 100), 100);
   };
 
@@ -145,10 +154,10 @@ export function JobOrdersForExtrusion() {
     const jobOrder = jobOrders?.find(jo => jo.id === jobOrderId);
     if (!jobOrder) return;
 
-    const { data: rolls } = fetchRollsByJobOrder(jobOrderId);
-    if (!rolls || rolls.length === 0) return;
+    const query = rollsQueries[jobOrderId];
+    if (!query || !query.data || query.data.length === 0) return;
     
-    const totalExtrudedQty = rolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
+    const totalExtrudedQty = query.data.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
     
     // If job order is fully extruded, update status
     if (totalExtrudedQty >= jobOrder.quantity && jobOrder.status !== "extrusion_completed") {
@@ -186,7 +195,7 @@ export function JobOrdersForExtrusion() {
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
     if (!product) return "Unknown Product";
     
-    return `${product.sizeCaption || ""} ${product.thickness ? product.thickness + 'mm' : ""} ${product.designType || ""}`;
+    return `${product.sizeCaption || ""} ${product.thickness ? product.thickness + 'mm' : ""}`;
   };
 
   // Filter job orders for the extrusion stage (pending or in_progress)
@@ -212,6 +221,15 @@ export function JobOrdersForExtrusion() {
 
   return (
     <div className="space-y-4">
+      {/* Roll Creation Dialog */}
+      <RollDialog
+        open={isRollDialogOpen}
+        onOpenChange={setIsRollDialogOpen}
+        jobOrder={selectedJobOrder}
+        onSubmit={handleRollDialogSubmit}
+        isLoading={createRollMutation.isPending}
+      />
+      
       {jobOrdersForExtrusion.length === 0 ? (
         <Card className="bg-white border border-dashed border-secondary-200">
           <CardContent className="py-6 text-center">
@@ -226,7 +244,8 @@ export function JobOrdersForExtrusion() {
           className="space-y-3"
         >
           {jobOrdersForExtrusion.map((jobOrder) => {
-            const { data: rolls, isLoading: rollsLoading } = fetchRollsByJobOrder(jobOrder.id);
+            const query = rollsQueries[jobOrder.id] || { data: [], isLoading: false };
+            const { data: rolls = [], isLoading: rollsLoading } = query;
             const isExpanded = expandedOrders.includes(jobOrder.id);
             const progressPercentage = calculateProgress(jobOrder);
             const isComplete = isJobOrderFullyExtruded(jobOrder);
