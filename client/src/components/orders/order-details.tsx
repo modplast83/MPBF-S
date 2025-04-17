@@ -80,7 +80,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
       await apiRequest("POST", API_ENDPOINTS.ROLLS, {
         jobOrderId: selectedJobOrder.id,
         extrudingQty: rollQuantity,
-        printingQty: 0,
+        printingQty: rollQuantity, // Set printing quantity equal to extrusion quantity
         cuttingQty: 0,
         currentStage: "extrusion",
         status: "pending",
@@ -608,6 +608,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
           <div className="space-y-4 py-4">
             <p className="text-sm text-secondary-500 mb-4">
               Roll serial number will be automatically generated in sequence for this job order.
+              Printing quantity will be automatically set to equal extrusion quantity.
             </p>
             
             <div className="space-y-2">
