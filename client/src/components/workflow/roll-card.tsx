@@ -65,6 +65,12 @@ export function RollCard({ roll }: RollCardProps) {
     updateData.status = nextStatus;
     updateData.currentStage = nextStage;
     
+    // Add toast notification for better feedback
+    toast({
+      title: `${roll.currentStage.charAt(0).toUpperCase() + roll.currentStage.slice(1)} Completed`,
+      description: `Roll #${roll.serialNumber} has moved to ${nextStage} stage.`,
+    });
+    
     updateRollMutation.mutate(updateData);
   };
   
