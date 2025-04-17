@@ -10,9 +10,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const { toast } = useToast();
+  
+  // Function to handle logout
+  const handleLogout = () => {
+    toast({
+      title: "Logout functionality",
+      description: "Full authentication system is not implemented in this demo version.",
+      variant: "default",
+    });
+  };
   
   // Function to get current page title based on location
   const getCurrentPageTitle = () => {
@@ -88,7 +99,7 @@ export default function Header() {
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleLogout}>
                 <span className="material-icons mr-2 text-sm">logout</span>
                 <span>Logout</span>
               </DropdownMenuItem>
