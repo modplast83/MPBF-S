@@ -34,6 +34,10 @@ import { useEffect } from "react";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
+import ToolsPage from "@/pages/tools/ToolsPage";
+import BagWeightCalculator from "@/pages/tools/bag-weight";
+import InkConsumptionCalculator from "@/pages/tools/ink-consumption";
+import UtilityTools from "@/pages/tools/utilities";
 
 function App() {
   // Remove any existing demo data flag
@@ -72,6 +76,10 @@ function App() {
             <ProtectedRoute path="/system/permissions" component={Permissions} />
             <ProtectedRoute path="/system/import-export" component={ImportExport} />
             <ProtectedRoute path="/system/sms" component={SmsIndex} />
+            <ProtectedRoute path="/tools" component={ToolsPage} />
+            <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} />
+            <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} />
+            <ProtectedRoute path="/tools/utilities" component={UtilityTools} />
             <Route component={NotFound} />
           </Switch>
         </MainLayout>

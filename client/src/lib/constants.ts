@@ -109,6 +109,16 @@ export const SIDEBAR_ITEMS = [
         icon: "bar_chart",
       },
       {
+        title: "Tools",
+        path: "/tools",
+        icon: "calculate",
+        subItems: [
+          { title: "Bag Weight Calculator", path: "/tools/bag-weight" },
+          { title: "Ink Consumption", path: "/tools/ink-consumption" },
+          { title: "Utility Tools", path: "/tools/utilities" },
+        ],
+      },
+      {
         title: "System Settings",
         path: "/system",
         icon: "admin_panel_settings",
