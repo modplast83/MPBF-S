@@ -1,0 +1,177 @@
+  // Demo data endpoint - for initializing test data
+  app.post("/api/init-demo-data", async (_req: Request, res: Response) => {
+    try {
+      // Create a customer
+      const customer = await storage.createCustomer({
+        id: "CUST001",
+        code: "PH001",
+        name: "Price House",
+        nameAr: "",
+        userId: null,
+        plateDrawerCode: "A-01",
+      });
+      
+      // Create customer products
+      const product1 = await storage.createCustomerProduct({
+        customerId: customer.id,
+        categoryId: "CAT001", // Using the one created in initializeData()
+        itemId: "ITM019",
+        sizeCaption: "9×9+28",
+        width: 9,
+        leftF: 9,
+        rightF: 28,
+        thickness: 15,
+        thicknessOne: 15,
+        printingCylinder: 0,
+        lengthCm: 0,
+        cuttingLength: 0,
+        rawMaterial: "HDPE",
+        masterBatchId: "MB001",
+        printed: "/",
+        cuttingUnit: "Kg",
+        unitWeight: 1,
+        packing: "20K/Bag",
+        punching: "None",
+        cover: "-",
+        volum: null,
+        knife: null,
+        notes: null,
+      });
+      
+      const product2 = await storage.createCustomerProduct({
+        customerId: customer.id,
+        categoryId: "CAT001",
+        itemId: "ITM020",
+        sizeCaption: "10×10+35",
+        width: 10,
+        leftF: 10,
+        rightF: 35,
+        thickness: 12,
+        thicknessOne: 12,
+        printingCylinder: 0,
+        lengthCm: 0,
+        cuttingLength: 0,
+        rawMaterial: "HDPE",
+        masterBatchId: "MB001",
+        printed: "/",
+        cuttingUnit: "Kg",
+        unitWeight: 1,
+        packing: "20K/Bag",
+        punching: "None",
+        cover: "-",
+        volum: null,
+        knife: null,
+        notes: null,
+      });
+      
+      const product3 = await storage.createCustomerProduct({
+        customerId: customer.id,
+        categoryId: "CAT001",
+        itemId: "ITM022",
+        sizeCaption: "12×12+42",
+        width: 12,
+        leftF: 12,
+        rightF: 42,
+        thickness: 13,
+        thicknessOne: 13,
+        printingCylinder: 28,
+        lengthCm: 71.12,
+        cuttingLength: 71.12,
+        rawMaterial: "HDPE",
+        masterBatchId: "MB001",
+        printed: "/",
+        cuttingUnit: "Kg",
+        unitWeight: 1,
+        packing: "20K/Bag",
+        punching: "None",
+        cover: "-",
+        volum: null,
+        knife: null,
+        notes: null,
+      });
+      
+      // Create an order
+      const order = await storage.createOrder({
+        customerId: customer.id,
+        note: "",
+        userId: "U0001",
+      });
+      
+      // Create job orders
+      const jobOrder1 = await storage.createJobOrder({
+        orderId: order.id,
+        customerProductId: product1.id,
+        quantity: 500,
+      });
+      
+      const jobOrder2 = await storage.createJobOrder({
+        orderId: order.id,
+        customerProductId: product2.id,
+        quantity: 600,
+      });
+      
+      const jobOrder3 = await storage.createJobOrder({
+        orderId: order.id,
+        customerProductId: product3.id,
+        quantity: 400,
+      });
+      
+      // Create rolls
+      await storage.createRoll({
+        id: "EX-124",
+        jobOrderId: jobOrder1.id,
+        serialNumber: "124",
+        extrudingQty: 100,
+        printingQty: 0,
+        cuttingQty: 0,
+        currentStage: "extrusion",
+        status: "processing",
+      });
+      
+      await storage.createRoll({
+        id: "EX-125",
+        jobOrderId: jobOrder2.id,
+        serialNumber: "125",
+        extrudingQty: 75,
+        printingQty: 0,
+        cuttingQty: 0,
+        currentStage: "extrusion",
+        status: "processing",
+      });
+      
+      await storage.createRoll({
+        id: "PR-089",
+        jobOrderId: jobOrder3.id,
+        serialNumber: "089",
+        extrudingQty: 100,
+        printingQty: 75,
+        cuttingQty: 0,
+        currentStage: "printing",
+        status: "processing",
+      });
+      
+      // Create raw materials
+      await storage.createRawMaterial({
+        name: "HDPE",
+        type: "Plastic",
+        quantity: 2400,
+        unit: "Kg",
+      });
+      
+      await storage.createRawMaterial({
+        name: "Colored Ink",
+        type: "Ink",
+        quantity: 500,
+        unit: "L",
+      });
+      
+      res.status(200).json({ message: "Demo data initialized successfully" });
+    } catch (error) {
+      console.error("Failed to initialize demo data:", error);
+      res.status(500).json({ message: "Failed to initialize demo data" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
