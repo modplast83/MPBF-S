@@ -109,11 +109,6 @@ export const SIDEBAR_ITEMS = [
         icon: "bar_chart",
       },
       {
-        title: "SMS Management",
-        path: "/sms",
-        icon: "message",
-      },
-      {
         title: "System Settings",
         path: "/system",
         icon: "admin_panel_settings",
@@ -121,6 +116,7 @@ export const SIDEBAR_ITEMS = [
           { title: "Database", path: "/system/database" },
           { title: "Permissions", path: "/system/permissions" },
           { title: "Import & Export", path: "/system/import-export" },
+          { title: "SMS Management", path: "/system/sms" },
         ],
       },
     ],
