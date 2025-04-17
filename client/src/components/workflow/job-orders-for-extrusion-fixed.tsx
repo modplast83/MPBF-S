@@ -207,9 +207,23 @@ export function JobOrdersForExtrusion() {
   };
 
   // Filter job orders for the extrusion stage (pending or in_progress)
-  const jobOrdersForExtrusion = jobOrders.filter(job => 
-    job.status === "pending" || job.status === "in_progress"
-  );
+  // Also, remove job orders that are already fully extruded (100% progress)
+  const jobOrdersForExtrusion = jobOrders.filter(job => {
+    // Only include pending and in_progress job orders 
+    if (job.status !== "pending" && job.status !== "in_progress") {
+      return false;
+    }
+    
+    // Check if job order is already fully extruded
+    const isFullyExtruded = isJobOrderFullyExtruded(job);
+    
+    // Don't show fully extruded job orders
+    if (isFullyExtruded) {
+      return false;
+    }
+    
+    return true;
+  });
 
   if (jobOrdersLoading || customerProductsLoading || customersLoading) {
     return (

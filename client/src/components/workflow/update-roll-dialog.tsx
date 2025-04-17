@@ -22,7 +22,10 @@ interface UpdateRollDialogProps {
 
 const formSchema = z.object({
   cuttingQty: z.coerce.number()
-    .min(0, "Quantity must be non-negative"),
+    .min(0, "Quantity must be non-negative")
+    .refine(val => val !== undefined, {
+      message: "Cutting quantity is required",
+    }),
 });
 
 export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogProps) {
@@ -76,6 +79,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/printing`] });
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/cutting`] });
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ROLLS] });
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.JOB_ORDERS] }); // Also invalidate job orders
       
       // Show success toast
       toast({

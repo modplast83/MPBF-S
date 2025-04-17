@@ -1117,6 +1117,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         extrudingQty: z.number().optional(),
         printingQty: z.number().optional(),
         cuttingQty: z.number().optional(),
+        wasteQty: z.number().optional(),
+        wastePercentage: z.number().optional(),
       });
       
       // Try to validate as a status/stage update
