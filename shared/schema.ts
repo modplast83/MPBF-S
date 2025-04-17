@@ -154,6 +154,12 @@ export const rolls = pgTable("rolls", {
   status: text("status").notNull().default("pending"), // Status (pending, processing, completed)
   wasteQty: doublePrecision("waste_qty").default(0), // Waste quantity in kg (difference between printing and cutting)
   wastePercentage: doublePrecision("waste_percentage").default(0), // Waste percentage
+  createdById: text("created_by_id").references(() => users.id), // User who created the roll (extrusion)
+  printedById: text("printed_by_id").references(() => users.id), // User who printed the roll
+  cutById: text("cut_by_id").references(() => users.id), // User who cut the roll
+  createdAt: timestamp("created_at").defaultNow(), // Creation timestamp
+  printedAt: timestamp("printed_at"), // Printing timestamp
+  cutAt: timestamp("cut_at"), // Cutting timestamp
 });
 
 export const insertRollSchema = createInsertSchema(rolls);

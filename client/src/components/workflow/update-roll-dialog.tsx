@@ -189,7 +189,48 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                     <div className="text-sm font-medium">Printing Quantity</div>
                     <div className="text-sm">{roll.printingQty} kg</div>
                   </div>
+                  
+                  {roll.wasteQty > 0 && (
+                    <div className="grid gap-1">
+                      <div className="text-sm font-medium">Waste Quantity</div>
+                      <div className="text-sm">{roll.wasteQty} kg ({roll.wastePercentage}%)</div>
+                    </div>
+                  )}
                 </>
+              )}
+              
+              {/* User Tracking Information */}
+              {!isEditing && (
+                <Card className="p-3 bg-secondary-50">
+                  <div className="grid gap-2">
+                    <div className="text-sm font-medium">Processing Information</div>
+                    <div className="grid gap-2">
+                      {roll.createdById && (
+                        <div>
+                          <div className="text-xs text-secondary-500">Created by</div>
+                          <div className="text-sm font-medium">{roll.createdById}</div>
+                          {roll.createdAt && <div className="text-xs text-secondary-400">{new Date(roll.createdAt).toLocaleString()}</div>}
+                        </div>
+                      )}
+                      
+                      {roll.printedById && roll.currentStage !== "extrusion" && (
+                        <div>
+                          <div className="text-xs text-secondary-500">Printed by</div>
+                          <div className="text-sm font-medium">{roll.printedById}</div>
+                          {roll.printedAt && <div className="text-xs text-secondary-400">{new Date(roll.printedAt).toLocaleString()}</div>}
+                        </div>
+                      )}
+                      
+                      {roll.cutById && roll.currentStage === "completed" && (
+                        <div>
+                          <div className="text-xs text-secondary-500">Cut by</div>
+                          <div className="text-sm font-medium">{roll.cutById}</div>
+                          {roll.cutAt && <div className="text-xs text-secondary-400">{new Date(roll.cutAt).toLocaleString()}</div>}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Card>
               )}
 
               {isEditing && roll.currentStage === "cutting" && (

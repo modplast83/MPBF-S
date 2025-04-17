@@ -60,14 +60,23 @@ export function RollCard({ roll }: RollCardProps) {
       currentStage: nextStage,
     };
     
+    // Hard-coded current user ID for demo - in real app, this would come from auth context
+    const currentUserId = "USER001"; // This should be replaced with actual authenticated user
+    
     if (roll.currentStage === "extrusion") {
       nextStage = "printing";
       nextStatus = "pending";
       // Set printing quantity equal to extrusion quantity
       updateData.printingQty = roll.extrudingQty;
+      // Record user who completed extrusion
+      updateData.printedById = currentUserId;
+      updateData.printedAt = new Date();
     } else if (roll.currentStage === "printing") {
       nextStage = "cutting";
       nextStatus = "pending";
+      // Record user who completed printing
+      updateData.cutById = currentUserId;
+      updateData.cutAt = new Date();
     } else if (roll.currentStage === "cutting") {
       nextStage = "completed";
       nextStatus = "completed";

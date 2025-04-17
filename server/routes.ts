@@ -1087,10 +1087,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const nextSerialNumber = (existingRolls.length + 1).toString();
       
       // Prepare the complete roll data with auto-generated fields
+      // For demo purposes, using hardcoded user - in production, use req.user.id from auth
+      const currentUserId = "USER001"; // This should come from authentication
+      
       const rollData: InsertRoll = {
         ...validatedData,
         serialNumber: nextSerialNumber,
-        id: `EX-${validatedData.jobOrderId}-${nextSerialNumber}`
+        id: `EX-${validatedData.jobOrderId}-${nextSerialNumber}`,
+        createdById: currentUserId,
+        createdAt: new Date()
       };
       
       const roll = await storage.createRoll(rollData);
@@ -1119,6 +1124,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cuttingQty: z.number().optional(),
         wasteQty: z.number().optional(),
         wastePercentage: z.number().optional(),
+        createdById: z.string().optional(),
+        printedById: z.string().optional(),
+        cutById: z.string().optional(), 
+        createdAt: z.date().optional(),
+        printedAt: z.date().optional(),
+        cutAt: z.date().optional(),
       });
       
       // Try to validate as a status/stage update
