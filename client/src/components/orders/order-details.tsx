@@ -31,7 +31,6 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   const queryClient = useQueryClient();
   const [rollDialogOpen, setRollDialogOpen] = useState(false);
   const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
-  const [rollSerial, setRollSerial] = useState("");
   const [rollQuantity, setRollQuantity] = useState(0);
   
   // Fetch order and related data
@@ -78,9 +77,8 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
       if (!selectedJobOrder) return;
       
       await apiRequest("POST", API_ENDPOINTS.ROLLS, {
-        id: `EX-${rollSerial}`,
+        // Serial number will be automatically generated on the server
         jobOrderId: selectedJobOrder.id,
-        serialNumber: rollSerial,
         extrudingQty: rollQuantity,
         printingQty: 0,
         cuttingQty: 0,
@@ -91,7 +89,6 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ROLLS] });
       setRollDialogOpen(false);
-      setRollSerial("");
       setRollQuantity(0);
       toast({
         title: "Roll Created",
@@ -183,10 +180,10 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   };
   
   const handleCreateRoll = () => {
-    if (!rollSerial || rollQuantity <= 0) {
+    if (rollQuantity <= 0) {
       toast({
         title: "Invalid Input",
-        description: "Please enter a valid roll serial number and quantity.",
+        description: "Please enter a valid quantity greater than zero.",
         variant: "destructive",
       });
       return;
@@ -413,16 +410,9 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Roll Serial Number</label>
-              <input
-                type="text"
-                value={rollSerial}
-                onChange={(e) => setRollSerial(e.target.value)}
-                placeholder="Enter roll serial number"
-                className="w-full p-2 border rounded"
-              />
-            </div>
+            <p className="text-sm text-secondary-500 mb-4">
+              Roll serial number will be automatically generated in sequence for this job order.
+            </p>
             
             <div className="space-y-2">
               <label className="text-sm font-medium">Quantity (Kg)</label>

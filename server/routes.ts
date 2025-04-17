@@ -1065,6 +1065,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Job order not found" });
       }
       
+      // Get existing rolls for this job order to generate the next serial number
+      const existingRolls = await storage.getRollsByJobOrder(validatedData.jobOrderId);
+      const nextSerialNumber = (existingRolls.length + 1).toString();
+      
+      // Set the serial number automatically
+      validatedData.serialNumber = nextSerialNumber;
+      
+      // Create a unique ID based on the stage prefix and serial number
+      // EX for extrusion stage
+      validatedData.id = `EX-${validatedData.jobOrderId}-${nextSerialNumber}`;
+      
       const roll = await storage.createRoll(validatedData);
       res.status(201).json(roll);
     } catch (error) {
