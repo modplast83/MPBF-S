@@ -1,0 +1,196 @@
+import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, unique } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+// Categories table
+export const categories = pgTable("categories", {
+  id: text("id").primaryKey(), // CID in the provided schema
+  name: text("name").notNull(), // Category Name
+  code: text("code").notNull().unique(), // Category Code
+});
+
+export const insertCategorySchema = createInsertSchema(categories);
+export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type Category = typeof categories.$inferSelect;
+
+// Items table
+export const items = pgTable("items", {
+  id: text("id").primaryKey(), // ItemID
+  categoryId: text("category_id").notNull().references(() => categories.id), // CategoriesID
+  name: text("name").notNull(), // Items Name
+  fullName: text("full_name").notNull(), // Item Full Name
+});
+
+export const insertItemSchema = createInsertSchema(items);
+export type InsertItem = z.infer<typeof insertItemSchema>;
+export type Item = typeof items.$inferSelect;
+
+// Sections table
+export const sections = pgTable("sections", {
+  id: text("id").primaryKey(), // Section ID
+  name: text("name").notNull(), // Section Name
+});
+
+export const insertSectionSchema = createInsertSchema(sections);
+export type InsertSection = z.infer<typeof insertSectionSchema>;
+export type Section = typeof sections.$inferSelect;
+
+// Master Batch table
+export const masterBatches = pgTable("master_batches", {
+  id: text("id").primaryKey(), // MasterBatch ID
+  name: text("name").notNull(), // Master Batch
+});
+
+export const insertMasterBatchSchema = createInsertSchema(masterBatches);
+export type InsertMasterBatch = z.infer<typeof insertMasterBatchSchema>;
+export type MasterBatch = typeof masterBatches.$inferSelect;
+
+// Users table
+export const users = pgTable("users", {
+  id: text("id").primaryKey(), // UID
+  username: text("username").notNull().unique(), // UserName
+  password: text("password").notNull(),
+  name: text("name").notNull(), // UserName (display name)
+  role: text("role").notNull(), // UserRole
+  isActive: boolean("is_active").default(true),
+  sectionId: text("section_id").references(() => sections.id), // UserSection
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
+// Customers table
+export const customers = pgTable("customers", {
+  id: text("id").primaryKey(), // CID
+  code: text("code").notNull().unique(), // Customer Code
+  name: text("name").notNull(), // Customer Name
+  nameAr: text("name_ar"), // Customer Name Ar
+  userId: text("user_id").references(() => users.id), // UserID (Sales)
+  plateDrawerCode: text("plate_drawer_code"), // Plate Drawer Code
+});
+
+export const insertCustomerSchema = createInsertSchema(customers);
+export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
+export type Customer = typeof customers.$inferSelect;
+
+// Customer Products table
+export const customerProducts = pgTable("customer_products", {
+  id: serial("id").primaryKey(), // CPID
+  customerId: text("customer_id").notNull().references(() => customers.id), // Customer ID
+  categoryId: text("category_id").notNull().references(() => categories.id), // CategoryID
+  itemId: text("item_id").notNull().references(() => items.id), // ItemID
+  sizeCaption: text("size_caption"), // Size Caption
+  width: doublePrecision("width"), // Width
+  leftF: doublePrecision("left_f"), // Left F
+  rightF: doublePrecision("right_f"), // Right F
+  thickness: doublePrecision("thickness"), // Thickness
+  thicknessOne: doublePrecision("thickness_one"), // Thickness One
+  printingCylinder: doublePrecision("printing_cylinder"), // Printing Cylinder (Inch)
+  lengthCm: doublePrecision("length_cm"), // Length (Cm)
+  cuttingLength: doublePrecision("cutting_length_cm"), // Cutting Length (CM)
+  rawMaterial: text("raw_material"), // Raw Material
+  masterBatchId: text("master_batch_id").references(() => masterBatches.id), // Master Batch ID
+  printed: text("printed"), // Printed
+  cuttingUnit: text("cutting_unit"), // Cutting Unit
+  unitWeight: doublePrecision("unit_weight_kg"), // Unit Weight (Kg)
+  packing: text("packing"), // Packing
+  punching: text("punching"), // Punching
+  cover: text("cover"), // Cover
+  volum: text("volum"), // Volum
+  knife: text("knife"), // Knife
+  notes: text("notes"), // Notes
+}, (table) => {
+  return {
+    customerProductUnique: unique().on(table.customerId, table.itemId),
+  };
+});
+
+export const insertCustomerProductSchema = createInsertSchema(customerProducts).omit({ id: true });
+export type InsertCustomerProduct = z.infer<typeof insertCustomerProductSchema>;
+export type CustomerProduct = typeof customerProducts.$inferSelect;
+
+// Orders table
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(), // ID
+  date: timestamp("date").defaultNow().notNull(), // Order Date
+  customerId: text("customer_id").notNull().references(() => customers.id), // Customer ID
+  note: text("note"), // Order Note
+  status: text("status").notNull().default("pending"), // Status (pending, processing, completed)
+  userId: text("user_id").references(() => users.id), // Created by
+});
+
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, date: true, status: true });
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type Order = typeof orders.$inferSelect;
+
+// Job Orders table
+export const jobOrders = pgTable("job_orders", {
+  id: serial("id").primaryKey(), // ID
+  orderId: integer("order_id").notNull().references(() => orders.id), // Order ID
+  customerProductId: integer("customer_product_id").notNull().references(() => customerProducts.id), // Customer Product No
+  quantity: doublePrecision("quantity").notNull(), // Qty Kg
+}, (table) => {
+  return {
+    jobOrderUnique: unique().on(table.orderId, table.customerProductId),
+  };
+});
+
+export const insertJobOrderSchema = createInsertSchema(jobOrders).omit({ id: true });
+export type InsertJobOrder = z.infer<typeof insertJobOrderSchema>;
+export type JobOrder = typeof jobOrders.$inferSelect;
+
+// Rolls table
+export const rolls = pgTable("rolls", {
+  id: text("id").primaryKey(), // ID
+  jobOrderId: integer("job_order_id").notNull().references(() => jobOrders.id), // Job Order ID
+  serialNumber: text("roll_serial").notNull(), // Roll Serial
+  extrudingQty: doublePrecision("extruding_qty").default(0), // Extruding Qty
+  printingQty: doublePrecision("printing_qty").default(0), // Printing Qty
+  cuttingQty: doublePrecision("cutting_qty").default(0), // Cutting Qty
+  currentStage: text("current_stage").notNull().default("extrusion"), // Current stage (extrusion, printing, cutting, completed)
+  status: text("status").notNull().default("pending"), // Status (pending, processing, completed)
+});
+
+export const insertRollSchema = createInsertSchema(rolls);
+export type InsertRoll = z.infer<typeof insertRollSchema>;
+export type Roll = typeof rolls.$inferSelect;
+
+// Machines table
+export const machines = pgTable("machines", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  sectionId: text("section_id").references(() => sections.id),
+  isActive: boolean("is_active").default(true),
+});
+
+export const insertMachineSchema = createInsertSchema(machines);
+export type InsertMachine = z.infer<typeof insertMachineSchema>;
+export type Machine = typeof machines.$inferSelect;
+
+// Raw Materials table
+export const rawMaterials = pgTable("raw_materials", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  quantity: doublePrecision("quantity").default(0),
+  unit: text("unit").notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+export const insertRawMaterialSchema = createInsertSchema(rawMaterials).omit({ id: true, lastUpdated: true });
+export type InsertRawMaterial = z.infer<typeof insertRawMaterialSchema>;
+export type RawMaterial = typeof rawMaterials.$inferSelect;
+
+// Final Products table
+export const finalProducts = pgTable("final_products", {
+  id: serial("id").primaryKey(),
+  jobOrderId: integer("job_order_id").notNull().references(() => jobOrders.id),
+  quantity: doublePrecision("quantity").notNull(),
+  completedDate: timestamp("completed_date").defaultNow(),
+  status: text("status").notNull().default("in-stock"),
+});
+
+export const insertFinalProductSchema = createInsertSchema(finalProducts).omit({ id: true, completedDate: true });
+export type InsertFinalProduct = z.infer<typeof insertFinalProductSchema>;
+export type FinalProduct = typeof finalProducts.$inferSelect;

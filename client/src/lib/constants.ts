@@ -1,0 +1,118 @@
+// API endpoints
+export const API_ENDPOINTS = {
+  // Setup
+  CATEGORIES: "/api/categories",
+  ITEMS: "/api/items",
+  CUSTOMERS: "/api/customers",
+  CUSTOMER_PRODUCTS: "/api/customer-products",
+  SECTIONS: "/api/sections",
+  MACHINES: "/api/machines",
+  USERS: "/api/users",
+  MASTER_BATCHES: "/api/master-batches",
+  
+  // Production
+  ORDERS: "/api/orders",
+  JOB_ORDERS: "/api/job-orders",
+  ROLLS: "/api/rolls",
+  
+  // Warehouse
+  RAW_MATERIALS: "/api/raw-materials",
+  FINAL_PRODUCTS: "/api/final-products",
+  
+  // Demo
+  INIT_DEMO_DATA: "/api/init-demo-data",
+};
+
+// Stage and status options
+export const ROLL_STAGES = [
+  { value: "extrusion", label: "Extrusion" },
+  { value: "printing", label: "Printing" },
+  { value: "cutting", label: "Cutting" },
+  { value: "completed", label: "Completed" },
+];
+
+export const STATUS_OPTIONS = [
+  { value: "pending", label: "Pending" },
+  { value: "processing", label: "Processing" },
+  { value: "completed", label: "Completed" },
+];
+
+// Sidebar items
+export const SIDEBAR_ITEMS = [
+  {
+    title: "Main",
+    items: [
+      {
+        title: "Dashboard",
+        path: "/",
+        icon: "dashboard",
+      },
+      {
+        title: "Setup",
+        path: "/setup",
+        icon: "settings",
+        subItems: [
+          { title: "Categories", path: "/setup/categories" },
+          { title: "Products", path: "/setup/products" },
+          { title: "Customers", path: "/setup/customers" },
+          { title: "Items", path: "/setup/items" },
+          { title: "Sections", path: "/setup/sections" },
+          { title: "Machines", path: "/setup/machines" },
+          { title: "Users", path: "/setup/users" },
+        ],
+      },
+      {
+        title: "Orders",
+        path: "/orders",
+        icon: "receipt",
+      },
+      {
+        title: "Workflow",
+        path: "/workflow",
+        icon: "linear_scale",
+      },
+      {
+        title: "Warehouse",
+        path: "/warehouse",
+        icon: "inventory",
+        subItems: [
+          { title: "Raw Materials", path: "/warehouse/raw-materials" },
+          { title: "Final Products", path: "/warehouse/final-products" },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Administration",
+    items: [
+      {
+        title: "Reports",
+        path: "/reports",
+        icon: "bar_chart",
+      },
+      {
+        title: "System Settings",
+        path: "/system",
+        icon: "admin_panel_settings",
+        subItems: [
+          { title: "Database", path: "/system/database" },
+          { title: "Permissions", path: "/system/permissions" },
+        ],
+      },
+    ],
+  },
+];
+
+// Default pagination settings
+export const DEFAULT_PAGE_SIZE = 10;
+export const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100];
+
+// Chart colors
+export const CHART_COLORS = {
+  primary: "rgb(25, 118, 210)",
+  secondary: "rgb(156, 39, 176)",
+  success: "rgb(76, 175, 80)",
+  error: "rgb(244, 67, 54)",
+  warning: "rgb(255, 152, 0)",
+  info: "rgb(33, 150, 243)",
+};
