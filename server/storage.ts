@@ -7,9 +7,12 @@ import {
   QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
   CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage
 } from "@shared/schema";
+import session from "express-session";
 
 // Interface for storage operations
 export interface IStorage {
+  // Session store for authentication
+  sessionStore: session.Store;
   // User management
   getUsers(): Promise<User[]>;
   getUser(id: string): Promise<User | undefined>;
@@ -168,8 +171,16 @@ export class MemStorage implements IStorage {
   private currentRawMaterialId: number;
   private currentFinalProductId: number;
   private currentSmsMessageId: number;
+  
+  sessionStore: session.Store;
 
   constructor() {
+    // Initialize session store
+    const MemoryStore = require('memorystore')(session);
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // Prune expired entries every 24h
+    });
+    
     this.users = new Map();
     this.categories = new Map();
     this.items = new Map();
