@@ -5,7 +5,7 @@ import {
   Order, InsertOrder, JobOrder, InsertJobOrder, Roll, InsertRoll,
   RawMaterial, InsertRawMaterial, FinalProduct, InsertFinalProduct,
   QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
-  CorrectiveAction, InsertCorrectiveAction
+  CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage
 } from "@shared/schema";
 
 // Interface for storage operations
@@ -160,12 +160,14 @@ export class MemStorage implements IStorage {
   private rolls: Map<string, Roll>;
   private rawMaterials: Map<number, RawMaterial>;
   private finalProducts: Map<number, FinalProduct>;
+  private smsMessages: Map<number, SmsMessage>;
   
   private currentCustomerProductId: number;
   private currentOrderId: number;
   private currentJobOrderId: number;
   private currentRawMaterialId: number;
   private currentFinalProductId: number;
+  private currentSmsMessageId: number;
 
   constructor() {
     this.users = new Map();
@@ -181,12 +183,14 @@ export class MemStorage implements IStorage {
     this.rolls = new Map();
     this.rawMaterials = new Map();
     this.finalProducts = new Map();
+    this.smsMessages = new Map();
     
     this.currentCustomerProductId = 1;
     this.currentOrderId = 1;
     this.currentJobOrderId = 1;
     this.currentRawMaterialId = 1;
     this.currentFinalProductId = 1;
+    this.currentSmsMessageId = 1;
     
     // Initialize with sample data
     this.initializeData();
@@ -699,6 +703,54 @@ export class MemStorage implements IStorage {
 
   async deleteFinalProduct(id: number): Promise<boolean> {
     return this.finalProducts.delete(id);
+  }
+
+  // SMS Messages methods
+  async getSmsMessages(): Promise<SmsMessage[]> {
+    return Array.from(this.smsMessages.values());
+  }
+
+  async getSmsMessagesByOrder(orderId: number): Promise<SmsMessage[]> {
+    return Array.from(this.smsMessages.values()).filter(msg => msg.orderId === orderId);
+  }
+
+  async getSmsMessagesByJobOrder(jobOrderId: number): Promise<SmsMessage[]> {
+    return Array.from(this.smsMessages.values()).filter(msg => msg.jobOrderId === jobOrderId);
+  }
+
+  async getSmsMessagesByCustomer(customerId: string): Promise<SmsMessage[]> {
+    return Array.from(this.smsMessages.values()).filter(msg => msg.customerId === customerId);
+  }
+
+  async getSmsMessage(id: number): Promise<SmsMessage | undefined> {
+    return this.smsMessages.get(id);
+  }
+
+  async createSmsMessage(message: InsertSmsMessage): Promise<SmsMessage> {
+    const id = this.currentSmsMessageId++;
+    const newMessage: SmsMessage = {
+      ...message,
+      id,
+      sentAt: new Date(),
+      deliveredAt: null,
+      twilioMessageId: null,
+      status: message.status || "pending"
+    };
+    this.smsMessages.set(id, newMessage);
+    return newMessage;
+  }
+
+  async updateSmsMessage(id: number, message: Partial<SmsMessage>): Promise<SmsMessage | undefined> {
+    const existingMessage = this.smsMessages.get(id);
+    if (!existingMessage) return undefined;
+
+    const updatedMessage = { ...existingMessage, ...message };
+    this.smsMessages.set(id, updatedMessage);
+    return updatedMessage;
+  }
+
+  async deleteSmsMessage(id: number): Promise<boolean> {
+    return this.smsMessages.delete(id);
   }
 }
 
