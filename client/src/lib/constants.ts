@@ -24,6 +24,9 @@ export const API_ENDPOINTS = {
   QUALITY_CHECKS: "/api/quality-checks",
   CORRECTIVE_ACTIONS: "/api/corrective-actions",
   
+  // Communications
+  SMS_MESSAGES: "/api/sms-messages",
+  
   // Demo
   INIT_DEMO_DATA: "/api/init-demo-data",
 };
@@ -104,6 +107,11 @@ export const SIDEBAR_ITEMS = [
         title: "Reports",
         path: "/reports",
         icon: "bar_chart",
+      },
+      {
+        title: "SMS Management",
+        path: "/sms",
+        icon: "message",
       },
       {
         title: "System Settings",
