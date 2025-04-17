@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation, Router } from "wouter";
 import Dashboard from "@/pages/dashboard";
 import SetupIndex from "@/pages/setup/index";
 import Categories from "@/pages/setup/categories";
@@ -26,14 +26,26 @@ import CorrectiveActions from "@/pages/quality/corrective-actions";
 import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
-import { ProtectedRoute } from "@/components/auth/protected-route";
-import { AuthProvider } from "@/hooks/use-auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [location, setLocation] = useLocation();
+
+  // Check if the user is logged in
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(loggedIn);
+    
+    // If not logged in and not on the login page, redirect to login
+    if (!loggedIn && location !== '/login') {
+      setLocation('/login');
+    }
+  }, [location, setLocation]);
+
   // Initialize demo data when the app loads for the first time
   useEffect(() => {
     // Use localStorage to prevent initialization on every page reload or HMR
@@ -57,35 +69,41 @@ function App() {
   }, []);
 
   return (
-    <MainLayout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/setup" component={SetupIndex} />
-        <Route path="/setup/categories" component={Categories} />
-        <Route path="/setup/products" component={Products} />
-        <Route path="/setup/customers" component={Customers} />
-        <Route path="/setup/items" component={Items} />
-        <Route path="/setup/sections" component={Sections} />
-        <Route path="/setup/machines" component={Machines} />
-        <Route path="/setup/users" component={Users} />
-        <Route path="/orders" component={OrdersIndex} />
-        <Route path="/orders/:id" component={OrderDetails} />
-        <Route path="/workflow" component={WorkflowIndex} />
-        <Route path="/warehouse" component={WarehouseIndex} />
-        <Route path="/warehouse/raw-materials" component={RawMaterials} />
-        <Route path="/warehouse/final-products" component={FinalProducts} />
-        <Route path="/reports" component={ReportsIndex} />
-        <Route path="/quality" component={QualityIndex} />
-        <Route path="/quality/check-types" component={QualityCheckTypes} />
-        <Route path="/quality/checks" component={QualityChecks} />
-        <Route path="/quality/corrective-actions" component={CorrectiveActions} />
-        <Route path="/system" component={SystemIndex} />
-        <Route path="/system/database" component={Database} />
-        <Route path="/system/permissions" component={Permissions} />
-        <Route path="/system/import-export" component={ImportExport} />
-        <Route component={NotFound} />
-      </Switch>
-    </MainLayout>
+    <>
+      {location === '/login' ? (
+        <LoginPage />
+      ) : (
+        <MainLayout>
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/setup" component={SetupIndex} />
+            <Route path="/setup/categories" component={Categories} />
+            <Route path="/setup/products" component={Products} />
+            <Route path="/setup/customers" component={Customers} />
+            <Route path="/setup/items" component={Items} />
+            <Route path="/setup/sections" component={Sections} />
+            <Route path="/setup/machines" component={Machines} />
+            <Route path="/setup/users" component={Users} />
+            <Route path="/orders" component={OrdersIndex} />
+            <Route path="/orders/:id" component={OrderDetails} />
+            <Route path="/workflow" component={WorkflowIndex} />
+            <Route path="/warehouse" component={WarehouseIndex} />
+            <Route path="/warehouse/raw-materials" component={RawMaterials} />
+            <Route path="/warehouse/final-products" component={FinalProducts} />
+            <Route path="/reports" component={ReportsIndex} />
+            <Route path="/quality" component={QualityIndex} />
+            <Route path="/quality/check-types" component={QualityCheckTypes} />
+            <Route path="/quality/checks" component={QualityChecks} />
+            <Route path="/quality/corrective-actions" component={CorrectiveActions} />
+            <Route path="/system" component={SystemIndex} />
+            <Route path="/system/database" component={Database} />
+            <Route path="/system/permissions" component={Permissions} />
+            <Route path="/system/import-export" component={ImportExport} />
+            <Route component={NotFound} />
+          </Switch>
+        </MainLayout>
+      )}
+    </>
   );
 }
 

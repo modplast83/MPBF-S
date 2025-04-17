@@ -1,28 +1,48 @@
-import { useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { FormEvent, useState } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Redirect } from "wouter";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { user, login } = useAuth();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
-  // If user is already logged in, redirect to dashboard
-  if (user) {
-    return <Redirect to="/" />;
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
+    
     try {
-      await login(username, password);
+      // Simple demo login - just accepts any credentials
+      // In a real app, this would validate against a backend
+      
+      if (username.trim() && password.trim()) {
+        // Store login state in localStorage
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', username);
+        
+        toast({
+          title: "Login successful",
+          description: `Welcome to MPBF System, ${username}!`,
+        });
+        
+        // Redirect to dashboard
+        setLocation('/');
+      } else {
+        throw new Error("Please enter both username and password");
+      }
+    } catch (error) {
+      toast({
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
     } finally {
       setIsLoggingIn(false);
     }
@@ -34,7 +54,7 @@ export default function LoginPage() {
         <div className="p-6 flex flex-col justify-center">
           <Card className="border-0 shadow-none">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
+              <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
               <CardDescription>
                 Enter your credentials to access the system
               </CardDescription>
@@ -81,13 +101,7 @@ export default function LoginPage() {
             </CardContent>
             <CardFooter className="flex flex-col items-start border-t pt-4">
               <p className="text-sm text-secondary-500">
-                Demo Credentials:
-              </p>
-              <p className="text-xs text-secondary-500">
-                Username: <span className="font-mono">admin</span>
-              </p>
-              <p className="text-xs text-secondary-500">
-                Password: <span className="font-mono">admin</span>
+                Demo Note: Enter any username and password to login.
               </p>
             </CardFooter>
           </Card>
