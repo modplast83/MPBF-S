@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation, Router } from "wouter";
+import { Switch, Route } from "wouter";
 import Dashboard from "@/pages/dashboard";
 import SetupIndex from "@/pages/setup/index";
 import Categories from "@/pages/setup/categories";
@@ -24,29 +24,18 @@ import QualityIndex from "@/pages/quality/index";
 import QualityCheckTypes from "@/pages/quality/check-types";
 import QualityChecks from "@/pages/quality/checks";
 import CorrectiveActions from "@/pages/quality/corrective-actions";
-import LoginPage from "@/pages/login";
+import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { AuthProvider } from "@/hooks/use-auth";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import { useEffect } from "react";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [location, setLocation] = useLocation();
-
-  // Check if the user is logged in
-  useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    setIsLoggedIn(loggedIn);
-    
-    // If not logged in and not on the login page, redirect to login
-    if (!loggedIn && location !== '/login') {
-      setLocation('/login');
-    }
-  }, [location, setLocation]);
-
   // Initialize demo data when the app loads for the first time
   useEffect(() => {
     // Use localStorage to prevent initialization on every page reload or HMR
@@ -70,42 +59,42 @@ function App() {
   }, []);
 
   return (
-    <>
-      {location === '/login' ? (
-        <LoginPage />
-      ) : (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <MainLayout>
           <Switch>
-            <Route path="/" component={Dashboard} />
-            <Route path="/setup" component={SetupIndex} />
-            <Route path="/setup/categories" component={Categories} />
-            <Route path="/setup/products" component={Products} />
-            <Route path="/setup/customers" component={Customers} />
-            <Route path="/setup/items" component={Items} />
-            <Route path="/setup/sections" component={Sections} />
-            <Route path="/setup/machines" component={Machines} />
-            <Route path="/setup/users" component={Users} />
-            <Route path="/orders" component={OrdersIndex} />
-            <Route path="/orders/:id" component={OrderDetails} />
-            <Route path="/workflow" component={WorkflowIndex} />
-            <Route path="/warehouse" component={WarehouseIndex} />
-            <Route path="/warehouse/raw-materials" component={RawMaterials} />
-            <Route path="/warehouse/final-products" component={FinalProducts} />
-            <Route path="/reports" component={ReportsIndex} />
-            <Route path="/quality" component={QualityIndex} />
-            <Route path="/quality/check-types" component={QualityCheckTypes} />
-            <Route path="/quality/checks" component={QualityChecks} />
-            <Route path="/quality/corrective-actions" component={CorrectiveActions} />
-            <Route path="/system" component={SystemIndex} />
-            <Route path="/system/database" component={Database} />
-            <Route path="/system/permissions" component={Permissions} />
-            <Route path="/system/import-export" component={ImportExport} />
-            <Route path="/system/sms-management" component={SmsManagement} />
+            <Route path="/auth" component={AuthPage} />
+            <ProtectedRoute path="/" component={Dashboard} />
+            <ProtectedRoute path="/setup" component={SetupIndex} />
+            <ProtectedRoute path="/setup/categories" component={Categories} />
+            <ProtectedRoute path="/setup/products" component={Products} />
+            <ProtectedRoute path="/setup/customers" component={Customers} />
+            <ProtectedRoute path="/setup/items" component={Items} />
+            <ProtectedRoute path="/setup/sections" component={Sections} />
+            <ProtectedRoute path="/setup/machines" component={Machines} />
+            <ProtectedRoute path="/setup/users" component={Users} />
+            <ProtectedRoute path="/orders" component={OrdersIndex} />
+            <ProtectedRoute path="/orders/:id" component={OrderDetails} />
+            <ProtectedRoute path="/workflow" component={WorkflowIndex} />
+            <ProtectedRoute path="/warehouse" component={WarehouseIndex} />
+            <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} />
+            <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} />
+            <ProtectedRoute path="/reports" component={ReportsIndex} />
+            <ProtectedRoute path="/quality" component={QualityIndex} />
+            <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} />
+            <ProtectedRoute path="/quality/checks" component={QualityChecks} />
+            <ProtectedRoute path="/quality/corrective-actions" component={CorrectiveActions} />
+            <ProtectedRoute path="/system" component={SystemIndex} />
+            <ProtectedRoute path="/system/database" component={Database} />
+            <ProtectedRoute path="/system/permissions" component={Permissions} />
+            <ProtectedRoute path="/system/import-export" component={ImportExport} />
+            <ProtectedRoute path="/system/sms-management" component={SmsManagement} />
             <Route component={NotFound} />
           </Switch>
         </MainLayout>
-      )}
-    </>
+        <Toaster />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

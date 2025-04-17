@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,36 +10,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 
 export default function Header() {
   const [location, setLocation] = useLocation();
-  const [username, setUsername] = useState<string>("admin@mpbf.com");
+  const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
-  
-  // Load username from localStorage if available
-  useEffect(() => {
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
-  }, []);
   
   // Function to handle logout
   const handleLogout = () => {
     // Confirm logout
     if (confirm("Are you sure you want to log out?")) {
-      // Remove login state
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('username');
-      
-      // Show toast notification
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out",
-      });
-      
-      // Redirect to login page
-      setLocation('/login');
+      logoutMutation.mutate();
     }
   };
   
@@ -104,7 +86,7 @@ export default function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-secondary-700">{username}</span>
+                <span className="text-sm font-medium text-secondary-700">{user?.name || 'User'}</span>
                 <span className="material-icons text-secondary-600 text-sm">arrow_drop_down</span>
               </Button>
             </DropdownMenuTrigger>
