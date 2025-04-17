@@ -8,6 +8,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Roll } from "@shared/schema";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { API_ENDPOINTS } from "@/lib/constants";
+import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
 
 interface UpdateRollDialogProps {
   open: boolean;
@@ -16,16 +21,39 @@ interface UpdateRollDialogProps {
 }
 
 const formSchema = z.object({
-  cuttingQty: z.coerce.number().min(0, "Quantity must be non-negative"),
+  cuttingQty: z.coerce.number()
+    .min(0, "Quantity must be non-negative"),
 });
 
 export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isEditing, setIsEditing] = useState(false);
+  const [wasteQty, setWasteQty] = useState(0);
+  const [wastePercentage, setWastePercentage] = useState(0);
+  
+  // Get the maximum available quantity for cutting (from printing stage)
+  const maxQuantity = roll.printingQty || 0;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       cuttingQty: roll.cuttingQty || 0,
     },
   });
+
+  // Recalculate waste when form values change
+  const watchCuttingQty = form.watch("cuttingQty");
+  
+  useEffect(() => {
+    // Calculate waste quantity as the difference between printing and cutting quantities
+    const wastage = Math.max(0, maxQuantity - watchCuttingQty);
+    setWasteQty(wastage);
+    
+    // Calculate waste percentage
+    const wastePercent = maxQuantity > 0 ? (wastage / maxQuantity) * 100 : 0;
+    setWastePercentage(parseFloat(wastePercent.toFixed(2)));
+  }, [watchCuttingQty, maxQuantity]);
 
   // Update form when roll changes
   useEffect(() => {
@@ -36,10 +64,49 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
     }
   }, [roll, form]);
 
+  // Mutation for updating roll
+  const updateRollMutation = useMutation({
+    mutationFn: (data: Partial<Roll>) => {
+      return apiRequest("PUT", `${API_ENDPOINTS.ROLLS}/${roll.id}`, data);
+    },
+    onSuccess: () => {
+      // Invalidate and refetch relevant queries
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${roll.jobOrderId}/rolls`] });
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/extrusion`] });
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/printing`] });
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/cutting`] });
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ROLLS] });
+      
+      // Show success toast
+      toast({
+        title: "Roll updated",
+        description: "Roll has been updated successfully",
+        variant: "default",
+      });
+      
+      setIsEditing(false);
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update roll: ${error}`,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
-    // This is just a view dialog for now
-    console.log("Roll update submitted with values:", values);
-    onOpenChange(false);
+    // Update roll with new cutting quantity and mark it as completed
+    const updatedRoll: Partial<Roll> = {
+      cuttingQty: values.cuttingQty,
+      status: "completed",
+      // Add waste information to roll data
+      wasteQty, 
+      wastePercentage
+    };
+    
+    updateRollMutation.mutate(updatedRoll);
   };
 
   const getQuantityLabel = () => {
@@ -66,7 +133,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Roll Details
+            {isEditing && roll.currentStage === "cutting" ? "Update Cutting Quantity" : "Roll Details"}
             <Badge variant="outline" className="ml-2">
               <span className="flex items-center">
                 <span className="material-icons text-sm mr-1">info</span>
@@ -94,10 +161,12 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                 <div className="text-sm">{roll.status}</div>
               </div>
 
-              <div className="grid gap-1">
-                <div className="text-sm font-medium">{getQuantityLabel()}</div>
-                <div className="text-sm">{getQuantityValue()} kg</div>
-              </div>
+              {!isEditing && (
+                <div className="grid gap-1">
+                  <div className="text-sm font-medium">{getQuantityLabel()}</div>
+                  <div className="text-sm">{getQuantityValue()} kg</div>
+                </div>
+              )}
 
               {roll.currentStage === "printing" && (
                 <div className="grid gap-1">
@@ -106,7 +175,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                 </div>
               )}
 
-              {roll.currentStage === "cutting" && (
+              {roll.currentStage === "cutting" && !isEditing && (
                 <>
                   <div className="grid gap-1">
                     <div className="text-sm font-medium">Extrusion Quantity</div>
@@ -118,16 +187,93 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                   </div>
                 </>
               )}
+
+              {isEditing && roll.currentStage === "cutting" && (
+                <>
+                  <div className="grid gap-2">
+                    <div className="text-sm font-medium">Printing Quantity (Source)</div>
+                    <div className="text-sm font-medium">{maxQuantity} kg</div>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="cuttingQty"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cutting Quantity (kg)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max={maxQuantity}
+                            placeholder="Enter final quantity"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Card className="p-3 bg-secondary-50">
+                    <div className="grid gap-2">
+                      <div className="text-sm font-medium">Waste Calculation</div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <div className="text-xs text-secondary-500">Waste Amount</div>
+                          <div className="text-sm font-medium">{wasteQty} kg</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-secondary-500">Waste Percentage</div>
+                          <div className="text-sm font-medium">{wastePercentage}%</div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </>
+              )}
             </div>
 
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => onOpenChange(false)}
-              >
-                Close
-              </Button>
+              {!isEditing && roll.currentStage === "cutting" && roll.status !== "completed" && (
+                <Button 
+                  type="button" 
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center"
+                >
+                  <span className="material-icons text-sm mr-1">edit</span>
+                  Update Cutting Quantity
+                </Button>
+              )}
+              
+              {isEditing && roll.currentStage === "cutting" && (
+                <>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit"
+                    disabled={updateRollMutation.isPending}
+                  >
+                    {updateRollMutation.isPending ? "Saving..." : "Save"}
+                  </Button>
+                </>
+              )}
+              
+              {(!isEditing || roll.currentStage !== "cutting" || roll.status === "completed") && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => onOpenChange(false)}
+                >
+                  Close
+                </Button>
+              )}
             </DialogFooter>
           </form>
         </Form>

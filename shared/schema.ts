@@ -152,6 +152,8 @@ export const rolls = pgTable("rolls", {
   cuttingQty: doublePrecision("cutting_qty").default(0), // Cutting Qty
   currentStage: text("current_stage").notNull().default("extrusion"), // Current stage (extrusion, printing, cutting, completed)
   status: text("status").notNull().default("pending"), // Status (pending, processing, completed)
+  wasteQty: doublePrecision("waste_qty").default(0), // Waste quantity in kg (difference between printing and cutting)
+  wastePercentage: doublePrecision("waste_percentage").default(0), // Waste percentage
 });
 
 export const insertRollSchema = createInsertSchema(rolls);

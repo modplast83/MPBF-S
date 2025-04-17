@@ -36,9 +36,18 @@ export function RollCard({ roll }: RollCardProps) {
       await apiRequest("PUT", `${API_ENDPOINTS.ROLLS}/${roll.id}`, updateData);
     },
     onSuccess: () => {
+      // Invalidate all necessary queries to keep data consistent
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ROLLS] });
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/${roll.id}`] });
-      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/${roll.currentStage}`] });
+      
+      // Invalidate all stage queries to ensure progress is calculated properly
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/extrusion`] });
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/printing`] });
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/cutting`] });
+      
+      // Also invalidate job order rolls to update calculations
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${roll.jobOrderId}/rolls`] });
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.JOB_ORDERS] });
     },
   });
   
