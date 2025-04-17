@@ -148,11 +148,11 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
       
       // Add to current quantity based on stage
       if (stage === "extrusion") {
-        currentQuantity += jobOrderRolls.reduce((sum, roll) => sum + roll.extrudingQty, 0);
+        currentQuantity += jobOrderRolls.reduce((sum, roll) => sum + (roll.extrudingQty || 0), 0);
       } else if (stage === "printing") {
-        currentQuantity += jobOrderRolls.reduce((sum, roll) => sum + roll.printingQty, 0);
+        currentQuantity += jobOrderRolls.reduce((sum, roll) => sum + (roll.printingQty || 0), 0);
       } else if (stage === "cutting") {
-        currentQuantity += jobOrderRolls.reduce((sum, roll) => sum + roll.cuttingQty, 0);
+        currentQuantity += jobOrderRolls.reduce((sum, roll) => sum + (roll.cuttingQty || 0), 0);
       }
     });
     
@@ -190,6 +190,198 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
     }
     
     createRollMutation.mutate();
+  };
+  
+  // Handle print order functionality
+  const handlePrintOrder = () => {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        title: "Print Error",
+        description: "Unable to open print window. Please check your browser settings.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Format job orders and products for printing
+    const jobOrderRows = jobOrders?.map(jobOrder => {
+      const product = getCustomerProduct(jobOrder);
+      return `
+        <tr>
+          <td>${product?.itemId || "N/A"}</td>
+          <td>${product?.sizeCaption || "N/A"}</td>
+          <td>${product?.thickness || "N/A"}</td>
+          <td>${product?.rawMaterial || "N/A"}</td>
+          <td>${product?.masterBatchId || "N/A"}</td>
+          <td>${jobOrder.quantity}</td>
+          <td>${product?.printed || "N/A"}</td>
+        </tr>
+      `;
+    }).join('') || '';
+    
+    // Format rolls for printing
+    const rollRows = orderRolls.map(roll => {
+      const jobOrder = jobOrders?.find(jo => jo.id === roll.jobOrderId);
+      const product = jobOrder ? getCustomerProduct(jobOrder) : null;
+      
+      return `
+        <tr>
+          <td>${roll.id}</td>
+          <td>${product?.itemId || "N/A"}</td>
+          <td>${roll.extrudingQty || 0}</td>
+          <td>${roll.printingQty || 0}</td>
+          <td>${roll.cuttingQty || 0}</td>
+          <td>${roll.currentStage}</td>
+          <td>${roll.status}</td>
+        </tr>
+      `;
+    }).join('');
+    
+    // Create the print document HTML
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Order #${order.id} - Modern Plastic Bag Factory</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+          }
+          h1, h2, h3 {
+            color: #2563eb;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f2f7ff;
+          }
+          .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+          }
+          .info-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+          }
+          .info-row {
+            display: flex;
+            margin-bottom: 5px;
+          }
+          .info-label {
+            font-weight: bold;
+            width: 150px;
+          }
+          @media print {
+            button { display: none; }
+          }
+          .print-footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+          }
+          .print-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <button class="print-button" onclick="window.print(); window.close();">Print Order</button>
+        
+        <div class="order-header">
+          <h1>Order #${order.id}</h1>
+          <h2>Status: ${order.status}</h2>
+        </div>
+        
+        <div class="info-box">
+          <h3>Order Information</h3>
+          <div class="info-row">
+            <div class="info-label">Customer:</div>
+            <div>${customer?.name}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Date:</div>
+            <div>${formatDateString(order.date)}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Plate Drawer Code:</div>
+            <div>${customer?.plateDrawerCode || "N/A"}</div>
+          </div>
+        </div>
+        
+        <h3>Order Products</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Size</th>
+              <th>Thickness</th>
+              <th>Material</th>
+              <th>Batch</th>
+              <th>Qty (Kg)</th>
+              <th>Printed</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${jobOrderRows}
+          </tbody>
+        </table>
+        
+        <h3>Roll Status</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Roll ID</th>
+              <th>Product</th>
+              <th>Extrusion Qty</th>
+              <th>Printing Qty</th>
+              <th>Cutting Qty</th>
+              <th>Current Stage</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rollRows.length > 0 ? rollRows : '<tr><td colspan="7" style="text-align: center;">No rolls created for this order yet</td></tr>'}
+          </tbody>
+        </table>
+        
+        <div class="print-footer">
+          <p>Modern Plastic Bag Factory - Order Report - Generated on ${new Date().toLocaleString()}</p>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // Write to the print window and trigger print
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    toast({
+      title: "Print Ready",
+      description: "Order print view has been prepared.",
+    });
   };
   
   return (
@@ -358,9 +550,9 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
                         <tr key={roll.id} className="border-b border-secondary-100">
                           <td className="py-3 px-4">{roll.id}</td>
                           <td className="py-3 px-4">{product?.itemId || "N/A"}</td>
-                          <td className="py-3 px-4">{roll.extrudingQty}</td>
-                          <td className="py-3 px-4">{roll.printingQty}</td>
-                          <td className="py-3 px-4">{roll.cuttingQty}</td>
+                          <td className="py-3 px-4">{roll.extrudingQty || 0}</td>
+                          <td className="py-3 px-4">{roll.printingQty || 0}</td>
+                          <td className="py-3 px-4">{roll.cuttingQty || 0}</td>
                           <td className="py-3 px-4">
                             <StatusBadge status={roll.currentStage} />
                           </td>
@@ -384,7 +576,11 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
         </CardContent>
         
         <CardFooter className="flex justify-end space-x-3">
-          <Button variant="outline">
+          <Button 
+            variant="outline"
+            onClick={() => handlePrintOrder()}
+          >
+            <span className="material-icons text-sm mr-1">print</span>
             Print Order
           </Button>
           <Button
