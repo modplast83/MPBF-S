@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -5,12 +6,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { Roll, JobOrder, CustomerProduct } from "@shared/schema";
+import { RollDialog } from "./roll-dialog";
 
 interface RollCardProps {
   roll: Roll;
 }
 
 export function RollCard({ roll }: RollCardProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   
   // Fetch related data
@@ -63,50 +66,73 @@ export function RollCard({ roll }: RollCardProps) {
     updateRollMutation.mutate({ status: "processing" });
   };
   
+  const openEditDialog = () => {
+    setIsDialogOpen(true);
+  };
+  
   return (
-    <Card className="bg-white p-3 rounded border border-secondary-200 shadow-sm">
-      <CardContent className="p-0">
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-medium">Roll #{roll.serialNumber}</span>
-          <StatusBadge status={roll.status} />
-        </div>
-        <div className="text-sm text-secondary-600">
-          <p>Order: #{jobOrder?.orderId}</p>
-          <p>Product: {customerProduct?.itemId} ({customerProduct?.sizeCaption})</p>
-          <p>
-            Quantity: {
-              roll.currentStage === "extrusion" 
-                ? roll.extrudingQty 
-                : roll.currentStage === "printing" 
-                  ? roll.printingQty 
-                  : roll.cuttingQty
-            } Kg
-          </p>
-        </div>
-        <div className="mt-3 flex justify-end">
-          {roll.status === "pending" ? (
-            <Button
-              size="sm"
-              variant="link"
-              className="text-primary-500 hover:text-primary-700"
-              onClick={handleStart}
-              disabled={updateRollMutation.isPending}
-            >
-              Start Process
-            </Button>
-          ) : roll.status === "processing" ? (
-            <Button
-              size="sm"
-              variant="link"
-              className="text-primary-500 hover:text-primary-700"
-              onClick={handleComplete}
-              disabled={updateRollMutation.isPending}
-            >
-              Complete Stage
-            </Button>
-          ) : null}
-        </div>
-      </CardContent>
-    </Card>
+    <>
+      <Card 
+        className="bg-white p-3 rounded border border-secondary-200 shadow-sm cursor-pointer transition-shadow hover:shadow-md"
+        onClick={openEditDialog}
+      >
+        <CardContent className="p-0">
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-medium">Roll #{roll.serialNumber}</span>
+            <StatusBadge status={roll.status} />
+          </div>
+          <div className="text-sm text-secondary-600">
+            <p>Order: #{jobOrder?.orderId}</p>
+            <p>Product: {customerProduct?.itemId} ({customerProduct?.sizeCaption})</p>
+            <p>
+              Quantity: {
+                roll.currentStage === "extrusion" 
+                  ? roll.extrudingQty 
+                  : roll.currentStage === "printing" 
+                    ? roll.printingQty 
+                    : roll.cuttingQty
+              } Kg
+            </p>
+          </div>
+          <div className="mt-3 flex justify-end">
+            {roll.status === "pending" ? (
+              <Button
+                size="sm"
+                variant="link"
+                className="text-primary-500 hover:text-primary-700"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent card click
+                  handleStart();
+                }}
+                disabled={updateRollMutation.isPending}
+              >
+                Start Process
+              </Button>
+            ) : roll.status === "processing" ? (
+              <Button
+                size="sm"
+                variant="link"
+                className="text-primary-500 hover:text-primary-700"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent card click
+                  handleComplete();
+                }}
+                disabled={updateRollMutation.isPending}
+              >
+                Complete Stage
+              </Button>
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {isDialogOpen && (
+        <RollDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          roll={roll}
+        />
+      )}
+    </>
   );
 }
