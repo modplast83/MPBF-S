@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,18 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
     },
   });
 
+  // Update form values when jobOrder changes
+  useEffect(() => {
+    if (jobOrder) {
+      form.reset({
+        extrudingQty: 0,
+        jobOrderId: jobOrder.id
+      });
+    }
+  }, [jobOrder, form]);
+
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log("Form submitted with values:", values);
     const rollData: CreateRoll = {
       jobOrderId: values.jobOrderId,
       extrudingQty: values.extrudingQty,

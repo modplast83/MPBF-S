@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { Roll, JobOrder, CustomerProduct } from "@shared/schema";
-import { RollDialog } from "./roll-dialog";
+import { UpdateRollDialog } from "./update-roll-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface RollCardProps {
@@ -145,13 +145,11 @@ export function RollCard({ roll }: RollCardProps) {
         </CardContent>
       </Card>
       
-      {isDialogOpen && (
-        <RollDialog
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-          roll={roll}
-        />
-      )}
+      <UpdateRollDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        roll={roll}
+      />
     </>
   );
 }
