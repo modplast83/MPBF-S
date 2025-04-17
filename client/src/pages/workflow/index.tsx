@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RollCard } from "@/components/workflow/roll-card";
+import { JobOrdersForExtrusion } from "@/components/workflow/job-orders-for-extrusion";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Roll } from "@shared/schema";
 
@@ -77,30 +78,33 @@ export default function WorkflowIndex() {
                   </div>
                   <div>
                     <h4 className="font-medium">Extrusion Stage</h4>
-                    <p className="text-sm text-secondary-500">
-                      {extrusionLoading 
-                        ? "Loading..." 
-                        : `${extrusionRolls?.length || 0} rolls in progress`}
-                    </p>
+                    <p className="text-sm text-secondary-500">Create rolls from active job orders</p>
                   </div>
                 </div>
                 
-                <div className="space-y-3">
-                  {extrusionLoading ? (
-                    <>
-                      <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
-                      <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
-                    </>
-                  ) : extrusionRolls && extrusionRolls.length > 0 ? (
-                    extrusionRolls.map((roll) => (
-                      <RollCard key={roll.id} roll={roll} />
-                    ))
-                  ) : (
-                    <div className="py-8 text-center text-secondary-400">
-                      <span className="material-icons text-3xl mb-2">hourglass_empty</span>
-                      <p>No rolls in extrusion stage</p>
-                    </div>
-                  )}
+                {/* Job Orders for Extrusion */}
+                <JobOrdersForExtrusion />
+                
+                {/* Active Extrusion Rolls */}
+                <div className="mt-6">
+                  <h5 className="font-medium mb-3">Rolls in Extrusion</h5>
+                  <div className="space-y-3">
+                    {extrusionLoading ? (
+                      <>
+                        <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
+                        <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
+                      </>
+                    ) : extrusionRolls && extrusionRolls.length > 0 ? (
+                      extrusionRolls.map((roll) => (
+                        <RollCard key={roll.id} roll={roll} />
+                      ))
+                    ) : (
+                      <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
+                        <span className="material-icons text-3xl mb-2">hourglass_empty</span>
+                        <p>No rolls currently in extrusion</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </TabsContent>

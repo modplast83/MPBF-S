@@ -130,6 +130,8 @@ export const jobOrders = pgTable("job_orders", {
   orderId: integer("order_id").notNull().references(() => orders.id), // Order ID
   customerProductId: integer("customer_product_id").notNull().references(() => customerProducts.id), // Customer Product No
   quantity: doublePrecision("quantity").notNull(), // Qty Kg
+  status: text("status").default("pending").notNull(), // Status (pending, in_progress, extrusion_completed, completed, cancelled)
+  customerId: text("customer_id").references(() => customers.id), // Customer ID
 }, (table) => {
   return {
     jobOrderUnique: unique().on(table.orderId, table.customerProductId),
