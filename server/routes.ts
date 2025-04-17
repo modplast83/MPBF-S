@@ -1611,6 +1611,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CSV Import endpoint
+  app.post("/api/import-csv", async (req: Request, res: Response) => {
+    try {
+      const { entityType } = req.body;
+      
+      if (!req.files || !req.files.file) {
+        return res.status(400).json({ message: "No file was uploaded" });
+      }
+      
+      if (!entityType) {
+        return res.status(400).json({ message: "Entity type is required" });
+      }
+      
+      const file = req.files.file as any;
+      const csvData = file.data.toString();
+      
+      // Import and use the CSV import function
+      const { importFromCSV } = await import('./import-utils');
+      const result = await importFromCSV(entityType, csvData, storage);
+      
+      if (result.success) {
+        res.status(200).json({ 
+          message: "CSV data imported successfully",
+          created: result.created,
+          updated: result.updated,
+          failed: result.failed,
+          errors: result.errors && result.errors.length > 0 ? result.errors : undefined
+        });
+      } else {
+        res.status(400).json({ 
+          message: result.message,
+          errors: result.errors
+        });
+      }
+    } catch (error: any) {
+      console.error("Failed to import CSV data:", error);
+      res.status(500).json({ message: "Failed to import CSV data", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
