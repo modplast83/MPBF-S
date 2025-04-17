@@ -64,6 +64,12 @@ export function OrderForm() {
     enabled: !!selectedCustomerId,
   });
   
+  // Fetch all categories to display category names
+  const { data: categories } = useQuery({
+    queryKey: [API_ENDPOINTS.CATEGORIES],
+    enabled: !!selectedCustomerId,
+  });
+  
   // Define form with default values
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
@@ -225,9 +231,11 @@ export function OrderForm() {
                                   {customerProducts?.map((product) => {
                                     // Find the corresponding item to get its name
                                     const item = items?.find(item => item.id === product.itemId);
+                                    // Find the corresponding category to get its name
+                                    const category = categories?.find(cat => cat.id === product.categoryId);
                                     return (
                                       <SelectItem key={product.id} value={product.id.toString()}>
-                                        {item?.name} {product.sizeCaption ? `(${product.sizeCaption})` : ''}
+                                        {category?.name} - {item?.name} {product.sizeCaption ? `(${product.sizeCaption})` : ''}
                                       </SelectItem>
                                     );
                                   })}
