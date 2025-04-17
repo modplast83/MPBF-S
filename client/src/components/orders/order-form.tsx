@@ -58,6 +58,12 @@ export function OrderForm() {
     enabled: !!selectedCustomerId,
   });
   
+  // Fetch all items to have their names available
+  const { data: items } = useQuery({
+    queryKey: [API_ENDPOINTS.ITEMS],
+    enabled: !!selectedCustomerId,
+  });
+  
   // Define form with default values
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
@@ -216,11 +222,15 @@ export function OrderForm() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {customerProducts?.map((product) => (
-                                    <SelectItem key={product.id} value={product.id.toString()}>
-                                      {product.itemId} ({product.sizeCaption})
-                                    </SelectItem>
-                                  ))}
+                                  {customerProducts?.map((product) => {
+                                    // Find the corresponding item to get its name
+                                    const item = items?.find(item => item.id === product.itemId);
+                                    return (
+                                      <SelectItem key={product.id} value={product.id.toString()}>
+                                        {item?.name} {product.sizeCaption ? `(${product.sizeCaption})` : ''}
+                                      </SelectItem>
+                                    );
+                                  })}
                                 </SelectContent>
                               </Select>
                               <FormMessage />
