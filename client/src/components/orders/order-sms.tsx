@@ -85,8 +85,9 @@ export function OrderSms({ order, customer }: OrderSmsProps) {
         )}
       </CardContent>
       <CardFooter>
+        {/* Using code as phone number since phone isn't in the schema */}
         <SmsDialog
-          recipientPhone={customer.phone || ""}
+          recipientPhone={customer.code || ""}
           recipientName={customer.name}
           customerId={customer.id}
           orderId={order.id}

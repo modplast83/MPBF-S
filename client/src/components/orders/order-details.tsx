@@ -510,6 +510,13 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
             </div>
           </div>
           
+          {/* SMS Messages */}
+          {customer && order && (
+            <div className="mt-8 mb-8">
+              <OrderSms order={order} customer={customer} />
+            </div>
+          )}
+          
           {/* Order Products */}
           <div>
             <h4 className="font-medium text-lg mb-4">Order Products</h4>
