@@ -1,10 +1,19 @@
 import express, { type Request, Response, NextFunction } from "express";
+import fileUpload from "express-fileupload";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(fileUpload({
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max file size
+  useTempFiles: false,
+  abortOnLimit: true,
+  createParentPath: true,
+  safeFileNames: true,
+  preserveExtension: true
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -10,6 +10,16 @@ import {
   insertRawMaterialSchema, insertFinalProductSchema
 } from "@shared/schema";
 import { z } from "zod";
+import fileUpload from 'express-fileupload';
+
+// Extend the Request type to include express-fileupload properties
+declare global {
+  namespace Express {
+    interface Request {
+      files?: fileUpload.FileArray | null;
+    }
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup API routes
@@ -1624,14 +1634,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Entity type is required" });
       }
       
-      const file = req.files.file as any;
+      const file = req.files.file as fileUpload.UploadedFile;
       const csvData = file.data.toString();
       
       // Import and use the CSV import function
       const { importFromCSV } = await import('./import-utils');
       const result = await importFromCSV(entityType, csvData, storage);
       
-      if (result.success) {
+      if (result.success === true && 'created' in result) {
         res.status(200).json({ 
           message: "CSV data imported successfully",
           created: result.created,
@@ -1639,11 +1649,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           failed: result.failed,
           errors: result.errors && result.errors.length > 0 ? result.errors : undefined
         });
-      } else {
+      } else if (result.success === false && 'message' in result) {
         res.status(400).json({ 
           message: result.message,
-          errors: result.errors
+          errors: result.errors || []
         });
+      } else {
+        res.status(500).json({ message: "Unknown import result format" });
       }
     } catch (error: any) {
       console.error("Failed to import CSV data:", error);

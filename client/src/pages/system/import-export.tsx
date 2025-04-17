@@ -46,7 +46,7 @@ export default function ImportExportPage() {
   };
 
   // Handle import
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!selectedFile || !selectedTemplate) {
       toast({
         title: "Error",
@@ -58,19 +58,50 @@ export default function ImportExportPage() {
 
     setImporting(true);
 
-    // This is where we would normally handle the file upload and processing
-    // For now, let's just simulate it with a timeout
-    setTimeout(() => {
-      toast({
-        title: "Import Initiated",
-        description: "This feature is currently under development. Your file has been received.",
+    try {
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('entityType', selectedTemplate);
+
+      // Send the file to the server
+      const response = await fetch('/api/import-csv', {
+        method: 'POST',
+        body: formData,
       });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Import Successful",
+          description: `${result.message}: Created ${result.created}, Updated ${result.updated}${result.failed > 0 ? `, Failed ${result.failed}` : ''}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.message || "An error occurred during import",
+          variant: "destructive",
+        });
+
+        if (result.errors && result.errors.length > 0) {
+          console.error("Import errors:", result.errors);
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Import Failed",
+        description: "An error occurred while trying to upload the file",
+        variant: "destructive",
+      });
+      console.error("Import error:", error);
+    } finally {
       setImporting(false);
       setSelectedFile(null);
       // Reset the file input
       const fileInput = document.getElementById("fileUpload") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
-    }, 1500);
+    }
   };
 
   return (
