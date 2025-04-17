@@ -203,3 +203,55 @@ export const finalProducts = pgTable("final_products", {
 export const insertFinalProductSchema = createInsertSchema(finalProducts).omit({ id: true, completedDate: true });
 export type InsertFinalProduct = z.infer<typeof insertFinalProductSchema>;
 export type FinalProduct = typeof finalProducts.$inferSelect;
+
+// Quality Check Types
+export const qualityCheckTypes = pgTable("quality_check_types", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  checklistItems: text("checklist_items").array(),
+  parameters: text("parameters").array(),
+  targetStage: text("target_stage").notNull(), // extrusion, printing, cutting, final
+  isActive: boolean("is_active").default(true),
+});
+
+export const insertQualityCheckTypeSchema = createInsertSchema(qualityCheckTypes);
+export type InsertQualityCheckType = z.infer<typeof insertQualityCheckTypeSchema>;
+export type QualityCheckType = typeof qualityCheckTypes.$inferSelect;
+
+// Quality Checks
+export const qualityChecks = pgTable("quality_checks", {
+  id: serial("id").primaryKey(), 
+  checkTypeId: text("check_type_id").notNull().references(() => qualityCheckTypes.id),
+  rollId: text("roll_id").references(() => rolls.id),
+  jobOrderId: integer("job_order_id").references(() => jobOrders.id),
+  performedBy: text("performed_by").references(() => users.id),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  status: text("status").notNull().default("pending"), // pending, passed, failed
+  notes: text("notes"),
+  checklistResults: text("checklist_results").array(),
+  parameterValues: text("parameter_values").array(),
+  issueSeverity: text("issue_severity"), // minor, major, critical
+  imageUrls: text("image_urls").array(),
+});
+
+export const insertQualityCheckSchema = createInsertSchema(qualityChecks).omit({ id: true, timestamp: true });
+export type InsertQualityCheck = z.infer<typeof insertQualityCheckSchema>;
+export type QualityCheck = typeof qualityChecks.$inferSelect;
+
+// Corrective Actions
+export const correctiveActions = pgTable("corrective_actions", {
+  id: serial("id").primaryKey(),
+  qualityCheckId: integer("quality_check_id").notNull().references(() => qualityChecks.id),
+  assignedTo: text("assigned_to").references(() => users.id),
+  description: text("description").notNull(),
+  status: text("status").notNull().default("open"), // open, in-progress, completed, verified
+  dueDate: timestamp("due_date"),
+  completedDate: timestamp("completed_date"),
+  verifiedBy: text("verified_by").references(() => users.id),
+  notes: text("notes"),
+});
+
+export const insertCorrectiveActionSchema = createInsertSchema(correctiveActions).omit({ id: true });
+export type InsertCorrectiveAction = z.infer<typeof insertCorrectiveActionSchema>;
+export type CorrectiveAction = typeof correctiveActions.$inferSelect;

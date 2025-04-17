@@ -3,7 +3,9 @@ import {
   Item, InsertItem, Section, InsertSection, Machine, InsertMachine,
   MasterBatch, InsertMasterBatch, CustomerProduct, InsertCustomerProduct,
   Order, InsertOrder, JobOrder, InsertJobOrder, Roll, InsertRoll,
-  RawMaterial, InsertRawMaterial, FinalProduct, InsertFinalProduct
+  RawMaterial, InsertRawMaterial, FinalProduct, InsertFinalProduct,
+  QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
+  CorrectiveAction, InsertCorrectiveAction
 } from "@shared/schema";
 
 // Interface for storage operations
@@ -107,6 +109,31 @@ export interface IStorage {
   createFinalProduct(finalProduct: InsertFinalProduct): Promise<FinalProduct>;
   updateFinalProduct(id: number, finalProduct: Partial<FinalProduct>): Promise<FinalProduct | undefined>;
   deleteFinalProduct(id: number): Promise<boolean>;
+  
+  // Quality Check Types methods
+  getQualityCheckTypes(): Promise<QualityCheckType[]>;
+  getQualityCheckTypesByStage(stage: string): Promise<QualityCheckType[]>;
+  getQualityCheckType(id: string): Promise<QualityCheckType | undefined>;
+  createQualityCheckType(qualityCheckType: InsertQualityCheckType): Promise<QualityCheckType>;
+  updateQualityCheckType(id: string, qualityCheckTypeUpdate: Partial<QualityCheckType>): Promise<QualityCheckType | undefined>;
+  deleteQualityCheckType(id: string): Promise<boolean>;
+  
+  // Quality Checks methods
+  getQualityChecks(): Promise<QualityCheck[]>;
+  getQualityChecksByRoll(rollId: string): Promise<QualityCheck[]>;
+  getQualityChecksByJobOrder(jobOrderId: number): Promise<QualityCheck[]>;
+  getQualityCheck(id: number): Promise<QualityCheck | undefined>;
+  createQualityCheck(qualityCheck: InsertQualityCheck): Promise<QualityCheck>;
+  updateQualityCheck(id: number, qualityCheckUpdate: Partial<QualityCheck>): Promise<QualityCheck | undefined>;
+  deleteQualityCheck(id: number): Promise<boolean>;
+  
+  // Corrective Actions methods
+  getCorrectiveActions(): Promise<CorrectiveAction[]>;
+  getCorrectiveActionsByQualityCheck(qualityCheckId: number): Promise<CorrectiveAction[]>;
+  getCorrectiveAction(id: number): Promise<CorrectiveAction | undefined>;
+  createCorrectiveAction(correctiveAction: InsertCorrectiveAction): Promise<CorrectiveAction>;
+  updateCorrectiveAction(id: number, correctiveActionUpdate: Partial<CorrectiveAction>): Promise<CorrectiveAction | undefined>;
+  deleteCorrectiveAction(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
