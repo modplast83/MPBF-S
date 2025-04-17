@@ -40,9 +40,11 @@ export default function Sidebar() {
     >
       <div className="p-4 flex justify-between items-center border-b border-blue-700">
         <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-            MP
-          </div>
+          <img 
+            src="/assets/company-logo.png" 
+            alt="Modern Plastic Bag Factory" 
+            className="h-10 w-10 object-contain rounded-full"
+          />
           {expanded && <h1 className="text-lg font-semibold whitespace-nowrap">MPBF System</h1>}
         </div>
         <button 
