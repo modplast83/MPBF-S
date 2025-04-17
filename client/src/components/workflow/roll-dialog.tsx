@@ -31,10 +31,21 @@ export function RollDialog({ isOpen, onClose, roll }: RollDialogProps) {
   
   // Handler for form changes
   const handleChange = (field: keyof Roll, value: any) => {
-    setFormValues((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormValues((prev) => {
+      // If changing extrusion quantity, automatically update printing quantity to match
+      if (field === "extrudingQty") {
+        return {
+          ...prev,
+          [field]: value,
+          printingQty: value, // Automatically set printing quantity equal to extrusion quantity
+        };
+      }
+      
+      return {
+        ...prev,
+        [field]: value,
+      };
+    });
   };
   
   // Update roll mutation
@@ -157,8 +168,10 @@ export function RollDialog({ isOpen, onClose, roll }: RollDialogProps) {
                 id="printingQty"
                 type="number"
                 value={formValues.printingQty || 0}
-                onChange={(e) => handleChange("printingQty", parseFloat(e.target.value) || 0)}
+                disabled={true}
+                className="bg-gray-100"
               />
+              <p className="text-xs text-muted-foreground">Printing quantity is automatically set to match extrusion quantity.</p>
             </div>
           )}
           

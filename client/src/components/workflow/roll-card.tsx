@@ -44,10 +44,16 @@ export function RollCard({ roll }: RollCardProps) {
     // Define next stage based on current stage
     let nextStage = roll.currentStage;
     let nextStatus = "completed";
+    const updateData: Partial<Roll> = {
+      status: nextStatus,
+      currentStage: nextStage,
+    };
     
     if (roll.currentStage === "extrusion") {
       nextStage = "printing";
       nextStatus = "pending";
+      // Set printing quantity equal to extrusion quantity
+      updateData.printingQty = roll.extrudingQty;
     } else if (roll.currentStage === "printing") {
       nextStage = "cutting";
       nextStatus = "pending";
@@ -56,10 +62,10 @@ export function RollCard({ roll }: RollCardProps) {
       nextStatus = "completed";
     }
     
-    updateRollMutation.mutate({
-      status: nextStatus,
-      currentStage: nextStage,
-    });
+    updateData.status = nextStatus;
+    updateData.currentStage = nextStage;
+    
+    updateRollMutation.mutate(updateData);
   };
   
   const handleStart = () => {
