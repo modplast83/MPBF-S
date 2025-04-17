@@ -2,88 +2,126 @@ import { IStorage } from './storage';
 
 export async function initializeDemoData(storage: IStorage) {
   try {
-    // Create admin user first
-    const admin = await storage.createUser({
-      username: "admin",
-      password: "admin123",
-      name: "Admin User",
-      role: "administrator",
-      isActive: true,
-      sectionId: null,
-    });
+    // Check if admin user exists first
+    let admin = await storage.getUserByUsername("admin");
     
-    // Create sections
-    const extrusionSection = await storage.createSection({
-      id: "SEC001",
-      name: "Extrusion",
-    });
+    // Create admin user if it doesn't exist
+    if (!admin) {
+      admin = await storage.createUser({
+        username: "admin",
+        password: "admin123",
+        name: "Admin User",
+        role: "administrator",
+        isActive: true,
+        sectionId: null,
+      });
+    }
     
-    const printingSection = await storage.createSection({
-      id: "SEC002",
-      name: "Printing",
-    });
+    // Check if sections exist, create if they don't
+    let extrusionSection = await storage.getSection("SEC001");
+    if (!extrusionSection) {
+      extrusionSection = await storage.createSection({
+        id: "SEC001",
+        name: "Extrusion",
+      });
+    }
     
-    const cuttingSection = await storage.createSection({
-      id: "SEC003",
-      name: "Cutting",
-    });
+    let printingSection = await storage.getSection("SEC002");
+    if (!printingSection) {
+      printingSection = await storage.createSection({
+        id: "SEC002",
+        name: "Printing",
+      });
+    }
     
-    // Create machines
-    await storage.createMachine({
-      id: "MCH001",
-      name: "Extruder 1",
-      sectionId: extrusionSection.id,
-      isActive: true
-    });
+    let cuttingSection = await storage.getSection("SEC003");
+    if (!cuttingSection) {
+      cuttingSection = await storage.createSection({
+        id: "SEC003",
+        name: "Cutting",
+      });
+    }
     
-    await storage.createMachine({
-      id: "MCH002",
-      name: "Printing Machine 1",
-      sectionId: printingSection.id,
-      isActive: true
-    });
+    // Check if machines exist, create if they don't
+    let machine1 = await storage.getMachine("MCH001");
+    if (!machine1) {
+      machine1 = await storage.createMachine({
+        id: "MCH001",
+        name: "Extruder 1",
+        sectionId: extrusionSection.id,
+        isActive: true
+      });
+    }
     
-    await storage.createMachine({
-      id: "MCH003",
-      name: "Cutting Machine 1",
-      sectionId: cuttingSection.id,
-      isActive: true
-    });
+    let machine2 = await storage.getMachine("MCH002");
+    if (!machine2) {
+      machine2 = await storage.createMachine({
+        id: "MCH002",
+        name: "Printing Machine 1",
+        sectionId: printingSection.id,
+        isActive: true
+      });
+    }
     
-    // Add master batches
-    const whiteMb = await storage.createMasterBatch({
-      id: "MB001",
-      name: "White EP11105W",
-    });
+    let machine3 = await storage.getMachine("MCH003");
+    if (!machine3) {
+      machine3 = await storage.createMachine({
+        id: "MCH003",
+        name: "Cutting Machine 1",
+        sectionId: cuttingSection.id,
+        isActive: true
+      });
+    }
     
-    // Add categories
-    const bagCategory = await storage.createCategory({
-      id: "CAT001",
-      name: "Plastic Bags",
-      code: "PB",
-    });
+    // Check if master batches exist, create if they don't
+    let whiteMb = await storage.getMasterBatch("MB001");
+    if (!whiteMb) {
+      whiteMb = await storage.createMasterBatch({
+        id: "MB001",
+        name: "White EP11105W",
+      });
+    }
     
-    // Add items
-    const smallBag = await storage.createItem({
-      id: "ITM019",
-      categoryId: bagCategory.id,
-      name: "Small Plastic Bag",
-      fullName: "Small HDPE Plastic Bag",
-    });
+    // Check if categories exist, create if they don't
+    let bagCategory = await storage.getCategory("CAT001");
+    if (!bagCategory) {
+      bagCategory = await storage.createCategory({
+        id: "CAT001",
+        name: "Plastic Bags",
+        code: "PB",
+      });
+    }
     
-    const mediumBag = await storage.createItem({
-      id: "ITM020",
-      categoryId: bagCategory.id,
-      name: "Medium Plastic Bag",
-      fullName: "Medium HDPE Plastic Bag",
-    });
+    // Check if items exist, create if they don't
+    let smallBag = await storage.getItem("ITM019");
+    if (!smallBag) {
+      smallBag = await storage.createItem({
+        id: "ITM019",
+        categoryId: bagCategory.id,
+        name: "Small Plastic Bag",
+        fullName: "Small HDPE Plastic Bag",
+      });
+    }
     
-    const largeBag = await storage.createItem({
-      id: "ITM022",
-      categoryId: bagCategory.id,
-      name: "Large Plastic Bag",
-      fullName: "Large HDPE Plastic Bag",
-    });
+    let mediumBag = await storage.getItem("ITM020");
+    if (!mediumBag) {
+      mediumBag = await storage.createItem({
+        id: "ITM020",
+        categoryId: bagCategory.id,
+        name: "Medium Plastic Bag",
+        fullName: "Medium HDPE Plastic Bag",
+      });
+    }
+    
+    let largeBag = await storage.getItem("ITM022");
+    if (!largeBag) {
+      largeBag = await storage.createItem({
+        id: "ITM022",
+        categoryId: bagCategory.id,
+        name: "Large Plastic Bag",
+        fullName: "Large HDPE Plastic Bag",
+      });
+    }
     
     // Create raw materials
     await storage.createRawMaterial({

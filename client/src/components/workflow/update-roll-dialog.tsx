@@ -190,7 +190,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                     <div className="text-sm">{roll.printingQty} kg</div>
                   </div>
                   
-                  {roll.wasteQty > 0 && (
+                  {roll.wasteQty && roll.wasteQty > 0 && (
                     <div className="grid gap-1">
                       <div className="text-sm font-medium">Waste Quantity</div>
                       <div className="text-sm">{roll.wasteQty} kg ({roll.wastePercentage}%)</div>

@@ -399,8 +399,8 @@ export default function QualityChecks() {
                     <FormItem>
                       <FormLabel>Issue Severity (if any)</FormLabel>
                       <Select 
-                        onValueChange={(value) => field.onChange(value || null)} 
-                        defaultValue={field.value || undefined}
+                        onValueChange={(value) => field.onChange(value === "none" ? null : value)} 
+                        defaultValue={field.value || "none"}
                       >
                         <FormControl>
                           <SelectTrigger>
