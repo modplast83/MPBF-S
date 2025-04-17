@@ -1293,7 +1293,278 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Demo data endpoint - for initializing test data
+  // Quality Check Types
+  app.get("/api/quality-check-types", async (_req: Request, res: Response) => {
+    try {
+      const qualityCheckTypes = await storage.getQualityCheckTypes();
+      res.json(qualityCheckTypes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quality check types" });
+    }
+  });
+
+  app.get("/api/quality-check-types/stage/:stage", async (req: Request, res: Response) => {
+    try {
+      const stage = req.params.stage;
+      const qualityCheckTypes = await storage.getQualityCheckTypesByStage(stage);
+      res.json(qualityCheckTypes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quality check types by stage" });
+    }
+  });
+
+  app.get("/api/quality-check-types/:id", async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const qualityCheckType = await storage.getQualityCheckType(id);
+      
+      if (!qualityCheckType) {
+        return res.status(404).json({ message: "Quality check type not found" });
+      }
+      
+      res.json(qualityCheckType);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quality check type" });
+    }
+  });
+
+  app.post("/api/quality-check-types", async (req: Request, res: Response) => {
+    try {
+      const qualityCheckType = await storage.createQualityCheckType(req.body);
+      res.status(201).json(qualityCheckType);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create quality check type" });
+    }
+  });
+
+  app.patch("/api/quality-check-types/:id", async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const qualityCheckType = await storage.updateQualityCheckType(id, req.body);
+      
+      if (!qualityCheckType) {
+        return res.status(404).json({ message: "Quality check type not found" });
+      }
+      
+      res.json(qualityCheckType);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update quality check type" });
+    }
+  });
+
+  app.delete("/api/quality-check-types/:id", async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const success = await storage.deleteQualityCheckType(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Quality check type not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete quality check type" });
+    }
+  });
+
+  // Quality Checks
+  app.get("/api/quality-checks", async (_req: Request, res: Response) => {
+    try {
+      const qualityChecks = await storage.getQualityChecks();
+      res.json(qualityChecks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quality checks" });
+    }
+  });
+
+  app.get("/api/quality-checks/roll/:rollId", async (req: Request, res: Response) => {
+    try {
+      const rollId = req.params.rollId;
+      const qualityChecks = await storage.getQualityChecksByRoll(rollId);
+      res.json(qualityChecks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quality checks by roll" });
+    }
+  });
+
+  app.get("/api/quality-checks/job-order/:jobOrderId", async (req: Request, res: Response) => {
+    try {
+      const jobOrderId = parseInt(req.params.jobOrderId);
+      
+      if (isNaN(jobOrderId)) {
+        return res.status(400).json({ message: "Invalid job order ID" });
+      }
+      
+      const qualityChecks = await storage.getQualityChecksByJobOrder(jobOrderId);
+      res.json(qualityChecks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quality checks by job order" });
+    }
+  });
+
+  app.get("/api/quality-checks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid quality check ID" });
+      }
+      
+      const qualityCheck = await storage.getQualityCheck(id);
+      
+      if (!qualityCheck) {
+        return res.status(404).json({ message: "Quality check not found" });
+      }
+      
+      res.json(qualityCheck);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quality check" });
+    }
+  });
+
+  app.post("/api/quality-checks", async (req: Request, res: Response) => {
+    try {
+      const qualityCheck = await storage.createQualityCheck(req.body);
+      res.status(201).json(qualityCheck);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create quality check" });
+    }
+  });
+
+  app.patch("/api/quality-checks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid quality check ID" });
+      }
+      
+      const qualityCheck = await storage.updateQualityCheck(id, req.body);
+      
+      if (!qualityCheck) {
+        return res.status(404).json({ message: "Quality check not found" });
+      }
+      
+      res.json(qualityCheck);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update quality check" });
+    }
+  });
+
+  app.delete("/api/quality-checks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid quality check ID" });
+      }
+      
+      const success = await storage.deleteQualityCheck(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Quality check not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete quality check" });
+    }
+  });
+
+  // Corrective Actions
+  app.get("/api/corrective-actions", async (_req: Request, res: Response) => {
+    try {
+      const correctiveActions = await storage.getCorrectiveActions();
+      res.json(correctiveActions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch corrective actions" });
+    }
+  });
+
+  app.get("/api/corrective-actions/quality-check/:qualityCheckId", async (req: Request, res: Response) => {
+    try {
+      const qualityCheckId = parseInt(req.params.qualityCheckId);
+      
+      if (isNaN(qualityCheckId)) {
+        return res.status(400).json({ message: "Invalid quality check ID" });
+      }
+      
+      const correctiveActions = await storage.getCorrectiveActionsByQualityCheck(qualityCheckId);
+      res.json(correctiveActions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch corrective actions by quality check" });
+    }
+  });
+
+  app.get("/api/corrective-actions/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid corrective action ID" });
+      }
+      
+      const correctiveAction = await storage.getCorrectiveAction(id);
+      
+      if (!correctiveAction) {
+        return res.status(404).json({ message: "Corrective action not found" });
+      }
+      
+      res.json(correctiveAction);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch corrective action" });
+    }
+  });
+
+  app.post("/api/corrective-actions", async (req: Request, res: Response) => {
+    try {
+      const correctiveAction = await storage.createCorrectiveAction(req.body);
+      res.status(201).json(correctiveAction);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create corrective action" });
+    }
+  });
+
+  app.patch("/api/corrective-actions/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid corrective action ID" });
+      }
+      
+      const correctiveAction = await storage.updateCorrectiveAction(id, req.body);
+      
+      if (!correctiveAction) {
+        return res.status(404).json({ message: "Corrective action not found" });
+      }
+      
+      res.json(correctiveAction);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update corrective action" });
+    }
+  });
+
+  app.delete("/api/corrective-actions/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid corrective action ID" });
+      }
+      
+      const success = await storage.deleteCorrectiveAction(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Corrective action not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete corrective action" });
+    }
+  });
+
   // Demo data endpoint - for initializing test data
   app.post("/api/init-demo-data", async (_req: Request, res: Response) => {
     try {

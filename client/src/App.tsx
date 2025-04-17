@@ -19,6 +19,10 @@ import SystemIndex from "@/pages/system/index";
 import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions";
 import ImportExport from "@/pages/system/import-export";
+import QualityIndex from "@/pages/quality/index";
+import QualityCheckTypes from "@/pages/quality/check-types";
+import QualityChecks from "@/pages/quality/checks";
+import CorrectiveActions from "@/pages/quality/corrective-actions";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
 import { useEffect } from "react";
@@ -68,6 +72,10 @@ function App() {
         <Route path="/warehouse/raw-materials" component={RawMaterials} />
         <Route path="/warehouse/final-products" component={FinalProducts} />
         <Route path="/reports" component={ReportsIndex} />
+        <Route path="/quality" component={QualityIndex} />
+        <Route path="/quality/check-types" component={QualityCheckTypes} />
+        <Route path="/quality/checks" component={QualityChecks} />
+        <Route path="/quality/corrective-actions" component={CorrectiveActions} />
         <Route path="/system" component={SystemIndex} />
         <Route path="/system/database" component={Database} />
         <Route path="/system/permissions" component={Permissions} />

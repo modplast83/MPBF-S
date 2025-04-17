@@ -19,6 +19,11 @@ export const API_ENDPOINTS = {
   RAW_MATERIALS: "/api/raw-materials",
   FINAL_PRODUCTS: "/api/final-products",
   
+  // Quality Management
+  QUALITY_CHECK_TYPES: "/api/quality-check-types",
+  QUALITY_CHECKS: "/api/quality-checks",
+  CORRECTIVE_ACTIONS: "/api/corrective-actions",
+  
   // Demo
   INIT_DEMO_DATA: "/api/init-demo-data",
 };
@@ -78,6 +83,16 @@ export const SIDEBAR_ITEMS = [
         subItems: [
           { title: "Raw Materials", path: "/warehouse/raw-materials" },
           { title: "Final Products", path: "/warehouse/final-products" },
+        ],
+      },
+      {
+        title: "Quality",
+        path: "/quality",
+        icon: "verified",
+        subItems: [
+          { title: "Check Types", path: "/quality/check-types" },
+          { title: "Quality Checks", path: "/quality/checks" },
+          { title: "Corrective Actions", path: "/quality/corrective-actions" },
         ],
       },
     ],

@@ -14,7 +14,10 @@ import {
   JobOrder, InsertJobOrder, jobOrders,
   Roll, InsertRoll, rolls,
   RawMaterial, InsertRawMaterial, rawMaterials,
-  FinalProduct, InsertFinalProduct, finalProducts
+  FinalProduct, InsertFinalProduct, finalProducts,
+  QualityCheckType, InsertQualityCheckType, qualityCheckTypes,
+  QualityCheck, InsertQualityCheck, qualityChecks,
+  CorrectiveAction, InsertCorrectiveAction, correctiveActions
 } from '@shared/schema';
 
 export class DatabaseStorage implements IStorage {
@@ -421,6 +424,106 @@ export class DatabaseStorage implements IStorage {
 
   async deleteFinalProduct(id: number): Promise<boolean> {
     const result = await db.delete(finalProducts).where(eq(finalProducts.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Quality Check Types
+  async getQualityCheckTypes(): Promise<QualityCheckType[]> {
+    return await db.select().from(qualityCheckTypes);
+  }
+
+  async getQualityCheckTypesByStage(stage: string): Promise<QualityCheckType[]> {
+    return await db.select().from(qualityCheckTypes).where(eq(qualityCheckTypes.targetStage, stage));
+  }
+
+  async getQualityCheckType(id: string): Promise<QualityCheckType | undefined> {
+    const result = await db.select().from(qualityCheckTypes).where(eq(qualityCheckTypes.id, id));
+    return result[0];
+  }
+
+  async createQualityCheckType(qualityCheckType: InsertQualityCheckType): Promise<QualityCheckType> {
+    const result = await db.insert(qualityCheckTypes).values(qualityCheckType).returning();
+    return result[0];
+  }
+
+  async updateQualityCheckType(id: string, qualityCheckTypeUpdate: Partial<QualityCheckType>): Promise<QualityCheckType | undefined> {
+    const result = await db.update(qualityCheckTypes)
+      .set(qualityCheckTypeUpdate)
+      .where(eq(qualityCheckTypes.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteQualityCheckType(id: string): Promise<boolean> {
+    const result = await db.delete(qualityCheckTypes).where(eq(qualityCheckTypes.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Quality Checks
+  async getQualityChecks(): Promise<QualityCheck[]> {
+    return await db.select().from(qualityChecks);
+  }
+
+  async getQualityChecksByRoll(rollId: string): Promise<QualityCheck[]> {
+    return await db.select().from(qualityChecks).where(eq(qualityChecks.rollId, rollId));
+  }
+
+  async getQualityChecksByJobOrder(jobOrderId: number): Promise<QualityCheck[]> {
+    return await db.select().from(qualityChecks).where(eq(qualityChecks.jobOrderId, jobOrderId));
+  }
+
+  async getQualityCheck(id: number): Promise<QualityCheck | undefined> {
+    const result = await db.select().from(qualityChecks).where(eq(qualityChecks.id, id));
+    return result[0];
+  }
+
+  async createQualityCheck(qualityCheck: InsertQualityCheck): Promise<QualityCheck> {
+    const result = await db.insert(qualityChecks).values(qualityCheck).returning();
+    return result[0];
+  }
+
+  async updateQualityCheck(id: number, qualityCheckUpdate: Partial<QualityCheck>): Promise<QualityCheck | undefined> {
+    const result = await db.update(qualityChecks)
+      .set(qualityCheckUpdate)
+      .where(eq(qualityChecks.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteQualityCheck(id: number): Promise<boolean> {
+    const result = await db.delete(qualityChecks).where(eq(qualityChecks.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Corrective Actions
+  async getCorrectiveActions(): Promise<CorrectiveAction[]> {
+    return await db.select().from(correctiveActions);
+  }
+
+  async getCorrectiveActionsByQualityCheck(qualityCheckId: number): Promise<CorrectiveAction[]> {
+    return await db.select().from(correctiveActions).where(eq(correctiveActions.qualityCheckId, qualityCheckId));
+  }
+
+  async getCorrectiveAction(id: number): Promise<CorrectiveAction | undefined> {
+    const result = await db.select().from(correctiveActions).where(eq(correctiveActions.id, id));
+    return result[0];
+  }
+
+  async createCorrectiveAction(correctiveAction: InsertCorrectiveAction): Promise<CorrectiveAction> {
+    const result = await db.insert(correctiveActions).values(correctiveAction).returning();
+    return result[0];
+  }
+
+  async updateCorrectiveAction(id: number, correctiveActionUpdate: Partial<CorrectiveAction>): Promise<CorrectiveAction | undefined> {
+    const result = await db.update(correctiveActions)
+      .set(correctiveActionUpdate)
+      .where(eq(correctiveActions.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteCorrectiveAction(id: number): Promise<boolean> {
+    const result = await db.delete(correctiveActions).where(eq(correctiveActions.id, id)).returning();
     return result.length > 0;
   }
 }
