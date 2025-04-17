@@ -1,4 +1,5 @@
-import { Twilio } from 'twilio';
+import twilio from 'twilio';
+const Twilio = twilio;
 import { storage } from '../storage';
 import { SmsMessage, InsertSmsMessage } from '@shared/schema';
 
