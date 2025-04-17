@@ -7,6 +7,7 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { Roll, JobOrder, CustomerProduct } from "@shared/schema";
 import { RollDialog } from "./roll-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface RollCardProps {
   roll: Roll;
@@ -15,6 +16,7 @@ interface RollCardProps {
 export function RollCard({ roll }: RollCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   // Fetch related data
   const { data: jobOrder } = useQuery<JobOrder>({
@@ -76,6 +78,11 @@ export function RollCard({ roll }: RollCardProps) {
   
   const handleStart = () => {
     updateRollMutation.mutate({ status: "processing" });
+    
+    toast({
+      title: `Started ${roll.currentStage.charAt(0).toUpperCase() + roll.currentStage.slice(1)}`,
+      description: `Roll #${roll.serialNumber} processing has begun.`,
+    });
   };
   
   const openEditDialog = () => {
