@@ -7,7 +7,8 @@ import {
   insertMasterBatchSchema, insertCustomerProductSchema,
   insertOrderSchema, insertJobOrderSchema, insertRollSchema,
   createRollSchema, InsertRoll,
-  insertRawMaterialSchema, insertFinalProductSchema
+  insertRawMaterialSchema, insertFinalProductSchema,
+  insertSmsMessageSchema, InsertSmsMessage
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
@@ -1660,6 +1661,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Failed to import CSV data:", error);
       res.status(500).json({ message: "Failed to import CSV data", error: error.message });
+    }
+  });
+
+  // SMS Messages
+  app.get("/api/sms-messages", async (_req: Request, res: Response) => {
+    try {
+      const messages = await storage.getSmsMessages();
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get SMS messages" });
+    }
+  });
+
+  app.get("/api/orders/:orderId/sms-messages", async (req: Request, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ message: "Invalid order ID" });
+      }
+      
+      // Verify order exists
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      const messages = await storage.getSmsMessagesByOrder(orderId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get SMS messages" });
+    }
+  });
+
+  app.get("/api/job-orders/:jobOrderId/sms-messages", async (req: Request, res: Response) => {
+    try {
+      const jobOrderId = parseInt(req.params.jobOrderId);
+      if (isNaN(jobOrderId)) {
+        return res.status(400).json({ message: "Invalid job order ID" });
+      }
+      
+      // Verify job order exists
+      const jobOrder = await storage.getJobOrder(jobOrderId);
+      if (!jobOrder) {
+        return res.status(404).json({ message: "Job order not found" });
+      }
+      
+      const messages = await storage.getSmsMessagesByJobOrder(jobOrderId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get SMS messages" });
+    }
+  });
+
+  app.get("/api/customers/:customerId/sms-messages", async (req: Request, res: Response) => {
+    try {
+      const customerId = req.params.customerId;
+      
+      // Verify customer exists
+      const customer = await storage.getCustomer(customerId);
+      if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      
+      const messages = await storage.getSmsMessagesByCustomer(customerId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get SMS messages" });
+    }
+  });
+
+  app.get("/api/sms-messages/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid SMS message ID" });
+      }
+      
+      const message = await storage.getSmsMessage(id);
+      if (!message) {
+        return res.status(404).json({ message: "SMS message not found" });
+      }
+      
+      res.json(message);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get SMS message" });
+    }
+  });
+
+  app.post("/api/sms-messages", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertSmsMessageSchema.parse(req.body);
+      
+      // Import and use the SMS service
+      const { SmsService } = await import('./services/sms-service');
+      
+      // Send the SMS using the service
+      let result;
+      if (validatedData.messageType === 'order_notification' && validatedData.orderId) {
+        result = await SmsService.sendOrderNotification(
+          validatedData.orderId,
+          validatedData.recipientPhone,
+          validatedData.message,
+          validatedData.sentBy || null,
+          validatedData.recipientName || null,
+          validatedData.customerId || null
+        );
+      } else if (validatedData.messageType === 'status_update' && validatedData.jobOrderId) {
+        result = await SmsService.sendJobOrderUpdate(
+          validatedData.jobOrderId,
+          validatedData.recipientPhone,
+          validatedData.message,
+          validatedData.sentBy || null,
+          validatedData.recipientName || null,
+          validatedData.customerId || null
+        );
+      } else {
+        result = await SmsService.sendCustomMessage(
+          validatedData.recipientPhone,
+          validatedData.message,
+          validatedData.sentBy || null,
+          validatedData.recipientName || null,
+          validatedData.customerId || null,
+          validatedData.orderId || null,
+          validatedData.jobOrderId || null
+        );
+      }
+      
+      res.status(201).json(result);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid SMS message data", errors: error.errors });
+      }
+      res.status(500).json({ message: `Failed to send SMS message: ${error.message}` });
+    }
+  });
+
+  app.delete("/api/sms-messages/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid SMS message ID" });
+      }
+      
+      const message = await storage.getSmsMessage(id);
+      if (!message) {
+        return res.status(404).json({ message: "SMS message not found" });
+      }
+      
+      await storage.deleteSmsMessage(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete SMS message" });
     }
   });
 

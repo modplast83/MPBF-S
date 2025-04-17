@@ -17,7 +17,8 @@ import {
   FinalProduct, InsertFinalProduct, finalProducts,
   QualityCheckType, InsertQualityCheckType, qualityCheckTypes,
   QualityCheck, InsertQualityCheck, qualityChecks,
-  CorrectiveAction, InsertCorrectiveAction, correctiveActions
+  CorrectiveAction, InsertCorrectiveAction, correctiveActions,
+  SmsMessage, InsertSmsMessage, smsMessages
 } from '@shared/schema';
 
 export class DatabaseStorage implements IStorage {
@@ -424,6 +425,46 @@ export class DatabaseStorage implements IStorage {
 
   async deleteFinalProduct(id: number): Promise<boolean> {
     const result = await db.delete(finalProducts).where(eq(finalProducts.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // SMS Messages
+  async getSmsMessages(): Promise<SmsMessage[]> {
+    return await db.select().from(smsMessages);
+  }
+
+  async getSmsMessagesByOrder(orderId: number): Promise<SmsMessage[]> {
+    return await db.select().from(smsMessages).where(eq(smsMessages.orderId, orderId));
+  }
+
+  async getSmsMessagesByJobOrder(jobOrderId: number): Promise<SmsMessage[]> {
+    return await db.select().from(smsMessages).where(eq(smsMessages.jobOrderId, jobOrderId));
+  }
+
+  async getSmsMessagesByCustomer(customerId: string): Promise<SmsMessage[]> {
+    return await db.select().from(smsMessages).where(eq(smsMessages.customerId, customerId));
+  }
+
+  async getSmsMessage(id: number): Promise<SmsMessage | undefined> {
+    const result = await db.select().from(smsMessages).where(eq(smsMessages.id, id));
+    return result[0];
+  }
+
+  async createSmsMessage(message: InsertSmsMessage): Promise<SmsMessage> {
+    const result = await db.insert(smsMessages).values(message).returning();
+    return result[0];
+  }
+
+  async updateSmsMessage(id: number, messageUpdate: Partial<SmsMessage>): Promise<SmsMessage | undefined> {
+    const result = await db.update(smsMessages)
+      .set(messageUpdate)
+      .where(eq(smsMessages.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteSmsMessage(id: number): Promise<boolean> {
+    const result = await db.delete(smsMessages).where(eq(smsMessages.id, id)).returning();
     return result.length > 0;
   }
 
