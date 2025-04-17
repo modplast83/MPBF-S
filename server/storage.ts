@@ -18,6 +18,16 @@ export interface IStorage {
   updateUser(id: string, user: Partial<User>): Promise<User | undefined>;
   deleteUser(id: string): Promise<boolean>;
   
+  // SMS Messages
+  getSmsMessages(): Promise<SmsMessage[]>;
+  getSmsMessagesByOrder(orderId: number): Promise<SmsMessage[]>;
+  getSmsMessagesByJobOrder(jobOrderId: number): Promise<SmsMessage[]>;
+  getSmsMessagesByCustomer(customerId: string): Promise<SmsMessage[]>;
+  getSmsMessage(id: number): Promise<SmsMessage | undefined>;
+  createSmsMessage(message: InsertSmsMessage): Promise<SmsMessage>;
+  updateSmsMessage(id: number, message: Partial<SmsMessage>): Promise<SmsMessage | undefined>;
+  deleteSmsMessage(id: number): Promise<boolean>;
+  
   // Categories
   getCategories(): Promise<Category[]>;
   getCategory(id: string): Promise<Category | undefined>;

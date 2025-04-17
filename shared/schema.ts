@@ -265,3 +265,30 @@ export const correctiveActions = pgTable("corrective_actions", {
 export const insertCorrectiveActionSchema = createInsertSchema(correctiveActions).omit({ id: true });
 export type InsertCorrectiveAction = z.infer<typeof insertCorrectiveActionSchema>;
 export type CorrectiveAction = typeof correctiveActions.$inferSelect;
+
+// SMS Messages
+export const smsMessages = pgTable("sms_messages", {
+  id: serial("id").primaryKey(),
+  recipientPhone: text("recipient_phone").notNull(),
+  recipientName: text("recipient_name"),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("pending"), // pending, sent, failed, delivered
+  orderId: integer("order_id").references(() => orders.id),
+  jobOrderId: integer("job_order_id").references(() => jobOrders.id),
+  customerId: text("customer_id").references(() => customers.id),
+  sentBy: text("sent_by").references(() => users.id),
+  sentAt: timestamp("sent_at").defaultNow(),
+  deliveredAt: timestamp("delivered_at"),
+  errorMessage: text("error_message"),
+  messageType: text("message_type").notNull(), // order_notification, status_update, custom, etc.
+  twilioMessageId: text("twilio_message_id"),
+});
+
+export const insertSmsMessageSchema = createInsertSchema(smsMessages).omit({ 
+  id: true, 
+  sentAt: true, 
+  deliveredAt: true, 
+  twilioMessageId: true 
+});
+export type InsertSmsMessage = z.infer<typeof insertSmsMessageSchema>;
+export type SmsMessage = typeof smsMessages.$inferSelect;
