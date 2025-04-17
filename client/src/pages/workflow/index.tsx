@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RollCard } from "@/components/workflow/roll-card";
-import { JobOrdersForExtrusion } from "@/components/workflow/job-orders-for-extrusion";
+import { JobOrdersForExtrusion } from "@/components/workflow/job-orders-for-extrusion-fixed";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Roll } from "@shared/schema";
 

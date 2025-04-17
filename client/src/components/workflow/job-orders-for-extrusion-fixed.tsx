@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import {
@@ -20,6 +20,16 @@ import { RollDialog } from "@/components/workflow/roll-dialog";
 import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 
+// Single roll query component
+function JobOrderRolls({ jobOrderId, isExpanded }: { jobOrderId: number; isExpanded: boolean }) {
+  const { data: rolls = [] } = useQuery<Roll[]>({
+    queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${jobOrderId}/rolls`],
+    enabled: isExpanded,
+  });
+  
+  return rolls;
+}
+
 export function JobOrdersForExtrusion() {
   const [expandedOrders, setExpandedOrders] = useState<number[]>([]);
   const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
@@ -28,36 +38,24 @@ export function JobOrdersForExtrusion() {
   const queryClient = useQueryClient();
 
   // Fetch all job orders
-  const { data: jobOrders, isLoading: jobOrdersLoading } = useQuery<JobOrder[]>({
+  const { data: jobOrders = [], isLoading: jobOrdersLoading } = useQuery<JobOrder[]>({
     queryKey: [API_ENDPOINTS.JOB_ORDERS],
   });
 
   // Fetch all customer products
-  const { data: customerProducts, isLoading: customerProductsLoading } = useQuery<CustomerProduct[]>({
+  const { data: customerProducts = [], isLoading: customerProductsLoading } = useQuery<CustomerProduct[]>({
     queryKey: [API_ENDPOINTS.CUSTOMER_PRODUCTS],
   });
 
   // Fetch all customers
-  const { data: customers, isLoading: customersLoading } = useQuery<Customer[]>({
+  const { data: customers = [], isLoading: customersLoading } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
   });
 
-  // Hooks must be called at the top level, not in a function
-  // For each job order, create a separate query
-  const rollsQueries = useMemo(() => {
-    if (!jobOrders) return {};
-    
-    return jobOrders.reduce<Record<number, ReturnType<typeof useQuery<Roll[]>>>>(
-      (acc, jobOrder) => {
-        acc[jobOrder.id] = useQuery<Roll[]>({
-          queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${jobOrder.id}/rolls`],
-          enabled: expandedOrders.includes(jobOrder.id),
-        });
-        return acc;
-      },
-      {}
-    );
-  }, [jobOrders, expandedOrders]);
+  // Fetch rolls by stage
+  const { data: extrusionRolls = [] } = useQuery<Roll[]>({
+    queryKey: [`${API_ENDPOINTS.ROLLS}/stage/extrusion`],
+  });
 
   // Mutation for creating a roll
   const createRollMutation = useMutation({
@@ -127,33 +125,33 @@ export function JobOrdersForExtrusion() {
     }
   };
 
-  // Check if all rolls for a job order meet the total quantity requirement
-  const isJobOrderFullyExtruded = (jobOrder: JobOrder): boolean => {
-    const query = rollsQueries[jobOrder.id];
-    if (!query || !query.data || query.data.length === 0) return false;
+  // Calculate the progress percentage for a job order using the extrusionRolls array
+  const calculateProgress = (jobOrder: JobOrder): number => {
+    const jobOrderRolls = extrusionRolls.filter(roll => roll.jobOrderId === jobOrder.id);
+    if (!jobOrderRolls.length) return 0;
     
-    const totalExtrudedQty = query.data.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
-    return totalExtrudedQty >= jobOrder.quantity;
+    const totalExtrudedQty = jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
+    return Math.min(Math.round((totalExtrudedQty / jobOrder.quantity) * 100), 100);
   };
 
-  // Calculate the progress percentage for a job order
-  const calculateProgress = (jobOrder: JobOrder): number => {
-    const query = rollsQueries[jobOrder.id];
-    if (!query || !query.data || query.data.length === 0) return 0;
+  // Check if job order is fully extruded using the extrusionRolls array
+  const isJobOrderFullyExtruded = (jobOrder: JobOrder): boolean => {
+    const jobOrderRolls = extrusionRolls.filter(roll => roll.jobOrderId === jobOrder.id);
+    if (!jobOrderRolls.length) return false;
     
-    const totalExtrudedQty = query.data.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
-    return Math.min(Math.round((totalExtrudedQty / jobOrder.quantity) * 100), 100);
+    const totalExtrudedQty = jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
+    return totalExtrudedQty >= jobOrder.quantity;
   };
 
   // Check and update job order status based on roll quantities
   const checkAndUpdateJobOrderStatus = (jobOrderId: number) => {
-    const jobOrder = jobOrders?.find(jo => jo.id === jobOrderId);
+    const jobOrder = jobOrders.find(jo => jo.id === jobOrderId);
     if (!jobOrder) return;
 
-    const query = rollsQueries[jobOrderId];
-    if (!query || !query.data || query.data.length === 0) return;
+    const jobOrderRolls = extrusionRolls.filter(roll => roll.jobOrderId === jobOrderId);
+    if (!jobOrderRolls.length) return;
     
-    const totalExtrudedQty = query.data.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
+    const totalExtrudedQty = jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
     
     // If job order is fully extruded, update status
     if (totalExtrudedQty >= jobOrder.quantity && jobOrder.status !== "extrusion_completed") {
@@ -186,7 +184,7 @@ export function JobOrdersForExtrusion() {
 
   // Get product details for a job order
   const getProductDetails = (jobOrder: JobOrder): string => {
-    if (!customerProducts) return "Loading...";
+    if (!customerProducts.length) return "Loading...";
     
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
     if (!product) return "Unknown Product";
@@ -195,14 +193,9 @@ export function JobOrdersForExtrusion() {
   };
 
   // Filter job orders for the extrusion stage (pending or in_progress)
-  const getJobOrdersForExtrusion = (): JobOrder[] => {
-    if (!jobOrders) return [];
-    
-    return jobOrders.filter(job => 
-      job.status === "pending" || 
-      job.status === "in_progress"
-    );
-  };
+  const jobOrdersForExtrusion = jobOrders.filter(job => 
+    job.status === "pending" || job.status === "in_progress"
+  );
 
   if (jobOrdersLoading || customerProductsLoading || customersLoading) {
     return (
@@ -212,8 +205,6 @@ export function JobOrdersForExtrusion() {
       </div>
     );
   }
-
-  const jobOrdersForExtrusion = getJobOrdersForExtrusion();
 
   return (
     <div className="space-y-4">
@@ -240,11 +231,14 @@ export function JobOrdersForExtrusion() {
           className="space-y-3"
         >
           {jobOrdersForExtrusion.map((jobOrder) => {
-            const query = rollsQueries[jobOrder.id] || { data: [], isLoading: false };
-            const { data: rolls = [], isLoading: rollsLoading } = query;
             const isExpanded = expandedOrders.includes(jobOrder.id);
             const progressPercentage = calculateProgress(jobOrder);
             const isComplete = isJobOrderFullyExtruded(jobOrder);
+            
+            // Only get rolls when the job order is expanded
+            const jobOrderRolls = isExpanded 
+              ? extrusionRolls.filter(roll => roll.jobOrderId === jobOrder.id)
+              : [];
             
             return (
               <AccordionItem
@@ -315,13 +309,13 @@ export function JobOrdersForExtrusion() {
                     
                     <div className="mb-4">
                       <h5 className="font-medium mb-2">Rolls</h5>
-                      {rollsLoading ? (
-                        <div className="animate-pulse bg-white h-20 rounded-lg"></div>
-                      ) : !rolls || rolls.length === 0 ? (
+                      {!isExpanded ? (
+                        <p className="text-sm text-secondary-500 py-2">Expand to view rolls</p>
+                      ) : jobOrderRolls.length === 0 ? (
                         <p className="text-sm text-secondary-500 py-2">No rolls created yet</p>
                       ) : (
                         <div className="space-y-2">
-                          {rolls.map((roll) => (
+                          {jobOrderRolls.map((roll) => (
                             <div 
                               key={roll.id} 
                               className="bg-white p-3 rounded-lg border border-secondary-200 flex justify-between items-center"
