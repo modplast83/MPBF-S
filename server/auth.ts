@@ -29,14 +29,16 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Set up session
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "mpbf-production-system-secret",
+    secret: process.env.SESSION_SECRET || "supersecretkey", // In production, use env var
     resave: false,
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
     }
   };
 
@@ -45,48 +47,68 @@ export function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Configure passport local strategy
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
         const user = await storage.getUserByUsername(username);
         if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false);
-        } else {
-          return done(null, user);
+          return done(null, false, { message: "Invalid username or password" });
         }
+        
+        // Don't return password in session
+        const { password: _, ...userWithoutPassword } = user;
+        return done(null, userWithoutPassword as SelectUser);
       } catch (error) {
         return done(error);
       }
-    }),
+    })
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  // Serialize and deserialize user for session
+  passport.serializeUser((user, done) => {
+    done(null, user.id);
+  });
+
   passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await storage.getUser(id);
-      done(null, user);
+      if (!user) {
+        return done(null, false);
+      }
+      
+      // Don't return password to client
+      const { password: _, ...userWithoutPassword } = user;
+      done(null, userWithoutPassword as SelectUser);
     } catch (error) {
       done(error);
     }
   });
 
+  // Authentication routes
   app.post("/api/register", async (req, res, next) => {
     try {
+      // Check if username exists
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
+      // Hash password
+      const hashedPassword = await hashPassword(req.body.password);
+      
+      // Create user
       const user = await storage.createUser({
         ...req.body,
-        password: await hashPassword(req.body.password),
+        password: hashedPassword,
       });
 
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-
+      // Log in the user automatically after registration
       req.login(user, (err) => {
         if (err) return next(err);
+        
+        // Don't send password back to client
+        const { password: _, ...userWithoutPassword } = user;
         res.status(201).json(userWithoutPassword);
       });
     } catch (error) {
@@ -97,30 +119,30 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
       if (err) return next(err);
-      if (!user) return res.status(401).json({ message: "Invalid credentials" });
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Authentication failed" });
+      }
       
       req.login(user, (err) => {
         if (err) return next(err);
-        
-        // Remove password from response
-        const { password, ...userWithoutPassword } = user;
-        return res.status(200).json(userWithoutPassword);
+        return res.json(user);
       });
     })(req, res, next);
   });
 
-  app.post("/api/logout", (req, res, next) => {
+  app.post("/api/logout", (req, res) => {
     req.logout((err) => {
-      if (err) return next(err);
-      res.sendStatus(200);
+      if (err) {
+        return res.status(500).json({ message: "Failed to logout" });
+      }
+      res.status(200).json({ message: "Logged out successfully" });
     });
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
-    
-    // Remove password from response
-    const { password, ...userWithoutPassword } = req.user as SelectUser;
-    res.json(userWithoutPassword);
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    res.json(req.user);
   });
 }

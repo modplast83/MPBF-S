@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
@@ -12,6 +12,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
+import { setupAuth } from "./auth";
 
 // Extend the Request type to include express-fileupload properties
 declare global {
@@ -23,8 +24,19 @@ declare global {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication
+  setupAuth(app);
+  
   // Setup API routes
   const apiRouter = app.route("/api");
+  
+  // Authentication middleware for protected routes
+  const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    next();
+  };
   
   // Categories
   app.get("/api/categories", async (_req: Request, res: Response) => {

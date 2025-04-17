@@ -20,8 +20,21 @@ import {
   CorrectiveAction, InsertCorrectiveAction, correctiveActions,
   SmsMessage, InsertSmsMessage, smsMessages
 } from '@shared/schema';
+import session from 'express-session';
+import connectPg from 'connect-pg-simple';
+import { pool } from './db';
 
 export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+  
+  constructor() {
+    const PostgresSessionStore = connectPg(session);
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      tableName: 'session', // Default table name is "session"
+      createTableIfMissing: true
+    });
+  }
   // User management
   async getUsers(): Promise<User[]> {
     return await db.select().from(users);

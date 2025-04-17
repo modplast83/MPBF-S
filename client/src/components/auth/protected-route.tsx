@@ -1,29 +1,36 @@
 import { ReactNode } from "react";
-import { Redirect, useLocation } from "wouter";
+import { Redirect, useLocation, Route } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  path: string;
+  component: React.ComponentType;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ path, component: Component }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
   const [location] = useLocation();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <Route path={path}>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Route>
     );
   }
 
   if (!user) {
     // Store the current location to redirect back after login
     sessionStorage.setItem("redirectAfterLogin", location);
-    return <Redirect to="/login" />;
+    return (
+      <Route path={path}>
+        <Redirect to="/auth" />
+      </Route>
+    );
   }
 
-  return <>{children}</>;
+  return <Route path={path} component={Component} />;
 }
