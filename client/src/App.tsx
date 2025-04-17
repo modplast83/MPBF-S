@@ -28,16 +28,24 @@ import { apiRequest } from "@/lib/queryClient";
 function App() {
   // Initialize demo data when the app loads for the first time
   useEffect(() => {
+    // Use localStorage to prevent initialization on every page reload or HMR
+    const hasInitialized = localStorage.getItem('demoDataInitialized');
+    
     const initializeData = async () => {
       try {
         await apiRequest("POST", API_ENDPOINTS.INIT_DEMO_DATA, {});
         console.log("Demo data initialized successfully");
+        // Set flag to prevent reinitializing
+        localStorage.setItem('demoDataInitialized', 'true');
       } catch (error) {
         console.error("Failed to initialize demo data:", error);
       }
     };
-
-    initializeData();
+    
+    // Only initialize if it hasn't been done in this session
+    if (!hasInitialized) {
+      initializeData();
+    }
   }, []);
 
   return (
