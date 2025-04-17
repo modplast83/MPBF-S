@@ -6,6 +6,7 @@ import {
   insertItemSchema, insertSectionSchema, insertMachineSchema,
   insertMasterBatchSchema, insertCustomerProductSchema,
   insertOrderSchema, insertJobOrderSchema, insertRollSchema,
+  createRollSchema, InsertRoll,
   insertRawMaterialSchema, insertFinalProductSchema
 } from "@shared/schema";
 import { z } from "zod";
@@ -1057,7 +1058,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/rolls", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertRollSchema.parse(req.body);
+      // Use the createRollSchema that omits id and serialNumber
+      const validatedData = createRollSchema.parse(req.body);
       
       // Verify job order exists
       const jobOrder = await storage.getJobOrder(validatedData.jobOrderId);
@@ -1069,14 +1071,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingRolls = await storage.getRollsByJobOrder(validatedData.jobOrderId);
       const nextSerialNumber = (existingRolls.length + 1).toString();
       
-      // Set the serial number automatically
-      validatedData.serialNumber = nextSerialNumber;
+      // Prepare the complete roll data with auto-generated fields
+      const rollData: InsertRoll = {
+        ...validatedData,
+        serialNumber: nextSerialNumber,
+        id: `EX-${validatedData.jobOrderId}-${nextSerialNumber}`
+      };
       
-      // Create a unique ID based on the stage prefix and serial number
-      // EX for extrusion stage
-      validatedData.id = `EX-${validatedData.jobOrderId}-${nextSerialNumber}`;
-      
-      const roll = await storage.createRoll(validatedData);
+      const roll = await storage.createRoll(rollData);
       res.status(201).json(roll);
     } catch (error) {
       if (error instanceof z.ZodError) {

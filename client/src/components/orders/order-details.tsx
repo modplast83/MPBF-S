@@ -76,8 +76,8 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
     mutationFn: async () => {
       if (!selectedJobOrder) return;
       
+      // Send only the necessary data - id and serialNumber will be generated on server
       await apiRequest("POST", API_ENDPOINTS.ROLLS, {
-        // Serial number will be automatically generated on the server
         jobOrderId: selectedJobOrder.id,
         extrudingQty: rollQuantity,
         printingQty: 0,

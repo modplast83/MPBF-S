@@ -153,7 +153,16 @@ export const rolls = pgTable("rolls", {
 });
 
 export const insertRollSchema = createInsertSchema(rolls);
+
+// Create a custom schema for roll creation API that makes id and serialNumber optional
+// since they'll be auto-generated on the server
+export const createRollSchema = insertRollSchema.omit({ 
+  id: true, 
+  serialNumber: true 
+});
+
 export type InsertRoll = z.infer<typeof insertRollSchema>;
+export type CreateRoll = z.infer<typeof createRollSchema>;
 export type Roll = typeof rolls.$inferSelect;
 
 // Machines table
