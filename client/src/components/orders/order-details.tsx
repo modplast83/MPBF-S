@@ -206,17 +206,28 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
     }
     
     // Format job orders and products for printing
-    const jobOrderRows = jobOrders?.map(jobOrder => {
+    const jobOrderRows = jobOrders?.map((jobOrder, index) => {
       const product = getCustomerProduct(jobOrder);
+      // Convert yes/no to Y/N for printed
+      const printedValue = product?.printed ? (product.printed === "yes" ? "Y" : "N") : "N";
+      
       return `
         <tr>
+          <td>${index + 1}</td>
           <td>${product?.itemId || "N/A"}</td>
           <td>${product?.sizeCaption || "N/A"}</td>
           <td>${product?.thickness || "N/A"}</td>
           <td>${product?.rawMaterial || "N/A"}</td>
           <td>${product?.masterBatchId || "N/A"}</td>
           <td>${jobOrder.quantity}</td>
-          <td>${product?.printed || "N/A"}</td>
+          <td>${printedValue}</td>
+          <td>${product?.printingCylinder || "0"}</td>
+          <td>${product?.punching || "None"}</td>
+          <td>${product?.lengthCm || "0"}</td>
+          <td>${product?.cuttingUnit || "Kg."}</td>
+          <td>${product?.unitWeight || "1"}</td>
+          <td>${product?.packing || "20K/Bag"}</td>
+          <td>${product?.cover || "-"}</td>
         </tr>
       `;
     }).join('') || '';
@@ -334,13 +345,21 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
         <table>
           <thead>
             <tr>
-              <th>Product</th>
+              <th>No</th>
+              <th>Item Name</th>
               <th>Size</th>
-              <th>Thickness</th>
-              <th>Material</th>
+              <th>Thick</th>
+              <th>Mater</th>
               <th>Batch</th>
-              <th>Qty (Kg)</th>
+              <th>Qty</th>
               <th>Printed</th>
+              <th>Cyle.</th>
+              <th>Punch</th>
+              <th>Length</th>
+              <th>Unit</th>
+              <th>U/W(Kg)</th>
+              <th>Packing</th>
+              <th>Cover</th>
             </tr>
           </thead>
           <tbody>
