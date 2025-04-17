@@ -18,11 +18,12 @@ export default function Header() {
   
   // Function to handle logout
   const handleLogout = () => {
-    toast({
-      title: "Logout functionality",
-      description: "Full authentication system is not implemented in this demo version.",
-      variant: "default",
-    });
+    // Use alert instead of toast for more visibility
+    alert("Logout functionality is not implemented in this demo version.\nA full authentication system would be needed for this feature.");
+    
+    // Simulate a logout effect by refreshing the page
+    // In a real app, this would clear session and redirect to login
+    // window.location.reload();
   };
   
   // Function to get current page title based on location
