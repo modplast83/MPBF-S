@@ -22,6 +22,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { formatDateString, calculateProgress } from "@/lib/utils";
 import { Order, Customer, JobOrder, CustomerProduct, Roll, Item, MasterBatch } from "@shared/schema";
 import { toast } from "@/hooks/use-toast";
+import { OrderSms } from "./order-sms";
 
 interface OrderDetailsProps {
   orderId: number;
