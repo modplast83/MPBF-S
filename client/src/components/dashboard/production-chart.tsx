@@ -9,11 +9,12 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
   ChartData,
   ChartOptions,
 } from "chart.js";
 import { Line, Bar } from "react-chartjs-2";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { CHART_COLORS } from "@/lib/constants";
 
 ChartJS.register(
@@ -24,7 +25,8 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 interface ProductionChartProps {
@@ -173,21 +175,32 @@ export function ProductionChart({ className }: ProductionChartProps) {
       <div className="p-6 border-b border-secondary-100">
         <div className="flex justify-between items-center">
           <h3 className="font-semibold text-lg">Production Activity</h3>
-          <Tabs defaultValue="daily" value={tab} onValueChange={setTab}>
-            <TabsList>
-              <TabsTrigger value="daily">Daily</TabsTrigger>
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex space-x-2">
+            <button 
+              className={`px-3 py-1 rounded-md text-sm font-medium ${tab === 'daily' ? 'bg-primary text-white' : 'bg-secondary-100'}`}
+              onClick={() => setTab("daily")}
+            >
+              Daily
+            </button>
+            <button 
+              className={`px-3 py-1 rounded-md text-sm font-medium ${tab === 'monthly' ? 'bg-primary text-white' : 'bg-secondary-100'}`}
+              onClick={() => setTab("monthly")}
+            >
+              Monthly
+            </button>
+          </div>
         </div>
       </div>
       <div className="p-6 h-80">
-        <TabsContent value="daily" className="h-full mt-0">
-          <Line options={dailyOptions} data={dailyData} />
-        </TabsContent>
-        <TabsContent value="monthly" className="h-full mt-0">
-          <Bar options={monthlyOptions} data={monthlyData} />
-        </TabsContent>
+        {tab === "daily" ? (
+          <div className="h-full">
+            <Line options={dailyOptions} data={dailyData} />
+          </div>
+        ) : (
+          <div className="h-full">
+            <Bar options={monthlyOptions} data={monthlyData} />
+          </div>
+        )}
       </div>
     </div>
   );

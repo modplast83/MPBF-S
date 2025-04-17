@@ -94,31 +94,27 @@ export default function Sidebar() {
                           <Link 
                             key={subIndex} 
                             href={subItem.path}
+                            className={cn(
+                              "flex items-center pl-11 py-2 hover:bg-primary-600 text-white",
+                              isActive(subItem.path) && "bg-primary-600"
+                            )}
                           >
-                            <a
-                              className={cn(
-                                "flex items-center pl-11 py-2 hover:bg-primary-600 text-white",
-                                isActive(subItem.path) && "bg-primary-600"
-                              )}
-                            >
-                              {subItem.title}
-                            </a>
+                            {subItem.title}
                           </Link>
                         ))}
                       </CollapsibleContent>
                     )}
                   </Collapsible>
                 ) : (
-                  <Link href={item.path}>
-                    <a
-                      className={cn(
-                        "flex items-center px-4 py-3 hover:bg-primary-600 text-white",
-                        isActive(item.path) && "bg-primary-600"
-                      )}
-                    >
-                      <span className="material-icons mr-3">{item.icon}</span>
-                      {expanded && <span>{item.title}</span>}
-                    </a>
+                  <Link 
+                    href={item.path}
+                    className={cn(
+                      "flex items-center px-4 py-3 hover:bg-primary-600 text-white",
+                      isActive(item.path) && "bg-primary-600"
+                    )}
+                  >
+                    <span className="material-icons mr-3">{item.icon}</span>
+                    {expanded && <span>{item.title}</span>}
                   </Link>
                 )}
               </div>
