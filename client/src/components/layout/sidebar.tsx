@@ -34,7 +34,7 @@ export default function Sidebar() {
   return (
     <aside 
       className={cn(
-        "bg-primary-700 text-white h-screen fixed z-10 overflow-y-auto transition-all duration-300",
+        "bg-primary-700 text-white h-screen fixed left-0 top-0 z-50 overflow-y-auto transition-all duration-300",
         expanded ? "w-[250px]" : "w-[64px]"
       )}
     >
