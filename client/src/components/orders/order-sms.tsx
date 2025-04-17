@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { SmsDialog } from "@/components/ui/sms-dialog";
 import { MessageSquare, RefreshCw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { Customer, Order } from "@shared/schema";
+import { Customer, Order, SmsMessage } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 
 interface OrderSmsProps {
@@ -15,11 +15,11 @@ interface OrderSmsProps {
 
 export function OrderSms({ order, customer }: OrderSmsProps) {
   const {
-    data: messages = [],
+    data: messages = [] as SmsMessage[],
     isLoading,
     isError,
     refetch,
-  } = useQuery({
+  } = useQuery<SmsMessage[]>({
     queryKey: ["/api/orders", order.id, "sms-messages"],
     retry: false,
     refetchOnWindowFocus: false,
@@ -66,7 +66,7 @@ export function OrderSms({ order, customer }: OrderSmsProps) {
           <div className="text-center py-4 text-muted-foreground">No messages sent yet</div>
         ) : (
           <div className="space-y-4">
-            {messages.map((message: any) => (
+            {messages.map((message: SmsMessage) => (
               <div key={message.id} className="border rounded-lg p-4">
                 <div className="flex justify-between mb-2">
                   <span className="font-semibold">{message.recipientName || message.recipientPhone}</span>

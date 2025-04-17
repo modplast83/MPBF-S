@@ -1,144 +1,173 @@
-import twilio from 'twilio';
-import { SmsMessage, InsertSmsMessage } from '@shared/schema';
+import { Twilio } from 'twilio';
 import { storage } from '../storage';
+import { SmsMessage, InsertSmsMessage } from '@shared/schema';
 
 // Initialize Twilio client with environment variables
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
-// Create Twilio client
-const twilioClient = twilio(accountSid, authToken);
-
-/**
- * SMS Service handles sending SMS messages using Twilio
- */
+// Create a SMS service class to handle Twilio integration
 export class SmsService {
-  /**
-   * Send an SMS message
-   * @param smsData SMS message data
-   * @returns The created SMS message record
-   */
-  static async sendSms(smsData: InsertSmsMessage): Promise<SmsMessage> {
+  private static twilioClient: Twilio | null = null;
+
+  // Initialize the Twilio client if credentials are available
+  private static getTwilioClient(): Twilio | null {
+    if (this.twilioClient) {
+      return this.twilioClient;
+    }
+
+    if (!accountSid || !authToken || !twilioPhoneNumber) {
+      console.error('Twilio credentials not found in environment variables.');
+      return null;
+    }
+
     try {
-      // Create the message in the database with pending status
-      const createdMessage = await storage.createSmsMessage(smsData);
-      
-      // Send the message via Twilio
-      const twilioMessage = await twilioClient.messages.create({
-        body: smsData.message,
-        from: twilioPhoneNumber,
-        to: smsData.recipientPhone,
-      });
-      
-      // Update the message with Twilio message ID and status
-      const updatedMessage = await storage.updateSmsMessage(createdMessage.id, {
-        status: 'sent',
-        twilioMessageId: twilioMessage.sid,
-      });
-      
-      return updatedMessage || createdMessage;
-    } catch (error: any) {
-      // If there's an error, update the message status
-      if (smsData.id) {
-        await storage.updateSmsMessage(smsData.id, {
-          status: 'failed',
-          errorMessage: error.message,
-        });
-      }
-      
-      throw new Error(`Failed to send SMS: ${error.message}`);
+      this.twilioClient = new Twilio(accountSid, authToken);
+      return this.twilioClient;
+    } catch (error) {
+      console.error('Failed to initialize Twilio client:', error);
+      return null;
     }
   }
-  
-  /**
-   * Send an order notification to a customer
-   * @param orderId Order ID
-   * @param phoneNumber Customer phone number
-   * @param message Custom message text
-   * @param sentBy User ID of the sender
-   * @returns The created SMS message record
-   */
-  static async sendOrderNotification(
+
+  // Send a message and record it in the database
+  private static async sendMessage(messageData: Omit<InsertSmsMessage, 'id' | 'sentAt' | 'deliveredAt' | 'twilioMessageId'>): Promise<SmsMessage> {
+    // Create a record in the database first with pending status
+    const message = await storage.createSmsMessage({
+      ...messageData,
+      status: 'pending',
+      sentAt: new Date(),
+      deliveredAt: null,
+      twilioMessageId: null
+    });
+
+    // Try to send the message via Twilio
+    try {
+      const client = this.getTwilioClient();
+      if (!client) {
+        // If Twilio client is not available, update the message status
+        return await storage.updateSmsMessage(message.id, {
+          status: 'failed',
+          errorMessage: 'Twilio client not initialized. Check environment credentials.'
+        });
+      }
+
+      // Send the message via Twilio
+      const twilioMessage = await client.messages.create({
+        body: messageData.message,
+        from: twilioPhoneNumber,
+        to: messageData.recipientPhone
+      });
+
+      // Update the message with Twilio message ID and sent status
+      return await storage.updateSmsMessage(message.id, {
+        status: 'sent',
+        twilioMessageId: twilioMessage.sid
+      });
+    } catch (error: any) {
+      // Handle sending errors and update the message status
+      console.error('Failed to send SMS:', error);
+      return await storage.updateSmsMessage(message.id, {
+        status: 'failed',
+        errorMessage: error.message || 'Failed to send SMS'
+      });
+    }
+  }
+
+  // Send order notification
+  public static async sendOrderNotification(
     orderId: number,
-    phoneNumber: string,
+    recipientPhone: string,
     message: string,
     sentBy?: string,
     recipientName?: string,
-    customerId?: string,
+    customerId?: string
   ): Promise<SmsMessage> {
-    const smsData: InsertSmsMessage = {
-      recipientPhone: phoneNumber,
-      recipientName,
+    return this.sendMessage({
+      recipientPhone,
       message,
+      messageType: 'order_notification',
       orderId,
       customerId,
+      recipientName,
       sentBy,
-      status: 'pending',
-      messageType: 'order_notification',
-    };
-    
-    return this.sendSms(smsData);
+      jobOrderId: null
+    });
   }
-  
-  /**
-   * Send a job order status update
-   * @param jobOrderId Job order ID
-   * @param phoneNumber Customer phone number
-   * @param message Custom message text
-   * @param sentBy User ID of the sender
-   * @returns The created SMS message record
-   */
-  static async sendJobOrderUpdate(
+
+  // Send job order status update
+  public static async sendJobOrderUpdate(
     jobOrderId: number,
-    phoneNumber: string,
+    recipientPhone: string,
     message: string,
     sentBy?: string,
     recipientName?: string,
-    customerId?: string,
+    customerId?: string
   ): Promise<SmsMessage> {
-    const smsData: InsertSmsMessage = {
-      recipientPhone: phoneNumber,
-      recipientName,
+    return this.sendMessage({
+      recipientPhone,
       message,
+      messageType: 'status_update',
       jobOrderId,
       customerId,
+      recipientName,
       sentBy,
-      status: 'pending',
-      messageType: 'status_update',
-    };
-    
-    return this.sendSms(smsData);
+      orderId: null
+    });
   }
-  
-  /**
-   * Send a custom message
-   * @param phoneNumber Recipient phone number
-   * @param message Custom message text
-   * @param sentBy User ID of the sender
-   * @returns The created SMS message record
-   */
-  static async sendCustomMessage(
-    phoneNumber: string,
+
+  // Send custom message
+  public static async sendCustomMessage(
+    recipientPhone: string,
     message: string,
     sentBy?: string,
     recipientName?: string,
     customerId?: string,
     orderId?: number,
-    jobOrderId?: number,
+    jobOrderId?: number
   ): Promise<SmsMessage> {
-    const smsData: InsertSmsMessage = {
-      recipientPhone: phoneNumber,
-      recipientName,
+    return this.sendMessage({
+      recipientPhone,
       message,
-      orderId,
-      jobOrderId,
-      customerId,
-      sentBy,
-      status: 'pending',
       messageType: 'custom',
-    };
-    
-    return this.sendSms(smsData);
+      customerId,
+      recipientName,
+      sentBy,
+      orderId,
+      jobOrderId
+    });
+  }
+
+  // Check message status and update in the database
+  public static async checkMessageStatus(messageId: number): Promise<SmsMessage | null> {
+    const message = await storage.getSmsMessage(messageId);
+    if (!message || !message.twilioMessageId) {
+      return message;
+    }
+
+    const client = this.getTwilioClient();
+    if (!client) {
+      return message;
+    }
+
+    try {
+      const twilioMessage = await client.messages(message.twilioMessageId).fetch();
+      const status = twilioMessage.status.toLowerCase();
+
+      // Only update if status has changed
+      if (status !== message.status) {
+        const updatedMessage = await storage.updateSmsMessage(messageId, {
+          status: status as any,
+          deliveredAt: status === 'delivered' ? new Date() : message.deliveredAt
+        });
+        return updatedMessage;
+      }
+
+      return message;
+    } catch (error) {
+      console.error(`Failed to check status for message ${messageId}:`, error);
+      return message;
+    }
   }
 }
