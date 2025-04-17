@@ -61,7 +61,7 @@ export default function Sidebar() {
         {SIDEBAR_ITEMS.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {expanded && (
-              <div className="px-4 py-2 text-gray-400 text-xs font-semibold uppercase">
+              <div className="px-2 py-2 text-gray-400 text-xs font-semibold uppercase">
                 {section.title}
               </div>
             )}
@@ -75,11 +75,11 @@ export default function Sidebar() {
                   >
                     <CollapsibleTrigger
                       className={cn(
-                        "flex items-center px-4 py-3 w-full hover:bg-gray-900 text-white",
+                        "flex items-center px-2 py-3 w-full hover:bg-gray-900 text-white",
                         isActive(item.path) && "bg-gray-800"
                       )}
                     >
-                      <span className="material-icons mr-3">{item.icon}</span>
+                      <span className="material-icons mr-2">{item.icon}</span>
                       {expanded && (
                         <>
                           <span className="flex-1">{item.title}</span>
@@ -97,7 +97,7 @@ export default function Sidebar() {
                             key={subIndex} 
                             href={subItem.path}
                             className={cn(
-                              "flex items-center pl-11 py-2 hover:bg-gray-900 text-white",
+                              "flex items-center pl-8 py-2 hover:bg-gray-900 text-white",
                               isActive(subItem.path) && "bg-gray-800"
                             )}
                           >
@@ -111,11 +111,11 @@ export default function Sidebar() {
                   <Link 
                     href={item.path}
                     className={cn(
-                      "flex items-center px-4 py-3 hover:bg-gray-900 text-white",
+                      "flex items-center px-2 py-3 hover:bg-gray-900 text-white",
                       isActive(item.path) && "bg-gray-800"
                     )}
                   >
-                    <span className="material-icons mr-3">{item.icon}</span>
+                    <span className="material-icons mr-2">{item.icon}</span>
                     {expanded && <span>{item.title}</span>}
                   </Link>
                 )}
