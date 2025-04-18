@@ -32,18 +32,13 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MixingDetailDialog from "@/components/mix-materials/mixing-detail-dialog";
 
-interface ParamsProps {
-  params?: {
-    id: string;
-  };
-}
-
-export default function MixingProcessDetailsPage({ params }: ParamsProps) {
+export default function MixingProcessDetailsPage() {
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   
-  // Get the ID from params
-  const processId = params?.id ? parseInt(params.id) : null;
+  // Extract the ID from the URL path
+  const pathParts = location.split('/');
+  const processId = pathParts.length > 2 ? parseInt(pathParts[pathParts.length - 1]) : null;
   const [isAddDetailDialogOpen, setIsAddDetailDialogOpen] = useState(false);
   const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
   const [newMaterialId, setNewMaterialId] = useState<number | null>(null);
