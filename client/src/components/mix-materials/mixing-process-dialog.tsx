@@ -257,9 +257,9 @@ export default function MixingProcessDialog({
                 <FormItem>
                   <FormLabel>Order (Optional)</FormLabel>
                   <Select
-                    onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
-                    defaultValue={field.value?.toString()}
-                    value={field.value?.toString()}
+                    onValueChange={(value) => field.onChange(value === "null" ? null : parseInt(value))}
+                    defaultValue={field.value?.toString() || "null"}
+                    value={field.value?.toString() || "null"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -267,7 +267,7 @@ export default function MixingProcessDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="null">None</SelectItem>
                       {orders?.map((order) => (
                         <SelectItem key={order.id} value={order.id.toString()}>
                           Order #{order.id}
