@@ -186,13 +186,77 @@ export default function MixingProcessDetailsPage() {
     );
   }
 
+  // Confirm mix mutation
+  const confirmMixMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest(
+        "PUT", 
+        `/api/mixing-processes/${processId}`, 
+        { confirmed: true }
+      );
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to confirm mix: ${errorText}`);
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Mix confirmed successfully. Raw material quantities have been updated.",
+      });
+      refetchProcess();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to confirm mix",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle confirm mix
+  const handleConfirmMix = () => {
+    if (confirm("Are you sure you want to confirm this mix? This will deduct materials from inventory.")) {
+      confirmMixMutation.mutate();
+    }
+  };
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold tracking-tight">Mix #{process.id} Details</h2>
-        <Button variant="outline" onClick={handleGoBack}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Mix List
-        </Button>
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Mix #{process.id} Details</h2>
+          <div className="mt-2">
+            {process.confirmed ? (
+              <Badge variant="success">Confirmed</Badge>
+            ) : (
+              <Badge variant="secondary">Draft</Badge>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {!process.confirmed && (
+            <Button 
+              variant="primary"
+              onClick={handleConfirmMix}
+              disabled={confirmMixMutation.isPending}
+            >
+              {confirmMixMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              Confirm Mix
+            </Button>
+          )}
+          <Button variant="outline" onClick={handleGoBack}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Mix List
+          </Button>
+        </div>
       </div>
       
       <Tabs defaultValue="details" className="w-full">
@@ -286,55 +350,57 @@ export default function MixingProcessDetailsPage() {
         </TabsContent>
         
         <TabsContent value="composition" className="space-y-6 mt-6">
-          {/* Add material section */}
-          <Card className="border-dashed">
-            <CardHeader>
-              <CardTitle>Add Material</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium mb-2">Material</label>
-                  <select 
-                    className="w-full px-3 py-2 border rounded-md"
-                    value={newMaterialId || ""}
-                    onChange={(e) => setNewMaterialId(e.target.value ? parseInt(e.target.value) : null)}
-                  >
-                    <option value="">Select a material...</option>
-                    {rawMaterials?.map((material) => (
-                      <option key={material.id} value={material.id}>
-                        {material.name} ({material.quantity} {material.unit} available)
-                      </option>
-                    ))}
-                  </select>
+          {/* Add material section - only shown if mix is not confirmed */}
+          {!process.confirmed && (
+            <Card className="border-dashed">
+              <CardHeader>
+                <CardTitle>Add Material</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-sm font-medium mb-2">Material</label>
+                    <select 
+                      className="w-full px-3 py-2 border rounded-md"
+                      value={newMaterialId || ""}
+                      onChange={(e) => setNewMaterialId(e.target.value ? parseInt(e.target.value) : null)}
+                    >
+                      <option value="">Select a material...</option>
+                      {rawMaterials?.map((material) => (
+                        <option key={material.id} value={material.id}>
+                          {material.name} ({material.quantity} {material.unit} available)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Quantity (KG)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      value={newMaterialQuantity}
+                      onChange={(e) => setNewMaterialQuantity(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <Button 
+                      className="w-full"
+                      onClick={handleAddMaterial}
+                      disabled={!newMaterialId || !newMaterialQuantity || parseFloat(newMaterialQuantity) <= 0 || addMaterialMutation.isPending}
+                    >
+                      {addMaterialMutation.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="mr-2 h-4 w-4" />
+                      )}
+                      Add to Mix
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Quantity (KG)</label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={newMaterialQuantity}
-                    onChange={(e) => setNewMaterialQuantity(e.target.value)}
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button 
-                    className="w-full"
-                    onClick={handleAddMaterial}
-                    disabled={!newMaterialId || !newMaterialQuantity || parseFloat(newMaterialQuantity) <= 0 || addMaterialMutation.isPending}
-                  >
-                    {addMaterialMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="mr-2 h-4 w-4" />
-                    )}
-                    Add to Mix
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
           
           {/* Materials table */}
           <Card>
@@ -375,13 +441,15 @@ export default function MixingProcessDetailsPage() {
                           <TableCell>{detail.percentage.toFixed(2)}%</TableCell>
                           <TableCell>{detail.notes || "-"}</TableCell>
                           <TableCell>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => handleDeleteDetail(detail.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            {!process.confirmed && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleDeleteDetail(detail.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       );
