@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { Loader2, ArrowLeft, Plus, Trash2, Save, Edit } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Trash2, Save, Edit, FileText } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 import {
@@ -27,6 +27,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MixingDetailDialog from "@/components/mix-materials/mixing-detail-dialog";
 
 export default function MixingProcessDetailsPage({ params }: { params: { id: string } }) {
@@ -35,46 +38,70 @@ export default function MixingProcessDetailsPage({ params }: { params: { id: str
   const [, setLocation] = useLocation();
   const [isAddDetailDialogOpen, setIsAddDetailDialogOpen] = useState(false);
   const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
+  const [newMaterialId, setNewMaterialId] = useState<number | null>(null);
+  const [newMaterialQuantity, setNewMaterialQuantity] = useState<string>("");
+  const [newMaterialNotes, setNewMaterialNotes] = useState<string>("");
 
-  // Fetch process details
+  // Fetch process details with associated machines and orders
   const {
-    data: process,
+    data: processData,
     isLoading: isProcessLoading,
     error: processError,
-  } = useQuery({
-    queryKey: [`/api/mixing-processes/${processId}`],
-    enabled: !isNaN(processId),
-  });
-
-  // Fetch mixing details
-  const {
-    data: mixingDetails,
-    isLoading: isDetailsLoading,
-    refetch: refetchDetails,
+    refetch: refetchProcess,
   } = useQuery({
     queryKey: [`/api/mixing-processes/${processId}/details`],
     enabled: !isNaN(processId),
   });
 
-  // Fetch related data
-  const { data: users } = useQuery({
-    queryKey: ["/api/users"],
-    enabled: true,
-  });
+  // Get process, machines, orders, and details from the response
+  const process = processData?.process;
+  const machines = processData?.machines || [];
+  const orders = processData?.orders || [];
+  const mixingDetails = processData?.details || [];
+  const user = processData?.user;
 
-  const { data: machines } = useQuery({
-    queryKey: ["/api/machines"],
-    enabled: true,
-  });
-
-  const { data: orders } = useQuery({
-    queryKey: ["/api/orders"],
-    enabled: true,
-  });
-
+  // Fetch raw materials
   const { data: rawMaterials } = useQuery({
     queryKey: ["/api/raw-materials"],
     enabled: true,
+  });
+
+  // Calculate total weight
+  const totalWeight = mixingDetails.reduce((sum, detail) => sum + detail.quantity, 0);
+
+  // Add material mutation
+  const addMaterialMutation = useMutation({
+    mutationFn: async () => {
+      if (!newMaterialId || !newMaterialQuantity || parseFloat(newMaterialQuantity) <= 0) {
+        throw new Error("Invalid material or quantity");
+      }
+      
+      const res = await apiRequest("POST", "/api/mixing-details", {
+        mixingProcessId: processId,
+        materialId: newMaterialId,
+        quantity: parseFloat(newMaterialQuantity),
+        notes: newMaterialNotes,
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      refetchProcess();
+      toast({
+        title: "Success",
+        description: "Material added to mix successfully",
+      });
+      // Reset form
+      setNewMaterialId(null);
+      setNewMaterialQuantity("");
+      setNewMaterialNotes("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add material to mix",
+        variant: "destructive",
+      });
+    },
   });
 
   // Delete detail mutation
@@ -84,10 +111,10 @@ export default function MixingProcessDetailsPage({ params }: { params: { id: str
       return res;
     },
     onSuccess: () => {
-      refetchDetails();
+      refetchProcess();
       toast({
         title: "Success",
-        description: "Material deleted successfully from mix",
+        description: "Material removed from mix",
       });
     },
     onError: (error) => {
@@ -100,33 +127,19 @@ export default function MixingProcessDetailsPage({ params }: { params: { id: str
   });
 
   // Helper functions
-  const getUserNameById = (userId: string | null) => {
-    if (!userId) return "N/A";
-    const user = users?.find(u => u.id === userId);
-    return user ? user.name : userId;
-  };
-
-  const getMachineNameById = (machineId: string | null) => {
-    if (!machineId) return "N/A";
-    const machine = machines?.find(m => m.id === machineId);
-    return machine ? machine.name : machineId;
-  };
-
-  const getOrderNumberById = (orderId: number | null) => {
-    if (!orderId) return "N/A";
-    const order = orders?.find(o => o.id === orderId);
-    return order ? `Order #${order.id}` : `Order #${orderId}`;
-  };
-
   const getMaterialNameById = (materialId: number | null) => {
     if (!materialId) return "N/A";
     const material = rawMaterials?.find(m => m.id === materialId);
     return material ? material.name : `Material #${materialId}`;
   };
 
+  const getMaterialById = (materialId: number) => {
+    return rawMaterials?.find(m => m.id === materialId);
+  };
+
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), "yyyy-MM-dd HH:mm");
+      return format(new Date(dateString), "yyyy-MM-dd");
     } catch (error) {
       return dateString;
     }
@@ -136,22 +149,8 @@ export default function MixingProcessDetailsPage({ params }: { params: { id: str
     setLocation("/mix-materials");
   };
 
-  const handleDetailCreated = () => {
-    refetchDetails();
-    setIsAddDetailDialogOpen(false);
-    toast({
-      title: "Success",
-      description: "Material added to mix successfully",
-    });
-  };
-
-  const handleDetailUpdated = () => {
-    refetchDetails();
-    setSelectedDetailId(null);
-    toast({
-      title: "Success",
-      description: "Mix material updated successfully",
-    });
+  const handleAddMaterial = () => {
+    addMaterialMutation.mutate();
   };
 
   const handleDeleteDetail = (detailId: number) => {
@@ -186,138 +185,234 @@ export default function MixingProcessDetailsPage({ params }: { params: { id: str
 
   return (
     <div className="container mx-auto py-6">
-      <PageHeader
-        heading={`Mixing Process #${process.id}`}
-        description="View and manage material mix details">
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={handleGoBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
-          </Button>
-        </div>
-      </PageHeader>
-      <Separator className="my-6" />
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Mixing Process Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium">Process ID</p>
-                  <p className="text-sm text-muted-foreground">{process.id}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Date</p>
-                  <p className="text-sm text-muted-foreground">{formatDate(process.mixingDate)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Mixed By</p>
-                  <p className="text-sm text-muted-foreground">{getUserNameById(process.mixedById)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Machine</p>
-                  <p className="text-sm text-muted-foreground">{getMachineNameById(process.machineId)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Order</p>
-                  <p className="text-sm text-muted-foreground">{getOrderNumberById(process.orderId)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Status</p>
-                  <Badge>{process.status}</Badge>
-                </div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold tracking-tight">Mix #{process.id} Details</h2>
+        <Button variant="outline" onClick={handleGoBack}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Mix List
+        </Button>
+      </div>
+      
+      <Tabs defaultValue="details" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="details">Mix Details</TabsTrigger>
+          <TabsTrigger value="composition">Composition</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="details" className="space-y-6 mt-6">
+          {/* Basic information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">Date</label>
+              <Input
+                type="date"
+                value={formatDate(process.mixingDate)}
+                disabled
+                className="bg-muted"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Created By</label>
+              <Input
+                value={user?.name || ""}
+                disabled
+                className="bg-muted"
+              />
+            </div>
+          </div>
+          
+          {/* Notes */}
+          {process.notes && (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">Notes</label>
+              <div className="p-3 bg-muted rounded-md">
+                <p className="text-sm">{process.notes}</p>
               </div>
-
-              {process.notes && (
-                <div>
-                  <p className="text-sm font-medium">Notes</p>
-                  <p className="text-sm text-muted-foreground">{process.notes}</p>
+            </div>
+          )}
+          
+          {/* Related Orders */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Related Orders</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {orders.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  No orders associated with this mix
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {orders.map((order) => (
+                    <div key={order.id} className="flex items-center p-3 border rounded-md">
+                      <FileText className="h-5 w-5 mr-3 text-muted-foreground" />
+                      <div>
+                        <div className="font-medium">Order #{order.id}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Customer: {order.customerId}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <div className="flex justify-between w-full">
-              <p className="text-sm font-medium">Total Weight</p>
-              <p className="text-lg font-bold">{process.totalWeight?.toFixed(2) || '0.00'} kg</p>
-            </div>
-          </CardFooter>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Mix Materials</CardTitle>
-              <CardDescription>Materials used in this mixing process</CardDescription>
-            </div>
-            <Button onClick={() => setIsAddDetailDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Add Material
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {isDetailsLoading ? (
-              <div className="flex justify-center items-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </CardContent>
+          </Card>
+          
+          {/* Machines */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Machines</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {machines.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  No machines associated with this mix
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {machines.map((machine) => (
+                    <div key={machine.id} className="p-3 border rounded-md">
+                      <div className="font-medium">{machine.name}</div>
+                      <div className="text-sm text-muted-foreground">Extruder</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="composition" className="space-y-6 mt-6">
+          {/* Add material section */}
+          <Card className="border-dashed">
+            <CardHeader>
+              <CardTitle>Add Material</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-medium mb-2">Material</label>
+                  <select 
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={newMaterialId || ""}
+                    onChange={(e) => setNewMaterialId(e.target.value ? parseInt(e.target.value) : null)}
+                  >
+                    <option value="">Select a material...</option>
+                    {rawMaterials?.map((material) => (
+                      <option key={material.id} value={material.id}>
+                        {material.name} ({material.quantity} {material.unit} available)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Quantity (KG)</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={newMaterialQuantity}
+                    onChange={(e) => setNewMaterialQuantity(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button 
+                    className="w-full"
+                    onClick={handleAddMaterial}
+                    disabled={!newMaterialId || !newMaterialQuantity || parseFloat(newMaterialQuantity) <= 0 || addMaterialMutation.isPending}
+                  >
+                    {addMaterialMutation.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="mr-2 h-4 w-4" />
+                    )}
+                    Add to Mix
+                  </Button>
+                </div>
               </div>
-            ) : !mixingDetails || mixingDetails.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No materials added yet. Click "Add Material" to add materials to this mix.
+            </CardContent>
+          </Card>
+          
+          {/* Materials table */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-center">
+                <CardTitle>Materials in This Mix</CardTitle>
+                <div className="text-sm font-medium">{totalWeight.toFixed(2)} kg</div>
               </div>
-            ) : (
-              <div className="rounded-md border">
+            </CardHeader>
+            <CardContent>
+              {mixingDetails.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No materials added yet. Use the form above to add materials.
+                </div>
+              ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Material</TableHead>
-                      <TableHead className="text-right">Quantity (kg)</TableHead>
-                      <TableHead className="text-right">Percentage</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Percentage</TableHead>
+                      <TableHead>Notes</TableHead>
+                      <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mixingDetails.map((detail) => (
-                      <TableRow key={detail.id}>
-                        <TableCell>{getMaterialNameById(detail.materialId)}</TableCell>
-                        <TableCell className="text-right">{detail.quantity.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">{detail.percentage.toFixed(2)}%</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setSelectedDetailId(detail.id)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="destructive"
+                    {mixingDetails.map((detail) => {
+                      const material = getMaterialById(detail.materialId);
+                      return (
+                        <TableRow key={detail.id}>
+                          <TableCell className="font-medium">
+                            {getMaterialNameById(detail.materialId)}
+                            <div className="text-xs text-muted-foreground">
+                              {material?.type}
+                            </div>
+                          </TableCell>
+                          <TableCell>{detail.quantity.toFixed(2)} kg</TableCell>
+                          <TableCell>{detail.percentage.toFixed(2)}%</TableCell>
+                          <TableCell>{detail.notes || "-"}</TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="ghost" 
                               size="icon"
                               onClick={() => handleDeleteDetail(detail.id)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Dialog for adding a material to the mix */}
-      <MixingDetailDialog
-        open={isAddDetailDialogOpen}
-        onOpenChange={setIsAddDetailDialogOpen}
-        processId={processId}
-        onSuccess={handleDetailCreated}
-      />
+              )}
+            </CardContent>
+          </Card>
+          
+          {/* Mix Composition Summary */}
+          {mixingDetails.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Mix Composition Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {mixingDetails.map((detail) => (
+                    <div key={detail.id} className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">{getMaterialNameById(detail.materialId)}</span>
+                        <span>{detail.percentage.toFixed(1)}%</span>
+                      </div>
+                      <div className="text-sm">{detail.quantity.toFixed(2)} kg</div>
+                      <Progress value={detail.percentage} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Dialog for editing a material in the mix */}
       {selectedDetailId && (
@@ -326,7 +421,10 @@ export default function MixingProcessDetailsPage({ params }: { params: { id: str
           onOpenChange={() => setSelectedDetailId(null)}
           processId={processId}
           detailId={selectedDetailId}
-          onSuccess={handleDetailUpdated}
+          onSuccess={() => {
+            refetchProcess();
+            setSelectedDetailId(null);
+          }}
         />
       )}
     </div>
