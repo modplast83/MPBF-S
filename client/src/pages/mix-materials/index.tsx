@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2, Save, ArrowLeft } from "lucide-react";
+import { Pencil, Plus, Trash2, Save, ArrowLeft, Eye, Edit, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
   Table,
@@ -51,6 +61,8 @@ export default function MixMaterialsPage() {
   const [, setLocation] = useLocation();
   const [isCreatingNewMix, setIsCreatingNewMix] = useState(false);
   const [viewingMixId, setViewingMixId] = useState<number | null>(null);
+  const [deletingMixId, setDeletingMixId] = useState<number | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   // New mix data states
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
@@ -648,6 +660,57 @@ export default function MixMaterialsPage() {
     );
   }
 
+  // Delete mix mutation
+  const deleteMixMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/mixing-processes/${id}`);
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to delete mixing process: ${error}`);
+      }
+      return id;
+    },
+    onSuccess: (id) => {
+      toast({
+        title: "Success",
+        description: `Mixing process #${id} deleted successfully`,
+      });
+      refetchProcesses();
+      setIsDeleteDialogOpen(false);
+      setDeletingMixId(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete mixing process",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Edit process function
+  const editProcess = (id: number) => {
+    // For now, just navigate to view - we'll implement edit in a future update
+    viewProcessDetails(id);
+    toast({
+      title: "Edit Coming Soon",
+      description: "Edit functionality will be available in a future update. For now, you can view the mix details.",
+    });
+  };
+
+  // Show delete confirmation
+  const showDeleteConfirmation = (id: number) => {
+    setDeletingMixId(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Confirm deletion
+  const confirmDelete = () => {
+    if (deletingMixId) {
+      deleteMixMutation.mutate(deletingMixId);
+    }
+  };
+
   return (
     <div className="container mx-auto py-6">
       <PageHeader
@@ -684,7 +747,6 @@ export default function MixMaterialsPage() {
                     <TableHead>Date</TableHead>
                     <TableHead>Mixed By</TableHead>
                     <TableHead>Total Weight (kg)</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -696,18 +758,27 @@ export default function MixMaterialsPage() {
                       <TableCell>{getUserNameById(process.mixedById)}</TableCell>
                       <TableCell>{process.totalWeight?.toFixed(2) || '0.00'}</TableCell>
                       <TableCell>
-                        <Badge variant={process.confirmed ? "success" : "secondary"}>
-                          {process.confirmed ? "Confirmed" : "Draft"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
                         <div className="flex space-x-2">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => viewProcessDetails(process.id)}
                           >
-                            View Details
+                            <Eye className="h-4 w-4 mr-1" /> View
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => editProcess(process.id)}
+                          >
+                            <Edit className="h-4 w-4 mr-1" /> Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => showDeleteConfirmation(process.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" /> Delete
                           </Button>
                         </div>
                       </TableCell>
@@ -719,6 +790,32 @@ export default function MixMaterialsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the mixing process and all associated data.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              disabled={deleteMixMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMixMutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
