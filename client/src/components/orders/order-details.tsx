@@ -346,8 +346,13 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
           <h3>Order Information</h3>
           <div class="info-row">
             <div class="info-label">Customer:</div>
-            <div>${customer?.name} ${customer?.nameAr ? `(${customer.nameAr})` : ''}</div>
+            <div>${customer?.name}</div>
           </div>
+          ${customer?.nameAr ? `
+          <div class="info-row">
+            <div class="info-label">Customer Ar:</div>
+            <div>${customer.nameAr}</div>
+          </div>` : ''}
           <div class="info-row">
             <div class="info-label">Date:</div>
             <div>${formatDateString(order.date)}</div>
@@ -441,8 +446,14 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
                 </p>
                 <p className="flex justify-between py-1.5 border-b border-secondary-100">
                   <span className="text-secondary-500">Customer:</span>
-                  <span className="font-medium">{customer?.name} {customer?.nameAr ? `(${customer.nameAr})` : ''}</span>
+                  <span className="font-medium">{customer?.name}</span>
                 </p>
+                {customer?.nameAr && (
+                <p className="flex justify-between py-1.5 border-b border-secondary-100">
+                  <span className="text-secondary-500">Customer Ar:</span>
+                  <span className="font-medium">{customer.nameAr}</span>
+                </p>
+                )}
                 <p className="flex justify-between py-1.5 border-b border-secondary-100">
                   <span className="text-secondary-500">Date:</span>
                   <span className="font-medium">{formatDateString(order.date)}</span>
