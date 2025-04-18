@@ -59,6 +59,8 @@ export default function MixMaterialsPage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  
+  // UI state
   const [isCreatingNewMix, setIsCreatingNewMix] = useState(false);
   const [viewingMixId, setViewingMixId] = useState<number | null>(null);
   const [deletingMixId, setDeletingMixId] = useState<number | null>(null);
@@ -113,6 +115,124 @@ export default function MixMaterialsPage() {
   const { data: rawMaterials } = useQuery({
     queryKey: ["/api/raw-materials"],
     enabled: true,
+  });
+
+  // Create new mix mutation
+  const createMixMutation = useMutation({
+    mutationFn: async () => {
+      if (mixMaterials.length === 0) {
+        throw new Error("Cannot save mix without materials");
+      }
+      
+      try {
+        // 1. Create the mixing process
+        const processData = {};
+        
+        console.log("Creating mixing process with data:", processData);
+        const processResponse = await apiRequest("POST", "/api/mixing-processes", processData);
+        
+        if (!processResponse.ok) {
+          const errorText = await processResponse.text();
+          throw new Error(`Failed to create mixing process: ${errorText}`);
+        }
+        
+        const processResult = await processResponse.json();
+        console.log("Process created:", processResult);
+        
+        // Get the process ID from the response
+        const processId = processResult.process.id;
+        
+        if (!processId) {
+          throw new Error("Failed to create mixing process - no ID returned");
+        }
+        
+        console.log("Process ID:", processId);
+        
+        // 2. Add machine associations if any
+        if (selectedMachines.length > 0) {
+          for (const machineId of selectedMachines) {
+            console.log(`Adding machine ${machineId} to process ${processId}`);
+            await apiRequest("POST", `/api/mixing-processes/${processId}/machines`, { machineId });
+          }
+        }
+        
+        // 3. Add order associations if any
+        if (selectedOrders.length > 0) {
+          for (const orderId of selectedOrders) {
+            console.log(`Adding order ${orderId} to process ${processId}`);
+            await apiRequest("POST", `/api/mixing-processes/${processId}/orders`, { orderId });
+          }
+        }
+        
+        // 4. Add all materials to the mix
+        for (const material of mixMaterials) {
+          const materialData = {
+            mixingProcessId: processId,
+            materialId: material.materialId,
+            quantity: material.quantity
+          };
+          
+          console.log("Adding material to mix:", materialData);
+          const detailResponse = await apiRequest("POST", "/api/mixing-details", materialData);
+          
+          if (!detailResponse.ok) {
+            const errorText = await detailResponse.text();
+            throw new Error(`Failed to add material to mix: ${errorText}`);
+          }
+        }
+        
+        return processResult;
+      } catch (error) {
+        console.error("Error in createMixMutation:", error);
+        throw error;
+      }
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Success",
+        description: "Mixing process created successfully",
+      });
+      
+      // Reset form and get back to list view
+      setIsCreatingNewMix(false);
+      resetMixForm();
+      refetchProcesses();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create mixing process",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete mix mutation
+  const deleteMixMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/mixing-processes/${id}`);
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to delete mixing process: ${error}`);
+      }
+      return id;
+    },
+    onSuccess: (id) => {
+      toast({
+        title: "Success",
+        description: `Mixing process #${id} deleted successfully`,
+      });
+      refetchProcesses();
+      setIsDeleteDialogOpen(false);
+      setDeletingMixId(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete mixing process",
+        variant: "destructive",
+      });
+    },
   });
 
   // Helper function to get user name by ID
@@ -248,96 +368,6 @@ export default function MixMaterialsPage() {
     setTotalWeight(newTotalWeight);
   };
 
-  // Create new mix mutation
-  const createMixMutation = useMutation({
-    mutationFn: async () => {
-      if (mixMaterials.length === 0) {
-        throw new Error("Cannot save mix without materials");
-      }
-      
-      try {
-        // 1. Create the mixing process
-        const processData = {};
-        
-        console.log("Creating mixing process with data:", processData);
-        const processResponse = await apiRequest("POST", "/api/mixing-processes", processData);
-        
-        if (!processResponse.ok) {
-          const errorText = await processResponse.text();
-          throw new Error(`Failed to create mixing process: ${errorText}`);
-        }
-        
-        const processResult = await processResponse.json();
-        console.log("Process created:", processResult);
-        
-        // Get the process ID from the response
-        const processId = processResult.process.id;
-        
-        if (!processId) {
-          throw new Error("Failed to create mixing process - no ID returned");
-        }
-        
-        console.log("Process ID:", processId);
-        
-        // 2. Add machine associations if any
-        if (selectedMachines.length > 0) {
-          for (const machineId of selectedMachines) {
-            console.log(`Adding machine ${machineId} to process ${processId}`);
-            await apiRequest("POST", `/api/mixing-processes/${processId}/machines`, { machineId });
-          }
-        }
-        
-        // 3. Add order associations if any
-        if (selectedOrders.length > 0) {
-          for (const orderId of selectedOrders) {
-            console.log(`Adding order ${orderId} to process ${processId}`);
-            await apiRequest("POST", `/api/mixing-processes/${processId}/orders`, { orderId });
-          }
-        }
-        
-        // 4. Add all materials to the mix
-        for (const material of mixMaterials) {
-          const materialData = {
-            mixingProcessId: processId,
-            materialId: material.materialId,
-            quantity: material.quantity
-          };
-          
-          console.log("Adding material to mix:", materialData);
-          const detailResponse = await apiRequest("POST", "/api/mixing-details", materialData);
-          
-          if (!detailResponse.ok) {
-            const errorText = await detailResponse.text();
-            throw new Error(`Failed to add material to mix: ${errorText}`);
-          }
-        }
-        
-        return processResult;
-      } catch (error) {
-        console.error("Error in createMixMutation:", error);
-        throw error;
-      }
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Success",
-        description: "Mixing process created successfully",
-      });
-      
-      // Reset form and get back to list view
-      setIsCreatingNewMix(false);
-      resetMixForm();
-      refetchProcesses();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create mixing process",
-        variant: "destructive",
-      });
-    },
-  });
-
   // Reset mix form
   const resetMixForm = () => {
     setSelectedDate(format(new Date(), "yyyy-MM-dd"));
@@ -361,6 +391,29 @@ export default function MixMaterialsPage() {
   const viewProcessDetails = (processId: number) => {
     setLocation(`/mix-materials/${processId}`);
   };
+  
+  // Edit process function 
+  const editProcess = (id: number) => {
+    // For now, just navigate to view - we'll implement edit in a future update
+    viewProcessDetails(id);
+    toast({
+      title: "Edit Coming Soon",
+      description: "Edit functionality will be available in a future update. For now, you can view the mix details.",
+    });
+  };
+
+  // Show delete confirmation
+  const showDeleteConfirmation = (id: number) => {
+    setDeletingMixId(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Confirm deletion
+  const confirmDelete = () => {
+    if (deletingMixId) {
+      deleteMixMutation.mutate(deletingMixId);
+    }
+  };
 
   // Save current mix
   const saveMix = () => {
@@ -376,6 +429,7 @@ export default function MixMaterialsPage() {
     createMixMutation.mutate();
   };
 
+  // Render the create mix form
   if (isCreatingNewMix) {
     return (
       <div className="container mx-auto py-6">
@@ -407,49 +461,98 @@ export default function MixMaterialsPage() {
             </div>
           </div>
           
-          {/* Remove Notes section */}
+          {/* Machine Selection (Optional) */}
+          <Collapsible className="border rounded-md p-4">
+            <CollapsibleTrigger className="flex justify-between items-center w-full">
+              <h3 className="text-lg font-medium">Machines (Optional)</h3>
+              <Button variant="ghost" size="sm">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {machines?.map((machine) => (
+                  <div
+                    key={machine.id}
+                    className={`p-3 border rounded-md cursor-pointer ${
+                      selectedMachines.includes(machine.id)
+                        ? "border-primary bg-primary/10"
+                        : ""
+                    }`}
+                    onClick={() => toggleMachineSelection(machine.id)}
+                  >
+                    <div className="font-medium">{machine.name}</div>
+                    <div className="text-sm text-muted-foreground">Extruder</div>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+          
+          {/* Order Selection (Optional) */}
+          <Collapsible className="border rounded-md p-4">
+            <CollapsibleTrigger className="flex justify-between items-center w-full">
+              <h3 className="text-lg font-medium">Orders (Optional)</h3>
+              <Button variant="ghost" size="sm">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {orders?.map((order) => (
+                  <div
+                    key={order.id}
+                    className={`p-3 border rounded-md cursor-pointer ${
+                      selectedOrders.includes(order.id)
+                        ? "border-primary bg-primary/10"
+                        : ""
+                    }`}
+                    onClick={() => toggleOrderSelection(order.id)}
+                  >
+                    <div className="font-medium">Order #{order.id}</div>
+                    <div className="text-sm text-muted-foreground">
+                      Customer: {order.customerId || "N/A"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
           
           {/* Mix Components Section */}
           <Collapsible open={true} className="w-full space-y-2">
-            <div className="flex items-center justify-between px-4 py-2 bg-muted rounded-md">
-              <h3 className="text-lg font-semibold">Mix Components</h3>
-              <CollapsibleTrigger asChild>
+            <CollapsibleTrigger asChild>
+              <div className="flex justify-between items-center border rounded-md p-4 cursor-pointer">
+                <h3 className="text-lg font-medium">Mix Components</h3>
                 <Button variant="ghost" size="sm">
                   <Pencil className="h-4 w-4" />
                 </Button>
-              </CollapsibleTrigger>
-            </div>
-            
-            <CollapsibleContent className="space-y-4">
-              <Card className="p-4 border-dashed">
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium mb-2">MATERIAL FROM INVENTORY</label>
-                      <Select 
-                        value={selectedMaterialId?.toString() || ""} 
-                        onValueChange={handleMaterialSelect}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Card className="border-dashed">
+                <CardHeader>
+                  <CardTitle>Add Material</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="col-span-1 md:col-span-2">
+                      <label className="block text-sm font-medium mb-2">Material</label>
+                      <select 
+                        className="w-full px-3 py-2 border rounded-md"
+                        value={selectedMaterialId || ""}
+                        onChange={(e) => handleMaterialSelect(e.target.value)}
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a material..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {rawMaterials?.map((material) => (
-                            <SelectItem key={material.id} value={material.id.toString()}>
-                              <div className="flex justify-between w-full">
-                                <span>{material.name}</span>
-                                <Badge variant={material.quantity > 0 ? "outline" : "destructive"} className="ml-2">
-                                  {material.quantity !== null ? `${material.quantity} ${material.unit}` : 'No stock'}
-                                </Badge>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <option value="">Select a material...</option>
+                        {rawMaterials?.map((material) => (
+                          <option key={material.id} value={material.id}>
+                            {material.name} ({material.quantity} {material.unit} available)
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    
-                    <div className="w-full sm:w-1/3">
-                      <label className="block text-sm font-medium mb-2">QUANTITY (KG)</label>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Quantity (KG)</label>
                       <Input
                         type="number"
                         step="0.01"
@@ -458,185 +561,55 @@ export default function MixMaterialsPage() {
                         onChange={(e) => setMaterialQuantity(parseFloat(e.target.value) || 0)}
                       />
                     </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-2">NOTES (OPTIONAL)</label>
-                    <Input
-                      placeholder="e.g. batch details, color, specific use"
-                      value={materialNotes}
-                      onChange={(e) => setMaterialNotes(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="flex justify-end">
-                    <Button 
-                      onClick={addMaterialToMix}
-                      disabled={!selectedMaterialId || materialQuantity <= 0}
-                    >
-                      <Plus className="mr-2 h-4 w-4" /> Add to Mix
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-              
-              {/* Materials in this mix */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-center">
-                    <CardTitle>MATERIALS IN THIS MIX</CardTitle>
-                    <div className="text-sm font-medium">{totalWeight.toFixed(2)} kg</div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {mixMaterials.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No materials added yet. Use the form above to add materials.
+                    <div className="flex items-end">
+                      <Button 
+                        className="w-full"
+                        onClick={addMaterialToMix}
+                        disabled={!selectedMaterialId || materialQuantity <= 0}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add to Mix
+                      </Button>
                     </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>MATERIAL</TableHead>
-                          <TableHead>QUANTITY</TableHead>
-                          <TableHead>PERCENTAGE</TableHead>
-                          <TableHead>NOTES</TableHead>
-                          <TableHead></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {mixMaterials.map((item) => (
-                          <TableRow key={item.materialId}>
-                            <TableCell className="font-medium">
-                              {item.material?.name || `Material #${item.materialId}`}
-                              <div className="text-xs text-muted-foreground">
-                                {item.material?.type}
-                              </div>
-                            </TableCell>
-                            <TableCell>{item.quantity.toFixed(2)} kg</TableCell>
-                            <TableCell>{item.percentage.toFixed(2)}%</TableCell>
-                            <TableCell>{item.notes || "-"}</TableCell>
-                            <TableCell>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                onClick={() => removeMaterialFromMix(item.materialId)}
-                              >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
               
-              {/* Mix Composition Summary */}
-              {mixMaterials.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>MIX COMPOSITION SUMMARY</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {mixMaterials.map((item) => (
-                        <div key={item.materialId} className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="font-medium">{item.material?.name}</span>
-                            <span>{item.percentage.toFixed(1)}%</span>
-                          </div>
-                          <div className="text-sm">{item.quantity.toFixed(2)} kg</div>
-                          <Progress value={item.percentage} className="h-2" />
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
-          
-          {/* Related Orders */}
-          <Collapsible className="w-full space-y-2">
-            <div className="flex items-center justify-between px-4 py-2 bg-muted rounded-md">
-              <h3 className="text-lg font-semibold">Related Orders</h3>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            
-            <CollapsibleContent className="p-4">
-              <ScrollArea className="h-60 border rounded-md p-4">
-                <div className="space-y-2">
-                  {orders?.length ? (
-                    orders.map((order) => (
-                      <div
-                        key={order.id}
-                        className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent cursor-pointer"
-                        onClick={() => toggleOrderSelection(order.id)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedOrders.includes(order.id)}
-                          onChange={() => {}}
-                          className="h-4 w-4"
-                        />
-                        <div>
-                          <div className="font-medium">Order #{order.id}</div>
-                          <div className="text-sm text-muted-foreground">Customer: {order.customerId}</div>
-                          <div className="text-sm text-muted-foreground">Status: {order.status}</div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-muted-foreground">
-                      No active orders available
-                    </div>
-                  )}
+              <div className="mt-4 space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Materials in This Mix</h3>
+                  <div className="text-sm font-medium">{totalWeight.toFixed(2)} kg total</div>
                 </div>
-              </ScrollArea>
-            </CollapsibleContent>
-          </Collapsible>
-          
-          {/* Machines */}
-          <Collapsible className="w-full space-y-2">
-            <div className="flex items-center justify-between px-4 py-2 bg-muted rounded-md">
-              <h3 className="text-lg font-semibold">Machines</h3>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            
-            <CollapsibleContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                {machines?.map((machine) => (
-                  <div
-                    key={machine.id}
-                    className={`border rounded-md p-4 cursor-pointer ${
-                      selectedMachines.includes(machine.id) ? 'border-primary' : ''
-                    }`}
-                    onClick={() => toggleMachineSelection(machine.id)}
-                  >
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedMachines.includes(machine.id)}
-                        onChange={() => {}}
-                        className="mr-3 h-4 w-4"
-                      />
-                      <div>
-                        <div className="font-medium">{machine.name}</div>
-                        <div className="text-sm text-muted-foreground">Extruder</div>
-                      </div>
-                    </div>
+                
+                {mixMaterials.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No materials added yet. Use the form above to add materials.
                   </div>
-                ))}
+                ) : (
+                  <div className="space-y-4">
+                    {mixMaterials.map((material) => (
+                      <div key={material.id} className="space-y-2">
+                        <div className="flex justify-between">
+                          <div className="flex items-center">
+                            <div className="font-medium">{material.material.name}</div>
+                            <Badge className="ml-2">{material.quantity.toFixed(2)} kg</Badge>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeMaterialFromMix(material.materialId)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                        <Progress value={material.percentage} className="h-2" />
+                        <div className="text-xs text-right text-muted-foreground">
+                          {material.percentage.toFixed(2)}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -660,57 +633,7 @@ export default function MixMaterialsPage() {
     );
   }
 
-  // Delete mix mutation
-  const deleteMixMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await apiRequest("DELETE", `/api/mixing-processes/${id}`);
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Failed to delete mixing process: ${error}`);
-      }
-      return id;
-    },
-    onSuccess: (id) => {
-      toast({
-        title: "Success",
-        description: `Mixing process #${id} deleted successfully`,
-      });
-      refetchProcesses();
-      setIsDeleteDialogOpen(false);
-      setDeletingMixId(null);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete mixing process",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Edit process function
-  const editProcess = (id: number) => {
-    // For now, just navigate to view - we'll implement edit in a future update
-    viewProcessDetails(id);
-    toast({
-      title: "Edit Coming Soon",
-      description: "Edit functionality will be available in a future update. For now, you can view the mix details.",
-    });
-  };
-
-  // Show delete confirmation
-  const showDeleteConfirmation = (id: number) => {
-    setDeletingMixId(id);
-    setIsDeleteDialogOpen(true);
-  };
-
-  // Confirm deletion
-  const confirmDelete = () => {
-    if (deletingMixId) {
-      deleteMixMutation.mutate(deletingMixId);
-    }
-  };
-
+  // Render the list view
   return (
     <div className="container mx-auto py-6">
       <PageHeader
