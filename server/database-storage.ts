@@ -1,6 +1,6 @@
 import { IStorage } from './storage';
 import { db } from './db';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import {
   User, InsertUser, users,
   Customer, InsertCustomer, customers,
@@ -20,7 +20,9 @@ import {
   CorrectiveAction, InsertCorrectiveAction, correctiveActions,
   SmsMessage, InsertSmsMessage, smsMessages,
   MixingProcess, InsertMixingProcess, mixingProcesses,
-  MixingDetail, InsertMixingDetail, mixingDetails
+  MixingDetail, InsertMixingDetail, mixingDetails,
+  MixingProcessMachine, InsertMixingProcessMachine, mixingProcessMachines,
+  MixingProcessOrder, InsertMixingProcessOrder, mixingProcessOrders
 } from '@shared/schema';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
@@ -594,11 +596,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMixingProcessesByMachine(machineId: string): Promise<MixingProcess[]> {
-    return await db.select().from(mixingProcesses).where(eq(mixingProcesses.machineId, machineId));
+    const processIds = await db.select({
+      mixingProcessId: mixingProcessMachines.mixingProcessId
+    })
+    .from(mixingProcessMachines)
+    .where(eq(mixingProcessMachines.machineId, machineId));
+    
+    if (processIds.length === 0) {
+      return [];
+    }
+    
+    return await db.select()
+      .from(mixingProcesses)
+      .where(inArray(mixingProcesses.id, processIds.map(p => p.mixingProcessId)));
   }
 
   async getMixingProcessesByOrder(orderId: number): Promise<MixingProcess[]> {
-    return await db.select().from(mixingProcesses).where(eq(mixingProcesses.orderId, orderId));
+    const processIds = await db.select({
+      mixingProcessId: mixingProcessOrders.mixingProcessId
+    })
+    .from(mixingProcessOrders)
+    .where(eq(mixingProcessOrders.orderId, orderId));
+    
+    if (processIds.length === 0) {
+      return [];
+    }
+    
+    return await db.select()
+      .from(mixingProcesses)
+      .where(inArray(mixingProcesses.id, processIds.map(p => p.mixingProcessId)));
   }
 
   async getMixingProcessesByUser(userId: string): Promise<MixingProcess[]> {
@@ -624,9 +650,140 @@ export class DatabaseStorage implements IStorage {
     // First delete all mixing details related to this process
     await db.delete(mixingDetails).where(eq(mixingDetails.mixingProcessId, id));
     
-    // Then delete the mixing process
+    // Then delete all machine associations
+    await db.delete(mixingProcessMachines).where(eq(mixingProcessMachines.mixingProcessId, id));
+    
+    // Then delete all order associations
+    await db.delete(mixingProcessOrders).where(eq(mixingProcessOrders.mixingProcessId, id));
+    
+    // Finally delete the mixing process
     const result = await db.delete(mixingProcesses).where(eq(mixingProcesses.id, id)).returning();
     return result.length > 0;
+  }
+  
+  // Mixing Process Machines
+  async getMixingProcessMachines(mixingProcessId: number): Promise<MixingProcessMachine[]> {
+    return await db.select()
+      .from(mixingProcessMachines)
+      .where(eq(mixingProcessMachines.mixingProcessId, mixingProcessId));
+  }
+  
+  async getMixingProcessMachine(id: number): Promise<MixingProcessMachine | undefined> {
+    const machines = await db.select()
+      .from(mixingProcessMachines)
+      .where(eq(mixingProcessMachines.id, id));
+    return machines[0];
+  }
+  
+  async createMixingProcessMachine(machine: InsertMixingProcessMachine): Promise<MixingProcessMachine> {
+    const result = await db.insert(mixingProcessMachines).values(machine).returning();
+    return result[0];
+  }
+  
+  async deleteMixingProcessMachine(id: number): Promise<boolean> {
+    const result = await db.delete(mixingProcessMachines)
+      .where(eq(mixingProcessMachines.id, id))
+      .returning();
+    return result.length > 0;
+  }
+  
+  // Mixing Process Orders
+  async getMixingProcessOrders(mixingProcessId: number): Promise<MixingProcessOrder[]> {
+    return await db.select()
+      .from(mixingProcessOrders)
+      .where(eq(mixingProcessOrders.mixingProcessId, mixingProcessId));
+  }
+  
+  async getMixingProcessOrder(id: number): Promise<MixingProcessOrder | undefined> {
+    const orders = await db.select()
+      .from(mixingProcessOrders)
+      .where(eq(mixingProcessOrders.id, id));
+    return orders[0];
+  }
+  
+  async createMixingProcessOrder(order: InsertMixingProcessOrder): Promise<MixingProcessOrder> {
+    const result = await db.insert(mixingProcessOrders).values(order).returning();
+    return result[0];
+  }
+  
+  async deleteMixingProcessOrder(id: number): Promise<boolean> {
+    const result = await db.delete(mixingProcessOrders)
+      .where(eq(mixingProcessOrders.id, id))
+      .returning();
+    return result.length > 0;
+  }
+  
+  // Helper for updating raw material quantity when confirming mixing
+  async updateRawMaterialQuantity(materialId: number, quantityChange: number): Promise<RawMaterial | undefined> {
+    const material = await this.getRawMaterial(materialId);
+    if (!material || material.quantity === null) {
+      return undefined;
+    }
+    
+    const newQuantity = material.quantity + quantityChange;
+    return this.updateRawMaterial(materialId, { quantity: newQuantity });
+  }
+  
+  // Get mixing process with all related data
+  async getMixingProcessWithDetails(id: number): Promise<{
+    process: MixingProcess;
+    machines: Machine[];
+    orders: Order[];
+    details: (MixingDetail & { material: RawMaterial })[];
+    user: User;
+  } | undefined> {
+    const process = await this.getMixingProcess(id);
+    if (!process) {
+      return undefined;
+    }
+    
+    // Get the user who created the process
+    const user = await this.getUser(process.mixedById);
+    if (!user) {
+      return undefined;
+    }
+    
+    // Get machines associated with this process
+    const machineAssociations = await this.getMixingProcessMachines(id);
+    const machines: Machine[] = [];
+    for (const assoc of machineAssociations) {
+      const machine = await this.getMachine(assoc.machineId);
+      if (machine) {
+        machines.push(machine);
+      }
+    }
+    
+    // Get orders associated with this process
+    const orderAssociations = await this.getMixingProcessOrders(id);
+    const orders: Order[] = [];
+    for (const assoc of orderAssociations) {
+      const order = await this.getOrder(assoc.orderId);
+      if (order) {
+        orders.push(order);
+      }
+    }
+    
+    // Get details with materials
+    const detailsList = await this.getMixingDetails(id);
+    const detailsWithMaterials: (MixingDetail & { material: RawMaterial })[] = [];
+    
+    for (const detail of detailsList) {
+      const material = await this.getRawMaterial(detail.materialId);
+      if (material) {
+        detailsWithMaterials.push({
+          ...detail,
+          material
+        });
+      }
+    }
+    
+    return {
+      process,
+      machines,
+      orders,
+      details: detailsWithMaterials,
+      user
+    };
   }
 
   // Mixing Details

@@ -153,10 +153,22 @@ export interface IStorage {
   // Material Mixing methods
   getMixingProcesses(): Promise<MixingProcess[]>;
   getMixingProcess(id: number): Promise<MixingProcess | undefined>;
+  getMixingProcessesByMachine(machineId: string): Promise<MixingProcess[]>;
+  getMixingProcessesByOrder(orderId: number): Promise<MixingProcess[]>;
   getMixingProcessesByUser(userId: string): Promise<MixingProcess[]>;
   createMixingProcess(mixingProcess: InsertMixingProcess): Promise<MixingProcess>;
   updateMixingProcess(id: number, mixingProcess: Partial<MixingProcess>): Promise<MixingProcess | undefined>;
+  updateRawMaterialQuantity(materialId: number, quantityChange: number): Promise<RawMaterial | undefined>;
   deleteMixingProcess(id: number): Promise<boolean>;
+  
+  // Get mixing process with all related data
+  getMixingProcessWithDetails(id: number): Promise<{
+    process: MixingProcess;
+    machines: Machine[];
+    orders: Order[];
+    details: (MixingDetail & { material: RawMaterial })[];
+    user: User;
+  } | undefined>;
   
   // Mixing Process Machine methods
   getMixingProcessMachines(mixingProcessId: number): Promise<MixingProcessMachine[]>;
