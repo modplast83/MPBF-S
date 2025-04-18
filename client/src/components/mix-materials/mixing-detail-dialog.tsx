@@ -32,13 +32,15 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, AlertCircle } from "lucide-react";
 
 // Define the form schema
 const formSchema = z.object({
   mixingProcessId: z.number(),
   materialId: z.number(),
-  quantity: z.coerce.number().positive(),
+  quantity: z.coerce.number().positive("Quantity must be greater than zero"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -60,6 +62,7 @@ export default function MixingDetailDialog({
 }: MixingDetailDialogProps) {
   const { toast } = useToast();
   const isEditMode = !!detailId;
+  const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(null);
 
   // Fetch existing detail for edit mode
   const {
@@ -70,11 +73,20 @@ export default function MixingDetailDialog({
     enabled: isEditMode && open,
   });
 
-  // Fetch raw materials for the dropdown
+  // Fetch raw materials for the dropdown (with available stock)
   const { data: rawMaterials, isLoading: isRawMaterialsLoading } = useQuery({
     queryKey: ["/api/raw-materials"],
     enabled: open,
   });
+
+  // Get the selected material's details
+  const selectedMaterial = selectedMaterialId 
+    ? rawMaterials?.find(m => m.id === selectedMaterialId) 
+    : null;
+
+  // Check if quantity exceeds available stock
+  const [exceedsStock, setExceedsStock] = useState(false);
+  const [qtyInput, setQtyInput] = useState<number>(0);
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -94,10 +106,21 @@ export default function MixingDetailDialog({
         materialId: existingDetail.materialId,
         quantity: existingDetail.quantity,
       });
+      setSelectedMaterialId(existingDetail.materialId);
+      setQtyInput(existingDetail.quantity);
     } else {
       form.setValue("mixingProcessId", processId);
     }
   }, [isEditMode, existingDetail, form, processId]);
+
+  // Check stock vs quantity when quantity or selected material changes
+  useEffect(() => {
+    if (selectedMaterial && selectedMaterial.quantity !== null && qtyInput > 0) {
+      setExceedsStock(qtyInput > selectedMaterial.quantity);
+    } else {
+      setExceedsStock(false);
+    }
+  }, [selectedMaterial, qtyInput]);
 
   // Create mutation
   const createMutation = useMutation({
@@ -108,6 +131,11 @@ export default function MixingDetailDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/mixing-processes/${processId}/details`] });
       queryClient.invalidateQueries({ queryKey: [`/api/mixing-processes/${processId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/raw-materials"] });
+      toast({
+        title: "Success",
+        description: "Material added to the mix",
+      });
       onSuccess();
     },
     onError: (error) => {
@@ -129,6 +157,11 @@ export default function MixingDetailDialog({
       queryClient.invalidateQueries({ queryKey: [`/api/mixing-processes/${processId}/details`] });
       queryClient.invalidateQueries({ queryKey: [`/api/mixing-processes/${processId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/mixing-details/${detailId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/raw-materials"] });
+      toast({
+        title: "Success",
+        description: "Material updated successfully",
+      });
       onSuccess();
     },
     onError: (error) => {
@@ -142,6 +175,15 @@ export default function MixingDetailDialog({
 
   // Handle form submission
   const onSubmit = (data: FormValues) => {
+    if (exceedsStock) {
+      toast({
+        title: "Insufficient Stock",
+        description: "The requested quantity exceeds the available stock",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (isEditMode) {
       updateMutation.mutate(data);
     } else {
@@ -178,7 +220,11 @@ export default function MixingDetailDialog({
                 <FormItem>
                   <FormLabel>Material</FormLabel>
                   <Select
-                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    onValueChange={(value) => {
+                      const materialId = parseInt(value);
+                      field.onChange(materialId);
+                      setSelectedMaterialId(materialId);
+                    }}
                     defaultValue={field.value ? field.value.toString() : undefined}
                     value={field.value ? field.value.toString() : undefined}
                   >
@@ -190,7 +236,12 @@ export default function MixingDetailDialog({
                     <SelectContent>
                       {rawMaterials?.map((material) => (
                         <SelectItem key={material.id} value={material.id.toString()}>
-                          {material.name}
+                          <div className="flex justify-between w-full">
+                            <span>{material.name}</span>
+                            <Badge variant={material.quantity > 0 ? "outline" : "destructive"} className="ml-2">
+                              {material.quantity !== null ? `${material.quantity} ${material.unit}` : 'No stock'}
+                            </Badge>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -202,6 +253,25 @@ export default function MixingDetailDialog({
                 </FormItem>
               )}
             />
+
+            {selectedMaterial && (
+              <div className="rounded-md bg-muted p-3">
+                <div className="text-sm">
+                  <span className="font-medium">Selected Material: </span>
+                  {selectedMaterial.name}
+                </div>
+                <div className="text-sm mt-1">
+                  <span className="font-medium">Available Stock: </span>
+                  {selectedMaterial.quantity !== null 
+                    ? `${selectedMaterial.quantity} ${selectedMaterial.unit}` 
+                    : 'No stock information'}
+                </div>
+                <div className="text-sm mt-1">
+                  <span className="font-medium">Type: </span>
+                  {selectedMaterial.type}
+                </div>
+              </div>
+            )}
 
             <FormField
               control={form.control}
@@ -216,6 +286,11 @@ export default function MixingDetailDialog({
                       min="0.01"
                       placeholder="Enter quantity in kg"
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setQtyInput(parseFloat(e.target.value) || 0);
+                      }}
+                      className={exceedsStock ? "border-red-500" : ""}
                     />
                   </FormControl>
                   <FormDescription>
@@ -226,6 +301,15 @@ export default function MixingDetailDialog({
               )}
             />
 
+            {exceedsStock && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  The quantity exceeds the available stock of {selectedMaterial?.quantity} {selectedMaterial?.unit}
+                </AlertDescription>
+              </Alert>
+            )}
+
             <DialogFooter>
               <Button
                 type="button"
@@ -234,7 +318,10 @@ export default function MixingDetailDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                disabled={isLoading || exceedsStock || !selectedMaterialId || qtyInput <= 0}
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEditMode ? "Update" : "Add"}
               </Button>
