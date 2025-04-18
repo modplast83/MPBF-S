@@ -155,6 +155,20 @@ export default function MixMaterialsPage() {
     });
   };
 
+  // Handle material selection with automatic quantity detection
+  const handleMaterialSelect = (materialId: string) => {
+    const id = parseInt(materialId);
+    setSelectedMaterialId(id);
+    
+    // Automatically set the quantity from the material stock
+    const material = rawMaterials?.find(m => m.id === id);
+    if (material && material.quantity) {
+      setMaterialQuantity(material.quantity);
+    } else {
+      setMaterialQuantity(0);
+    }
+  };
+
   // Add material to current mix
   const addMaterialToMix = () => {
     if (!selectedMaterialId || materialQuantity <= 0) {
@@ -229,37 +243,42 @@ export default function MixMaterialsPage() {
         throw new Error("Cannot save mix without materials");
       }
       
-      if (selectedMachines.length === 0) {
-        throw new Error("Please select at least one machine");
-      }
-      
       // 1. Create the mixing process
       const processData = {
-        notes: mixNotes,
+        // No notes field
       };
       
       const processResponse = await apiRequest("POST", "/api/mixing-processes", processData);
       const processResult = await processResponse.json();
       
-      // 2. Add machine associations
-      for (const machineId of selectedMachines) {
-        await apiRequest("POST", `/api/mixing-processes/${processResult.id}/machines`, { machineId });
+      // Store the process ID to use in subsequent calls
+      const processId = processResult.id;
+      
+      if (!processId) {
+        throw new Error("Failed to create mixing process - no ID returned");
+      }
+      
+      // 2. Add machine associations if any
+      if (selectedMachines.length > 0) {
+        for (const machineId of selectedMachines) {
+          await apiRequest("POST", `/api/mixing-processes/${processId}/machines`, { machineId });
+        }
       }
       
       // 3. Add order associations if any
       if (selectedOrders.length > 0) {
         for (const orderId of selectedOrders) {
-          await apiRequest("POST", `/api/mixing-processes/${processResult.id}/orders`, { orderId });
+          await apiRequest("POST", `/api/mixing-processes/${processId}/orders`, { orderId });
         }
       }
       
       // 4. Add all materials to the mix
       for (const material of mixMaterials) {
         await apiRequest("POST", "/api/mixing-details", {
-          mixingProcessId: processResult.id,
+          mixingProcessId: processId,
           materialId: material.materialId,
           quantity: material.quantity,
-          notes: material.notes,
+          // No notes field
         });
       }
       
@@ -354,16 +373,7 @@ export default function MixMaterialsPage() {
             </div>
           </div>
           
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Notes</label>
-            <Textarea
-              placeholder="Enter notes here..."
-              value={mixNotes}
-              onChange={(e) => setMixNotes(e.target.value)}
-              rows={4}
-            />
-          </div>
+          {/* Remove Notes section */}
           
           {/* Mix Components Section */}
           <Collapsible open={true} className="w-full space-y-2">
@@ -384,7 +394,7 @@ export default function MixMaterialsPage() {
                       <label className="block text-sm font-medium mb-2">MATERIAL FROM INVENTORY</label>
                       <Select 
                         value={selectedMaterialId?.toString() || ""} 
-                        onValueChange={(value) => setSelectedMaterialId(parseInt(value))}
+                        onValueChange={handleMaterialSelect}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a material..." />
@@ -603,7 +613,7 @@ export default function MixMaterialsPage() {
             </Button>
             <Button 
               onClick={saveMix} 
-              disabled={createMixMutation.isPending || mixMaterials.length === 0 || selectedMachines.length === 0}
+              disabled={createMixMutation.isPending || mixMaterials.length === 0}
             >
               {createMixMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
