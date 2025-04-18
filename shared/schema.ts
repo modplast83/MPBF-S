@@ -292,3 +292,39 @@ export const insertSmsMessageSchema = createInsertSchema(smsMessages).omit({
 });
 export type InsertSmsMessage = z.infer<typeof insertSmsMessageSchema>;
 export type SmsMessage = typeof smsMessages.$inferSelect;
+
+// Material Mixing
+export const mixingProcesses = pgTable("mixing_processes", {
+  id: serial("id").primaryKey(),
+  mixingDate: timestamp("mixing_date").defaultNow().notNull(),
+  mixedById: text("mixed_by_id").references(() => users.id),
+  totalWeight: doublePrecision("total_weight").default(0),
+  machineId: text("machine_id").references(() => machines.id),
+  orderId: integer("order_id").references(() => orders.id),
+  notes: text("notes"),
+  status: text("status").default("completed").notNull(),
+});
+
+export const insertMixingProcessSchema = createInsertSchema(mixingProcesses).omit({ 
+  id: true, 
+  mixingDate: true,
+  totalWeight: true
+});
+export type InsertMixingProcess = z.infer<typeof insertMixingProcessSchema>;
+export type MixingProcess = typeof mixingProcesses.$inferSelect;
+
+// Mixing process details (materials used in a mix)
+export const mixingDetails = pgTable("mixing_details", {
+  id: serial("id").primaryKey(),
+  mixingProcessId: integer("mixing_process_id").notNull().references(() => mixingProcesses.id),
+  materialId: integer("material_id").notNull().references(() => rawMaterials.id),
+  quantity: doublePrecision("quantity").notNull(),
+  percentage: doublePrecision("percentage").default(0),
+});
+
+export const insertMixingDetailSchema = createInsertSchema(mixingDetails).omit({ 
+  id: true,
+  percentage: true
+});
+export type InsertMixingDetail = z.infer<typeof insertMixingDetailSchema>;
+export type MixingDetail = typeof mixingDetails.$inferSelect;
