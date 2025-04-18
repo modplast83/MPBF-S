@@ -2088,15 +2088,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid mixing process ID" });
       }
       
-      const process = await storage.getMixingProcess(processId);
-      if (!process) {
+      // Get the complete process data with all related info
+      const processData = await storage.getMixingProcessWithDetails(processId);
+      if (!processData) {
         return res.status(404).json({ message: "Mixing process not found" });
       }
       
-      const details = await storage.getMixingDetails(processId);
-      res.json(details);
+      res.json(processData);
     } catch (error) {
-      res.status(500).json({ message: "Failed to get mixing details" });
+      console.error("Error fetching mixing process details:", error);
+      res.status(500).json({ message: "Failed to get mixing process details" });
     }
   });
 
