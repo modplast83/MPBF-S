@@ -239,7 +239,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
           <td>${printedValue}</td>
           <td>${product?.printingCylinder || "0"}</td>
           <td>${product?.punching || "None"}</td>
-          <td>${product?.lengthCm || "0"}</td>
+          <td>${product?.lengthCm ? Math.round(product.lengthCm) : "0"}</td>
           <td>${product?.cuttingUnit || "Kg."}</td>
           <td>${product?.unitWeight || "1"}</td>
           <td>${product?.packing || "20K/Bag"}</td>
@@ -290,7 +290,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
           th, td {
             border: 1px solid #ddd;
             padding: 8px;
-            text-align: left;
+            text-align: center;
           }
           th {
             background-color: #f2f7ff;
