@@ -18,7 +18,9 @@ import {
   QualityCheckType, InsertQualityCheckType, qualityCheckTypes,
   QualityCheck, InsertQualityCheck, qualityChecks,
   CorrectiveAction, InsertCorrectiveAction, correctiveActions,
-  SmsMessage, InsertSmsMessage, smsMessages
+  SmsMessage, InsertSmsMessage, smsMessages,
+  MixingProcess, InsertMixingProcess, mixingProcesses,
+  MixingDetail, InsertMixingDetail, mixingDetails
 } from '@shared/schema';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
@@ -579,5 +581,157 @@ export class DatabaseStorage implements IStorage {
   async deleteCorrectiveAction(id: number): Promise<boolean> {
     const result = await db.delete(correctiveActions).where(eq(correctiveActions.id, id)).returning();
     return result.length > 0;
+  }
+
+  // Material Mixing
+  async getMixingProcesses(): Promise<MixingProcess[]> {
+    return await db.select().from(mixingProcesses);
+  }
+
+  async getMixingProcess(id: number): Promise<MixingProcess | undefined> {
+    const processes = await db.select().from(mixingProcesses).where(eq(mixingProcesses.id, id));
+    return processes[0];
+  }
+
+  async getMixingProcessesByMachine(machineId: string): Promise<MixingProcess[]> {
+    return await db.select().from(mixingProcesses).where(eq(mixingProcesses.machineId, machineId));
+  }
+
+  async getMixingProcessesByOrder(orderId: number): Promise<MixingProcess[]> {
+    return await db.select().from(mixingProcesses).where(eq(mixingProcesses.orderId, orderId));
+  }
+
+  async getMixingProcessesByUser(userId: string): Promise<MixingProcess[]> {
+    return await db.select().from(mixingProcesses).where(eq(mixingProcesses.mixedById, userId));
+  }
+
+  async createMixingProcess(mixingProcess: InsertMixingProcess): Promise<MixingProcess> {
+    const result = await db.insert(mixingProcesses).values(mixingProcess).returning();
+    return result[0];
+  }
+
+  async updateMixingProcess(id: number, updateData: Partial<MixingProcess>): Promise<MixingProcess | undefined> {
+    const result = await db
+      .update(mixingProcesses)
+      .set(updateData)
+      .where(eq(mixingProcesses.id, id))
+      .returning();
+
+    return result[0];
+  }
+
+  async deleteMixingProcess(id: number): Promise<boolean> {
+    // First delete all mixing details related to this process
+    await db.delete(mixingDetails).where(eq(mixingDetails.mixingProcessId, id));
+    
+    // Then delete the mixing process
+    const result = await db.delete(mixingProcesses).where(eq(mixingProcesses.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Mixing Details
+  async getMixingDetails(mixingProcessId: number): Promise<MixingDetail[]> {
+    return await db.select().from(mixingDetails).where(eq(mixingDetails.mixingProcessId, mixingProcessId));
+  }
+
+  async getMixingDetail(id: number): Promise<MixingDetail | undefined> {
+    const details = await db.select().from(mixingDetails).where(eq(mixingDetails.id, id));
+    return details[0];
+  }
+
+  async createMixingDetail(detail: InsertMixingDetail): Promise<MixingDetail> {
+    const result = await db.insert(mixingDetails).values(detail).returning();
+    
+    // Update the total weight of the mixing process
+    const mixingProcess = await this.getMixingProcess(detail.mixingProcessId);
+    if (mixingProcess) {
+      const details = await this.getMixingDetails(detail.mixingProcessId);
+      const totalWeight = details.reduce((sum, d) => sum + d.quantity, 0);
+      
+      // Update total weight and recalculate percentages for all details
+      await this.updateMixingProcess(detail.mixingProcessId, { totalWeight });
+      
+      // Update percentages for all details in this mixing process
+      for (const d of details) {
+        const percentage = (d.quantity / totalWeight) * 100;
+        await db
+          .update(mixingDetails)
+          .set({ percentage })
+          .where(eq(mixingDetails.id, d.id));
+      }
+    }
+    
+    return result[0];
+  }
+
+  async updateMixingDetail(id: number, updateData: Partial<MixingDetail>): Promise<MixingDetail | undefined> {
+    const result = await db
+      .update(mixingDetails)
+      .set(updateData)
+      .where(eq(mixingDetails.id, id))
+      .returning();
+    
+    if (result[0] && updateData.quantity !== undefined) {
+      // If quantity was updated, we need to recalculate total weight and percentages
+      const detail = result[0];
+      const mixingProcess = await this.getMixingProcess(detail.mixingProcessId);
+      
+      if (mixingProcess) {
+        const details = await this.getMixingDetails(detail.mixingProcessId);
+        const totalWeight = details.reduce((sum, d) => sum + d.quantity, 0);
+        
+        // Update total weight and recalculate percentages
+        await this.updateMixingProcess(detail.mixingProcessId, { totalWeight });
+        
+        // Update percentages for all details in this mixing process
+        for (const d of details) {
+          const percentage = (d.quantity / totalWeight) * 100;
+          await db
+            .update(mixingDetails)
+            .set({ percentage })
+            .where(eq(mixingDetails.id, d.id));
+        }
+      }
+    }
+    
+    return result[0];
+  }
+
+  async deleteMixingDetail(id: number): Promise<boolean> {
+    // Get the detail first to know its mixing process
+    const detail = await this.getMixingDetail(id);
+    
+    if (!detail) {
+      return false;
+    }
+    
+    // Delete the detail
+    const result = await db.delete(mixingDetails).where(eq(mixingDetails.id, id)).returning();
+    
+    if (result.length > 0) {
+      // Recalculate total weight and percentages for the mixing process
+      const mixingProcess = await this.getMixingProcess(detail.mixingProcessId);
+      
+      if (mixingProcess) {
+        const details = await this.getMixingDetails(detail.mixingProcessId);
+        const totalWeight = details.reduce((sum, d) => sum + d.quantity, 0);
+        
+        // Update total weight
+        await this.updateMixingProcess(detail.mixingProcessId, { totalWeight });
+        
+        // Update percentages for all remaining details
+        for (const d of details) {
+          const percentage = totalWeight > 0 ? (d.quantity / totalWeight) * 100 : 0;
+          await db
+            .update(mixingDetails)
+            .set({ percentage })
+            .where(eq(mixingDetails.id, d.id));
+        }
+      }
+      
+      return true;
+    }
+    
+    return false;
   }
 }

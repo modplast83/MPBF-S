@@ -8,7 +8,8 @@ import {
   insertOrderSchema, insertJobOrderSchema, insertRollSchema,
   createRollSchema, InsertRoll,
   insertRawMaterialSchema, insertFinalProductSchema,
-  insertSmsMessageSchema, InsertSmsMessage
+  insertSmsMessageSchema, InsertSmsMessage,
+  insertMixingProcessSchema, insertMixingDetailSchema
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';

@@ -5,7 +5,8 @@ import {
   Order, InsertOrder, JobOrder, InsertJobOrder, Roll, InsertRoll,
   RawMaterial, InsertRawMaterial, FinalProduct, InsertFinalProduct,
   QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
-  CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage
+  CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage,
+  MixingProcess, InsertMixingProcess, MixingDetail, InsertMixingDetail
 } from "@shared/schema";
 import session from "express-session";
 
@@ -147,6 +148,23 @@ export interface IStorage {
   createCorrectiveAction(correctiveAction: InsertCorrectiveAction): Promise<CorrectiveAction>;
   updateCorrectiveAction(id: number, correctiveActionUpdate: Partial<CorrectiveAction>): Promise<CorrectiveAction | undefined>;
   deleteCorrectiveAction(id: number): Promise<boolean>;
+  
+  // Material Mixing methods
+  getMixingProcesses(): Promise<MixingProcess[]>;
+  getMixingProcess(id: number): Promise<MixingProcess | undefined>;
+  getMixingProcessesByMachine(machineId: string): Promise<MixingProcess[]>;
+  getMixingProcessesByOrder(orderId: number): Promise<MixingProcess[]>;
+  getMixingProcessesByUser(userId: string): Promise<MixingProcess[]>;
+  createMixingProcess(mixingProcess: InsertMixingProcess): Promise<MixingProcess>;
+  updateMixingProcess(id: number, mixingProcess: Partial<MixingProcess>): Promise<MixingProcess | undefined>;
+  deleteMixingProcess(id: number): Promise<boolean>;
+  
+  // Mixing Details methods
+  getMixingDetails(mixingProcessId: number): Promise<MixingDetail[]>;
+  getMixingDetail(id: number): Promise<MixingDetail | undefined>;
+  createMixingDetail(detail: InsertMixingDetail): Promise<MixingDetail>;
+  updateMixingDetail(id: number, detail: Partial<MixingDetail>): Promise<MixingDetail | undefined>;
+  deleteMixingDetail(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
