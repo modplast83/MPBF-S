@@ -243,46 +243,68 @@ export default function MixMaterialsPage() {
         throw new Error("Cannot save mix without materials");
       }
       
-      // 1. Create the mixing process
-      const processData = {
-        // No notes field
-      };
-      
-      const processResponse = await apiRequest("POST", "/api/mixing-processes", processData);
-      const processResult = await processResponse.json();
-      
-      // Store the process ID to use in subsequent calls
-      const processId = processResult.id;
-      
-      if (!processId) {
-        throw new Error("Failed to create mixing process - no ID returned");
-      }
-      
-      // 2. Add machine associations if any
-      if (selectedMachines.length > 0) {
-        for (const machineId of selectedMachines) {
-          await apiRequest("POST", `/api/mixing-processes/${processId}/machines`, { machineId });
+      try {
+        // 1. Create the mixing process
+        const processData = {};
+        
+        console.log("Creating mixing process with data:", processData);
+        const processResponse = await apiRequest("POST", "/api/mixing-processes", processData);
+        
+        if (!processResponse.ok) {
+          const errorText = await processResponse.text();
+          throw new Error(`Failed to create mixing process: ${errorText}`);
         }
-      }
-      
-      // 3. Add order associations if any
-      if (selectedOrders.length > 0) {
-        for (const orderId of selectedOrders) {
-          await apiRequest("POST", `/api/mixing-processes/${processId}/orders`, { orderId });
+        
+        const processResult = await processResponse.json();
+        console.log("Process created:", processResult);
+        
+        // Get the process ID from the response
+        const processId = processResult.process.id;
+        
+        if (!processId) {
+          throw new Error("Failed to create mixing process - no ID returned");
         }
+        
+        console.log("Process ID:", processId);
+        
+        // 2. Add machine associations if any
+        if (selectedMachines.length > 0) {
+          for (const machineId of selectedMachines) {
+            console.log(`Adding machine ${machineId} to process ${processId}`);
+            await apiRequest("POST", `/api/mixing-processes/${processId}/machines`, { machineId });
+          }
+        }
+        
+        // 3. Add order associations if any
+        if (selectedOrders.length > 0) {
+          for (const orderId of selectedOrders) {
+            console.log(`Adding order ${orderId} to process ${processId}`);
+            await apiRequest("POST", `/api/mixing-processes/${processId}/orders`, { orderId });
+          }
+        }
+        
+        // 4. Add all materials to the mix
+        for (const material of mixMaterials) {
+          const materialData = {
+            mixingProcessId: processId,
+            materialId: material.materialId,
+            quantity: material.quantity
+          };
+          
+          console.log("Adding material to mix:", materialData);
+          const detailResponse = await apiRequest("POST", "/api/mixing-details", materialData);
+          
+          if (!detailResponse.ok) {
+            const errorText = await detailResponse.text();
+            throw new Error(`Failed to add material to mix: ${errorText}`);
+          }
+        }
+        
+        return processResult;
+      } catch (error) {
+        console.error("Error in createMixMutation:", error);
+        throw error;
       }
-      
-      // 4. Add all materials to the mix
-      for (const material of mixMaterials) {
-        await apiRequest("POST", "/api/mixing-details", {
-          mixingProcessId: processId,
-          materialId: material.materialId,
-          quantity: material.quantity,
-          // No notes field
-        });
-      }
-      
-      return processResult;
     },
     onSuccess: (data) => {
       toast({
