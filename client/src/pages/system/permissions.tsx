@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Define role permission interface
 interface RolePermission {
@@ -20,6 +28,13 @@ interface RolePermission {
 }
 
 export default function Permissions() {
+  // State for custom role dialog
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [newRoleName, setNewRoleName] = useState("");
+  const [availableModules] = useState(["Dashboard", "Orders", "Inventory", "Reports", "Setup", "System", "Tools", "Warehouse", "Workflow", "Quality"]);
+  const [selectedModule, setSelectedModule] = useState("Dashboard");
+  const [showInactive, setShowInactive] = useState(false);
+  
   // Sample permissions data (in a real app, this would come from the API)
   const [permissions, setPermissions] = useState<RolePermission[]>([
     {
@@ -138,80 +153,50 @@ export default function Permissions() {
     });
   };
   
-  const columns = [
-    {
-      header: "Role",
-      accessorKey: "role",
-    },
-    {
-      header: "Module",
-      accessorKey: "module",
-    },
-    {
-      header: "View",
-      accessorKey: "canView",
-      cell: (row: RolePermission) => (
-        <Checkbox 
-          checked={row.canView} 
-          onCheckedChange={(checked) => 
-            handlePermissionChange(row.id, "canView", checked as boolean)
-          }
-          className="data-[state=checked]:bg-primary-500"
-        />
-      ),
-    },
-    {
-      header: "Create",
-      accessorKey: "canCreate",
-      cell: (row: RolePermission) => (
-        <Checkbox 
-          checked={row.canCreate} 
-          onCheckedChange={(checked) => 
-            handlePermissionChange(row.id, "canCreate", checked as boolean)
-          }
-          className="data-[state=checked]:bg-primary-500"
-        />
-      ),
-    },
-    {
-      header: "Edit",
-      accessorKey: "canEdit",
-      cell: (row: RolePermission) => (
-        <Checkbox 
-          checked={row.canEdit} 
-          onCheckedChange={(checked) => 
-            handlePermissionChange(row.id, "canEdit", checked as boolean)
-          }
-          className="data-[state=checked]:bg-primary-500"
-        />
-      ),
-    },
-    {
-      header: "Delete",
-      accessorKey: "canDelete",
-      cell: (row: RolePermission) => (
-        <Checkbox 
-          checked={row.canDelete} 
-          onCheckedChange={(checked) => 
-            handlePermissionChange(row.id, "canDelete", checked as boolean)
-          }
-          className="data-[state=checked]:bg-primary-500"
-        />
-      ),
-    },
-    {
-      header: "Active",
-      accessorKey: "isActive",
-      cell: (row: RolePermission) => (
-        <Switch 
-          checked={row.isActive} 
-          onCheckedChange={(checked) => 
-            handlePermissionChange(row.id, "isActive", checked)
-          }
-        />
-      ),
-    },
-  ];
+  // Function to handle adding a new custom role
+  const handleAddCustomRole = () => {
+    if (!newRoleName.trim()) {
+      toast({
+        title: "Error",
+        description: "Role name cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Generate a new ID by getting the max ID and incrementing it
+    const maxId = Math.max(...permissions.map(p => parseInt(p.id)));
+    const newId = (maxId + 1).toString();
+    
+    // Create new permission entry for the selected module
+    const newPermission: RolePermission = {
+      id: newId,
+      role: newRoleName,
+      module: selectedModule,
+      canView: true,
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      isActive: true,
+    };
+    
+    setPermissions([...permissions, newPermission]);
+    
+    toast({
+      title: "Role Added",
+      description: `New role '${newRoleName}' has been added successfully.`,
+    });
+    
+    // Reset form and close dialog
+    setNewRoleName("");
+    setSelectedModule("Dashboard");
+    setRoleDialogOpen(false);
+  };
+  
+  // Filter permissions based on active state if needed
+  const filteredPermissions = showInactive 
+    ? permissions 
+    : permissions.filter(p => p.isActive);
 
   return (
     <div className="space-y-6">
@@ -241,14 +226,78 @@ export default function Permissions() {
             </div>
           </div>
           
-          <DataTable 
-            data={permissions}
-            columns={columns}
-          />
+          {/* Permissions Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary-50 text-secondary-600 border-b border-secondary-100">
+                <tr>
+                  <th className="py-3 px-4 text-left">Role</th>
+                  <th className="py-3 px-4 text-left">Module</th>
+                  <th className="py-3 px-4 text-center">View</th>
+                  <th className="py-3 px-4 text-center">Create</th>
+                  <th className="py-3 px-4 text-center">Edit</th>
+                  <th className="py-3 px-4 text-center">Delete</th>
+                  <th className="py-3 px-4 text-center">Active</th>
+                </tr>
+              </thead>
+              <tbody className="text-secondary-800">
+                {filteredPermissions.map(permission => (
+                  <tr key={permission.id} className="border-b border-secondary-100">
+                    <td className="py-3 px-4">{permission.role}</td>
+                    <td className="py-3 px-4">{permission.module}</td>
+                    <td className="py-3 px-4 text-center">
+                      <Checkbox 
+                        checked={permission.canView}
+                        onCheckedChange={(checked) => 
+                          handlePermissionChange(permission.id, "canView", checked as boolean)
+                        }
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <Checkbox 
+                        checked={permission.canCreate}
+                        onCheckedChange={(checked) => 
+                          handlePermissionChange(permission.id, "canCreate", checked as boolean)
+                        }
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <Checkbox 
+                        checked={permission.canEdit}
+                        onCheckedChange={(checked) => 
+                          handlePermissionChange(permission.id, "canEdit", checked as boolean)
+                        }
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <Checkbox 
+                        checked={permission.canDelete}
+                        onCheckedChange={(checked) => 
+                          handlePermissionChange(permission.id, "canDelete", checked as boolean)
+                        }
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <Switch 
+                        checked={permission.isActive}
+                        onCheckedChange={(checked) => 
+                          handlePermissionChange(permission.id, "isActive", checked)
+                        }
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           
           <div className="mt-6">
             <div className="flex items-center space-x-2">
-              <Switch id="disable-role" />
+              <Switch 
+                id="disable-role" 
+                checked={showInactive}
+                onCheckedChange={setShowInactive}
+              />
               <Label htmlFor="disable-role">Show inactive roles and modules</Label>
             </div>
           </div>
@@ -265,13 +314,62 @@ export default function Permissions() {
           </p>
           
           <div className="flex justify-end">
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => setRoleDialogOpen(true)}
+            >
               <span className="material-icons text-sm mr-1">add</span>
               Add Custom Role
             </Button>
           </div>
         </CardContent>
       </Card>
+      
+      {/* Add Custom Role Dialog */}
+      <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Custom Role</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="role-name">Role Name</Label>
+              <Input
+                id="role-name"
+                placeholder="Enter role name"
+                value={newRoleName}
+                onChange={(e) => setNewRoleName(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="module">Module</Label>
+              <Select value={selectedModule} onValueChange={setSelectedModule}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a module" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableModules.map(module => (
+                    <SelectItem key={module} value={module}>
+                      {module}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddCustomRole}>
+              Add Role
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
