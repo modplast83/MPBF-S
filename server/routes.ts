@@ -1986,12 +1986,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // If confirming the mix, update the raw material quantities
         if (req.body.confirmed === true && existingProcess.confirmed === false) {
+          console.log(`Confirming mix #${id} - updating raw material quantities`);
+          
           // Get all the mixing details
           const details = await storage.getMixingDetails(id);
+          console.log(`Found ${details.length} details for mix #${id}`);
           
           // Update the raw material quantities
           for (const detail of details) {
-            await storage.updateRawMaterialQuantity(detail.materialId, -detail.quantity);
+            console.log(`Updating material #${detail.materialId} by ${-detail.quantity} kg`);
+            const updatedMaterial = await storage.updateRawMaterialQuantity(detail.materialId, -detail.quantity);
+            console.log(`Material #${detail.materialId} updated - new quantity: ${updatedMaterial?.quantity || 'unknown'}`);
           }
         }
       }
