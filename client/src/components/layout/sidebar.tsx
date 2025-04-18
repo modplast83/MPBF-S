@@ -34,7 +34,7 @@ export default function Sidebar() {
   return (
     <aside 
       className={cn(
-        "bg-black text-white h-screen fixed left-0 top-0 z-50 overflow-y-auto transition-all duration-300",
+        "bg-black text-white h-screen fixed left-0 top-0 z-50 flex flex-col transition-all duration-300",
         expanded ? "w-[250px]" : "w-[64px]"
       )}
     >
@@ -57,7 +57,7 @@ export default function Sidebar() {
         </button>
       </div>
       
-      <nav className="mt-5">
+      <nav className="mt-5 flex-grow overflow-y-auto">
         {SIDEBAR_ITEMS.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {expanded && (
@@ -129,7 +129,7 @@ export default function Sidebar() {
         ))}
       </nav>
       
-      <div className="absolute bottom-0 w-full border-t border-gray-800 p-4">
+      <div className="mt-auto w-full border-t border-gray-800 p-4">
         <div className="flex items-center">
           <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold">
             A
