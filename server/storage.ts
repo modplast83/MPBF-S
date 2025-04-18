@@ -6,7 +6,8 @@ import {
   RawMaterial, InsertRawMaterial, FinalProduct, InsertFinalProduct,
   QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
   CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage,
-  MixingProcess, InsertMixingProcess, MixingDetail, InsertMixingDetail
+  MixingProcess, InsertMixingProcess, MixingDetail, InsertMixingDetail,
+  MixingProcessMachine, InsertMixingProcessMachine, MixingProcessOrder, InsertMixingProcessOrder
 } from "@shared/schema";
 import session from "express-session";
 
@@ -152,12 +153,22 @@ export interface IStorage {
   // Material Mixing methods
   getMixingProcesses(): Promise<MixingProcess[]>;
   getMixingProcess(id: number): Promise<MixingProcess | undefined>;
-  getMixingProcessesByMachine(machineId: string): Promise<MixingProcess[]>;
-  getMixingProcessesByOrder(orderId: number): Promise<MixingProcess[]>;
   getMixingProcessesByUser(userId: string): Promise<MixingProcess[]>;
   createMixingProcess(mixingProcess: InsertMixingProcess): Promise<MixingProcess>;
   updateMixingProcess(id: number, mixingProcess: Partial<MixingProcess>): Promise<MixingProcess | undefined>;
   deleteMixingProcess(id: number): Promise<boolean>;
+  
+  // Mixing Process Machine methods
+  getMixingProcessMachines(mixingProcessId: number): Promise<MixingProcessMachine[]>;
+  getMixingProcessMachine(id: number): Promise<MixingProcessMachine | undefined>;
+  createMixingProcessMachine(machine: InsertMixingProcessMachine): Promise<MixingProcessMachine>;
+  deleteMixingProcessMachine(id: number): Promise<boolean>;
+  
+  // Mixing Process Order methods
+  getMixingProcessOrders(mixingProcessId: number): Promise<MixingProcessOrder[]>;
+  getMixingProcessOrder(id: number): Promise<MixingProcessOrder | undefined>;
+  createMixingProcessOrder(order: InsertMixingProcessOrder): Promise<MixingProcessOrder>;
+  deleteMixingProcessOrder(id: number): Promise<boolean>;
   
   // Mixing Details methods
   getMixingDetails(mixingProcessId: number): Promise<MixingDetail[]>;
@@ -165,6 +176,17 @@ export interface IStorage {
   createMixingDetail(detail: InsertMixingDetail): Promise<MixingDetail>;
   updateMixingDetail(id: number, detail: Partial<MixingDetail>): Promise<MixingDetail | undefined>;
   deleteMixingDetail(id: number): Promise<boolean>;
+  
+  // Machine and order helpers
+  getMixingProcessWithDetails(id: number): Promise<{
+    process: MixingProcess;
+    machines: Machine[];
+    orders: Order[];
+    details: MixingDetail[];
+  }>;
+  
+  // Material and warehouse operations
+  updateRawMaterialQuantity(id: number, quantityChange: number): Promise<RawMaterial | undefined>;
 }
 
 export class MemStorage implements IStorage {

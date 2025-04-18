@@ -297,12 +297,9 @@ export type SmsMessage = typeof smsMessages.$inferSelect;
 export const mixingProcesses = pgTable("mixing_processes", {
   id: serial("id").primaryKey(),
   mixingDate: timestamp("mixing_date").defaultNow().notNull(),
-  mixedById: text("mixed_by_id").references(() => users.id),
+  mixedById: text("mixed_by_id").notNull().references(() => users.id),
   totalWeight: doublePrecision("total_weight").default(0),
-  machineId: text("machine_id").references(() => machines.id),
-  orderId: integer("order_id").references(() => orders.id),
-  notes: text("notes"),
-  status: text("status").default("completed").notNull(),
+  confirmed: boolean("confirmed").default(false).notNull(),
 });
 
 export const insertMixingProcessSchema = createInsertSchema(mixingProcesses).omit({ 
@@ -312,6 +309,32 @@ export const insertMixingProcessSchema = createInsertSchema(mixingProcesses).omi
 });
 export type InsertMixingProcess = z.infer<typeof insertMixingProcessSchema>;
 export type MixingProcess = typeof mixingProcesses.$inferSelect;
+
+// Mixing process machines (many-to-many relationship)
+export const mixingProcessMachines = pgTable("mixing_process_machines", {
+  id: serial("id").primaryKey(),
+  mixingProcessId: integer("mixing_process_id").notNull().references(() => mixingProcesses.id),
+  machineId: text("machine_id").notNull().references(() => machines.id),
+});
+
+export const insertMixingProcessMachineSchema = createInsertSchema(mixingProcessMachines).omit({
+  id: true
+});
+export type InsertMixingProcessMachine = z.infer<typeof insertMixingProcessMachineSchema>;
+export type MixingProcessMachine = typeof mixingProcessMachines.$inferSelect;
+
+// Mixing process orders (many-to-many relationship)
+export const mixingProcessOrders = pgTable("mixing_process_orders", {
+  id: serial("id").primaryKey(),
+  mixingProcessId: integer("mixing_process_id").notNull().references(() => mixingProcesses.id),
+  orderId: integer("order_id").notNull().references(() => orders.id),
+});
+
+export const insertMixingProcessOrderSchema = createInsertSchema(mixingProcessOrders).omit({
+  id: true
+});
+export type InsertMixingProcessOrder = z.infer<typeof insertMixingProcessOrderSchema>;
+export type MixingProcessOrder = typeof mixingProcessOrders.$inferSelect;
 
 // Mixing process details (materials used in a mix)
 export const mixingDetails = pgTable("mixing_details", {
