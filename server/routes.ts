@@ -1829,6 +1829,285 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Material Mixing Process
+  app.get("/api/mixing-processes", async (_req: Request, res: Response) => {
+    try {
+      const processes = await storage.getMixingProcesses();
+      res.json(processes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mixing processes" });
+    }
+  });
+
+  app.get("/api/mixing-processes/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid mixing process ID" });
+      }
+      
+      const process = await storage.getMixingProcess(id);
+      if (!process) {
+        return res.status(404).json({ message: "Mixing process not found" });
+      }
+      res.json(process);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mixing process" });
+    }
+  });
+
+  app.get("/api/machines/:machineId/mixing-processes", async (req: Request, res: Response) => {
+    try {
+      const machine = await storage.getMachine(req.params.machineId);
+      if (!machine) {
+        return res.status(404).json({ message: "Machine not found" });
+      }
+      
+      const processes = await storage.getMixingProcessesByMachine(req.params.machineId);
+      res.json(processes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mixing processes for machine" });
+    }
+  });
+
+  app.get("/api/orders/:orderId/mixing-processes", async (req: Request, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ message: "Invalid order ID" });
+      }
+      
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      const processes = await storage.getMixingProcessesByOrder(orderId);
+      res.json(processes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mixing processes for order" });
+    }
+  });
+
+  app.post("/api/mixing-processes", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertMixingProcessSchema.parse(req.body);
+      
+      // Validate references
+      if (validatedData.machineId) {
+        const machine = await storage.getMachine(validatedData.machineId);
+        if (!machine) {
+          return res.status(404).json({ message: "Machine not found" });
+        }
+      }
+      
+      if (validatedData.orderId) {
+        const order = await storage.getOrder(validatedData.orderId);
+        if (!order) {
+          return res.status(404).json({ message: "Order not found" });
+        }
+      }
+      
+      if (validatedData.mixedById) {
+        const user = await storage.getUser(validatedData.mixedById);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+      }
+      
+      const process = await storage.createMixingProcess(validatedData);
+      res.status(201).json(process);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid mixing process data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create mixing process" });
+    }
+  });
+
+  app.put("/api/mixing-processes/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid mixing process ID" });
+      }
+      
+      const existingProcess = await storage.getMixingProcess(id);
+      if (!existingProcess) {
+        return res.status(404).json({ message: "Mixing process not found" });
+      }
+      
+      const validatedData = insertMixingProcessSchema.parse(req.body);
+      
+      // Validate references
+      if (validatedData.machineId) {
+        const machine = await storage.getMachine(validatedData.machineId);
+        if (!machine) {
+          return res.status(404).json({ message: "Machine not found" });
+        }
+      }
+      
+      if (validatedData.orderId) {
+        const order = await storage.getOrder(validatedData.orderId);
+        if (!order) {
+          return res.status(404).json({ message: "Order not found" });
+        }
+      }
+      
+      if (validatedData.mixedById) {
+        const user = await storage.getUser(validatedData.mixedById);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+      }
+      
+      const process = await storage.updateMixingProcess(id, validatedData);
+      res.json(process);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid mixing process data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update mixing process" });
+    }
+  });
+
+  app.delete("/api/mixing-processes/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid mixing process ID" });
+      }
+      
+      const process = await storage.getMixingProcess(id);
+      if (!process) {
+        return res.status(404).json({ message: "Mixing process not found" });
+      }
+      
+      await storage.deleteMixingProcess(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete mixing process" });
+    }
+  });
+
+  // Mixing Details
+  app.get("/api/mixing-processes/:processId/details", async (req: Request, res: Response) => {
+    try {
+      const processId = parseInt(req.params.processId);
+      if (isNaN(processId)) {
+        return res.status(400).json({ message: "Invalid mixing process ID" });
+      }
+      
+      const process = await storage.getMixingProcess(processId);
+      if (!process) {
+        return res.status(404).json({ message: "Mixing process not found" });
+      }
+      
+      const details = await storage.getMixingDetails(processId);
+      res.json(details);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mixing details" });
+    }
+  });
+
+  app.get("/api/mixing-details/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid mixing detail ID" });
+      }
+      
+      const detail = await storage.getMixingDetail(id);
+      if (!detail) {
+        return res.status(404).json({ message: "Mixing detail not found" });
+      }
+      res.json(detail);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mixing detail" });
+    }
+  });
+
+  app.post("/api/mixing-details", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertMixingDetailSchema.parse(req.body);
+      
+      // Validate process
+      const process = await storage.getMixingProcess(validatedData.mixingProcessId);
+      if (!process) {
+        return res.status(404).json({ message: "Mixing process not found" });
+      }
+      
+      // Validate material
+      const material = await storage.getRawMaterial(validatedData.materialId);
+      if (!material) {
+        return res.status(404).json({ message: "Raw material not found" });
+      }
+      
+      const detail = await storage.createMixingDetail(validatedData);
+      res.status(201).json(detail);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid mixing detail data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create mixing detail" });
+    }
+  });
+
+  app.put("/api/mixing-details/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid mixing detail ID" });
+      }
+      
+      const existingDetail = await storage.getMixingDetail(id);
+      if (!existingDetail) {
+        return res.status(404).json({ message: "Mixing detail not found" });
+      }
+      
+      const validatedData = insertMixingDetailSchema.parse(req.body);
+      
+      // Validate process
+      const process = await storage.getMixingProcess(validatedData.mixingProcessId);
+      if (!process) {
+        return res.status(404).json({ message: "Mixing process not found" });
+      }
+      
+      // Validate material
+      const material = await storage.getRawMaterial(validatedData.materialId);
+      if (!material) {
+        return res.status(404).json({ message: "Raw material not found" });
+      }
+      
+      const detail = await storage.updateMixingDetail(id, validatedData);
+      res.json(detail);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid mixing detail data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update mixing detail" });
+    }
+  });
+
+  app.delete("/api/mixing-details/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid mixing detail ID" });
+      }
+      
+      const detail = await storage.getMixingDetail(id);
+      if (!detail) {
+        return res.status(404).json({ message: "Mixing detail not found" });
+      }
+      
+      await storage.deleteMixingDetail(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete mixing detail" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
