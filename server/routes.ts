@@ -1846,11 +1846,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid mixing process ID" });
       }
       
-      const process = await storage.getMixingProcess(id);
-      if (!process) {
+      // Get the process with all related data (machines, orders, details)
+      const processData = await storage.getMixingProcessWithDetails(id);
+      if (!processData) {
         return res.status(404).json({ message: "Mixing process not found" });
       }
-      res.json(process);
+      
+      res.json(processData);
     } catch (error) {
       res.status(500).json({ message: "Failed to get mixing process" });
     }
@@ -1891,36 +1893,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/mixing-processes", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertMixingProcessSchema.parse(req.body);
+      // Validate the current user
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "You must be logged in to create a mixing process" });
+      }
+
+      const validatedData = insertMixingProcessSchema.parse({
+        mixedById: req.user.id, // Automatically use logged-in user
+        confirmed: false
+      });
       
-      // Validate references
-      if (validatedData.machineId) {
-        const machine = await storage.getMachine(validatedData.machineId);
-        if (!machine) {
-          return res.status(404).json({ message: "Machine not found" });
-        }
+      // Validate the user exists
+      const user = await storage.getUser(validatedData.mixedById);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
       
-      if (validatedData.orderId) {
-        const order = await storage.getOrder(validatedData.orderId);
-        if (!order) {
-          return res.status(404).json({ message: "Order not found" });
-        }
-      }
-      
-      if (validatedData.mixedById) {
-        const user = await storage.getUser(validatedData.mixedById);
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
-        }
-      }
-      
+      // Create the mixing process
       const process = await storage.createMixingProcess(validatedData);
-      res.status(201).json(process);
+      
+      // If machines are provided, add them
+      const { machines, orders } = req.body;
+      
+      if (Array.isArray(machines) && machines.length > 0) {
+        for (const machineId of machines) {
+          // Validate the machine exists and is in the Extrusion section
+          const machine = await storage.getMachine(machineId);
+          if (!machine) {
+            return res.status(404).json({ message: `Machine ${machineId} not found` });
+          }
+          
+          const section = await storage.getSection(machine.sectionId);
+          if (!section || section.name !== "Extrusion") {
+            return res.status(400).json({ message: `Machine ${machineId} is not in the Extrusion section` });
+          }
+          
+          // Add the machine to the process
+          await storage.createMixingProcessMachine({
+            mixingProcessId: process.id,
+            machineId
+          });
+        }
+      }
+      
+      // If orders are provided, add them
+      if (Array.isArray(orders) && orders.length > 0) {
+        for (const orderId of orders) {
+          // Validate the order exists
+          const order = await storage.getOrder(orderId);
+          if (!order) {
+            return res.status(404).json({ message: `Order ${orderId} not found` });
+          }
+          
+          // Add the order to the process
+          await storage.createMixingProcessOrder({
+            mixingProcessId: process.id,
+            orderId
+          });
+        }
+      }
+      
+      // Return the complete process data
+      const processWithDetails = await storage.getMixingProcessWithDetails(process.id);
+      res.status(201).json(processWithDetails);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid mixing process data", errors: error.errors });
       }
+      console.error(error);
       res.status(500).json({ message: "Failed to create mixing process" });
     }
   });
@@ -1936,37 +1976,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!existingProcess) {
         return res.status(404).json({ message: "Mixing process not found" });
       }
+
+      // Validated request body data
+      const updateData: Partial<MixingProcess> = {};
       
-      const validatedData = insertMixingProcessSchema.parse(req.body);
-      
-      // Validate references
-      if (validatedData.machineId) {
-        const machine = await storage.getMachine(validatedData.machineId);
-        if (!machine) {
-          return res.status(404).json({ message: "Machine not found" });
+      // Only allow updating the confirmed field
+      if (req.body.confirmed !== undefined) {
+        updateData.confirmed = req.body.confirmed;
+        
+        // If confirming the mix, update the raw material quantities
+        if (req.body.confirmed === true && existingProcess.confirmed === false) {
+          // Get all the mixing details
+          const details = await storage.getMixingDetails(id);
+          
+          // Update the raw material quantities
+          for (const detail of details) {
+            await storage.updateRawMaterialQuantity(detail.materialId, -detail.quantity);
+          }
         }
       }
       
-      if (validatedData.orderId) {
-        const order = await storage.getOrder(validatedData.orderId);
-        if (!order) {
-          return res.status(404).json({ message: "Order not found" });
+      // Update the process
+      const process = await storage.updateMixingProcess(id, updateData);
+      
+      // If updating machines, clear existing ones and add new ones
+      if (Array.isArray(req.body.machines)) {
+        // Get existing machines to delete them
+        const existingMachines = await storage.getMixingProcessMachines(id);
+        for (const machine of existingMachines) {
+          await storage.deleteMixingProcessMachine(machine.id);
+        }
+        
+        // Add new machines
+        for (const machineId of req.body.machines) {
+          // Validate the machine exists and is in the Extrusion section
+          const machine = await storage.getMachine(machineId);
+          if (!machine) {
+            return res.status(404).json({ message: `Machine ${machineId} not found` });
+          }
+          
+          const section = await storage.getSection(machine.sectionId);
+          if (!section || section.name !== "Extrusion") {
+            return res.status(400).json({ message: `Machine ${machineId} is not in the Extrusion section` });
+          }
+          
+          // Add the machine to the process
+          await storage.createMixingProcessMachine({
+            mixingProcessId: id,
+            machineId
+          });
         }
       }
       
-      if (validatedData.mixedById) {
-        const user = await storage.getUser(validatedData.mixedById);
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
+      // If updating orders, clear existing ones and add new ones
+      if (Array.isArray(req.body.orders)) {
+        // Get existing orders to delete them
+        const existingOrders = await storage.getMixingProcessOrders(id);
+        for (const order of existingOrders) {
+          await storage.deleteMixingProcessOrder(order.id);
+        }
+        
+        // Add new orders
+        for (const orderId of req.body.orders) {
+          // Validate the order exists
+          const order = await storage.getOrder(orderId);
+          if (!order) {
+            return res.status(404).json({ message: `Order ${orderId} not found` });
+          }
+          
+          // Add the order to the process
+          await storage.createMixingProcessOrder({
+            mixingProcessId: id,
+            orderId
+          });
         }
       }
       
-      const process = await storage.updateMixingProcess(id, validatedData);
-      res.json(process);
+      // Return the complete process data
+      const processWithDetails = await storage.getMixingProcessWithDetails(id);
+      res.json(processWithDetails);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid mixing process data", errors: error.errors });
-      }
+      console.error(error);
       res.status(500).json({ message: "Failed to update mixing process" });
     }
   });
