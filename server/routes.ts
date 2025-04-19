@@ -1153,10 +1153,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.put("/api/rolls/:id", async (req: Request, res: Response) => {
     try {
+      console.log(`Attempting to update roll ID: ${req.params.id} with data:`, req.body);
+      
       const existingRoll = await storage.getRoll(req.params.id);
       if (!existingRoll) {
+        console.log(`Roll with ID ${req.params.id} not found`);
         return res.status(404).json({ message: "Roll not found" });
       }
+      
+      console.log(`Found existing roll:`, existingRoll);
       
       // For status and stage updates, we'll accept a simple object
       const statusStageSchema = z.object({
@@ -1169,18 +1174,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         wastePercentage: z.number().optional(),
         createdById: z.string().optional(),
         printedById: z.string().optional(),
-        cutById: z.string().optional(), 
-        createdAt: z.date().optional(),
-        printedAt: z.date().optional(),
-        cutAt: z.date().optional(),
+        cutById: z.string().optional(),
       });
       
       // Try to validate as a status/stage update
       try {
+        console.log("Attempting to validate as a stage/status update");
         const updateData = statusStageSchema.parse(req.body);
+        console.log("Validation succeeded, updating roll with:", updateData);
+        
+        // If moving to printing stage from extrusion, set printedAt date
+        if (existingRoll.currentStage === "extrusion" && updateData.currentStage === "printing") {
+          console.log("Adding printedAt date to update data");
+          updateData.printedAt = new Date();
+        }
+        
+        // If moving to cutting stage from printing, set cutAt date
+        if (existingRoll.currentStage === "printing" && updateData.currentStage === "cutting") {
+          console.log("Adding cutAt date to update data");
+          updateData.cutAt = new Date();
+        }
+        
         const updatedRoll = await storage.updateRoll(req.params.id, updateData);
+        console.log("Roll successfully updated:", updatedRoll);
         return res.json(updatedRoll);
       } catch (statusError) {
+        console.log("Status/stage validation failed:", statusError);
         // Not a status/stage update, continue with full validation
       }
       

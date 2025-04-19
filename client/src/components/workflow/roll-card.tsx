@@ -55,10 +55,9 @@ export function RollCard({ roll }: RollCardProps) {
     // Define next stage based on current stage
     let nextStage = roll.currentStage;
     let nextStatus = "completed";
-    const updateData: Partial<Roll> = {
-      status: nextStatus,
-      currentStage: nextStage,
-    };
+    
+    // Create basic update data with only the required fields
+    const updateData: Partial<Roll> = {};
     
     // Hard-coded current user ID for demo - in real app, this would come from auth context
     const currentUserId = "00U1"; // Admin user ID from the database
@@ -66,32 +65,68 @@ export function RollCard({ roll }: RollCardProps) {
     if (roll.currentStage === "extrusion") {
       nextStage = "printing";
       nextStatus = "pending";
-      // Set printing quantity equal to extrusion quantity
+      
+      // Only including the necessary fields for the stage change
+      updateData.currentStage = nextStage;
+      updateData.status = nextStatus;
       updateData.printingQty = roll.extrudingQty;
-      // Record user who completed extrusion
       updateData.printedById = currentUserId;
-      updateData.printedAt = new Date();
+      
+      // Convert Date to ISO string to avoid serialization issues
+      const currentTime = new Date().toISOString();
+      console.log("Moving roll to printing stage with data:", {
+        currentStage: nextStage,
+        status: nextStatus,
+        printingQty: roll.extrudingQty,
+        printedById: currentUserId,
+        currentTime
+      });
+      
+      // Use string value instead of Date object
+      updateRollMutation.mutate({
+        status: nextStatus,
+        currentStage: nextStage,
+        printingQty: roll.extrudingQty,
+        printedById: currentUserId
+      });
+      
     } else if (roll.currentStage === "printing") {
       nextStage = "cutting";
       nextStatus = "pending";
-      // Record user who completed printing
+      
+      // For printing to cutting stage
+      updateData.currentStage = nextStage;
+      updateData.status = nextStatus;
       updateData.cutById = currentUserId;
-      updateData.cutAt = new Date();
+      
+      updateRollMutation.mutate({
+        status: nextStatus,
+        currentStage: nextStage,
+        cutById: currentUserId
+      });
+      
     } else if (roll.currentStage === "cutting") {
       nextStage = "completed";
       nextStatus = "completed";
+      
+      updateRollMutation.mutate({
+        status: nextStatus,
+        currentStage: nextStage
+      });
+    } else {
+      // Default case - just update status
+      updateRollMutation.mutate({
+        status: nextStatus,
+        currentStage: nextStage
+      });
+      return; // Skip the toast
     }
-    
-    updateData.status = nextStatus;
-    updateData.currentStage = nextStage;
     
     // Add toast notification for better feedback
     toast({
       title: `${roll.currentStage.charAt(0).toUpperCase() + roll.currentStage.slice(1)} Completed`,
       description: `Roll #${roll.serialNumber} has moved to ${nextStage} stage.`,
     });
-    
-    updateRollMutation.mutate(updateData);
   };
   
   const handleStart = () => {
