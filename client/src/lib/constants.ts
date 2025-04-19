@@ -19,9 +19,6 @@ export const API_ENDPOINTS = {
   RAW_MATERIALS: "/api/raw-materials",
   FINAL_PRODUCTS: "/api/final-products",
   
-  // Mix Materials
-  MIXING_PROCESSES: "/api/mixing-processes",
-  MIXING_DETAILS: "/api/mixing-details",
   
   // Quality Management
   QUALITY_CHECK_TYPES: "/api/quality-check-types",
@@ -92,11 +89,7 @@ export const SIDEBAR_ITEMS = [
           { title: "Final Products", path: "/warehouse/final-products" },
         ],
       },
-      {
-        title: "Mix Materials",
-        path: "/mix-materials",
-        icon: "blender",
-      },
+
       {
         title: "Quality",
         path: "/quality",
