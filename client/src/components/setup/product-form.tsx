@@ -265,6 +265,25 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
+            name="rightF"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Right F</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Right F" 
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
             name="width"
             render={({ field }) => (
               <FormItem>
@@ -292,25 +311,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
                   <Input 
                     type="number" 
                     placeholder="Left F" 
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="rightF"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Right F</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="Right F" 
                     {...field}
                     onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
                   />
