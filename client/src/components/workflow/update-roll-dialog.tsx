@@ -34,6 +34,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
   const [isEditing, setIsEditing] = useState(false);
   const [wasteQty, setWasteQty] = useState(0);
   const [wastePercentage, setWastePercentage] = useState(0);
+  const [isPrinting, setIsPrinting] = useState(false);
   
   // Fetch related data
   const { data: jobOrder } = useQuery<JobOrder>({
@@ -160,6 +161,183 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
     roll.currentStage === "extrusion" ? "Extrusion" :
     roll.currentStage === "printing" ? "Printing" :
     roll.currentStage === "cutting" ? "Cutting" : "Unknown";
+    
+  // Function to print the label
+  const handlePrintLabel = () => {
+    setIsPrinting(true);
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    
+    if (!printWindow) {
+      toast({
+        title: "Error",
+        description: "Popup blocked. Please allow popups for this site.",
+        variant: "destructive",
+      });
+      setIsPrinting(false);
+      return;
+    }
+    
+    // Format date to display on label
+    const formattedDate = roll.createdAt 
+      ? new Date(roll.createdAt).toLocaleDateString() 
+      : new Date().toLocaleDateString();
+    
+    // Set the content of the print window with CSS for a 3" x 5" label
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Roll Label - ${roll.id}</title>
+        <style>
+          @page {
+            size: 3in 5in;
+            margin: 0;
+          }
+          body {
+            margin: 0;
+            padding: 0.25in;
+            width: 3in;
+            height: 5in;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+          }
+          .label-container {
+            border: 1px solid #ccc;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0.15in;
+            box-sizing: border-box;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #000;
+            padding-bottom: 0.1in;
+            margin-bottom: 0.1in;
+          }
+          .roll-id {
+            font-size: 16pt;
+            font-weight: bold;
+          }
+          .qr-code {
+            width: 0.75in;
+            height: 0.75in;
+            border: 1px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 8pt;
+          }
+          .info-row {
+            margin: 0.05in 0;
+            display: flex;
+          }
+          .info-label {
+            font-weight: bold;
+            width: 1in;
+          }
+          .info-value {
+            flex: 1;
+          }
+          .barcode {
+            margin-top: 0.1in;
+            height: 0.5in;
+            border: 1px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .footer {
+            margin-top: auto;
+            font-size: 8pt;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 0.1in;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="label-container">
+          <div class="header">
+            <div class="roll-id">${roll.id}</div>
+            <div class="qr-code">QR Code</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Customer:</div>
+            <div class="info-value">${customer?.name || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Product:</div>
+            <div class="info-value">${item?.name || customerProduct?.itemId || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Size:</div>
+            <div class="info-value">${customerProduct?.sizeCaption || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Order #:</div>
+            <div class="info-value">${jobOrder?.orderId || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Job Order #:</div>
+            <div class="info-value">${roll.jobOrderId}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Date:</div>
+            <div class="info-value">${formattedDate}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Weight:</div>
+            <div class="info-value">${getQuantityValue()} kg</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Status:</div>
+            <div class="info-value">${roll.status} - ${roll.currentStage}</div>
+          </div>
+          
+          <div class="barcode">
+            Barcode: ${roll.id}
+          </div>
+          
+          <div class="footer">
+            Printed on ${new Date().toLocaleString()} • Dimensions: 3" × 5"
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+    
+    // Execute print after a short delay to ensure content is loaded
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.onafterprint = () => {
+        printWindow.close();
+        setIsPrinting(false);
+      };
+    }, 500);
+    
+    // Fallback in case onafterprint doesn't trigger
+    setTimeout(() => {
+      setIsPrinting(false);
+    }, 5000);
+    
+    toast({
+      title: "Printing Label",
+      description: "3\" × 5\" label for roll " + roll.id + " has been sent to printer",
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -355,13 +533,26 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
               )}
               
               {(!isEditing || roll.currentStage !== "cutting" || roll.status === "completed") && (
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => onOpenChange(false)}
-                >
-                  Close
-                </Button>
+                <>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => onOpenChange(false)}
+                  >
+                    Close
+                  </Button>
+                  
+                  <Button 
+                    type="button" 
+                    variant="secondary"
+                    className="flex items-center"
+                    onClick={handlePrintLabel}
+                    disabled={isPrinting}
+                  >
+                    <span className="material-icons text-sm mr-1">print</span>
+                    {isPrinting ? "Printing..." : "Print Label (3\" × 5\")"}
+                  </Button>
+                </>
               )}
             </DialogFooter>
           </form>
