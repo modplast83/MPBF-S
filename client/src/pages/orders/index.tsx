@@ -33,9 +33,10 @@ export default function OrdersIndex() {
         const response = await apiRequest("DELETE", `${API_ENDPOINTS.ORDERS}/${id}`, null);
         return response.json(); // Parse the JSON response
       } catch (err: any) {
-        // Extract the error message from the server response
-        if (err.message && err.message.includes('409')) {
-          throw new Error("Cannot delete order with associated job orders");
+        // Handle different HTTP error codes
+        if (err.status === 409) {
+          const errorData = await err.json();
+          throw new Error(errorData.message || "Cannot delete order with associated rolls");
         }
         throw err;
       }
@@ -44,7 +45,8 @@ export default function OrdersIndex() {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
       
       // Use the message from the API response if available
-      const message = data?.message || "Order deleted successfully";
+      const message = data?.message || "Order and associated job orders deleted successfully";
+      const jobOrdersCount = data?.deletedJobOrders || 0;
       
       toast({
         title: "Order Deleted",
@@ -161,8 +163,8 @@ export default function OrdersIndex() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete order #{deletingOrder?.id}.
-              Note: You cannot delete orders that have associated job orders.
+              This will permanently delete order #{deletingOrder?.id} and all its associated job orders.
+              Note: Orders with job orders that have rolls cannot be deleted.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
