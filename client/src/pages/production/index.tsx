@@ -30,29 +30,30 @@ export default function ProductionIndex() {
   };
 
   const orderColumns = [
-    { header: "Order ID", accessorKey: "id" },
+    { header: "Order ID", accessorKey: "id" as const },
     {
       header: "Date",
-      accessorKey: "date",
+      accessorKey: "date" as const,
       cell: (row: { date: string }) => formatDateString(row.date),
     },
     {
       header: "Customer",
-      accessorKey: "customerId",
+      accessorKey: "customerId" as const,
       cell: (row: { customerId: string }) => getCustomerName(row.customerId),
     },
     {
       header: "Status",
-      accessorKey: "status",
+      accessorKey: "status" as const,
       cell: (row: { status: string }) => <StatusBadge status={row.status} />,
     },
     {
       header: "Note",
-      accessorKey: "note",
+      accessorKey: "note" as const,
       cell: (row: { note: string | null }) => row.note || "-",
     },
     {
       header: "Actions",
+      id: "actions",
       cell: (row: Order) => (
         <div className="flex space-x-2">
           <Link href={`/orders/${row.id}`}>
