@@ -147,9 +147,6 @@ export interface IStorage {
   createCorrectiveAction(correctiveAction: InsertCorrectiveAction): Promise<CorrectiveAction>;
   updateCorrectiveAction(id: number, correctiveActionUpdate: Partial<CorrectiveAction>): Promise<CorrectiveAction | undefined>;
   deleteCorrectiveAction(id: number): Promise<boolean>;
-  
-  // Material and warehouse operations
-  updateRawMaterialQuantity(id: number, quantityChange: number): Promise<RawMaterial | undefined>;
 }
 
 export class MemStorage implements IStorage {

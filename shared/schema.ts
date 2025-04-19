@@ -292,5 +292,3 @@ export const insertSmsMessageSchema = createInsertSchema(smsMessages).omit({
 });
 export type InsertSmsMessage = z.infer<typeof insertSmsMessageSchema>;
 export type SmsMessage = typeof smsMessages.$inferSelect;
-
-// Note: Material Mixing tables were removed from database and will be reimplemented in a future update

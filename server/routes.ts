@@ -1096,31 +1096,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/rolls", async (req: Request, res: Response) => {
     try {
-      console.log("Creating roll with data:", req.body);
-      
       // Use the createRollSchema that omits id and serialNumber
       const validatedData = createRollSchema.parse(req.body);
-      console.log("Validated data:", validatedData);
-
+      
       // Verify job order exists
       const jobOrder = await storage.getJobOrder(validatedData.jobOrderId);
       if (!jobOrder) {
-        console.error("Job order not found:", validatedData.jobOrderId);
         return res.status(404).json({ message: "Job order not found" });
       }
-      console.log("Found job order:", jobOrder);
       
       // Get existing rolls for this job order to generate the next serial number
       const existingRolls = await storage.getRollsByJobOrder(validatedData.jobOrderId);
       const nextSerialNumber = (existingRolls.length + 1).toString();
-      console.log("Next serial number:", nextSerialNumber);
       
-      // Get the authenticated user
-      let currentUserId = "00U1"; // Default to admin user
-      if ((req as any).user && (req as any).user.id) {
-        currentUserId = (req as any).user.id;
-      }
-      console.log("Current user ID:", currentUserId);
+      // Prepare the complete roll data with auto-generated fields
+      // For demo purposes, using hardcoded user - in production, use req.user.id from auth
+      const currentUserId = "USER001"; // This should come from authentication
       
       const rollData: InsertRoll = {
         ...validatedData,
@@ -1129,18 +1120,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdById: currentUserId,
         createdAt: new Date()
       };
-      console.log("Roll data to insert:", rollData);
       
-      try {
-        const roll = await storage.createRoll(rollData);
-        console.log("Roll created successfully:", roll);
-        res.status(201).json(roll);
-      } catch (dbError) {
-        console.error("Database error creating roll:", dbError);
-        throw dbError; // Re-throw to be caught by outer catch
-      }
+      const roll = await storage.createRoll(rollData);
+      res.status(201).json(roll);
     } catch (error) {
-      console.error("Error creating roll:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid roll data", errors: error.errors });
       }
@@ -1844,8 +1827,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete SMS message" });
     }
   });
-
-  // Material Mixing Process routes removed as per user request
 
   const httpServer = createServer(app);
   return httpServer;

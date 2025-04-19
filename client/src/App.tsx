@@ -24,7 +24,6 @@ import QualityIndex from "@/pages/quality/index";
 import QualityCheckTypes from "@/pages/quality/check-types";
 import QualityChecks from "@/pages/quality/checks";
 import CorrectiveActions from "@/pages/quality/corrective-actions";
-
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
@@ -72,7 +71,6 @@ function App() {
             <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} />
             <ProtectedRoute path="/quality/checks" component={QualityChecks} />
             <ProtectedRoute path="/quality/corrective-actions" component={CorrectiveActions} />
-
             <ProtectedRoute path="/system" component={SystemIndex} />
             <ProtectedRoute path="/system/database" component={Database} />
             <ProtectedRoute path="/system/permissions" component={Permissions} />

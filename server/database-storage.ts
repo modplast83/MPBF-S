@@ -1,6 +1,6 @@
 import { IStorage } from './storage';
 import { db } from './db';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import {
   User, InsertUser, users,
   Customer, InsertCustomer, customers,
@@ -579,19 +579,5 @@ export class DatabaseStorage implements IStorage {
   async deleteCorrectiveAction(id: number): Promise<boolean> {
     const result = await db.delete(correctiveActions).where(eq(correctiveActions.id, id)).returning();
     return result.length > 0;
-  }
-  
-  // Material and warehouse operations
-  async updateRawMaterialQuantity(id: number, quantityChange: number): Promise<RawMaterial | undefined> {
-    const material = await this.getRawMaterial(id);
-    if (!material) return undefined;
-    
-    const currentQuantity = material.quantity || 0;
-    const newQuantity = currentQuantity + quantityChange;
-    
-    return this.updateRawMaterial(id, { 
-      quantity: newQuantity,
-      lastUpdated: new Date()
-    });
   }
 }

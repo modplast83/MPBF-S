@@ -19,7 +19,6 @@ export const API_ENDPOINTS = {
   RAW_MATERIALS: "/api/raw-materials",
   FINAL_PRODUCTS: "/api/final-products",
   
-  
   // Quality Management
   QUALITY_CHECK_TYPES: "/api/quality-check-types",
   QUALITY_CHECKS: "/api/quality-checks",
@@ -89,7 +88,6 @@ export const SIDEBAR_ITEMS = [
           { title: "Final Products", path: "/warehouse/final-products" },
         ],
       },
-
       {
         title: "Quality",
         path: "/quality",
