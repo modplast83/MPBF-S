@@ -1123,13 +1123,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Next serial number: ${nextSerialNumber}, existing rolls: ${existingRolls.length}`);
       
       // Prepare the complete roll data with auto-generated fields
-      // For demo purposes, using hardcoded user - in production, use req.user.id from auth
-      const currentUserId = "00U1"; // Updated to valid user ID from the system
+      // Get the current user ID (using admin for now)
+      const currentUserId = "00U1"; // ID of admin user
+      
+      // Format the ID with padding to ensure uniqueness
+      const paddedJobOrderId = String(validatedData.jobOrderId).padStart(4, '0');
+      const paddedSerialNumber = nextSerialNumber.padStart(3, '0');
       
       const rollData: InsertRoll = {
         ...validatedData,
-        serialNumber: nextSerialNumber,
-        id: `EX-${validatedData.jobOrderId}-${nextSerialNumber}`,
+        serialNumber: paddedSerialNumber,
+        id: `EX-${paddedJobOrderId}-${paddedSerialNumber}`,
         createdById: currentUserId,
         createdAt: new Date()
       };
