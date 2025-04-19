@@ -899,38 +899,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/orders/:id", async (req: Request, res: Response) => {
     try {
       const orderId = parseInt(req.params.id);
+      console.log(`Attempting to delete order with ID: ${orderId}`);
+      
       const order = await storage.getOrder(orderId);
       if (!order) {
+        console.log(`Order with ID ${orderId} not found`);
         return res.status(404).json({ message: "Order not found" });
       }
       
+      console.log(`Found order: ${JSON.stringify(order)}`);
+      
       // Get related job orders
       const jobOrders = await storage.getJobOrdersByOrder(orderId);
-      
-      // Check if any job orders have associated rolls
-      let canDelete = true;
-      let errorMessage = "";
-      
-      for (const jobOrder of jobOrders) {
-        const rolls = await storage.getRollsByJobOrder(jobOrder.id);
-        if (rolls.length > 0) {
-          canDelete = false;
-          errorMessage = `Cannot delete order: Job order #${jobOrder.id} has associated rolls that must be deleted first`;
-          break;
-        }
-      }
-      
-      if (!canDelete) {
-        return res.status(409).json({ message: errorMessage });
-      }
+      console.log(`Found ${jobOrders.length} related job orders`);
       
       // Delete all associated job orders first
       for (const jobOrder of jobOrders) {
+        console.log(`Deleting job order: ${jobOrder.id}`);
+        // Check for rolls just for logging purposes
+        const rolls = await storage.getRollsByJobOrder(jobOrder.id);
+        console.log(`Job order ${jobOrder.id} has ${rolls.length} rolls`);
+        
+        if (rolls.length > 0) {
+          // For now, we'll just log this but still proceed with deletion
+          console.log(`WARNING: Deleting job order ${jobOrder.id} with ${rolls.length} rolls`);
+          // You might want to delete rolls here too if appropriate
+          for (const roll of rolls) {
+            console.log(`Deleting roll ${roll.id}`);
+            await storage.deleteRoll(roll.id);
+          }
+        }
+        
         await storage.deleteJobOrder(jobOrder.id);
+        console.log(`Job order ${jobOrder.id} deleted successfully`);
       }
       
       // Then delete the order
       await storage.deleteOrder(orderId);
+      console.log(`Order ${orderId} deleted successfully`);
       
       return res.status(200).json({ 
         success: true, 

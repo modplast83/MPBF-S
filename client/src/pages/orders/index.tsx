@@ -28,25 +28,27 @@ export default function OrdersIndex() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      try {
-        // Modified to return the actual response from the API
-        const response = await apiRequest("DELETE", `${API_ENDPOINTS.ORDERS}/${id}`, null);
-        return response.json(); // Parse the JSON response
-      } catch (err: any) {
-        // Handle different HTTP error codes
-        if (err.status === 409) {
-          const errorData = await err.json();
-          throw new Error(errorData.message || "Cannot delete order with associated rolls");
-        }
-        throw err;
+      // Use raw fetch instead of apiRequest for better error handling
+      const response = await fetch(`${API_ENDPOINTS.ORDERS}/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      
+      // Parse the response
+      const data = await response.json();
+      
+      // If response is not ok, throw an error with the message from the server
+      if (!response.ok) {
+        throw new Error(data.message || `Failed to delete order (${response.status})`);
       }
+      
+      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
       
       // Use the message from the API response if available
       const message = data?.message || "Order and associated job orders deleted successfully";
-      const jobOrdersCount = data?.deletedJobOrders || 0;
       
       toast({
         title: "Order Deleted",
