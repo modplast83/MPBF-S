@@ -70,14 +70,13 @@ export const SIDEBAR_ITEMS = [
         ],
       },
       {
-        title: "Orders",
-        path: "/orders",
-        icon: "receipt",
-      },
-      {
-        title: "Workflow",
-        path: "/workflow",
-        icon: "linear_scale",
+        title: "Production",
+        path: "/production",
+        icon: "precision_manufacturing",
+        subItems: [
+          { title: "Orders", path: "/orders" },
+          { title: "Workflow", path: "/workflow" },
+        ],
       },
       {
         title: "Warehouse",
