@@ -21,6 +21,9 @@ interface RollDialogProps {
 
 export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }: RollDialogProps) {
   const [stage] = useState<string>("extrusion");
+  const [currentQty, setCurrentQty] = useState<number>(0);
+  const [exceedsLimit, setExceedsLimit] = useState<boolean>(false);
+  const [excessAmount, setExcessAmount] = useState<number>(0);
 
   // Fetch existing rolls for this job order to calculate remaining quantity
   const { data: existingRolls = [] } = useQuery<Roll[]>({
@@ -33,12 +36,11 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
     total + (roll.extrudingQty || 0), 0);
   const remainingQty = jobOrder ? Math.max(0, jobOrder.quantity - totalExtrudedQty) : 0;
 
-  // Dynamic schema based on remaining quantity
+  // Schema for roll creation (allowing exceeding job order quantity)
   const formSchema = z.object({
     extrudingQty: z.coerce
       .number()
-      .positive("Quantity must be greater than 0")
-      .max(remainingQty, `Cannot exceed remaining quantity of ${remainingQty} kg`),
+      .positive("Quantity must be greater than 0"),
     jobOrderId: z.number().positive(),
   });
 
@@ -59,6 +61,26 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
       });
     }
   }, [jobOrder, remainingQty, form]);
+  
+  // Watch for quantity changes and update warning state
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'extrudingQty' || name === undefined) {
+        const currentValue = Number(value.extrudingQty || 0);
+        setCurrentQty(currentValue);
+        
+        if (currentValue > remainingQty && remainingQty > 0) {
+          setExceedsLimit(true);
+          setExcessAmount(currentValue - remainingQty);
+        } else {
+          setExceedsLimit(false);
+          setExcessAmount(0);
+        }
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form, remainingQty]);
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
     console.log("Form submitted with values:", values);
@@ -115,6 +137,12 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
                       <div className="text-sm font-medium text-primary-600">{remainingQty} kg</div>
                     </div>
                   </div>
+                  {exceedsLimit && (
+                    <div className="mt-2 text-xs text-warning-600 bg-warning-50 p-2 rounded border border-warning-200 flex items-center">
+                      <span className="material-icons text-sm mr-1">warning</span>
+                      The quantity exceeds the remaining job order quantity by {excessAmount.toFixed(2)} kg
+                    </div>
+                  )}
                 </div>
 
                 <FormField
@@ -128,7 +156,6 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
                           type="number"
                           step="0.01"
                           min="0"
-                          max={remainingQty}
                           placeholder="Enter quantity"
                           {...field}
                         />
