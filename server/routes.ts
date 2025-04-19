@@ -1103,22 +1103,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/rolls", async (req: Request, res: Response) => {
     try {
+      console.log("Receiving roll creation request with data:", req.body);
+      
       // Use the createRollSchema that omits id and serialNumber
       const validatedData = createRollSchema.parse(req.body);
+      console.log("Validated roll data:", validatedData);
       
       // Verify job order exists
       const jobOrder = await storage.getJobOrder(validatedData.jobOrderId);
       if (!jobOrder) {
+        console.error(`Job order not found with ID: ${validatedData.jobOrderId}`);
         return res.status(404).json({ message: "Job order not found" });
       }
+      console.log("Found job order:", jobOrder);
       
       // Get existing rolls for this job order to generate the next serial number
       const existingRolls = await storage.getRollsByJobOrder(validatedData.jobOrderId);
       const nextSerialNumber = (existingRolls.length + 1).toString();
+      console.log(`Next serial number: ${nextSerialNumber}, existing rolls: ${existingRolls.length}`);
       
       // Prepare the complete roll data with auto-generated fields
       // For demo purposes, using hardcoded user - in production, use req.user.id from auth
-      const currentUserId = "USER001"; // This should come from authentication
+      const currentUserId = "00U1"; // Updated to valid user ID from the system
       
       const rollData: InsertRoll = {
         ...validatedData,
@@ -1127,10 +1133,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdById: currentUserId,
         createdAt: new Date()
       };
+      console.log("Roll data to be inserted:", rollData);
       
       const roll = await storage.createRoll(rollData);
+      console.log("Successfully created roll:", roll);
       res.status(201).json(roll);
     } catch (error) {
+      console.error("Error creating roll:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid roll data", errors: error.errors });
       }

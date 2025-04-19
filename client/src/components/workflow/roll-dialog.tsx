@@ -149,7 +149,7 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={isLoading || remainingQty <= 0}
+                  disabled={isLoading || Number(form.getValues().extrudingQty) <= 0}
                 >
                   {isLoading ? "Creating..." : "Create Roll"}
                 </Button>
