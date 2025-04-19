@@ -28,25 +28,39 @@ export default function OrdersIndex() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `${API_ENDPOINTS.ORDERS}/${id}`, null);
+      // Modified to return the actual response from the API
+      const response = await apiRequest("DELETE", `${API_ENDPOINTS.ORDERS}/${id}`, null);
+      return response.json(); // Parse the JSON response
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
+      
+      // Use the message from the API response if available
+      const message = data?.message || "The order and all its associated job orders have been deleted successfully.";
+      
       toast({
         title: "Order Deleted",
-        description: "The order and all its associated job orders have been deleted successfully.",
+        description: message,
       });
       setDeletingOrder(null);
     },
     onError: (error: any) => {
-      // Check if it's a 409 conflict error with rolls
-      let errorMessage = `Failed to delete order: ${error}`;
+      console.error("Delete error:", error);
+      
+      // Extract error message
+      let errorMessage = "Failed to delete order";
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      // Try to parse the error response
       try {
-        if (error.response && error.response.status === 409) {
-          errorMessage = error.response.data.message || errorMessage;
+        if (typeof error === 'string' && error.includes('409')) {
+          errorMessage = "Cannot delete order with job orders that have associated rolls";
         }
       } catch (parseError) {
-        // If we can't parse the error, use the default message
+        // If we can't parse the error, use the already set message
       }
       
       toast({

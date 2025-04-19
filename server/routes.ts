@@ -898,22 +898,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.delete("/api/orders/:id", async (req: Request, res: Response) => {
     try {
-      const order = await storage.getOrder(parseInt(req.params.id));
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
       
       // Get related job orders
-      const jobOrders = await storage.getJobOrdersByOrder(parseInt(req.params.id));
+      const jobOrders = await storage.getJobOrdersByOrder(orderId);
       
       // Check if any job orders have associated rolls
+      let canDelete = true;
+      let errorMessage = "";
+      
       for (const jobOrder of jobOrders) {
         const rolls = await storage.getRollsByJobOrder(jobOrder.id);
         if (rolls.length > 0) {
-          return res.status(409).json({ 
-            message: `Cannot delete order with job order #${jobOrder.id} that has associated rolls`
-          });
+          canDelete = false;
+          errorMessage = `Cannot delete order with job order #${jobOrder.id} that has associated rolls`;
+          break;
         }
+      }
+      
+      if (!canDelete) {
+        return res.status(409).json({ message: errorMessage });
       }
       
       // Delete all associated job orders first
@@ -922,10 +930,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Then delete the order
-      await storage.deleteOrder(parseInt(req.params.id));
-      res.status(204).send();
+      await storage.deleteOrder(orderId);
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: "Order and related job orders deleted successfully",
+        deletedJobOrders: jobOrders.length
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete order" });
+      console.error("Error deleting order:", error);
+      return res.status(500).json({ 
+        message: "Failed to delete order", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
   

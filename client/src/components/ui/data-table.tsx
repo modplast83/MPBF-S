@@ -107,7 +107,15 @@ export function DataTable<T>({
               paginatedData.map((row, rowIndex) => (
                 <TableRow
                   key={rowIndex}
-                  onClick={() => onRowClick && onRowClick(row)}
+                  onClick={(e) => {
+                    // Only trigger row click if not clicking on an action button
+                    if (onRowClick && 
+                        e.target && 
+                        !((e.target as HTMLElement).closest('button') || 
+                          (e.target as HTMLElement).closest('a'))) {
+                      onRowClick(row);
+                    }
+                  }}
                   className={onRowClick ? "cursor-pointer hover:bg-secondary-50" : ""}
                 >
                   {columns.map((column, colIndex) => (
