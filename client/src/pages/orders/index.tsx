@@ -28,15 +28,23 @@ export default function OrdersIndex() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      // Modified to return the actual response from the API
-      const response = await apiRequest("DELETE", `${API_ENDPOINTS.ORDERS}/${id}`, null);
-      return response.json(); // Parse the JSON response
+      try {
+        // Modified to return the actual response from the API
+        const response = await apiRequest("DELETE", `${API_ENDPOINTS.ORDERS}/${id}`, null);
+        return response.json(); // Parse the JSON response
+      } catch (err: any) {
+        // Extract the error message from the server response
+        if (err.message && err.message.includes('409')) {
+          throw new Error("Cannot delete order with associated job orders");
+        }
+        throw err;
+      }
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
       
       // Use the message from the API response if available
-      const message = data?.message || "The order and all its associated job orders have been deleted successfully.";
+      const message = data?.message || "Order deleted successfully";
       
       toast({
         title: "Order Deleted",
@@ -47,21 +55,8 @@ export default function OrdersIndex() {
     onError: (error: any) => {
       console.error("Delete error:", error);
       
-      // Extract error message
-      let errorMessage = "Failed to delete order";
-      
-      if (error?.message) {
-        errorMessage = error.message;
-      }
-      
-      // Try to parse the error response
-      try {
-        if (typeof error === 'string' && error.includes('409')) {
-          errorMessage = "Cannot delete order with job orders that have associated rolls";
-        }
-      } catch (parseError) {
-        // If we can't parse the error, use the already set message
-      }
+      // Use the error message
+      const errorMessage = error?.message || "Failed to delete order";
       
       toast({
         title: "Error",
@@ -166,7 +161,8 @@ export default function OrdersIndex() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete order #{deletingOrder?.id} and all its associated job orders.
+              This will permanently delete order #{deletingOrder?.id}.
+              Note: You cannot delete orders that have associated job orders.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

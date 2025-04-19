@@ -907,35 +907,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get related job orders
       const jobOrders = await storage.getJobOrdersByOrder(orderId);
       
-      // Check if any job orders have associated rolls
-      let canDelete = true;
-      let errorMessage = "";
-      
-      for (const jobOrder of jobOrders) {
-        const rolls = await storage.getRollsByJobOrder(jobOrder.id);
-        if (rolls.length > 0) {
-          canDelete = false;
-          errorMessage = `Cannot delete order with job order #${jobOrder.id} that has associated rolls`;
-          break;
-        }
+      // Check if there are any job orders (per user request)
+      if (jobOrders.length > 0) {
+        return res.status(409).json({ 
+          message: "Cannot delete order with associated job orders"
+        });
       }
       
-      if (!canDelete) {
-        return res.status(409).json({ message: errorMessage });
-      }
-      
-      // Delete all associated job orders first
-      for (const jobOrder of jobOrders) {
-        await storage.deleteJobOrder(jobOrder.id);
-      }
-      
-      // Then delete the order
+      // Then delete the order (we only get here if there are no job orders)
       await storage.deleteOrder(orderId);
       
       return res.status(200).json({ 
         success: true, 
-        message: "Order and related job orders deleted successfully",
-        deletedJobOrders: jobOrders.length
+        message: "Order deleted successfully"
       });
     } catch (error) {
       console.error("Error deleting order:", error);
