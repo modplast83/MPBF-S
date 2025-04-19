@@ -34,14 +34,24 @@ export default function OrdersIndex() {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
       toast({
         title: "Order Deleted",
-        description: "The order has been deleted successfully.",
+        description: "The order and all its associated job orders have been deleted successfully.",
       });
       setDeletingOrder(null);
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      // Check if it's a 409 conflict error with rolls
+      let errorMessage = `Failed to delete order: ${error}`;
+      try {
+        if (error.response && error.response.status === 409) {
+          errorMessage = error.response.data.message || errorMessage;
+        }
+      } catch (parseError) {
+        // If we can't parse the error, use the default message
+      }
+      
       toast({
         title: "Error",
-        description: `Failed to delete order: ${error}`,
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -142,7 +152,7 @@ export default function OrdersIndex() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete order #{deletingOrder?.id}.
+              This will permanently delete order #{deletingOrder?.id} and all its associated job orders.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
