@@ -1042,12 +1042,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Job order not found" });
       }
       
-      // Check for related rolls
-      const rolls = await storage.getRollsByJobOrder(parseInt(req.params.id));
-      if (rolls.length > 0) {
-        return res.status(409).json({ message: "Cannot delete job order with associated rolls" });
-      }
-      
+      // We're allowing deletion of job orders with rolls now, as the storage layer
+      // will handle the cascade deletion
       await storage.deleteJobOrder(parseInt(req.params.id));
       res.status(204).send();
     } catch (error) {
