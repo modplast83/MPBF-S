@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
 import {
@@ -28,7 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { CustomerProduct, JobOrder, insertJobOrderSchema } from "@shared/schema";
+import { CustomerProduct, JobOrder, Order, insertJobOrderSchema } from "@shared/schema";
 
 interface JobOrderDialogProps {
   open: boolean;
@@ -92,10 +93,17 @@ export function JobOrderDialog({
     onSubmit(data);
   };
 
+  // Get order's customer ID
+  const { data: order } = useQuery<Order>({
+    queryKey: [`/api/orders/${orderId}`],
+    enabled: !!orderId
+  });
+
   // Filter customer products to get only those for this order's customer
   const getFilteredCustomerProducts = () => {
-    if (!customerProducts) return [];
-    return customerProducts;
+    if (!customerProducts || !order) return [];
+    // Filter to only show products from the order's customer
+    return customerProducts.filter(product => product.customerId === order.customerId);
   };
 
   return (
@@ -103,6 +111,11 @@ export function JobOrderDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Edit Job Order" : "Add New Job Order"}</DialogTitle>
+          <DialogDescription>
+            {isEditMode 
+              ? "Update the details of this job order." 
+              : "Create a new job order for this customer order."}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
