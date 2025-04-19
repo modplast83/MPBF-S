@@ -313,6 +313,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteOrder(id: number): Promise<boolean> {
+    // Get all job orders that will be deleted
+    const jobOrdersToDelete = await this.getJobOrdersByOrder(id);
+    console.log(`Found ${jobOrdersToDelete.length} job orders to delete for order ${id}`);
+    
+    // Delete all rolls for these job orders first if any
+    for (const jobOrder of jobOrdersToDelete) {
+      const rollsToDelete = await this.getRollsByJobOrder(jobOrder.id);
+      console.log(`Found ${rollsToDelete.length} rolls to delete for job order ${jobOrder.id}`);
+      
+      for (const roll of rollsToDelete) {
+        console.log(`Deleting roll ${roll.id}`);
+        await db.delete(rolls).where(eq(rolls.id, roll.id));
+      }
+      
+      // Now delete the job order
+      console.log(`Deleting job order ${jobOrder.id}`);
+      await db.delete(jobOrders).where(eq(jobOrders.id, jobOrder.id));
+    }
+    
+    // Finally delete the order
+    console.log(`Deleting order ${id}`);
     const result = await db.delete(orders).where(eq(orders.id, id)).returning();
     return result.length > 0;
   }
@@ -345,6 +366,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteJobOrder(id: number): Promise<boolean> {
+    // First delete any associated rolls
+    const relatedRolls = await this.getRollsByJobOrder(id);
+    console.log(`Found ${relatedRolls.length} rolls to delete for job order ${id}`);
+    
+    for (const roll of relatedRolls) {
+      console.log(`Deleting roll ${roll.id}`);
+      await db.delete(rolls).where(eq(rolls.id, roll.id));
+    }
+    
+    // Now delete the job order
+    console.log(`Deleting job order ${id}`);
     const result = await db.delete(jobOrders).where(eq(jobOrders.id, id)).returning();
     return result.length > 0;
   }

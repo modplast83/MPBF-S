@@ -907,42 +907,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Order not found" });
       }
       
-      console.log(`Found order: ${JSON.stringify(order)}`);
+      // Let the storage implementation handle cascading delete
+      const success = await storage.deleteOrder(orderId);
       
-      // Get related job orders
-      const jobOrders = await storage.getJobOrdersByOrder(orderId);
-      console.log(`Found ${jobOrders.length} related job orders`);
-      
-      // Delete all associated job orders first
-      for (const jobOrder of jobOrders) {
-        console.log(`Deleting job order: ${jobOrder.id}`);
-        // Check for rolls just for logging purposes
-        const rolls = await storage.getRollsByJobOrder(jobOrder.id);
-        console.log(`Job order ${jobOrder.id} has ${rolls.length} rolls`);
-        
-        if (rolls.length > 0) {
-          // For now, we'll just log this but still proceed with deletion
-          console.log(`WARNING: Deleting job order ${jobOrder.id} with ${rolls.length} rolls`);
-          // You might want to delete rolls here too if appropriate
-          for (const roll of rolls) {
-            console.log(`Deleting roll ${roll.id}`);
-            await storage.deleteRoll(roll.id);
-          }
-        }
-        
-        await storage.deleteJobOrder(jobOrder.id);
-        console.log(`Job order ${jobOrder.id} deleted successfully`);
+      if (success) {
+        return res.status(200).json({ 
+          success: true, 
+          message: `Order and all associated job orders deleted successfully`
+        });
+      } else {
+        return res.status(500).json({ message: "Failed to delete order" });
       }
-      
-      // Then delete the order
-      await storage.deleteOrder(orderId);
-      console.log(`Order ${orderId} deleted successfully`);
-      
-      return res.status(200).json({ 
-        success: true, 
-        message: `Order and ${jobOrders.length} associated job orders deleted successfully`,
-        deletedJobOrders: jobOrders.length
-      });
     } catch (error) {
       console.error("Error deleting order:", error);
       return res.status(500).json({ 
