@@ -16,12 +16,23 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDateString, calculateProgress } from "@/lib/utils";
 import { Order, Customer, JobOrder, CustomerProduct, Roll, Item, MasterBatch } from "@shared/schema";
 import { toast } from "@/hooks/use-toast";
+import { JobOrderDialog } from "./job-order-dialog";
 
 interface OrderDetailsProps {
   orderId: number;
@@ -30,6 +41,8 @@ interface OrderDetailsProps {
 export function OrderDetails({ orderId }: OrderDetailsProps) {
   const queryClient = useQueryClient();
   const [rollDialogOpen, setRollDialogOpen] = useState(false);
+  const [jobOrderDialogOpen, setJobOrderDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
   const [rollQuantity, setRollQuantity] = useState(0);
   
@@ -77,6 +90,56 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
       toast({
         title: "Order Updated",
         description: "Order status has been updated successfully.",
+      });
+    },
+  });
+  
+  // Mutation to create a new job order
+  const createJobOrderMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("POST", API_ENDPOINTS.JOB_ORDERS, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ORDERS}/${orderId}/job-orders`] });
+      setJobOrderDialogOpen(false);
+      setSelectedJobOrder(null);
+      toast({
+        title: "Job Order Created",
+        description: "New job order has been created successfully.",
+      });
+    },
+  });
+  
+  // Mutation to update a job order
+  const updateJobOrderMutation = useMutation({
+    mutationFn: async (data: any) => {
+      if (!selectedJobOrder) return;
+      await apiRequest("PUT", `${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ORDERS}/${orderId}/job-orders`] });
+      setJobOrderDialogOpen(false);
+      setSelectedJobOrder(null);
+      toast({
+        title: "Job Order Updated",
+        description: "Job order has been updated successfully.",
+      });
+    },
+  });
+  
+  // Mutation to delete a job order
+  const deleteJobOrderMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedJobOrder) return;
+      await apiRequest("DELETE", `${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ORDERS}/${orderId}/job-orders`] });
+      setDeleteDialogOpen(false);
+      setSelectedJobOrder(null);
+      toast({
+        title: "Job Order Deleted",
+        description: "Job order has been deleted successfully.",
       });
     },
   });
@@ -184,6 +247,37 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   const cuttingProgress = calculateOrderProgress("cutting");
   const orderRolls = getOrderRolls();
   
+  // Job Order handlers
+  const handleAddJobOrder = () => {
+    setSelectedJobOrder(null);
+    setJobOrderDialogOpen(true);
+  };
+  
+  const handleEditJobOrder = (jobOrder: JobOrder) => {
+    setSelectedJobOrder(jobOrder);
+    setJobOrderDialogOpen(true);
+  };
+  
+  const handleDeleteJobOrder = (jobOrder: JobOrder) => {
+    setSelectedJobOrder(jobOrder);
+    setDeleteDialogOpen(true);
+  };
+  
+  const handleJobOrderSubmit = (data: any) => {
+    if (selectedJobOrder) {
+      // Edit mode
+      updateJobOrderMutation.mutate(data);
+    } else {
+      // Add mode
+      createJobOrderMutation.mutate(data);
+    }
+  };
+  
+  const confirmDelete = () => {
+    deleteJobOrderMutation.mutate();
+  };
+  
+  // Roll handlers
   const handleOpenRollDialog = (jobOrder: JobOrder) => {
     setSelectedJobOrder(jobOrder);
     setRollDialogOpen(true);
@@ -529,7 +623,17 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
           
           {/* Order Products */}
           <div>
-            <h4 className="font-medium text-lg mb-4">Order Products</h4>
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="font-medium text-lg">Order Products</h4>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleAddJobOrder}
+              >
+                <span className="material-icons text-sm mr-1">add</span>
+                Add Job Order
+              </Button>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-secondary-50 text-secondary-600 border-b border-secondary-100">
@@ -563,19 +667,40 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
                         <td className="py-3 px-4">{jobOrder.quantity}</td>
                         <td className="py-3 px-4">{product?.printed || "N/A"}</td>
                         <td className="py-3 px-4">{product?.printingCylinder || "0"}</td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 flex space-x-2">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleOpenRollDialog(jobOrder)}
                           >
-                            <span className="material-icons text-sm mr-1">add</span>
-                            Add Roll
+                            <span className="material-icons text-sm">add</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditJobOrder(jobOrder)}
+                          >
+                            <span className="material-icons text-sm">edit</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-error-500 hover:text-error-700"
+                            onClick={() => handleDeleteJobOrder(jobOrder)}
+                          >
+                            <span className="material-icons text-sm">delete</span>
                           </Button>
                         </td>
                       </tr>
                     );
                   })}
+                  {(!jobOrders || jobOrders.length === 0) && (
+                    <tr>
+                      <td colSpan={9} className="py-4 text-center text-secondary-500">
+                        No job orders found for this order. Click "Add Job Order" to create one.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -658,6 +783,37 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
           </Link>
         </CardFooter>
       </Card>
+      
+      {/* Add/Edit Job Order Dialog */}
+      <JobOrderDialog
+        open={jobOrderDialogOpen}
+        onOpenChange={setJobOrderDialogOpen}
+        onSubmit={handleJobOrderSubmit}
+        jobOrder={selectedJobOrder}
+        orderId={orderId}
+      />
+      
+      {/* Delete Job Order Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Job Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the job order and all its associated rolls.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-error-500 hover:bg-error-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       {/* Add Roll Dialog */}
       <Dialog open={rollDialogOpen} onOpenChange={setRollDialogOpen}>
