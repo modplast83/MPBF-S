@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Roll } from "@shared/schema";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Roll, CustomerProduct, JobOrder } from "@shared/schema";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +34,35 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
   const [isEditing, setIsEditing] = useState(false);
   const [wasteQty, setWasteQty] = useState(0);
   const [wastePercentage, setWastePercentage] = useState(0);
+  
+  // Fetch related data
+  const { data: jobOrder } = useQuery<JobOrder>({
+    queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${roll.jobOrderId}`],
+  });
+  
+  const { data: customerProduct } = useQuery<CustomerProduct>({
+    queryKey: [
+      `${API_ENDPOINTS.CUSTOMER_PRODUCTS}/${jobOrder?.customerProductId}`,
+    ],
+    enabled: !!jobOrder?.customerProductId,
+  });
+  
+  // Fetch order and customer data
+  const { data: order } = useQuery<any>({
+    queryKey: [jobOrder ? `${API_ENDPOINTS.ORDERS}/${jobOrder.orderId}` : null],
+    enabled: !!jobOrder?.orderId,
+  });
+  
+  const { data: customer } = useQuery<any>({
+    queryKey: [order ? `${API_ENDPOINTS.CUSTOMERS}/${order.customerId}` : null],
+    enabled: !!order?.customerId,
+  });
+  
+  // Fetch item data for the product
+  const { data: item } = useQuery<any>({
+    queryKey: [customerProduct ? `${API_ENDPOINTS.ITEMS}/${customerProduct.itemId}` : null],
+    enabled: !!customerProduct?.itemId,
+  });
   
   // Get the maximum available quantity for cutting (from printing stage)
   const maxQuantity = roll.printingQty || 0;
@@ -153,6 +182,21 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
               <div className="grid gap-1">
                 <div className="text-sm font-medium">Roll ID</div>
                 <div className="text-sm">{roll.id}</div>
+              </div>
+
+              <div className="grid gap-1">
+                <div className="text-sm font-medium">Order</div>
+                <div className="text-sm">#{jobOrder?.orderId}</div>
+              </div>
+              
+              <div className="grid gap-1">
+                <div className="text-sm font-medium">Customer</div>
+                <div className="text-sm">{customer?.name || 'Loading...'}</div>
+              </div>
+              
+              <div className="grid gap-1">
+                <div className="text-sm font-medium">Product</div>
+                <div className="text-sm">{item?.name || customerProduct?.itemId} ({customerProduct?.sizeCaption})</div>
               </div>
 
               <div className="grid gap-1">

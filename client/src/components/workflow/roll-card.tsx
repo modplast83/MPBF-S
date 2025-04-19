@@ -30,6 +30,23 @@ export function RollCard({ roll }: RollCardProps) {
     enabled: !!jobOrder?.customerProductId,
   });
   
+  // Fetch order and customer data
+  const { data: order } = useQuery<any>({
+    queryKey: [jobOrder ? `${API_ENDPOINTS.ORDERS}/${jobOrder.orderId}` : null],
+    enabled: !!jobOrder?.orderId,
+  });
+  
+  const { data: customer } = useQuery<any>({
+    queryKey: [order ? `${API_ENDPOINTS.CUSTOMERS}/${order.customerId}` : null],
+    enabled: !!order?.customerId,
+  });
+  
+  // Fetch item data for the product
+  const { data: item } = useQuery<any>({
+    queryKey: [customerProduct ? `${API_ENDPOINTS.ITEMS}/${customerProduct.itemId}` : null],
+    enabled: !!customerProduct?.itemId,
+  });
+  
   // Mutations for updating roll status
   const updateRollMutation = useMutation({
     mutationFn: async (updateData: Partial<Roll>) => {
@@ -149,15 +166,15 @@ export function RollCard({ roll }: RollCardProps) {
         onClick={openEditDialog}
       >
         <CardContent className="p-0">
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-medium">Roll #{roll.serialNumber}</span>
+          <div className="flex justify-between items-center mb-3">
+            <span className="font-medium text-lg">Roll #{roll.serialNumber}</span>
             <StatusBadge status={roll.status} />
           </div>
-          <div className="text-sm text-secondary-600">
-            <p>Order: #{jobOrder?.orderId}</p>
-            <p>Product: {customerProduct?.itemId} ({customerProduct?.sizeCaption})</p>
-            <p>
-              Quantity: {
+          <div className="text-sm text-secondary-700 space-y-1.5">
+            <p><span className="font-medium">Order:</span> #{jobOrder?.orderId}</p>
+            <p><span className="font-medium">Customer:</span> {customer?.name || 'Loading...'}</p>
+            <p><span className="font-medium">Product:</span> {item?.name || customerProduct?.itemId} ({customerProduct?.sizeCaption})</p>
+            <p><span className="font-medium">Quantity:</span> {
                 roll.currentStage === "extrusion" 
                   ? roll.extrudingQty 
                   : roll.currentStage === "printing" 
@@ -166,7 +183,7 @@ export function RollCard({ roll }: RollCardProps) {
               } Kg
             </p>
           </div>
-          <div className="mt-3 flex justify-end">
+          <div className="mt-4 flex justify-end border-t pt-3 border-secondary-100">
             {roll.status === "pending" ? (
               <Button
                 size="sm"
