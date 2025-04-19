@@ -61,7 +61,7 @@ export function RollCard({ roll }: RollCardProps) {
     };
     
     // Hard-coded current user ID for demo - in real app, this would come from auth context
-    const currentUserId = "USER001"; // This should be replaced with actual authenticated user
+    const currentUserId = "00U1"; // Admin user ID from the database
     
     if (roll.currentStage === "extrusion") {
       nextStage = "printing";
