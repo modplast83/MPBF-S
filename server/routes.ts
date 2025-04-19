@@ -1828,15 +1828,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Material Mixing Process
-  app.get("/api/mixing-processes", async (_req: Request, res: Response) => {
-    try {
-      const processes = await storage.getMixingProcesses();
-      res.json(processes);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get mixing processes" });
-    }
-  });
+  // Material Mixing Process - Removed as per request
 
   app.get("/api/mixing-processes/:id", async (req: Request, res: Response) => {
     try {
