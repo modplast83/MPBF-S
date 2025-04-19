@@ -94,7 +94,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
       lengthCm: product?.lengthCm || undefined,
       cuttingLength: product?.cuttingLength || undefined,
       rawMaterial: product?.rawMaterial || "",
-      masterBatchId: product?.masterBatchId || "",
+      masterBatchId: product?.masterBatchId || "none",
       printed: product?.printed || "",
       cuttingUnit: product?.cuttingUnit || "",
       unitWeight: product?.unitWeight || undefined,
@@ -122,6 +122,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         lengthCm: values.lengthCm ? Number(values.lengthCm) : null,
         cuttingLength: values.cuttingLength ? Number(values.cuttingLength) : null,
         unitWeight: values.unitWeight ? Number(values.unitWeight) : null,
+        masterBatchId: values.masterBatchId === "none" ? "" : values.masterBatchId,
       };
       
       if (isEditing && product) {
@@ -451,7 +452,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {masterBatches?.map((mb) => (
                       <SelectItem key={mb.id} value={mb.id}>
                         {mb.name}
