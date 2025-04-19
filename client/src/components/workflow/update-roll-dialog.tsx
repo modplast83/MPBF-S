@@ -223,15 +223,6 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
             font-size: 16pt;
             font-weight: bold;
           }
-          .qr-code {
-            width: 0.75in;
-            height: 0.75in;
-            border: 1px solid #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 8pt;
-          }
           .info-row {
             margin: 0.05in 0;
             display: flex;
@@ -264,7 +255,6 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
         <div class="label-container">
           <div class="header">
             <div class="roll-id">${roll.id}</div>
-            <div class="qr-code">QR Code</div>
           </div>
           
           <div class="info-row">
@@ -312,7 +302,8 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
           </div>
           
           <div class="footer">
-            Printed on ${new Date().toLocaleString()} • Dimensions: 3" × 5"
+            Printed on ${new Date().toLocaleString()} • Dimensions: 3" × 5"<br>
+            Created by: ${roll.createdById ? roll.createdById : 'System User'}
           </div>
         </div>
       </body>
