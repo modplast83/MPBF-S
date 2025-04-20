@@ -234,6 +234,14 @@
     "language": {
       "en": "English",
       "ar": "العربية"
+    },
+    "pagination": {
+      "showing_entries": "Showing {{from}} to {{to}} of {{total}} entries",
+      "first_page": "First Page",
+      "last_page": "Last Page",
+      "next_page": "Next Page",
+      "previous_page": "Previous Page",
+      "no_results": "No results."
     }
   }
 }

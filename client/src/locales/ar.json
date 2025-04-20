@@ -234,6 +234,14 @@
     "language": {
       "en": "English",
       "ar": "العربية"
+    },
+    "pagination": {
+      "showing_entries": "عرض {{from}} إلى {{to}} من {{total}} سجل",
+      "first_page": "الصفحة الأولى",
+      "last_page": "الصفحة الأخيرة",
+      "next_page": "الصفحة التالية",
+      "previous_page": "الصفحة السابقة",
+      "no_results": "لا توجد نتائج."
     }
   }
 }

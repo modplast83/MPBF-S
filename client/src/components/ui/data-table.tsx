@@ -44,7 +44,10 @@ export function DataTable<T>({
   pagination = true,
   actions,
   onRowClick,
+  dir = 'ltr',
 }: DataTableProps<T>) {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -73,22 +76,26 @@ export function DataTable<T>({
     setCurrentPage(1); // Reset to first page
   };
 
+  // Use the dir prop or fallback to isRTL from context
+  const direction = dir || (isRTL ? 'rtl' : 'ltr');
+  const isRightToLeft = direction === 'rtl';
+  
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${isRightToLeft ? 'rtl' : 'ltr'}`} dir={direction}>
       {(searchable || actions) && (
-        <div className="flex items-center justify-between">
+        <div className={`flex items-center justify-between ${isRightToLeft ? 'flex-row-reverse' : ''}`}>
           {searchable && (
             <div className="relative w-64">
               <Input
-                placeholder="Search..."
+                placeholder={t("common.search")}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1); // Reset to first page
                 }}
-                className="pl-10"
+                className={isRightToLeft ? "pr-10 text-right" : "pl-10"}
               />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <span className={`absolute ${isRightToLeft ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-gray-400`}>
                 <span className="material-icons text-sm">search</span>
               </span>
             </div>
@@ -102,7 +109,10 @@ export function DataTable<T>({
           <TableHeader>
             <TableRow>
               {columns.map((column, index) => (
-                <TableHead key={index} className="font-semibold">
+                <TableHead 
+                  key={index} 
+                  className={`font-semibold ${column.meta?.className || ''} ${isRightToLeft ? 'text-right' : ''}`}
+                >
                   {column.header}
                 </TableHead>
               ))}
@@ -125,12 +135,17 @@ export function DataTable<T>({
                   className={onRowClick ? "cursor-pointer hover:bg-secondary-50" : ""}
                 >
                   {columns.map((column, colIndex) => (
-                    <TableCell key={colIndex}>
+                    <TableCell 
+                      key={colIndex}
+                      className={column.meta?.className || ''}
+                    >
                       {column.cell
                         ? column.cell(row)
                         : typeof column.accessorKey === "function"
                         ? column.accessorKey(row)
-                        : (row[column.accessorKey] as React.ReactNode)}
+                        : column.accessorKey 
+                          ? (row[column.accessorKey as keyof T] as React.ReactNode)
+                          : null}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -141,7 +156,7 @@ export function DataTable<T>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {t("pagination.no_results")}
                 </TableCell>
               </TableRow>
             )}
@@ -150,21 +165,23 @@ export function DataTable<T>({
       </div>
 
       {pagination && totalPages > 0 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            Showing {Math.min(filteredData.length, (currentPage - 1) * pageSize + 1)} to{" "}
-            {Math.min(filteredData.length, currentPage * pageSize)} of{" "}
-            {filteredData.length} entries
+        <div className={`flex items-center justify-between ${isRightToLeft ? 'flex-row-reverse' : ''}`}>
+          <div className={`text-sm text-gray-500 ${isRightToLeft ? 'text-right' : ''}`}>
+            {t("pagination.showing_entries", {
+              from: Math.min(filteredData.length, (currentPage - 1) * pageSize + 1),
+              to: Math.min(filteredData.length, currentPage * pageSize),
+              total: filteredData.length
+            })}
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-1">
+          <div className={`flex items-center ${isRightToLeft ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+            <div className={`flex items-center ${isRightToLeft ? 'space-x-reverse space-x-1 flex-row-reverse' : 'space-x-1'}`}>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handlePageChange(1)}
                 disabled={currentPage === 1}
               >
-                <span className="material-icons text-sm">first_page</span>
+                <span className="material-icons text-sm">{isRightToLeft ? 'last_page' : 'first_page'}</span>
               </Button>
               <Button
                 variant="outline"
@@ -172,7 +189,7 @@ export function DataTable<T>({
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                <span className="material-icons text-sm">chevron_left</span>
+                <span className="material-icons text-sm">{isRightToLeft ? 'chevron_right' : 'chevron_left'}</span>
               </Button>
               
               {/* Page Numbers */}
@@ -199,7 +216,7 @@ export function DataTable<T>({
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
-                <span className="material-icons text-sm">chevron_right</span>
+                <span className="material-icons text-sm">{isRightToLeft ? 'chevron_left' : 'chevron_right'}</span>
               </Button>
               <Button
                 variant="outline"
@@ -207,7 +224,7 @@ export function DataTable<T>({
                 onClick={() => handlePageChange(totalPages)}
                 disabled={currentPage === totalPages}
               >
-                <span className="material-icons text-sm">last_page</span>
+                <span className="material-icons text-sm">{isRightToLeft ? 'first_page' : 'last_page'}</span>
               </Button>
             </div>
 
