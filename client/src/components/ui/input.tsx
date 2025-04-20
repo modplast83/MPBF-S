@@ -1,5 +1,5 @@
 import * as React from "react"
-import { motion, HTMLMotionProps } from "framer-motion"
+import { motion } from "framer-motion"
 import { FiCheck, FiAlertCircle } from "react-icons/fi"
 import { cn } from "@/lib/utils"
 
@@ -12,70 +12,41 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, status = "idle", showStatusIcon = true, animateValidation = true, ...props }, ref) => {
-    // Animation variants for different states
-    const inputVariants = {
-      valid: {
-        boxShadow: "0 0 0 1px rgba(34, 197, 94, 0.5)",
-        borderColor: "rgba(34, 197, 94, 1)",
-        transition: { duration: 0.2 }
-      },
-      invalid: {
-        boxShadow: "0 0 0 1px rgba(239, 68, 68, 0.5)",
-        borderColor: "rgba(239, 68, 68, 1)",
-        transition: { duration: 0.2 }
-      },
-      focus: {
-        scale: 1.01,
-        boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)",
-        transition: { duration: 0.2 }
-      },
-      idle: {
-        boxShadow: "none",
-        borderColor: "rgba(209, 213, 219, 1)",
-        scale: 1,
-        transition: { duration: 0.2 }
-      }
-    };
-
     // Track focus state
     const [isFocused, setIsFocused] = React.useState(false);
     
-    // Determine current animation state
-    const currentVariant = isFocused ? "focus" : status === "valid" ? "valid" : status === "invalid" ? "invalid" : "idle";
-
-    // These are the props we want to pass to the standard input element
-    const inputProps: React.InputHTMLAttributes<HTMLInputElement> = {
-      type,
-      className: cn(
-        "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-        status === "valid" && "border-green-500",
-        status === "invalid" && "border-red-500",
-        className
-      ),
-      onFocus: (e) => {
-        setIsFocused(true);
-        props.onFocus && props.onFocus(e);
-      },
-      onBlur: (e) => {
-        setIsFocused(false);
-        props.onBlur && props.onBlur(e);
-      },
-      ...props
+    // Handle focus and blur
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(true);
+      props.onFocus && props.onFocus(e);
     };
 
-    // These are the motion-specific props
-    const motionProps: HTMLMotionProps<"input"> = {
-      animate: animateValidation ? currentVariant : undefined,
-      variants: inputVariants,
-      transition: { type: "spring", stiffness: 300, damping: 25 }
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(false);
+      props.onBlur && props.onBlur(e);
     };
+
+    // Determine className based on status
+    const inputClassName = cn(
+      "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+      status === "valid" && "border-green-500 focus-visible:ring-green-500",
+      status === "invalid" && "border-red-500 focus-visible:ring-red-500",
+      isFocused && animateValidation && "scale-[1.01] transition-transform duration-200",
+      status === "valid" && animateValidation && "shadow-[0_0_0_1px_rgba(34,197,94,0.5)]",
+      status === "invalid" && animateValidation && "shadow-[0_0_0_1px_rgba(239,68,68,0.5)]",
+      isFocused && animateValidation && "shadow-[0_0_0_2px_rgba(59,130,246,0.5)]",
+      className
+    );
 
     return (
       <div className="relative w-full">
-        <motion.input
+        <input
           ref={ref}
-          {...inputProps}
-          {...motionProps}
+          type={type}
+          className={inputClassName}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          {...props}
         />
         
         {showStatusIcon && status === "valid" && (

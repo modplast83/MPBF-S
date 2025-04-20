@@ -9,6 +9,7 @@ import {
   FormProvider,
   useFormContext,
 } from "react-hook-form"
+import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
@@ -78,7 +79,14 @@ const FormItem = React.forwardRef<
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div ref={ref} className={cn("space-y-2", className)} {...props} />
+      <motion.div 
+        ref={ref} 
+        className={cn("space-y-2", className)} 
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        {...props} 
+      />
     </FormItemContext.Provider>
   )
 })
@@ -130,10 +138,13 @@ const FormDescription = React.forwardRef<
   const { formDescriptionId } = useFormField()
 
   return (
-    <p
+    <motion.p
       ref={ref}
       id={formDescriptionId}
       className={cn("text-sm text-muted-foreground", className)}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.8 }}
+      transition={{ duration: 0.2 }}
       {...props}
     />
   )
@@ -151,19 +162,16 @@ const FormMessage = React.forwardRef<
     return null
   }
 
-  // Import at the component level to avoid affecting the whole file
-  const { motion } = require("framer-motion")
-
   return (
     <motion.p
       ref={ref}
       id={formMessageId}
       className={cn("text-sm font-medium text-destructive", className)}
-      {...props}
-      initial={{ opacity: 0, y: -10, height: 0 }}
+      initial={{ opacity: 0, y: -5, height: 0 }}
       animate={{ opacity: 1, y: 0, height: "auto" }}
-      exit={{ opacity: 0, y: -10, height: 0 }}
-      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      exit={{ opacity: 0, y: -5, height: 0 }}
+      transition={{ type: "spring", damping: 25, stiffness: 500 }}
+      {...props}
     >
       {body}
     </motion.p>
