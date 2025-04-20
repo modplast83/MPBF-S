@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { calculateProgress } from "@/lib/utils";
 import { Order, Customer, JobOrder, CustomerProduct } from "@shared/schema";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 
 export function ActiveOrdersTable() {
   // Fetch all required data

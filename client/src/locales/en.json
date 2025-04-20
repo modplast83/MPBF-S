@@ -23,7 +23,8 @@
       "login": "Log In",
       "logout_confirm": "Are you sure you want to log out?",
       "profile": "Profile",
-      "settings": "Settings"
+      "settings": "Settings",
+      "unknown_customer": "Unknown Customer"
     },
     "auth": {
       "username": "Username",
@@ -99,7 +100,9 @@
       "trend_from_last_month": "{{percent}} from last month",
       "trend_from_last_week": "{{percent}} from last week",
       "trend_more_than_yesterday": "5 more than yesterday",
-      "low_inventory_alert": "Low inventory alert"
+      "low_inventory_alert": "Low inventory alert",
+      "recent_orders": "Recent Orders",
+      "active_orders": "Active Orders"
     },
     "setup": {
       "title": "System Setup",
@@ -183,7 +186,9 @@
       "pending": "Pending",
       "processing": "Processing",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "no_recent_orders": "No recent orders found",
+      "see_all_orders": "See all orders"
     },
     "job_orders": {
       "title": "Job Orders",

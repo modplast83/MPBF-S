@@ -23,7 +23,8 @@
       "login": "تسجيل الدخول",
       "logout_confirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
       "profile": "الملف الشخصي",
-      "settings": "الإعدادات"
+      "settings": "الإعدادات",
+      "unknown_customer": "عميل غير معروف"
     },
     "auth": {
       "username": "اسم المستخدم",
@@ -99,7 +100,9 @@
       "trend_from_last_month": "{{percent}} من الشهر الماضي",
       "trend_from_last_week": "{{percent}} من الأسبوع الماضي",
       "trend_more_than_yesterday": "5 أكثر من الأمس",
-      "low_inventory_alert": "تنبيه: مخزون منخفض"
+      "low_inventory_alert": "تنبيه: مخزون منخفض",
+      "recent_orders": "أحدث الطلبات",
+      "active_orders": "الطلبات النشطة"
     },
     "setup": {
       "title": "إعداد النظام",
@@ -183,7 +186,9 @@
       "pending": "معلق",
       "processing": "قيد المعالجة",
       "completed": "مكتمل",
-      "cancelled": "ملغى"
+      "cancelled": "ملغى",
+      "no_recent_orders": "لا توجد طلبات حديثة",
+      "see_all_orders": "عرض جميع الطلبات"
     },
     "job_orders": {
       "title": "أوامر العمل",
