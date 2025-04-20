@@ -29,12 +29,8 @@ import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
 import { AuthProvider } from "@/hooks/use-auth";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useEffect } from "react";
-import { API_ENDPOINTS } from "@/lib/constants";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Toaster } from "@/components/ui/toaster";
 import ToolsPage from "@/pages/tools/ToolsPage";
 import BagWeightCalculator from "@/pages/tools/bag-weight";
 import InkConsumptionCalculator from "@/pages/tools/ink-consumption";
@@ -47,47 +43,44 @@ function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <MainLayout>
-          <Switch>
-            <Route path="/auth" component={AuthPage} />
-            <ProtectedRoute path="/" component={Dashboard} />
-            <ProtectedRoute path="/setup" component={SetupIndex} />
-            <ProtectedRoute path="/setup/categories" component={Categories} />
-            <ProtectedRoute path="/setup/products" component={Products} />
-            <ProtectedRoute path="/setup/customers" component={Customers} />
-            <ProtectedRoute path="/setup/items" component={Items} />
-            <ProtectedRoute path="/setup/sections" component={Sections} />
-            <ProtectedRoute path="/setup/machines" component={Machines} />
-            <ProtectedRoute path="/setup/users" component={Users} />
-            <ProtectedRoute path="/production" component={ProductionIndex} />
-            <ProtectedRoute path="/orders" component={OrdersIndex} />
-            <ProtectedRoute path="/orders/:id" component={OrderDetails} />
-            <ProtectedRoute path="/workflow" component={WorkflowIndex} />
-            <ProtectedRoute path="/warehouse" component={WarehouseIndex} />
-            <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} />
-            <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} />
-            <ProtectedRoute path="/reports" component={ReportsIndex} />
-            <ProtectedRoute path="/quality" component={QualityIndex} />
-            <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} />
-            <ProtectedRoute path="/quality/checks" component={QualityChecks} />
-            <ProtectedRoute path="/quality/corrective-actions" component={CorrectiveActions} />
-            <ProtectedRoute path="/system" component={SystemIndex} />
-            <ProtectedRoute path="/system/database" component={Database} />
-            <ProtectedRoute path="/system/permissions" component={Permissions} />
-            <ProtectedRoute path="/system/import-export" component={ImportExport} />
-            <ProtectedRoute path="/system/sms" component={SmsIndex} />
-            <ProtectedRoute path="/tools" component={ToolsPage} />
-            <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} />
-            <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} />
-            <ProtectedRoute path="/tools/utilities" component={UtilityTools} />
-            <Route component={NotFound} />
-          </Switch>
-        </MainLayout>
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <MainLayout>
+        <Switch>
+          <Route path="/auth" component={AuthPage} />
+          <ProtectedRoute path="/" component={Dashboard} />
+          <ProtectedRoute path="/setup" component={SetupIndex} />
+          <ProtectedRoute path="/setup/categories" component={Categories} />
+          <ProtectedRoute path="/setup/products" component={Products} />
+          <ProtectedRoute path="/setup/customers" component={Customers} />
+          <ProtectedRoute path="/setup/items" component={Items} />
+          <ProtectedRoute path="/setup/sections" component={Sections} />
+          <ProtectedRoute path="/setup/machines" component={Machines} />
+          <ProtectedRoute path="/setup/users" component={Users} />
+          <ProtectedRoute path="/production" component={ProductionIndex} />
+          <ProtectedRoute path="/orders" component={OrdersIndex} />
+          <ProtectedRoute path="/orders/:id" component={OrderDetails} />
+          <ProtectedRoute path="/workflow" component={WorkflowIndex} />
+          <ProtectedRoute path="/warehouse" component={WarehouseIndex} />
+          <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} />
+          <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} />
+          <ProtectedRoute path="/reports" component={ReportsIndex} />
+          <ProtectedRoute path="/quality" component={QualityIndex} />
+          <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} />
+          <ProtectedRoute path="/quality/checks" component={QualityChecks} />
+          <ProtectedRoute path="/quality/corrective-actions" component={CorrectiveActions} />
+          <ProtectedRoute path="/system" component={SystemIndex} />
+          <ProtectedRoute path="/system/database" component={Database} />
+          <ProtectedRoute path="/system/permissions" component={Permissions} />
+          <ProtectedRoute path="/system/import-export" component={ImportExport} />
+          <ProtectedRoute path="/system/sms" component={SmsIndex} />
+          <ProtectedRoute path="/tools" component={ToolsPage} />
+          <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} />
+          <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} />
+          <ProtectedRoute path="/tools/utilities" component={UtilityTools} />
+          <Route component={NotFound} />
+        </Switch>
+      </MainLayout>
+    </AuthProvider>
   );
 }
 
