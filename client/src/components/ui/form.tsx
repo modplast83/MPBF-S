@@ -151,15 +151,22 @@ const FormMessage = React.forwardRef<
     return null
   }
 
+  // Import at the component level to avoid affecting the whole file
+  const { motion } = require("framer-motion")
+
   return (
-    <p
+    <motion.p
       ref={ref}
       id={formMessageId}
       className={cn("text-sm font-medium text-destructive", className)}
       {...props}
+      initial={{ opacity: 0, y: -10, height: 0 }}
+      animate={{ opacity: 1, y: 0, height: "auto" }}
+      exit={{ opacity: 0, y: -10, height: 0 }}
+      transition={{ type: "spring", stiffness: 500, damping: 30 }}
     >
       {body}
-    </p>
+    </motion.p>
   )
 })
 FormMessage.displayName = "FormMessage"
