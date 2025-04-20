@@ -97,18 +97,22 @@ export default function Sidebar() {
                     
                     {expanded && (
                       <CollapsibleContent>
-                        {item.subItems.map((subItem, subIndex) => (
-                          <Link 
-                            key={subIndex} 
-                            href={subItem.path}
-                            className={cn(
-                              `flex items-center py-2 hover:bg-gray-900 text-white ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
-                              isActive(subItem.path) && "bg-gray-800"
-                            )}
-                          >
-                            {t(`sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`)}
-                          </Link>
-                        ))}
+                        {item.subItems.map((subItem, subIndex) => {
+                          // Log the subItem details to debug
+                          console.log(`Subitem: ${subItem.title}, Translation key: sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`);
+                          return (
+                            <Link 
+                              key={subIndex} 
+                              href={subItem.path}
+                              className={cn(
+                                `flex items-center py-2 hover:bg-gray-900 text-white ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
+                                isActive(subItem.path) && "bg-gray-800"
+                              )}
+                            >
+                              {t(`sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`)}
+                            </Link>
+                          );
+                        })}
                       </CollapsibleContent>
                     )}
                   </Collapsible>
