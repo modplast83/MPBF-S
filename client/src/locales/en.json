@@ -81,7 +81,9 @@
       "permissions": "Permissions",
       "import_export": "Import & Export",
       "sms": "SMS",
-      "tools": "Tools"
+      "tools": "Tools",
+      "admin_user": "Admin User",
+      "administrator": "Administrator"
     },
     "dashboard": {
       "title": "Dashboard",

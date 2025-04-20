@@ -81,7 +81,9 @@
       "permissions": "الصلاحيات",
       "import_export": "استيراد وتصدير",
       "sms": "الرسائل النصية",
-      "tools": "الأدوات"
+      "tools": "الأدوات",
+      "admin_user": "المسؤول",
+      "administrator": "مدير النظام"
     },
     "dashboard": {
       "title": "لوحة التحكم",

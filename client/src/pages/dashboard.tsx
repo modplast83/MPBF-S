@@ -5,8 +5,13 @@ import { ProductionChart } from "@/components/dashboard/production-chart";
 import { RecentOrders } from "@/components/dashboard/recent-orders";
 import { ActiveOrdersTable } from "@/components/dashboard/active-orders-table";
 import { Order, Roll, RawMaterial } from "@shared/schema";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+  
   // Fetch data for dashboard statistics
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: [API_ENDPOINTS.ORDERS],
@@ -27,38 +32,38 @@ export default function Dashboard() {
   
   const activeRolls = rolls?.filter(roll => roll.status !== "completed").length || 0;
   
-  const totalRawMaterial = rawMaterials?.reduce((sum, material) => sum + material.quantity, 0) || 0;
+  const totalRawMaterial = rawMaterials?.reduce((sum, material) => sum + (material.quantity || 0), 0) || 0;
   
   // Production efficiency (sample calculation)
   const productionEfficiency = 78; // This would be calculated from real data in a full implementation
 
   // Trend calculations
   const orderTrend = {
-    value: "12% from last month",
+    value: t("dashboard.trend_from_last_month", { percent: "12%" }),
     direction: totalOrders > 350 ? "up" : "down",
   } as const;
 
   const efficiencyTrend = {
-    value: "3% from last week",
+    value: t("dashboard.trend_from_last_week", { percent: "3%" }),
     direction: productionEfficiency < 80 ? "down" : "up",
   } as const;
 
   const rollsTrend = {
-    value: "5 more than yesterday",
+    value: t("dashboard.trend_more_than_yesterday", { count: 5 }),
     direction: "up",
   } as const;
 
   const materialTrend = {
-    value: "Low inventory alert",
+    value: t("dashboard.low_inventory_alert"),
     direction: "down",
   } as const;
 
   return (
     <div className="space-y-8">
       {/* Dashboard Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${isRTL ? 'rtl' : ''}`}>
         <StatCard
-          title="Total Orders"
+          title={t("dashboard.total_orders")}
           value={totalOrders}
           icon="receipt_long"
           trend={orderTrend}
@@ -67,7 +72,7 @@ export default function Dashboard() {
         />
 
         <StatCard
-          title="Production Efficiency"
+          title={t("dashboard.production_efficiency")}
           value={`${productionEfficiency}%`}
           icon="trending_up"
           trend={efficiencyTrend}
@@ -76,7 +81,7 @@ export default function Dashboard() {
         />
 
         <StatCard
-          title="Active Roll Jobs"
+          title={t("dashboard.active_roll_jobs")}
           value={activeRolls}
           icon="linear_scale"
           trend={rollsTrend}
@@ -85,7 +90,7 @@ export default function Dashboard() {
         />
 
         <StatCard
-          title="Raw Material Stock"
+          title={t("dashboard.raw_material_stock")}
           value={`${(totalRawMaterial / 1000).toFixed(1)}T`}
           icon="inventory"
           trend={materialTrend}
@@ -94,16 +99,18 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isRTL ? 'rtl' : ''}`}>
         {/* Production Chart */}
-        <ProductionChart className="bg-white rounded-lg shadow col-span-2" />
+        <ProductionChart className={`bg-white rounded-lg shadow col-span-2 ${isRTL ? 'rtl' : ''}`} />
 
         {/* Recent Orders */}
         <RecentOrders />
       </div>
 
       {/* Active Orders Table */}
-      <ActiveOrdersTable />
+      <div className={isRTL ? 'rtl' : ''}>
+        <ActiveOrdersTable />
+      </div>
     </div>
   );
 }

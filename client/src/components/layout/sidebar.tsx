@@ -121,7 +121,7 @@ export default function Sidebar() {
                     )}
                   >
                     <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'}`}>{item.icon}</span>
-                    {expanded && <span>{t(`sidebar.${item.title.toLowerCase()}`)}</span>}
+                    {expanded && <span>{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
                   </Link>
                 )}
               </div>
@@ -141,8 +141,8 @@ export default function Sidebar() {
           </div>
           {expanded && (
             <div className={isRTL ? 'mr-3' : 'ml-3'}>
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-gray-400">Administrator</p>
+              <p className="text-sm font-medium">{t("sidebar.admin_user")}</p>
+              <p className="text-xs text-gray-400">{t("sidebar.administrator")}</p>
             </div>
           )}
         </div>
