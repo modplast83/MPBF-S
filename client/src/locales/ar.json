@@ -86,7 +86,14 @@
       "sms": "الرسائل النصية",
       "tools": "الأدوات",
       "admin_user": "المسؤول",
-      "administrator": "مدير النظام"
+      "administrator": "مدير النظام",
+      "administration": "الإدارة",
+      "reports": "التقارير",
+      "bag_weight_calculator": "حاسبة وزن الأكياس",
+      "ink_consumption": "استهلاك الحبر",
+      "utility_tools": "أدوات المساعدة",
+      "system_settings": "إعدادات النظام",
+      "sms_management": "إدارة الرسائل النصية"
     },
     "dashboard": {
       "title": "لوحة التحكم",

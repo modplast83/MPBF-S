@@ -86,7 +86,14 @@
       "sms": "SMS",
       "tools": "Tools",
       "admin_user": "Admin User",
-      "administrator": "Administrator"
+      "administrator": "Administrator",
+      "administration": "Administration",
+      "reports": "Reports",
+      "bag_weight_calculator": "Bag Weight Calculator",
+      "ink_consumption": "Ink Consumption",
+      "utility_tools": "Utility Tools",
+      "system_settings": "System Settings",
+      "sms_management": "SMS Management"
     },
     "dashboard": {
       "title": "Dashboard",
