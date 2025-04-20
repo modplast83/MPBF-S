@@ -91,7 +91,15 @@
       "pending_orders": "الطلبات المعلقة",
       "completed_orders": "الطلبات المكتملة",
       "total_rolls": "إجمالي اللفات",
-      "welcome": "مرحبًا بك في مصنع الأكياس البلاستيكية الحديثة"
+      "welcome": "مرحبًا بك في مصنع الأكياس البلاستيكية الحديثة",
+      "total_orders": "إجمالي الطلبات",
+      "production_efficiency": "كفاءة الإنتاج",
+      "active_roll_jobs": "مهام اللفات النشطة",
+      "raw_material_stock": "مخزون المواد الخام",
+      "trend_from_last_month": "{{percent}} من الشهر الماضي",
+      "trend_from_last_week": "{{percent}} من الأسبوع الماضي",
+      "trend_more_than_yesterday": "5 أكثر من الأمس",
+      "low_inventory_alert": "تنبيه: مخزون منخفض"
     },
     "setup": {
       "title": "إعداد النظام",

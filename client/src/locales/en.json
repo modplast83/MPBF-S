@@ -91,7 +91,15 @@
       "pending_orders": "Pending Orders",
       "completed_orders": "Completed Orders",
       "total_rolls": "Total Rolls",
-      "welcome": "Welcome to Modern Plastic Bag Factory"
+      "welcome": "Welcome to Modern Plastic Bag Factory",
+      "total_orders": "Total Orders",
+      "production_efficiency": "Production Efficiency",
+      "active_roll_jobs": "Active Roll Jobs",
+      "raw_material_stock": "Raw Material Stock",
+      "trend_from_last_month": "{{percent}} from last month",
+      "trend_from_last_week": "{{percent}} from last week",
+      "trend_more_than_yesterday": "5 more than yesterday",
+      "low_inventory_alert": "Low inventory alert"
     },
     "setup": {
       "title": "System Setup",
