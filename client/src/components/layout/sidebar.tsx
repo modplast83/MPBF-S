@@ -87,7 +87,7 @@ export default function Sidebar() {
                       <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'}`}>{item.icon}</span>
                       {expanded && (
                         <>
-                          <span className="flex-1">{t(`sidebar.${item.title.toLowerCase()}`)}</span>
+                          <span className="flex-1">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
                           <span className={`material-icons text-sm ${isRTL ? 'flip-in-rtl' : ''}`}>
                             {openMenus[item.title] ? "expand_less" : "expand_more"}
                           </span>
