@@ -1,0 +1,193 @@
+{
+  "translation": {
+    "app": {
+      "title": "MPBF System",
+      "full_title": "Modern Plastic Bag Factory"
+    },
+    "common": {
+      "loading": "Loading...",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "create": "Create",
+      "search": "Search",
+      "filter": "Filter",
+      "sort": "Sort",
+      "yes": "Yes",
+      "no": "No",
+      "actions": "Actions",
+      "status": "Status",
+      "submit": "Submit",
+      "logout": "Log Out",
+      "login": "Log In",
+      "logout_confirm": "Are you sure you want to log out?"
+    },
+    "auth": {
+      "username": "Username",
+      "password": "Password",
+      "login": "Login",
+      "remember_me": "Remember Me",
+      "forgot_password": "Forgot Password?",
+      "invalid_credentials": "Invalid username or password"
+    },
+    "sidebar": {
+      "main": "Main",
+      "dashboard": "Dashboard",
+      "setup": "Setup",
+      "categories": "Categories",
+      "products": "Products",
+      "customers": "Customers",
+      "items": "Items",
+      "sections": "Sections",
+      "machines": "Machines",
+      "users": "Users",
+      "production": "Production",
+      "orders": "Orders",
+      "workflow": "Workflow",
+      "warehouse": "Warehouse",
+      "raw_materials": "Raw Materials",
+      "final_products": "Final Products",
+      "quality": "Quality",
+      "check_types": "Check Types",
+      "quality_checks": "Quality Checks",
+      "corrective_actions": "Corrective Actions",
+      "system": "System",
+      "database": "Database",
+      "permissions": "Permissions",
+      "import_export": "Import & Export",
+      "sms": "SMS",
+      "tools": "Tools"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "orders_count": "Orders",
+      "pending_orders": "Pending Orders",
+      "completed_orders": "Completed Orders",
+      "total_rolls": "Total Rolls",
+      "welcome": "Welcome to Modern Plastic Bag Factory"
+    },
+    "setup": {
+      "title": "System Setup",
+      "categories": {
+        "title": "Categories",
+        "description": "Manage product categories for organization",
+        "id": "ID",
+        "name": "Name",
+        "code": "Code"
+      },
+      "products": {
+        "title": "Products",
+        "description": "Manage customer-specific product specifications"
+      },
+      "customers": {
+        "title": "Customers",
+        "description": "Manage customer information and relationships",
+        "id": "ID",
+        "code": "Code",
+        "name": "Name",
+        "name_ar": "Name (Arabic)",
+        "user_id": "Sales Representative",
+        "plate_drawer_code": "Plate Drawer Code"
+      },
+      "items": {
+        "title": "Items",
+        "description": "Manage product items and details"
+      },
+      "sections": {
+        "title": "Sections",
+        "description": "Manage factory production sections"
+      },
+      "machines": {
+        "title": "Machines",
+        "description": "Manage production machinery and equipment"
+      },
+      "users": {
+        "title": "Users",
+        "description": "Manage system users and permissions"
+      }
+    },
+    "production": {
+      "title": "Production",
+      "orders": "Orders",
+      "workflow": "Workflow"
+    },
+    "warehouse": {
+      "title": "Warehouse",
+      "raw_materials": "Raw Materials",
+      "final_products": "Final Products" 
+    },
+    "quality": {
+      "title": "Quality Management",
+      "check_types": "Check Types",
+      "quality_checks": "Quality Checks",
+      "corrective_actions": "Corrective Actions"
+    },
+    "system": {
+      "title": "System Management",
+      "database": "Database",
+      "permissions": "Permissions",
+      "import_export": "Import & Export",
+      "sms": "SMS"
+    },
+    "tools": {
+      "title": "Tools",
+      "bag_weight": "Bag Weight Calculator",
+      "ink_consumption": "Ink Consumption Calculator",
+      "utilities": "Utility Tools"
+    },
+    "orders": {
+      "title": "Orders",
+      "new_order": "New Order",
+      "order_id": "Order ID",
+      "customer": "Customer",
+      "date": "Date",
+      "status": "Status",
+      "items_count": "Items Count",
+      "total_quantity": "Total Quantity",
+      "note": "Note",
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "job_orders": {
+      "title": "Job Orders",
+      "new_job_order": "New Job Order",
+      "job_order_id": "Job Order ID",
+      "order_id": "Order ID",
+      "customer_product": "Product",
+      "quantity": "Quantity (Kg)",
+      "status": "Status",
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "extrusion_completed": "Extrusion Completed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "rolls": {
+      "title": "Rolls",
+      "new_roll": "New Roll",
+      "roll_id": "Roll ID",
+      "job_order_id": "Job Order ID",
+      "serial_number": "Serial Number",
+      "extruding_qty": "Extruding Qty",
+      "printing_qty": "Printing Qty",
+      "cutting_qty": "Cutting Qty",
+      "current_stage": "Current Stage",
+      "status": "Status",
+      "waste_qty": "Waste Qty",
+      "waste_percentage": "Waste %",
+      "extrusion": "Extrusion",
+      "printing": "Printing",
+      "cutting": "Cutting",
+      "completed": "Completed",
+      "pending": "Pending",
+      "processing": "Processing"
+    },
+    "language": {
+      "en": "English",
+      "ar": "العربية"
+    }
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "translation": {
+    "app": {
+      "title": "نظام مصنع الأكياس البلاستيكية الحديثة",
+      "full_title": "مصنع الأكياس البلاستيكية الحديثة"
+    },
+    "common": {
+      "loading": "جاري التحميل...",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete": "حذف",
+      "edit": "تعديل",
+      "create": "إنشاء",
+      "search": "بحث",
+      "filter": "تصفية",
+      "sort": "ترتيب",
+      "yes": "نعم",
+      "no": "لا",
+      "actions": "إجراءات",
+      "status": "الحالة",
+      "submit": "إرسال",
+      "logout": "تسجيل الخروج",
+      "login": "تسجيل الدخول",
+      "logout_confirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟"
+    },
+    "auth": {
+      "username": "اسم المستخدم",
+      "password": "كلمة المرور",
+      "login": "تسجيل الدخول",
+      "remember_me": "تذكرني",
+      "forgot_password": "نسيت كلمة المرور؟",
+      "invalid_credentials": "اسم المستخدم أو كلمة المرور غير صحيحة"
+    },
+    "sidebar": {
+      "main": "الرئيسية",
+      "dashboard": "لوحة التحكم",
+      "setup": "الإعدادات",
+      "categories": "الفئات",
+      "products": "المنتجات",
+      "customers": "العملاء",
+      "items": "العناصر",
+      "sections": "الأقسام",
+      "machines": "الآلات",
+      "users": "المستخدمين",
+      "production": "الإنتاج",
+      "orders": "الطلبات",
+      "workflow": "سير العمل",
+      "warehouse": "المستودع",
+      "raw_materials": "المواد الخام",
+      "final_products": "المنتجات النهائية",
+      "quality": "الجودة",
+      "check_types": "أنواع الفحص",
+      "quality_checks": "فحوصات الجودة",
+      "corrective_actions": "الإجراءات التصحيحية",
+      "system": "النظام",
+      "database": "قاعدة البيانات",
+      "permissions": "الصلاحيات",
+      "import_export": "استيراد وتصدير",
+      "sms": "الرسائل النصية",
+      "tools": "الأدوات"
+    },
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "orders_count": "الطلبات",
+      "pending_orders": "الطلبات المعلقة",
+      "completed_orders": "الطلبات المكتملة",
+      "total_rolls": "إجمالي اللفات",
+      "welcome": "مرحبًا بك في مصنع الأكياس البلاستيكية الحديثة"
+    },
+    "setup": {
+      "title": "إعداد النظام",
+      "categories": {
+        "title": "الفئات",
+        "description": "إدارة فئات المنتجات للتنظيم",
+        "id": "المعرف",
+        "name": "الاسم",
+        "code": "الرمز"
+      },
+      "products": {
+        "title": "المنتجات",
+        "description": "إدارة مواصفات المنتجات الخاصة بالعملاء"
+      },
+      "customers": {
+        "title": "العملاء",
+        "description": "إدارة معلومات وعلاقات العملاء",
+        "id": "المعرف",
+        "code": "الرمز",
+        "name": "الاسم",
+        "name_ar": "الاسم (بالعربية)",
+        "user_id": "مندوب المبيعات",
+        "plate_drawer_code": "رمز درج الطباعة"
+      },
+      "items": {
+        "title": "العناصر",
+        "description": "إدارة عناصر وتفاصيل المنتجات"
+      },
+      "sections": {
+        "title": "الأقسام",
+        "description": "إدارة أقسام إنتاج المصنع"
+      },
+      "machines": {
+        "title": "الآلات",
+        "description": "إدارة آلات ومعدات الإنتاج"
+      },
+      "users": {
+        "title": "المستخدمين",
+        "description": "إدارة مستخدمي النظام والصلاحيات"
+      }
+    },
+    "production": {
+      "title": "الإنتاج",
+      "orders": "الطلبات",
+      "workflow": "سير العمل"
+    },
+    "warehouse": {
+      "title": "المستودع",
+      "raw_materials": "المواد الخام",
+      "final_products": "المنتجات النهائية" 
+    },
+    "quality": {
+      "title": "إدارة الجودة",
+      "check_types": "أنواع الفحص",
+      "quality_checks": "فحوصات الجودة",
+      "corrective_actions": "الإجراءات التصحيحية"
+    },
+    "system": {
+      "title": "إدارة النظام",
+      "database": "قاعدة البيانات",
+      "permissions": "الصلاحيات",
+      "import_export": "استيراد وتصدير",
+      "sms": "الرسائل النصية"
+    },
+    "tools": {
+      "title": "الأدوات",
+      "bag_weight": "حاسبة وزن الأكياس",
+      "ink_consumption": "حاسبة استهلاك الحبر",
+      "utilities": "أدوات المساعدة"
+    },
+    "orders": {
+      "title": "الطلبات",
+      "new_order": "طلب جديد",
+      "order_id": "رقم الطلب",
+      "customer": "العميل",
+      "date": "التاريخ",
+      "status": "الحالة",
+      "items_count": "عدد العناصر",
+      "total_quantity": "إجمالي الكمية",
+      "note": "ملاحظة",
+      "pending": "معلق",
+      "processing": "قيد المعالجة",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "job_orders": {
+      "title": "أوامر العمل",
+      "new_job_order": "أمر عمل جديد",
+      "job_order_id": "رقم أمر العمل",
+      "order_id": "رقم الطلب",
+      "customer_product": "المنتج",
+      "quantity": "الكمية (كجم)",
+      "status": "الحالة",
+      "pending": "معلق",
+      "in_progress": "قيد التنفيذ",
+      "extrusion_completed": "تم البثق",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "rolls": {
+      "title": "اللفات",
+      "new_roll": "لفة جديدة",
+      "roll_id": "معرف اللفة",
+      "job_order_id": "رقم أمر العمل",
+      "serial_number": "الرقم التسلسلي",
+      "extruding_qty": "كمية البثق",
+      "printing_qty": "كمية الطباعة",
+      "cutting_qty": "كمية القص",
+      "current_stage": "المرحلة الحالية",
+      "status": "الحالة",
+      "waste_qty": "كمية الهدر",
+      "waste_percentage": "نسبة الهدر %",
+      "extrusion": "البثق",
+      "printing": "الطباعة",
+      "cutting": "القص",
+      "completed": "مكتمل",
+      "pending": "معلق",
+      "processing": "قيد المعالجة"
+    },
+    "language": {
+      "en": "English",
+      "ar": "العربية"
+    }
+  }
+}
