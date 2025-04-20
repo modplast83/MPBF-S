@@ -3,6 +3,7 @@ import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/hooks/use-language";
 import { useLocation } from "wouter";
 
 interface MainLayoutProps {
@@ -12,6 +13,7 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const { expanded } = useSidebar();
   const { user } = useAuth();
+  const { isRTL } = useLanguage();
   const [location] = useLocation();
   
   const isAuthPage = location === "/auth";
@@ -26,7 +28,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
       {user && <Sidebar />}
       <div 
         className={`flex flex-col flex-1 transition-all duration-300 ${
-          user && expanded ? "ml-[250px]" : user ? "ml-[64px]" : "ml-0"
+          user && expanded 
+            ? isRTL ? "mr-[250px]" : "ml-[250px]" 
+            : user 
+              ? isRTL ? "mr-[64px]" : "ml-[64px]" 
+              : "mx-0"
         }`}
       >
         {user && <Header />}

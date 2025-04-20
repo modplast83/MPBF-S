@@ -21,7 +21,9 @@
       "submit": "Submit",
       "logout": "Log Out",
       "login": "Log In",
-      "logout_confirm": "Are you sure you want to log out?"
+      "logout_confirm": "Are you sure you want to log out?",
+      "profile": "Profile",
+      "settings": "Settings"
     },
     "auth": {
       "username": "Username",

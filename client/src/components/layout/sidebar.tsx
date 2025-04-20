@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
 import { useSidebar } from "@/hooks/use-sidebar";
+import { useLanguage } from "@/hooks/use-language";
+import { useTranslation } from "react-i18next";
 import { Separator } from "@/components/ui/separator";
 import { 
   Collapsible,
@@ -13,6 +15,8 @@ import { cn } from "@/lib/utils";
 export default function Sidebar() {
   const [location] = useLocation();
   const { expanded, toggle } = useSidebar();
+  const { isRTL } = useLanguage();
+  const { t } = useTranslation();
 
   // For storing open state of collapsible menu items
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
@@ -34,24 +38,25 @@ export default function Sidebar() {
   return (
     <aside 
       className={cn(
-        "bg-black text-white h-screen fixed left-0 top-0 z-50 flex flex-col transition-all duration-300",
-        expanded ? "w-[250px]" : "w-[64px]"
+        "bg-black text-white h-screen fixed top-0 z-50 flex flex-col transition-all duration-300",
+        expanded ? "w-[250px]" : "w-[64px]",
+        isRTL ? "right-0" : "left-0"
       )}
     >
-      <div className="p-4 flex justify-between items-center border-b border-gray-800">
-        <div className="flex items-center space-x-3">
+      <div className={`p-4 flex justify-between items-center border-b border-gray-800 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3`}>
           <img 
             src="/assets/company-logo.png" 
             alt="Modern Plastic Bag Factory" 
             className="h-10 w-10 object-contain rounded-full"
           />
-          {expanded && <h1 className="text-lg font-semibold whitespace-nowrap">MPBF System</h1>}
+          {expanded && <h1 className="text-lg font-semibold whitespace-nowrap">{t("app.title")}</h1>}
         </div>
         <button 
           onClick={toggle} 
           className="text-white focus:outline-none"
         >
-          <span className="material-icons">
+          <span className={`material-icons ${isRTL ? 'flip-in-rtl' : ''}`}>
             {expanded ? "menu_open" : "menu"}
           </span>
         </button>
@@ -62,7 +67,7 @@ export default function Sidebar() {
           <div key={sectionIndex}>
             {expanded && (
               <div className="px-2 py-2 text-gray-400 text-xs font-semibold uppercase">
-                {section.title}
+                {t(`sidebar.${section.title.toLowerCase()}`)}
               </div>
             )}
             
@@ -75,15 +80,15 @@ export default function Sidebar() {
                   >
                     <CollapsibleTrigger
                       className={cn(
-                        "flex items-center px-2 py-3 w-full hover:bg-gray-900 text-white",
+                        `flex items-center px-2 py-3 w-full hover:bg-gray-900 text-white ${isRTL ? 'flex-row-reverse text-right' : ''}`,
                         isActive(item.path) && "bg-gray-800"
                       )}
                     >
-                      <span className="material-icons mr-2">{item.icon}</span>
+                      <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'}`}>{item.icon}</span>
                       {expanded && (
                         <>
-                          <span className="flex-1">{item.title}</span>
-                          <span className="material-icons text-sm">
+                          <span className="flex-1">{t(`sidebar.${item.title.toLowerCase()}`)}</span>
+                          <span className={`material-icons text-sm ${isRTL ? 'flip-in-rtl' : ''}`}>
                             {openMenus[item.title] ? "expand_less" : "expand_more"}
                           </span>
                         </>
@@ -97,11 +102,11 @@ export default function Sidebar() {
                             key={subIndex} 
                             href={subItem.path}
                             className={cn(
-                              "flex items-center pl-8 py-2 hover:bg-gray-900 text-white",
+                              `flex items-center py-2 hover:bg-gray-900 text-white ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
                               isActive(subItem.path) && "bg-gray-800"
                             )}
                           >
-                            {subItem.title}
+                            {t(`sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`)}
                           </Link>
                         ))}
                       </CollapsibleContent>
@@ -111,12 +116,12 @@ export default function Sidebar() {
                   <Link 
                     href={item.path}
                     className={cn(
-                      "flex items-center px-2 py-3 hover:bg-gray-900 text-white",
+                      `flex items-center px-2 py-3 hover:bg-gray-900 text-white ${isRTL ? 'flex-row-reverse text-right' : ''}`,
                       isActive(item.path) && "bg-gray-800"
                     )}
                   >
-                    <span className="material-icons mr-2">{item.icon}</span>
-                    {expanded && <span>{item.title}</span>}
+                    <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'}`}>{item.icon}</span>
+                    {expanded && <span>{t(`sidebar.${item.title.toLowerCase()}`)}</span>}
                   </Link>
                 )}
               </div>
@@ -130,12 +135,12 @@ export default function Sidebar() {
       </nav>
       
       <div className="mt-auto w-full border-t border-gray-800 p-4">
-        <div className="flex items-center">
+        <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold">
             A
           </div>
           {expanded && (
-            <div className="ml-3">
+            <div className={isRTL ? 'mr-3' : 'ml-3'}>
               <p className="text-sm font-medium">Admin User</p>
               <p className="text-xs text-gray-400">Administrator</p>
             </div>
