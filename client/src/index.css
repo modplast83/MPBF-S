@@ -17,31 +17,57 @@
     text-align: right;
   }
   
+  /* RTL for HTML element */
+  html[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+  }
+  
   /* Flip icons and other direction-dependent elements in RTL mode */
-  body.rtl .material-icons.flip-in-rtl {
+  body.rtl .material-icons.flip-in-rtl,
+  html[dir="rtl"] .material-icons.flip-in-rtl {
     transform: scaleX(-1);
   }
   
   /* Adjust padding/margin for RTL */
-  body.rtl .rtl-swap-padding {
+  body.rtl .rtl-swap-padding,
+  html[dir="rtl"] .rtl-swap-padding {
     @apply pl-0 pr-4;
   }
   
-  body:not(.rtl) .rtl-swap-padding {
+  body:not(.rtl) .rtl-swap-padding,
+  html:not([dir="rtl"]) .rtl-swap-padding {
     @apply pr-0 pl-4;
   }
   
   /* Adjust margins for RTL */
-  body.rtl .rtl-swap-margin {
+  body.rtl .rtl-swap-margin,
+  html[dir="rtl"] .rtl-swap-margin {
     @apply ml-0 mr-4;
   }
   
-  body:not(.rtl) .rtl-swap-margin {
+  body:not(.rtl) .rtl-swap-margin,
+  html:not([dir="rtl"]) .rtl-swap-margin {
     @apply mr-0 ml-4;
   }
   
   /* RTL utility classes */
   .rtl\:flex-row-reverse {
     @apply flex-row-reverse;
+  }
+  
+  /* General RTL/LTR classes */
+  .rtl {
+    direction: rtl;
+    text-align: right;
+  }
+  
+  .ltr {
+    direction: ltr;
+    text-align: left;
+  }
+  
+  .flip-in-rtl {
+    transform: scaleX(-1);
   }
 }
