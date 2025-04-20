@@ -24,7 +24,9 @@
       "logout_confirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
       "profile": "الملف الشخصي",
       "settings": "الإعدادات",
-      "unknown_customer": "عميل غير معروف"
+      "unknown_customer": "عميل غير معروف",
+      "unknown": "غير معروف",
+      "not_available": "غير متوفر"
     },
     "auth": {
       "username": "اسم المستخدم",
@@ -188,7 +190,12 @@
       "completed": "مكتمل",
       "cancelled": "ملغى",
       "no_recent_orders": "لا توجد طلبات حديثة",
-      "see_all_orders": "عرض جميع الطلبات"
+      "see_all_orders": "عرض جميع الطلبات",
+      "size": "المقاس",
+      "quantity": "الكمية",
+      "stage": "المرحلة",
+      "active_production_orders": "طلبات الإنتاج النشطة",
+      "product": "المنتج"
     },
     "job_orders": {
       "title": "أوامر العمل",

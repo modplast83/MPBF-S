@@ -17,18 +17,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 
 interface DataTableProps<T> {
   data: T[];
   columns: {
     header: string;
-    accessorKey: keyof T | ((row: T) => React.ReactNode);
+    accessorKey?: keyof T | ((row: T) => React.ReactNode);
     cell?: (row: T) => React.ReactNode;
+    meta?: {
+      className?: string;
+    };
   }[];
   searchable?: boolean;
   pagination?: boolean;
   actions?: React.ReactNode;
   onRowClick?: (row: T) => void;
+  dir?: 'ltr' | 'rtl';
 }
 
 export function DataTable<T>({

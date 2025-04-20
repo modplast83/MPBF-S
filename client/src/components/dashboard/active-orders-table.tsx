@@ -10,6 +10,9 @@ import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 
 export function ActiveOrdersTable() {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+  
   // Fetch all required data
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: [API_ENDPOINTS.ORDERS],
@@ -33,7 +36,7 @@ export function ActiveOrdersTable() {
   );
   
   const getCustomerName = (customerId: string) => {
-    return customers?.find(c => c.id === customerId)?.name || "Unknown";
+    return customers?.find(c => c.id === customerId)?.name || t("common.unknown_customer");
   };
   
   const getOrderProducts = (orderId: number) => {
@@ -42,10 +45,10 @@ export function ActiveOrdersTable() {
     return orderJobOrders.map(jo => {
       const product = customerProducts?.find(cp => cp.id === jo.customerProductId);
       return {
-        productId: product?.itemId || "Unknown",
-        size: product?.sizeCaption || "Unknown",
+        productId: product?.itemId || t("common.unknown"),
+        size: product?.sizeCaption || t("common.unknown"),
         quantity: jo.quantity,
-        stage: "Extrusion", // Default to first stage
+        stage: t("rolls.extrusion"), // Default to first stage
         progress: 35, // Sample value
       };
     });
@@ -53,62 +56,83 @@ export function ActiveOrdersTable() {
   
   const columns = [
     {
-      header: "Order ID",
-      accessorKey: "id",
+      header: t("orders.order_id"),
+      cell: (row: any) => <span>{row.id}</span>,
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
     },
     {
-      header: "Customer",
-      accessorKey: (row: any) => getCustomerName(row.customerId),
+      header: t("orders.customer"),
+      cell: (row: any) => <span>{getCustomerName(row.customerId)}</span>,
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
     },
     {
-      header: "Product",
-      accessorKey: (row: any) => {
-        const products = getOrderProducts(row.id);
-        return products.length > 0 ? products[0].productId : "N/A";
-      },
-    },
-    {
-      header: "Size",
-      accessorKey: (row: any) => {
-        const products = getOrderProducts(row.id);
-        return products.length > 0 ? products[0].size : "N/A";
-      },
-    },
-    {
-      header: "Quantity",
-      accessorKey: (row: any) => {
-        const products = getOrderProducts(row.id);
-        return products.length > 0 ? `${products[0].quantity} Kg` : "N/A";
-      },
-    },
-    {
-      header: "Stage",
+      header: t("job_orders.customer_product"),
       cell: (row: any) => {
         const products = getOrderProducts(row.id);
-        const stage = products.length > 0 ? products[0].stage : "N/A";
+        return <span>{products.length > 0 ? products[0].productId : t("common.not_available")}</span>;
+      },
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("orders.size"),
+      cell: (row: any) => {
+        const products = getOrderProducts(row.id);
+        return <span>{products.length > 0 ? products[0].size : t("common.not_available")}</span>;
+      },
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("orders.quantity"),
+      cell: (row: any) => {
+        const products = getOrderProducts(row.id);
+        return <span>{products.length > 0 ? `${products[0].quantity} Kg` : t("common.not_available")}</span>;
+      },
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("orders.stage"),
+      cell: (row: any) => {
+        const products = getOrderProducts(row.id);
+        const stage = products.length > 0 ? products[0].stage : t("common.not_available");
         const progress = products.length > 0 ? products[0].progress : 0;
         
         return (
-          <div className="flex items-center">
+          <div className={`flex items-center ${isRTL ? "flex-row-reverse" : ""}`}>
             <div className="w-32 bg-secondary-200 rounded-full h-2.5">
               <div 
                 className="bg-primary-500 h-2.5 rounded-full" 
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
-            <span className="ml-2 text-xs">{stage}</span>
+            <span className={`${isRTL ? "mr-2" : "ml-2"} text-xs`}>{stage}</span>
           </div>
         );
       },
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
     },
     {
-      header: "Status",
+      header: t("orders.status"),
       cell: (row: any) => <StatusBadge status={row.status} />,
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
     },
     {
-      header: "Actions",
+      header: t("common.actions"),
       cell: (row: any) => (
-        <div className="flex space-x-2">
+        <div className={`flex ${isRTL ? "space-x-reverse space-x-2 flex-row-reverse" : "space-x-2"}`}>
           <Link href={`/orders/${row.id}`}>
             <Button variant="ghost" size="icon" className="text-primary-500 hover:text-primary-700">
               <span className="material-icons text-sm">visibility</span>
@@ -122,21 +146,24 @@ export function ActiveOrdersTable() {
           </Button>
         </div>
       ),
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
     },
   ];
   
   const actions = (
     <Link href="/orders/new">
       <Button className="bg-primary-500 text-white hover:bg-primary-600">
-        <span className="material-icons text-sm mr-1">add</span>
-        New Order
+        <span className={`material-icons text-sm ${isRTL ? 'ml-1' : 'mr-1'}`}>add</span>
+        {t("orders.new_order")}
       </Button>
     </Link>
   );
   
   if (ordersLoading) {
     return (
-      <div className="bg-white rounded-lg shadow animate-pulse">
+      <div className={`bg-white rounded-lg shadow animate-pulse ${isRTL ? 'rtl' : ''}`}>
         <div className="p-6 h-12 bg-secondary-50"></div>
         <div className="p-6 space-y-4">
           <div className="h-64 bg-secondary-50 rounded"></div>
@@ -146,16 +173,19 @@ export function ActiveOrdersTable() {
   }
   
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b border-secondary-100 flex justify-between items-center">
-        <h3 className="font-semibold text-lg">Active Production Orders</h3>
+    <div className={`bg-white rounded-lg shadow ${isRTL ? 'rtl' : ''}`}>
+      <div className={`p-6 border-b border-secondary-100 flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <h3 className={`font-semibold text-lg ${isRTL ? 'text-right' : ''}`}>
+          {t("orders.active_production_orders")}
+        </h3>
         {actions}
       </div>
       <div className="p-6">
         <DataTable 
           data={activeOrders || []}
-          columns={columns}
+          columns={columns as any}
           actions={actions}
+          dir={isRTL ? 'rtl' : 'ltr'}
           onRowClick={(row) => window.location.href = `/orders/${row.id}`}
         />
       </div>

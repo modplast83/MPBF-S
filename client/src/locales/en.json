@@ -24,7 +24,9 @@
       "logout_confirm": "Are you sure you want to log out?",
       "profile": "Profile",
       "settings": "Settings",
-      "unknown_customer": "Unknown Customer"
+      "unknown_customer": "Unknown Customer",
+      "unknown": "Unknown",
+      "not_available": "N/A"
     },
     "auth": {
       "username": "Username",
@@ -188,7 +190,12 @@
       "completed": "Completed",
       "cancelled": "Cancelled",
       "no_recent_orders": "No recent orders found",
-      "see_all_orders": "See all orders"
+      "see_all_orders": "See all orders",
+      "size": "Size",
+      "quantity": "Quantity",
+      "stage": "Stage",
+      "active_production_orders": "Active Production Orders",
+      "product": "Product"
     },
     "job_orders": {
       "title": "Job Orders",
