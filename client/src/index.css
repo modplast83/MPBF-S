@@ -70,4 +70,19 @@
   .flip-in-rtl {
     transform: scaleX(-1);
   }
+  
+  /* RTL bullet points */
+  .list-disc-rtl {
+    list-style-type: disc;
+    list-style-position: inside;
+    padding-right: 1.5em;
+    text-indent: -1.5em;
+  }
+  
+  .list-disc-rtl li::before {
+    content: "\2022"; /* Unicode bullet point */
+    display: inline-block;
+    width: 1em;
+    margin-left: 0.5em;
+  }
 }

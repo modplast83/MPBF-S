@@ -183,7 +183,7 @@ export default function VirtualTour() {
       </Card>
 
       <Tabs defaultValue="extrusion" value={currentArea} onValueChange={handleTabChange}>
-        <TabsList className="w-full grid grid-cols-4">
+        <TabsList className={cn("w-full grid grid-cols-4", isRTL ? "flex-row-reverse" : "")}>
           <TabsTrigger value="extrusion">{t("virtual_tour.extrusion", "Extrusion")}</TabsTrigger>
           <TabsTrigger value="printing">{t("virtual_tour.printing", "Printing")}</TabsTrigger>
           <TabsTrigger value="cutting">{t("virtual_tour.cutting", "Cutting")}</TabsTrigger>
@@ -235,19 +235,19 @@ export default function VirtualTour() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-4", isRTL ? "md:grid-flow-row-dense" : "")}>
+                <div className={isRTL ? "text-right" : ""}>
                   <h4 className="font-semibold mb-2">{t("virtual_tour.key_equipment", "Key Equipment:")}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className={cn("list-inside space-y-1 text-sm", isRTL ? "list-disc-rtl" : "list-disc")}>
                     <li>{t("virtual_tour.printing_equip1", "Flexographic printing machines")}</li>
                     <li>{t("virtual_tour.printing_equip2", "Color mixing stations")}</li>
                     <li>{t("virtual_tour.printing_equip3", "Printing cylinders")}</li>
                     <li>{t("virtual_tour.printing_equip4", "Drying systems")}</li>
                   </ul>
                 </div>
-                <div>
+                <div className={isRTL ? "text-right" : ""}>
                   <h4 className="font-semibold mb-2">{t("virtual_tour.key_processes", "Key Processes:")}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className={cn("list-inside space-y-1 text-sm", isRTL ? "list-disc-rtl" : "list-disc")}>
                     <li>{t("virtual_tour.printing_process1", "Ink preparation")}</li>
                     <li>{t("virtual_tour.printing_process2", "Color matching")}</li>
                     <li>{t("virtual_tour.printing_process3", "Multi-color printing")}</li>
@@ -275,19 +275,19 @@ export default function VirtualTour() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-4", isRTL ? "md:grid-flow-row-dense" : "")}>
+                <div className={isRTL ? "text-right" : ""}>
                   <h4 className="font-semibold mb-2">{t("virtual_tour.key_equipment", "Key Equipment:")}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className={cn("list-inside space-y-1 text-sm", isRTL ? "list-disc-rtl" : "list-disc")}>
                     <li>{t("virtual_tour.cutting_equip1", "Bag making machines")}</li>
                     <li>{t("virtual_tour.cutting_equip2", "Sealing equipment")}</li>
                     <li>{t("virtual_tour.cutting_equip3", "Perforation systems")}</li>
                     <li>{t("virtual_tour.cutting_equip4", "Conveyor belts")}</li>
                   </ul>
                 </div>
-                <div>
+                <div className={isRTL ? "text-right" : ""}>
                   <h4 className="font-semibold mb-2">{t("virtual_tour.key_processes", "Key Processes:")}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className={cn("list-inside space-y-1 text-sm", isRTL ? "list-disc-rtl" : "list-disc")}>
                     <li>{t("virtual_tour.cutting_process1", "Precise cutting")}</li>
                     <li>{t("virtual_tour.cutting_process2", "Heat sealing")}</li>
                     <li>{t("virtual_tour.cutting_process3", "Handle punching")}</li>
@@ -315,19 +315,19 @@ export default function VirtualTour() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-4", isRTL ? "md:grid-flow-row-dense" : "")}>
+                <div className={isRTL ? "text-right" : ""}>
                   <h4 className="font-semibold mb-2">{t("virtual_tour.key_equipment", "Key Equipment:")}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className={cn("list-inside space-y-1 text-sm", isRTL ? "list-disc-rtl" : "list-disc")}>
                     <li>{t("virtual_tour.warehouse_equip1", "Packaging machines")}</li>
                     <li>{t("virtual_tour.warehouse_equip2", "Forklifts")}</li>
                     <li>{t("virtual_tour.warehouse_equip3", "Storage racks")}</li>
                     <li>{t("virtual_tour.warehouse_equip4", "Loading bays")}</li>
                   </ul>
                 </div>
-                <div>
+                <div className={isRTL ? "text-right" : ""}>
                   <h4 className="font-semibold mb-2">{t("virtual_tour.key_processes", "Key Processes:")}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className={cn("list-inside space-y-1 text-sm", isRTL ? "list-disc-rtl" : "list-disc")}>
                     <li>{t("virtual_tour.warehouse_process1", "Inventory management")}</li>
                     <li>{t("virtual_tour.warehouse_process2", "Order fulfillment")}</li>
                     <li>{t("virtual_tour.warehouse_process3", "Shipping preparation")}</li>
