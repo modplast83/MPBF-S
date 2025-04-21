@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { RollDialog } from "@/components/workflow/roll-dialog";
-import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll } from "@shared/schema";
+import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 
 // Single roll query component
@@ -50,6 +50,11 @@ export function JobOrdersForExtrusion() {
   // Fetch all customers
   const { data: customers = [], isLoading: customersLoading } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
+  });
+  
+  // Fetch all items
+  const { data: items = [], isLoading: itemsLoading } = useQuery<Item[]>({
+    queryKey: [API_ENDPOINTS.ITEMS],
   });
 
   // Fetch rolls by stage
@@ -196,6 +201,17 @@ export function JobOrdersForExtrusion() {
     return "Unknown Customer";
   };
 
+  // Get item name for a job order
+  const getItemName = (jobOrder: JobOrder): string => {
+    if (!customerProducts.length || !items.length) return "Loading...";
+    
+    const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
+    if (!product) return "Unknown Product";
+    
+    const item = items.find(i => i.id === product.itemId);
+    return item ? item.name : "Unknown Item";
+  };
+  
   // Get product details for a job order
   const getProductDetails = (jobOrder: JobOrder): string => {
     if (!customerProducts.length) return "Loading...";
@@ -225,7 +241,7 @@ export function JobOrdersForExtrusion() {
     return true;
   });
 
-  if (jobOrdersLoading || customerProductsLoading || customersLoading) {
+  if (jobOrdersLoading || customerProductsLoading || customersLoading || itemsLoading) {
     return (
       <div className="space-y-4">
         <div className="animate-pulse bg-secondary-100 h-40 rounded-lg"></div>
@@ -316,12 +332,16 @@ export function JobOrdersForExtrusion() {
                     
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <p className="text-sm text-secondary-500">Product</p>
-                        <p className="font-medium">{getProductDetails(jobOrder)}</p>
+                        <p className="text-sm text-secondary-500">Item Name</p>
+                        <p className="font-medium">{getItemName(jobOrder)}</p>
                       </div>
                       <div>
                         <p className="text-sm text-secondary-500">Required Quantity</p>
                         <p className="font-medium">{jobOrder.quantity} kg</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-secondary-500">Product Details</p>
+                        <p className="font-medium">{getProductDetails(jobOrder)}</p>
                       </div>
                     </div>
                     
