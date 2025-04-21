@@ -254,10 +254,10 @@ export default function VirtualTour() {
               </div>
               <div className="mt-4 space-x-2">
                 <Button variant="outline" onClick={() => setCurrentArea("extrusion")}>
-                  {t("virtual_tour.prev_area", "Previous Area: Extrusion")}
+                  {t("virtual_tour.prev_area", { area: t("virtual_tour.extrusion", "Extrusion") })}
                 </Button>
                 <Button variant="outline" onClick={() => setCurrentArea("cutting")}>
-                  {t("virtual_tour.next_area", "Next Area: Cutting")}
+                  {t("virtual_tour.next_area", { area: t("virtual_tour.cutting", "Cutting") })}
                 </Button>
               </div>
             </CardContent>
@@ -294,10 +294,10 @@ export default function VirtualTour() {
               </div>
               <div className="mt-4 space-x-2">
                 <Button variant="outline" onClick={() => setCurrentArea("printing")}>
-                  {t("virtual_tour.prev_area", "Previous Area: Printing")}
+                  {t("virtual_tour.prev_area", { area: t("virtual_tour.printing", "Printing") })}
                 </Button>
                 <Button variant="outline" onClick={() => setCurrentArea("warehouse")}>
-                  {t("virtual_tour.next_area", "Next Area: Warehouse")}
+                  {t("virtual_tour.next_area", { area: t("virtual_tour.warehouse", "Warehouse") })}
                 </Button>
               </div>
             </CardContent>
@@ -334,7 +334,7 @@ export default function VirtualTour() {
               </div>
               <div className="mt-4">
                 <Button variant="outline" onClick={() => setCurrentArea("cutting")}>
-                  {t("virtual_tour.prev_area", "Previous Area: Cutting")}
+                  {t("virtual_tour.prev_area", { area: t("virtual_tour.cutting", "Cutting") })}
                 </Button>
               </div>
             </CardContent>
