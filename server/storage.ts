@@ -6,7 +6,8 @@ import {
   RawMaterial, InsertRawMaterial, FinalProduct, InsertFinalProduct,
   QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
   CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage,
-  MixMaterial, InsertMixMaterial, MixItem, InsertMixItem
+  MixMaterial, InsertMixMaterial, MixItem, InsertMixItem,
+  MixMachine, InsertMixMachine, mixMachines
 } from "@shared/schema";
 import session from "express-session";
 
@@ -187,6 +188,7 @@ export class MemStorage implements IStorage {
   private finalProducts: Map<number, FinalProduct>;
   private smsMessages: Map<number, SmsMessage>;
   private mixMaterials: Map<number, MixMaterial>;
+  private mixMachines: Map<number, MixMachine>;
   private mixItems: Map<number, MixItem>;
   
   private currentCustomerProductId: number;
@@ -196,6 +198,7 @@ export class MemStorage implements IStorage {
   private currentFinalProductId: number;
   private currentSmsMessageId: number;
   private currentMixMaterialId: number;
+  private currentMixMachineId: number;
   private currentMixItemId: number;
   
   sessionStore: session.Store;
@@ -222,6 +225,7 @@ export class MemStorage implements IStorage {
     this.finalProducts = new Map();
     this.smsMessages = new Map();
     this.mixMaterials = new Map();
+    this.mixMachines = new Map();
     this.mixItems = new Map();
     
     this.currentCustomerProductId = 1;
@@ -231,6 +235,7 @@ export class MemStorage implements IStorage {
     this.currentFinalProductId = 1;
     this.currentSmsMessageId = 1;
     this.currentMixMaterialId = 1;
+    this.currentMixMachineId = 1;
     this.currentMixItemId = 1;
     
     // Initialize with sample data

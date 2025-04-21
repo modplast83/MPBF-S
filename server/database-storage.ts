@@ -20,7 +20,8 @@ import {
   CorrectiveAction, InsertCorrectiveAction, correctiveActions,
   SmsMessage, InsertSmsMessage, smsMessages,
   MixMaterial, InsertMixMaterial, mixMaterials,
-  MixItem, InsertMixItem, mixItems
+  MixItem, InsertMixItem, mixItems,
+  MixMachine, InsertMixMachine, mixMachines
 } from '@shared/schema';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
@@ -650,7 +651,29 @@ export class DatabaseStorage implements IStorage {
       await this.deleteMixItem(item.id);
     }
     
+    // Delete any machine associations
+    await this.deleteMixMachinesByMixId(id);
+    
     const result = await db.delete(mixMaterials).where(eq(mixMaterials.id, id)).returning();
+    return result.length > 0;
+  }
+  
+  // Mix Machines
+  async getMixMachines(): Promise<MixMachine[]> {
+    return await db.select().from(mixMachines);
+  }
+  
+  async getMixMachinesByMixId(mixId: number): Promise<MixMachine[]> {
+    return await db.select().from(mixMachines).where(eq(mixMachines.mixId, mixId));
+  }
+  
+  async createMixMachine(mixMachine: InsertMixMachine): Promise<MixMachine> {
+    const result = await db.insert(mixMachines).values(mixMachine).returning();
+    return result[0];
+  }
+  
+  async deleteMixMachinesByMixId(mixId: number): Promise<boolean> {
+    const result = await db.delete(mixMachines).where(eq(mixMachines.mixId, mixId)).returning();
     return result.length > 0;
   }
 
