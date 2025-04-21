@@ -22,7 +22,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { insertCustomerSchema, Customer } from "@shared/schema";
+import { insertCustomerSchema, Customer, User } from "@shared/schema";
 
 interface CustomerFormProps {
   customer?: Customer;
@@ -34,7 +34,7 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
   const isEditing = !!customer;
   
   // Fetch users (for sales person)
-  const { data: users, isLoading: usersLoading } = useQuery({
+  const { data: users, isLoading: usersLoading } = useQuery<User[]>({
     queryKey: [API_ENDPOINTS.USERS],
   });
   
@@ -163,8 +163,8 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
               <FormItem>
                 <FormLabel>Sales Person</FormLabel>
                 <Select
-                  onValueChange={(value) => field.onChange(value || null)}
-                  value={field.value || ""}
+                  onValueChange={(value) => field.onChange(value === "null" ? null : value)}
+                  value={field.value || "null"}
                   disabled={usersLoading}
                 >
                   <FormControl>
@@ -173,7 +173,7 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="null">None</SelectItem>
                     {users?.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name}
