@@ -5,121 +5,124 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Pannellum } from "react-pannellum";
+import { useLanguage } from "@/hooks/use-language";
+import { cn } from "@/lib/utils";
 
 export default function VirtualTour() {
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const [currentArea, setCurrentArea] = useState<string>("extrusion");
 
   // Define panorama scenes for different areas of the factory
   const scenes = {
     extrusion: {
-      title: "Extrusion Area",
-      description: "The extrusion department where plastic film is made from raw materials",
+      title: t("virtual_tour.extrusion_area", "Extrusion Area"),
+      description: t("virtual_tour.extrusion_description", "This is where the plastic is melted and formed into film through an extrusion process."),
       imageSource: "https://pannellum.org/images/cerro-toco-0.jpg", // Placeholder until real factory images are available
       hotSpots: [
         {
           pitch: -3,
           yaw: 117,
           type: "info",
-          text: "Extrusion Machine 1",
+          text: t("virtual_tour.extrusion_equip1", "Extruder machines"),
         },
         {
           pitch: -9,
           yaw: 222,
           type: "info",
-          text: "Raw Material Storage",
+          text: t("virtual_tour.extrusion_process1", "Raw material mixing"),
         },
         {
           pitch: 1,
           yaw: 175,
           type: "scene",
-          text: "Go to Printing Area",
+          text: t("virtual_tour.next_area", { area: t("virtual_tour.printing", "Printing") }),
           sceneId: "printing",
         }
       ]
     },
     printing: {
-      title: "Printing Area",
-      description: "Where designs are printed onto plastic film",
+      title: t("virtual_tour.printing_area", "Printing Area"),
+      description: t("virtual_tour.printing_description", "In this area, designs and branding are printed onto the plastic film."),
       imageSource: "https://pannellum.org/images/alma.jpg", // Placeholder until real factory images are available
       hotSpots: [
         {
           pitch: 1,
           yaw: 150,
           type: "info",
-          text: "Printing Machine 1",
+          text: t("virtual_tour.printing_equip1", "Flexographic printing machines"),
         },
         {
           pitch: -1,
           yaw: 230,
           type: "scene",
-          text: "Go to Extrusion Area",
+          text: t("virtual_tour.prev_area", { area: t("virtual_tour.extrusion", "Extrusion") }),
           sceneId: "extrusion",
         },
         {
           pitch: 3,
           yaw: 45,
           type: "scene",
-          text: "Go to Cutting Area",
+          text: t("virtual_tour.next_area", { area: t("virtual_tour.cutting", "Cutting") }),
           sceneId: "cutting",
         }
       ]
     },
     cutting: {
-      title: "Cutting Area",
-      description: "Where printed film is cut into finished bags",
+      title: t("virtual_tour.cutting_area", "Cutting Area"),
+      description: t("virtual_tour.cutting_description", "Here, the printed film is cut, sealed, and formed into various bag shapes and sizes."),
       imageSource: "https://pannellum.org/images/jefe.jpg", // Placeholder until real factory images are available
       hotSpots: [
         {
           pitch: -10,
           yaw: 110,
           type: "info",
-          text: "Cutting Machine 1",
+          text: t("virtual_tour.cutting_equip1", "Bag making machines"),
         },
         {
           pitch: 5,
           yaw: 175,
           type: "info",
-          text: "Quality Check Station",
+          text: t("virtual_tour.cutting_process4", "Final quality inspection"),
         },
         {
           pitch: 0,
           yaw: 285,
           type: "scene",
-          text: "Go to Printing Area",
+          text: t("virtual_tour.prev_area", { area: t("virtual_tour.printing", "Printing") }),
           sceneId: "printing",
         },
         {
           pitch: -5,
           yaw: 200,
           type: "scene",
-          text: "Go to Warehouse",
+          text: t("virtual_tour.next_area", { area: t("virtual_tour.warehouse", "Warehouse") }),
           sceneId: "warehouse",
         }
       ]
     },
     warehouse: {
-      title: "Warehouse",
-      description: "Storage area for finished products ready for shipping",
+      title: t("virtual_tour.warehouse_area", "Warehouse Area"),
+      description: t("virtual_tour.warehouse_description", "The final stage where products are packaged, stored, and prepared for shipping."),
       imageSource: "https://pannellum.org/images/millyard-nighttime.jpg", // Placeholder until real factory images are available
       hotSpots: [
         {
           pitch: -5,
           yaw: 120,
           type: "info",
-          text: "Finished Product Storage",
+          text: t("virtual_tour.warehouse_process2", "Order fulfillment"),
         },
         {
           pitch: 0,
           yaw: 170,
           type: "info",
-          text: "Shipping Station",
+          text: t("virtual_tour.warehouse_process3", "Shipping preparation"),
         },
         {
           pitch: 0,
           yaw: 220,
           type: "scene",
-          text: "Go to Cutting Area",
+          text: t("virtual_tour.prev_area", { area: t("virtual_tour.cutting", "Cutting") }),
           sceneId: "cutting",
         }
       ]
@@ -138,7 +141,7 @@ export default function VirtualTour() {
     disableKeyboardCtrl: false,
     hotSpots: scenes[currentArea as keyof typeof scenes].hotSpots,
     title: scenes[currentArea as keyof typeof scenes].title,
-    author: "Modern Plastic Bag Factory",
+    author: t("app.full_title", "Modern Plastic Bag Factory"),
     sceneFadeDuration: 1000
   };
 
@@ -195,19 +198,19 @@ export default function VirtualTour() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-4", isRTL ? "md:grid-flow-row-dense" : "")}>
+                <div className={isRTL ? "text-right" : ""}>
                   <h4 className="font-semibold mb-2">{t("virtual_tour.key_equipment", "Key Equipment:")}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className={cn("list-inside space-y-1 text-sm", isRTL ? "list-disc-rtl" : "list-disc")}>
                     <li>{t("virtual_tour.extrusion_equip1", "Extruder machines")}</li>
                     <li>{t("virtual_tour.extrusion_equip2", "Film blower unit")}</li>
                     <li>{t("virtual_tour.extrusion_equip3", "Temperature control systems")}</li>
                     <li>{t("virtual_tour.extrusion_equip4", "Film winders")}</li>
                   </ul>
                 </div>
-                <div>
+                <div className={isRTL ? "text-right" : ""}>
                   <h4 className="font-semibold mb-2">{t("virtual_tour.key_processes", "Key Processes:")}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
+                  <ul className={cn("list-inside space-y-1 text-sm", isRTL ? "list-disc-rtl" : "list-disc")}>
                     <li>{t("virtual_tour.extrusion_process1", "Raw material mixing")}</li>
                     <li>{t("virtual_tour.extrusion_process2", "Plastic melting")}</li>
                     <li>{t("virtual_tour.extrusion_process3", "Film blowing")}</li>
@@ -215,7 +218,7 @@ export default function VirtualTour() {
                   </ul>
                 </div>
               </div>
-              <div className="mt-4">
+              <div className={cn("mt-4", isRTL ? "text-right" : "")}>
                 <Button variant="outline" onClick={() => setCurrentArea("printing")}>
                   {t("virtual_tour.next_area", { area: t("virtual_tour.printing", "Printing") })}
                 </Button>
@@ -252,7 +255,7 @@ export default function VirtualTour() {
                   </ul>
                 </div>
               </div>
-              <div className="mt-4 space-x-2">
+              <div className={cn("mt-4 flex gap-2", isRTL ? "flex-row-reverse" : "")}>
                 <Button variant="outline" onClick={() => setCurrentArea("extrusion")}>
                   {t("virtual_tour.prev_area", { area: t("virtual_tour.extrusion", "Extrusion") })}
                 </Button>
@@ -292,7 +295,7 @@ export default function VirtualTour() {
                   </ul>
                 </div>
               </div>
-              <div className="mt-4 space-x-2">
+              <div className={cn("mt-4 flex gap-2", isRTL ? "flex-row-reverse" : "")}>
                 <Button variant="outline" onClick={() => setCurrentArea("printing")}>
                   {t("virtual_tour.prev_area", { area: t("virtual_tour.printing", "Printing") })}
                 </Button>
@@ -332,7 +335,7 @@ export default function VirtualTour() {
                   </ul>
                 </div>
               </div>
-              <div className="mt-4">
+              <div className={cn("mt-4", isRTL ? "text-right" : "")}>
                 <Button variant="outline" onClick={() => setCurrentArea("cutting")}>
                   {t("virtual_tour.prev_area", { area: t("virtual_tour.cutting", "Cutting") })}
                 </Button>
