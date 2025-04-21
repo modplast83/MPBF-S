@@ -82,7 +82,7 @@
       "system": "System",
       "database": "Database",
       "permissions": "Permissions",
-      "import_export": "Import & Export",
+      "import_&_export": "Import\\Export",
       "sms": "SMS",
       "tools": "Tools",
       "admin_user": "Admin User",
@@ -173,7 +173,7 @@
       "title": "System Management",
       "database": "Database",
       "permissions": "Permissions",
-      "import_export": "Import & Export",
+      "import_&_export": "Import\\Export",
       "sms": "SMS"
     },
     "tools": {
