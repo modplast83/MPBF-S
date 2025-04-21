@@ -187,6 +187,8 @@
       "new_order": "New Order",
       "order_id": "Order ID",
       "customer": "Customer",
+      "customer_ar": "Customer (Arabic)",
+      "plate_drawer_code": "Plate Drawer Code",
       "date": "Date",
       "status": "Status",
       "items_count": "Items Count",

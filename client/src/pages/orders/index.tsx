@@ -10,11 +10,13 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDateString } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { Order, Customer } from "@shared/schema";
 
 export default function OrdersIndex() {
   const queryClient = useQueryClient();
   const [deletingOrder, setDeletingOrder] = useState<Order | null>(null);
+  const { t } = useTranslation();
 
   // Fetch orders and customers
   const { data: orders, isLoading } = useQuery<Order[]>({
@@ -80,33 +82,51 @@ export default function OrdersIndex() {
     }
   };
 
-  // Helper function to get customer name
+  // Helper functions to get customer info
   const getCustomerName = (customerId: string) => {
     return customers?.find(c => c.id === customerId)?.name || "Unknown";
+  };
+  
+  const getCustomerNameAr = (customerId: string) => {
+    return customers?.find(c => c.id === customerId)?.nameAr || "-";
+  };
+  
+  const getCustomerPlateDrawerCode = (customerId: string) => {
+    return customers?.find(c => c.id === customerId)?.plateDrawerCode || "-";
   };
 
   const columns = [
     {
-      header: "Order ID",
+      header: t("orders.order_id"),
       accessorKey: "id",
     },
     {
-      header: "Date",
+      header: t("orders.date"),
       accessorKey: "date",
       cell: (row: { date: string }) => formatDateString(row.date),
     },
     {
-      header: "Customer",
+      header: t("orders.customer"),
       accessorKey: "customerId",
       cell: (row: { customerId: string }) => getCustomerName(row.customerId),
     },
     {
-      header: "Status",
+      header: t("orders.customer_ar"),
+      accessorKey: "customerId",
+      cell: (row: { customerId: string }) => getCustomerNameAr(row.customerId),
+    },
+    {
+      header: t("orders.plate_drawer_code"),
+      accessorKey: "customerId",
+      cell: (row: { customerId: string }) => getCustomerPlateDrawerCode(row.customerId),
+    },
+    {
+      header: t("orders.status"),
       accessorKey: "status",
       cell: (row: { status: string }) => <StatusBadge status={row.status} />,
     },
     {
-      header: "Note",
+      header: t("orders.note"),
       accessorKey: "note",
       cell: (row: { note: string | null }) => row.note || "-",
     },
@@ -131,7 +151,7 @@ export default function OrdersIndex() {
     <Link href="/orders/new">
       <Button>
         <span className="material-icons text-sm mr-1">add</span>
-        New Order
+        {t("orders.new_order")}
       </Button>
     </Link>
   );
@@ -139,13 +159,13 @@ export default function OrdersIndex() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Orders</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t("orders.title")}</h1>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Production Orders</span>
+            <span>{t("orders.active_production_orders")}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -163,7 +183,7 @@ export default function OrdersIndex() {
       <AlertDialog open={!!deletingOrder} onOpenChange={(open) => !open && setDeletingOrder(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("common.logout_confirm")}</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently delete order #{deletingOrder?.id} and all its associated job orders.
               Note: Orders with job orders that have rolls cannot be deleted.
@@ -171,12 +191,12 @@ export default function OrdersIndex() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
               className="bg-error-500 hover:bg-error-600"
             >
-              Delete
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

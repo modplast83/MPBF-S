@@ -187,6 +187,8 @@
       "new_order": "طلب جديد",
       "order_id": "رقم الطلب",
       "customer": "العميل",
+      "customer_ar": "العميل (بالعربية)",
+      "plate_drawer_code": "رمز درج الطباعة",
       "date": "التاريخ",
       "status": "الحالة",
       "items_count": "عدد العناصر",
