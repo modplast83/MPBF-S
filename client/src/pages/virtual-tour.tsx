@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Pannellum } from "react-pannellum";
+import { PannellumWrapper } from "@/components/ui/pannellum-wrapper";
 import { useLanguage } from "@/hooks/use-language";
 import { cn } from "@/lib/utils";
 
@@ -167,7 +167,7 @@ export default function VirtualTour() {
         </CardHeader>
         <CardContent>
           <div className="aspect-video">
-            <Pannellum
+            <PannellumWrapper
               width="100%"
               height="100%"
               image={scenes[currentArea as keyof typeof scenes].imageSource}
