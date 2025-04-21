@@ -12,6 +12,7 @@ export default function VirtualTour() {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const [currentArea, setCurrentArea] = useState<string>("extrusion");
+  const [showFallback, setShowFallback] = useState<boolean>(false);
 
   // Define panorama scenes for different areas of the factory
   const scenes = {
@@ -166,18 +167,22 @@ export default function VirtualTour() {
           <CardDescription>{scenes[currentArea as keyof typeof scenes].description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="aspect-video">
+          <div className={cn("aspect-video virtual-tour-navigation", isRTL ? "rtl" : "ltr")}>
             <PannellumWrapper
               width="100%"
               height="100%"
               image={scenes[currentArea as keyof typeof scenes].imageSource}
               pitch={10}
-              yaw={180}
+              // Adjust default yaw for RTL layouts
+              yaw={isRTL ? 170 : 180}
               hfov={110}
               autoLoad
               onScenechange={handleSceneChange}
               config={config}
             />
+          </div>
+          <div className={cn("mt-3 text-sm text-muted-foreground", isRTL ? "text-right" : "text-left")}>
+            {t("virtual_tour.navigation_tip", "Use mouse or touch to navigate the 360° view. Click hotspots to explore or switch areas.")}
           </div>
         </CardContent>
       </Card>

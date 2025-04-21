@@ -85,4 +85,36 @@
     width: 1em;
     margin-left: 0.5em;
   }
+  
+  /* Virtual Tour RTL styles */
+  html[dir="rtl"] .virtual-tour-navigation .pnlm-controls {
+    right: auto !important;
+    left: 4px !important;
+  }
+  
+  /* Flip navigation buttons in RTL mode */
+  html[dir="rtl"] .pnlm-load-button,
+  html[dir="rtl"] .virtual-tour-navigation-buttons button[aria-label="Previous"],
+  html[dir="rtl"] .virtual-tour-navigation-buttons button[aria-label="Next"] {
+    transform: scaleX(-1);
+  }
+  
+  /* Custom styling for panorama hotspots in RTL */
+  html[dir="rtl"] .pnlm-hotspot {
+    direction: rtl !important;
+  }
+  
+  html[dir="rtl"] .pnlm-tooltip {
+    direction: rtl !important;
+    text-align: right !important;
+  }
+  
+  /* Ensure fallback tour cards work correctly in RTL */
+  html[dir="rtl"] .virtual-tour-fallback .tour-navigation {
+    flex-direction: row-reverse;
+  }
+  
+  html[dir="rtl"] .virtual-tour-fallback .tour-description {
+    text-align: right;
+  }
 }
