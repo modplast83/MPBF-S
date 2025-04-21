@@ -61,6 +61,7 @@
     "sidebar": {
       "main": "Main",
       "dashboard": "Dashboard",
+      "virtual_tour": "Virtual Tour",
       "setup": "Setup",
       "categories": "Categories",
       "products": "Products",

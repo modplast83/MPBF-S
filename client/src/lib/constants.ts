@@ -56,6 +56,11 @@ export const SIDEBAR_ITEMS = [
         icon: "dashboard",
       },
       {
+        title: "Virtual Tour",
+        path: "/virtual-tour",
+        icon: "360",
+      },
+      {
         title: "Setup",
         path: "/setup",
         icon: "settings",
