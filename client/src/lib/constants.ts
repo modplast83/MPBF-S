@@ -14,6 +14,8 @@ export const API_ENDPOINTS = {
   ORDERS: "/api/orders",
   JOB_ORDERS: "/api/job-orders",
   ROLLS: "/api/rolls",
+  MIX_MATERIALS: "/api/mix-materials",
+  MIX_ITEMS: "/api/mix-items",
   
   // Warehouse
   RAW_MATERIALS: "/api/raw-materials",
@@ -76,6 +78,7 @@ export const SIDEBAR_ITEMS = [
         subItems: [
           { title: "Orders", path: "/orders" },
           { title: "Workflow", path: "/workflow" },
+          { title: "Mix Materials", path: "/production/mix-materials" },
         ],
       },
       {
