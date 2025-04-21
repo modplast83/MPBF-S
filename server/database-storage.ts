@@ -18,7 +18,9 @@ import {
   QualityCheckType, InsertQualityCheckType, qualityCheckTypes,
   QualityCheck, InsertQualityCheck, qualityChecks,
   CorrectiveAction, InsertCorrectiveAction, correctiveActions,
-  SmsMessage, InsertSmsMessage, smsMessages
+  SmsMessage, InsertSmsMessage, smsMessages,
+  MixMaterial, InsertMixMaterial, mixMaterials,
+  MixItem, InsertMixItem, mixItems
 } from '@shared/schema';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
@@ -611,5 +613,221 @@ export class DatabaseStorage implements IStorage {
   async deleteCorrectiveAction(id: number): Promise<boolean> {
     const result = await db.delete(correctiveActions).where(eq(correctiveActions.id, id)).returning();
     return result.length > 0;
+  }
+  
+  // Mix Materials
+  async getMixMaterials(): Promise<MixMaterial[]> {
+    return await db.select().from(mixMaterials);
+  }
+
+  async getMixMaterial(id: number): Promise<MixMaterial | undefined> {
+    const result = await db.select().from(mixMaterials).where(eq(mixMaterials.id, id));
+    return result[0];
+  }
+
+  async createMixMaterial(mix: InsertMixMaterial): Promise<MixMaterial> {
+    const result = await db.insert(mixMaterials).values({
+      ...mix,
+      mixDate: new Date(),
+      totalQuantity: 0,
+      createdAt: new Date()
+    }).returning();
+    return result[0];
+  }
+
+  async updateMixMaterial(id: number, mixUpdate: Partial<MixMaterial>): Promise<MixMaterial | undefined> {
+    const result = await db.update(mixMaterials)
+      .set(mixUpdate)
+      .where(eq(mixMaterials.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteMixMaterial(id: number): Promise<boolean> {
+    // First delete any associated mix items
+    const mixItems = await this.getMixItemsByMix(id);
+    for (const item of mixItems) {
+      await this.deleteMixItem(item.id);
+    }
+    
+    const result = await db.delete(mixMaterials).where(eq(mixMaterials.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Mix Items
+  async getMixItems(): Promise<MixItem[]> {
+    return await db.select().from(mixItems);
+  }
+
+  async getMixItemsByMix(mixId: number): Promise<MixItem[]> {
+    return await db.select().from(mixItems).where(eq(mixItems.mixId, mixId));
+  }
+
+  async getMixItem(id: number): Promise<MixItem | undefined> {
+    const result = await db.select().from(mixItems).where(eq(mixItems.id, id));
+    return result[0];
+  }
+
+  async createMixItem(mixItem: InsertMixItem): Promise<MixItem> {
+    // Get the mix to update total quantity
+    const mix = await this.getMixMaterial(mixItem.mixId);
+    if (!mix) {
+      throw new Error(`Mix with ID ${mixItem.mixId} not found`);
+    }
+    
+    // Get the raw material to reduce quantity from inventory
+    const rawMaterial = await this.getRawMaterial(mixItem.rawMaterialId);
+    if (!rawMaterial) {
+      throw new Error(`Raw material with ID ${mixItem.rawMaterialId} not found`);
+    }
+
+    // Update the raw material quantity
+    if (rawMaterial.quantity !== null && rawMaterial.quantity >= mixItem.quantity) {
+      await this.updateRawMaterial(
+        rawMaterial.id, 
+        { quantity: rawMaterial.quantity - mixItem.quantity }
+      );
+    } else {
+      throw new Error(`Insufficient quantity of raw material ${rawMaterial.name}`);
+    }
+    
+    // Update the mix total quantity
+    const newTotalQuantity = (mix.totalQuantity || 0) + mixItem.quantity;
+    await this.updateMixMaterial(mix.id, { totalQuantity: newTotalQuantity });
+    
+    // Calculate the percentage of this item in the mix
+    const percentage = (mixItem.quantity / newTotalQuantity) * 100;
+    
+    // Create the mix item with percentage
+    const result = await db.insert(mixItems).values({
+      ...mixItem,
+      percentage
+    }).returning();
+    
+    // Update percentages for all items in this mix
+    const existingMixItems = await this.getMixItemsByMix(mixItem.mixId);
+    for (const item of existingMixItems) {
+      // Skip the current item as it was just created
+      if (item.id === result[0].id) continue;
+      
+      // Recalculate percentage for existing items
+      const updatedPercentage = (item.quantity / newTotalQuantity) * 100;
+      await this.updateMixItem(item.id, { percentage: updatedPercentage });
+    }
+    
+    return result[0];
+  }
+
+  async updateMixItem(id: number, mixItemUpdate: Partial<MixItem>): Promise<MixItem | undefined> {
+    const existingMixItem = await this.getMixItem(id);
+    if (!existingMixItem) return undefined;
+
+    // Handle quantity changes that require recalculation of percentages
+    if (mixItemUpdate.quantity !== undefined && 
+        mixItemUpdate.quantity !== existingMixItem.quantity) {
+      
+      const mix = await this.getMixMaterial(existingMixItem.mixId);
+      if (!mix) {
+        throw new Error(`Mix with ID ${existingMixItem.mixId} not found`);
+      }
+
+      // Calculate the new total quantity for the mix
+      const quantityDiff = mixItemUpdate.quantity - existingMixItem.quantity;
+      const newTotalQuantity = (mix.totalQuantity || 0) + quantityDiff;
+      
+      // Update the raw material quantity
+      if (quantityDiff !== 0) {
+        const rawMaterial = await this.getRawMaterial(existingMixItem.rawMaterialId);
+        if (!rawMaterial) {
+          throw new Error(`Raw material with ID ${existingMixItem.rawMaterialId} not found`);
+        }
+        
+        if (quantityDiff > 0) {
+          // Check if we have enough raw material
+          if (rawMaterial.quantity !== null && rawMaterial.quantity >= quantityDiff) {
+            await this.updateRawMaterial(
+              rawMaterial.id, 
+              { quantity: rawMaterial.quantity - quantityDiff }
+            );
+          } else {
+            throw new Error(`Insufficient quantity of raw material ${rawMaterial.name}`);
+          }
+        } else {
+          // Return raw material to inventory
+          await this.updateRawMaterial(
+            rawMaterial.id,
+            { quantity: (rawMaterial.quantity || 0) - quantityDiff }
+          );
+        }
+      }
+      
+      // Update the mix total quantity
+      await this.updateMixMaterial(mix.id, { totalQuantity: newTotalQuantity });
+      
+      // Calculate the new percentage for this item
+      mixItemUpdate.percentage = (mixItemUpdate.quantity / newTotalQuantity) * 100;
+      
+      // Update percentages for all other items in this mix
+      const mixItems = await this.getMixItemsByMix(existingMixItem.mixId);
+      for (const item of mixItems) {
+        // Skip the current item as it will be updated later
+        if (item.id === id) continue;
+        
+        // Recalculate percentage for other items
+        const updatedPercentage = (item.quantity / newTotalQuantity) * 100;
+        await this.updateMixItem(item.id, { percentage: updatedPercentage });
+      }
+    }
+
+    const result = await db.update(mixItems)
+      .set(mixItemUpdate)
+      .where(eq(mixItems.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteMixItem(id: number): Promise<boolean> {
+    const mixItem = await this.getMixItem(id);
+    if (!mixItem) return false;
+    
+    // Get the mix to update total quantity
+    const mix = await this.getMixMaterial(mixItem.mixId);
+    if (!mix) {
+      // Just delete the mix item if the mix is not found
+      const result = await db.delete(mixItems).where(eq(mixItems.id, id)).returning();
+      return result.length > 0;
+    }
+    
+    // Get the raw material to return quantity to inventory
+    const rawMaterial = await this.getRawMaterial(mixItem.rawMaterialId);
+    if (rawMaterial) {
+      // Return raw material to inventory
+      await this.updateRawMaterial(
+        rawMaterial.id,
+        { quantity: (rawMaterial.quantity || 0) + mixItem.quantity }
+      );
+    }
+    
+    // Update the mix total quantity
+    const newTotalQuantity = (mix.totalQuantity || 0) - mixItem.quantity;
+    await this.updateMixMaterial(mix.id, { totalQuantity: newTotalQuantity });
+    
+    // Delete the mix item
+    const result = await db.delete(mixItems).where(eq(mixItems.id, id)).returning();
+    
+    if (result.length > 0) {
+      // Update percentages for remaining items in this mix
+      const remainingItems = await this.getMixItemsByMix(mixItem.mixId);
+      for (const item of remainingItems) {
+        // Recalculate percentage for remaining items
+        const updatedPercentage = newTotalQuantity > 0 
+          ? (item.quantity / newTotalQuantity) * 100 
+          : 0;
+        await this.updateMixItem(item.id, { percentage: updatedPercentage });
+      }
+      return true;
+    }
+    
+    return false;
   }
 }

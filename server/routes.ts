@@ -8,7 +8,8 @@ import {
   insertOrderSchema, insertJobOrderSchema, insertRollSchema,
   createRollSchema, InsertRoll,
   insertRawMaterialSchema, insertFinalProductSchema,
-  insertSmsMessageSchema, InsertSmsMessage
+  insertSmsMessageSchema, InsertSmsMessage,
+  insertMixMaterialSchema, insertMixItemSchema
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
@@ -1864,6 +1865,270 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete SMS message" });
+    }
+  });
+
+  // Mix Materials
+  app.get("/api/mix-materials", requireAuth, async (_req: Request, res: Response) => {
+    try {
+      const mixMaterials = await storage.getMixMaterials();
+      res.json(mixMaterials);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mix materials" });
+    }
+  });
+
+  app.get("/api/mix-materials/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const mixMaterial = await storage.getMixMaterial(id);
+      if (!mixMaterial) {
+        return res.status(404).json({ message: "Mix material not found" });
+      }
+      
+      res.json(mixMaterial);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mix material" });
+    }
+  });
+
+  app.post("/api/mix-materials", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertMixMaterialSchema.parse(req.body);
+      
+      // Validate orderId and machineId if provided
+      if (validatedData.orderId) {
+        const order = await storage.getOrder(validatedData.orderId);
+        if (!order) {
+          return res.status(404).json({ message: "Order not found" });
+        }
+      }
+      
+      if (validatedData.machineId) {
+        const machine = await storage.getMachine(validatedData.machineId);
+        if (!machine) {
+          return res.status(404).json({ message: "Machine not found" });
+        }
+      }
+      
+      // Set mixPerson to current user ID if not provided
+      if (!validatedData.mixPerson && req.user) {
+        validatedData.mixPerson = (req.user as User).id;
+      }
+      
+      const mixMaterial = await storage.createMixMaterial(validatedData);
+      res.status(201).json(mixMaterial);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid mix material data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create mix material" });
+    }
+  });
+
+  app.put("/api/mix-materials/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const existingMixMaterial = await storage.getMixMaterial(id);
+      if (!existingMixMaterial) {
+        return res.status(404).json({ message: "Mix material not found" });
+      }
+      
+      const validatedData = insertMixMaterialSchema.parse(req.body);
+      
+      // Validate orderId and machineId if provided
+      if (validatedData.orderId) {
+        const order = await storage.getOrder(validatedData.orderId);
+        if (!order) {
+          return res.status(404).json({ message: "Order not found" });
+        }
+      }
+      
+      if (validatedData.machineId) {
+        const machine = await storage.getMachine(validatedData.machineId);
+        if (!machine) {
+          return res.status(404).json({ message: "Machine not found" });
+        }
+      }
+      
+      const updatedMixMaterial = await storage.updateMixMaterial(id, validatedData);
+      res.json(updatedMixMaterial);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid mix material data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update mix material" });
+    }
+  });
+
+  app.delete("/api/mix-materials/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const mixMaterial = await storage.getMixMaterial(id);
+      if (!mixMaterial) {
+        return res.status(404).json({ message: "Mix material not found" });
+      }
+      
+      await storage.deleteMixMaterial(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete mix material" });
+    }
+  });
+
+  // Mix Items
+  app.get("/api/mix-items", requireAuth, async (_req: Request, res: Response) => {
+    try {
+      const mixItems = await storage.getMixItems();
+      res.json(mixItems);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mix items" });
+    }
+  });
+
+  app.get("/api/mix-materials/:mixId/items", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const mixId = parseInt(req.params.mixId);
+      if (isNaN(mixId)) {
+        return res.status(400).json({ message: "Invalid mix ID format" });
+      }
+      
+      const mixMaterial = await storage.getMixMaterial(mixId);
+      if (!mixMaterial) {
+        return res.status(404).json({ message: "Mix material not found" });
+      }
+      
+      const mixItems = await storage.getMixItemsByMix(mixId);
+      res.json(mixItems);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mix items" });
+    }
+  });
+
+  app.get("/api/mix-items/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const mixItem = await storage.getMixItem(id);
+      if (!mixItem) {
+        return res.status(404).json({ message: "Mix item not found" });
+      }
+      
+      res.json(mixItem);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mix item" });
+    }
+  });
+
+  app.post("/api/mix-items", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertMixItemSchema.parse(req.body);
+      
+      // Validate mixId
+      const mixMaterial = await storage.getMixMaterial(validatedData.mixId);
+      if (!mixMaterial) {
+        return res.status(404).json({ message: "Mix material not found" });
+      }
+      
+      // Validate rawMaterialId
+      const rawMaterial = await storage.getRawMaterial(validatedData.rawMaterialId);
+      if (!rawMaterial) {
+        return res.status(404).json({ message: "Raw material not found" });
+      }
+      
+      // Validate quantity is greater than zero
+      if (validatedData.quantity <= 0) {
+        return res.status(400).json({ message: "Quantity must be greater than zero" });
+      }
+      
+      // Validate raw material has enough quantity
+      if (rawMaterial.quantity === null || rawMaterial.quantity < validatedData.quantity) {
+        return res.status(400).json({ 
+          message: `Insufficient quantity of raw material ${rawMaterial.name}`,
+          available: rawMaterial.quantity,
+          requested: validatedData.quantity
+        });
+      }
+      
+      const mixItem = await storage.createMixItem(validatedData);
+      res.status(201).json(mixItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid mix item data", errors: error.errors });
+      }
+      if (error instanceof Error) {
+        return res.status(400).json({ message: error.message });
+      }
+      res.status(500).json({ message: "Failed to create mix item" });
+    }
+  });
+
+  app.put("/api/mix-items/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const existingMixItem = await storage.getMixItem(id);
+      if (!existingMixItem) {
+        return res.status(404).json({ message: "Mix item not found" });
+      }
+      
+      // For updating, only allow quantity to be changed
+      const { quantity } = req.body;
+      if (quantity === undefined) {
+        return res.status(400).json({ message: "Quantity is required" });
+      }
+      
+      if (quantity <= 0) {
+        return res.status(400).json({ message: "Quantity must be greater than zero" });
+      }
+      
+      const updatedMixItem = await storage.updateMixItem(id, { quantity });
+      res.json(updatedMixItem);
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(400).json({ message: error.message });
+      }
+      res.status(500).json({ message: "Failed to update mix item" });
+    }
+  });
+
+  app.delete("/api/mix-items/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const mixItem = await storage.getMixItem(id);
+      if (!mixItem) {
+        return res.status(404).json({ message: "Mix item not found" });
+      }
+      
+      await storage.deleteMixItem(id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(400).json({ message: error.message });
+      }
+      res.status(500).json({ message: "Failed to delete mix item" });
     }
   });
 
