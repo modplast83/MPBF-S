@@ -39,6 +39,12 @@ export interface IStorage {
   updateMixMaterial(id: number, mix: Partial<MixMaterial>): Promise<MixMaterial | undefined>;
   deleteMixMaterial(id: number): Promise<boolean>;
   
+  // Mix Machines
+  getMixMachines(): Promise<MixMachine[]>;
+  getMixMachinesByMixId(mixId: number): Promise<MixMachine[]>; 
+  createMixMachine(mixMachine: InsertMixMachine): Promise<MixMachine>;
+  deleteMixMachinesByMixId(mixId: number): Promise<boolean>;
+  
   // Mix Items
   getMixItems(): Promise<MixItem[]>;
   getMixItemsByMix(mixId: number): Promise<MixItem[]>;

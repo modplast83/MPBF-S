@@ -299,10 +299,18 @@ export const mixMaterials = pgTable("mix_materials", {
   mixDate: timestamp("mix_date").defaultNow().notNull(),
   mixPerson: text("mix_person").notNull().references(() => users.id),
   orderId: integer("order_id").references(() => orders.id),
-  machineId: text("machine_id").references(() => machines.id),
   totalQuantity: doublePrecision("total_quantity").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Mix Machines junction table
+export const mixMachines = pgTable("mix_machines", {
+  id: serial("id").primaryKey(),
+  mixId: integer("mix_id").notNull().references(() => mixMaterials.id, { onDelete: "cascade" }),
+  machineId: text("machine_id").notNull().references(() => machines.id),
+}, (table) => ({
+  uniqueIndex: unique().on(table.mixId, table.machineId),
+}));
 
 export const insertMixMaterialSchema = createInsertSchema(mixMaterials).omit({ 
   id: true, 
@@ -310,8 +318,15 @@ export const insertMixMaterialSchema = createInsertSchema(mixMaterials).omit({
   totalQuantity: true,
   createdAt: true 
 });
+
+export const insertMixMachineSchema = createInsertSchema(mixMachines).omit({
+  id: true
+});
+
 export type InsertMixMaterial = z.infer<typeof insertMixMaterialSchema>;
+export type InsertMixMachine = z.infer<typeof insertMixMachineSchema>;
 export type MixMaterial = typeof mixMaterials.$inferSelect;
+export type MixMachine = typeof mixMachines.$inferSelect;
 
 // Mix Items table
 export const mixItems = pgTable("mix_items", {

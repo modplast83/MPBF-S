@@ -1898,9 +1898,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/mix-materials", requireAuth, async (req: Request, res: Response) => {
     try {
-      const validatedData = insertMixMaterialSchema.parse(req.body);
+      const { machineIds, ...mixData } = req.body;
+      const validatedData = insertMixMaterialSchema.parse(mixData);
       
-      // Validate orderId and machineId if provided
+      // Validate orderId if provided
       if (validatedData.orderId) {
         const order = await storage.getOrder(validatedData.orderId);
         if (!order) {
@@ -1908,24 +1909,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      if (validatedData.machineId) {
-        const machine = await storage.getMachine(validatedData.machineId);
-        if (!machine) {
-          return res.status(404).json({ message: "Machine not found" });
+      // Set mixPerson to current user ID
+      if (req.user) {
+        validatedData.mixPerson = (req.user as any).id;
+      } else {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Create the mix material
+      const mixMaterial = await storage.createMixMaterial(validatedData);
+      
+      // Process machine associations if provided
+      if (machineIds && Array.isArray(machineIds) && machineIds.length > 0) {
+        for (const machineId of machineIds) {
+          // Validate machine exists
+          const machine = await storage.getMachine(machineId);
+          if (!machine) {
+            // Skip invalid machines but don't fail the whole operation
+            console.warn(`Machine with ID ${machineId} not found. Skipping.`);
+            continue;
+          }
+          
+          // Add machine to mix
+          await storage.createMixMachine({
+            mixId: mixMaterial.id,
+            machineId
+          });
         }
       }
       
-      // Set mixPerson to current user ID if not provided
-      if (!validatedData.mixPerson && req.user) {
-        validatedData.mixPerson = (req.user as User).id;
-      }
+      // Return the created mix with machine information
+      const result = {
+        ...mixMaterial,
+        machines: machineIds || []
+      };
       
-      const mixMaterial = await storage.createMixMaterial(validatedData);
-      res.status(201).json(mixMaterial);
+      res.status(201).json(result);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid mix material data", errors: error.errors });
       }
+      console.error("Error creating mix material:", error);
       res.status(500).json({ message: "Failed to create mix material" });
     }
   });
@@ -1942,9 +1966,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Mix material not found" });
       }
       
-      const validatedData = insertMixMaterialSchema.parse(req.body);
+      const { machineIds, ...mixData } = req.body;
+      const validatedData = insertMixMaterialSchema.parse(mixData);
       
-      // Validate orderId and machineId if provided
+      // Validate orderId if provided
       if (validatedData.orderId) {
         const order = await storage.getOrder(validatedData.orderId);
         if (!order) {
@@ -1952,19 +1977,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      if (validatedData.machineId) {
-        const machine = await storage.getMachine(validatedData.machineId);
-        if (!machine) {
-          return res.status(404).json({ message: "Machine not found" });
+      // Update the mix material
+      const updatedMixMaterial = await storage.updateMixMaterial(id, validatedData);
+      
+      // Update machine associations if provided
+      if (machineIds !== undefined) {
+        // First, remove all existing machine associations
+        await storage.deleteMixMachinesByMixId(id);
+        
+        // Then add the new ones
+        if (Array.isArray(machineIds) && machineIds.length > 0) {
+          for (const machineId of machineIds) {
+            // Validate machine exists
+            const machine = await storage.getMachine(machineId);
+            if (!machine) {
+              // Skip invalid machines but don't fail the whole operation
+              console.warn(`Machine with ID ${machineId} not found. Skipping.`);
+              continue;
+            }
+            
+            // Add machine to mix
+            await storage.createMixMachine({
+              mixId: id,
+              machineId
+            });
+          }
         }
       }
       
-      const updatedMixMaterial = await storage.updateMixMaterial(id, validatedData);
-      res.json(updatedMixMaterial);
+      // Get current machine associations
+      const mixMachines = await storage.getMixMachinesByMixId(id);
+      const machineIdsArray = mixMachines.map(mm => mm.machineId);
+      
+      // Return the updated mix with machine information
+      const result = {
+        ...updatedMixMaterial,
+        machines: machineIdsArray
+      };
+      
+      res.json(result);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid mix material data", errors: error.errors });
       }
+      console.error("Error updating mix material:", error);
       res.status(500).json({ message: "Failed to update mix material" });
     }
   });
