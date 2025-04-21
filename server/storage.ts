@@ -5,7 +5,8 @@ import {
   Order, InsertOrder, JobOrder, InsertJobOrder, Roll, InsertRoll,
   RawMaterial, InsertRawMaterial, FinalProduct, InsertFinalProduct,
   QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
-  CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage
+  CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage,
+  MixMaterial, InsertMixMaterial, MixItem, InsertMixItem
 } from "@shared/schema";
 import session from "express-session";
 
@@ -30,6 +31,21 @@ export interface IStorage {
   createSmsMessage(message: InsertSmsMessage): Promise<SmsMessage>;
   updateSmsMessage(id: number, message: Partial<SmsMessage>): Promise<SmsMessage | undefined>;
   deleteSmsMessage(id: number): Promise<boolean>;
+  
+  // Mix Materials
+  getMixMaterials(): Promise<MixMaterial[]>;
+  getMixMaterial(id: number): Promise<MixMaterial | undefined>;
+  createMixMaterial(mix: InsertMixMaterial): Promise<MixMaterial>;
+  updateMixMaterial(id: number, mix: Partial<MixMaterial>): Promise<MixMaterial | undefined>;
+  deleteMixMaterial(id: number): Promise<boolean>;
+  
+  // Mix Items
+  getMixItems(): Promise<MixItem[]>;
+  getMixItemsByMix(mixId: number): Promise<MixItem[]>;
+  getMixItem(id: number): Promise<MixItem | undefined>;
+  createMixItem(mixItem: InsertMixItem): Promise<MixItem>;
+  updateMixItem(id: number, mixItem: Partial<MixItem>): Promise<MixItem | undefined>;
+  deleteMixItem(id: number): Promise<boolean>;
   
   // Categories
   getCategories(): Promise<Category[]>;
@@ -164,6 +180,8 @@ export class MemStorage implements IStorage {
   private rawMaterials: Map<number, RawMaterial>;
   private finalProducts: Map<number, FinalProduct>;
   private smsMessages: Map<number, SmsMessage>;
+  private mixMaterials: Map<number, MixMaterial>;
+  private mixItems: Map<number, MixItem>;
   
   private currentCustomerProductId: number;
   private currentOrderId: number;
@@ -171,6 +189,8 @@ export class MemStorage implements IStorage {
   private currentRawMaterialId: number;
   private currentFinalProductId: number;
   private currentSmsMessageId: number;
+  private currentMixMaterialId: number;
+  private currentMixItemId: number;
   
   sessionStore: session.Store;
 
@@ -195,6 +215,8 @@ export class MemStorage implements IStorage {
     this.rawMaterials = new Map();
     this.finalProducts = new Map();
     this.smsMessages = new Map();
+    this.mixMaterials = new Map();
+    this.mixItems = new Map();
     
     this.currentCustomerProductId = 1;
     this.currentOrderId = 1;
@@ -202,6 +224,8 @@ export class MemStorage implements IStorage {
     this.currentRawMaterialId = 1;
     this.currentFinalProductId = 1;
     this.currentSmsMessageId = 1;
+    this.currentMixMaterialId = 1;
+    this.currentMixItemId = 1;
     
     // Initialize with sample data
     this.initializeData();
@@ -762,6 +786,221 @@ export class MemStorage implements IStorage {
 
   async deleteSmsMessage(id: number): Promise<boolean> {
     return this.smsMessages.delete(id);
+  }
+
+  // Mix Materials
+  async getMixMaterials(): Promise<MixMaterial[]> {
+    return Array.from(this.mixMaterials.values());
+  }
+
+  async getMixMaterial(id: number): Promise<MixMaterial | undefined> {
+    return this.mixMaterials.get(id);
+  }
+
+  async createMixMaterial(mix: InsertMixMaterial): Promise<MixMaterial> {
+    const id = this.currentMixMaterialId++;
+    const totalQuantity = 0; // Will be updated as mix items are added
+    const newMix: MixMaterial = {
+      ...mix,
+      id,
+      mixDate: new Date(),
+      totalQuantity,
+      createdAt: new Date()
+    };
+    this.mixMaterials.set(id, newMix);
+    return newMix;
+  }
+
+  async updateMixMaterial(id: number, mix: Partial<MixMaterial>): Promise<MixMaterial | undefined> {
+    const existingMix = this.mixMaterials.get(id);
+    if (!existingMix) return undefined;
+
+    const updatedMix = { ...existingMix, ...mix };
+    this.mixMaterials.set(id, updatedMix);
+    return updatedMix;
+  }
+
+  async deleteMixMaterial(id: number): Promise<boolean> {
+    // First delete any associated mix items
+    const mixItems = await this.getMixItemsByMix(id);
+    for (const item of mixItems) {
+      await this.deleteMixItem(item.id);
+    }
+    return this.mixMaterials.delete(id);
+  }
+
+  // Mix Items
+  async getMixItems(): Promise<MixItem[]> {
+    return Array.from(this.mixItems.values());
+  }
+
+  async getMixItemsByMix(mixId: number): Promise<MixItem[]> {
+    return Array.from(this.mixItems.values()).filter(item => item.mixId === mixId);
+  }
+
+  async getMixItem(id: number): Promise<MixItem | undefined> {
+    return this.mixItems.get(id);
+  }
+
+  async createMixItem(mixItem: InsertMixItem): Promise<MixItem> {
+    const id = this.currentMixItemId++;
+    
+    // Get the mix to update total quantity
+    const mix = await this.getMixMaterial(mixItem.mixId);
+    if (!mix) {
+      throw new Error(`Mix with ID ${mixItem.mixId} not found`);
+    }
+    
+    // Get the raw material to reduce quantity from inventory
+    const rawMaterial = await this.getRawMaterial(mixItem.rawMaterialId);
+    if (!rawMaterial) {
+      throw new Error(`Raw material with ID ${mixItem.rawMaterialId} not found`);
+    }
+
+    // Update the raw material quantity
+    if (rawMaterial.quantity !== null && rawMaterial.quantity >= mixItem.quantity) {
+      await this.updateRawMaterial(
+        rawMaterial.id, 
+        { quantity: rawMaterial.quantity - mixItem.quantity }
+      );
+    } else {
+      throw new Error(`Insufficient quantity of raw material ${rawMaterial.name}`);
+    }
+    
+    // Update the mix total quantity
+    const newTotalQuantity = mix.totalQuantity + mixItem.quantity;
+    await this.updateMixMaterial(mix.id, { totalQuantity: newTotalQuantity });
+    
+    // Calculate the percentage of this item in the mix
+    const percentage = (mixItem.quantity / newTotalQuantity) * 100;
+    
+    // Create the mix item with percentage
+    const newMixItem: MixItem = {
+      ...mixItem,
+      id,
+      percentage
+    };
+    
+    // Update percentages for all items in this mix
+    const mixItems = await this.getMixItemsByMix(mixItem.mixId);
+    for (const item of mixItems) {
+      // Skip the current item as it's not in the map yet
+      if (item.id === id) continue;
+      
+      // Recalculate percentage for existing items
+      const updatedPercentage = (item.quantity / newTotalQuantity) * 100;
+      await this.updateMixItem(item.id, { percentage: updatedPercentage });
+    }
+    
+    this.mixItems.set(id, newMixItem);
+    return newMixItem;
+  }
+
+  async updateMixItem(id: number, mixItemUpdate: Partial<MixItem>): Promise<MixItem | undefined> {
+    const existingMixItem = this.mixItems.get(id);
+    if (!existingMixItem) return undefined;
+
+    // Handle quantity changes that require recalculation of percentages
+    if (mixItemUpdate.quantity !== undefined && 
+        mixItemUpdate.quantity !== existingMixItem.quantity) {
+      
+      const mix = await this.getMixMaterial(existingMixItem.mixId);
+      if (!mix) {
+        throw new Error(`Mix with ID ${existingMixItem.mixId} not found`);
+      }
+
+      // Calculate the new total quantity for the mix
+      const quantityDiff = mixItemUpdate.quantity - existingMixItem.quantity;
+      const newTotalQuantity = mix.totalQuantity + quantityDiff;
+      
+      // Update the raw material quantity
+      if (quantityDiff !== 0) {
+        const rawMaterial = await this.getRawMaterial(existingMixItem.rawMaterialId);
+        if (!rawMaterial) {
+          throw new Error(`Raw material with ID ${existingMixItem.rawMaterialId} not found`);
+        }
+        
+        if (quantityDiff > 0) {
+          // Check if we have enough raw material
+          if (rawMaterial.quantity !== null && rawMaterial.quantity >= quantityDiff) {
+            await this.updateRawMaterial(
+              rawMaterial.id, 
+              { quantity: rawMaterial.quantity - quantityDiff }
+            );
+          } else {
+            throw new Error(`Insufficient quantity of raw material ${rawMaterial.name}`);
+          }
+        } else {
+          // Return raw material to inventory
+          await this.updateRawMaterial(
+            rawMaterial.id,
+            { quantity: (rawMaterial.quantity || 0) - quantityDiff }
+          );
+        }
+      }
+      
+      // Update the mix total quantity
+      await this.updateMixMaterial(mix.id, { totalQuantity: newTotalQuantity });
+      
+      // Calculate the new percentage for this item
+      mixItemUpdate.percentage = (mixItemUpdate.quantity / newTotalQuantity) * 100;
+      
+      // Update percentages for all other items in this mix
+      const mixItems = await this.getMixItemsByMix(existingMixItem.mixId);
+      for (const item of mixItems) {
+        // Skip the current item as it will be updated later
+        if (item.id === id) continue;
+        
+        // Recalculate percentage for other items
+        const updatedPercentage = (item.quantity / newTotalQuantity) * 100;
+        const otherUpdatedItem = { ...item, percentage: updatedPercentage };
+        this.mixItems.set(item.id, otherUpdatedItem);
+      }
+    }
+
+    const updatedMixItem = { ...existingMixItem, ...mixItemUpdate };
+    this.mixItems.set(id, updatedMixItem);
+    return updatedMixItem;
+  }
+
+  async deleteMixItem(id: number): Promise<boolean> {
+    const mixItem = this.mixItems.get(id);
+    if (!mixItem) return false;
+    
+    // Get the mix to update total quantity
+    const mix = await this.getMixMaterial(mixItem.mixId);
+    if (!mix) {
+      return this.mixItems.delete(id);
+    }
+    
+    // Get the raw material to return quantity to inventory
+    const rawMaterial = await this.getRawMaterial(mixItem.rawMaterialId);
+    if (rawMaterial) {
+      // Return raw material to inventory
+      await this.updateRawMaterial(
+        rawMaterial.id,
+        { quantity: (rawMaterial.quantity || 0) + mixItem.quantity }
+      );
+    }
+    
+    // Update the mix total quantity
+    const newTotalQuantity = mix.totalQuantity - mixItem.quantity;
+    await this.updateMixMaterial(mix.id, { totalQuantity: newTotalQuantity });
+    
+    // Update percentages for remaining items in this mix
+    const mixItems = await this.getMixItemsByMix(mixItem.mixId);
+    for (const item of mixItems) {
+      // Skip the current item as it will be deleted
+      if (item.id === id) continue;
+      
+      // Recalculate percentage for remaining items
+      const updatedPercentage = newTotalQuantity > 0 
+        ? (item.quantity / newTotalQuantity) * 100 
+        : 0;
+      await this.updateMixItem(item.id, { percentage: updatedPercentage });
+    }
+    
+    return this.mixItems.delete(id);
   }
 }
 

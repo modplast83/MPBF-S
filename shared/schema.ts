@@ -292,3 +292,39 @@ export const insertSmsMessageSchema = createInsertSchema(smsMessages).omit({
 });
 export type InsertSmsMessage = z.infer<typeof insertSmsMessageSchema>;
 export type SmsMessage = typeof smsMessages.$inferSelect;
+
+// Mix Materials table
+export const mixMaterials = pgTable("mix_materials", {
+  id: serial("id").primaryKey(),
+  mixDate: timestamp("mix_date").defaultNow().notNull(),
+  mixPerson: text("mix_person").notNull().references(() => users.id),
+  orderId: integer("order_id").references(() => orders.id),
+  machineId: text("machine_id").references(() => machines.id),
+  totalQuantity: doublePrecision("total_quantity").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMixMaterialSchema = createInsertSchema(mixMaterials).omit({ 
+  id: true, 
+  mixDate: true, 
+  totalQuantity: true,
+  createdAt: true 
+});
+export type InsertMixMaterial = z.infer<typeof insertMixMaterialSchema>;
+export type MixMaterial = typeof mixMaterials.$inferSelect;
+
+// Mix Items table
+export const mixItems = pgTable("mix_items", {
+  id: serial("id").primaryKey(),
+  mixId: integer("mix_id").notNull().references(() => mixMaterials.id),
+  rawMaterialId: integer("raw_material_id").notNull().references(() => rawMaterials.id),
+  quantity: doublePrecision("quantity").notNull(),
+  percentage: doublePrecision("percentage").default(0),
+});
+
+export const insertMixItemSchema = createInsertSchema(mixItems).omit({ 
+  id: true,
+  percentage: true 
+});
+export type InsertMixItem = z.infer<typeof insertMixItemSchema>;
+export type MixItem = typeof mixItems.$inferSelect;
