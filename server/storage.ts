@@ -837,7 +837,44 @@ export class MemStorage implements IStorage {
     for (const item of mixItems) {
       await this.deleteMixItem(item.id);
     }
+    
+    // Delete any machine associations
+    await this.deleteMixMachinesByMixId(id);
+    
     return this.mixMaterials.delete(id);
+  }
+  
+  // Mix Machines
+  async getMixMachines(): Promise<MixMachine[]> {
+    return Array.from(this.mixMachines.values());
+  }
+  
+  async getMixMachinesByMixId(mixId: number): Promise<MixMachine[]> {
+    return Array.from(this.mixMachines.values())
+      .filter(mixMachine => mixMachine.mixId === mixId);
+  }
+  
+  async createMixMachine(mixMachine: InsertMixMachine): Promise<MixMachine> {
+    const id = this.currentMixMachineId++;
+    const newMixMachine: MixMachine = {
+      ...mixMachine,
+      id
+    };
+    this.mixMachines.set(id, newMixMachine);
+    return newMixMachine;
+  }
+  
+  async deleteMixMachinesByMixId(mixId: number): Promise<boolean> {
+    const toDelete = await this.getMixMachinesByMixId(mixId);
+    
+    let success = true;
+    for (const mixMachine of toDelete) {
+      if (!this.mixMachines.delete(mixMachine.id)) {
+        success = false;
+      }
+    }
+    
+    return success;
   }
 
   // Mix Items

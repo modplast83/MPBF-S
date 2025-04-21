@@ -1872,7 +1872,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/mix-materials", requireAuth, async (_req: Request, res: Response) => {
     try {
       const mixMaterials = await storage.getMixMaterials();
-      res.json(mixMaterials);
+      
+      // Collect all mix IDs to get machine associations
+      const mixIds = mixMaterials.map(mix => mix.id);
+      
+      // Create a map of mixId -> machines for efficient lookup
+      const mixMachinesMap = new Map<number, string[]>();
+      
+      // Process each mix to get its associated machines
+      for (const mixId of mixIds) {
+        const mixMachines = await storage.getMixMachinesByMixId(mixId);
+        const machineIds = mixMachines.map(mm => mm.machineId);
+        mixMachinesMap.set(mixId, machineIds);
+      }
+      
+      // Combine mix data with machine information
+      const result = mixMaterials.map(mix => ({
+        ...mix,
+        machines: mixMachinesMap.get(mix.id) || []
+      }));
+      
+      res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to get mix materials" });
     }
@@ -1890,7 +1910,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Mix material not found" });
       }
       
-      res.json(mixMaterial);
+      // Get associated machines
+      const mixMachines = await storage.getMixMachinesByMixId(id);
+      const machineIds = mixMachines.map(mm => mm.machineId);
+      
+      // Return mix with machine information
+      const result = {
+        ...mixMaterial,
+        machines: machineIds
+      };
+      
+      res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to get mix material" });
     }
