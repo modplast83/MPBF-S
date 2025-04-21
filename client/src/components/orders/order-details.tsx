@@ -312,8 +312,8 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
     // Format job orders and products for printing
     const jobOrderRows = jobOrders?.map((jobOrder, index) => {
       const product = getCustomerProduct(jobOrder);
-      // Convert yes/no to Y/N for printed
-      const printedValue = product?.printed ? (product.printed === "yes" ? "Y" : "N") : "N";
+      // Convert yes/no/checked to Y/N for printed
+      const printedValue = product?.printed ? (product.printed === "yes" || product.printed === "checked" ? "Y" : "N") : "N";
       
       // Get item name
       const item = items?.find(i => i.id === product?.itemId);
