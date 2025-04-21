@@ -12,6 +12,7 @@ import OrdersIndex from "@/pages/orders/index";
 import OrderDetails from "@/pages/orders/[id]";
 import WorkflowIndex from "@/pages/workflow/index";
 import ProductionIndex from "@/pages/production/index";
+import MixMaterialsPage from "@/pages/production/mix-materials";
 import WarehouseIndex from "@/pages/warehouse/index";
 import RawMaterials from "@/pages/warehouse/raw-materials";
 import FinalProducts from "@/pages/warehouse/final-products";
@@ -57,6 +58,7 @@ function App() {
           <ProtectedRoute path="/setup/machines" component={Machines} />
           <ProtectedRoute path="/setup/users" component={Users} />
           <ProtectedRoute path="/production" component={ProductionIndex} />
+          <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} />
           <ProtectedRoute path="/orders" component={OrdersIndex} />
           <ProtectedRoute path="/orders/:id" component={OrderDetails} />
           <ProtectedRoute path="/workflow" component={WorkflowIndex} />
