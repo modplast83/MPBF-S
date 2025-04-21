@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { RollDialog } from "@/components/workflow/roll-dialog";
-import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item } from "@shared/schema";
+import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item, MasterBatch } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 
 // Single roll query component
@@ -55,6 +55,11 @@ export function JobOrdersForExtrusion() {
   // Fetch all items
   const { data: items = [], isLoading: itemsLoading } = useQuery<Item[]>({
     queryKey: [API_ENDPOINTS.ITEMS],
+  });
+  
+  // Fetch all master batches
+  const { data: masterBatches = [], isLoading: masterBatchesLoading } = useQuery<MasterBatch[]>({
+    queryKey: [API_ENDPOINTS.MASTER_BATCHES],
   });
 
   // Fetch rolls by stage
@@ -212,6 +217,37 @@ export function JobOrdersForExtrusion() {
     return item ? item.name : "Unknown Item";
   };
   
+  // Get thickness for a job order
+  const getThickness = (jobOrder: JobOrder): string => {
+    if (!customerProducts.length) return "Loading...";
+    
+    const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
+    if (!product) return "Unknown";
+    
+    return product.thickness ? `${product.thickness} mm` : "N/A";
+  };
+  
+  // Get raw material for a job order
+  const getRawMaterial = (jobOrder: JobOrder): string => {
+    if (!customerProducts.length) return "Loading...";
+    
+    const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
+    if (!product) return "Unknown";
+    
+    return product.rawMaterial || "N/A";
+  };
+  
+  // Get master batch name for a job order
+  const getMasterBatchName = (jobOrder: JobOrder): string => {
+    if (!customerProducts.length || !masterBatches.length) return "Loading...";
+    
+    const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
+    if (!product || !product.masterBatchId) return "No Master Batch";
+    
+    const masterBatch = masterBatches.find(mb => mb.id === product.masterBatchId);
+    return masterBatch ? masterBatch.name : "Unknown Master Batch";
+  };
+  
   // Get product details for a job order
   const getProductDetails = (jobOrder: JobOrder): string => {
     if (!customerProducts.length) return "Loading...";
@@ -241,7 +277,7 @@ export function JobOrdersForExtrusion() {
     return true;
   });
 
-  if (jobOrdersLoading || customerProductsLoading || customersLoading || itemsLoading) {
+  if (jobOrdersLoading || customerProductsLoading || customersLoading || itemsLoading || masterBatchesLoading) {
     return (
       <div className="space-y-4">
         <div className="animate-pulse bg-secondary-100 h-40 rounded-lg"></div>
@@ -338,6 +374,18 @@ export function JobOrdersForExtrusion() {
                       <div>
                         <p className="text-sm text-secondary-500">Required Quantity</p>
                         <p className="font-medium">{jobOrder.quantity} kg</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-secondary-500">Thickness</p>
+                        <p className="font-medium">{getThickness(jobOrder)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-secondary-500">Raw Material</p>
+                        <p className="font-medium">{getRawMaterial(jobOrder)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-secondary-500">Master Batch</p>
+                        <p className="font-medium">{getMasterBatchName(jobOrder)}</p>
                       </div>
                       <div>
                         <p className="text-sm text-secondary-500">Product Details</p>
