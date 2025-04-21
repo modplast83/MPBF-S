@@ -153,8 +153,8 @@ export default function VirtualTour() {
   return (
     <div className="container p-6">
       <PageHeader 
-        title={t("virtual_tour.title", "Virtual Factory Tour")} 
-        description={t("virtual_tour.description", "Explore our factory floor with 360-degree views")}
+        heading={t("virtual_tour.title", "Virtual Factory Tour")} 
+        text={t("virtual_tour.description", "Explore our factory floor with 360-degree views")}
       />
 
       <Card className="mb-8">
@@ -217,7 +217,7 @@ export default function VirtualTour() {
               </div>
               <div className="mt-4">
                 <Button variant="outline" onClick={() => setCurrentArea("printing")}>
-                  {t("virtual_tour.next_area", "Next Area: Printing")}
+                  {t("virtual_tour.next_area", { area: t("virtual_tour.printing", "Printing") })}
                 </Button>
               </div>
             </CardContent>
