@@ -1,6 +1,5 @@
 import { Switch, Route } from "wouter";
 import Dashboard from "@/pages/dashboard";
-import VirtualTour from "@/pages/virtual-tour";
 import SetupIndex from "@/pages/setup/index";
 import Categories from "@/pages/setup/categories";
 import Products from "@/pages/setup/products";
@@ -49,7 +48,6 @@ function App() {
         <Switch>
           <Route path="/auth" component={AuthPage} />
           <ProtectedRoute path="/" component={Dashboard} />
-          <ProtectedRoute path="/virtual-tour" component={VirtualTour} />
           <ProtectedRoute path="/setup" component={SetupIndex} />
           <ProtectedRoute path="/setup/categories" component={Categories} />
           <ProtectedRoute path="/setup/products" component={Products} />
