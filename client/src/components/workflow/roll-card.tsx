@@ -182,6 +182,9 @@ export function RollCard({ roll }: RollCardProps) {
                     : roll.cuttingQty
               } Kg
             </p>
+            {roll.currentStage === "printing" && customerProduct?.printingCylinder && (
+              <p><span className="font-medium">Printing Cylinder:</span> {customerProduct.printingCylinder} Inch</p>
+            )}
           </div>
           <div className="mt-4 flex justify-end border-t pt-3 border-secondary-100">
             {roll.status === "pending" ? (
