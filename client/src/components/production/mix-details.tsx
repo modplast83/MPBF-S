@@ -258,6 +258,9 @@ export function MixDetails({ mixId, rawMaterials, machines, onClose }: MixDetail
                           {material.name} ({material.quantity !== null ? `${material.quantity.toFixed(2)} ${material.unit}` : 'Out of stock'})
                         </SelectItem>
                       ))}
+                      {rawMaterials.length === 0 && (
+                        <SelectItem value="no-materials">No materials available</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

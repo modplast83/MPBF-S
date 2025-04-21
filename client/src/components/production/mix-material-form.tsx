@@ -65,6 +65,11 @@ export function MixMaterialForm({ rawMaterials, machines, onSuccess }: MixMateri
     machineId: null,
     orderId: null,
   };
+  
+  // Handle form field transformations
+  const handleMachineChange = (value: string) => {
+    return value === "none" ? null : value;
+  };
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -127,8 +132,8 @@ export function MixMaterialForm({ rawMaterials, machines, onSuccess }: MixMateri
               <FormItem>
                 <FormLabel>Machine (Optional)</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value || ""}
+                  onValueChange={(value) => field.onChange(handleMachineChange(value))}
+                  value={field.value || "none"}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -136,7 +141,7 @@ export function MixMaterialForm({ rawMaterials, machines, onSuccess }: MixMateri
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {machines.map((machine) => (
                       <SelectItem key={machine.id} value={machine.id}>
                         {machine.name}
