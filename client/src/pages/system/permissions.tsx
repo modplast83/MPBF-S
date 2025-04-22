@@ -131,16 +131,20 @@ export default function Permissions() {
   // Mutation for updating permissions
   const updatePermissionMutation = useMutation({
     mutationFn: async (permission: { id: number, data: Partial<Permission> }) => {
-      // Convert to API format
-      const apiFormat = {
-        role: permission.data.role,
-        module: permission.data.module,
-        can_view: permission.data.canView,
-        can_create: permission.data.canCreate,
-        can_edit: permission.data.canEdit,
-        can_delete: permission.data.canDelete,
-        is_active: permission.data.isActive
-      };
+      // Convert to API format - we need to map camelCase to snake_case
+      // Only include properties that are actually changed
+      const apiFormat: Record<string, any> = {};
+      
+      // Only add fields that exist in the data object
+      if (permission.data.role !== undefined) apiFormat.role = permission.data.role;
+      if (permission.data.module !== undefined) apiFormat.module = permission.data.module;
+      if (permission.data.canView !== undefined) apiFormat.can_view = permission.data.canView;
+      if (permission.data.canCreate !== undefined) apiFormat.can_create = permission.data.canCreate;
+      if (permission.data.canEdit !== undefined) apiFormat.can_edit = permission.data.canEdit;
+      if (permission.data.canDelete !== undefined) apiFormat.can_delete = permission.data.canDelete;
+      if (permission.data.isActive !== undefined) apiFormat.is_active = permission.data.isActive;
+      
+      console.log('Updating permission:', permission.id, apiFormat);
       
       const response = await fetch(`/api/permissions/${permission.id}`, {
         method: 'PUT',
@@ -313,9 +317,18 @@ export default function Permissions() {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-secondary-900">User Permissions</h1>
-        <Button onClick={handleSaveChanges}>
-          <span className="material-icons text-sm mr-1">save</span>
-          Save Changes
+        <Button onClick={handleSaveChanges} disabled={isSaving || Object.keys(changedPermissions).length === 0}>
+          {isSaving ? (
+            <>
+              <span className="material-icons animate-spin text-sm mr-1">refresh</span>
+              Saving...
+            </>
+          ) : (
+            <>
+              <span className="material-icons text-sm mr-1">save</span>
+              Save Changes
+            </>
+          )}
         </Button>
       </div>
 
