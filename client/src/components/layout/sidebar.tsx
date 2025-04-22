@@ -38,7 +38,7 @@ export default function Sidebar() {
   return (
     <aside 
       className={cn(
-        "bg-gradient-to-b from-primary-900 to-primary-950 text-white h-screen fixed top-0 z-50 flex flex-col transition-all duration-300 shadow-lg",
+        "bg-gradient-to-b from-primary-800 to-primary-900 text-white h-screen fixed top-0 z-50 flex flex-col transition-all duration-300 shadow-lg",
         expanded ? "w-[250px]" : "w-[64px]",
         isRTL ? "right-0" : "left-0"
       )}
@@ -75,7 +75,7 @@ export default function Sidebar() {
         {SIDEBAR_ITEMS.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {expanded && (
-              <div className="px-4 py-2 text-primary-200/70 text-xs font-semibold uppercase tracking-wider">
+              <div className="px-4 py-2 text-primary-100 text-xs font-semibold uppercase tracking-wider">
                 {t(`sidebar.${section.title.toLowerCase()}`)}
               </div>
             )}
@@ -89,11 +89,11 @@ export default function Sidebar() {
                   >
                     <CollapsibleTrigger
                       className={cn(
-                        `flex items-center px-3 py-3 w-full rounded-md mx-2 my-1 hover:bg-primary-800/60 hover:shadow-md text-white/90 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
-                        isActive(item.path) && "bg-primary-800/80 shadow-md text-white"
+                        `flex items-center px-3 py-3 w-full rounded-md mx-2 my-1 hover:bg-primary-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                        isActive(item.path) && "bg-primary-600 shadow-md text-white border-l-4 border-white"
                       )}
                     >
-                      <span className={`material-icons ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
+                      <span className={`material-icons text-primary-100 ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
                       {expanded && (
                         <>
                           <span className="flex-1 font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
@@ -114,8 +114,8 @@ export default function Sidebar() {
                               key={subIndex} 
                               href={subItem.path}
                               className={cn(
-                                `flex items-center py-2 px-3 mx-3 my-1 rounded text-white/80 hover:bg-primary-700/30 hover:text-white transition-colors text-sm ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
-                                isActive(subItem.path) && "bg-primary-700/40 text-white font-medium"
+                                `flex items-center py-2 px-3 mx-3 my-1 rounded text-white hover:bg-primary-600/50 hover:text-white transition-colors text-sm ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
+                                isActive(subItem.path) && "bg-primary-600/50 text-white font-medium"
                               )}
                             >
                               <span className="h-1.5 w-1.5 rounded-full bg-white/40 mr-2"></span>
@@ -130,11 +130,11 @@ export default function Sidebar() {
                   <Link 
                     href={item.path}
                     className={cn(
-                      `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-primary-800/60 hover:shadow-md text-white/90 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
-                      isActive(item.path) && "bg-primary-800/80 shadow-md text-white"
+                      `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-primary-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                      isActive(item.path) && "bg-primary-600 shadow-md text-white border-l-4 border-white"
                     )}
                   >
-                    <span className={`material-icons ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
+                    <span className={`material-icons text-primary-100 ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
                     {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
                   </Link>
                 )}
