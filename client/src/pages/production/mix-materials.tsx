@@ -111,7 +111,6 @@ export default function MixMaterialsPage() {
               </DialogHeader>
               <MixMaterialForm 
                 rawMaterials={rawMaterials || []}
-                machines={machines || []}
                 onSuccess={() => {
                   setIsCreateDialogOpen(false);
                   refetchMixes();

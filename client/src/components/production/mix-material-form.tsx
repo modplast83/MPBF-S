@@ -1,18 +1,16 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { 
   Form, 
   FormControl, 
   FormDescription, 
-  FormField, 
   FormItem, 
   FormLabel, 
   FormMessage 
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   Select, 
   SelectContent, 
@@ -20,77 +18,109 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { z } from "zod";
-import { insertMixMaterialSchema, RawMaterial, Machine } from "@shared/schema";
+import { insertMixMaterialSchema, RawMaterial } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
-// Create a form schema based on the Drizzle schema with additional validations
+// Create a simplified form schema without machine or order
 const formSchema = insertMixMaterialSchema
-  .extend({
-    machineId: z.string().nullable(),
-    orderId: z.number().nullable(),
-  })
-  .refine(
-    (data) => {
-      // At least one field must be filled
-      return data.mixPerson.trim() !== "";
-    },
-    {
-      message: "Operator name is required",
-      path: ["mixPerson"],
-    }
-  );
+  .omit({
+    mixPerson: true, // We'll set this automatically from the current user
+  });
 
 type FormValues = z.infer<typeof formSchema>;
 
+interface MaterialItem {
+  rawMaterialId: number;
+  quantity: number;
+}
+
 interface MixMaterialFormProps {
   rawMaterials: RawMaterial[];
-  machines: Machine[];
   onSuccess?: () => void;
 }
 
-export function MixMaterialForm({ rawMaterials, machines, onSuccess }: MixMaterialFormProps) {
+export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showRawMaterialForm, setShowRawMaterialForm] = useState(false);
   const [selectedRawMaterial, setSelectedRawMaterial] = useState<number | null>(null);
   const [rawMaterialQuantity, setRawMaterialQuantity] = useState("");
-
-  // Get the default form values
-  const defaultValues: FormValues = {
-    mixPerson: "",
-    machineId: null,
-    orderId: null,
-  };
+  const [materials, setMaterials] = useState<MaterialItem[]>([]);
   
-  // Handle form field transformations
-  const handleMachineChange = (value: string) => {
-    return value === "none" ? null : value;
-  };
+  // Get current user
+  const { data: currentUser } = useQuery<{id: string, name: string}>({
+    queryKey: [API_ENDPOINTS.USER],
+    staleTime: 300000, // 5 minutes
+  });
 
   // Initialize form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {},
   });
 
   // Create mix material mutation
   const createMixMutation = useMutation({
-    mutationFn: async (data: FormValues) => {
-      return apiRequest(API_ENDPOINTS.MIX_MATERIALS, {
+    mutationFn: async () => {
+      // First create the mix with the current user as the operator
+      const userId = currentUser?.id;
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+      
+      // Create mix with current user as operator
+      const mixResponse = await fetch(API_ENDPOINTS.MIX_MATERIALS, {
         method: "POST",
-        data,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          mixPerson: userId,
+        }),
       });
+      
+      if (!mixResponse.ok) {
+        const error = await mixResponse.json();
+        throw new Error(error.message || "Failed to create mix");
+      }
+      
+      const mixData = await mixResponse.json();
+      const mixId = mixData.id;
+      
+      // Then add all materials to the mix
+      for (const material of materials) {
+        const itemResponse = await fetch(API_ENDPOINTS.MIX_ITEMS, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mixId,
+            rawMaterialId: material.rawMaterialId,
+            quantity: material.quantity,
+          }),
+        });
+        
+        if (!itemResponse.ok) {
+          const error = await itemResponse.json();
+          throw new Error(error.message || "Failed to add material to mix");
+        }
+      }
+      
+      return mixData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MIX_MATERIALS] });
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.RAW_MATERIALS] });
       toast({
         title: "Success",
         description: "Mix material created successfully!",
-        variant: "success",
+        variant: "destructive",
       });
       onSuccess?.();
     },
@@ -103,71 +133,197 @@ export function MixMaterialForm({ rawMaterials, machines, onSuccess }: MixMateri
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    createMixMutation.mutate(data);
+  const addMaterial = () => {
+    if (!selectedRawMaterial) {
+      toast({
+        title: "Error",
+        description: "Please select a raw material",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const quantity = parseFloat(rawMaterialQuantity);
+    if (isNaN(quantity) || quantity <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid quantity greater than zero",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if we already have this material
+    if (materials.some(m => m.rawMaterialId === selectedRawMaterial)) {
+      toast({
+        title: "Error",
+        description: "This material is already added to the mix",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Add the material to our list
+    setMaterials([...materials, { rawMaterialId: selectedRawMaterial, quantity }]);
+    
+    // Reset the inputs
+    setSelectedRawMaterial(null);
+    setRawMaterialQuantity("");
   };
+
+  const removeMaterial = (index: number) => {
+    const newMaterials = [...materials];
+    newMaterials.splice(index, 1);
+    setMaterials(newMaterials);
+  };
+
+  const onSubmit = () => {
+    if (materials.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add at least one material to the mix",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    createMixMutation.mutate();
+  };
+
+  // Get the material name by ID
+  const getMaterialName = (id: number) => {
+    const material = rawMaterials.find(m => m.id === id);
+    return material ? material.name : `Unknown Material (${id})`;
+  };
+
+  // Calculate total weight of the mix
+  const totalWeight = materials.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="space-y-4">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
-          <FormField
-            control={form.control}
-            name="mixPerson"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Operator Name</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Enter operator name" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4 pt-2">
+          {/* Current Operator Display */}
+          <Alert className="bg-muted">
+            <AlertTitle>Current Operator</AlertTitle>
+            <AlertDescription>
+              {currentUser?.name || "Loading user information..."}
+            </AlertDescription>
+          </Alert>
 
-          <FormField
-            control={form.control}
-            name="machineId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Machine (Optional)</FormLabel>
+          {/* Material Selection */}
+          <div className="space-y-4 border rounded-md p-4">
+            <h3 className="text-lg font-medium">Add Materials</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+              <div className="md:col-span-2">
+                <FormLabel>Raw Material</FormLabel>
                 <Select
-                  onValueChange={(value) => field.onChange(handleMachineChange(value))}
-                  value={field.value || "none"}
+                  value={selectedRawMaterial?.toString() || ""}
+                  onValueChange={(value) => setSelectedRawMaterial(parseInt(value))}
                 >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a machine" />
-                    </SelectTrigger>
-                  </FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select material" />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {machines.map((machine) => (
-                      <SelectItem key={machine.id} value={machine.id}>
-                        {machine.name}
+                    {rawMaterials.map((material) => (
+                      <SelectItem key={material.id} value={material.id.toString()}>
+                        {material.name} ({material.quantity} {material.unit})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  The machine used for this mix (if applicable)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
+              </div>
+              
+              <div className="md:col-span-2">
+                <FormLabel>Quantity (kg)</FormLabel>
+                <Input
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  value={rawMaterialQuantity}
+                  onChange={(e) => setRawMaterialQuantity(e.target.value)}
+                  placeholder="Enter quantity in kg"
+                />
+              </div>
+              
+              <div className="flex items-end">
+                <Button 
+                  type="button" 
+                  onClick={addMaterial}
+                  className="w-full"
+                >
+                  Add
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Material List */}
+          <div className="border rounded-md p-4">
+            <h3 className="text-lg font-medium mb-2">Mix Composition</h3>
+            
+            {materials.length === 0 ? (
+              <p className="text-sm text-gray-500 italic">No materials added yet</p>
+            ) : (
+              <div className="space-y-2">
+                <div className="grid grid-cols-12 gap-2 font-medium text-sm px-2">
+                  <div className="col-span-5">Material</div>
+                  <div className="col-span-2">Quantity</div>
+                  <div className="col-span-2">Unit</div>
+                  <div className="col-span-2">Percentage</div>
+                  <div className="col-span-1"></div>
+                </div>
+                
+                {materials.map((material, index) => {
+                  const percentage = totalWeight > 0 
+                    ? ((material.quantity / totalWeight) * 100).toFixed(1) 
+                    : "0.0";
+                    
+                  return (
+                    <div key={index} className="grid grid-cols-12 gap-2 items-center bg-muted rounded-md p-2">
+                      <div className="col-span-5">{getMaterialName(material.rawMaterialId)}</div>
+                      <div className="col-span-2">{material.quantity}</div>
+                      <div className="col-span-2">kg</div>
+                      <div className="col-span-2">
+                        <Badge variant="outline">{percentage}%</Badge>
+                      </div>
+                      <div className="col-span-1">
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => removeMaterial(index)}
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                <div className="grid grid-cols-12 gap-2 font-medium text-sm mt-2 pt-2 border-t">
+                  <div className="col-span-5">Total</div>
+                  <div className="col-span-2">{totalWeight.toFixed(1)}</div>
+                  <div className="col-span-2">kg</div>
+                  <div className="col-span-2">100.0%</div>
+                  <div className="col-span-1"></div>
+                </div>
+              </div>
             )}
-          />
+          </div>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => form.reset(defaultValues)}
+              onClick={() => setMaterials([])}
             >
               Reset
             </Button>
             <Button 
               type="submit" 
-              disabled={createMixMutation.isPending}
+              disabled={createMixMutation.isPending || materials.length === 0}
             >
               {createMixMutation.isPending ? (
                 <>
@@ -181,10 +337,6 @@ export function MixMaterialForm({ rawMaterials, machines, onSuccess }: MixMateri
           </div>
         </form>
       </Form>
-
-      <div className="text-center text-sm text-secondary-500 pt-4">
-        <p>After creating the mix, you will be able to add raw materials to it.</p>
-      </div>
     </div>
   );
 }

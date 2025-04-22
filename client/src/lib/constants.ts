@@ -1,5 +1,8 @@
 // API endpoints
 export const API_ENDPOINTS = {
+  // Authentication
+  USER: "/api/user",
+  
   // Setup
   CATEGORIES: "/api/categories",
   ITEMS: "/api/items",
