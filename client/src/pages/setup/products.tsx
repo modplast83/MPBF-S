@@ -111,6 +111,7 @@ export default function Products() {
     return categories?.find(c => c.id === categoryId)?.name || "Unknown";
   };
 
+  // Define columns with proper typing
   const columns = [
     {
       header: "Customer",
@@ -119,21 +120,21 @@ export default function Products() {
     },
     {
       header: "Item",
-      accessorKey: "itemId",
-      cell: (info: any) => getItemName(info.getValue()),
+      accessorFn: (row: CustomerProduct) => getItemName(row.itemId),
+      id: "itemName"
     },
     {
       header: "Category",
-      accessorKey: "categoryId",
-      cell: (info: any) => getCategoryName(info.getValue()),
+      accessorFn: (row: CustomerProduct) => getCategoryName(row.categoryId),
+      id: "categoryName"
     },
     {
       header: "Size",
-      accessorKey: "sizeCaption",
+      accessorKey: "sizeCaption" as const,
     },
     {
       header: "Material",
-      accessorKey: "rawMaterial",
+      accessorKey: "rawMaterial" as const,
     },
     {
       header: "Actions",
@@ -240,6 +241,7 @@ export default function Products() {
           <ProductForm 
             product={editProduct || undefined}
             onSuccess={handleFormClose}
+            preSelectedCustomerId={selectedCustomerId}
           />
         </DialogContent>
       </Dialog>

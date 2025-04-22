@@ -22,7 +22,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { insertCustomerProductSchema, CustomerProduct } from "@shared/schema";
+import { insertCustomerProductSchema, CustomerProduct, Customer, Category, Item } from "@shared/schema";
 
 interface ProductFormProps {
   product?: CustomerProduct;
@@ -30,24 +30,24 @@ interface ProductFormProps {
   preSelectedCustomerId?: string;
 }
 
-export function ProductForm({ product, onSuccess }: ProductFormProps) {
+export function ProductForm({ product, onSuccess, preSelectedCustomerId }: ProductFormProps) {
   const queryClient = useQueryClient();
   const isEditing = !!product;
   
   // Fetch required data
-  const { data: customers, isLoading: customersLoading } = useQuery({
+  const { data: customers = [], isLoading: customersLoading } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
   });
   
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: [API_ENDPOINTS.CATEGORIES],
   });
   
-  const { data: items, isLoading: itemsLoading } = useQuery({
+  const { data: items = [], isLoading: itemsLoading } = useQuery<Item[]>({
     queryKey: [API_ENDPOINTS.ITEMS],
   });
   
-  const { data: masterBatches, isLoading: masterBatchesLoading } = useQuery({
+  const { data: masterBatches = [], isLoading: masterBatchesLoading } = useQuery<any[]>({
     queryKey: [API_ENDPOINTS.MASTER_BATCHES],
   });
   
@@ -82,7 +82,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      customerId: product?.customerId || "",
+      customerId: product?.customerId || preSelectedCustomerId || "",
       categoryId: product?.categoryId || "",
       itemId: product?.itemId || "",
       sizeCaption: product?.sizeCaption || "",
