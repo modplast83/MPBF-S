@@ -285,6 +285,7 @@
       "see_all_orders": "عرض جميع الطلبات",
       "size": "المقاس",
       "quantity": "الكمية",
+      "required_quantity": "الكمية المطلوبة",
       "stage": "المرحلة",
       "active_production_orders": "طلبات الإنتاج النشطة",
       "product": "المنتج"
