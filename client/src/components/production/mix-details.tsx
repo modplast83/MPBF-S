@@ -58,7 +58,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
       toast({
         title: "Success",
         description: "Material added to mix successfully!",
-        variant: "success",
+        variant: "default",
       });
     },
     onError: (error: any) => {
@@ -84,7 +84,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
       toast({
         title: "Success",
         description: "Material removed from mix successfully!",
-        variant: "success",
+        variant: "default",
       });
     },
     onError: (error: any) => {
@@ -165,7 +165,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
               <tr key={item.id}>
                 <td style={{ border: "1px solid #ccc", padding: "4px" }}>{getRawMaterialName(item.rawMaterialId)}</td>
                 <td style={{ border: "1px solid #ccc", padding: "4px", textAlign: "right" }}>{item.quantity.toFixed(2)}</td>
-                <td style={{ border: "1px solid #ccc", padding: "4px", textAlign: "right" }}>{item.percentage.toFixed(2)}%</td>
+                <td style={{ border: "1px solid #ccc", padding: "4px", textAlign: "right" }}>{item.percentage?.toFixed(2) || "0.00"}%</td>
               </tr>
             ))}
           </tbody>
@@ -336,7 +336,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                       {getRawMaterialName(item.rawMaterialId)}
                     </TableCell>
                     <TableCell className="text-right">{item.quantity.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{item.percentage.toFixed(2)}%</TableCell>
+                    <TableCell className="text-right">{item.percentage?.toFixed(2) || "0.00"}%</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

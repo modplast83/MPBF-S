@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { MixMaterial, RawMaterial, Machine } from "@shared/schema";
+import { MixMaterial, RawMaterial } from "@shared/schema";
 import { formatDateString } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MixMaterialForm } from "@/components/production/mix-material-form";
@@ -26,10 +26,7 @@ export default function MixMaterialsPage() {
     queryKey: [API_ENDPOINTS.RAW_MATERIALS],
   });
 
-  // Fetch machines for the select dropdown in the form
-  const { data: machines } = useQuery<Machine[]>({
-    queryKey: [API_ENDPOINTS.MACHINES],
-  });
+  // Machines no longer needed for mix materials
 
   // Table columns for mix materials
   const mixColumns = [
@@ -303,7 +300,6 @@ export default function MixMaterialsPage() {
             <MixDetails 
               mixId={selectedMixId} 
               rawMaterials={rawMaterials || []}
-              machines={machines || []}
               onClose={() => setIsViewDialogOpen(false)}
             />
           )}
