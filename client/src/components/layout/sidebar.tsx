@@ -38,24 +38,26 @@ export default function Sidebar() {
   return (
     <aside 
       className={cn(
-        "bg-black text-white h-screen fixed top-0 z-50 flex flex-col transition-all duration-300",
+        "bg-gradient-to-b from-primary-900 to-primary-950 text-white h-screen fixed top-0 z-50 flex flex-col transition-all duration-300 shadow-lg",
         expanded ? "w-[250px]" : "w-[64px]",
         isRTL ? "right-0" : "left-0"
       )}
     >
-      <div className={`p-4 border-b border-gray-800 ${isRTL ? 'text-right' : 'text-left'}`}>
+      <div className={`p-4 border-b border-primary-800/50 ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className="flex justify-between items-center">
           <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <img 
-              src="/assets/company-logo.png" 
-              alt="Modern Plastic Bag Factory" 
-              className="h-10 w-10 object-contain rounded-full"
-            />
+            <div className="bg-white/10 backdrop-blur-sm p-2 rounded-lg shadow-inner">
+              <img 
+                src="/assets/company-logo.png" 
+                alt="Modern Plastic Bag Factory" 
+                className="h-8 w-8 object-contain"
+              />
+            </div>
             {!expanded && <span className="hidden"></span>}
           </div>
           <button 
             onClick={toggle} 
-            className="text-white focus:outline-none"
+            className="text-white/80 hover:text-white focus:outline-none transition-colors"
           >
             <span className={`material-icons ${isRTL ? 'flip-in-rtl' : ''}`}>
               {expanded ? "menu_open" : "menu"}
@@ -63,7 +65,7 @@ export default function Sidebar() {
           </button>
         </div>
         {expanded && (
-          <h1 className="text-sm font-semibold mt-2 whitespace-normal leading-tight">
+          <h1 className="text-sm font-semibold mt-3 whitespace-normal leading-tight text-white/90">
             {t("app.title")}
           </h1>
         )}
