@@ -72,6 +72,7 @@
       "production": "Production",
       "orders": "Orders",
       "workflow": "Workflow",
+      "mix_materials": "Mix Materials",
       "warehouse": "Warehouse",
       "raw_materials": "Raw Materials",
       "final_products": "Final Products",
@@ -156,7 +157,25 @@
     "production": {
       "title": "Production",
       "orders": "Orders",
-      "workflow": "Workflow"
+      "workflow": "Workflow",
+      "mix_materials": {
+        "title": "Mix Materials",
+        "new_mix": "New Mix",
+        "mix_id": "Mix ID",
+        "date": "Date",
+        "operator": "Operator",
+        "total_weight": "Total Weight",
+        "materials": "Materials",
+        "composition": "Mix Composition",
+        "add_material": "Add Material",
+        "material": "Material",
+        "quantity": "Quantity (kg)",
+        "percentage": "Percentage",
+        "print_label": "Print Label",
+        "add_material_to_mix": "Add Material to Mix",
+        "no_materials": "No materials added to this mix yet",
+        "mix_label": "MIX MATERIAL LABEL"
+      }
     },
     "warehouse": {
       "title": "Warehouse",

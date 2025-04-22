@@ -72,6 +72,7 @@
       "production": "الإنتاج",
       "orders": "الطلبات",
       "workflow": "سير العمل",
+      "mix_materials": "خلط مواد",
       "warehouse": "المستودع",
       "raw_materials": "المواد الخام",
       "final_products": "المنتجات النهائية",
@@ -156,7 +157,25 @@
     "production": {
       "title": "الإنتاج",
       "orders": "الطلبات",
-      "workflow": "سير العمل"
+      "workflow": "سير العمل",
+      "mix_materials": {
+        "title": "خلط مواد",
+        "new_mix": "خلط جديد",
+        "mix_id": "رقم الخلط",
+        "date": "التاريخ",
+        "operator": "المشغل",
+        "total_weight": "الوزن الإجمالي",
+        "materials": "المواد",
+        "composition": "تركيبة الخلط",
+        "add_material": "إضافة مادة",
+        "material": "المادة",
+        "quantity": "الكمية (كجم)",
+        "percentage": "النسبة المئوية",
+        "print_label": "طباعة الملصق",
+        "add_material_to_mix": "إضافة مادة للخلط",
+        "no_materials": "لا توجد مواد مضافة إلى هذا الخلط حتى الآن",
+        "mix_label": "ملصق خلط المواد"
+      }
     },
     "warehouse": {
       "title": "المستودع",
