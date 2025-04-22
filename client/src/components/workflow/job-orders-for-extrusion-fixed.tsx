@@ -32,6 +32,7 @@ function JobOrderRolls({ jobOrderId, isExpanded }: { jobOrderId: number; isExpan
 }
 
 export function JobOrdersForExtrusion() {
+  const { t } = useTranslation();
   const [expandedOrders, setExpandedOrders] = useState<number[]>([]);
   const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
   const [isRollDialogOpen, setIsRollDialogOpen] = useState(false);
@@ -94,8 +95,8 @@ export function JobOrdersForExtrusion() {
       
       // Show success toast
       toast({
-        title: "Roll created",
-        description: "Roll has been created successfully",
+        title: t("production.roll_management.roll_created"),
+        description: t("production.roll_management.roll_created_successfully"),
         variant: "default",
       });
       
@@ -104,8 +105,8 @@ export function JobOrdersForExtrusion() {
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to create roll: ${error}`,
+        title: t("common.error"),
+        description: t("production.roll_management.roll_creation_failed", { error }),
         variant: "destructive",
       });
     },
@@ -204,57 +205,57 @@ export function JobOrdersForExtrusion() {
       }
     }
 
-    return "Unknown Customer";
+    return t("common.unknown_customer");
   };
 
   // Get item name for a job order
   const getItemName = (jobOrder: JobOrder): string => {
-    if (!customerProducts.length || !items.length) return "Loading...";
+    if (!customerProducts.length || !items.length) return t("common.loading");
     
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
-    if (!product) return "Unknown Product";
+    if (!product) return t("common.unknown_product");
     
     const item = items.find(i => i.id === product.itemId);
-    return item ? item.name : "Unknown Item";
+    return item ? item.name : t("common.unknown_item");
   };
   
   // Get thickness for a job order
   const getThickness = (jobOrder: JobOrder): string => {
-    if (!customerProducts.length) return "Loading...";
+    if (!customerProducts.length) return t("common.loading");
     
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
-    if (!product) return "Unknown";
+    if (!product) return t("common.unknown");
     
-    return product.thickness ? `${product.thickness} mm` : "N/A";
+    return product.thickness ? `${product.thickness} mm` : t("common.not_available");
   };
   
   // Get raw material for a job order
   const getRawMaterial = (jobOrder: JobOrder): string => {
-    if (!customerProducts.length) return "Loading...";
+    if (!customerProducts.length) return t("common.loading");
     
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
-    if (!product) return "Unknown";
+    if (!product) return t("common.unknown");
     
-    return product.rawMaterial || "N/A";
+    return product.rawMaterial || t("common.not_available");
   };
   
   // Get master batch name for a job order
   const getMasterBatchName = (jobOrder: JobOrder): string => {
-    if (!customerProducts.length || !masterBatches.length) return "Loading...";
+    if (!customerProducts.length || !masterBatches.length) return t("common.loading");
     
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
-    if (!product || !product.masterBatchId) return "No Master Batch";
+    if (!product || !product.masterBatchId) return t("production.no_master_batch");
     
     const masterBatch = masterBatches.find(mb => mb.id === product.masterBatchId);
-    return masterBatch ? masterBatch.name : "Unknown Master Batch";
+    return masterBatch ? masterBatch.name : t("production.unknown_master_batch");
   };
   
   // Get product details for a job order
   const getProductDetails = (jobOrder: JobOrder): string => {
-    if (!customerProducts.length) return "Loading...";
+    if (!customerProducts.length) return t("common.loading");
     
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
-    if (!product) return "Unknown Product";
+    if (!product) return t("common.unknown_product");
     
     return `${product.sizeCaption || ""} ${product.thickness ? product.thickness + 'mm' : ""}`;
   };
@@ -302,7 +303,7 @@ export function JobOrdersForExtrusion() {
         <Card className="bg-white border border-dashed border-secondary-200">
           <CardContent className="py-6 text-center">
             <span className="material-icons text-3xl text-secondary-400 mb-2">assignment</span>
-            <p className="text-secondary-500">No active job orders for extrusion</p>
+            <p className="text-secondary-500">{t("production.roll_management.no_job_orders_extrusion")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -340,21 +341,21 @@ export function JobOrdersForExtrusion() {
                         <span className="material-icons text-primary-600">description</span>
                       </div>
                       <div className="text-left">
-                        <h4 className="font-medium">Job Order #{jobOrder.id}</h4>
+                        <h4 className="font-medium">{t("orders.job_order")} #{jobOrder.id}</h4>
                         <p className="text-sm text-secondary-500">{getCustomerName(jobOrder)}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Badge variant={jobOrder.status === "pending" ? "outline" : "default"}>
-                        {jobOrder.status === "pending" && "Pending"}
-                        {jobOrder.status === "in_progress" && "In Progress"}
-                        {jobOrder.status === "extrusion_completed" && "Extrusion Completed"}
-                        {jobOrder.status === "completed" && "Completed"}
-                        {jobOrder.status === "cancelled" && "Cancelled"}
+                        {jobOrder.status === "pending" && t("status.pending")}
+                        {jobOrder.status === "in_progress" && t("status.in_progress")}
+                        {jobOrder.status === "extrusion_completed" && t("status.extrusion_completed")}
+                        {jobOrder.status === "completed" && t("status.completed")}
+                        {jobOrder.status === "cancelled" && t("status.cancelled")}
                       </Badge>
                       <div className="text-right">
                         <span className="text-sm font-medium">
-                          {progressPercentage}% Complete
+                          {progressPercentage}% {t("common.complete")}
                         </span>
                       </div>
                     </div>
@@ -364,39 +365,39 @@ export function JobOrdersForExtrusion() {
                 <AccordionContent className="p-0">
                   <div className="px-4 py-3 bg-secondary-50">
                     <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-medium">Details</h5>
+                      <h5 className="font-medium">{t("common.details")}</h5>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <p className="text-sm text-secondary-500">Item Name</p>
+                        <p className="text-sm text-secondary-500">{t("items.item_name")}</p>
                         <p className="font-medium">{getItemName(jobOrder)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">Required Quantity</p>
+                        <p className="text-sm text-secondary-500">{t("orders.required_quantity")}</p>
                         <p className="font-medium">{jobOrder.quantity} kg</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">Thickness</p>
+                        <p className="text-sm text-secondary-500">{t("products.thickness")}</p>
                         <p className="font-medium">{getThickness(jobOrder)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">Raw Material</p>
+                        <p className="text-sm text-secondary-500">{t("products.raw_material")}</p>
                         <p className="font-medium">{getRawMaterial(jobOrder)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">Master Batch</p>
+                        <p className="text-sm text-secondary-500">{t("products.master_batch")}</p>
                         <p className="font-medium">{getMasterBatchName(jobOrder)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">Product Details</p>
+                        <p className="text-sm text-secondary-500">{t("products.product_details")}</p>
                         <p className="font-medium">{getProductDetails(jobOrder)}</p>
                       </div>
                     </div>
                     
                     <div className="mt-2">
                       <div className="flex justify-between text-sm mb-1">
-                        <span>Progress</span>
+                        <span>{t("common.progress")}</span>
                         <span>{progressPercentage}%</span>
                       </div>
                       <Progress value={progressPercentage} className="h-2" />
@@ -405,11 +406,11 @@ export function JobOrdersForExtrusion() {
                     <Separator className="my-4" />
                     
                     <div className="mb-4">
-                      <h5 className="font-medium mb-2">Rolls</h5>
+                      <h5 className="font-medium mb-2">{t("production.roll_management.rolls")}</h5>
                       {!isExpanded ? (
-                        <p className="text-sm text-secondary-500 py-2">Expand to view rolls</p>
+                        <p className="text-sm text-secondary-500 py-2">{t("production.roll_management.expand_to_view_rolls")}</p>
                       ) : jobOrderRolls.length === 0 ? (
-                        <p className="text-sm text-secondary-500 py-2">No rolls created yet</p>
+                        <p className="text-sm text-secondary-500 py-2">{t("production.roll_management.no_rolls_created")}</p>
                       ) : (
                         <div className="space-y-2">
                           {jobOrderRolls.map((roll) => (
@@ -420,7 +421,7 @@ export function JobOrdersForExtrusion() {
                               <div>
                                 <p className="font-medium">{roll.id}</p>
                                 <p className="text-sm text-secondary-500">
-                                  Quantity: {roll.extrudingQty} kg
+                                  {t("production.roll_management.quantity")}: {roll.extrudingQty} kg
                                 </p>
                               </div>
                               <Badge variant={
@@ -428,7 +429,7 @@ export function JobOrdersForExtrusion() {
                                 roll.status === "processing" ? "secondary" : 
                                 "default"
                               }>
-                                {roll.status}
+                                {t(`status.${roll.status}`)}
                               </Badge>
                             </div>
                           ))}
@@ -443,7 +444,7 @@ export function JobOrdersForExtrusion() {
                         className="flex items-center"
                       >
                         <span className="material-icons text-sm mr-1">add</span>
-                        Create Roll
+                        {t("production.roll_management.create_roll")}
                       </Button>
                     </div>
                   </div>
