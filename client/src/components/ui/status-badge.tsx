@@ -6,42 +6,74 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const getColorClasses = () => {
+  const getStatusInfo = () => {
     switch (status.toLowerCase()) {
       case "pending":
-        return "bg-yellow-100 text-yellow-700";
+        return {
+          classes: "bg-amber-50 text-amber-700 border-amber-200",
+          icon: "hourglass_empty"
+        };
       case "processing":
-        return "bg-blue-100 text-blue-700";
+        return {
+          classes: "bg-blue-50 text-blue-700 border-blue-200",
+          icon: "sync"
+        };
       case "completed":
-        return "bg-green-100 text-green-700";
+        return {
+          classes: "bg-emerald-50 text-emerald-700 border-emerald-200",
+          icon: "check_circle"
+        };
       case "cancelled":
       case "rejected":
-        return "bg-red-100 text-red-700";
+        return {
+          classes: "bg-red-50 text-red-700 border-red-200",
+          icon: "cancel"
+        };
       case "extrusion":
-        return "bg-blue-100 text-blue-700";
+        return {
+          classes: "bg-indigo-50 text-indigo-700 border-indigo-200",
+          icon: "view_in_ar"
+        };
       case "printing":
-        return "bg-yellow-100 text-yellow-700";
+        return {
+          classes: "bg-amber-50 text-amber-700 border-amber-200",
+          icon: "print"
+        };
       case "cutting":
-        return "bg-green-100 text-green-700";
+        return {
+          classes: "bg-cyan-50 text-cyan-700 border-cyan-200",
+          icon: "content_cut"
+        };
       case "on hold":
-        return "bg-orange-100 text-orange-700";
+        return {
+          classes: "bg-orange-50 text-orange-700 border-orange-200",
+          icon: "pause_circle"
+        };
       case "in stock":
-        return "bg-purple-100 text-purple-700";
+        return {
+          classes: "bg-purple-50 text-purple-700 border-purple-200",
+          icon: "inventory_2"
+        };
       default:
-        return "bg-gray-100 text-gray-700";
+        return {
+          classes: "bg-gray-50 text-gray-700 border-gray-200",
+          icon: "help_outline"
+        };
     }
   };
 
+  const { classes, icon } = getStatusInfo();
   const displayText = status.charAt(0).toUpperCase() + status.slice(1);
 
   return (
     <span
       className={cn(
-        "px-2.5 py-0.5 rounded-full text-xs font-medium",
-        getColorClasses(),
+        "px-2.5 py-1 rounded-full text-xs font-medium border flex items-center gap-1 whitespace-nowrap",
+        classes,
         className
       )}
     >
+      <span className="material-icons text-[13px]">{icon}</span>
       {displayText}
     </span>
   );

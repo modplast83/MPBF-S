@@ -108,13 +108,15 @@ export function ActiveOrdersTable() {
         
         return (
           <div className={`flex items-center ${isRTL ? "flex-row-reverse" : ""}`}>
-            <div className="w-32 bg-secondary-200 rounded-full h-2.5">
+            <div className="w-32 bg-gray-100 rounded-full h-2.5 overflow-hidden">
               <div 
-                className="bg-primary-500 h-2.5 rounded-full" 
+                className="bg-primary-500 h-2.5 rounded-full relative"
                 style={{ width: `${progress}%` }}
-              ></div>
+              >
+                <span className="absolute inset-0 bg-white/30 h-full w-full bg-[linear-gradient(45deg,rgba(255,255,255,0.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.15)_50%,rgba(255,255,255,0.15)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[progress-bar-stripes_1s_linear_infinite]"></span>
+              </div>
             </div>
-            <span className={`${isRTL ? "mr-2" : "ml-2"} text-xs`}>{stage}</span>
+            <span className={`${isRTL ? "mr-2" : "ml-2"} text-xs font-medium text-gray-600`}>{stage}</span>
           </div>
         );
       },
@@ -134,14 +136,16 @@ export function ActiveOrdersTable() {
       cell: (row: any) => (
         <div className={`flex ${isRTL ? "space-x-reverse space-x-2 flex-row-reverse" : "space-x-2"}`}>
           <Link href={`/orders/${row.id}`}>
-            <Button variant="ghost" size="icon" className="text-primary-500 hover:text-primary-700">
+            <Button variant="outline" size="sm" className="text-primary-600 border-primary-200 hover:bg-primary-50 hover:text-primary-700 rounded-full h-8 w-8 p-0">
               <span className="material-icons text-sm">visibility</span>
             </Button>
           </Link>
-          <Button variant="ghost" size="icon" className="text-warning-500 hover:text-warning-700">
-            <span className="material-icons text-sm">edit</span>
-          </Button>
-          <Button variant="ghost" size="icon" className="text-error-500 hover:text-error-700">
+          <Link href={`/orders/edit/${row.id}`}>
+            <Button variant="outline" size="sm" className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 rounded-full h-8 w-8 p-0">
+              <span className="material-icons text-sm">edit</span>
+            </Button>
+          </Link>
+          <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 rounded-full h-8 w-8 p-0">
             <span className="material-icons text-sm">delete</span>
           </Button>
         </div>
@@ -154,7 +158,7 @@ export function ActiveOrdersTable() {
   
   const actions = (
     <Link href="/orders/new">
-      <Button className="bg-primary-500 text-white hover:bg-primary-600">
+      <Button className="bg-primary-600 text-white hover:bg-primary-700 rounded-full shadow-sm">
         <span className={`material-icons text-sm ${isRTL ? 'ml-1' : 'mr-1'}`}>add</span>
         {t("orders.new_order")}
       </Button>
@@ -163,21 +167,39 @@ export function ActiveOrdersTable() {
   
   if (ordersLoading) {
     return (
-      <div className={`bg-white rounded-lg shadow animate-pulse ${isRTL ? 'rtl' : ''}`}>
-        <div className="p-6 h-12 bg-secondary-50"></div>
+      <div className={`bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 animate-pulse ${isRTL ? 'rtl' : ''}`}>
+        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50/80 to-white">
+          <div className="flex justify-between items-center mb-1">
+            <div className="h-7 bg-gray-200 rounded w-48"></div>
+            <div className="h-9 bg-gray-200 rounded-full w-32"></div>
+          </div>
+        </div>
         <div className="p-6 space-y-4">
-          <div className="h-64 bg-secondary-50 rounded"></div>
+          <div className="h-10 bg-gray-100 rounded-md"></div>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex justify-between">
+                <div className="h-6 bg-gray-100 rounded w-1/4"></div>
+                <div className="h-6 bg-gray-100 rounded w-1/5"></div>
+                <div className="h-6 bg-gray-100 rounded w-1/6"></div>
+                <div className="h-6 bg-gray-100 rounded w-1/4"></div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
   
   return (
-    <div className={`bg-white rounded-lg shadow ${isRTL ? 'rtl' : ''}`}>
-      <div className={`p-6 border-b border-secondary-100 flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <h3 className={`font-semibold text-lg ${isRTL ? 'text-right' : ''}`}>
-          {t("orders.active_production_orders")}
-        </h3>
+    <div className={`bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 ${isRTL ? 'rtl' : ''}`}>
+      <div className={`p-6 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-white flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className="flex items-center gap-2">
+          <span className="material-icons text-primary-600">receipt_long</span>
+          <h3 className={`font-semibold text-lg text-gray-800 ${isRTL ? 'text-right' : ''}`}>
+            {t("orders.active_production_orders")}
+          </h3>
+        </div>
         {actions}
       </div>
       <div className="p-6">
