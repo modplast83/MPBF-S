@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
@@ -10,12 +10,27 @@ import { formatDateString } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MixMaterialForm } from "@/components/production/mix-material-form";
 import { MixDetails } from "@/components/production/mix-details";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function MixMaterialsPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [selectedMixId, setSelectedMixId] = useState<number | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [mixToDelete, setMixToDelete] = useState<number | null>(null);
   const [printableData, setPrintableData] = useState<{
     mix: any;
     items: any[];
@@ -32,6 +47,41 @@ export default function MixMaterialsPage() {
   const { data: rawMaterials } = useQuery<RawMaterial[]>({
     queryKey: [API_ENDPOINTS.RAW_MATERIALS],
   });
+  
+  // Delete mix mutation
+  const deleteMixMutation = useMutation({
+    mutationFn: async (mixId: number) => {
+      await apiRequest("DELETE", `${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: t("common.success"),
+        description: t("common.delete_success"),
+        variant: "default",
+      });
+      refetchMixes();
+    },
+    onError: (error) => {
+      toast({
+        title: t("common.error"),
+        description: `${t("common.delete_error")}: ${error}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleDeleteMix = (id: number) => {
+    setMixToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (mixToDelete !== null) {
+      deleteMixMutation.mutate(mixToDelete);
+      setIsDeleteDialogOpen(false);
+      setMixToDelete(null);
+    }
+  };
 
   // Machines no longer needed for mix materials
 
@@ -82,6 +132,17 @@ export default function MixMaterialsPage() {
             }}
           >
             <span className="material-icons text-sm">print</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-red-500 hover:text-red-700"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteMix(row.id);
+            }}
+          >
+            <span className="material-icons text-sm">delete</span>
           </Button>
         </div>
       ),
@@ -250,6 +311,27 @@ export default function MixMaterialsPage() {
       <div className="hidden print:block print:m-0 print:p-0">
         <PrintableLabel />
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("common.delete")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("common.delete_confirmation_message", { item: t("production.mix_materials.title") })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
