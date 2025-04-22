@@ -39,7 +39,11 @@
       "details": "التفاصيل",
       "progress": "التقدم",
       "unknown_product": "منتج غير معروف",
-      "unknown_item": "عنصر غير معروف"
+      "unknown_item": "عنصر غير معروف",
+      "success": "نجاح",
+      "delete_success": "تم حذف العنصر بنجاح",
+      "delete_error": "خطأ في حذف العنصر",
+      "delete_confirmation_message": "هل أنت متأكد أنك تريد حذف {{item}}؟ لا يمكن التراجع عن هذا الإجراء."
     },
     "auth": {
       "username": "اسم المستخدم",

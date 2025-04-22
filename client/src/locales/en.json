@@ -39,7 +39,11 @@
       "details": "Details",
       "progress": "Progress",
       "unknown_product": "Unknown Product",
-      "unknown_item": "Unknown Item"
+      "unknown_item": "Unknown Item",
+      "success": "Success",
+      "delete_success": "Item deleted successfully",
+      "delete_error": "Error deleting item",
+      "delete_confirmation_message": "Are you sure you want to delete this {{item}}? This action cannot be undone."
     },
     "auth": {
       "username": "Username",
