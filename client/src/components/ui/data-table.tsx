@@ -47,6 +47,7 @@ export function DataTable<T>({
   actions,
   onRowClick,
   dir = 'ltr',
+  isLoading = false,
 }: DataTableProps<T>) {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
@@ -121,7 +122,18 @@ export function DataTable<T>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.length > 0 ? (
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: 5 }).map((_, rowIndex) => (
+                <TableRow key={`skeleton-${rowIndex}`}>
+                  {columns.map((_, colIndex) => (
+                    <TableCell key={`skeleton-cell-${colIndex}`}>
+                      <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : paginatedData.length > 0 ? (
               paginatedData.map((row, rowIndex) => (
                 <TableRow
                   key={rowIndex}

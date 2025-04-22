@@ -12,7 +12,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { MixMaterial, MixItem, RawMaterial, Machine } from "@shared/schema";
+import { MixMaterial, MixItem, RawMaterial } from "@shared/schema";
 import { formatDateString } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -20,11 +20,10 @@ import { apiRequest } from "@/lib/queryClient";
 interface MixDetailsProps {
   mixId: number;
   rawMaterials: RawMaterial[];
-  machines: Machine[];
   onClose?: () => void;
 }
 
-export function MixDetails({ mixId, rawMaterials, machines, onClose }: MixDetailsProps) {
+export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedMaterial, setSelectedMaterial] = useState<number | null>(null);
@@ -130,11 +129,7 @@ export function MixDetails({ mixId, rawMaterials, machines, onClose }: MixDetail
     }
   };
 
-  const getMachineName = (id: string | null) => {
-    if (!id) return "-";
-    const machine = machines.find(m => m.id === id);
-    return machine ? machine.name : id;
-  };
+  // Machine field no longer used
 
   const getRawMaterialName = (id: number) => {
     const rawMaterial = rawMaterials.find(m => m.id === id);
@@ -209,10 +204,7 @@ export function MixDetails({ mixId, rawMaterials, machines, onClose }: MixDetail
                   <div className="font-medium text-secondary-500">Operator</div>
                   <div>{mix.mixPerson}</div>
                 </div>
-                <div>
-                  <div className="font-medium text-secondary-500">Machine</div>
-                  <div>{getMachineName(mix.machineId)}</div>
-                </div>
+
                 <div>
                   <div className="font-medium text-secondary-500">Total Weight</div>
                   <div className="font-semibold text-primary-600">{mix.totalQuantity?.toFixed(2) || "0.00"} kg</div>

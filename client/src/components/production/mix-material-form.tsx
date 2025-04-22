@@ -80,7 +80,7 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ 
-          mixPerson: userId,
+          mixPerson: currentUser.name || `User ${userId}`,
         }),
       });
       
