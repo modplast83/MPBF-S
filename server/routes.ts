@@ -2270,14 +2270,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
-      const validatedData = insertPermissionSchema.parse(req.body);
-      const permission = await storage.updatePermission(id, validatedData);
-      
-      if (!permission) {
-        return res.status(404).json({ message: "Permission not found" });
+      // Create a schema for partial updates
+      const partialUpdateFields = {
+        can_view: z.boolean().optional(),
+        can_create: z.boolean().optional(),
+        can_edit: z.boolean().optional(),
+        can_delete: z.boolean().optional(),
+        is_active: z.boolean().optional(),
+        role: z.string().optional(),
+        module: z.string().optional()
+      };
+
+      // Validate only the fields that are provided
+      try {
+        const validatedData = z.object(partialUpdateFields).parse(req.body);
+        const permission = await storage.updatePermission(id, validatedData);
+        
+        if (!permission) {
+          return res.status(404).json({ message: "Permission not found" });
+        }
+        
+        res.json(permission);
+      } catch (validationError) {
+        console.error("Validation error:", validationError);
+        return res.status(400).json({ message: "Invalid permission data", error: validationError });
       }
-      
-      res.json(permission);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid permission data", errors: error.errors });
