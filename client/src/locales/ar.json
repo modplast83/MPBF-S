@@ -186,7 +186,12 @@
         "stage_completed": "تم الانتهاء من {{stage}}",
         "roll_moved": "تم نقل اللفة #{{rollNumber}} إلى مرحلة {{nextStage}}",
         "started_stage": "بدأت {{stage}}",
-        "processing_begun": "بدأت معالجة اللفة #{{rollNumber}}"
+        "processing_begun": "بدأت معالجة اللفة #{{rollNumber}}",
+        "roll_details": "تفاصيل اللفة",
+        "update_cutting_qty": "تحديث كمية القص",
+        "roll_updated": "تم تحديث اللفة",
+        "roll_updated_success": "تم تحديث اللفة بنجاح",
+        "roll_update_failed": "فشل تحديث اللفة: {{error}}"
       },
       "mix_materials": {
         "title": "خلط مواد",

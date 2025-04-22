@@ -115,8 +115,8 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
       
       // Show success toast
       toast({
-        title: "Roll updated",
-        description: "Roll has been updated successfully",
+        title: t("production.roll_management.roll_updated"),
+        description: t("production.roll_management.roll_updated_success"),
         variant: "default",
       });
       
@@ -125,8 +125,8 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update roll: ${error}`,
+        title: t("common.error"),
+        description: t("production.roll_management.roll_update_failed", { error }),
         variant: "destructive",
       });
     },
@@ -337,7 +337,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {isEditing && roll.currentStage === "cutting" ? "Update Cutting Quantity" : "Roll Details"}
+            {isEditing && roll.currentStage === "cutting" ? t("production.roll_management.update_cutting_qty") : t("production.roll_management.roll_details")}
             <Badge variant="outline" className="ml-2">
               <span className="flex items-center">
                 <span className="material-icons text-sm mr-1">info</span>
@@ -351,32 +351,32 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
           <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
             <div className="grid gap-4 py-2">
               <div className="grid gap-1">
-                <div className="text-sm font-medium">Roll ID</div>
+                <div className="text-sm font-medium">{t("rolls.roll_id")}</div>
                 <div className="text-sm">{roll.id}</div>
               </div>
 
               <div className="grid gap-1">
-                <div className="text-sm font-medium">Order</div>
+                <div className="text-sm font-medium">{t("orders.order_id")}</div>
                 <div className="text-sm">#{jobOrder?.orderId}</div>
               </div>
               
               <div className="grid gap-1">
-                <div className="text-sm font-medium">Customer</div>
-                <div className="text-sm">{customer?.name || 'Loading...'}</div>
+                <div className="text-sm font-medium">{t("orders.customer")}</div>
+                <div className="text-sm">{customer?.name || t("production.roll_management.loading")}</div>
               </div>
               
               <div className="grid gap-1">
-                <div className="text-sm font-medium">Product</div>
+                <div className="text-sm font-medium">{t("orders.product")}</div>
                 <div className="text-sm">{item?.name || customerProduct?.itemId} ({customerProduct?.sizeCaption})</div>
               </div>
 
               <div className="grid gap-1">
-                <div className="text-sm font-medium">Job Order</div>
+                <div className="text-sm font-medium">{t("job_orders.job_order_id")}</div>
                 <div className="text-sm">#{roll.jobOrderId}</div>
               </div>
 
               <div className="grid gap-1">
-                <div className="text-sm font-medium">Status</div>
+                <div className="text-sm font-medium">{t("rolls.status")}</div>
                 <div className="text-sm">{roll.status}</div>
               </div>
 
@@ -389,7 +389,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
 
               {roll.currentStage === "printing" && (
                 <div className="grid gap-1">
-                  <div className="text-sm font-medium">Extrusion Quantity</div>
+                  <div className="text-sm font-medium">{t("rolls.extruding_qty")}</div>
                   <div className="text-sm">{roll.extrudingQty} kg</div>
                 </div>
               )}
@@ -397,17 +397,17 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
               {roll.currentStage === "cutting" && !isEditing && (
                 <>
                   <div className="grid gap-1">
-                    <div className="text-sm font-medium">Extrusion Quantity</div>
+                    <div className="text-sm font-medium">{t("rolls.extruding_qty")}</div>
                     <div className="text-sm">{roll.extrudingQty} kg</div>
                   </div>
                   <div className="grid gap-1">
-                    <div className="text-sm font-medium">Printing Quantity</div>
+                    <div className="text-sm font-medium">{t("rolls.printing_qty")}</div>
                     <div className="text-sm">{roll.printingQty} kg</div>
                   </div>
                   
                   {roll.wasteQty && roll.wasteQty > 0 && (
                     <div className="grid gap-1">
-                      <div className="text-sm font-medium">Waste Quantity</div>
+                      <div className="text-sm font-medium">{t("rolls.waste_qty")}</div>
                       <div className="text-sm">{roll.wasteQty} kg ({roll.wastePercentage}%)</div>
                     </div>
                   )}
@@ -418,11 +418,11 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
               {!isEditing && (
                 <Card className="p-3 bg-secondary-50">
                   <div className="grid gap-2">
-                    <div className="text-sm font-medium">Processing Information</div>
+                    <div className="text-sm font-medium">{t("production.roll_management.processing_info")}</div>
                     <div className="grid gap-2">
                       {roll.createdById && (
                         <div>
-                          <div className="text-xs text-secondary-500">Created by</div>
+                          <div className="text-xs text-secondary-500">{t("production.roll_management.created_by")}</div>
                           <div className="text-sm font-medium">{roll.createdById}</div>
                           {roll.createdAt && <div className="text-xs text-secondary-400">{new Date(roll.createdAt).toLocaleString()}</div>}
                         </div>
@@ -430,7 +430,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                       
                       {roll.printedById && roll.currentStage !== "extrusion" && (
                         <div>
-                          <div className="text-xs text-secondary-500">Printed by</div>
+                          <div className="text-xs text-secondary-500">{t("production.roll_management.printed_by")}</div>
                           <div className="text-sm font-medium">{roll.printedById}</div>
                           {roll.printedAt && <div className="text-xs text-secondary-400">{new Date(roll.printedAt).toLocaleString()}</div>}
                         </div>
@@ -438,7 +438,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                       
                       {roll.cutById && roll.currentStage === "completed" && (
                         <div>
-                          <div className="text-xs text-secondary-500">Cut by</div>
+                          <div className="text-xs text-secondary-500">{t("production.roll_management.cut_by")}</div>
                           <div className="text-sm font-medium">{roll.cutById}</div>
                           {roll.cutAt && <div className="text-xs text-secondary-400">{new Date(roll.cutAt).toLocaleString()}</div>}
                         </div>

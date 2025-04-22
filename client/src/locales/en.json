@@ -186,7 +186,12 @@
         "stage_completed": "{{stage}} Completed",
         "roll_moved": "Roll #{{rollNumber}} has moved to {{nextStage}} stage",
         "started_stage": "Started {{stage}}",
-        "processing_begun": "Roll #{{rollNumber}} processing has begun"
+        "processing_begun": "Roll #{{rollNumber}} processing has begun",
+        "roll_details": "Roll Details",
+        "update_cutting_qty": "Update Cutting Quantity",
+        "roll_updated": "Roll Updated",
+        "roll_updated_success": "Roll has been updated successfully",
+        "roll_update_failed": "Failed to update roll: {{error}}"
       },
       "mix_materials": {
         "title": "Mix Materials",
