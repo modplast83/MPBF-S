@@ -33,7 +33,13 @@
       "unknown_customer": "Unknown Customer",
       "unknown": "Unknown",
       "not_available": "N/A",
-      "inch": "Inch"
+      "inch": "Inch",
+      "error": "Error",
+      "complete": "Complete",
+      "details": "Details",
+      "progress": "Progress",
+      "unknown_product": "Unknown Product",
+      "unknown_item": "Unknown Item"
     },
     "auth": {
       "username": "Username",
@@ -203,7 +209,18 @@
         "processing_info": "Processing Information",
         "created_by": "Created by",
         "printed_by": "Printed by",
-        "cut_by": "Cut by"
+        "cut_by": "Cut by",
+        "roll_created": "Roll Created",
+        "roll_created_successfully": "Roll has been created successfully",
+        "roll_creation_failed": "Failed to create roll: {{error}}",
+        "no_job_orders_extrusion": "No active job orders for extrusion",
+        "rolls": "Rolls",
+        "expand_to_view_rolls": "Expand to view rolls",
+        "no_rolls_created": "No rolls created yet",
+        "quantity": "Quantity",
+        "create_roll": "Create Roll",
+        "no_master_batch": "No Master Batch",
+        "unknown_master_batch": "Unknown Master Batch"
       },
       "mix_materials": {
         "title": "Mix Materials",
@@ -268,6 +285,7 @@
       "see_all_orders": "See all orders",
       "size": "Size",
       "quantity": "Quantity",
+      "required_quantity": "Required Quantity",
       "stage": "Stage",
       "active_production_orders": "Active Production Orders",
       "product": "Product"
@@ -320,6 +338,27 @@
       "next_page": "Next Page",
       "previous_page": "Previous Page",
       "no_results": "No results."
+    },
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "extrusion_completed": "Extrusion Completed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "processing": "Processing",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "products": {
+      "thickness": "Thickness", 
+      "raw_material": "Raw Material",
+      "master_batch": "Master Batch",
+      "product_details": "Product Details"
+    },
+    "items": {
+      "item_name": "Item Name"
     }
   }
 }

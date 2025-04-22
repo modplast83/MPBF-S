@@ -33,7 +33,13 @@
       "unknown_customer": "عميل غير معروف",
       "unknown": "غير معروف",
       "not_available": "غير متوفر",
-      "inch": "بوصة"
+      "inch": "بوصة",
+      "error": "خطأ",
+      "complete": "مكتمل",
+      "details": "التفاصيل",
+      "progress": "التقدم",
+      "unknown_product": "منتج غير معروف",
+      "unknown_item": "عنصر غير معروف"
     },
     "auth": {
       "username": "اسم المستخدم",
@@ -203,7 +209,18 @@
         "processing_info": "معلومات المعالجة",
         "created_by": "تم إنشاؤها بواسطة",
         "printed_by": "تمت طباعتها بواسطة",
-        "cut_by": "تم قصها بواسطة"
+        "cut_by": "تم قصها بواسطة",
+        "roll_created": "تم إنشاء اللفة",
+        "roll_created_successfully": "تم إنشاء اللفة بنجاح",
+        "roll_creation_failed": "فشل إنشاء اللفة: {{error}}",
+        "no_job_orders_extrusion": "لا توجد أوامر عمل نشطة للبثق",
+        "rolls": "اللفات",
+        "expand_to_view_rolls": "قم بالتوسيع لعرض اللفات",
+        "no_rolls_created": "لم يتم إنشاء لفات بعد",
+        "quantity": "الكمية",
+        "create_roll": "إنشاء لفة",
+        "no_master_batch": "لا يوجد ماستر باتش",
+        "unknown_master_batch": "ماستر باتش غير معروف"
       },
       "mix_materials": {
         "title": "خلط مواد",
@@ -320,6 +337,27 @@
       "next_page": "الصفحة التالية",
       "previous_page": "الصفحة السابقة",
       "no_results": "لا توجد نتائج."
+    },
+    "status": {
+      "pending": "معلق",
+      "in_progress": "قيد التنفيذ",
+      "extrusion_completed": "تم البثق",
+      "completed": "مكتمل",
+      "cancelled": "ملغى",
+      "processing": "قيد المعالجة",
+      "approved": "معتمد",
+      "rejected": "مرفوض",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "products": {
+      "thickness": "السماكة", 
+      "raw_material": "المادة الخام",
+      "master_batch": "الماستر باتش",
+      "product_details": "تفاصيل المنتج"
+    },
+    "items": {
+      "item_name": "اسم العنصر"
     }
   }
 }
