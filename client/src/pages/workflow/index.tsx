@@ -29,15 +29,15 @@ export default function WorkflowIndex() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Workflow</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t("production.workflow")}</h1>
         <div className="flex space-x-2">
           <Button variant="outline" className="flex items-center">
             <span className="material-icons text-sm mr-1">filter_list</span>
-            Filter
+            {t("common.filter")}
           </Button>
           <Button variant="outline" className="flex items-center">
             <span className="material-icons text-sm mr-1">file_download</span>
-            Export
+            {t("common.export")}
           </Button>
         </div>
       </div>

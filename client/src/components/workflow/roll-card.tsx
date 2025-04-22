@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Roll, JobOrder, CustomerProduct } from "@shared/schema";
 import { UpdateRollDialog } from "./update-roll-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface RollCardProps {
   roll: Roll;
