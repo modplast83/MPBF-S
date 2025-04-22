@@ -7,8 +7,10 @@ import { RollCard } from "@/components/workflow/roll-card";
 import { JobOrdersForExtrusion } from "@/components/workflow/job-orders-for-extrusion-fixed";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Roll } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export default function WorkflowIndex() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("extrusion");
   
   // Fetch rolls by stage
@@ -42,28 +44,28 @@ export default function WorkflowIndex() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Roll Management</CardTitle>
+          <CardTitle>{t("production.roll_management.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="extrusion" onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="extrusion" className="flex items-center gap-2">
                 <span className="material-icons text-primary-500">merge_type</span>
-                <span>Extrusion</span>
+                <span>{t("rolls.extrusion")}</span>
                 <span className="ml-2 h-5 w-5 rounded-full bg-primary-100 text-xs flex items-center justify-center">
                   {extrusionLoading ? "-" : extrusionRolls?.length || 0}
                 </span>
               </TabsTrigger>
               <TabsTrigger value="printing" className="flex items-center gap-2">
                 <span className="material-icons text-warning-500">format_color_fill</span>
-                <span>Printing</span>
+                <span>{t("rolls.printing")}</span>
                 <span className="ml-2 h-5 w-5 rounded-full bg-warning-100 text-xs flex items-center justify-center">
                   {printingLoading ? "-" : printingRolls?.length || 0}
                 </span>
               </TabsTrigger>
               <TabsTrigger value="cutting" className="flex items-center gap-2">
                 <span className="material-icons text-success">content_cut</span>
-                <span>Cutting</span>
+                <span>{t("rolls.cutting")}</span>
                 <span className="ml-2 h-5 w-5 rounded-full bg-success-100 text-xs flex items-center justify-center">
                   {cuttingLoading ? "-" : cuttingRolls?.length || 0}
                 </span>
@@ -77,8 +79,8 @@ export default function WorkflowIndex() {
                     <span className="material-icons text-primary-500">merge_type</span>
                   </div>
                   <div>
-                    <h4 className="font-medium">Extrusion Stage</h4>
-                    <p className="text-sm text-secondary-500">Create rolls from active job orders</p>
+                    <h4 className="font-medium">{t("production.roll_management.extrusion_stage")}</h4>
+                    <p className="text-sm text-secondary-500">{t("production.roll_management.create_rolls")}</p>
                   </div>
                 </div>
                 
@@ -87,7 +89,7 @@ export default function WorkflowIndex() {
                 
                 {/* Active Extrusion Rolls */}
                 <div className="mt-6">
-                  <h5 className="font-medium mb-3">Rolls in Extrusion</h5>
+                  <h5 className="font-medium mb-3">{t("production.roll_management.rolls_in_extrusion")}</h5>
                   <div className="space-y-3">
                     {extrusionLoading ? (
                       <>
@@ -101,7 +103,7 @@ export default function WorkflowIndex() {
                     ) : (
                       <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                         <span className="material-icons text-3xl mb-2">hourglass_empty</span>
-                        <p>No rolls currently in extrusion</p>
+                        <p>{t("production.roll_management.no_rolls_extrusion")}</p>
                       </div>
                     )}
                   </div>
@@ -116,14 +118,14 @@ export default function WorkflowIndex() {
                     <span className="material-icons text-warning-500">format_color_fill</span>
                   </div>
                   <div>
-                    <h4 className="font-medium">Printing Stage</h4>
+                    <h4 className="font-medium">{t("production.roll_management.printing_stage")}</h4>
                     <p className="text-sm text-secondary-500">
                       {printingLoading 
-                        ? "Loading..." 
-                        : `${printingRolls?.length || 0} rolls ready for printing`}
+                        ? t("production.roll_management.loading") 
+                        : `${printingRolls?.length || 0} ${t("production.roll_management.rolls_ready_printing")}`}
                     </p>
                     <p className="text-xs text-secondary-400 italic">
-                      Printing quantity is automatically set equal to extrusion quantity
+                      {t("production.roll_management.printing_note")}
                     </p>
                   </div>
                 </div>
@@ -141,7 +143,7 @@ export default function WorkflowIndex() {
                   ) : (
                     <div className="py-8 text-center text-secondary-400">
                       <span className="material-icons text-3xl mb-2">hourglass_empty</span>
-                      <p>No rolls in printing stage</p>
+                      <p>{t("production.roll_management.no_rolls_printing")}</p>
                     </div>
                   )}
                 </div>
@@ -155,14 +157,14 @@ export default function WorkflowIndex() {
                     <span className="material-icons text-success">content_cut</span>
                   </div>
                   <div>
-                    <h4 className="font-medium">Cutting Stage</h4>
+                    <h4 className="font-medium">{t("production.roll_management.cutting_stage")}</h4>
                     <p className="text-sm text-secondary-500">
                       {cuttingLoading 
-                        ? "Loading..." 
-                        : `${cuttingRolls?.length || 0} rolls ready for cutting`}
+                        ? t("production.roll_management.loading") 
+                        : `${cuttingRolls?.length || 0} ${t("production.roll_management.rolls_ready_cutting")}`}
                     </p>
                     <p className="text-xs text-secondary-400 italic">
-                      Input cutting quantity - the difference is calculated as waste
+                      {t("production.roll_management.cutting_note")}
                     </p>
                   </div>
                 </div>
@@ -180,7 +182,7 @@ export default function WorkflowIndex() {
                   ) : (
                     <div className="py-8 text-center text-secondary-400">
                       <span className="material-icons text-3xl mb-2">hourglass_empty</span>
-                      <p>No rolls in cutting stage</p>
+                      <p>{t("production.roll_management.no_rolls_cutting")}</p>
                     </div>
                   )}
                 </div>

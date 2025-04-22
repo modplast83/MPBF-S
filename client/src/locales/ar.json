@@ -163,6 +163,22 @@
       "title": "الإنتاج",
       "orders": "الطلبات",
       "workflow": "سير العمل",
+      "roll_management": {
+        "title": "إدارة اللفات",
+        "extrusion_stage": "مرحلة البثق",
+        "printing_stage": "مرحلة الطباعة",
+        "cutting_stage": "مرحلة القص",
+        "create_rolls": "إنشاء لفات من أوامر العمل النشطة",
+        "rolls_in_extrusion": "اللفات في مرحلة البثق",
+        "no_rolls_extrusion": "لا توجد لفات حاليا في مرحلة البثق",
+        "rolls_ready_printing": "لفات جاهزة للطباعة",
+        "rolls_ready_cutting": "لفات جاهزة للقص",
+        "printing_note": "كمية الطباعة تعادل تلقائيًا كمية البثق",
+        "cutting_note": "أدخل كمية القص - يتم حساب الفرق كهدر",
+        "no_rolls_printing": "لا توجد لفات في مرحلة الطباعة",
+        "no_rolls_cutting": "لا توجد لفات في مرحلة القص",
+        "loading": "جاري التحميل..."
+      },
       "mix_materials": {
         "title": "خلط مواد",
         "new_mix": "خلط جديد",

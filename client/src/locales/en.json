@@ -163,6 +163,22 @@
       "title": "Production",
       "orders": "Orders",
       "workflow": "Workflow",
+      "roll_management": {
+        "title": "Roll Management",
+        "extrusion_stage": "Extrusion Stage",
+        "printing_stage": "Printing Stage",
+        "cutting_stage": "Cutting Stage",
+        "create_rolls": "Create rolls from active job orders",
+        "rolls_in_extrusion": "Rolls in Extrusion",
+        "no_rolls_extrusion": "No rolls currently in extrusion",
+        "rolls_ready_printing": "rolls ready for printing",
+        "rolls_ready_cutting": "rolls ready for cutting",
+        "printing_note": "Printing quantity is automatically set equal to extrusion quantity",
+        "cutting_note": "Input cutting quantity - the difference is calculated as waste",
+        "no_rolls_printing": "No rolls in printing stage",
+        "no_rolls_cutting": "No rolls in cutting stage",
+        "loading": "Loading..."
+      },
       "mix_materials": {
         "title": "Mix Materials",
         "new_mix": "New Mix",
