@@ -43,10 +43,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   // Add mix item mutation
   const addMixItemMutation = useMutation({
     mutationFn: async (data: { mixId: number; rawMaterialId: number; quantity: number }) => {
-      return apiRequest(API_ENDPOINTS.MIX_ITEMS, {
-        method: "POST",
-        data,
-      });
+      return apiRequest("POST", API_ENDPOINTS.MIX_ITEMS, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}/items`] });
@@ -73,9 +70,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   // Remove mix item mutation
   const removeMixItemMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`${API_ENDPOINTS.MIX_ITEMS}/${id}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `${API_ENDPOINTS.MIX_ITEMS}/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}/items`] });
@@ -141,7 +136,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
     if (!mix || !mixItems) return null;
 
     return (
-      <div className="printable-label" style={{ width: "5in", height: "3in", padding: "0.25in" }}>
+      <div className="printable-label" style={{ width: "3in", height: "5in", padding: "0.25in" }}>
         <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "10px" }}>
           Mix Material #{mix.id}
         </div>

@@ -92,7 +92,7 @@ export default function MixMaterialsPage() {
     const mixItems = await itemsResponse.json();
     
     // Create a new window for printing
-    const printWindow = window.open('', '', 'width=5in,height=3in');
+    const printWindow = window.open('', '', 'width=3in,height=5in');
     if (!printWindow) return;
     
     // Calculate total weight
@@ -113,12 +113,12 @@ export default function MixMaterialsPage() {
           <title>Mix Label</title>
           <style>
             @page {
-              size: 5in 3in;
+              size: 3in 5in;
               margin: 0;
             }
             body {
-              width: 5in;
-              height: 3in;
+              width: 3in;
+              height: 5in;
               margin: 0;
               padding: 0.25in;
               box-sizing: border-box;
@@ -186,8 +186,8 @@ export default function MixMaterialsPage() {
             }
             @media print {
               body {
-                width: 5in;
-                height: 3in;
+                width: 3in;
+                height: 5in;
               }
               .no-print {
                 display: none;
@@ -232,7 +232,7 @@ export default function MixMaterialsPage() {
             </div>
             <div class="footer">
               Printed on ${new Date().toLocaleString()}<br>
-              Size: 5" x 3"
+              Size: 3" x 5"
             </div>
           </div>
           <div class="no-print" style="margin-top: 0.25in; text-align: center;">
