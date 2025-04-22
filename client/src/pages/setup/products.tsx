@@ -116,10 +116,7 @@ export default function Products() {
     {
       header: "S/N",
       id: "index",
-      cell: (info: any) => {
-        if (!info || !info.row) return null;
-        return info.row.index + 1;
-      }
+      cell: (_row: CustomerProduct, index?: number) => (index !== undefined ? index + 1 : 0)
     },
     {
       header: "ID",
@@ -127,54 +124,42 @@ export default function Products() {
     },
     {
       header: "Category",
-      accessorFn: (row: CustomerProduct) => getCategoryName(row.categoryId),
-      id: "categoryName"
+      id: "categoryName",
+      cell: (row: CustomerProduct) => getCategoryName(row.categoryId)
     },
     {
       header: "Item",
-      accessorFn: (row: CustomerProduct) => getItemName(row.itemId),
-      id: "itemName"
+      id: "itemName",
+      cell: (row: CustomerProduct) => getItemName(row.itemId)
     },
     {
       header: "Size Caption",
-      accessorKey: "sizeCaption" as const,
+      id: "sizeCaption",
+      cell: (row: CustomerProduct) => row.sizeCaption || "-"
     },
     {
       header: "Thickness",
-      accessorKey: "thickness" as const,
-      cell: (info: any) => {
-        const thickness = info.row?.original?.thickness;
-        return thickness ? `${thickness}` : "-";
-      }
+      id: "thickness",
+      cell: (row: CustomerProduct) => row.thickness ? `${row.thickness}` : "-"
     },
     {
       header: "Length (cm)",
-      accessorKey: "lengthCm" as const,
-      cell: (info: any) => {
-        const length = info.row?.original?.lengthCm;
-        return length ? `${length}` : "-";
-      }
+      id: "lengthCm",
+      cell: (row: CustomerProduct) => row.lengthCm ? `${row.lengthCm}` : "-"
     },
     {
       header: "Actions",
       id: "actions",
-      cell: (info: any) => {
-        if (!info || !info.row) return null;
-        
-        const row = info.row.original;
-        if (!row) return null;
-        
-        return (
-          <div className="flex space-x-2">
-            <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
-              <span className="material-icons text-sm">edit</span>
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
-              <span className="material-icons text-sm">delete</span>
-            </Button>
-          </div>
-        );
-      },
+      cell: (row: CustomerProduct) => (
+        <div className="flex space-x-2">
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
+            <span className="material-icons text-sm">edit</span>
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
+            <span className="material-icons text-sm">delete</span>
+          </Button>
+        </div>
+      ),
     },
   ];
 

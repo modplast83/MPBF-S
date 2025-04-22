@@ -25,7 +25,7 @@ interface DataTableProps<T> {
   columns: {
     header: string;
     accessorKey?: keyof T | ((row: T) => React.ReactNode);
-    cell?: (row: T) => React.ReactNode;
+    cell?: (row: T, index?: number) => React.ReactNode;
     meta?: {
       className?: string;
     };
@@ -33,6 +33,10 @@ interface DataTableProps<T> {
   }[];
   searchable?: boolean;
   pagination?: boolean;
+  pageSize?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
   actions?: React.ReactNode;
   onRowClick?: (row: T) => void;
   dir?: 'ltr' | 'rtl';
@@ -44,6 +48,10 @@ export function DataTable<T>({
   columns,
   searchable = true,
   pagination = true,
+  pageSize: externalPageSize,
+  currentPage: externalCurrentPage,
+  onPageChange: externalPageChange,
+  onPageSizeChange: externalPageSizeChange,
   actions,
   onRowClick,
   dir = 'ltr',
@@ -52,8 +60,12 @@ export function DataTable<T>({
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
+  const [internalPageSize, setInternalPageSize] = useState(DEFAULT_PAGE_SIZE);
+  
+  // Use external state if provided, otherwise use internal state
+  const currentPage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
+  const pageSize = externalPageSize !== undefined ? externalPageSize : internalPageSize;
 
   // Filter data based on search query
   const filteredData = searchable && searchQuery
@@ -71,12 +83,25 @@ export function DataTable<T>({
     : filteredData;
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    if (externalPageChange) {
+      externalPageChange(page);
+    } else {
+      setInternalCurrentPage(page);
+    }
   };
 
   const handlePageSizeChange = (value: string) => {
-    setPageSize(Number(value));
-    setCurrentPage(1); // Reset to first page
+    const newSize = Number(value);
+    if (externalPageSizeChange) {
+      externalPageSizeChange(newSize);
+      // Reset to first page
+      if (externalPageChange) {
+        externalPageChange(1);
+      }
+    } else {
+      setInternalPageSize(newSize);
+      setInternalCurrentPage(1); // Reset to first page
+    }
   };
 
   // Use the dir prop or fallback to isRTL from context
@@ -154,7 +179,7 @@ export function DataTable<T>({
                       className={column.meta?.className || ''}
                     >
                       {column.cell
-                        ? column.cell(row)
+                        ? column.cell(row, rowIndex)
                         : typeof column.accessorKey === "function"
                         ? column.accessorKey(row)
                         : column.accessorKey 
