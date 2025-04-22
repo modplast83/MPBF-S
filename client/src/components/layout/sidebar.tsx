@@ -50,7 +50,7 @@ export default function Sidebar() {
             alt="Modern Plastic Bag Factory" 
             className="h-10 w-10 object-contain rounded-full"
           />
-          {expanded && <h1 className="text-lg font-semibold whitespace-nowrap">{t("app.title")}</h1>}
+          {expanded && <h1 className="text-sm font-semibold whitespace-nowrap leading-tight">{t("app.title")}</h1>}
         </div>
         <button 
           onClick={toggle} 
