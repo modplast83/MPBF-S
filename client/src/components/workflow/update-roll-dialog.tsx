@@ -173,8 +173,8 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
     
     if (!printWindow) {
       toast({
-        title: "Error",
-        description: "Popup blocked. Please allow popups for this site.",
+        title: t("common.error"),
+        description: t("production.roll_management.popup_blocked"),
         variant: "destructive",
       });
       setIsPrinting(false);
@@ -327,8 +327,8 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
     }, 5000);
     
     toast({
-      title: "Printing Label",
-      description: "3\" × 5\" label for roll " + roll.id + " has been sent to printer",
+      title: t("production.roll_management.printing_label"),
+      description: t("production.roll_management.label_sent_to_printer", { rollId: roll.id }),
     });
   };
 
@@ -451,7 +451,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
               {isEditing && roll.currentStage === "cutting" && (
                 <>
                   <div className="grid gap-2">
-                    <div className="text-sm font-medium">Printing Quantity (Source)</div>
+                    <div className="text-sm font-medium">{t("production.roll_management.printing_qty_source")}</div>
                     <div className="text-sm font-medium">{maxQuantity} kg</div>
                   </div>
 
@@ -460,14 +460,14 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                     name="cuttingQty"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cutting Quantity (kg)</FormLabel>
+                        <FormLabel>{t("rolls.cutting_qty")} (kg)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             step="0.01"
                             min="0"
                             max={maxQuantity}
-                            placeholder="Enter final quantity"
+                            placeholder={t("production.roll_management.enter_final_qty")}
                             {...field}
                           />
                         </FormControl>
@@ -478,14 +478,14 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
 
                   <Card className="p-3 bg-secondary-50">
                     <div className="grid gap-2">
-                      <div className="text-sm font-medium">Waste Calculation</div>
+                      <div className="text-sm font-medium">{t("production.roll_management.waste_calculation")}</div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <div className="text-xs text-secondary-500">Waste Amount</div>
+                          <div className="text-xs text-secondary-500">{t("rolls.waste_qty")}</div>
                           <div className="text-sm font-medium">{wasteQty} kg</div>
                         </div>
                         <div>
-                          <div className="text-xs text-secondary-500">Waste Percentage</div>
+                          <div className="text-xs text-secondary-500">{t("rolls.waste_percentage")}</div>
                           <div className="text-sm font-medium">{wastePercentage}%</div>
                         </div>
                       </div>
@@ -503,7 +503,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                   className="flex items-center"
                 >
                   <span className="material-icons text-sm mr-1">edit</span>
-                  Update Cutting Quantity
+                  {t("production.roll_management.update_cutting_qty")}
                 </Button>
               )}
               
@@ -514,13 +514,13 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                     variant="outline" 
                     onClick={() => setIsEditing(false)}
                   >
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                   <Button 
                     type="submit"
                     disabled={updateRollMutation.isPending}
                   >
-                    {updateRollMutation.isPending ? "Saving..." : "Save"}
+                    {updateRollMutation.isPending ? t("common.saving") : t("common.save")}
                   </Button>
                 </>
               )}
@@ -532,7 +532,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                     variant="outline" 
                     onClick={() => onOpenChange(false)}
                   >
-                    Close
+                    {t("common.close")}
                   </Button>
                   
                   <Button 
@@ -543,7 +543,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                     disabled={isPrinting}
                   >
                     <span className="material-icons text-sm mr-1">print</span>
-                    {isPrinting ? "Printing..." : "Print Label (3\" × 5\")"}
+                    {isPrinting ? t("production.roll_management.printing") : t("production.roll_management.print_label")}
                   </Button>
                 </>
               )}

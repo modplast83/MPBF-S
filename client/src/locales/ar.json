@@ -191,7 +191,19 @@
         "update_cutting_qty": "تحديث كمية القص",
         "roll_updated": "تم تحديث اللفة",
         "roll_updated_success": "تم تحديث اللفة بنجاح",
-        "roll_update_failed": "فشل تحديث اللفة: {{error}}"
+        "roll_update_failed": "فشل تحديث اللفة: {{error}}",
+        "popup_blocked": "تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة لهذا الموقع.",
+        "printing_label": "جاري طباعة الملصق",
+        "label_sent_to_printer": "تم إرسال ملصق بحجم 3 × 5 بوصة للفة {{rollId}} إلى الطابعة",
+        "printing": "جاري الطباعة...",
+        "print_label": "طباعة ملصق (3 × 5 بوصة)",
+        "printing_qty_source": "كمية الطباعة (المصدر)",
+        "enter_final_qty": "أدخل الكمية النهائية",
+        "waste_calculation": "حساب الهدر",
+        "processing_info": "معلومات المعالجة",
+        "created_by": "تم إنشاؤها بواسطة",
+        "printed_by": "تمت طباعتها بواسطة",
+        "cut_by": "تم قصها بواسطة"
       },
       "mix_materials": {
         "title": "خلط مواد",

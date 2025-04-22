@@ -191,7 +191,19 @@
         "update_cutting_qty": "Update Cutting Quantity",
         "roll_updated": "Roll Updated",
         "roll_updated_success": "Roll has been updated successfully",
-        "roll_update_failed": "Failed to update roll: {{error}}"
+        "roll_update_failed": "Failed to update roll: {{error}}",
+        "popup_blocked": "Popup blocked. Please allow popups for this site.",
+        "printing_label": "Printing Label",
+        "label_sent_to_printer": "3\" × 5\" label for roll {{rollId}} has been sent to printer",
+        "printing": "Printing...",
+        "print_label": "Print Label (3\" × 5\")",
+        "printing_qty_source": "Printing Quantity (Source)",
+        "enter_final_qty": "Enter final quantity",
+        "waste_calculation": "Waste Calculation",
+        "processing_info": "Processing Information",
+        "created_by": "Created by",
+        "printed_by": "Printed by",
+        "cut_by": "Cut by"
       },
       "mix_materials": {
         "title": "Mix Materials",
