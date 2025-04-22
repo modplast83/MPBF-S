@@ -144,10 +144,14 @@ export const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100];
 
 // Chart colors
 export const CHART_COLORS = {
-  primary: "rgb(25, 118, 210)",
-  secondary: "rgb(156, 39, 176)",
-  success: "rgb(76, 175, 80)",
-  error: "rgb(244, 67, 54)",
-  warning: "rgb(255, 152, 0)",
-  info: "rgb(33, 150, 243)",
+  primary: "rgb(59, 130, 246)",      // Tailwind blue-500
+  primaryLight: "rgba(59, 130, 246, 0.2)", // Tailwind blue-500 with opacity
+  secondary: "rgb(139, 92, 246)",    // Tailwind purple-500
+  success: "rgb(16, 185, 129)",      // Tailwind emerald-500
+  successLight: "rgba(16, 185, 129, 0.2)", // Tailwind emerald-500 with opacity
+  error: "rgb(239, 68, 68)",         // Tailwind red-500
+  warning: "rgb(245, 158, 11)",      // Tailwind amber-500
+  info: "rgb(14, 165, 233)",         // Tailwind sky-500
+  gray: "rgb(107, 114, 128)",        // Tailwind gray-500
+  grayLight: "rgba(243, 244, 246, 0.8)", // Tailwind gray-100 with opacity
 };
