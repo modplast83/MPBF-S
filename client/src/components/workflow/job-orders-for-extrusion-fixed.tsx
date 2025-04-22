@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { RollDialog } from "@/components/workflow/roll-dialog";
 import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item, MasterBatch } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
 
 // Single roll query component
 function JobOrderRolls({ jobOrderId, isExpanded }: { jobOrderId: number; isExpanded: boolean }) {
