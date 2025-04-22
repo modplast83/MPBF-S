@@ -7,7 +7,8 @@ import {
   QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
   CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage,
   MixMaterial, InsertMixMaterial, MixItem, InsertMixItem,
-  MixMachine, InsertMixMachine, mixMachines
+  MixMachine, InsertMixMachine, mixMachines, permissions,
+  Permission, InsertPermission
 } from "@shared/schema";
 import session from "express-session";
 
