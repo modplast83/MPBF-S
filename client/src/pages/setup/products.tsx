@@ -114,14 +114,16 @@ export default function Products() {
   // Define columns with proper typing
   const columns = [
     {
-      header: "Customer",
-      accessorFn: (row: CustomerProduct) => getCustomerName(row.customerId),
-      id: "customerName"
+      header: "S/N",
+      id: "index",
+      cell: (info: any) => {
+        if (!info || !info.row) return null;
+        return info.row.index + 1;
+      }
     },
     {
-      header: "Item",
-      accessorFn: (row: CustomerProduct) => getItemName(row.itemId),
-      id: "itemName"
+      header: "ID",
+      accessorKey: "id" as const,
     },
     {
       header: "Category",
@@ -129,12 +131,29 @@ export default function Products() {
       id: "categoryName"
     },
     {
-      header: "Size",
+      header: "Item",
+      accessorFn: (row: CustomerProduct) => getItemName(row.itemId),
+      id: "itemName"
+    },
+    {
+      header: "Size Caption",
       accessorKey: "sizeCaption" as const,
     },
     {
-      header: "Material",
-      accessorKey: "rawMaterial" as const,
+      header: "Thickness",
+      accessorKey: "thickness" as const,
+      cell: (info: any) => {
+        const thickness = info.row?.original?.thickness;
+        return thickness ? `${thickness}` : "-";
+      }
+    },
+    {
+      header: "Length (cm)",
+      accessorKey: "lengthCm" as const,
+      cell: (info: any) => {
+        const length = info.row?.original?.lengthCm;
+        return length ? `${length}` : "-";
+      }
     },
     {
       header: "Actions",
@@ -166,6 +185,10 @@ export default function Products() {
     </Button>
   );
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
@@ -224,6 +247,11 @@ export default function Products() {
               columns={columns}
               isLoading={isLoading}
               actions={selectedCustomerId ? tableActions : undefined}
+              pagination={true}
+              pageSize={pageSize}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
             />
           ) : (
             <div className="text-center py-8 text-gray-500">
