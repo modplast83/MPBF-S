@@ -43,23 +43,30 @@ export default function Sidebar() {
         isRTL ? "right-0" : "left-0"
       )}
     >
-      <div className={`p-4 flex justify-between items-center border-b border-gray-800 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3`}>
-          <img 
-            src="/assets/company-logo.png" 
-            alt="Modern Plastic Bag Factory" 
-            className="h-10 w-10 object-contain rounded-full"
-          />
-          {expanded && <h1 className="text-sm font-semibold whitespace-nowrap leading-tight">{t("app.title")}</h1>}
+      <div className={`p-4 border-b border-gray-800 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className="flex justify-between items-center">
+          <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <img 
+              src="/assets/company-logo.png" 
+              alt="Modern Plastic Bag Factory" 
+              className="h-10 w-10 object-contain rounded-full"
+            />
+            {!expanded && <span className="hidden"></span>}
+          </div>
+          <button 
+            onClick={toggle} 
+            className="text-white focus:outline-none"
+          >
+            <span className={`material-icons ${isRTL ? 'flip-in-rtl' : ''}`}>
+              {expanded ? "menu_open" : "menu"}
+            </span>
+          </button>
         </div>
-        <button 
-          onClick={toggle} 
-          className="text-white focus:outline-none"
-        >
-          <span className={`material-icons ${isRTL ? 'flip-in-rtl' : ''}`}>
-            {expanded ? "menu_open" : "menu"}
-          </span>
-        </button>
+        {expanded && (
+          <h1 className="text-sm font-semibold mt-2 whitespace-normal leading-tight">
+            {t("app.title")}
+          </h1>
+        )}
       </div>
       
       <nav className="mt-5 flex-grow overflow-y-auto">
