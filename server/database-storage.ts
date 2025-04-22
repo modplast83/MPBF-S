@@ -519,11 +519,13 @@ export class DatabaseStorage implements IStorage {
   
   // Permissions
   async getPermissions(): Promise<Permission[]> {
-    return await db.select().from(permissions);
+    return await db.select().from(permissions).orderBy(permissions.role, permissions.module);
   }
 
   async getPermissionsByRole(role: string): Promise<Permission[]> {
-    return await db.select().from(permissions).where(eq(permissions.role, role));
+    return await db.select().from(permissions)
+      .where(eq(permissions.role, role))
+      .orderBy(permissions.module);
   }
 
   async createPermission(permission: InsertPermission): Promise<Permission> {
@@ -882,32 +884,5 @@ export class DatabaseStorage implements IStorage {
     return false;
   }
   
-  // Permissions Management
-  async getPermissions(): Promise<Permission[]> {
-    return await db.select().from(permissions).orderBy(permissions.role, permissions.module);
-  }
-
-  async getPermissionsByRole(role: string): Promise<Permission[]> {
-    return await db.select().from(permissions)
-      .where(eq(permissions.role, role))
-      .orderBy(permissions.module);
-  }
-
-  async createPermission(permission: InsertPermission): Promise<Permission> {
-    const result = await db.insert(permissions).values(permission).returning();
-    return result[0];
-  }
-
-  async updatePermission(id: number, permissionUpdate: Partial<Permission>): Promise<Permission | undefined> {
-    const result = await db.update(permissions)
-      .set(permissionUpdate)
-      .where(eq(permissions.id, id))
-      .returning();
-    return result[0];
-  }
-
-  async deletePermission(id: number): Promise<boolean> {
-    const result = await db.delete(permissions).where(eq(permissions.id, id)).returning();
-    return result.length > 0;
-  }
+  // End of class
 }
