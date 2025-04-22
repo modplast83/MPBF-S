@@ -12,6 +12,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 
 interface UpdateRollDialogProps {
@@ -31,6 +32,7 @@ const formSchema = z.object({
 export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [wasteQty, setWasteQty] = useState(0);
   const [wastePercentage, setWastePercentage] = useState(0);
@@ -144,10 +146,10 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
   };
 
   const getQuantityLabel = () => {
-    if (roll.currentStage === "extrusion") return "Extrusion Quantity";
-    if (roll.currentStage === "printing") return "Printing Quantity";
-    if (roll.currentStage === "cutting") return "Cutting Quantity";
-    return "Quantity";
+    if (roll.currentStage === "extrusion") return t("rolls.extruding_qty");
+    if (roll.currentStage === "printing") return t("rolls.printing_qty");
+    if (roll.currentStage === "cutting") return t("rolls.cutting_qty");
+    return t("orders.quantity");
   };
 
   const getQuantityValue = () => {
@@ -158,9 +160,9 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
   };
 
   const stageLabel = 
-    roll.currentStage === "extrusion" ? "Extrusion" :
-    roll.currentStage === "printing" ? "Printing" :
-    roll.currentStage === "cutting" ? "Cutting" : "Unknown";
+    roll.currentStage === "extrusion" ? t("rolls.extrusion") :
+    roll.currentStage === "printing" ? t("rolls.printing") :
+    roll.currentStage === "cutting" ? t("rolls.cutting") : t("common.unknown");
     
   // Function to print the label
   const handlePrintLabel = () => {
