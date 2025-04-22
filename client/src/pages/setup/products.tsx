@@ -140,7 +140,11 @@ export default function Products() {
       header: "Actions",
       id: "actions",
       cell: (info: any) => {
-        const row = info.row.original as CustomerProduct;
+        if (!info || !info.row) return null;
+        
+        const row = info.row.original;
+        if (!row) return null;
+        
         return (
           <div className="flex space-x-2">
             <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
