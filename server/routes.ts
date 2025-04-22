@@ -9,7 +9,8 @@ import {
   createRollSchema, InsertRoll,
   insertRawMaterialSchema, insertFinalProductSchema,
   insertSmsMessageSchema, InsertSmsMessage,
-  insertMixMaterialSchema, insertMixItemSchema
+  insertMixMaterialSchema, insertMixItemSchema,
+  insertPermissionSchema
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
@@ -2215,6 +2216,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: error.message });
       }
       res.status(500).json({ message: "Failed to delete mix item" });
+    }
+  });
+
+  // Permissions
+  app.get("/api/permissions", requireAuth, async (_req: Request, res: Response) => {
+    try {
+      const permissions = await storage.getPermissions();
+      res.json(permissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get permissions" });
+    }
+  });
+
+  app.get("/api/permissions/role/:role", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const permissions = await storage.getPermissionsByRole(req.params.role);
+      res.json(permissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get role permissions" });
+    }
+  });
+
+  app.post("/api/permissions", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Make sure only administrators can add permissions
+      if (req.user && (req.user as any).role !== "administrator") {
+        return res.status(403).json({ message: "Only administrators can manage permissions" });
+      }
+
+      const validatedData = insertPermissionSchema.parse(req.body);
+      const permission = await storage.createPermission(validatedData);
+      res.status(201).json(permission);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid permission data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create permission" });
+    }
+  });
+
+  app.put("/api/permissions/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Make sure only administrators can update permissions
+      if (req.user && (req.user as any).role !== "administrator") {
+        return res.status(403).json({ message: "Only administrators can manage permissions" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      const validatedData = insertPermissionSchema.parse(req.body);
+      const permission = await storage.updatePermission(id, validatedData);
+      
+      if (!permission) {
+        return res.status(404).json({ message: "Permission not found" });
+      }
+      
+      res.json(permission);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid permission data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update permission" });
+    }
+  });
+
+  app.delete("/api/permissions/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Make sure only administrators can delete permissions
+      if (req.user && (req.user as any).role !== "administrator") {
+        return res.status(403).json({ message: "Only administrators can manage permissions" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      await storage.deletePermission(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete permission" });
     }
   });
 
