@@ -108,6 +108,11 @@ export function DataTable<T>({
   const direction = dir || (isRTL ? 'rtl' : 'ltr');
   const isRightToLeft = direction === 'rtl';
   
+  // Calculate the actual row index for pagination
+  const getAbsoluteRowIndex = (relativeIndex: number): number => {
+    return (currentPage - 1) * pageSize + relativeIndex;
+  };
+  
   return (
     <div className={`space-y-4 ${isRightToLeft ? 'rtl' : 'ltr'}`} dir={direction}>
       {(searchable || actions) && (
@@ -119,7 +124,7 @@ export function DataTable<T>({
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
-                  setCurrentPage(1); // Reset to first page
+                  handlePageChange(1); // Reset to first page
                 }}
                 className={isRightToLeft ? "pr-10 text-right" : "pl-10"}
               />
@@ -179,7 +184,7 @@ export function DataTable<T>({
                       className={column.meta?.className || ''}
                     >
                       {column.cell
-                        ? column.cell(row, rowIndex)
+                        ? column.cell(row, getAbsoluteRowIndex(rowIndex))
                         : typeof column.accessorKey === "function"
                         ? column.accessorKey(row)
                         : column.accessorKey 
