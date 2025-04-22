@@ -27,6 +27,7 @@ import { insertCustomerProductSchema, CustomerProduct } from "@shared/schema";
 interface ProductFormProps {
   product?: CustomerProduct;
   onSuccess?: () => void;
+  preSelectedCustomerId?: string;
 }
 
 export function ProductForm({ product, onSuccess }: ProductFormProps) {

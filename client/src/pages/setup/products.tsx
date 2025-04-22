@@ -10,19 +10,24 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { CustomerProduct, Customer, Item, Category } from "@shared/schema";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 export default function Products() {
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<CustomerProduct | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<CustomerProduct | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Fetch products and related data
-  const { data: products, isLoading } = useQuery<CustomerProduct[]>({
+  const { data: allProducts, isLoading } = useQuery<CustomerProduct[]>({
     queryKey: [API_ENDPOINTS.CUSTOMER_PRODUCTS],
   });
 
-  const { data: customers } = useQuery<Customer[]>({
+  const { data: customers, isLoading: customersLoading } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
   });
 
@@ -33,6 +38,17 @@ export default function Products() {
   const { data: categories } = useQuery<Category[]>({
     queryKey: [API_ENDPOINTS.CATEGORIES],
   });
+  
+  // Filter customers by search query
+  const filteredCustomers = customers?.filter(customer => 
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    customer.code.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  // Filter products by selected customer
+  const products = selectedCustomerId 
+    ? allProducts?.filter(product => product.customerId === selectedCustomerId)
+    : [];
 
   // Delete mutation
   const deleteMutation = useMutation({
@@ -75,6 +91,12 @@ export default function Products() {
     setFormOpen(false);
     setEditProduct(null);
   };
+  
+  // Pre-select customer for new product
+  const handleAddProduct = () => {
+    setEditProduct(null);
+    setFormOpen(true);
+  };
 
   // Helper functions to get related data
   const getCustomerName = (customerId: string) => {
@@ -92,17 +114,18 @@ export default function Products() {
   const columns = [
     {
       header: "Customer",
-      accessorKey: (row: CustomerProduct) => getCustomerName(row.customerId),
+      accessorFn: (row: CustomerProduct) => getCustomerName(row.customerId),
+      id: "customerName"
     },
     {
       header: "Item",
       accessorKey: "itemId",
-      cell: (row: { itemId: string }) => getItemName(row.itemId),
+      cell: (info: any) => getItemName(info.getValue()),
     },
     {
       header: "Category",
       accessorKey: "categoryId",
-      cell: (row: { categoryId: string }) => getCategoryName(row.categoryId),
+      cell: (info: any) => getCategoryName(info.getValue()),
     },
     {
       header: "Size",
@@ -114,21 +137,25 @@ export default function Products() {
     },
     {
       header: "Actions",
-      cell: (row: CustomerProduct) => (
-        <div className="flex space-x-2">
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
-            <span className="material-icons text-sm">edit</span>
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
-            <span className="material-icons text-sm">delete</span>
-          </Button>
-        </div>
-      ),
+      id: "actions",
+      cell: (info: any) => {
+        const row = info.row.original as CustomerProduct;
+        return (
+          <div className="flex space-x-2">
+            <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
+              <span className="material-icons text-sm">edit</span>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
+              <span className="material-icons text-sm">delete</span>
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
   const tableActions = (
-    <Button onClick={() => setFormOpen(true)}>
+    <Button onClick={handleAddProduct}>
       <span className="material-icons text-sm mr-1">add</span>
       Add Product
     </Button>
@@ -140,19 +167,65 @@ export default function Products() {
         <h1 className="text-2xl font-bold text-secondary-900">Products</h1>
       </div>
 
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Select Customer</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-3 relative">
+              <Input
+                placeholder="Search customer by name or code..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            </div>
+            <Select 
+              value={selectedCustomerId} 
+              onValueChange={setSelectedCustomerId}
+              disabled={customersLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a customer" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredCustomers?.map((customer) => (
+                  <SelectItem key={customer.id} value={customer.id}>
+                    {customer.name} ({customer.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Manage Customer Products</span>
+            <span>
+              {selectedCustomerId 
+                ? `Products for ${getCustomerName(selectedCustomerId)}`
+                : "Select a customer to view products"}
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <DataTable 
-            data={products || []}
-            columns={columns}
-            isLoading={isLoading}
-            actions={tableActions}
-          />
+          {selectedCustomerId ? (
+            <DataTable 
+              data={products || []}
+              columns={columns}
+              isLoading={isLoading}
+              actions={selectedCustomerId ? tableActions : undefined}
+            />
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <span className="material-icons text-4xl mb-2">people</span>
+              <p>Please select a customer to view their products</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

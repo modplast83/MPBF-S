@@ -134,7 +134,7 @@ export default function Sidebar() {
                       isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
                     )}
                   >
-                    <span className={`material-icons text-primary-100 ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
+                    <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
                     {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
                   </Link>
                 )}
