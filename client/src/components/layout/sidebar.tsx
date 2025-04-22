@@ -71,7 +71,7 @@ export default function Sidebar() {
         )}
       </div>
       
-      <nav className="mt-5 flex-grow overflow-y-auto">
+      <nav className="mt-5 flex-grow overflow-y-auto scrollbar-hide">
         {SIDEBAR_ITEMS.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {expanded && (
