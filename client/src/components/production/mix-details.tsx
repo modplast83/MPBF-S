@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ interface MixDetailsProps {
 }
 
 export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedMaterial, setSelectedMaterial] = useState<number | null>(null);
@@ -170,11 +172,11 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   };
 
   if (mixLoading) {
-    return <div className="flex justify-center p-4">Loading mix details...</div>;
+    return <div className="flex justify-center p-4">{t('common.loading')}...</div>;
   }
 
   if (!mix) {
-    return <div className="text-center p-4 text-secondary-400">Mix not found</div>;
+    return <div className="text-center p-4 text-secondary-400">{t('common.not_found')}</div>;
   }
 
   return (
@@ -182,26 +184,26 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>Mix Details</CardTitle>
+            <CardTitle>{t('production.mix_materials.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <div className="font-medium text-secondary-500">Mix ID</div>
+                  <div className="font-medium text-secondary-500">{t('production.mix_materials.mix_id')}</div>
                   <div>{mix.id}</div>
                 </div>
                 <div>
-                  <div className="font-medium text-secondary-500">Date</div>
+                  <div className="font-medium text-secondary-500">{t('production.mix_materials.date')}</div>
                   <div>{formatDateString(mix.mixDate)}</div>
                 </div>
                 <div>
-                  <div className="font-medium text-secondary-500">Operator</div>
+                  <div className="font-medium text-secondary-500">{t('production.mix_materials.operator')}</div>
                   <div>{mix.mixPerson}</div>
                 </div>
 
                 <div>
-                  <div className="font-medium text-secondary-500">Total Weight</div>
+                  <div className="font-medium text-secondary-500">{t('production.mix_materials.total_weight')}</div>
                   <div className="font-semibold text-primary-600">{mix.totalQuantity?.toFixed(2) || "0.00"} kg</div>
                 </div>
               </div>
@@ -212,7 +214,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                   onClick={() => window.print()}
                 >
                   <span className="material-icons mr-2">print</span>
-                  Print Label
+                  {t('production.mix_materials.print_label')}
                 </Button>
               </div>
             </div>
@@ -221,19 +223,19 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Add Materials</CardTitle>
+            <CardTitle>{t('production.mix_materials.add_material')}</CardTitle>
           </CardHeader>
           <CardContent>
             {isAddingMaterial ? (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Raw Material</label>
+                  <label className="text-sm font-medium">{t('production.mix_materials.material')}</label>
                   <Select
                     value={selectedMaterial?.toString() || ""}
                     onValueChange={(value) => setSelectedMaterial(parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select material" />
+                      <SelectValue placeholder={t('production.mix_materials.material')} />
                     </SelectTrigger>
                     <SelectContent>
                       {rawMaterials.map((material) => (
@@ -242,23 +244,23 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                           value={material.id.toString()}
                           disabled={material.quantity === null || material.quantity <= 0}
                         >
-                          {material.name} ({material.quantity !== null ? `${material.quantity.toFixed(2)} ${material.unit}` : 'Out of stock'})
+                          {material.name} ({material.quantity !== null ? `${material.quantity.toFixed(2)} ${material.unit}` : t('common.out_of_stock')})
                         </SelectItem>
                       ))}
                       {rawMaterials.length === 0 && (
-                        <SelectItem value="no-materials">No materials available</SelectItem>
+                        <SelectItem value="no-materials">{t('production.mix_materials.no_materials')}</SelectItem>
                       )}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Quantity (kg)</label>
+                  <label className="text-sm font-medium">{t('production.mix_materials.quantity')}</label>
                   <Input
                     type="number"
                     step="0.01"
                     min="0.01"
-                    placeholder="Enter quantity"
+                    placeholder={t('production.mix_materials.quantity')}
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
                   />
@@ -273,7 +275,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                       setQuantity("");
                     }}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button 
                     onClick={handleAddMaterial}
@@ -282,10 +284,10 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                     {addMixItemMutation.isPending ? (
                       <>
                         <span className="animate-spin mr-2">◌</span>
-                        Adding...
+                        {t('common.adding')}...
                       </>
                     ) : (
-                      "Add Material"
+                      t('production.mix_materials.add_material')
                     )}
                   </Button>
                 </div>
@@ -296,7 +298,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                 onClick={() => setIsAddingMaterial(true)}
               >
                 <span className="material-icons mr-2">add</span>
-                Add Material to Mix
+                {t('production.mix_materials.add_material_to_mix')}
               </Button>
             )}
           </CardContent>
@@ -305,7 +307,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Mix Composition</CardTitle>
+          <CardTitle>{t('production.mix_materials.composition')}</CardTitle>
         </CardHeader>
         <CardContent>
           {itemsLoading ? (
@@ -318,10 +320,10 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Material</TableHead>
-                  <TableHead className="text-right">Quantity (kg)</TableHead>
-                  <TableHead className="text-right">Percentage</TableHead>
-                  <TableHead className="w-[100px] text-right">Actions</TableHead>
+                  <TableHead>{t('production.mix_materials.material')}</TableHead>
+                  <TableHead className="text-right">{t('production.mix_materials.quantity')}</TableHead>
+                  <TableHead className="text-right">{t('production.mix_materials.percentage')}</TableHead>
+                  <TableHead className="w-[100px] text-right">{t('common.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -349,7 +351,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
             </Table>
           ) : (
             <div className="text-center py-8 text-secondary-400">
-              No materials added to this mix yet
+              {t('production.mix_materials.no_materials')}
             </div>
           )}
         </CardContent>

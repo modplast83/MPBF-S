@@ -12,9 +12,16 @@ import { MixMaterialForm } from "@/components/production/mix-material-form";
 import { MixDetails } from "@/components/production/mix-details";
 
 export default function MixMaterialsPage() {
+  const { t } = useTranslation();
   const [selectedMixId, setSelectedMixId] = useState<number | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [printableData, setPrintableData] = useState<{
+    mix: any;
+    items: any[];
+    totalWeight: number;
+    materialNames: {[key: number]: string};
+  } | null>(null);
 
   // Fetch all mix materials
   const { data: mixMaterials, isLoading: mixLoading, refetch: refetchMixes } = useQuery<MixMaterial[]>({
@@ -31,20 +38,20 @@ export default function MixMaterialsPage() {
   // Table columns for mix materials
   const mixColumns = [
     {
-      header: "ID",
+      header: t('production.mix_materials.mix_id'),
       accessorKey: "id" as const,
     },
     {
-      header: "Date",
+      header: t('production.mix_materials.date'),
       accessorKey: "mixDate" as const,
       cell: (row: any) => formatDateString(row.mixDate.toString()),
     },
     {
-      header: "Operator",
+      header: t('production.mix_materials.operator'),
       accessorKey: "mixPerson" as const,
     },
     {
-      header: "Total Quantity (kg)",
+      header: t('production.mix_materials.total_weight'),
       accessorKey: "totalQuantity" as const,
       cell: (row: { totalQuantity: number | null }) => row.totalQuantity?.toFixed(2) || "0.00",
     },
@@ -81,185 +88,118 @@ export default function MixMaterialsPage() {
     },
   ];
   
-  // Function to print a 5"x3" label for a mix
-  const printMixLabel = async (mixId: number) => {
-    // Fetch mix details
-    const response = await fetch(`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`);
-    const mixData = await response.json();
-    
-    // Fetch mix items
-    const itemsResponse = await fetch(`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}/items`);
-    const mixItems = await itemsResponse.json();
-    
-    // Create a new window for printing
-    const printWindow = window.open('', '', 'width=3in,height=5in');
-    if (!printWindow) return;
-    
-    // Calculate total weight
-    const totalWeight = mixItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
-    
-    // Get material names for the items
-    const materialNames: {[key: number]: string} = {};
-    if (rawMaterials) {
-      rawMaterials.forEach(material => {
-        materialNames[material.id] = material.name;
+  // Function to prepare the data for printing
+  const preparePrintData = async (mixId: number) => {
+    try {
+      // Fetch mix details
+      const response = await fetch(`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`);
+      const mixData = await response.json();
+      
+      // Fetch mix items
+      const itemsResponse = await fetch(`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}/items`);
+      const mixItems = await itemsResponse.json();
+      
+      // Calculate total weight
+      const totalWeight = mixItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
+      
+      // Get material names for the items
+      const materialNames: {[key: number]: string} = {};
+      if (rawMaterials) {
+        rawMaterials.forEach(material => {
+          materialNames[material.id] = material.name;
+        });
+      }
+      
+      // Store the data for the printable label
+      setPrintableData({
+        mix: mixData,
+        items: mixItems,
+        totalWeight,
+        materialNames
       });
+      
+      // Trigger print immediately
+      setTimeout(() => {
+        window.print();
+      }, 100);
+    } catch (error) {
+      console.error("Failed to prepare print data:", error);
     }
+  };
+
+  // Function to print a mix label directly
+  const printMixLabel = (mixId: number) => {
+    preparePrintData(mixId);
+  };
+
+  // Create printable label component
+  const PrintableLabel = () => {
+    if (!printableData) return null;
     
-    // Generate HTML content for the label
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Mix Label</title>
-          <style>
-            @page {
-              size: 3in 5in;
-              margin: 0;
-            }
-            body {
-              width: 3in;
-              height: 5in;
-              margin: 0;
-              padding: 0.25in;
-              box-sizing: border-box;
-              font-family: Arial, sans-serif;
-              font-size: 10pt;
-            }
-            .label {
-              border: 1px solid #ccc;
-              width: 100%;
-              height: 100%;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-            }
-            .header {
-              display: flex;
-              justify-content: space-between;
-              border-bottom: 1px solid #ccc;
-              padding-bottom: 0.1in;
-              font-weight: bold;
-            }
-            .mix-details {
-              padding-top: 0.1in;
-              padding-bottom: 0.1in;
-            }
-            .materials {
-              flex-grow: 1;
-              overflow: hidden;
-            }
-            .material-item {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 0.1in;
-            }
-            .material-name {
-              flex: 2;
-            }
-            .material-qty {
-              flex: 1;
-              text-align: right;
-            }
-            .material-percent {
-              flex: 1;
-              text-align: right;
-            }
-            .title {
-              font-weight: bold;
-              text-align: center;
-              margin-bottom: 0.1in;
-              font-size: 12pt;
-              border-bottom: 1px solid #ccc;
-              padding-bottom: 0.1in;
-            }
-            .total {
-              border-top: 1px solid #ccc;
-              font-weight: bold;
-              padding-top: 0.1in;
-              display: flex;
-              justify-content: space-between;
-            }
-            .footer {
-              text-align: center;
-              font-size: 8pt;
-              margin-top: 0.1in;
-            }
-            @media print {
-              body {
-                width: 3in;
-                height: 5in;
-              }
-              .no-print {
-                display: none;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="label">
-            <div class="title">
-              MIX MATERIAL LABEL
-            </div>
-            <div class="header">
-              <div>Mix ID: ${mixData.id}</div>
-              <div>Date: ${formatDateString(mixData.mixDate.toString())}</div>
-            </div>
-            <div class="mix-details">
-              <div>Operator: ${mixData.mixPerson}</div>
-              <div>Total Weight: ${totalWeight.toFixed(2)} kg</div>
-            </div>
-            <div class="materials">
-              <div class="material-item" style="font-weight: bold;">
-                <div class="material-name">Material</div>
-                <div class="material-qty">Qty (kg)</div>
-                <div class="material-percent">%</div>
-              </div>
-              ${mixItems.map((item: any) => {
-                const percentage = ((item.quantity / totalWeight) * 100).toFixed(1);
-                const materialName = materialNames[item.rawMaterialId] || `Material ${item.rawMaterialId}`;
-                return `
-                  <div class="material-item">
-                    <div class="material-name">${materialName}</div>
-                    <div class="material-qty">${item.quantity}</div>
-                    <div class="material-percent">${percentage}%</div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-            <div class="total">
-              <div>Total Materials: ${mixItems.length}</div>
-              <div>Total Weight: ${totalWeight.toFixed(2)} kg</div>
-            </div>
-            <div class="footer">
-              Printed on ${new Date().toLocaleString()}<br>
-              Size: 3" x 5"
-            </div>
-          </div>
-          <div class="no-print" style="margin-top: 0.25in; text-align: center;">
-            <button onclick="window.print(); window.close();" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Print Label</button>
-          </div>
-        </body>
-      </html>
-    `);
+    const { mix, items, totalWeight, materialNames } = printableData;
     
-    printWindow.document.close();
+    return (
+      <div className="printable-label" style={{ width: "3in", height: "5in", padding: "0.25in" }}>
+        <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "10px", textAlign: "center" }}>
+          {t('production.mix_materials.mix_label')}
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", borderBottom: "1px solid #ccc", paddingBottom: "0.1in" }}>
+          <div>{t('production.mix_materials.mix_id')}: {mix.id}</div>
+          <div>{t('production.mix_materials.date')}: {formatDateString(mix.mixDate)}</div>
+        </div>
+        <div style={{ marginBottom: "10px" }}>
+          <div>{t('production.mix_materials.operator')}: {mix.mixPerson}</div>
+          <div>{t('production.mix_materials.total_weight')}: {totalWeight.toFixed(2)} kg</div>
+        </div>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={{ border: "1px solid #ccc", padding: "4px" }}>{t('production.mix_materials.material')}</th>
+              <th style={{ border: "1px solid #ccc", padding: "4px" }}>{t('production.mix_materials.quantity')}</th>
+              <th style={{ border: "1px solid #ccc", padding: "4px" }}>{t('production.mix_materials.percentage')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item) => {
+              const percentage = ((item.quantity / totalWeight) * 100).toFixed(1);
+              const materialName = materialNames[item.rawMaterialId] || `Material ${item.rawMaterialId}`;
+              return (
+                <tr key={item.id}>
+                  <td style={{ border: "1px solid #ccc", padding: "4px" }}>{materialName}</td>
+                  <td style={{ border: "1px solid #ccc", padding: "4px", textAlign: "right" }}>{item.quantity.toFixed(2)}</td>
+                  <td style={{ border: "1px solid #ccc", padding: "4px", textAlign: "right" }}>{percentage}%</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <div style={{ borderTop: "1px solid #ccc", paddingTop: "0.1in", display: "flex", justifyContent: "space-between", fontWeight: "bold", marginTop: "10px" }}>
+          <div>Total: {items.length}</div>
+          <div>{totalWeight.toFixed(2)} kg</div>
+        </div>
+        <div style={{ textAlign: "center", fontSize: "8pt", marginTop: "0.1in" }}>
+          {new Date().toLocaleString()}<br/>
+          Size: 3" x 5"
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-primary-700">Mix Materials</h1>
+        <h1 className="text-2xl font-bold text-primary-700">{t('production.mix_materials.title')}</h1>
         <div className="flex space-x-2">
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-1">
                 <span className="material-icons text-sm">add</span>
-                New Mix
+                {t('production.mix_materials.new_mix')}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[550px]">
               <DialogHeader>
-                <DialogTitle>Create New Mix</DialogTitle>
+                <DialogTitle>{t('production.mix_materials.new_mix')}</DialogTitle>
               </DialogHeader>
               <MixMaterialForm 
                 rawMaterials={rawMaterials || []}
@@ -275,7 +215,7 @@ export default function MixMaterialsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Mix Materials</CardTitle>
+          <CardTitle>{t('production.mix_materials.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable 
@@ -294,7 +234,7 @@ export default function MixMaterialsPage() {
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="sm:max-w-[750px]">
           <DialogHeader>
-            <DialogTitle>Mix Details</DialogTitle>
+            <DialogTitle>{t('production.mix_materials.title')}</DialogTitle>
           </DialogHeader>
           {selectedMixId && (
             <MixDetails 
@@ -305,6 +245,11 @@ export default function MixMaterialsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Hidden printable label that will only show when printing */}
+      <div className="hidden print:block print:m-0 print:p-0">
+        <PrintableLabel />
+      </div>
     </div>
   );
 }
