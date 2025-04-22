@@ -32,7 +32,8 @@
       "settings": "الإعدادات",
       "unknown_customer": "عميل غير معروف",
       "unknown": "غير معروف",
-      "not_available": "غير متوفر"
+      "not_available": "غير متوفر",
+      "inch": "بوصة"
     },
     "auth": {
       "username": "اسم المستخدم",
@@ -164,6 +165,7 @@
       "title": "الإنتاج",
       "orders": "الطلبات",
       "workflow": "سير العمل",
+      "printing_cylinder": "اسطوانة الطباعة",
       "roll_management": {
         "title": "إدارة اللفات",
         "extrusion_stage": "مرحلة البثق",
@@ -178,7 +180,13 @@
         "cutting_note": "أدخل كمية القص - يتم حساب الفرق كهدر",
         "no_rolls_printing": "لا توجد لفات في مرحلة الطباعة",
         "no_rolls_cutting": "لا توجد لفات في مرحلة القص",
-        "loading": "جاري التحميل..."
+        "loading": "جاري التحميل...",
+        "start_process": "بدء العملية",
+        "complete_stage": "إكمال المرحلة",
+        "stage_completed": "تم الانتهاء من {{stage}}",
+        "roll_moved": "تم نقل اللفة #{{rollNumber}} إلى مرحلة {{nextStage}}",
+        "started_stage": "بدأت {{stage}}",
+        "processing_begun": "بدأت معالجة اللفة #{{rollNumber}}"
       },
       "mix_materials": {
         "title": "خلط مواد",

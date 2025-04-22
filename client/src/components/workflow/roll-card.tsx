@@ -18,6 +18,7 @@ export function RollCard({ roll }: RollCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   // Fetch related data
   const { data: jobOrder } = useQuery<JobOrder>({
@@ -140,19 +141,29 @@ export function RollCard({ roll }: RollCardProps) {
       return; // Skip the toast
     }
     
+    // Get translated stage names
+    const currentStageName = t(`rolls.${roll.currentStage}`);
+    const nextStageName = t(`rolls.${nextStage}`);
+    
     // Add toast notification for better feedback
     toast({
-      title: `${roll.currentStage.charAt(0).toUpperCase() + roll.currentStage.slice(1)} Completed`,
-      description: `Roll #${roll.serialNumber} has moved to ${nextStage} stage.`,
+      title: t("production.roll_management.stage_completed", { stage: currentStageName }),
+      description: t("production.roll_management.roll_moved", { 
+        rollNumber: roll.serialNumber, 
+        nextStage: nextStageName 
+      }),
     });
   };
   
   const handleStart = () => {
     updateRollMutation.mutate({ status: "processing" });
     
+    // Get translated stage name
+    const stageName = t(`rolls.${roll.currentStage}`);
+    
     toast({
-      title: `Started ${roll.currentStage.charAt(0).toUpperCase() + roll.currentStage.slice(1)}`,
-      description: `Roll #${roll.serialNumber} processing has begun.`,
+      title: t("production.roll_management.started_stage", { stage: stageName }),
+      description: t("production.roll_management.processing_begun", { rollNumber: roll.serialNumber }),
     });
   };
   
@@ -168,14 +179,14 @@ export function RollCard({ roll }: RollCardProps) {
       >
         <CardContent className="p-0">
           <div className="flex justify-between items-center mb-3">
-            <span className="font-medium text-lg">Roll #{roll.serialNumber}</span>
+            <span className="font-medium text-lg">{t("rolls.title")} #{roll.serialNumber}</span>
             <StatusBadge status={roll.status} />
           </div>
           <div className="text-sm text-secondary-700 space-y-1.5">
-            <p><span className="font-medium">Order:</span> #{jobOrder?.orderId}</p>
-            <p><span className="font-medium">Customer:</span> {customer?.name || 'Loading...'}</p>
-            <p><span className="font-medium">Product:</span> {item?.name || customerProduct?.itemId} ({customerProduct?.sizeCaption})</p>
-            <p><span className="font-medium">Quantity:</span> {
+            <p><span className="font-medium">{t("orders.title")}:</span> #{jobOrder?.orderId}</p>
+            <p><span className="font-medium">{t("orders.customer")}:</span> {customer?.name || t("common.loading")}</p>
+            <p><span className="font-medium">{t("orders.product")}:</span> {item?.name || customerProduct?.itemId} ({customerProduct?.sizeCaption})</p>
+            <p><span className="font-medium">{t("orders.quantity")}:</span> {
                 roll.currentStage === "extrusion" 
                   ? roll.extrudingQty 
                   : roll.currentStage === "printing" 
@@ -184,7 +195,7 @@ export function RollCard({ roll }: RollCardProps) {
               } Kg
             </p>
             {roll.currentStage === "printing" && customerProduct?.printingCylinder && (
-              <p><span className="font-medium">Printing Cylinder:</span> {customerProduct.printingCylinder} Inch</p>
+              <p><span className="font-medium">{t("production.printing_cylinder")}:</span> {customerProduct.printingCylinder} {t("common.inch")}</p>
             )}
           </div>
           <div className="mt-4 flex justify-end border-t pt-3 border-secondary-100">
@@ -199,7 +210,7 @@ export function RollCard({ roll }: RollCardProps) {
                 }}
                 disabled={updateRollMutation.isPending}
               >
-                Start Process
+                {t("production.roll_management.start_process")}
               </Button>
             ) : roll.status === "processing" ? (
               <Button
@@ -212,7 +223,7 @@ export function RollCard({ roll }: RollCardProps) {
                 }}
                 disabled={updateRollMutation.isPending}
               >
-                Complete Stage
+                {t("production.roll_management.complete_stage")}
               </Button>
             ) : null}
           </div>

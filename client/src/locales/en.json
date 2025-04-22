@@ -32,7 +32,8 @@
       "settings": "Settings",
       "unknown_customer": "Unknown Customer",
       "unknown": "Unknown",
-      "not_available": "N/A"
+      "not_available": "N/A",
+      "inch": "Inch"
     },
     "auth": {
       "username": "Username",
@@ -164,6 +165,7 @@
       "title": "Production",
       "orders": "Orders",
       "workflow": "Workflow",
+      "printing_cylinder": "Printing Cylinder",
       "roll_management": {
         "title": "Roll Management",
         "extrusion_stage": "Extrusion Stage",
@@ -178,7 +180,13 @@
         "cutting_note": "Input cutting quantity - the difference is calculated as waste",
         "no_rolls_printing": "No rolls in printing stage",
         "no_rolls_cutting": "No rolls in cutting stage",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "start_process": "Start Process",
+        "complete_stage": "Complete Stage",
+        "stage_completed": "{{stage}} Completed",
+        "roll_moved": "Roll #{{rollNumber}} has moved to {{nextStage}} stage",
+        "started_stage": "Started {{stage}}",
+        "processing_begun": "Roll #{{rollNumber}} processing has begun"
       },
       "mix_materials": {
         "title": "Mix Materials",
