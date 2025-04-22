@@ -175,6 +175,24 @@ export type InsertRoll = z.infer<typeof insertRollSchema>;
 export type CreateRoll = z.infer<typeof createRollSchema>;
 export type Roll = typeof rolls.$inferSelect;
 
+// Permissions table
+export const permissions = pgTable("permissions", {
+  id: serial("id").primaryKey(),
+  role: text("role").notNull(),
+  module: text("module").notNull(),
+  canView: boolean("can_view").default(false),
+  canCreate: boolean("can_create").default(false),
+  canEdit: boolean("can_edit").default(false),
+  canDelete: boolean("can_delete").default(false),
+  isActive: boolean("is_active").default(true),
+}, (table) => ({
+  uniqueIndex: unique().on(table.role, table.module),
+}));
+
+export const insertPermissionSchema = createInsertSchema(permissions).omit({ id: true });
+export type InsertPermission = z.infer<typeof insertPermissionSchema>;
+export type Permission = typeof permissions.$inferSelect;
+
 // Machines table
 export const machines = pgTable("machines", {
   id: text("id").primaryKey(),

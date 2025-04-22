@@ -23,6 +23,13 @@ export interface IStorage {
   updateUser(id: string, user: Partial<User>): Promise<User | undefined>;
   deleteUser(id: string): Promise<boolean>;
   
+  // Permissions management
+  getPermissions(): Promise<Permission[]>;
+  getPermissionsByRole(role: string): Promise<Permission[]>;
+  createPermission(permission: InsertPermission): Promise<Permission>;
+  updatePermission(id: number, permission: Partial<Permission>): Promise<Permission | undefined>;
+  deletePermission(id: number): Promise<boolean>;
+  
   // SMS Messages
   getSmsMessages(): Promise<SmsMessage[]>;
   getSmsMessagesByOrder(orderId: number): Promise<SmsMessage[]>;

@@ -21,7 +21,8 @@ import {
   SmsMessage, InsertSmsMessage, smsMessages,
   MixMaterial, InsertMixMaterial, mixMaterials,
   MixItem, InsertMixItem, mixItems,
-  MixMachine, InsertMixMachine, mixMachines
+  MixMachine, InsertMixMachine, mixMachines,
+  Permission, InsertPermission, permissions
 } from '@shared/schema';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
@@ -513,6 +514,33 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSmsMessage(id: number): Promise<boolean> {
     const result = await db.delete(smsMessages).where(eq(smsMessages.id, id)).returning();
+    return result.length > 0;
+  }
+  
+  // Permissions
+  async getPermissions(): Promise<Permission[]> {
+    return await db.select().from(permissions);
+  }
+
+  async getPermissionsByRole(role: string): Promise<Permission[]> {
+    return await db.select().from(permissions).where(eq(permissions.role, role));
+  }
+
+  async createPermission(permission: InsertPermission): Promise<Permission> {
+    const result = await db.insert(permissions).values(permission).returning();
+    return result[0];
+  }
+
+  async updatePermission(id: number, permissionUpdate: Partial<Permission>): Promise<Permission | undefined> {
+    const result = await db.update(permissions)
+      .set(permissionUpdate)
+      .where(eq(permissions.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deletePermission(id: number): Promise<boolean> {
+    const result = await db.delete(permissions).where(eq(permissions.id, id)).returning();
     return result.length > 0;
   }
 
