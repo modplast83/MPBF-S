@@ -2238,6 +2238,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   app.post("/api/permissions", requireAuth, async (req: Request, res: Response) => {
     try {
       // Make sure only administrators can add permissions
