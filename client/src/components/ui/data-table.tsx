@@ -29,12 +29,14 @@ interface DataTableProps<T> {
     meta?: {
       className?: string;
     };
+    id?: string;
   }[];
   searchable?: boolean;
   pagination?: boolean;
   actions?: React.ReactNode;
   onRowClick?: (row: T) => void;
   dir?: 'ltr' | 'rtl';
+  isLoading?: boolean;
 }
 
 export function DataTable<T>({
