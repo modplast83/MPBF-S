@@ -75,7 +75,7 @@ export default function Sidebar() {
         {SIDEBAR_ITEMS.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {expanded && (
-              <div className="px-2 py-2 text-gray-400 text-xs font-semibold uppercase">
+              <div className="px-4 py-2 text-primary-200/70 text-xs font-semibold uppercase tracking-wider">
                 {t(`sidebar.${section.title.toLowerCase()}`)}
               </div>
             )}
@@ -89,15 +89,15 @@ export default function Sidebar() {
                   >
                     <CollapsibleTrigger
                       className={cn(
-                        `flex items-center px-2 py-3 w-full hover:bg-gray-900 text-white ${isRTL ? 'flex-row-reverse text-right' : ''}`,
-                        isActive(item.path) && "bg-gray-800"
+                        `flex items-center px-3 py-3 w-full rounded-md mx-2 my-1 hover:bg-primary-800/60 hover:shadow-md text-white/90 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                        isActive(item.path) && "bg-primary-800/80 shadow-md text-white"
                       )}
                     >
-                      <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'}`}>{item.icon}</span>
+                      <span className={`material-icons ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
                       {expanded && (
                         <>
-                          <span className="flex-1">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
-                          <span className={`material-icons text-sm ${isRTL ? 'flip-in-rtl' : ''}`}>
+                          <span className="flex-1 font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
+                          <span className={`material-icons text-sm opacity-70 ${isRTL ? 'flip-in-rtl' : ''}`}>
                             {openMenus[item.title] ? "expand_less" : "expand_more"}
                           </span>
                         </>
@@ -114,10 +114,11 @@ export default function Sidebar() {
                               key={subIndex} 
                               href={subItem.path}
                               className={cn(
-                                `flex items-center py-2 hover:bg-gray-900 text-white ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
-                                isActive(subItem.path) && "bg-gray-800"
+                                `flex items-center py-2 px-3 mx-3 my-1 rounded text-white/80 hover:bg-primary-700/30 hover:text-white transition-colors text-sm ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
+                                isActive(subItem.path) && "bg-primary-700/40 text-white font-medium"
                               )}
                             >
+                              <span className="h-1.5 w-1.5 rounded-full bg-white/40 mr-2"></span>
                               {t(`sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`)}
                             </Link>
                           );
@@ -129,12 +130,12 @@ export default function Sidebar() {
                   <Link 
                     href={item.path}
                     className={cn(
-                      `flex items-center px-2 py-3 hover:bg-gray-900 text-white ${isRTL ? 'flex-row-reverse text-right' : ''}`,
-                      isActive(item.path) && "bg-gray-800"
+                      `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-primary-800/60 hover:shadow-md text-white/90 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                      isActive(item.path) && "bg-primary-800/80 shadow-md text-white"
                     )}
                   >
-                    <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'}`}>{item.icon}</span>
-                    {expanded && <span>{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
+                    <span className={`material-icons ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
+                    {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
                   </Link>
                 )}
               </div>
@@ -147,15 +148,15 @@ export default function Sidebar() {
         ))}
       </nav>
       
-      <div className="mt-auto w-full border-t border-gray-800 p-4">
+      <div className="mt-auto w-full border-t border-primary-800/50 p-4">
         <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold">
+          <div className="h-10 w-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-full flex items-center justify-center text-white font-bold shadow-md">
             A
           </div>
           {expanded && (
             <div className={isRTL ? 'mr-3' : 'ml-3'}>
-              <p className="text-sm font-medium">{t("sidebar.admin_user")}</p>
-              <p className="text-xs text-gray-400">{t("sidebar.administrator")}</p>
+              <p className="text-sm font-medium text-white">{t("sidebar.admin_user")}</p>
+              <p className="text-xs text-primary-300">{t("sidebar.administrator")}</p>
             </div>
           )}
         </div>

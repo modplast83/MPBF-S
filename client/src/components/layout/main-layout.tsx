@@ -36,8 +36,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
         }`}
       >
         {user && <Header />}
-        <main className="flex-1 overflow-auto bg-secondary-50 p-6">
-          {children}
+        <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

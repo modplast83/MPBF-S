@@ -73,10 +73,11 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm">
-      <div className={`flex justify-between items-center px-6 py-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+    <header className="bg-white shadow-sm backdrop-blur-md bg-white/90 sticky top-0 z-10">
+      <div className={`flex justify-between items-center px-6 py-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div className="flex items-center">
-          <h2 className="text-xl font-semibold text-secondary-800">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+            <span className="h-8 w-1 bg-primary-600 rounded-full mr-3 shadow-md"></span>
             {getCurrentPageTitle()}
           </h2>
         </div>
@@ -84,46 +85,49 @@ export default function Header() {
           {/* Language Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="flex items-center justify-center">
-                <Globe className="h-5 w-5 text-secondary-600" />
+              <Button variant="outline" size="icon" className="flex items-center justify-center text-primary-600 border-primary-200 shadow-sm hover:bg-primary-50">
+                <Globe className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onSelect={() => setLanguage("en")} className={language === "en" ? "bg-secondary-100" : ""}>
-                <span className={`${language === "en" ? "font-bold" : ""}`}>{t("language.en")}</span>
+              <DropdownMenuItem onSelect={() => setLanguage("en")} className={language === "en" ? "bg-primary-50" : ""}>
+                <span className={`${language === "en" ? "font-bold text-primary-700" : ""}`}>{t("language.en")}</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setLanguage("ar")} className={language === "ar" ? "bg-secondary-100" : ""}>
-                <span className={`${language === "ar" ? "font-bold" : ""}`}>{t("language.ar")}</span>
+              <DropdownMenuItem onSelect={() => setLanguage("ar")} className={language === "ar" ? "bg-primary-50" : ""}>
+                <span className={`${language === "ar" ? "font-bold text-primary-700" : ""}`}>{t("language.ar")}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button variant="ghost" size="icon">
-            <span className="material-icons text-secondary-600">notifications</span>
+          <Button variant="outline" size="icon" className="text-primary-600 border-primary-200 shadow-sm hover:bg-primary-50">
+            <span className="material-icons">notifications</span>
           </Button>
-          <Button variant="ghost" size="icon">
-            <span className="material-icons text-secondary-600">help_outline</span>
+          <Button variant="outline" size="icon" className="text-primary-600 border-primary-200 shadow-sm hover:bg-primary-50">
+            <span className="material-icons">help_outline</span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2`}>
-                <span className="text-sm font-medium text-secondary-700">{user?.name || 'User'}</span>
-                <span className={`material-icons text-secondary-600 text-sm ${isRTL ? 'flip-in-rtl' : ''}`}>arrow_drop_down</span>
+              <Button variant="outline" className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 pl-3 pr-2 border-primary-200 shadow-sm hover:bg-primary-50 group`}>
+                <div className="h-7 w-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-medium mr-2 group-hover:bg-primary-200 transition-colors">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <span className="text-sm font-medium text-gray-700">{user?.name || 'User'}</span>
+                <span className={`material-icons text-primary-600 text-sm ${isRTL ? 'flip-in-rtl' : ''}`}>arrow_drop_down</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>
-                <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-sm`}>person</span>
+            <DropdownMenuContent align="end" className="w-56 p-1 shadow-lg">
+              <DropdownMenuItem className="rounded hover:bg-primary-50 cursor-pointer focus:bg-primary-50 py-2">
+                <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-primary-600`}>person</span>
                 <span>{t("common.profile")}</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-sm`}>settings</span>
+              <DropdownMenuItem className="rounded hover:bg-primary-50 cursor-pointer focus:bg-primary-50 py-2">
+                <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-primary-600`}>settings</span>
                 <span>{t("common.settings")}</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={handleLogout}>
-                <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-sm`}>logout</span>
-                <span>{t("common.logout")}</span>
+              <DropdownMenuSeparator className="my-1 bg-gray-100" />
+              <DropdownMenuItem onSelect={handleLogout} className="rounded hover:bg-red-50 cursor-pointer focus:bg-red-50 py-2">
+                <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-red-600`}>logout</span>
+                <span className="text-red-600">{t("common.logout")}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
