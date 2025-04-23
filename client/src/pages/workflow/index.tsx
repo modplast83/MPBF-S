@@ -8,10 +8,12 @@ import { JobOrdersForExtrusion } from "@/components/workflow/job-orders-for-extr
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Roll } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function WorkflowIndex() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("extrusion");
+  const isMobile = useIsMobile();
   
   // Fetch rolls by stage
   const { data: extrusionRolls, isLoading: extrusionLoading } = useQuery<Roll[]>({
@@ -27,60 +29,82 @@ export default function WorkflowIndex() {
   });
   
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">{t("production.workflow")}</h1>
+    <div className="space-y-4 md:space-y-6">
+      {/* Header Section - Responsive layout */}
+      <div className={`flex ${isMobile ? 'flex-col space-y-3' : 'justify-between items-center'} mb-4 md:mb-6`}>
+        <h1 className="text-xl md:text-2xl font-bold text-secondary-900">{t("production.workflow")}</h1>
         <div className="flex space-x-2">
-          <Button variant="outline" className="flex items-center">
+          <Button variant="outline" size={isMobile ? "sm" : "default"} className="flex items-center">
             <span className="material-icons text-sm mr-1">filter_list</span>
-            {t("common.filter")}
+            {isMobile ? "" : t("common.filter")}
           </Button>
-          <Button variant="outline" className="flex items-center">
+          <Button variant="outline" size={isMobile ? "sm" : "default"} className="flex items-center">
             <span className="material-icons text-sm mr-1">file_download</span>
-            {t("common.export")}
+            {isMobile ? "" : t("common.export")}
           </Button>
         </div>
       </div>
       
       <Card>
-        <CardHeader>
-          <CardTitle>{t("production.roll_management.title")}</CardTitle>
+        <CardHeader className="pb-2 md:pb-6">
+          <CardTitle className="text-base md:text-lg">{t("production.roll_management.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="extrusion" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="extrusion" className="flex items-center gap-2">
-                <span className="material-icons text-primary-500">merge_type</span>
-                <span>{t("rolls.extrusion")}</span>
-                <span className="ml-2 h-5 w-5 rounded-full bg-primary-100 text-xs flex items-center justify-center">
-                  {extrusionLoading ? "-" : extrusionRolls?.length || 0}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="printing" className="flex items-center gap-2">
-                <span className="material-icons text-warning-500">format_color_fill</span>
-                <span>{t("rolls.printing")}</span>
-                <span className="ml-2 h-5 w-5 rounded-full bg-warning-100 text-xs flex items-center justify-center">
-                  {printingLoading ? "-" : printingRolls?.length || 0}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="cutting" className="flex items-center gap-2">
-                <span className="material-icons text-success">content_cut</span>
-                <span>{t("rolls.cutting")}</span>
-                <span className="ml-2 h-5 w-5 rounded-full bg-success-100 text-xs flex items-center justify-center">
-                  {cuttingLoading ? "-" : cuttingRolls?.length || 0}
-                </span>
-              </TabsTrigger>
+            {/* Responsive tabs - Simplified view on mobile */}
+            <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} mb-4 md:mb-6`}>
+              {isMobile ? (
+                <select 
+                  className="w-full p-2 bg-secondary-100 rounded border border-secondary-200"
+                  value={activeTab}
+                  onChange={(e) => setActiveTab(e.target.value)}
+                >
+                  <option value="extrusion">
+                    {t("rolls.extrusion")} ({extrusionLoading ? "-" : extrusionRolls?.length || 0})
+                  </option>
+                  <option value="printing">
+                    {t("rolls.printing")} ({printingLoading ? "-" : printingRolls?.length || 0})
+                  </option>
+                  <option value="cutting">
+                    {t("rolls.cutting")} ({cuttingLoading ? "-" : cuttingRolls?.length || 0})
+                  </option>
+                </select>
+              ) : (
+                <>
+                  <TabsTrigger value="extrusion" className="flex items-center gap-2">
+                    <span className="material-icons text-primary-500">merge_type</span>
+                    <span>{t("rolls.extrusion")}</span>
+                    <span className="ml-2 h-5 w-5 rounded-full bg-primary-100 text-xs flex items-center justify-center">
+                      {extrusionLoading ? "-" : extrusionRolls?.length || 0}
+                    </span>
+                  </TabsTrigger>
+                  <TabsTrigger value="printing" className="flex items-center gap-2">
+                    <span className="material-icons text-warning-500">format_color_fill</span>
+                    <span>{t("rolls.printing")}</span>
+                    <span className="ml-2 h-5 w-5 rounded-full bg-warning-100 text-xs flex items-center justify-center">
+                      {printingLoading ? "-" : printingRolls?.length || 0}
+                    </span>
+                  </TabsTrigger>
+                  <TabsTrigger value="cutting" className="flex items-center gap-2">
+                    <span className="material-icons text-success">content_cut</span>
+                    <span>{t("rolls.cutting")}</span>
+                    <span className="ml-2 h-5 w-5 rounded-full bg-success-100 text-xs flex items-center justify-center">
+                      {cuttingLoading ? "-" : cuttingRolls?.length || 0}
+                    </span>
+                  </TabsTrigger>
+                </>
+              )}
             </TabsList>
             
             <TabsContent value="extrusion" className="space-y-4">
-              <div className="bg-secondary-50 rounded-lg p-4">
+              <div className="bg-secondary-50 rounded-lg p-3 md:p-4">
                 <div className="flex items-center mb-4">
                   <div className="rounded-full bg-primary-100 p-2 mr-3">
                     <span className="material-icons text-primary-500">merge_type</span>
                   </div>
                   <div>
-                    <h4 className="font-medium">{t("production.roll_management.extrusion_stage")}</h4>
-                    <p className="text-sm text-secondary-500">{t("production.roll_management.create_rolls")}</p>
+                    <h4 className="font-medium text-sm md:text-base">{t("production.roll_management.extrusion_stage")}</h4>
+                    <p className="text-xs md:text-sm text-secondary-500">{t("production.roll_management.create_rolls")}</p>
                   </div>
                 </div>
                 
@@ -88,8 +112,8 @@ export default function WorkflowIndex() {
                 <JobOrdersForExtrusion />
                 
                 {/* Active Extrusion Rolls */}
-                <div className="mt-6">
-                  <h5 className="font-medium mb-3">{t("production.roll_management.rolls_in_extrusion")}</h5>
+                <div className="mt-4 md:mt-6">
+                  <h5 className="font-medium text-sm md:text-base mb-3">{t("production.roll_management.rolls_in_extrusion")}</h5>
                   <div className="space-y-3">
                     {extrusionLoading ? (
                       <>
@@ -103,7 +127,7 @@ export default function WorkflowIndex() {
                     ) : (
                       <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                         <span className="material-icons text-3xl mb-2">hourglass_empty</span>
-                        <p>{t("production.roll_management.no_rolls_extrusion")}</p>
+                        <p className="text-sm">{t("production.roll_management.no_rolls_extrusion")}</p>
                       </div>
                     )}
                   </div>
@@ -112,14 +136,14 @@ export default function WorkflowIndex() {
             </TabsContent>
             
             <TabsContent value="printing" className="space-y-4">
-              <div className="bg-secondary-50 rounded-lg p-4">
+              <div className="bg-secondary-50 rounded-lg p-3 md:p-4">
                 <div className="flex items-center mb-4">
                   <div className="rounded-full bg-warning-100 p-2 mr-3">
                     <span className="material-icons text-warning-500">format_color_fill</span>
                   </div>
                   <div>
-                    <h4 className="font-medium">{t("production.roll_management.printing_stage")}</h4>
-                    <p className="text-sm text-secondary-500">
+                    <h4 className="font-medium text-sm md:text-base">{t("production.roll_management.printing_stage")}</h4>
+                    <p className="text-xs md:text-sm text-secondary-500">
                       {printingLoading 
                         ? t("production.roll_management.loading") 
                         : `${printingRolls?.length || 0} ${t("production.roll_management.rolls_ready_printing")}`}
@@ -141,9 +165,9 @@ export default function WorkflowIndex() {
                       <RollCard key={roll.id} roll={roll} />
                     ))
                   ) : (
-                    <div className="py-8 text-center text-secondary-400">
+                    <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                       <span className="material-icons text-3xl mb-2">hourglass_empty</span>
-                      <p>{t("production.roll_management.no_rolls_printing")}</p>
+                      <p className="text-sm">{t("production.roll_management.no_rolls_printing")}</p>
                     </div>
                   )}
                 </div>
@@ -151,14 +175,14 @@ export default function WorkflowIndex() {
             </TabsContent>
             
             <TabsContent value="cutting" className="space-y-4">
-              <div className="bg-secondary-50 rounded-lg p-4">
+              <div className="bg-secondary-50 rounded-lg p-3 md:p-4">
                 <div className="flex items-center mb-4">
                   <div className="rounded-full bg-success-100 p-2 mr-3">
                     <span className="material-icons text-success">content_cut</span>
                   </div>
                   <div>
-                    <h4 className="font-medium">{t("production.roll_management.cutting_stage")}</h4>
-                    <p className="text-sm text-secondary-500">
+                    <h4 className="font-medium text-sm md:text-base">{t("production.roll_management.cutting_stage")}</h4>
+                    <p className="text-xs md:text-sm text-secondary-500">
                       {cuttingLoading 
                         ? t("production.roll_management.loading") 
                         : `${cuttingRolls?.length || 0} ${t("production.roll_management.rolls_ready_cutting")}`}
@@ -180,9 +204,9 @@ export default function WorkflowIndex() {
                       <RollCard key={roll.id} roll={roll} />
                     ))
                   ) : (
-                    <div className="py-8 text-center text-secondary-400">
+                    <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                       <span className="material-icons text-3xl mb-2">hourglass_empty</span>
-                      <p>{t("production.roll_management.no_rolls_cutting")}</p>
+                      <p className="text-sm">{t("production.roll_management.no_rolls_cutting")}</p>
                     </div>
                   )}
                 </div>

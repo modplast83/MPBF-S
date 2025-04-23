@@ -9,6 +9,7 @@ import { Roll, JobOrder, CustomerProduct } from "@shared/schema";
 import { UpdateRollDialog } from "./update-roll-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface RollCardProps {
   roll: Roll;
@@ -19,6 +20,7 @@ export function RollCard({ roll }: RollCardProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   
   // Fetch related data
   const { data: jobOrder } = useQuery<JobOrder>({
@@ -90,16 +92,6 @@ export function RollCard({ roll }: RollCardProps) {
       updateData.status = nextStatus;
       updateData.printingQty = roll.extrudingQty;
       updateData.printedById = currentUserId;
-      
-      // Convert Date to ISO string to avoid serialization issues
-      const currentTime = new Date().toISOString();
-      console.log("Moving roll to printing stage with data:", {
-        currentStage: nextStage,
-        status: nextStatus,
-        printingQty: roll.extrudingQty,
-        printedById: currentUserId,
-        currentTime
-      });
       
       // Use string value instead of Date object
       updateRollMutation.mutate({
@@ -174,18 +166,27 @@ export function RollCard({ roll }: RollCardProps) {
   return (
     <>
       <Card 
-        className="bg-white p-3 rounded border border-secondary-200 shadow-sm cursor-pointer transition-shadow hover:shadow-md"
+        className="bg-white p-2 md:p-3 rounded border border-secondary-200 shadow-sm cursor-pointer transition-shadow hover:shadow-md"
         onClick={openEditDialog}
       >
         <CardContent className="p-0">
-          <div className="flex justify-between items-center mb-3">
-            <span className="font-medium text-lg">{t("rolls.title")} #{roll.serialNumber}</span>
+          {/* Mobile-optimized header */}
+          <div className="flex justify-between items-center mb-2 md:mb-3">
+            <span className="font-medium text-base md:text-lg truncate max-w-[65%]">
+              {t("rolls.title")} #{roll.serialNumber}
+            </span>
             <StatusBadge status={roll.status} />
           </div>
-          <div className="text-sm text-secondary-700 space-y-1.5">
-            <p><span className="font-medium">{t("orders.title")}:</span> #{jobOrder?.orderId}</p>
-            <p><span className="font-medium">{t("orders.customer")}:</span> {customer?.name || t("common.loading")}</p>
-            <p><span className="font-medium">{t("orders.product")}:</span> {item?.name || customerProduct?.itemId} ({customerProduct?.sizeCaption})</p>
+          
+          {/* Mobile-optimized content with smaller text and tighter spacing */}
+          <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-secondary-700 space-y-1 md:space-y-1.5`}>
+            <p className="truncate"><span className="font-medium">{t("orders.title")}:</span> #{jobOrder?.orderId}</p>
+            <p className="truncate"><span className="font-medium">{t("orders.customer")}:</span> {customer?.name || t("common.loading")}</p>
+            <p className="truncate">
+              <span className="font-medium">{t("orders.product")}:</span> 
+              {item?.name || customerProduct?.itemId} 
+              <span className="ml-1">({customerProduct?.sizeCaption})</span>
+            </p>
             <p><span className="font-medium">{t("orders.quantity")}:</span> {
                 roll.currentStage === "extrusion" 
                   ? roll.extrudingQty 
@@ -198,32 +199,34 @@ export function RollCard({ roll }: RollCardProps) {
               <p><span className="font-medium">{t("production.printing_cylinder")}:</span> {customerProduct.printingCylinder} {t("common.inch")}</p>
             )}
           </div>
-          <div className="mt-4 flex justify-end border-t pt-3 border-secondary-100">
+          
+          {/* Mobile-optimized action buttons */}
+          <div className="mt-3 md:mt-4 flex justify-end border-t pt-2 md:pt-3 border-secondary-100">
             {roll.status === "pending" ? (
               <Button
-                size="sm"
+                size={isMobile ? "sm" : "default"}
                 variant="link"
-                className="text-primary-500 hover:text-primary-700"
+                className="text-primary-500 hover:text-primary-700 text-xs md:text-sm py-1 h-auto"
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent card click
                   handleStart();
                 }}
                 disabled={updateRollMutation.isPending}
               >
-                {t("production.roll_management.start_process")}
+                {isMobile ? t("common.start") : t("production.roll_management.start_process")}
               </Button>
             ) : roll.status === "processing" ? (
               <Button
-                size="sm"
+                size={isMobile ? "sm" : "default"}
                 variant="link"
-                className="text-primary-500 hover:text-primary-700"
+                className="text-primary-500 hover:text-primary-700 text-xs md:text-sm py-1 h-auto"
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent card click
                   handleComplete();
                 }}
                 disabled={updateRollMutation.isPending}
               >
-                {t("production.roll_management.complete_stage")}
+                {isMobile ? t("common.complete") : t("production.roll_management.complete_stage")}
               </Button>
             ) : null}
           </div>

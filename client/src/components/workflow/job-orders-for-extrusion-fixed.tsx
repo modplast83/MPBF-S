@@ -368,30 +368,30 @@ export function JobOrdersForExtrusion() {
                       <h5 className="font-medium">{t("common.details")}</h5>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                       <div>
-                        <p className="text-sm text-secondary-500">{t("items.item_name")}</p>
-                        <p className="font-medium">{getItemName(jobOrder)}</p>
+                        <p className="text-xs sm:text-sm text-secondary-500">{t("items.item_name")}</p>
+                        <p className="font-medium text-sm">{getItemName(jobOrder)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">{t("orders.required_quantity")}</p>
-                        <p className="font-medium">{jobOrder.quantity} kg</p>
+                        <p className="text-xs sm:text-sm text-secondary-500">{t("orders.required_quantity")}</p>
+                        <p className="font-medium text-sm">{jobOrder.quantity} kg</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">{t("products.thickness")}</p>
-                        <p className="font-medium">{getThickness(jobOrder)}</p>
+                        <p className="text-xs sm:text-sm text-secondary-500">{t("products.thickness")}</p>
+                        <p className="font-medium text-sm">{getThickness(jobOrder)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">{t("products.raw_material")}</p>
-                        <p className="font-medium">{getRawMaterial(jobOrder)}</p>
+                        <p className="text-xs sm:text-sm text-secondary-500">{t("products.raw_material")}</p>
+                        <p className="font-medium text-sm">{getRawMaterial(jobOrder)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">{t("products.master_batch")}</p>
-                        <p className="font-medium">{getMasterBatchName(jobOrder)}</p>
+                        <p className="text-xs sm:text-sm text-secondary-500">{t("products.master_batch")}</p>
+                        <p className="font-medium text-sm truncate">{getMasterBatchName(jobOrder)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-secondary-500">{t("products.product_details")}</p>
-                        <p className="font-medium">{getProductDetails(jobOrder)}</p>
+                        <p className="text-xs sm:text-sm text-secondary-500">{t("products.product_details")}</p>
+                        <p className="font-medium text-sm truncate">{getProductDetails(jobOrder)}</p>
                       </div>
                     </div>
                     
