@@ -519,18 +519,59 @@ export class DatabaseStorage implements IStorage {
   
   // Permissions
   async getPermissions(): Promise<Permission[]> {
-    return await db.select().from(permissions).orderBy(permissions.role, permissions.module);
+    try {
+      // Try with Drizzle ORM first
+      const results = await db.select().from(permissions).orderBy(permissions.role, permissions.module);
+      console.log(`Retrieved ${results.length} permissions`);
+      return results;
+    } catch (error) {
+      console.error('Error fetching permissions with ORM:', error);
+      
+      // Fall back to raw SQL
+      try {
+        console.log('Falling back to raw SQL query for permissions');
+        const rawResults = await db.execute('SELECT * FROM permissions ORDER BY role, module');
+        console.log(`Retrieved ${rawResults.rows.length} permissions with raw SQL`);
+        return rawResults.rows as Permission[];
+      } catch (fallbackError) {
+        console.error('Fallback query also failed:', fallbackError);
+        throw fallbackError;
+      }
+    }
   }
 
   async getPermissionsByRole(role: string): Promise<Permission[]> {
-    return await db.select().from(permissions)
-      .where(eq(permissions.role, role))
-      .orderBy(permissions.module);
+    try {
+      const results = await db.select().from(permissions)
+        .where(eq(permissions.role, role))
+        .orderBy(permissions.module);
+      return results;
+    } catch (error) {
+      console.error(`Error fetching permissions for role ${role}:`, error);
+      
+      // Fall back to raw SQL
+      const rawResults = await db.execute(`SELECT * FROM permissions WHERE role = '${role}' ORDER BY module`);
+      return rawResults.rows as Permission[];
+    }
   }
   
   async getPermission(id: number): Promise<Permission | undefined> {
-    const result = await db.select().from(permissions).where(eq(permissions.id, id));
-    return result[0];
+    try {
+      const permissionId = Number(id);
+      const result = await db.select().from(permissions).where(eq(permissions.id, permissionId));
+      return result[0];
+    } catch (error) {
+      console.error(`Error fetching permission ${id}:`, error);
+      
+      // Fall back to raw SQL
+      try {
+        const rawResult = await db.execute(`SELECT * FROM permissions WHERE id = ${id}`);
+        return rawResult.rows[0] as Permission | undefined;
+      } catch (fallbackError) {
+        console.error('Fallback query failed:', fallbackError);
+        return undefined;
+      }
+    }
   }
 
   async createPermission(permission: InsertPermission): Promise<Permission> {
