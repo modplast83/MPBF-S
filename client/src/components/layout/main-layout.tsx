@@ -52,7 +52,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <Sheet open={isOpen} onOpenChange={handleMobileMenuToggle}>
           <SheetContent 
             side={isRTL ? "right" : "left"} 
-            className="p-0 border-0 shadow-xl w-[85%] max-w-[300px] h-[100dvh]"
+            className="p-0 m-0 border-0 shadow-xl w-[85%] max-w-[300px] h-full min-h-[100dvh] bg-gray-900 overflow-hidden"
             onInteractOutside={(e) => {
               // Don't close when interacting with navigation links
               e.preventDefault();
