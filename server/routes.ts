@@ -2270,31 +2270,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
-      // Create a schema for partial updates
-      const partialUpdateFields = {
-        can_view: z.boolean().optional(),
-        can_create: z.boolean().optional(),
-        can_edit: z.boolean().optional(),
-        can_delete: z.boolean().optional(),
-        is_active: z.boolean().optional(),
-        role: z.string().optional(),
-        module: z.string().optional()
-      };
-
-      // Validate only the fields that are provided
-      try {
-        const validatedData = z.object(partialUpdateFields).parse(req.body);
-        const permission = await storage.updatePermission(id, validatedData);
-        
-        if (!permission) {
-          return res.status(404).json({ message: "Permission not found" });
-        }
-        
-        res.json(permission);
-      } catch (validationError) {
-        console.error("Validation error:", validationError);
-        return res.status(400).json({ message: "Invalid permission data", error: validationError });
+      console.log(`Updating permission ${id} with data:`, req.body);
+      
+      // Simple validation for fields that might be updated
+      if (Object.keys(req.body).length === 0) {
+        return res.status(400).json({ message: "No data provided for update" });
       }
+      
+      // Get the existing permission to confirm it exists
+      const existingPermission = await storage.getPermission(id);
+      if (!existingPermission) {
+        return res.status(404).json({ message: "Permission not found" });
+      }
+      
+      // Send the data directly to storage
+      const permission = await storage.updatePermission(id, req.body);
+      
+      if (!permission) {
+        return res.status(404).json({ message: "Failed to update permission" });
+      }
+      
+      res.json(permission);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid permission data", errors: error.errors });

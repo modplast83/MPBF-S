@@ -27,6 +27,7 @@ export interface IStorage {
   // Permissions management
   getPermissions(): Promise<Permission[]>;
   getPermissionsByRole(role: string): Promise<Permission[]>;
+  getPermission(id: number): Promise<Permission | undefined>;
   createPermission(permission: InsertPermission): Promise<Permission>;
   updatePermission(id: number, permission: Partial<Permission>): Promise<Permission | undefined>;
   deletePermission(id: number): Promise<boolean>;

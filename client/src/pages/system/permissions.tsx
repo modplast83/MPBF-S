@@ -217,12 +217,19 @@ export default function Permissions() {
     );
     setPermissions(updatedPermissions);
     
-    // Track the changes to be saved later
+    // Track the changes to be saved later - handle both camelCase and snake_case conversions
+    // since the server is expecting snake_case names
+    const apiFieldName = field === 'canView' ? 'can_view' : 
+                         field === 'canCreate' ? 'can_create' :
+                         field === 'canEdit' ? 'can_edit' :
+                         field === 'canDelete' ? 'can_delete' :
+                         field === 'isActive' ? 'is_active' : field;
+                         
     setChangedPermissions(prev => ({
       ...prev,
       [id]: {
         ...prev[id],
-        [field]: value
+        [apiFieldName]: value  // Use the snake_case field name for the API
       }
     }));
     

@@ -527,6 +527,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(permissions.role, role))
       .orderBy(permissions.module);
   }
+  
+  async getPermission(id: number): Promise<Permission | undefined> {
+    const result = await db.select().from(permissions).where(eq(permissions.id, id));
+    return result[0];
+  }
 
   async createPermission(permission: InsertPermission): Promise<Permission> {
     const result = await db.insert(permissions).values(permission).returning();
