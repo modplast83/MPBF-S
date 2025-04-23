@@ -554,20 +554,55 @@ export class DatabaseStorage implements IStorage {
         return undefined;
       }
       
-      // Directly use the update data as it's already in snake_case format
-      // from the API routes validation
-      const result = await db.update(permissions)
-        .set(permissionUpdate)
-        .where(eq(permissions.id, id))
-        .returning();
+      // Make sure the id is a number
+      const permissionId = Number(id);
+      
+      // Execute the update query with proper error handling
+      try {
+        const result = await db.update(permissions)
+          .set(permissionUpdate)
+          .where(eq(permissions.id, permissionId))
+          .returning();
+          
+        if (result.length === 0) {
+          console.log(`No permission was updated with ID ${id}`);
+          return undefined;
+        }
         
-      if (result.length === 0) {
-        console.log(`No permission was updated with ID ${id}`);
+        console.log(`Successfully updated permission: ${JSON.stringify(result[0])}`);
+        return result[0];
+      } catch (dbError) {
+        // More specific error handling for SQL issues
+        console.error('SQL error during permission update:', dbError);
+        
+        // Fall back to a raw SQL query which might be more reliable
+        console.log('Attempting fallback with raw SQL update');
+        
+        // Prepare update fields string
+        const updateFields = Object.entries(permissionUpdate)
+          .map(([key, value]) => {
+            if (typeof value === 'boolean') {
+              return `${key} = ${value}`;
+            } else if (value === null) {
+              return `${key} = NULL`;
+            } else {
+              return `${key} = '${value}'`;
+            }
+          })
+          .join(', ');
+        
+        // Execute raw SQL update
+        const rawResult = await db.execute(
+          `UPDATE permissions SET ${updateFields} WHERE id = ${permissionId} RETURNING *`
+        );
+        
+        if (rawResult.rows.length > 0) {
+          console.log('Raw SQL update successful:', rawResult.rows[0]);
+          return rawResult.rows[0] as Permission;
+        }
+        
         return undefined;
       }
-      
-      console.log(`Successfully updated permission: ${JSON.stringify(result[0])}`);
-      return result[0];
     } catch (error) {
       console.error('Permission update error:', error);
       throw error;
