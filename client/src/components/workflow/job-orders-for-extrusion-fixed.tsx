@@ -335,18 +335,18 @@ export function JobOrdersForExtrusion() {
                   }}
                   className="px-4 py-3 hover:bg-secondary-50"
                 >
-                  <div className="flex items-center justify-between w-full">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 sm:gap-0">
                     <div className="flex items-center space-x-3">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-100">
-                        <span className="material-icons text-primary-600">description</span>
+                      <div className="flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-100">
+                        <span className="material-icons text-primary-600 text-sm sm:text-base">description</span>
                       </div>
                       <div className="text-left">
-                        <h4 className="font-medium">{t("orders.job_order")} #{jobOrder.id}</h4>
-                        <p className="text-sm text-secondary-500">{getCustomerName(jobOrder)}</p>
+                        <h4 className="font-medium text-sm sm:text-base">{t("orders.job_order")} #{jobOrder.id}</h4>
+                        <p className="text-xs sm:text-sm text-secondary-500 truncate max-w-[200px] sm:max-w-none">{getCustomerName(jobOrder)}</p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <Badge variant={jobOrder.status === "pending" ? "outline" : "default"}>
+                    <div className="flex items-center justify-between sm:justify-start sm:space-x-3 mt-2 sm:mt-0">
+                      <Badge variant={jobOrder.status === "pending" ? "outline" : "default"} className="text-xs py-0.5">
                         {jobOrder.status === "pending" && t("status.pending")}
                         {jobOrder.status === "in_progress" && t("status.in_progress")}
                         {jobOrder.status === "extrusion_completed" && t("status.extrusion_completed")}
@@ -354,7 +354,7 @@ export function JobOrdersForExtrusion() {
                         {jobOrder.status === "cancelled" && t("status.cancelled")}
                       </Badge>
                       <div className="text-right">
-                        <span className="text-sm font-medium">
+                        <span className="text-xs sm:text-sm font-medium">
                           {progressPercentage}% {t("common.complete")}
                         </span>
                       </div>
@@ -441,9 +441,10 @@ export function JobOrdersForExtrusion() {
                       <Button
                         onClick={() => handleCreateRoll(jobOrder)}
                         disabled={isComplete || createRollMutation.isPending}
-                        className="flex items-center"
+                        className="flex items-center text-xs sm:text-sm py-1 px-2 sm:py-2 sm:px-3 h-auto"
+                        size="sm"
                       >
-                        <span className="material-icons text-sm mr-1">add</span>
+                        <span className="material-icons text-xs sm:text-sm mr-1">add</span>
                         {t("production.roll_management.create_roll")}
                       </Button>
                     </div>

@@ -51,49 +51,29 @@ export default function WorkflowIndex() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="extrusion" onValueChange={setActiveTab}>
-            {/* Responsive tabs - Simplified view on mobile */}
-            <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} mb-4 md:mb-6`}>
-              {isMobile ? (
-                <select 
-                  className="w-full p-2 bg-secondary-100 rounded border border-secondary-200"
-                  value={activeTab}
-                  onChange={(e) => setActiveTab(e.target.value)}
-                >
-                  <option value="extrusion">
-                    {t("rolls.extrusion")} ({extrusionLoading ? "-" : extrusionRolls?.length || 0})
-                  </option>
-                  <option value="printing">
-                    {t("rolls.printing")} ({printingLoading ? "-" : printingRolls?.length || 0})
-                  </option>
-                  <option value="cutting">
-                    {t("rolls.cutting")} ({cuttingLoading ? "-" : cuttingRolls?.length || 0})
-                  </option>
-                </select>
-              ) : (
-                <>
-                  <TabsTrigger value="extrusion" className="flex items-center gap-2">
-                    <span className="material-icons text-primary-500">merge_type</span>
-                    <span>{t("rolls.extrusion")}</span>
-                    <span className="ml-2 h-5 w-5 rounded-full bg-primary-100 text-xs flex items-center justify-center">
-                      {extrusionLoading ? "-" : extrusionRolls?.length || 0}
-                    </span>
-                  </TabsTrigger>
-                  <TabsTrigger value="printing" className="flex items-center gap-2">
-                    <span className="material-icons text-warning-500">format_color_fill</span>
-                    <span>{t("rolls.printing")}</span>
-                    <span className="ml-2 h-5 w-5 rounded-full bg-warning-100 text-xs flex items-center justify-center">
-                      {printingLoading ? "-" : printingRolls?.length || 0}
-                    </span>
-                  </TabsTrigger>
-                  <TabsTrigger value="cutting" className="flex items-center gap-2">
-                    <span className="material-icons text-success">content_cut</span>
-                    <span>{t("rolls.cutting")}</span>
-                    <span className="ml-2 h-5 w-5 rounded-full bg-success-100 text-xs flex items-center justify-center">
-                      {cuttingLoading ? "-" : cuttingRolls?.length || 0}
-                    </span>
-                  </TabsTrigger>
-                </>
-              )}
+            {/* Full tabs with better mobile layout */}
+            <TabsList className="grid w-full grid-cols-3 mb-4 md:mb-6">
+              <TabsTrigger value="extrusion" className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 px-1 md:px-2 h-auto text-center">
+                <span className="material-icons text-primary-500 text-base md:text-lg">merge_type</span>
+                <span className="text-xs md:text-sm truncate">{t("rolls.extrusion")}</span>
+                <span className="h-4 w-4 md:h-5 md:w-5 rounded-full bg-primary-100 text-xs flex items-center justify-center">
+                  {extrusionLoading ? "-" : extrusionRolls?.length || 0}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="printing" className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 px-1 md:px-2 h-auto text-center">
+                <span className="material-icons text-warning-500 text-base md:text-lg">format_color_fill</span>
+                <span className="text-xs md:text-sm truncate">{t("rolls.printing")}</span>
+                <span className="h-4 w-4 md:h-5 md:w-5 rounded-full bg-warning-100 text-xs flex items-center justify-center">
+                  {printingLoading ? "-" : printingRolls?.length || 0}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="cutting" className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 px-1 md:px-2 h-auto text-center">
+                <span className="material-icons text-success text-base md:text-lg">content_cut</span>
+                <span className="text-xs md:text-sm truncate">{t("rolls.cutting")}</span>
+                <span className="h-4 w-4 md:h-5 md:w-5 rounded-full bg-success-100 text-xs flex items-center justify-center">
+                  {cuttingLoading ? "-" : cuttingRolls?.length || 0}
+                </span>
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="extrusion" className="space-y-4">
