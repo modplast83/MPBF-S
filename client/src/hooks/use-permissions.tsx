@@ -31,7 +31,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   }, [rolePermissions]);
 
   // Function to check if user has permission for a specific module and action
-  const hasPermission = (module: string, action: "view" | "create" | "edit" | "delete" = "view") => {
+  const hasPermission = (module: string, action: "view" | "create" | "edit" | "delete" = "view"): boolean => {
     // If no user or user data is loading, deny permission
     if (!user) return false;
     
@@ -40,6 +40,13 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
     
     // Administrator role has all permissions
     if (userRole === "administrator") return true;
+
+    // Special case for operators - they can view workflow and mix materials
+    if (userRole === "operator" && action === "view") {
+      if (module === "Workflow" || module === "Mix Materials") {
+        return true;
+      }
+    }
     
     // Find the permission for this role and module
     const permission = permissions.find(
@@ -52,13 +59,13 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
     // Check for the specific permission action
     switch (action) {
       case "view":
-        return permission.canView;
+        return permission.canView === true;
       case "create":
-        return permission.canCreate;
+        return permission.canCreate === true;
       case "edit":
-        return permission.canEdit;
+        return permission.canEdit === true;
       case "delete":
-        return permission.canDelete;
+        return permission.canDelete === true;
       default:
         return false;
     }

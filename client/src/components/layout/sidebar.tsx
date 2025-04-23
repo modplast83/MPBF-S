@@ -11,12 +11,16 @@ import {
   CollapsibleContent 
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+import { usePermissions } from "@/hooks/use-permissions";
 
 export default function Sidebar() {
   const [location] = useLocation();
   const { expanded, toggle } = useSidebar();
   const { isRTL } = useLanguage();
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { hasPermission } = usePermissions();
 
   // For storing open state of collapsible menu items
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
@@ -34,6 +38,49 @@ export default function Sidebar() {
       [title]: !prev[title]
     }));
   };
+
+  // Filter sidebar items based on permissions
+  const filterItemsByPermission = (items: any[]) => {
+    return items.map(section => ({
+      ...section,
+      items: section.items
+        .filter(item => {
+          // If it's a standalone item, check permission for it
+          if (!item.subItems) {
+            // Dashboard is always visible
+            if (item.title === 'Dashboard') return true;
+            return hasPermission(item.title);
+          }
+
+          // For items with subitems, check if any subitems have permission
+          const filteredSubItems = (item.subItems || []).filter(subItem => 
+            // Special case for operators
+            (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
+            || hasPermission(subItem.title)
+          );
+          
+          // Only keep parent item if there are visible subitems
+          return filteredSubItems.length > 0;
+        })
+        .map(item => {
+          // If item has subitems, filter those too
+          if (item.subItems) {
+            return {
+              ...item,
+              subItems: item.subItems.filter(subItem => 
+                // Special case for operators
+                (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
+                || hasPermission(subItem.title)
+              ),
+            };
+          }
+          return item;
+        }),
+    }));
+  };
+
+  // Filter sidebar items based on user permissions
+  const filteredSidebarItems = filterItemsByPermission(SIDEBAR_ITEMS);
 
   return (
     <aside 
@@ -72,44 +119,43 @@ export default function Sidebar() {
       </div>
       
       <nav className="mt-5 flex-grow overflow-y-auto scrollbar-hide">
-        {SIDEBAR_ITEMS.map((section, sectionIndex) => (
-          <div key={sectionIndex}>
-            {expanded && (
-              <div className="px-4 py-2 text-gray-300 text-xs font-semibold uppercase tracking-wider">
-                {t(`sidebar.${section.title.toLowerCase()}`)}
-              </div>
-            )}
-            
-            {section.items.map((item, itemIndex) => (
-              <div key={itemIndex}>
-                {item.subItems ? (
-                  <Collapsible
-                    open={openMenus[item.title]}
-                    onOpenChange={() => toggleMenu(item.title)}
-                  >
-                    <CollapsibleTrigger
-                      className={cn(
-                        `flex items-center px-3 py-3 w-full rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
-                        isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
-                      )}
+        {filteredSidebarItems.map((section, sectionIndex) => (
+          // Only show sections that have items
+          section.items.length > 0 ? (
+            <div key={sectionIndex}>
+              {expanded && (
+                <div className="px-4 py-2 text-gray-300 text-xs font-semibold uppercase tracking-wider">
+                  {t(`sidebar.${section.title.toLowerCase()}`)}
+                </div>
+              )}
+              
+              {section.items.map((item, itemIndex) => (
+                <div key={itemIndex}>
+                  {item.subItems ? (
+                    <Collapsible
+                      open={openMenus[item.title]}
+                      onOpenChange={() => toggleMenu(item.title)}
                     >
-                      <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
+                      <CollapsibleTrigger
+                        className={cn(
+                          `flex items-center px-3 py-3 w-full rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                          isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
+                        )}
+                      >
+                        <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
+                        {expanded && (
+                          <>
+                            <span className="flex-1 font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
+                            <span className={`material-icons text-sm opacity-70 ${isRTL ? 'flip-in-rtl' : ''}`}>
+                              {openMenus[item.title] ? "expand_less" : "expand_more"}
+                            </span>
+                          </>
+                        )}
+                      </CollapsibleTrigger>
+                      
                       {expanded && (
-                        <>
-                          <span className="flex-1 font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
-                          <span className={`material-icons text-sm opacity-70 ${isRTL ? 'flip-in-rtl' : ''}`}>
-                            {openMenus[item.title] ? "expand_less" : "expand_more"}
-                          </span>
-                        </>
-                      )}
-                    </CollapsibleTrigger>
-                    
-                    {expanded && (
-                      <CollapsibleContent>
-                        {item.subItems.map((subItem, subIndex) => {
-                          // Log the subItem details to debug
-                          console.log(`Subitem: ${subItem.title}, Translation key: sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`);
-                          return (
+                        <CollapsibleContent>
+                          {item.subItems.map((subItem, subIndex) => (
                             <Link 
                               key={subIndex} 
                               href={subItem.path}
@@ -121,42 +167,43 @@ export default function Sidebar() {
                               <span className="h-1.5 w-1.5 rounded-full bg-white/40 mr-2"></span>
                               {t(`sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`)}
                             </Link>
-                          );
-                        })}
-                      </CollapsibleContent>
-                    )}
-                  </Collapsible>
-                ) : (
-                  <Link 
-                    href={item.path}
-                    className={cn(
-                      `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
-                      isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
-                    )}
-                  >
-                    <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
-                    {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
-                  </Link>
-                )}
-              </div>
-            ))}
-            
-            {sectionIndex < SIDEBAR_ITEMS.length - 1 && (
-              <Separator className="my-2 bg-gray-600 opacity-50" />
-            )}
-          </div>
+                          ))}
+                        </CollapsibleContent>
+                      )}
+                    </Collapsible>
+                  ) : (
+                    <Link 
+                      href={item.path}
+                      className={cn(
+                        `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                        isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
+                      )}
+                    >
+                      <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
+                      {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
+                    </Link>
+                  )}
+                </div>
+              ))}
+              
+              {sectionIndex < filteredSidebarItems.length - 1 && 
+                filteredSidebarItems[sectionIndex + 1].items.length > 0 && (
+                  <Separator className="my-2 bg-gray-600 opacity-50" />
+              )}
+            </div>
+          ) : null
         ))}
       </nav>
       
       <div className="mt-auto w-full border-t border-gray-700/50 p-4">
         <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="h-10 w-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-            A
+            {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
           </div>
           {expanded && (
             <div className={isRTL ? 'mr-3' : 'ml-3'}>
-              <p className="text-sm font-medium text-white">{t("sidebar.admin_user")}</p>
-              <p className="text-xs text-gray-300">{t("sidebar.administrator")}</p>
+              <p className="text-sm font-medium text-white">{user?.name || t("sidebar.user")}</p>
+              <p className="text-xs text-gray-300">{user?.role || t("sidebar.role")}</p>
             </div>
           )}
         </div>

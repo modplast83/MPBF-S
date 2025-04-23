@@ -30,6 +30,7 @@ import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
 import { AuthProvider } from "@/hooks/use-auth";
+import { PermissionsProvider } from "@/hooks/use-permissions";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useEffect } from "react";
 import ToolsPage from "@/pages/tools/ToolsPage";
@@ -45,43 +46,45 @@ function App() {
 
   return (
     <AuthProvider>
-      <MainLayout>
-        <Switch>
-          <Route path="/auth" component={AuthPage} />
-          <ProtectedRoute path="/" component={Dashboard} />
-          <ProtectedRoute path="/setup" component={SetupIndex} />
-          <ProtectedRoute path="/setup/categories" component={Categories} />
-          <ProtectedRoute path="/setup/products" component={Products} />
-          <ProtectedRoute path="/setup/customers" component={Customers} />
-          <ProtectedRoute path="/setup/items" component={Items} />
-          <ProtectedRoute path="/setup/sections" component={Sections} />
-          <ProtectedRoute path="/setup/machines" component={Machines} />
-          <ProtectedRoute path="/setup/users" component={Users} />
-          <ProtectedRoute path="/production" component={ProductionIndex} />
-          <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} />
-          <ProtectedRoute path="/orders" component={OrdersIndex} />
-          <ProtectedRoute path="/orders/:id" component={OrderDetails} />
-          <ProtectedRoute path="/workflow" component={WorkflowIndex} />
-          <ProtectedRoute path="/warehouse" component={WarehouseIndex} />
-          <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} />
-          <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} />
-          <ProtectedRoute path="/reports" component={ReportsIndex} />
-          <ProtectedRoute path="/quality" component={QualityIndex} />
-          <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} />
-          <ProtectedRoute path="/quality/checks" component={QualityChecks} />
-          <ProtectedRoute path="/quality/corrective-actions" component={CorrectiveActions} />
-          <ProtectedRoute path="/system" component={SystemIndex} />
-          <ProtectedRoute path="/system/database" component={Database} />
-          <ProtectedRoute path="/system/permissions" component={Permissions} />
-          <ProtectedRoute path="/system/import-export" component={ImportExport} />
-          <ProtectedRoute path="/system/sms" component={SmsIndex} />
-          <ProtectedRoute path="/tools" component={ToolsPage} />
-          <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} />
-          <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} />
-          <ProtectedRoute path="/tools/utilities" component={UtilityTools} />
-          <Route component={NotFound} />
-        </Switch>
-      </MainLayout>
+      <PermissionsProvider>
+        <MainLayout>
+          <Switch>
+            <Route path="/auth" component={AuthPage} />
+            <ProtectedRoute path="/" component={Dashboard} />
+            <ProtectedRoute path="/setup" component={SetupIndex} module="Setup" />
+            <ProtectedRoute path="/setup/categories" component={Categories} module="Categories" />
+            <ProtectedRoute path="/setup/products" component={Products} module="Products" />
+            <ProtectedRoute path="/setup/customers" component={Customers} module="Customers" />
+            <ProtectedRoute path="/setup/items" component={Items} module="Items" />
+            <ProtectedRoute path="/setup/sections" component={Sections} module="Sections" />
+            <ProtectedRoute path="/setup/machines" component={Machines} module="Machines" />
+            <ProtectedRoute path="/setup/users" component={Users} module="Users" />
+            <ProtectedRoute path="/production" component={ProductionIndex} module="Production" />
+            <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" />
+            <ProtectedRoute path="/orders" component={OrdersIndex} module="Orders" />
+            <ProtectedRoute path="/orders/:id" component={OrderDetails} module="Orders" />
+            <ProtectedRoute path="/workflow" component={WorkflowIndex} module="Workflow" />
+            <ProtectedRoute path="/warehouse" component={WarehouseIndex} module="Warehouse" />
+            <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" />
+            <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" />
+            <ProtectedRoute path="/reports" component={ReportsIndex} module="Reports" />
+            <ProtectedRoute path="/quality" component={QualityIndex} module="Quality" />
+            <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} module="Check Types" />
+            <ProtectedRoute path="/quality/checks" component={QualityChecks} module="Quality Checks" />
+            <ProtectedRoute path="/quality/corrective-actions" component={CorrectiveActions} module="Corrective Actions" />
+            <ProtectedRoute path="/system" component={SystemIndex} module="System Settings" />
+            <ProtectedRoute path="/system/database" component={Database} module="Database" />
+            <ProtectedRoute path="/system/permissions" component={Permissions} module="Permissions" />
+            <ProtectedRoute path="/system/import-export" component={ImportExport} module="Import & Export" />
+            <ProtectedRoute path="/system/sms" component={SmsIndex} module="SMS Management" />
+            <ProtectedRoute path="/tools" component={ToolsPage} module="Tools" />
+            <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} module="Bag Weight Calculator" />
+            <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} module="Ink Consumption" />
+            <ProtectedRoute path="/tools/utilities" component={UtilityTools} module="Utility Tools" />
+            <Route component={NotFound} />
+          </Switch>
+        </MainLayout>
+      </PermissionsProvider>
     </AuthProvider>
   );
 }
