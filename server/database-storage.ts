@@ -534,11 +534,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updatePermission(id: number, permissionUpdate: Partial<Permission>): Promise<Permission | undefined> {
-    const result = await db.update(permissions)
-      .set(permissionUpdate)
-      .where(eq(permissions.id, id))
-      .returning();
-    return result[0];
+    console.log('Updating permission with ID:', id, 'Data:', JSON.stringify(permissionUpdate));
+    
+    // Create a new object to hold the converted fields
+    // Don't pass the raw Partial<Permission> directly to .set()
+    const updateData: Record<string, any> = {};
+    
+    // Convert camelCase property names to snake_case db column names explicitly
+    if ('canView' in permissionUpdate) updateData.can_view = permissionUpdate.canView;
+    if ('canCreate' in permissionUpdate) updateData.can_create = permissionUpdate.canCreate;
+    if ('canEdit' in permissionUpdate) updateData.can_edit = permissionUpdate.canEdit;
+    if ('canDelete' in permissionUpdate) updateData.can_delete = permissionUpdate.canDelete;
+    if ('isActive' in permissionUpdate) updateData.is_active = permissionUpdate.isActive;
+    if ('role' in permissionUpdate) updateData.role = permissionUpdate.role;
+    if ('module' in permissionUpdate) updateData.module = permissionUpdate.module;
+    
+    console.log('Converted update data:', JSON.stringify(updateData));
+    
+    try {
+      const result = await db.update(permissions)
+        .set(updateData)
+        .where(eq(permissions.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error('Permission update error:', error);
+      throw error;
+    }
   }
 
   async deletePermission(id: number): Promise<boolean> {

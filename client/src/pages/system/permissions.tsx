@@ -144,21 +144,30 @@ export default function Permissions() {
       if (permission.data.canDelete !== undefined) apiFormat.can_delete = permission.data.canDelete;
       if (permission.data.isActive !== undefined) apiFormat.is_active = permission.data.isActive;
       
-      console.log('Updating permission:', permission.id, apiFormat);
+      console.log('Updating permission:', permission.id, JSON.stringify(apiFormat));
       
-      const response = await fetch(`/api/permissions/${permission.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(apiFormat)
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update permission');
+      try {
+        const response = await fetch(`/api/permissions/${permission.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(apiFormat)
+        });
+        
+        const responseText = await response.text();
+        console.log('Response status:', response.status);
+        console.log('Response text:', responseText);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to update permission: ${responseText}`);
+        }
+        
+        return responseText ? JSON.parse(responseText) : {};
+      } catch (error) {
+        console.error('Permission update error:', error);
+        throw error;
       }
-      
-      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
