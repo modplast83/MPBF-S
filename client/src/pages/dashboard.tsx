@@ -7,10 +7,12 @@ import { ActiveOrdersTable } from "@/components/dashboard/active-orders-table";
 import { Order, Roll, RawMaterial } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Dashboard() {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
+  const isMobile = useIsMobile();
   
   // Fetch data for dashboard statistics
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
@@ -59,9 +61,9 @@ export default function Dashboard() {
   } as const;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Dashboard Stats */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${isRTL ? 'rtl' : ''}`}>
+      <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 ${isRTL ? 'rtl' : ''}`}>
         <StatCard
           title={t("dashboard.total_orders")}
           value={totalOrders}
@@ -99,9 +101,10 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isRTL ? 'rtl' : ''}`}>
+      {/* In mobile view, show chart and orders stacked */}
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 ${isRTL ? 'rtl' : ''}`}>
         {/* Production Chart */}
-        <ProductionChart className={`bg-white rounded-lg shadow col-span-2 ${isRTL ? 'rtl' : ''}`} />
+        <ProductionChart className={`bg-white rounded-lg shadow ${!isMobile ? 'col-span-2' : ''} ${isRTL ? 'rtl' : ''}`} />
 
         {/* Recent Orders */}
         <RecentOrders />

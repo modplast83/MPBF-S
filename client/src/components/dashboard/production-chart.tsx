@@ -14,7 +14,7 @@ import {
   ChartOptions,
 } from "chart.js";
 import { Line, Bar } from "react-chartjs-2";
-
+import { useIsMobile } from "@/hooks/use-mobile";
 import { CHART_COLORS } from "@/lib/constants";
 
 ChartJS.register(
@@ -35,6 +35,7 @@ interface ProductionChartProps {
 
 export function ProductionChart({ className }: ProductionChartProps) {
   const [tab, setTab] = useState("daily");
+  const isMobile = useIsMobile();
   
   // Simulated production data
   const [dailyData, setDailyData] = useState<ChartData<"line">>({
@@ -52,6 +53,10 @@ export function ProductionChart({ className }: ProductionChartProps) {
     const days = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
+      // Simplified labels for mobile
+      if (isMobile) {
+        return date.toLocaleDateString("en-US", { weekday: "short" });
+      }
       return date.toLocaleDateString("en-US", { weekday: "short", day: "numeric" });
     });
     
@@ -69,8 +74,8 @@ export function ProductionChart({ className }: ProductionChartProps) {
           pointBackgroundColor: "#fff",
           pointBorderColor: CHART_COLORS.primary,
           pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
+          pointRadius: isMobile ? 2 : 4,
+          pointHoverRadius: isMobile ? 4 : 6,
         },
         {
           label: "Efficiency (%)",
@@ -84,8 +89,8 @@ export function ProductionChart({ className }: ProductionChartProps) {
           pointBackgroundColor: "#fff",
           pointBorderColor: CHART_COLORS.success,
           pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
+          pointRadius: isMobile ? 2 : 4,
+          pointHoverRadius: isMobile ? 4 : 6,
         },
       ],
     });
@@ -121,14 +126,18 @@ export function ProductionChart({ className }: ProductionChartProps) {
         },
       ],
     });
-  }, []);
+  }, [isMobile]);
   
   const dailyOptions: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: "top" as const,
+        position: isMobile ? "bottom" as const : "top" as const,
+        labels: {
+          boxWidth: isMobile ? 12 : 40,
+          padding: isMobile ? 10 : 15,
+        }
       },
       title: {
         display: false,
@@ -138,7 +147,7 @@ export function ProductionChart({ className }: ProductionChartProps) {
       y: {
         beginAtZero: true,
         title: {
-          display: true,
+          display: !isMobile,
           text: "Volume (kg)",
         },
       },
@@ -146,7 +155,7 @@ export function ProductionChart({ className }: ProductionChartProps) {
         beginAtZero: true,
         position: "right",
         title: {
-          display: true,
+          display: !isMobile,
           text: "Efficiency (%)",
         },
         max: 100,
@@ -162,7 +171,11 @@ export function ProductionChart({ className }: ProductionChartProps) {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: "top" as const,
+        position: isMobile ? "bottom" as const : "top" as const,
+        labels: {
+          boxWidth: isMobile ? 12 : 40,
+          padding: isMobile ? 10 : 15,
+        }
       },
       title: {
         display: false,
@@ -172,7 +185,7 @@ export function ProductionChart({ className }: ProductionChartProps) {
       y: {
         beginAtZero: true,
         title: {
-          display: true,
+          display: !isMobile,
           text: "Volume (kg)",
         },
       },
@@ -180,7 +193,7 @@ export function ProductionChart({ className }: ProductionChartProps) {
         beginAtZero: true,
         position: "right",
         title: {
-          display: true,
+          display: !isMobile,
           text: "Orders",
         },
         grid: {
@@ -192,15 +205,15 @@ export function ProductionChart({ className }: ProductionChartProps) {
   
   return (
     <div className={`rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 ${className}`}>
-      <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-white">
-        <div className="flex justify-between items-center mb-1">
+      <div className="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-white">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="material-icons text-primary-600">insights</span>
             <h3 className="font-semibold text-lg text-gray-800">Production Activity</h3>
           </div>
           <div className="flex p-1 bg-gray-100 rounded-lg shadow-sm">
             <button 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+              className={`px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
                 tab === 'daily' 
                   ? 'bg-white text-primary-700 shadow-sm' 
                   : 'text-gray-600 hover:text-primary-600'
@@ -210,7 +223,7 @@ export function ProductionChart({ className }: ProductionChartProps) {
               Daily
             </button>
             <button 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+              className={`px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
                 tab === 'monthly' 
                   ? 'bg-white text-primary-700 shadow-sm' 
                   : 'text-gray-600 hover:text-primary-600'
@@ -221,13 +234,13 @@ export function ProductionChart({ className }: ProductionChartProps) {
             </button>
           </div>
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-xs sm:text-sm text-gray-500 mt-2">
           {tab === "daily" 
             ? "Production output and efficiency over the past week" 
             : "Production volume and completed orders over 6 months"}
         </p>
       </div>
-      <div className="p-6 h-80 bg-white">
+      <div className="p-3 sm:p-6 h-64 sm:h-80 bg-white">
         {tab === "daily" ? (
           <div className="h-full">
             <Line options={dailyOptions} data={dailyData} />
