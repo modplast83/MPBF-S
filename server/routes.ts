@@ -2247,10 +2247,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only administrators can manage permissions" });
       }
 
-      const validatedData = insertPermissionSchema.parse(req.body);
+      // Define expected fields
+      const createSchema = z.object({
+        role: z.string(),
+        module: z.string(),
+        can_view: z.boolean().optional(),
+        can_create: z.boolean().optional(),
+        can_edit: z.boolean().optional(),
+        can_delete: z.boolean().optional(),
+        is_active: z.boolean().optional()
+      });
+
+      // Validate the request body
+      const validatedData = createSchema.parse(req.body);
+      
+      console.log("Creating permission with data:", JSON.stringify(validatedData));
+      
+      // Use the validated data to create the permission
       const permission = await storage.createPermission(validatedData);
       res.status(201).json(permission);
     } catch (error) {
+      console.error("Permission creation error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid permission data", errors: error.errors });
       }
@@ -2270,11 +2287,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
-      console.log(`Updating permission ${id} with data:`, req.body);
+      // Define a schema for validated fields that might be updated
+      const updateSchema = z.object({
+        can_view: z.boolean().optional(),
+        can_create: z.boolean().optional(),
+        can_edit: z.boolean().optional(),
+        can_delete: z.boolean().optional(),
+        is_active: z.boolean().optional(),
+        role: z.string().optional(),
+        module: z.string().optional()
+      });
+
+      // Validate the request body
+      const validatedData = updateSchema.parse(req.body);
       
-      // Simple validation for fields that might be updated
-      if (Object.keys(req.body).length === 0) {
-        return res.status(400).json({ message: "No data provided for update" });
+      console.log(`Updating permission ${id} with data:`, JSON.stringify(validatedData));
+      
+      if (Object.keys(validatedData).length === 0) {
+        return res.status(400).json({ message: "No valid fields to update" });
       }
       
       // Get the existing permission to confirm it exists
@@ -2283,8 +2313,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Permission not found" });
       }
       
-      // Send the data directly to storage
-      const permission = await storage.updatePermission(id, req.body);
+      // Send the validated data to storage
+      const permission = await storage.updatePermission(id, validatedData);
       
       if (!permission) {
         return res.status(404).json({ message: "Failed to update permission" });
@@ -2292,10 +2322,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(permission);
     } catch (error) {
+      console.error("Permission update error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid permission data", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to update permission" });
+      res.status(500).json({ message: "Failed to update permission", error: String(error) });
     }
   });
 

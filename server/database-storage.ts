@@ -538,29 +538,35 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async updatePermission(id: number, permissionUpdate: Partial<Permission>): Promise<Permission | undefined> {
+  async updatePermission(id: number, permissionUpdate: any): Promise<Permission | undefined> {
     console.log('Updating permission with ID:', id, 'Data:', JSON.stringify(permissionUpdate));
     
-    // Create a new object to hold the converted fields
-    // Don't pass the raw Partial<Permission> directly to .set()
-    const updateData: Record<string, any> = {};
-    
-    // Convert camelCase property names to snake_case db column names explicitly
-    if ('canView' in permissionUpdate) updateData.can_view = permissionUpdate.canView;
-    if ('canCreate' in permissionUpdate) updateData.can_create = permissionUpdate.canCreate;
-    if ('canEdit' in permissionUpdate) updateData.can_edit = permissionUpdate.canEdit;
-    if ('canDelete' in permissionUpdate) updateData.can_delete = permissionUpdate.canDelete;
-    if ('isActive' in permissionUpdate) updateData.is_active = permissionUpdate.isActive;
-    if ('role' in permissionUpdate) updateData.role = permissionUpdate.role;
-    if ('module' in permissionUpdate) updateData.module = permissionUpdate.module;
-    
-    console.log('Converted update data:', JSON.stringify(updateData));
+    // Ensure we have something to update
+    if (!permissionUpdate || Object.keys(permissionUpdate).length === 0) {
+      throw new Error('No update data provided');
+    }
     
     try {
+      // Get existing permission to verify it exists
+      const existingPermission = await this.getPermission(id);
+      if (!existingPermission) {
+        console.log(`Permission with ID ${id} not found`);
+        return undefined;
+      }
+      
+      // Directly use the update data as it's already in snake_case format
+      // from the API routes validation
       const result = await db.update(permissions)
-        .set(updateData)
+        .set(permissionUpdate)
         .where(eq(permissions.id, id))
         .returning();
+        
+      if (result.length === 0) {
+        console.log(`No permission was updated with ID ${id}`);
+        return undefined;
+      }
+      
+      console.log(`Successfully updated permission: ${JSON.stringify(result[0])}`);
       return result[0];
     } catch (error) {
       console.error('Permission update error:', error);
