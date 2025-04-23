@@ -6,7 +6,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/use-language";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { 
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose 
+} from "@/components/ui/sheet";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -25,7 +31,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   // Close sidebar on location change when in mobile view
   useEffect(() => {
-    if (isMobile && isOpen) {
+    if (isMobile && isOpen && location !== "/") {
       setIsOpen(false);
     }
   }, [location, isMobile, isOpen]);
@@ -42,14 +48,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* Desktop sidebar */}
       {user && !isMobile && <Sidebar />}
       
-      {/* Mobile sidebar as a sheet overlay */}
+      {/* Mobile sidebar as a sheet for better mobile experience */}
       {user && isMobile && (
         <Sheet open={isOpen} onOpenChange={handleMobileMenuToggle}>
           <SheetContent 
             side={isRTL ? "right" : "left"} 
-            className="p-0 w-[85%] max-w-[300px] border-0"
+            className="p-0 border-0 shadow-xl w-[85%] max-w-[300px] h-screen"
+            overlayProps={{ className: "backdrop-blur-sm bg-black/20" }}
           >
             <Sidebar />
           </SheetContent>

@@ -40,7 +40,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
   // Function to toggle mobile sidebar
   const toggleMobileSidebar = () => {
     if (setMobileMenuOpen) {
-      setMobileMenuOpen(true);
+      setMobileMenuOpen(!mobileMenuOpen);
     }
   };
   
