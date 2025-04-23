@@ -29,12 +29,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
   
   const isAuthPage = location === "/auth";
 
-  // Close sidebar on location change when in mobile view
-  useEffect(() => {
-    if (isMobile && isOpen && location !== "/") {
-      setIsOpen(false);
-    }
-  }, [location, isMobile, isOpen]);
+  // We're removing the automatic sidebar closing on navigation
+  // This will allow the sidebar to stay open when navigating between pages
   
   // Separate return for auth page to avoid conditional rendering of components with hooks
   if (isAuthPage) {
@@ -56,8 +52,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <Sheet open={isOpen} onOpenChange={handleMobileMenuToggle}>
           <SheetContent 
             side={isRTL ? "right" : "left"} 
-            className="p-0 border-0 shadow-xl w-[85%] max-w-[300px] h-screen"
-            overlayProps={{ className: "backdrop-blur-sm bg-black/20" }}
+            className="p-0 border-0 shadow-xl w-[85%] max-w-[300px] h-[100dvh]"
+            onInteractOutside={(e) => {
+              // Don't close when interacting with navigation links
+              e.preventDefault();
+            }}
           >
             <Sidebar />
           </SheetContent>
