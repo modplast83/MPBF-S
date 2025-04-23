@@ -13,6 +13,7 @@ interface StatCardProps {
   className?: string;
   iconColor?: string;
   iconBgColor?: string;
+  isMobile?: boolean;
 }
 
 export function StatCard({
@@ -23,9 +24,13 @@ export function StatCard({
   className,
   iconColor = "text-primary-500",
   iconBgColor = "bg-primary-50",
+  isMobile
 }: StatCardProps) {
   const { isRTL } = useLanguage();
-  const isMobile = useIsMobile();
+  const isDeviceMobile = useIsMobile();
+  
+  // Use the passed prop if available, otherwise use the hook
+  const isMobileView = isMobile !== undefined ? isMobile : isDeviceMobile;
   
   return (
     <div className={cn(
@@ -38,16 +43,16 @@ export function StatCard({
       <div className={cn(
         "flex justify-between items-start", 
         isRTL && "flex-row-reverse",
-        isMobile && "flex-col"
+        isMobileView && "flex-col"
       )}>
         <div className={cn(
           isRTL ? 'text-right' : '',
-          isMobile && "w-full mb-3"
+          isMobileView && "w-full mb-3"
         )}>
           <div className={cn(
             "flex items-center",
             isRTL ? "flex-row-reverse justify-end" : "",
-            isMobile ? "justify-between" : "hidden"
+            isMobileView ? "justify-between" : "hidden"
           )}>
             <p className="text-gray-500 text-sm font-medium tracking-wide uppercase">{title}</p>
             
@@ -63,7 +68,7 @@ export function StatCard({
           {/* Only show title in its own line on non-mobile */}
           <p className={cn(
             "text-gray-500 text-sm font-medium tracking-wide uppercase",
-            isMobile && "hidden"
+            isMobileView && "hidden"
           )}>
             {title}
           </p>
@@ -101,7 +106,7 @@ export function StatCard({
           "rounded-lg p-3 shadow-sm group-hover:shadow-md transition-all", 
           iconBgColor,
           "group-hover:scale-110 transform duration-200",
-          isMobile && "hidden"
+          isMobileView && "hidden"
         )}>
           <span className={cn("material-icons", iconColor)}>{icon}</span>
         </div>

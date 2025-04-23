@@ -61,9 +61,13 @@ export default function Dashboard() {
   } as const;
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8">
+      <h1 className="text-xl md:text-2xl font-bold text-secondary-900 mb-4 md:mb-6 px-1">
+        {t("sidebar.dashboard")}
+      </h1>
+      
       {/* Dashboard Stats */}
-      <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 ${isRTL ? 'rtl' : ''}`}>
+      <div className={`grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 ${isRTL ? 'rtl' : ''}`}>
         <StatCard
           title={t("dashboard.total_orders")}
           value={totalOrders}
@@ -71,6 +75,7 @@ export default function Dashboard() {
           trend={orderTrend}
           iconColor="text-primary-500"
           iconBgColor="bg-primary-50"
+          isMobile={isMobile}
         />
 
         <StatCard
@@ -80,6 +85,7 @@ export default function Dashboard() {
           trend={efficiencyTrend}
           iconColor="text-success"
           iconBgColor="bg-success-50"
+          isMobile={isMobile}
         />
 
         <StatCard
@@ -89,6 +95,7 @@ export default function Dashboard() {
           trend={rollsTrend}
           iconColor="text-warning-500"
           iconBgColor="bg-warning-50"
+          isMobile={isMobile}
         />
 
         <StatCard
@@ -98,16 +105,24 @@ export default function Dashboard() {
           trend={materialTrend}
           iconColor="text-error-500"
           iconBgColor="bg-error-50"
+          isMobile={isMobile}
         />
       </div>
 
-      {/* In mobile view, show chart and orders stacked */}
+      {/* Chart and Recent Orders - Responsive layout */}
       <div className={`grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 ${isRTL ? 'rtl' : ''}`}>
         {/* Production Chart */}
-        <ProductionChart className={`bg-white rounded-lg shadow ${!isMobile ? 'col-span-2' : ''} ${isRTL ? 'rtl' : ''}`} />
+        <div className={`bg-white rounded-lg shadow p-3 md:p-5 ${!isMobile ? 'col-span-2' : ''} ${isRTL ? 'rtl' : ''} order-2 lg:order-1`}>
+          <h2 className="text-base md:text-lg font-medium mb-3 md:mb-4">
+            {t("dashboard.production_trends")}
+          </h2>
+          <ProductionChart className={`${isRTL ? 'rtl' : ''}`} />
+        </div>
 
-        {/* Recent Orders */}
-        <RecentOrders />
+        {/* Recent Orders - Display first on mobile */}
+        <div className="order-1 lg:order-2">
+          <RecentOrders />
+        </div>
       </div>
 
       {/* Active Orders Table */}

@@ -218,7 +218,8 @@ export function ActiveOrdersTable() {
     if (!activeOrders || activeOrders.length === 0) {
       return (
         <div className="py-8 text-center text-gray-500">
-          {t("orders.no_active_orders")}
+          <span className="material-icons text-gray-300 text-3xl mb-1">receipt_long</span>
+          <p>{t("orders.no_active_orders")}</p>
         </div>
       );
     }
@@ -232,19 +233,22 @@ export function ActiveOrdersTable() {
               <Link href={`/orders/${order.id}`}>
                 <CardHeader className="p-3 pb-2 flex flex-row justify-between items-start">
                   <div>
-                    <CardTitle className="text-base font-semibold">#{order.id}</CardTitle>
-                    <p className="text-xs text-gray-500 mt-1">{getCustomerName(order.customerId)}</p>
+                    <div className="flex items-center space-x-1">
+                      <span className="material-icons text-xs text-primary-500">receipt_long</span>
+                      <CardTitle className="text-sm font-semibold">#{order.id}</CardTitle>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1 truncate max-w-[140px]">{getCustomerName(order.customerId)}</p>
                   </div>
                   <StatusBadge status={order.status} />
                 </CardHeader>
-                <CardContent className="p-3 pt-0">
+                <CardContent className="p-3 pt-1">
                   {products.length > 0 && (
                     <div className="text-sm text-gray-600">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-gray-500">{products[0].productId}</span>
-                        <span className="text-xs">{products[0].quantity} Kg</span>
+                        <span className="text-xs text-gray-500 truncate max-w-[100px]">{products[0].productId}</span>
+                        <span className="text-xs font-medium">{products[0].quantity} Kg</span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden mt-2">
                         <div 
                           className="bg-primary-500 h-2 rounded-full relative"
                           style={{ width: `${products[0].progress}%` }}
@@ -252,17 +256,30 @@ export function ActiveOrdersTable() {
                           <span className="absolute inset-0 bg-white/30 h-full w-full bg-[linear-gradient(45deg,rgba(255,255,255,0.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.15)_50%,rgba(255,255,255,0.15)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[progress-bar-stripes_1s_linear_infinite]"></span>
                         </div>
                       </div>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-[10px] text-gray-500">{products[0].stage}</span>
+                        <span className="text-[10px] text-gray-600 font-medium">{products[0].progress}%</span>
+                      </div>
                     </div>
                   )}
                 </CardContent>
+                <CardFooter className="p-2 pt-0 flex justify-end">
+                  <span className="text-primary-500 text-xs flex items-center">
+                    {t("common.view_details")}
+                    <span className="material-icons text-xs ml-1">arrow_forward</span>
+                  </span>
+                </CardFooter>
               </Link>
             </Card>
           );
         })}
         <Link href="/orders">
-          <p className="text-center text-sm text-primary-600 py-2 hover:underline">
-            {t("orders.see_all_orders")}
-          </p>
+          <div className="text-center py-3 bg-gray-50 rounded-lg border border-gray-100 shadow-sm hover:bg-gray-100 transition-colors">
+            <p className="text-sm text-primary-600 font-medium flex items-center justify-center">
+              {t("orders.see_all_orders")}
+              <span className="material-icons text-sm ml-1">list</span>
+            </p>
+          </div>
         </Link>
       </div>
     );
@@ -306,11 +323,11 @@ export function ActiveOrdersTable() {
   
   return (
     <div className={`bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 ${isRTL ? 'rtl' : ''}`}>
-      <div className={`p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-white flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <div className="flex items-center gap-2">
-          <span className="material-icons text-primary-600">receipt_long</span>
-          <h3 className={`font-semibold text-lg text-gray-800 ${isRTL ? 'text-right' : ''}`}>
-            {t("orders.active_production_orders")}
+      <div className={`p-3 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-white flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <span className="material-icons text-primary-600 text-sm sm:text-base">receipt_long</span>
+          <h3 className={`font-semibold text-sm sm:text-lg text-gray-800 ${isRTL ? 'text-right' : ''}`}>
+            {isMobile ? t("orders.active_orders") : t("orders.active_production_orders")}
           </h3>
         </div>
         {actions}
