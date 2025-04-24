@@ -79,11 +79,11 @@ async function initializeAdminPermissions() {
           await storage.createPermission({
             role,
             module,
-            can_view: true,
-            can_create: true,
-            can_edit: true,
-            can_delete: true,
-            is_active: true
+            canView: true,
+            canCreate: true,
+            canEdit: true,
+            canDelete: true,
+            isActive: true
           });
           created++;
           console.log(`Created new permission for ${role}/${module}`);

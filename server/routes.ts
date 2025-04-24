@@ -2394,6 +2394,29 @@ app.post("/api/final-products", async (req: Request, res: Response) => {
       res.status(500).json({ message: "Failed to delete permission" });
     }
   });
+  
+  // Admin permissions initialization
+  app.post("/api/admin-permissions/init", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Make sure only administrators can initialize admin permissions
+      if (req.user && (req.user as any).role !== "administrator" && (req.user as any).role !== "admin") {
+        return res.status(403).json({ message: "Only administrators can initialize admin permissions" });
+      }
+      
+      console.log("Starting admin permissions initialization...");
+      const result = await initializeAdminPermissions();
+      console.log("Admin permissions initialization completed:", result);
+      
+      res.status(200).json({
+        message: "Admin permissions initialized successfully",
+        created: result.created,
+        updated: result.updated
+      });
+    } catch (error) {
+      console.error("Failed to initialize admin permissions:", error);
+      res.status(500).json({ message: "Failed to initialize admin permissions" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
