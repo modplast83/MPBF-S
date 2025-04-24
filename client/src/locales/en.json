@@ -48,7 +48,8 @@
       "refresh": "Refresh",
       "back": "Back",
       "print": "Print",
-      "add": "Add"
+      "add": "Add",
+      "start": "Start"
     },
     "auth": {
       "username": "Username",

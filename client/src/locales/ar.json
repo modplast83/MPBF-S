@@ -35,7 +35,7 @@
       "not_available": "غير متوفر",
       "inch": "بوصة",
       "error": "خطأ",
-      "complete": "مكتمل",
+      "complete": "إكمال",
       "details": "التفاصيل",
       "progress": "التقدم",
       "unknown_product": "منتج غير معروف",
@@ -43,7 +43,13 @@
       "success": "نجاح",
       "delete_success": "تم حذف العنصر بنجاح",
       "delete_error": "خطأ في حذف العنصر",
-      "delete_confirmation_message": "هل أنت متأكد أنك تريد حذف {{item}}؟ لا يمكن التراجع عن هذا الإجراء."
+      "delete_confirmation": "هل أنت متأكد؟",
+      "delete_confirmation_message": "هل أنت متأكد أنك تريد حذف {{item}}؟ لا يمكن التراجع عن هذا الإجراء.",
+      "refresh": "تحديث",
+      "back": "رجوع",
+      "print": "طباعة",
+      "add": "إضافة",
+      "start": "بدء"
     },
     "auth": {
       "username": "اسم المستخدم",
@@ -138,7 +144,12 @@
         "description": "إدارة فئات المنتجات للتنظيم",
         "id": "المعرف",
         "name": "الاسم",
-        "code": "الرمز"
+        "code": "الرمز",
+        "add": "إضافة فئة",
+        "edit": "تعديل الفئة",
+        "add_description": "إنشاء فئة منتجات جديدة",
+        "edit_description": "تعديل تفاصيل الفئة الحالية",
+        "no_categories": "لم يتم العثور على فئات"
       },
       "products": {
         "title": "المنتجات",

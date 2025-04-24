@@ -213,7 +213,7 @@ export function RollCard({ roll }: RollCardProps) {
                 }}
                 disabled={updateRollMutation.isPending}
               >
-                {isMobile ? t("common.start") : t("production.roll_management.start_process")}
+                {t(isMobile ? "common.start" : "production.roll_management.start_process")}
               </Button>
             ) : roll.status === "processing" ? (
               <Button
@@ -226,7 +226,7 @@ export function RollCard({ roll }: RollCardProps) {
                 }}
                 disabled={updateRollMutation.isPending}
               >
-                {isMobile ? t("common.complete") : t("production.roll_management.complete_stage")}
+                {t(isMobile ? "common.complete" : "production.roll_management.complete_stage")}
               </Button>
             ) : null}
           </div>
