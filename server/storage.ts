@@ -11,6 +11,7 @@ import {
   Permission, InsertPermission
 } from "@shared/schema";
 import session from "express-session";
+import { DatabaseStorage } from './database-storage';
 
 // Interface for storage operations
 export interface IStorage {
