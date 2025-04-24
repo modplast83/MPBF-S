@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Roll, CustomerProduct, JobOrder } from "@shared/schema";
+import { Roll, CustomerProduct, JobOrder, User } from "@shared/schema";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -65,6 +65,12 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
   const { data: item } = useQuery<any>({
     queryKey: [customerProduct ? `${API_ENDPOINTS.ITEMS}/${customerProduct.itemId}` : null],
     enabled: !!customerProduct?.itemId,
+  });
+  
+  // Fetch user data for the creator
+  const { data: creator } = useQuery<User>({
+    queryKey: [roll.createdById ? `${API_ENDPOINTS.USERS}/${roll.createdById}` : null],
+    enabled: !!roll.createdById,
   });
   
   // Get the maximum available quantity for cutting (from printing stage)
@@ -304,8 +310,8 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
           </div>
           
           <div class="footer">
-            Printed on ${new Date().toLocaleString()} • Dimensions: 3" × 5"<br>
-            Created by: ${roll.createdById ? roll.createdById : 'System User'}
+            Printed on ${new Date().toLocaleString()}<br>
+            Created by: ${creator?.name || roll.createdById || 'System User'}
           </div>
         </div>
       </body>
