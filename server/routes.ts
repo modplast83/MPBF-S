@@ -1315,6 +1315,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get completed job orders with cutting rolls info
+  app.get("/api/job-orders/completed", async (_req: Request, res: Response) => {
+    try {
+      // Get job orders with status "completed"
+      const jobOrders = await storage.getJobOrdersByStatus("completed");
+      
+      // For each job order, get the rolls that have current_stage = "completed"
+      const completedJobOrdersWithRolls = await Promise.all(
+        jobOrders.map(async (jobOrder) => {
+          const rolls = await storage.getRollsByJobOrder(jobOrder.id);
+          const completedRolls = rolls.filter(roll => roll.currentStage === "cutting" && roll.status === "completed");
+          
+          // Calculate total cutting quantity
+          const totalCuttingQty = completedRolls.reduce((sum, roll) => {
+            return sum + (roll.cuttingQty || 0);
+          }, 0);
+          
+          return {
+            ...jobOrder,
+            rolls: completedRolls,
+            totalCuttingQty: totalCuttingQty,
+            isConfirmed: !!jobOrder.productionQty,
+          };
+        })
+      );
+      
+      res.json(completedJobOrdersWithRolls);
+    } catch (error) {
+      console.error("Error fetching completed job orders:", error);
+      res.status(500).json({ message: "Failed to get completed job orders" });
+    }
+  });
+  
   app.get("/api/final-products/:id", async (req: Request, res: Response) => {
     try {
       const finalProduct = await storage.getFinalProduct(parseInt(req.params.id));
