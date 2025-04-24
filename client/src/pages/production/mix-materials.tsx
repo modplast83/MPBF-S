@@ -404,7 +404,7 @@ export default function MixMaterialsPage() {
 
       {/* Mix details dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="sm:max-w-[750px]">
+        <DialogContent className={isMobile ? "max-w-[95vw] p-4 overflow-y-auto max-h-[90vh]" : "sm:max-w-[750px]"}>
           <DialogHeader>
             <DialogTitle>{t('production.mix_materials.title')}</DialogTitle>
           </DialogHeader>
@@ -425,18 +425,20 @@ export default function MixMaterialsPage() {
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className={isMobile ? "max-w-[95vw] p-4 sm:p-6" : ""}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("common.delete")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t("common.delete_confirmation_message", { item: t("production.mix_materials.title") })}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+          <AlertDialogFooter className={isMobile ? "flex-col space-y-2" : ""}>
+            <AlertDialogCancel className={isMobile ? "w-full mt-0" : ""}>
+              {t("common.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className={`bg-red-600 hover:bg-red-700 text-white ${isMobile ? "w-full" : ""}`}
             >
               {t("common.delete")}
             </AlertDialogAction>
