@@ -567,6 +567,119 @@ export default function FinalProducts() {
           <TabsTrigger value="confirm">Confirm Production</TabsTrigger>
         </TabsList>
         
+        {/* Job Order Confirmation Dialog */}
+        <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Production Quantity</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              {currentJobOrder && (
+                <>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Job Order</Label>
+                    <div className="col-span-3">#{currentJobOrder.id}</div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Total Rolls</Label>
+                    <div className="col-span-3">{currentJobOrder.rolls.length}</div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Calculated Qty</Label>
+                    <div className="col-span-3">{currentJobOrder.totalCuttingQty} kg</div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="productionQty" className="text-right">
+                      Final Production Qty (kg)
+                    </Label>
+                    <Input
+                      id="productionQty"
+                      type="number"
+                      value={productionQty}
+                      onChange={(e) => setProductionQty(parseFloat(e.target.value))}
+                      className="col-span-3"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={confirmJobOrder} 
+                disabled={confirmJobOrderMutation.isPending}
+              >
+                {confirmJobOrderMutation.isPending ? "Confirming..." : "Confirm Production"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Batch Confirmation Dialog */}
+        <Dialog open={batchConfirmDialogOpen} onOpenChange={setBatchConfirmDialogOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Batch Confirm Production Quantities</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="overflow-y-auto max-h-[400px]">
+                <table className="w-full">
+                  <thead className="bg-secondary-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left">ID</th>
+                      <th className="px-4 py-2 text-left">Order</th>
+                      <th className="px-4 py-2 text-left">Rolls</th>
+                      <th className="px-4 py-2 text-left">Suggested Qty</th>
+                      <th className="px-4 py-2 text-left">Production Qty</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedJobOrders.map(jobOrderId => {
+                      const jobOrder = completedJobOrders?.find(jo => jo.id === jobOrderId);
+                      if (!jobOrder) return null;
+                      
+                      const order = orders?.find(o => o.id === jobOrder.orderId);
+                      
+                      return (
+                        <tr key={jobOrder.id} className="border-b">
+                          <td className="px-4 py-2">#{jobOrder.id}</td>
+                          <td className="px-4 py-2">#{order?.id || "Unknown"}</td>
+                          <td className="px-4 py-2">{jobOrder.rolls.length}</td>
+                          <td className="px-4 py-2">{jobOrder.totalCuttingQty} kg</td>
+                          <td className="px-4 py-2">
+                            <Input
+                              type="number"
+                              value={jobOrderQuantities[jobOrder.id] || 0}
+                              onChange={(e) => updateJobOrderQuantity(jobOrder.id, parseFloat(e.target.value))}
+                              className="w-24"
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setBatchConfirmDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={submitBatchConfirmation} 
+                disabled={batchConfirmMutation.isPending || selectedJobOrders.length === 0}
+              >
+                {batchConfirmMutation.isPending 
+                  ? "Confirming..." 
+                  : `Confirm ${selectedJobOrders.length} Job Order${selectedJobOrders.length > 1 ? 's' : ''}`
+                }
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
         <TabsContent value="current">
           <Card>
             <CardHeader>
@@ -637,7 +750,7 @@ export default function FinalProducts() {
                 // Desktop table view
                 <DataTable
                   data={completedJobOrders || []}
-                  columns={completedJobOrderColumns}
+                  columns={completedJobOrderColumns as any}
                   isLoading={jobOrdersLoading}
                   actions={confirmTableActions}
                   selectionHeading={
