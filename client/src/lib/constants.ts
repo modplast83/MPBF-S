@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
   // Warehouse
   RAW_MATERIALS: "/api/raw-materials",
   FINAL_PRODUCTS: "/api/final-products",
+  MATERIAL_INPUTS: "/api/material-inputs",
   
   // Quality Management
   QUALITY_CHECK_TYPES: "/api/quality-check-types",

@@ -8,7 +8,8 @@ import {
   CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage,
   MixMaterial, InsertMixMaterial, MixItem, InsertMixItem,
   MixMachine, InsertMixMachine, mixMachines, permissions,
-  Permission, InsertPermission
+  Permission, InsertPermission, MaterialInput, InsertMaterialInput,
+  MaterialInputItem, InsertMaterialInputItem
 } from "@shared/schema";
 import session from "express-session";
 
@@ -179,6 +180,20 @@ export interface IStorage {
   createCorrectiveAction(correctiveAction: InsertCorrectiveAction): Promise<CorrectiveAction>;
   updateCorrectiveAction(id: number, correctiveActionUpdate: Partial<CorrectiveAction>): Promise<CorrectiveAction | undefined>;
   deleteCorrectiveAction(id: number): Promise<boolean>;
+  
+  // Material Inputs methods
+  getMaterialInputs(): Promise<MaterialInput[]>;
+  getMaterialInput(id: number): Promise<MaterialInput | undefined>;
+  createMaterialInput(materialInput: InsertMaterialInput): Promise<MaterialInput>;
+  updateMaterialInput(id: number, materialInput: Partial<MaterialInput>): Promise<MaterialInput | undefined>;
+  deleteMaterialInput(id: number): Promise<boolean>;
+  
+  // Material Input Items methods
+  getMaterialInputItems(): Promise<MaterialInputItem[]>;
+  getMaterialInputItemsByInput(inputId: number): Promise<MaterialInputItem[]>;
+  getMaterialInputItem(id: number): Promise<MaterialInputItem | undefined>;
+  createMaterialInputItem(item: InsertMaterialInputItem): Promise<MaterialInputItem>;
+  deleteMaterialInputItem(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {

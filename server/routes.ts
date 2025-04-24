@@ -2536,6 +2536,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Material Inputs API endpoints
+  app.get("/api/material-inputs", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const materialInputs = await storage.getMaterialInputs();
+      res.json(materialInputs);
+    } catch (error) {
+      console.error("Error getting material inputs:", error);
+      res.status(500).json({ message: "Failed to get material inputs" });
+    }
+  });
+
+  app.get("/api/material-inputs/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      const materialInput = await storage.getMaterialInput(id);
+      if (!materialInput) {
+        return res.status(404).json({ message: "Material input not found" });
+      }
+
+      res.json(materialInput);
+    } catch (error) {
+      console.error("Error getting material input:", error);
+      res.status(500).json({ message: "Failed to get material input" });
+    }
+  });
+
+  app.get("/api/material-inputs/:id/items", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      const items = await storage.getMaterialInputItemsByInput(id);
+      res.json(items);
+    } catch (error) {
+      console.error("Error getting material input items:", error);
+      res.status(500).json({ message: "Failed to get material input items" });
+    }
+  });
+
+  app.post("/api/material-inputs", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Validate the input data
+      const validatedData = insertMaterialInputSchema.parse(req.body);
+
+      // Create the material input
+      const materialInput = await storage.createMaterialInput({
+        ...validatedData,
+        userId: req.user?.id || ''
+      });
+
+      // Add items if provided
+      if (req.body.items && Array.isArray(req.body.items)) {
+        for (const itemData of req.body.items) {
+          const validatedItemData = insertMaterialInputItemSchema.parse({
+            ...itemData,
+            inputId: materialInput.id
+          });
+          
+          // Create the input item
+          await storage.createMaterialInputItem(validatedItemData);
+          
+          // Update the raw material quantity
+          const rawMaterial = await storage.getRawMaterial(validatedItemData.rawMaterialId);
+          if (rawMaterial) {
+            const updatedQuantity = (rawMaterial.quantity || 0) + validatedItemData.quantity;
+            await storage.updateRawMaterial(validatedItemData.rawMaterialId, {
+              quantity: updatedQuantity,
+              lastUpdated: new Date()
+            });
+          }
+        }
+      }
+      
+      res.status(201).json(materialInput);
+    } catch (error) {
+      console.error("Error creating material input:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid material input data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create material input", error: String(error) });
+    }
+  });
+
+  app.delete("/api/material-inputs/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      // Get the items to revert raw material quantities
+      const items = await storage.getMaterialInputItemsByInput(id);
+      
+      // Revert raw material quantities for each item
+      for (const item of items) {
+        const rawMaterial = await storage.getRawMaterial(item.rawMaterialId);
+        if (rawMaterial && rawMaterial.quantity) {
+          const updatedQuantity = Math.max(0, rawMaterial.quantity - item.quantity);
+          await storage.updateRawMaterial(item.rawMaterialId, {
+            quantity: updatedQuantity,
+            lastUpdated: new Date()
+          });
+        }
+      }
+      
+      // Delete the material input (this will cascade delete the items)
+      await storage.deleteMaterialInput(id);
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting material input:", error);
+      res.status(500).json({ message: "Failed to delete material input" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

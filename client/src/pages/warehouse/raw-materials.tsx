@@ -16,7 +16,7 @@ import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
-import { RawMaterial } from "@shared/schema";
+import { RawMaterial, MaterialInput, MaterialInputItem } from "@shared/schema";
 
 export default function RawMaterials() {
   const queryClient = useQueryClient();
