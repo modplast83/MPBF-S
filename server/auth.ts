@@ -29,23 +29,16 @@ async function comparePasswords(supplied: string, stored: string) {
     return supplied === stored;
   }
 
-  try {
-    // Normal secure comparison with salt
-    const [hashed, salt] = stored.split(".");
-    
-    if (!hashed || !salt) {
-      return false;
-    }
-    
-    const hashedBuf = Buffer.from(hashed, "hex");
-    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-    return timingSafeEqual(hashedBuf, suppliedBuf);
-  } catch (error) {
-    console.error("Error comparing passwords:", error);
-    // If there's an error in the secure comparison, try a direct comparison as last resort
-    // This is helpful for the predefined admin account during initial setup
-    return supplied === "admin123" && stored.includes("5ecce9622302d479f57cc78d6cacb38c8be01aa6c2d0dbb6db7dbbb8b7b3b84f391bdf61188ee07a92e5e527e40cc2cd60ca71b52fc2cd56c32cd4f8a44de42b");
+  // Normal secure comparison with salt
+  const [hashed, salt] = stored.split(".");
+  
+  if (!hashed || !salt) {
+    return false;
   }
+  
+  const hashedBuf = Buffer.from(hashed, "hex");
+  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+  return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
 export function setupAuth(app: Express) {
@@ -71,29 +64,15 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        console.log(`Attempting login for username: ${username}`);
         const user = await storage.getUserByUsername(username);
-        
-        if (!user) {
-          console.log(`User ${username} not found`);
+        if (!user || !(await comparePasswords(password, user.password))) {
           return done(null, false, { message: "Invalid username or password" });
         }
-        
-        console.log(`User found, comparing passwords`);
-        const passwordsMatch = await comparePasswords(password, user.password);
-        console.log(`Password comparison result: ${passwordsMatch}`);
-        
-        if (!passwordsMatch) {
-          return done(null, false, { message: "Invalid username or password" });
-        }
-
-        console.log(`Login successful for user: ${username}`);
         
         // Don't return password in session
         const { password: _, ...userWithoutPassword } = user;
         return done(null, userWithoutPassword as SelectUser);
       } catch (error) {
-        console.error("Error during authentication:", error);
         return done(error);
       }
     })

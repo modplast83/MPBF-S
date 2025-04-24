@@ -130,7 +130,6 @@ export const jobOrders = pgTable("job_orders", {
   orderId: integer("order_id").notNull().references(() => orders.id), // Order ID
   customerProductId: integer("customer_product_id").notNull().references(() => customerProducts.id), // Customer Product No
   quantity: doublePrecision("quantity").notNull(), // Qty Kg
-  productionQty: doublePrecision("production_qty").default(0), // Sum of all cutting quantities from associated rolls
   status: text("status").default("pending").notNull(), // Status (pending, in_progress, extrusion_completed, completed, cancelled)
   customerId: text("customer_id").references(() => customers.id), // Customer ID
 }, (table) => {
@@ -147,7 +146,7 @@ export type JobOrder = typeof jobOrders.$inferSelect;
 export const rolls = pgTable("rolls", {
   id: text("id").primaryKey(), // ID
   jobOrderId: integer("job_order_id").notNull().references(() => jobOrders.id), // Job Order ID
-  rollSerial: text("roll_serial").notNull(), // Roll Serial
+  serialNumber: text("roll_serial").notNull(), // Roll Serial
   extrudingQty: doublePrecision("extruding_qty").default(0), // Extruding Qty
   printingQty: doublePrecision("printing_qty").default(0), // Printing Qty
   cuttingQty: doublePrecision("cutting_qty").default(0), // Cutting Qty
@@ -165,11 +164,11 @@ export const rolls = pgTable("rolls", {
 
 export const insertRollSchema = createInsertSchema(rolls);
 
-// Create a custom schema for roll creation API that makes id and rollSerial optional
+// Create a custom schema for roll creation API that makes id and serialNumber optional
 // since they'll be auto-generated on the server
 export const createRollSchema = insertRollSchema.omit({ 
   id: true, 
-  rollSerial: true 
+  serialNumber: true 
 });
 
 export type InsertRoll = z.infer<typeof insertRollSchema>;

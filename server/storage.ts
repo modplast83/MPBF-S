@@ -11,7 +11,6 @@ import {
   Permission, InsertPermission
 } from "@shared/schema";
 import session from "express-session";
-import { DatabaseStorage } from './database-storage';
 
 // Interface for storage operations
 export interface IStorage {
@@ -1061,6 +1060,8 @@ export class MemStorage implements IStorage {
     return this.mixItems.delete(id);
   }
 }
+
+import { DatabaseStorage } from './database-storage';
 
 // Use the database storage implementation
 export const storage = new DatabaseStorage();

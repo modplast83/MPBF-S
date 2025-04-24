@@ -15,7 +15,6 @@ import {
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
 import { setupAuth } from "./auth";
-import { initializeAdminPermissions } from "./admin-permissions";
 
 // Extend the Request type to include express-fileupload properties
 declare global {
@@ -1135,7 +1134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const rollData: InsertRoll = {
         ...validatedData,
-        rollSerial: paddedSerialNumber,
+        serialNumber: paddedSerialNumber,
         id: `EX-${paddedJobOrderId}-${paddedSerialNumber}`,
         createdById: currentUserId,
         createdAt: new Date()
@@ -1327,52 +1326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Job Orders with Production Quantity
-  app.get("/api/job-orders/with-production", async (_req: Request, res: Response) => {
-    try {
-      // Get all job orders
-      const jobOrders = await storage.getJobOrders();
-      
-      // Enhanced job orders data with customer and product names
-      const enhancedJobOrders = await Promise.all(
-        jobOrders.map(async (jobOrder) => {
-          // Get customer details
-          const customer = jobOrder.customerId 
-            ? await storage.getCustomer(jobOrder.customerId)
-            : null;
-          
-          // Get customer product details
-          const customerProduct = await storage.getCustomerProduct(jobOrder.customerProductId);
-          
-          // Get order details for the date
-          const order = await storage.getOrder(jobOrder.orderId);
-          
-          // Get item details through customer product
-          let productName = "";
-          if (customerProduct && customerProduct.itemId) {
-            const item = await storage.getItem(customerProduct.itemId);
-            if (item) {
-              productName = item.name;
-            }
-          }
-          
-          return {
-            ...jobOrder,
-            customerName: customer ? customer.name : "",
-            productName,
-            orderDate: order ? new Date(order.date).toLocaleDateString() : ""
-          };
-        })
-      );
-      
-      res.json(enhancedJobOrders);
-    } catch (error) {
-      console.error("Error fetching enhanced job orders:", error);
-      res.status(500).json({ message: "Failed to get job orders with production data" });
-    }
-  });
-
-app.post("/api/final-products", async (req: Request, res: Response) => {
+  app.post("/api/final-products", async (req: Request, res: Response) => {
     try {
       const validatedData = insertFinalProductSchema.parse(req.body);
       
@@ -2392,29 +2346,6 @@ app.post("/api/final-products", async (req: Request, res: Response) => {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete permission" });
-    }
-  });
-  
-  // Admin permissions initialization
-  app.post("/api/admin-permissions/init", requireAuth, async (req: Request, res: Response) => {
-    try {
-      // Make sure only administrators can initialize admin permissions
-      if (req.user && (req.user as any).role !== "administrator" && (req.user as any).role !== "admin") {
-        return res.status(403).json({ message: "Only administrators can initialize admin permissions" });
-      }
-      
-      console.log("Starting admin permissions initialization...");
-      const result = await initializeAdminPermissions();
-      console.log("Admin permissions initialization completed:", result);
-      
-      res.status(200).json({
-        message: "Admin permissions initialized successfully",
-        created: result.created,
-        updated: result.updated
-      });
-    } catch (error) {
-      console.error("Failed to initialize admin permissions:", error);
-      res.status(500).json({ message: "Failed to initialize admin permissions" });
     }
   });
 
