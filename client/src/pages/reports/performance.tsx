@@ -347,7 +347,6 @@ function PerformanceCharts({ data, isMobile, isRTL }: {
             <Progress 
               value={data.wasteMetrics.overallWastePercentage} 
               className="h-2 bg-green-100" 
-              indicatorClassName="bg-amber-500"
             />
           </div>
         </CardContent>

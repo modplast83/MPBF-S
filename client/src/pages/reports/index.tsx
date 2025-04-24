@@ -10,6 +10,8 @@ import { formatDateString, formatNumber } from "@/lib/utils";
 import { Order, JobOrder, Roll, CustomerProduct, Customer } from "@shared/schema";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
 
 // Simple line chart component
 function LineChart({ isMobile = false }: { isMobile?: boolean }) {
@@ -30,6 +32,7 @@ function LineChart({ isMobile = false }: { isMobile?: boolean }) {
 
 export default function ReportsIndex() {
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
   const [reportType, setReportType] = useState("production");
   const [dateRange, setDateRange] = useState<{ start: Date | undefined; end: Date | undefined }>({
     start: undefined,
@@ -220,6 +223,52 @@ export default function ReportsIndex() {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-secondary-900">Reports</h1>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Link href="/reports/performance" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">{t("performance.title")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-blue-50 rounded mb-3">
+                <span className="material-icons text-4xl text-blue-400">insights</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                {t("performance.production_efficiency")}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Card className="h-full">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Inventory Reports</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center h-32 bg-green-50 rounded mb-3">
+              <span className="material-icons text-4xl text-green-400">inventory_2</span>
+            </div>
+            <p className="text-sm text-gray-600">
+              Track inventory levels and material usage
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card className="h-full">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Quality Reports</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center h-32 bg-purple-50 rounded mb-3">
+              <span className="material-icons text-4xl text-purple-400">verified</span>
+            </div>
+            <p className="text-sm text-gray-600">
+              Analyze quality metrics and defect rates
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>

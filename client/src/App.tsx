@@ -17,6 +17,7 @@ import WarehouseIndex from "@/pages/warehouse/index";
 import RawMaterials from "@/pages/warehouse/raw-materials";
 import FinalProducts from "@/pages/warehouse/final-products";
 import ReportsIndex from "@/pages/reports/index";
+import PerformancePage from "@/pages/reports/performance";
 import SystemIndex from "@/pages/system/index";
 import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions";
@@ -68,6 +69,7 @@ function App() {
             <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" />
             <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" />
             <ProtectedRoute path="/reports" component={ReportsIndex} module="Reports" />
+            <ProtectedRoute path="/reports/performance" component={PerformancePage} module="Performance Metrics" />
             <ProtectedRoute path="/quality" component={QualityIndex} module="Quality" />
             <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} module="Check Types" />
             <ProtectedRoute path="/quality/checks" component={QualityChecks} module="Quality Checks" />
