@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   // Production
   ORDERS: "/api/orders",
   JOB_ORDERS: "/api/job-orders",
+  JOB_ORDERS_COMPLETED: "/api/job-orders/completed",
   ROLLS: "/api/rolls",
   MIX_MATERIALS: "/api/mix-materials",
   MIX_ITEMS: "/api/mix-items",
