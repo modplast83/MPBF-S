@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -11,12 +11,16 @@ import { apiRequest } from "@/lib/queryClient";
 import { formatDateString } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Order, Customer } from "@shared/schema";
 
 export default function OrdersIndex() {
   const queryClient = useQueryClient();
   const [deletingOrder, setDeletingOrder] = useState<Order | null>(null);
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+  const isMobile = useIsMobile();
 
   // Fetch orders and customers
   const { data: orders, isLoading } = useQuery<Order[]>({
@@ -156,10 +160,105 @@ export default function OrdersIndex() {
     </Link>
   );
 
+  // Mobile card view for orders
+  const renderMobileOrderList = () => {
+    if (!orders || orders.length === 0) {
+      return (
+        <div className="text-center py-8 px-4 bg-gray-50 rounded-md">
+          <span className="material-icons text-gray-300 text-3xl mb-2">receipt_long</span>
+          <p className="text-gray-500">{t("orders.no_orders")}</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-4">
+        {orders.map((order) => (
+          <Card key={order.id} className="overflow-hidden hover:shadow-md transition-all">
+            <Link href={`/orders/${order.id}`}>
+              <CardHeader className="p-3 pb-2 flex flex-row justify-between items-start bg-gray-50">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-icons text-xs text-primary-500">receipt_long</span>
+                    <CardTitle className="text-sm font-semibold">#{order.id}</CardTitle>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{formatDateString(order.date)}</p>
+                </div>
+                <StatusBadge status={order.status} />
+              </CardHeader>
+              <CardContent className="p-3 pt-2">
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <div>
+                    <p className="text-xs text-gray-500">{t("orders.customer")}</p>
+                    <p className="text-sm font-medium truncate">{getCustomerName(order.customerId)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">{t("orders.customer_ar")}</p>
+                    <p className="text-sm font-medium truncate">{getCustomerNameAr(order.customerId)}</p>
+                  </div>
+                </div>
+                
+                <div className="mt-2 pt-2 border-t border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-500">{t("orders.plate_drawer_code")}</p>
+                    <p className="text-sm font-medium">{getCustomerPlateDrawerCode(order.customerId)}</p>
+                  </div>
+                  
+                  {order.note && (
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      <p className="text-xs text-gray-500">{t("orders.note")}</p>
+                      <p className="text-sm mt-1 text-gray-700">{order.note}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="p-2 pt-0 flex justify-between items-center">
+                <span className="text-primary-500 text-xs flex items-center">
+                  {t("common.view_details")}
+                  <span className="material-icons text-xs ml-1">arrow_forward</span>
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDelete(order);
+                  }} 
+                  className="h-8 w-8 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
+                >
+                  <span className="material-icons text-sm">delete</span>
+                </Button>
+              </CardFooter>
+            </Link>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  // Mobile view fallback and loading state
+  const renderMobileLoadingState = () => {
+    return (
+      <div className="space-y-4 animate-pulse">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-40 bg-gray-100 rounded-lg"></div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-secondary-900">{t("orders.title")}</h1>
+        {isMobile && (
+          <Link href="/orders/new">
+            <Button className="rounded-full h-10 w-10 p-0">
+              <span className="material-icons text-base">add</span>
+            </Button>
+          </Link>
+        )}
       </div>
 
       <Card>
@@ -169,13 +268,18 @@ export default function OrdersIndex() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <DataTable 
-            data={orders || []}
-            columns={columns}
-            isLoading={isLoading}
-            actions={tableActions}
-            onRowClick={(row) => window.location.href = `/orders/${row.id}`}
-          />
+          {isLoading ? (
+            isMobile ? renderMobileLoadingState() : <div className="h-32 bg-gray-100 rounded animate-pulse"></div>
+          ) : isMobile ? (
+            renderMobileOrderList()
+          ) : (
+            <DataTable 
+              data={orders || []}
+              columns={columns as any}
+              actions={tableActions}
+              onRowClick={(row) => window.location.href = `/orders/${row.id}`}
+            />
+          )}
         </CardContent>
       </Card>
 
