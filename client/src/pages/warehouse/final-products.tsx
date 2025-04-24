@@ -47,6 +47,8 @@ export default function FinalProducts() {
   const [selectedJobOrders, setSelectedJobOrders] = useState<number[]>([]);
   const [batchConfirmDialogOpen, setBatchConfirmDialogOpen] = useState(false);
   const [jobOrderQuantities, setJobOrderQuantities] = useState<Record<number, number>>({});
+  
+
 
   // Fetch final products and related data
   const { data: finalProducts, isLoading: finalProductsLoading } = useQuery<FinalProduct[]>({
@@ -265,9 +267,9 @@ export default function FinalProducts() {
 
   // Batch confirm job orders mutation
   const batchConfirmMutation = useMutation({
-    mutationFn: async (data: { jobOrders: { id: number, productionQty: number }[] }) => {
+    mutationFn: async (jobOrders: { id: number, productionQty: number }[]) => {
       return await apiRequest("POST", `${API_ENDPOINTS.JOB_ORDERS}/confirm-batch`, {
-        jobOrders: data.jobOrders
+        jobOrders: jobOrders
       });
     },
     onSuccess: () => {
@@ -364,7 +366,7 @@ export default function FinalProducts() {
       return;
     }
 
-    batchConfirmMutation.mutate({ jobOrders: jobOrdersToConfirm });
+    batchConfirmMutation.mutate(jobOrdersToConfirm);
   };
 
   // Toggle all job orders for batch confirmation
@@ -573,36 +575,34 @@ export default function FinalProducts() {
             <DialogHeader>
               <DialogTitle>Confirm Production Quantity</DialogTitle>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              {currentJobOrder && (
-                <>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Job Order</Label>
-                    <div className="col-span-3">#{currentJobOrder.id}</div>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Total Rolls</Label>
-                    <div className="col-span-3">{currentJobOrder.rolls.length}</div>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Calculated Qty</Label>
-                    <div className="col-span-3">{currentJobOrder.totalCuttingQty} kg</div>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="productionQty" className="text-right">
-                      Final Production Qty (kg)
-                    </Label>
-                    <Input
-                      id="productionQty"
-                      type="number"
-                      value={productionQty}
-                      onChange={(e) => setProductionQty(parseFloat(e.target.value))}
-                      className="col-span-3"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
+            {currentJobOrder && (
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Job Order</Label>
+                  <div className="col-span-3">#{currentJobOrder.id}</div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Total Rolls</Label>
+                  <div className="col-span-3">{currentJobOrder.rolls.length}</div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Calculated Qty</Label>
+                  <div className="col-span-3">{currentJobOrder.totalCuttingQty} kg</div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="productionQty" className="text-right">
+                    Final Production Qty (kg)
+                  </Label>
+                  <Input
+                    id="productionQty"
+                    type="number"
+                    value={productionQty}
+                    onChange={(e) => setProductionQty(parseFloat(e.target.value))}
+                    className="col-span-3"
+                  />
+                </div>
+              </div>
+            )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
                 Cancel
@@ -709,19 +709,21 @@ export default function FinalProducts() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Content based on view type */}
               {isMobile ? (
-                // Mobile card view
-                <>
+                <div className="mobile-view">
                   {jobOrdersLoading && <div className="text-center py-4">Loading job orders...</div>}
+                  
                   {!jobOrdersLoading && completedJobOrders?.length === 0 && (
                     <div className="text-center py-4">No completed job orders found</div>
                   )}
+                  
                   {!jobOrdersLoading && completedJobOrders && completedJobOrders.length > 0 && (
                     <div>
                       <div className="flex justify-between mb-4">
-                        <Label htmlFor="select-all" className="flex items-center space-x-2 cursor-pointer">
+                        <Label htmlFor="select-all-mobile" className="flex items-center space-x-2 cursor-pointer">
                           <Checkbox 
-                            id="select-all"
+                            id="select-all-mobile"
                             onCheckedChange={(checked) => toggleAllJobOrders(!!checked)}
                             checked={selectedJobOrders.length > 0 && 
                               selectedJobOrders.length === 
@@ -745,27 +747,27 @@ export default function FinalProducts() {
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               ) : (
-                // Desktop table view
-                <DataTable
-                  data={completedJobOrders || []}
-                  columns={completedJobOrderColumns as any}
-                  isLoading={jobOrdersLoading}
-                  actions={confirmTableActions}
-                  selectionHeading={
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="select-all"
-                        onCheckedChange={(checked) => toggleAllJobOrders(!!checked)}
-                        checked={selectedJobOrders.length > 0 && 
-                          selectedJobOrders.length === 
-                          completedJobOrders?.filter(jo => !jo.isConfirmed).length}
-                      />
-                      <Label htmlFor="select-all">Select All Unconfirmed</Label>
-                    </div>
-                  }
-                />
+                <div className="desktop-view">
+                  <div className="mb-4 flex items-center space-x-2">
+                    <Checkbox 
+                      id="select-all-desktop"
+                      onCheckedChange={(checked) => toggleAllJobOrders(!!checked)}
+                      checked={selectedJobOrders.length > 0 && 
+                        selectedJobOrders.length === 
+                        completedJobOrders?.filter(jo => !jo.isConfirmed).length}
+                    />
+                    <Label htmlFor="select-all-desktop">Select All Unconfirmed</Label>
+                  </div>
+                  
+                  <DataTable
+                    data={completedJobOrders || []}
+                    columns={completedJobOrderColumns as any}
+                    isLoading={jobOrdersLoading}
+                    actions={confirmTableActions}
+                  />
+                </div>
               )}
             </CardContent>
           </Card>
