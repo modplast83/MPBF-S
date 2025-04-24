@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ import { RawMaterial, MaterialInput, MaterialInputItem } from "@shared/schema";
 export default function RawMaterials() {
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
+  const [inputFormOpen, setInputFormOpen] = useState(false);
   const [editMaterial, setEditMaterial] = useState<RawMaterial | null>(null);
   const [deletingMaterial, setDeletingMaterial] = useState<RawMaterial | null>(null);
   const isMobile = useIsMobile();
@@ -32,6 +33,11 @@ export default function RawMaterials() {
   const [type, setType] = useState("");
   const [quantity, setQuantity] = useState<number>(0);
   const [unit, setUnit] = useState("Kg");
+  
+  // Input material form state
+  const [inputItems, setInputItems] = useState<{id: number, rawMaterialId: number, quantity: number}[]>([]);
+  const [selectedRawMaterialId, setSelectedRawMaterialId] = useState<number | null>(null);
+  const [inputQuantity, setInputQuantity] = useState<number>(0);
 
   // Fetch raw materials
   const { data: materials, isLoading } = useQuery<RawMaterial[]>({
@@ -85,12 +91,96 @@ export default function RawMaterials() {
       });
     },
   });
+  
+  // Input Material mutation
+  const inputMaterialMutation = useMutation({
+    mutationFn: async (data: { items: { rawMaterialId: number, quantity: number }[] }) => {
+      return await apiRequest("POST", API_ENDPOINTS.MATERIAL_INPUTS, {
+        date: new Date(),
+        items: data.items
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.RAW_MATERIALS] });
+      toast({
+        title: "Materials Updated",
+        description: "Material quantities have been updated successfully.",
+      });
+      handleCloseInputForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update material quantities: ${error}`,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Handle adding an item to the input list
+  const handleAddInputItem = () => {
+    if (!selectedRawMaterialId || inputQuantity <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a material and enter a valid quantity.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Add item to the list
+    const newId = inputItems.length > 0 ? Math.max(...inputItems.map(item => item.id)) + 1 : 1;
+    setInputItems([
+      ...inputItems,
+      { 
+        id: newId, 
+        rawMaterialId: selectedRawMaterialId, 
+        quantity: inputQuantity 
+      }
+    ]);
+    
+    // Reset the form
+    setSelectedRawMaterialId(null);
+    setInputQuantity(0);
+  };
+  
+  // Handle removing an item from the input list
+  const handleRemoveInputItem = (id: number) => {
+    setInputItems(inputItems.filter(item => item.id !== id));
+  };
+  
+  // Handle saving the input form
+  const handleSaveInput = () => {
+    if (inputItems.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please add at least one material to the input list.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    inputMaterialMutation.mutate({ 
+      items: inputItems.map(item => ({ 
+        rawMaterialId: item.rawMaterialId, 
+        quantity: item.quantity 
+      })) 
+    });
+  };
+  
+  // Handle closing the input form
+  const handleCloseInputForm = () => {
+    setInputFormOpen(false);
+    setSelectedRawMaterialId(null);
+    setInputQuantity(0);
+    setInputItems([]);
+  };
 
   const handleEdit = (material: RawMaterial) => {
     setEditMaterial(material);
     setName(material.name);
     setType(material.type);
-    setQuantity(material.quantity);
+    setQuantity(material.quantity || 0);
     setUnit(material.unit);
     setFormOpen(true);
   };
@@ -165,10 +255,16 @@ export default function RawMaterials() {
   ];
 
   const tableActions = (
-    <Button onClick={() => setFormOpen(true)}>
-      <span className="material-icons text-sm mr-1">add</span>
-      {isMobile ? "" : "Add Material"}
-    </Button>
+    <div className="flex space-x-2">
+      <Button onClick={() => setFormOpen(true)}>
+        <span className="material-icons text-sm mr-1">add</span>
+        {isMobile ? "" : "Add Material"}
+      </Button>
+      <Button onClick={() => setInputFormOpen(true)} variant="outline">
+        <span className="material-icons text-sm mr-1">add_shopping_cart</span>
+        {isMobile ? "" : "Input Material"}
+      </Button>
+    </div>
   );
   
   // Mobile card view for raw materials
@@ -256,12 +352,21 @@ export default function RawMaterials() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-secondary-900">Raw Materials</h1>
         {isMobile && (
-          <Button 
-            onClick={() => setFormOpen(true)} 
-            className="rounded-full h-10 w-10 p-0"
-          >
-            <span className="material-icons text-base">add</span>
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              onClick={() => setInputFormOpen(true)} 
+              variant="outline"
+              className="rounded-full h-10 w-10 p-0"
+            >
+              <span className="material-icons text-base">add_shopping_cart</span>
+            </Button>
+            <Button 
+              onClick={() => setFormOpen(true)} 
+              className="rounded-full h-10 w-10 p-0"
+            >
+              <span className="material-icons text-base">add</span>
+            </Button>
+          </div>
         )}
       </div>
 
@@ -445,6 +550,111 @@ export default function RawMaterials() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* Input Material Dialog */}
+      <Dialog open={inputFormOpen} onOpenChange={setInputFormOpen}>
+        <DialogContent className={isMobile ? "max-w-[95vw] p-4 sm:p-6" : ""}>
+          <DialogHeader>
+            <DialogTitle>Input Material</DialogTitle>
+            <DialogDescription>
+              Add quantities to existing raw materials.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Add material form */}
+            <div className={isMobile ? "space-y-4" : "grid grid-cols-10 gap-4 items-end"}>
+              <div className={isMobile ? "space-y-2" : "col-span-6"}>
+                <Label htmlFor="material-select">Material</Label>
+                <Select 
+                  value={selectedRawMaterialId?.toString() || ""} 
+                  onValueChange={(value) => setSelectedRawMaterialId(parseInt(value))}
+                >
+                  <SelectTrigger id="material-select">
+                    <SelectValue placeholder="Select a material" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {materials?.map((material) => (
+                      <SelectItem key={material.id} value={material.id.toString()}>
+                        {material.name} ({material.type})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className={isMobile ? "space-y-2" : "col-span-3"}>
+                <Label htmlFor="input-quantity">Quantity</Label>
+                <Input
+                  id="input-quantity"
+                  type="number"
+                  value={inputQuantity}
+                  onChange={(e) => setInputQuantity(parseFloat(e.target.value))}
+                />
+              </div>
+              
+              <Button 
+                onClick={handleAddInputItem} 
+                className={isMobile ? "w-full" : "col-span-1"} 
+                size={isMobile ? "default" : "icon"}
+                type="button"
+              >
+                {isMobile ? "Add to List" : <span className="material-icons">add</span>}
+              </Button>
+            </div>
+            
+            {/* Input items list */}
+            {inputItems.length > 0 && (
+              <div className="space-y-3 pt-4 border-t">
+                <h3 className="font-medium text-sm">Materials to Input:</h3>
+                <div className="space-y-2">
+                  {inputItems.map((item) => {
+                    const material = materials?.find(m => m.id === item.rawMaterialId);
+                    return (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between p-2 rounded-md bg-gray-50"
+                      >
+                        <div>
+                          <p className="font-medium">{material?.name}</p>
+                          <p className="text-sm text-gray-500">
+                            {item.quantity} {material?.unit}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveInputItem(item.id)}
+                          className="h-8 w-8 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
+                        >
+                          <span className="material-icons text-sm">delete</span>
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className={isMobile ? "flex flex-col space-y-2" : ""}>
+            <Button 
+              variant="outline" 
+              onClick={handleCloseInputForm}
+              className={isMobile ? "w-full" : ""}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveInput} 
+              disabled={inputMaterialMutation.isPending || inputItems.length === 0}
+              className={isMobile ? "w-full" : ""}
+            >
+              {inputMaterialMutation.isPending ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
