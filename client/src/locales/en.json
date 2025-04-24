@@ -43,7 +43,12 @@
       "success": "Success",
       "delete_success": "Item deleted successfully",
       "delete_error": "Error deleting item",
-      "delete_confirmation_message": "Are you sure you want to delete this {{item}}? This action cannot be undone."
+      "delete_confirmation": "Are you sure?",
+      "delete_confirmation_message": "Are you sure you want to delete this {{item}}? This action cannot be undone.",
+      "refresh": "Refresh",
+      "back": "Back",
+      "print": "Print",
+      "add": "Add"
     },
     "auth": {
       "username": "Username",
@@ -138,7 +143,12 @@
         "description": "Manage product categories for organization",
         "id": "ID",
         "name": "Name",
-        "code": "Code"
+        "code": "Code",
+        "add": "Add Category",
+        "edit": "Edit Category",
+        "add_description": "Create a new product category",
+        "edit_description": "Modify existing category details",
+        "no_categories": "No categories found"
       },
       "products": {
         "title": "Products",
