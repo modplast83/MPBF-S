@@ -49,7 +49,9 @@
       "back": "Back",
       "print": "Print",
       "add": "Add",
-      "start": "Start"
+      "start": "Start",
+      "close": "Close",
+      "saving": "Saving..."
     },
     "auth": {
       "username": "Username",
