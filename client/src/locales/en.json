@@ -51,7 +51,9 @@
       "add": "Add",
       "start": "Start",
       "close": "Close",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "view": "View",
+      "view_details": "View Details"
     },
     "auth": {
       "username": "Username",

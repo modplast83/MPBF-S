@@ -214,7 +214,7 @@ export default function OrdersIndex() {
               </CardContent>
               <CardFooter className="p-2 pt-0 flex justify-between items-center">
                 <span className="text-primary-500 text-xs flex items-center">
-                  {t("common.view_details")}
+                  {t("common.view")}
                   <span className="material-icons text-xs ml-1">arrow_forward</span>
                 </span>
                 <Button 
