@@ -10,7 +10,8 @@ import {
   insertRawMaterialSchema, insertFinalProductSchema,
   insertSmsMessageSchema, InsertSmsMessage,
   insertMixMaterialSchema, insertMixItemSchema,
-  insertPermissionSchema
+  insertPermissionSchema, insertMaterialInputSchema,
+  insertMaterialInputItemSchema
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
