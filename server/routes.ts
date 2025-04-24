@@ -2197,6 +2197,193 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Performance metrics endpoint for dashboard optimization
+  app.get("/api/performance-metrics", requireAuth, async (_req: Request, res: Response) => {
+    try {
+      const rolls = await storage.getRolls();
+      const orders = await storage.getOrders();
+      const jobOrders = await storage.getJobOrders();
+      const qualityChecks = await storage.getQualityChecks();
+      
+      // Calculate processing times
+      const rollProcessingTimes = rolls
+        .filter(roll => roll.createdAt && (roll.printedAt || roll.cutAt))
+        .map(roll => {
+          // Calculate processing time for different stages
+          const extrusionToNextStage = roll.printedAt ? 
+            (new Date(roll.printedAt).getTime() - new Date(roll.createdAt).getTime()) : 
+            (roll.cutAt ? (new Date(roll.cutAt).getTime() - new Date(roll.createdAt).getTime()) : 0);
+          
+          // Calculate printing to cutting if available
+          const printingToCutting = (roll.printedAt && roll.cutAt) ? 
+            (new Date(roll.cutAt).getTime() - new Date(roll.printedAt).getTime()) : 0;
+          
+          return {
+            rollId: roll.id,
+            jobOrderId: roll.jobOrderId,
+            extrusionToNextStage: extrusionToNextStage / (1000 * 60 * 60), // hours
+            printingToCutting: printingToCutting / (1000 * 60 * 60), // hours
+            totalProcessingTime: (extrusionToNextStage + printingToCutting) / (1000 * 60 * 60), // hours
+            currentStage: roll.currentStage,
+            status: roll.status,
+            extrudingQty: roll.extrudingQty || 0,
+            printingQty: roll.printingQty || 0,
+            cuttingQty: roll.cuttingQty || 0,
+            wasteQty: roll.wasteQty || 0,
+            wastePercentage: roll.wastePercentage || 0
+          };
+        });
+      
+      // Calculate average processing times
+      const avgExtrusionToNextStage = rollProcessingTimes.length > 0 ? 
+        rollProcessingTimes.reduce((sum, item) => sum + item.extrusionToNextStage, 0) / rollProcessingTimes.length : 0;
+      
+      const avgPrintingToCutting = rollProcessingTimes.filter(item => item.printingToCutting > 0).length > 0 ?
+        rollProcessingTimes.reduce((sum, item) => sum + item.printingToCutting, 0) / 
+        rollProcessingTimes.filter(item => item.printingToCutting > 0).length : 0;
+      
+      const avgTotalProcessingTime = rollProcessingTimes.length > 0 ?
+        rollProcessingTimes.reduce((sum, item) => sum + item.totalProcessingTime, 0) / rollProcessingTimes.length : 0;
+      
+      // Calculate waste statistics
+      const totalWasteQty = rollProcessingTimes.reduce((sum, item) => sum + item.wasteQty, 0);
+      const totalExtrudingQty = rollProcessingTimes.reduce((sum, item) => sum + item.extrudingQty, 0);
+      const overallWastePercentage = totalExtrudingQty > 0 ? (totalWasteQty / totalExtrudingQty) * 100 : 0;
+      
+      // Calculate order fulfillment time
+      const completedOrders = orders.filter(order => order.status === "completed");
+      const orderFulfillmentTimes = completedOrders.map(order => {
+        const orderJobOrders = jobOrders.filter(jo => jo.orderId === order.id);
+        const orderRolls = rolls.filter(roll => 
+          orderJobOrders.some(jo => jo.id === roll.jobOrderId) && roll.status === "completed"
+        );
+        
+        // Find earliest and latest timestamps for this order
+        const timestamps = orderRolls
+          .flatMap(roll => [
+            roll.createdAt ? new Date(roll.createdAt).getTime() : null,
+            roll.cutAt ? new Date(roll.cutAt).getTime() : null
+          ])
+          .filter(ts => ts !== null) as number[];
+        
+        if (timestamps.length > 0) {
+          const earliestTimestamp = Math.min(...timestamps);
+          const latestTimestamp = Math.max(...timestamps);
+          return {
+            orderId: order.id,
+            fulfillmentTime: (latestTimestamp - earliestTimestamp) / (1000 * 60 * 60 * 24) // days
+          };
+        }
+        return null;
+      }).filter(item => item !== null) as { orderId: number, fulfillmentTime: number }[];
+      
+      const avgOrderFulfillmentTime = orderFulfillmentTimes.length > 0 ?
+        orderFulfillmentTimes.reduce((sum, item) => sum + item.fulfillmentTime, 0) / orderFulfillmentTimes.length : 0;
+      
+      // Calculate quality metrics
+      const totalQualityChecks = qualityChecks.length;
+      const failedQualityChecks = qualityChecks.filter(check => check.status === "failed").length;
+      const qualityFailureRate = totalQualityChecks > 0 ? (failedQualityChecks / totalQualityChecks) * 100 : 0;
+      
+      // Mobile performance metrics
+      const recentRolls = rolls
+        .filter(roll => roll.createdAt)
+        .sort((a, b) => 
+          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        )
+        .slice(0, 20);
+      
+      const recentProcessingTimes = recentRolls
+        .filter(roll => roll.createdAt && (roll.printedAt || roll.cutAt))
+        .map(roll => {
+          const extrusionToNextStage = roll.printedAt ? 
+            (new Date(roll.printedAt).getTime() - new Date(roll.createdAt).getTime()) : 
+            (roll.cutAt ? (new Date(roll.cutAt).getTime() - new Date(roll.createdAt).getTime()) : 0);
+          
+          return {
+            rollId: roll.id,
+            processingTime: extrusionToNextStage / (1000 * 60 * 60), // hours
+            stage: roll.currentStage,
+            date: roll.createdAt
+          };
+        });
+        
+      // Calculate throughput - rolls per day over time
+      const calculateThroughput = (rolls: any[]) => {
+        // Get completed rolls with timestamps
+        const completedRolls = rolls.filter(r => r.status === "completed" && r.cutAt);
+        
+        if (completedRolls.length === 0) return [];
+        
+        // Sort by completion date
+        completedRolls.sort((a, b) => 
+          new Date(a.cutAt || 0).getTime() - new Date(b.cutAt || 0).getTime()
+        );
+        
+        // Group by day
+        const rollsByDay = completedRolls.reduce((acc, roll) => {
+          const date = new Date(roll.cutAt || 0);
+          const dateKey = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+          
+          if (!acc[dateKey]) {
+            acc[dateKey] = [];
+          }
+          
+          acc[dateKey].push(roll);
+          return acc;
+        }, {} as Record<string, any[]>);
+        
+        // Convert to array format
+        return Object.entries(rollsByDay).map(([date, dayRolls]) => ({
+          date,
+          count: dayRolls.length,
+          totalWeight: dayRolls.reduce((sum, r) => sum + (r.cuttingQty || 0), 0)
+        }));
+      };
+      
+      // Return the metrics
+      res.json({
+        processingTimes: {
+          avgExtrusionToNextStage,
+          avgPrintingToCutting,
+          avgTotalProcessingTime,
+          recentProcessingTimes
+        },
+        wasteMetrics: {
+          totalWasteQty,
+          overallWastePercentage,
+          rollProcessingTimes: rollProcessingTimes.map(item => ({
+            rollId: item.rollId,
+            wasteQty: item.wasteQty,
+            wastePercentage: item.wastePercentage
+          }))
+        },
+        orderMetrics: {
+          avgOrderFulfillmentTime,
+          orderFulfillmentTimes
+        },
+        qualityMetrics: {
+          totalQualityChecks,
+          failedQualityChecks,
+          qualityFailureRate
+        },
+        rollsData: rollProcessingTimes,
+        throughput: calculateThroughput(rolls),
+        // Mobile-specific metrics (more summarized)
+        mobileMetrics: {
+          avgProcessingTime: avgTotalProcessingTime,
+          avgOrderFulfillment: avgOrderFulfillmentTime,
+          wastePercentage: overallWastePercentage,
+          qualityFailureRate,
+          recentProcessingTimes
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching performance metrics:", error);
+      res.status(500).json({ message: "Failed to fetch performance metrics" });
+    }
+  });
+  
   app.delete("/api/mix-items/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
