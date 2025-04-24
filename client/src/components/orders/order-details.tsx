@@ -8,6 +8,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,6 +41,7 @@ interface OrderDetailsProps {
 
 export function OrderDetails({ orderId }: OrderDetailsProps) {
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [rollDialogOpen, setRollDialogOpen] = useState(false);
   const [jobOrderDialogOpen, setJobOrderDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -634,153 +636,320 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
                 Add Job Order
               </Button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary-50 text-secondary-600 border-b border-secondary-100">
-                  <tr>
-                    <th className="py-3 px-4 text-left">Product</th>
-                    <th className="py-3 px-4 text-left">Size</th>
-                    <th className="py-3 px-4 text-left">Thickness</th>
-                    <th className="py-3 px-4 text-left">Material</th>
-                    <th className="py-3 px-4 text-left">Batch</th>
-                    <th className="py-3 px-4 text-left">Qty (Kg)</th>
-                    <th className="py-3 px-4 text-left">Printed</th>
-                    <th className="py-3 px-4 text-left">Cylinder (Inch)</th>
-                    <th className="py-3 px-4 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="text-secondary-800">
-                  {jobOrders?.map(jobOrder => {
+            
+            {isMobile ? (
+              // Mobile view - card layout
+              <div className="space-y-4">
+                {jobOrders && jobOrders.length > 0 ? (
+                  jobOrders.map(jobOrder => {
                     const product = getCustomerProduct(jobOrder);
-                    // Get item name
                     const item = items?.find(i => i.id === product?.itemId);
-                    // Get master batch name
                     const masterBatch = masterBatches?.find(mb => mb.id === product?.masterBatchId);
                     
                     return (
-                      <tr key={jobOrder.id} className="border-b border-secondary-100">
-                        <td className="py-3 px-4">{item?.name || "N/A"}</td>
-                        <td className="py-3 px-4">{product?.sizeCaption || "N/A"}</td>
-                        <td className="py-3 px-4">{product?.thickness || "N/A"}</td>
-                        <td className="py-3 px-4">{product?.rawMaterial || "N/A"}</td>
-                        <td className="py-3 px-4">{masterBatch?.name || "N/A"}</td>
-                        <td className="py-3 px-4">{jobOrder.quantity}</td>
-                        <td className="py-3 px-4">{product?.printed || "N/A"}</td>
-                        <td className="py-3 px-4">{product?.printingCylinder || "0"}</td>
-                        <td className="py-3 px-4 flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleOpenRollDialog(jobOrder)}
-                          >
-                            <span className="material-icons text-sm">add</span>
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditJobOrder(jobOrder)}
-                          >
-                            <span className="material-icons text-sm">edit</span>
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-error-500 hover:text-error-700"
-                            onClick={() => handleDeleteJobOrder(jobOrder)}
-                          >
-                            <span className="material-icons text-sm">delete</span>
-                          </Button>
+                      <div key={jobOrder.id} className="bg-white border rounded-lg shadow-sm p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <h4 className="font-semibold">{item?.name || "Unknown Item"}</h4>
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 rounded-full"
+                              onClick={() => handleOpenRollDialog(jobOrder)}
+                            >
+                              <span className="material-icons text-sm">add</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 rounded-full"
+                              onClick={() => handleEditJobOrder(jobOrder)}
+                            >
+                              <span className="material-icons text-sm">edit</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 rounded-full text-error-500"
+                              onClick={() => handleDeleteJobOrder(jobOrder)}
+                            >
+                              <span className="material-icons text-sm">delete</span>
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <p className="text-secondary-500">Size:</p>
+                            <p className="font-medium">{product?.sizeCaption || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Qty (Kg):</p>
+                            <p className="font-medium">{jobOrder.quantity}</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Thickness:</p>
+                            <p className="font-medium">{product?.thickness || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Material:</p>
+                            <p className="font-medium">{product?.rawMaterial || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Batch:</p>
+                            <p className="font-medium">{masterBatch?.name || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Printed:</p>
+                            <p className="font-medium">{product?.printed || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Cylinder (Inch):</p>
+                            <p className="font-medium">{product?.printingCylinder || "0"}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="bg-white border rounded-lg p-6 text-center text-secondary-500">
+                    No job orders found for this order. Click "Add Job Order" to create one.
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Desktop view - table layout
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-secondary-50 text-secondary-600 border-b border-secondary-100">
+                    <tr>
+                      <th className="py-3 px-4 text-left">Product</th>
+                      <th className="py-3 px-4 text-left">Size</th>
+                      <th className="py-3 px-4 text-left">Thickness</th>
+                      <th className="py-3 px-4 text-left">Material</th>
+                      <th className="py-3 px-4 text-left">Batch</th>
+                      <th className="py-3 px-4 text-left">Qty (Kg)</th>
+                      <th className="py-3 px-4 text-left">Printed</th>
+                      <th className="py-3 px-4 text-left">Cylinder (Inch)</th>
+                      <th className="py-3 px-4 text-left">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-secondary-800">
+                    {jobOrders?.map(jobOrder => {
+                      const product = getCustomerProduct(jobOrder);
+                      // Get item name
+                      const item = items?.find(i => i.id === product?.itemId);
+                      // Get master batch name
+                      const masterBatch = masterBatches?.find(mb => mb.id === product?.masterBatchId);
+                      
+                      return (
+                        <tr key={jobOrder.id} className="border-b border-secondary-100">
+                          <td className="py-3 px-4">{item?.name || "N/A"}</td>
+                          <td className="py-3 px-4">{product?.sizeCaption || "N/A"}</td>
+                          <td className="py-3 px-4">{product?.thickness || "N/A"}</td>
+                          <td className="py-3 px-4">{product?.rawMaterial || "N/A"}</td>
+                          <td className="py-3 px-4">{masterBatch?.name || "N/A"}</td>
+                          <td className="py-3 px-4">{jobOrder.quantity}</td>
+                          <td className="py-3 px-4">{product?.printed || "N/A"}</td>
+                          <td className="py-3 px-4">{product?.printingCylinder || "0"}</td>
+                          <td className="py-3 px-4 flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleOpenRollDialog(jobOrder)}
+                            >
+                              <span className="material-icons text-sm">add</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditJobOrder(jobOrder)}
+                            >
+                              <span className="material-icons text-sm">edit</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-error-500 hover:text-error-700"
+                              onClick={() => handleDeleteJobOrder(jobOrder)}
+                            >
+                              <span className="material-icons text-sm">delete</span>
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {(!jobOrders || jobOrders.length === 0) && (
+                      <tr>
+                        <td colSpan={9} className="py-4 text-center text-secondary-500">
+                          No job orders found for this order. Click "Add Job Order" to create one.
                         </td>
                       </tr>
-                    );
-                  })}
-                  {(!jobOrders || jobOrders.length === 0) && (
-                    <tr>
-                      <td colSpan={9} className="py-4 text-center text-secondary-500">
-                        No job orders found for this order. Click "Add Job Order" to create one.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
           
           {/* Rolls */}
           <div>
             <h4 className="font-medium text-lg mb-4">Roll Status</h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary-50 text-secondary-600 border-b border-secondary-100">
-                  <tr>
-                    <th className="py-3 px-4 text-left">Roll ID</th>
-                    <th className="py-3 px-4 text-left">Product</th>
-                    <th className="py-3 px-4 text-left">Extrusion Qty</th>
-                    <th className="py-3 px-4 text-left">Printing Qty</th>
-                    <th className="py-3 px-4 text-left">Cutting Qty</th>
-                    <th className="py-3 px-4 text-left">Current Stage</th>
-                    <th className="py-3 px-4 text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="text-secondary-800">
-                  {orderRolls.length > 0 ? (
-                    orderRolls.map(roll => {
-                      const jobOrder = jobOrders?.find(jo => jo.id === roll.jobOrderId);
-                      const product = jobOrder 
-                        ? getCustomerProduct(jobOrder)
-                        : null;
-                      // Get item name
-                      const item = items?.find(i => i.id === product?.itemId);
-                      
-                      return (
-                        <tr key={roll.id} className="border-b border-secondary-100">
-                          <td className="py-3 px-4">{roll.id}</td>
-                          <td className="py-3 px-4">{item?.name || "N/A"}</td>
-                          <td className="py-3 px-4">{roll.extrudingQty || 0}</td>
-                          <td className="py-3 px-4">{roll.printingQty || 0}</td>
-                          <td className="py-3 px-4">{roll.cuttingQty || 0}</td>
-                          <td className="py-3 px-4">
-                            <StatusBadge status={roll.currentStage} />
-                          </td>
-                          <td className="py-3 px-4">
+            
+            {isMobile ? (
+              // Mobile view - card layout
+              <div className="space-y-4">
+                {orderRolls.length > 0 ? (
+                  orderRolls.map(roll => {
+                    const jobOrder = jobOrders?.find(jo => jo.id === roll.jobOrderId);
+                    const product = jobOrder ? getCustomerProduct(jobOrder) : null;
+                    const item = items?.find(i => i.id === product?.itemId);
+                    
+                    return (
+                      <div key={roll.id} className="bg-white border rounded-lg shadow-sm p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <h4 className="font-semibold">{roll.id}</h4>
+                          <div className="flex items-center space-x-2">
                             <StatusBadge status={roll.status} />
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <p className="text-secondary-500">Product:</p>
+                            <p className="font-medium">{item?.name || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Stage:</p>
+                            <StatusBadge status={roll.currentStage} />
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Extrusion Qty:</p>
+                            <p className="font-medium">{roll.extrudingQty || 0}</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Printing Qty:</p>
+                            <p className="font-medium">{roll.printingQty || 0}</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary-500">Cutting Qty:</p>
+                            <p className="font-medium">{roll.cuttingQty || 0}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="bg-white border rounded-lg p-6 text-center text-secondary-500">
+                    No rolls created for this order yet
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Desktop view - table layout
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-secondary-50 text-secondary-600 border-b border-secondary-100">
                     <tr>
-                      <td colSpan={7} className="py-6 text-center text-secondary-500">
-                        No rolls created for this order yet
-                      </td>
+                      <th className="py-3 px-4 text-left">Roll ID</th>
+                      <th className="py-3 px-4 text-left">Product</th>
+                      <th className="py-3 px-4 text-left">Extrusion Qty</th>
+                      <th className="py-3 px-4 text-left">Printing Qty</th>
+                      <th className="py-3 px-4 text-left">Cutting Qty</th>
+                      <th className="py-3 px-4 text-left">Current Stage</th>
+                      <th className="py-3 px-4 text-left">Status</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="text-secondary-800">
+                    {orderRolls.length > 0 ? (
+                      orderRolls.map(roll => {
+                        const jobOrder = jobOrders?.find(jo => jo.id === roll.jobOrderId);
+                        const product = jobOrder 
+                          ? getCustomerProduct(jobOrder)
+                          : null;
+                        // Get item name
+                        const item = items?.find(i => i.id === product?.itemId);
+                        
+                        return (
+                          <tr key={roll.id} className="border-b border-secondary-100">
+                            <td className="py-3 px-4">{roll.id}</td>
+                            <td className="py-3 px-4">{item?.name || "N/A"}</td>
+                            <td className="py-3 px-4">{roll.extrudingQty || 0}</td>
+                            <td className="py-3 px-4">{roll.printingQty || 0}</td>
+                            <td className="py-3 px-4">{roll.cuttingQty || 0}</td>
+                            <td className="py-3 px-4">
+                              <StatusBadge status={roll.currentStage} />
+                            </td>
+                            <td className="py-3 px-4">
+                              <StatusBadge status={roll.status} />
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className="py-6 text-center text-secondary-500">
+                          No rolls created for this order yet
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </CardContent>
         
-        <CardFooter className="flex justify-end space-x-3">
-          <Button 
-            variant="outline"
-            onClick={() => handlePrintOrder()}
-          >
-            <span className="material-icons text-sm mr-1">print</span>
-            Print Order
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => updateOrderMutation.mutate("completed")}
-            disabled={updateOrderMutation.isPending || order.status === "completed"}
-          >
-            Mark as Completed
-          </Button>
-          <Link href="/orders">
-            <Button variant="outline">
-              Back to Orders
-            </Button>
-          </Link>
+        <CardFooter className={`${isMobile ? 'flex-col space-y-3' : 'flex justify-end space-x-3'}`}>
+          {isMobile ? (
+            <>
+              <Button 
+                variant="outline"
+                className="w-full justify-center"
+                onClick={() => handlePrintOrder()}
+              >
+                <span className="material-icons text-sm mr-1">print</span>
+                Print Order
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-center"
+                onClick={() => updateOrderMutation.mutate("completed")}
+                disabled={updateOrderMutation.isPending || order.status === "completed"}
+              >
+                <span className="material-icons text-sm mr-1">check_circle</span>
+                Mark as Completed
+              </Button>
+              <Link href="/orders" className="w-full">
+                <Button variant="outline" className="w-full justify-center">
+                  <span className="material-icons text-sm mr-1">arrow_back</span>
+                  Back to Orders
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Button 
+                variant="outline"
+                onClick={() => handlePrintOrder()}
+              >
+                <span className="material-icons text-sm mr-1">print</span>
+                Print Order
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => updateOrderMutation.mutate("completed")}
+                disabled={updateOrderMutation.isPending || order.status === "completed"}
+              >
+                Mark as Completed
+              </Button>
+              <Link href="/orders">
+                <Button variant="outline">
+                  Back to Orders
+                </Button>
+              </Link>
+            </>
+          )}
         </CardFooter>
       </Card>
       
