@@ -408,11 +408,57 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  // Helper method to update job order's production quantity
+  private async updateJobOrderProductionQty(jobOrderId: number): Promise<void> {
+    try {
+      // Get all completed rolls for this job order
+      const jobOrderRolls = await db.select({
+        cuttingQty: rolls.cuttingQty
+      })
+      .from(rolls)
+      .where(and(
+        eq(rolls.jobOrderId, jobOrderId),
+        eq(rolls.status, "completed"),
+        eq(rolls.currentStage, "cutting")
+      ));
+      
+      // Calculate the total production quantity
+      const productionQty = jobOrderRolls.reduce((total, roll) => {
+        return total + (roll.cuttingQty || 0);
+      }, 0);
+      
+      console.log(`Updating job order ${jobOrderId} production quantity to ${productionQty} kg`);
+      
+      // Update the job order with the new production quantity
+      await db.update(jobOrders)
+        .set({ productionQty })
+        .where(eq(jobOrders.id, jobOrderId));
+    } catch (error) {
+      console.error(`Error updating job order production quantity: ${error}`);
+    }
+  }
+
   async updateRoll(id: string, rollUpdate: Partial<Roll>): Promise<Roll | undefined> {
     const result = await db.update(rolls)
       .set(rollUpdate)
       .where(eq(rolls.id, id))
       .returning();
+    
+    // If we're updating cutting quantity or status for a cutting roll,
+    // we should recalculate the job order's production quantity
+    if (result.length > 0) {
+      const updatedRoll = result[0];
+      
+      // If this is a cutting stage roll that's being completed
+      // or if the cutting quantity is being updated, update the job order's production quantity
+      if (
+        (updatedRoll.currentStage === "cutting" && rollUpdate.status === "completed") ||
+        (updatedRoll.currentStage === "cutting" && rollUpdate.cuttingQty !== undefined)
+      ) {
+        await this.updateJobOrderProductionQty(updatedRoll.jobOrderId);
+      }
+    }
+    
     return result[0];
   }
 
