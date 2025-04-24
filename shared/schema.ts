@@ -361,3 +361,32 @@ export const insertMixItemSchema = createInsertSchema(mixItems).omit({
 });
 export type InsertMixItem = z.infer<typeof insertMixItemSchema>;
 export type MixItem = typeof mixItems.$inferSelect;
+
+// Material Inputs table
+export const materialInputs = pgTable("material_inputs", {
+  id: serial("id").primaryKey(),
+  date: timestamp("date").defaultNow().notNull(),
+  userId: text("user_id").notNull().references(() => users.id), // User who performed the input
+  notes: text("notes"),
+});
+
+export const insertMaterialInputSchema = createInsertSchema(materialInputs).omit({ 
+  id: true, 
+  date: true 
+});
+export type InsertMaterialInput = z.infer<typeof insertMaterialInputSchema>;
+export type MaterialInput = typeof materialInputs.$inferSelect;
+
+// Material Input Items table
+export const materialInputItems = pgTable("material_input_items", {
+  id: serial("id").primaryKey(),
+  inputId: integer("input_id").notNull().references(() => materialInputs.id, { onDelete: "cascade" }),
+  rawMaterialId: integer("raw_material_id").notNull().references(() => rawMaterials.id),
+  quantity: doublePrecision("quantity").notNull(),
+});
+
+export const insertMaterialInputItemSchema = createInsertSchema(materialInputItems).omit({ 
+  id: true
+});
+export type InsertMaterialInputItem = z.infer<typeof insertMaterialInputItemSchema>;
+export type MaterialInputItem = typeof materialInputItems.$inferSelect;
