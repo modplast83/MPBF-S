@@ -22,7 +22,9 @@ import {
   MixMaterial, InsertMixMaterial, mixMaterials,
   MixItem, InsertMixItem, mixItems,
   MixMachine, InsertMixMachine, mixMachines,
-  Permission, InsertPermission, permissions
+  Permission, InsertPermission, permissions,
+  MaterialInput, InsertMaterialInput, materialInputs,
+  MaterialInputItem, InsertMaterialInputItem, materialInputItems
 } from '@shared/schema';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
@@ -991,6 +993,116 @@ export class DatabaseStorage implements IStorage {
     }
     
     return false;
+  }
+  
+  // Material Inputs methods
+  async getMaterialInputs(): Promise<MaterialInput[]> {
+    return await db.select().from(materialInputs).orderBy(desc(materialInputs.date));
+  }
+  
+  async getMaterialInput(id: number): Promise<MaterialInput | undefined> {
+    const result = await db.select().from(materialInputs).where(eq(materialInputs.id, id));
+    return result[0];
+  }
+  
+  async createMaterialInput(materialInput: InsertMaterialInput): Promise<MaterialInput> {
+    const result = await db.insert(materialInputs).values(materialInput).returning();
+    return result[0];
+  }
+  
+  async updateMaterialInput(id: number, materialInputUpdate: Partial<MaterialInput>): Promise<MaterialInput | undefined> {
+    const result = await db.update(materialInputs)
+      .set(materialInputUpdate)
+      .where(eq(materialInputs.id, id))
+      .returning();
+    return result[0];
+  }
+  
+  async deleteMaterialInput(id: number): Promise<boolean> {
+    // First, we need to get all items associated with this input
+    const items = await this.getMaterialInputItemsByInput(id);
+    
+    // For each item, we need to subtract the quantity from the raw material
+    for (const item of items) {
+      const rawMaterial = await this.getRawMaterial(item.rawMaterialId);
+      if (rawMaterial) {
+        const updatedQuantity = Math.max(0, (rawMaterial.quantity || 0) - item.quantity);
+        await this.updateRawMaterial(item.rawMaterialId, {
+          quantity: updatedQuantity,
+          lastUpdated: new Date()
+        });
+      }
+      
+      // Delete the input item
+      await db.delete(materialInputItems).where(eq(materialInputItems.id, item.id));
+    }
+    
+    // Finally, delete the material input itself
+    const result = await db.delete(materialInputs).where(eq(materialInputs.id, id)).returning();
+    return result.length > 0;
+  }
+  
+  // Material Input Items methods
+  async getMaterialInputItems(): Promise<MaterialInputItem[]> {
+    return await db.select().from(materialInputItems);
+  }
+  
+  async getMaterialInputItemsByInput(inputId: number): Promise<MaterialInputItem[]> {
+    return await db.select().from(materialInputItems).where(eq(materialInputItems.inputId, inputId));
+  }
+  
+  async getMaterialInputItem(id: number): Promise<MaterialInputItem | undefined> {
+    const result = await db.select().from(materialInputItems).where(eq(materialInputItems.id, id));
+    return result[0];
+  }
+  
+  async createMaterialInputItem(item: InsertMaterialInputItem): Promise<MaterialInputItem> {
+    const result = await db.insert(materialInputItems).values(item).returning();
+    return result[0];
+  }
+  
+  async updateMaterialInputItem(id: number, itemUpdate: Partial<MaterialInputItem>): Promise<MaterialInputItem | undefined> {
+    // If quantity is being updated, we need to update the raw material quantity as well
+    if (itemUpdate.quantity !== undefined) {
+      const currentItem = await this.getMaterialInputItem(id);
+      if (currentItem) {
+        const quantityDiff = itemUpdate.quantity - currentItem.quantity;
+        // Update the raw material quantity
+        const rawMaterial = await this.getRawMaterial(currentItem.rawMaterialId);
+        if (rawMaterial) {
+          const updatedQuantity = (rawMaterial.quantity || 0) + quantityDiff;
+          await this.updateRawMaterial(currentItem.rawMaterialId, {
+            quantity: updatedQuantity,
+            lastUpdated: new Date()
+          });
+        }
+      }
+    }
+    
+    const result = await db.update(materialInputItems)
+      .set(itemUpdate)
+      .where(eq(materialInputItems.id, id))
+      .returning();
+    return result[0];
+  }
+  
+  async deleteMaterialInputItem(id: number): Promise<boolean> {
+    // Get the current item to update the raw material quantity
+    const currentItem = await this.getMaterialInputItem(id);
+    if (currentItem) {
+      // Update the raw material quantity
+      const rawMaterial = await this.getRawMaterial(currentItem.rawMaterialId);
+      if (rawMaterial) {
+        const updatedQuantity = Math.max(0, (rawMaterial.quantity || 0) - currentItem.quantity);
+        await this.updateRawMaterial(currentItem.rawMaterialId, {
+          quantity: updatedQuantity,
+          lastUpdated: new Date()
+        });
+      }
+    }
+    
+    const result = await db.delete(materialInputItems).where(eq(materialInputItems.id, id)).returning();
+    return result.length > 0;
   }
   
   // End of class
