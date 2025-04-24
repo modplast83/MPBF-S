@@ -8,6 +8,8 @@ import { DataTable } from "@/components/ui/data-table";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { formatDateString, formatNumber } from "@/lib/utils";
 import { Order, JobOrder, Roll, CustomerProduct, Customer } from "@shared/schema";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Separator } from "@/components/ui/separator";
 
 // Simple line chart component
 function LineChart() {
@@ -23,6 +25,7 @@ function LineChart() {
 }
 
 export default function ReportsIndex() {
+  const isMobile = useIsMobile();
   const [reportType, setReportType] = useState("production");
   const [dateRange, setDateRange] = useState<{ start: Date | undefined; end: Date | undefined }>({
     start: undefined,
