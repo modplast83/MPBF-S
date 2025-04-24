@@ -543,7 +543,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                     disabled={isPrinting}
                   >
                     <span className="material-icons text-sm mr-1">print</span>
-                    {isPrinting ? t("production.roll_management.printing") : t("production.roll_management.print_label")}
+                    {t(isPrinting ? "production.roll_management.printing" : "production.roll_management.print_label")}
                   </Button>
                 </>
               )}
