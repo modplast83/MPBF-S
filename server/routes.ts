@@ -1135,7 +1135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const rollData: InsertRoll = {
         ...validatedData,
-        serialNumber: paddedSerialNumber,
+        rollSerial: paddedSerialNumber,
         id: `EX-${paddedJobOrderId}-${paddedSerialNumber}`,
         createdById: currentUserId,
         createdAt: new Date()

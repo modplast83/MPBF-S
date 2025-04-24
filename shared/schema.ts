@@ -147,7 +147,7 @@ export type JobOrder = typeof jobOrders.$inferSelect;
 export const rolls = pgTable("rolls", {
   id: text("id").primaryKey(), // ID
   jobOrderId: integer("job_order_id").notNull().references(() => jobOrders.id), // Job Order ID
-  serialNumber: text("roll_serial").notNull(), // Roll Serial
+  rollSerial: text("roll_serial").notNull(), // Roll Serial
   extrudingQty: doublePrecision("extruding_qty").default(0), // Extruding Qty
   printingQty: doublePrecision("printing_qty").default(0), // Printing Qty
   cuttingQty: doublePrecision("cutting_qty").default(0), // Cutting Qty
@@ -165,11 +165,11 @@ export const rolls = pgTable("rolls", {
 
 export const insertRollSchema = createInsertSchema(rolls);
 
-// Create a custom schema for roll creation API that makes id and serialNumber optional
+// Create a custom schema for roll creation API that makes id and rollSerial optional
 // since they'll be auto-generated on the server
 export const createRollSchema = insertRollSchema.omit({ 
   id: true, 
-  serialNumber: true 
+  rollSerial: true 
 });
 
 export type InsertRoll = z.infer<typeof insertRollSchema>;
