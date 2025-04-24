@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage } from "@/hooks/use-language";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -26,6 +28,8 @@ import {
 export default function MixMaterialsPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const { isRTL } = useLanguage();
   const [selectedMixId, setSelectedMixId] = useState<number | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -245,6 +249,95 @@ export default function MixMaterialsPage() {
       </div>
     );
   };
+  
+  // Mobile card view for mix materials
+  const renderMobileCards = () => {
+    if (!mixMaterials || mixMaterials.length === 0) {
+      return (
+        <div className="text-center py-8 px-4 bg-gray-50 rounded-md">
+          <span className="material-icons text-gray-300 text-3xl mb-2">science</span>
+          <p className="text-gray-500">{t('production.mix_materials.no_mixes')}</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-4">
+        {mixMaterials.map((mix) => (
+          <Card 
+            key={mix.id} 
+            className="overflow-hidden hover:shadow-md transition-all"
+            onClick={() => {
+              setSelectedMixId(mix.id);
+              setIsViewDialogOpen(true);
+            }}
+          >
+            <CardHeader className="p-3 pb-2 flex flex-row justify-between items-start bg-gray-50">
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="material-icons text-xs text-primary-500">science</span>
+                  <CardTitle className="text-sm font-semibold">
+                    {t('production.mix_materials.mix_id')}: {mix.id}
+                  </CardTitle>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {formatDateString(mix.mixDate.toString())}
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent className="p-3 pt-2">
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div>
+                  <p className="text-xs text-gray-500">{t('production.mix_materials.operator')}</p>
+                  <p className="text-sm font-medium">{mix.mixPerson}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{t('production.mix_materials.total_weight')}</p>
+                  <p className="text-sm font-medium">{mix.totalQuantity?.toFixed(2) || "0.00"} kg</p>
+                </div>
+              </div>
+              
+              <div className="mt-3 pt-2 flex justify-end items-center space-x-2 border-t border-gray-100">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    printMixLabel(mix.id);
+                  }}
+                  className="h-8 w-8 rounded-full text-primary-500 hover:text-primary-700 hover:bg-primary-50"
+                >
+                  <span className="material-icons text-sm">print</span>
+                </Button>
+                <Button 
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteMix(mix.id);
+                  }}
+                  className="h-8 w-8 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
+                >
+                  <span className="material-icons text-sm">delete</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+  
+  // Mobile loading state
+  const renderMobileLoadingState = () => {
+    return (
+      <div className="space-y-4 animate-pulse">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-32 bg-gray-100 rounded-lg"></div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -255,10 +348,10 @@ export default function MixMaterialsPage() {
             <DialogTrigger asChild>
               <Button className="flex items-center gap-1">
                 <span className="material-icons text-sm">add</span>
-                {t('production.mix_materials.new_mix')}
+                {isMobile ? "" : t('production.mix_materials.new_mix')}
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[550px]">
+            <DialogContent className={isMobile ? "max-w-[95vw] p-4 sm:p-6" : "sm:max-w-[550px]"}>
               <DialogHeader>
                 <DialogTitle>{t('production.mix_materials.new_mix')}</DialogTitle>
               </DialogHeader>
@@ -276,18 +369,36 @@ export default function MixMaterialsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('production.mix_materials.title')}</CardTitle>
+          <CardTitle className="flex justify-between items-center">
+            <span>{t('production.mix_materials.title')}</span>
+            {!isMobile && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetchMixes()}
+                className="ml-auto"
+              >
+                <span className="material-icons text-sm mr-1">refresh</span>
+                {t('common.refresh')}
+              </Button>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <DataTable 
-            data={mixMaterials || []}
-            columns={mixColumns}
-            isLoading={mixLoading}
-            onRowClick={(row) => {
-              setSelectedMixId(row.id);
-              setIsViewDialogOpen(true);
-            }}
-          />
+          {mixLoading ? (
+            isMobile ? renderMobileLoadingState() : <div className="h-32 bg-gray-100 rounded animate-pulse"></div>
+          ) : isMobile ? (
+            renderMobileCards()
+          ) : (
+            <DataTable 
+              data={mixMaterials || []}
+              columns={mixColumns as any}
+              onRowClick={(row) => {
+                setSelectedMixId(row.id);
+                setIsViewDialogOpen(true);
+              }}
+            />
+          )}
         </CardContent>
       </Card>
 
