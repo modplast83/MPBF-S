@@ -44,20 +44,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Desktop sidebar */}
-      {user && !isMobile && <Sidebar />}
+      {/* Desktop sidebar - fixed position */}
+      {user && !isMobile && <Sidebar isMobile={false} />}
       
       {/* Mobile sidebar as a sheet for better mobile experience */}
       {user && isMobile && (
         <Sheet open={isOpen} onOpenChange={handleMobileMenuToggle}>
           <SheetContent 
             side={isRTL ? "right" : "left"} 
-            className="p-0 m-0 border-0 shadow-xl w-[85%] max-w-[300px] h-full min-h-[100dvh] bg-gray-900 overflow-hidden"
+            className="p-0 m-0 border-0 shadow-xl w-[85%] max-w-[300px] h-full min-h-[100dvh] bg-transparent overflow-hidden"
           >
             <VisuallyHidden>
               <div id="mobile-sidebar-title">Navigation Menu</div>
             </VisuallyHidden>
-            <Sidebar onNavItemClick={() => setIsOpen(false)} />
+            <Sidebar isMobile={true} onNavItemClick={() => setIsOpen(false)} />
           </SheetContent>
         </Sheet>
       )}
