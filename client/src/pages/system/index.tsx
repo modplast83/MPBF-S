@@ -66,12 +66,19 @@ export default function SystemIndex() {
           icon="admin_panel_settings"
           path="/system/permissions"
         />
+        
+        <SettingCard
+          title="Initialize Admin"
+          description="Set up full access permissions for admin users"
+          icon="security"
+          path="/system/initialize-admin"
+        />
 
         <SettingCard
           title="SMS Management"
           description="Send and manage SMS messages, track status"
           icon="message"
-          path="/system/sms-management"
+          path="/system/sms"
         />
         
         <SettingCard

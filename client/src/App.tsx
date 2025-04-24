@@ -22,6 +22,7 @@ import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions";
 import ImportExport from "@/pages/system/import-export";
 import SmsIndex from "@/pages/system/sms/index";
+import InitializeAdmin from "@/pages/system/initialize-admin";
 import QualityIndex from "@/pages/quality/index";
 import QualityCheckTypes from "@/pages/quality/check-types";
 import QualityChecks from "@/pages/quality/checks";
@@ -75,6 +76,7 @@ function App() {
             <ProtectedRoute path="/system" component={SystemIndex} module="System Settings" />
             <ProtectedRoute path="/system/database" component={Database} module="Database" />
             <ProtectedRoute path="/system/permissions" component={Permissions} module="Permissions" />
+            <ProtectedRoute path="/system/initialize-admin" component={InitializeAdmin} module="Permissions" />
             <ProtectedRoute path="/system/import-export" component={ImportExport} module="Import & Export" />
             <ProtectedRoute path="/system/sms" component={SmsIndex} module="SMS Management" />
             <ProtectedRoute path="/tools" component={ToolsPage} module="Tools" />
