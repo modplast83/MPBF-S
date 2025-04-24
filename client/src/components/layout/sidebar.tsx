@@ -16,9 +16,10 @@ import { usePermissions } from "@/hooks/use-permissions";
 
 interface SidebarProps {
   onNavItemClick?: () => void;
+  isMobile?: boolean;
 }
 
-export default function Sidebar({ onNavItemClick }: SidebarProps) {
+export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarProps) {
   const [location] = useLocation();
   const { expanded, toggle } = useSidebar();
   const { isRTL } = useLanguage();
@@ -89,8 +90,9 @@ export default function Sidebar({ onNavItemClick }: SidebarProps) {
   return (
     <aside 
       className={cn(
-        "bg-gradient-to-b from-gray-900 to-black text-white h-full min-h-screen fixed top-0 z-50 flex flex-col transition-all duration-300 shadow-lg overflow-hidden",
+        "bg-gradient-to-b from-gray-900 to-black text-white h-full min-h-screen flex flex-col transition-all duration-300 shadow-lg overflow-hidden",
         expanded ? "w-[250px]" : "w-[64px]",
+        isMobile ? "relative" : "fixed top-0 z-50",
         isRTL ? "right-0" : "left-0"
       )}
     >
