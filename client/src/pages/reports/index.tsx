@@ -12,13 +12,17 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 
 // Simple line chart component
-function LineChart() {
+function LineChart({ isMobile = false }: { isMobile?: boolean }) {
   return (
-    <div className="h-80 flex items-center justify-center bg-secondary-50 rounded border border-dashed border-secondary-200">
-      <div className="text-center">
+    <div className={`${isMobile ? 'h-60' : 'h-80'} flex items-center justify-center bg-secondary-50 rounded border border-dashed border-secondary-200`}>
+      <div className="text-center px-4">
         <span className="material-icons text-4xl text-secondary-300">insert_chart</span>
-        <p className="mt-2 text-secondary-500">Production report chart shows here</p>
-        <p className="text-xs text-secondary-400 mt-1">This would be a real chart in production</p>
+        <p className={`mt-2 text-secondary-500 ${isMobile ? 'text-sm' : ''}`}>
+          Production report chart shows here
+        </p>
+        <p className="text-xs text-secondary-400 mt-1">
+          This would be a real chart in production
+        </p>
       </div>
     </div>
   );
@@ -131,7 +135,7 @@ export default function ReportsIndex() {
     ? getProductionReportData()
     : []; // For now only production report is implemented
 
-  // Report columns
+  // Report columns for desktop view
   const productionColumns = [
     { header: "Order ID", accessorKey: "id" },
     { header: "Date", accessorKey: "date" },
@@ -141,16 +145,76 @@ export default function ReportsIndex() {
     { 
       header: "Ordered (Kg)", 
       accessorKey: "ordered",
-      cell: (row: { ordered: number }) => formatNumber(row.ordered, 1),
+      cell: (row: any) => formatNumber(row.ordered, 1),
     },
     { 
       header: "Completed (Kg)", 
       accessorKey: "completed",
-      cell: (row: { completed: number }) => formatNumber(row.completed, 1),
+      cell: (row: any) => formatNumber(row.completed, 1),
     },
     { header: "Efficiency", accessorKey: "efficiency" },
     { header: "Status", accessorKey: "status" },
   ];
+  
+  // Mobile card view for report data
+  const renderMobileReportCards = () => {
+    if (!reportData || reportData.length === 0) {
+      return (
+        <div className="text-center p-4 bg-gray-50 rounded-md">
+          <p className="text-gray-500">No data available for the selected criteria.</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-4">
+        {reportData.map((row, index) => (
+          <Card key={index} className="overflow-hidden">
+            <CardHeader className="p-4 bg-gray-50">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-base font-medium">Order #{row.id}</CardTitle>
+                <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">{row.status}</span>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-gray-500">Date</p>
+                  <p className="text-sm font-medium">{row.date}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Customer</p>
+                  <p className="text-sm font-medium truncate">{row.customer}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Product</p>
+                  <p className="text-sm font-medium truncate">{row.product}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Size</p>
+                  <p className="text-sm font-medium">{row.size}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Ordered</p>
+                  <p className="text-sm font-medium">{formatNumber(row.ordered, 1)} Kg</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Completed</p>
+                  <p className="text-sm font-medium">{formatNumber(row.completed, 1)} Kg</p>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Efficiency</span>
+                  <span className="text-sm font-medium">{row.efficiency}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -203,7 +267,7 @@ export default function ReportsIndex() {
           </div>
           
           <div className="mb-6">
-            <LineChart />
+            <LineChart isMobile={isMobile} />
           </div>
           
           <div>
@@ -215,18 +279,28 @@ export default function ReportsIndex() {
                   : "Efficiency Summary"}
             </h3>
             
-            <DataTable 
-              data={reportData}
-              columns={productionColumns}
-            />
+            {isMobile ? (
+              renderMobileReportCards()
+            ) : (
+              <DataTable 
+                data={reportData}
+                columns={productionColumns as any}
+              />
+            )}
           </div>
           
-          <div className="flex justify-end mt-6">
-            <Button variant="outline" className="flex items-center">
+          <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'justify-end'} mt-6`}>
+            <Button 
+              variant="outline" 
+              className={`flex items-center justify-center ${isMobile ? 'w-full' : ''}`}
+            >
               <span className="material-icons text-sm mr-1">download</span>
               Export to Excel
             </Button>
-            <Button variant="outline" className="flex items-center ml-2">
+            <Button 
+              variant="outline" 
+              className={`flex items-center justify-center ${isMobile ? 'w-full' : 'ml-2'}`}
+            >
               <span className="material-icons text-sm mr-1">print</span>
               Print Report
             </Button>
