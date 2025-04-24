@@ -15,6 +15,7 @@ import {
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
 import { setupAuth } from "./auth";
+import { initializeAdminPermissions } from "./admin-permissions";
 
 // Extend the Request type to include express-fileupload properties
 declare global {
