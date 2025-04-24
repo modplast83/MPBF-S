@@ -14,7 +14,11 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { usePermissions } from "@/hooks/use-permissions";
 
-export default function Sidebar() {
+interface SidebarProps {
+  onNavItemClick?: () => void;
+}
+
+export default function Sidebar({ onNavItemClick }: SidebarProps) {
   const [location] = useLocation();
   const { expanded, toggle } = useSidebar();
   const { isRTL } = useLanguage();
@@ -159,7 +163,11 @@ export default function Sidebar() {
                             <Link 
                               key={subIndex} 
                               href={subItem.path}
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Close mobile menu if callback provided
+                                if (onNavItemClick) onNavItemClick();
+                              }}
                               className={cn(
                                 `flex items-center py-2 px-3 mx-3 my-1 rounded text-white hover:bg-gray-600/50 hover:text-white transition-colors text-sm ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
                                 isActive(subItem.path) && "bg-gray-600/50 text-white font-medium"
@@ -175,7 +183,11 @@ export default function Sidebar() {
                   ) : (
                     <Link 
                       href={item.path}
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Close mobile menu if callback provided
+                        if (onNavItemClick) onNavItemClick();
+                      }}
                       className={cn(
                         `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
                         isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
