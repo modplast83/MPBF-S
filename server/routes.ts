@@ -2584,31 +2584,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/material-inputs", requireAuth, async (req: Request, res: Response) => {
     try {
-      // Validate the input data
-      const validatedData = insertMaterialInputSchema.parse(req.body);
-
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Prepare the validated data
+      const inputData = {
+        userId: req.user.id,
+        notes: req.body.notes
+      };
+      
       // Create the material input
-      const materialInput = await storage.createMaterialInput({
-        ...validatedData,
-        userId: req.user?.id || ''
-      });
+      const materialInput = await storage.createMaterialInput(inputData);
 
       // Add items if provided
       if (req.body.items && Array.isArray(req.body.items)) {
         for (const itemData of req.body.items) {
-          const validatedItemData = insertMaterialInputItemSchema.parse({
-            ...itemData,
-            inputId: materialInput.id
-          });
+          // Prepare the item data
+          const inputItemData = {
+            inputId: materialInput.id,
+            rawMaterialId: itemData.rawMaterialId,
+            quantity: itemData.quantity
+          };
           
           // Create the input item
-          await storage.createMaterialInputItem(validatedItemData);
+          await storage.createMaterialInputItem(inputItemData);
           
           // Update the raw material quantity
-          const rawMaterial = await storage.getRawMaterial(validatedItemData.rawMaterialId);
+          const rawMaterial = await storage.getRawMaterial(inputItemData.rawMaterialId);
           if (rawMaterial) {
-            const updatedQuantity = (rawMaterial.quantity || 0) + validatedItemData.quantity;
-            await storage.updateRawMaterial(validatedItemData.rawMaterialId, {
+            const updatedQuantity = (rawMaterial.quantity || 0) + inputItemData.quantity;
+            await storage.updateRawMaterial(inputItemData.rawMaterialId, {
               quantity: updatedQuantity,
               lastUpdated: new Date()
             });
