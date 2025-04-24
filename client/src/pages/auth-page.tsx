@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
-import { Redirect } from "wouter";
+import { Redirect, useLocation } from "wouter";
 import { Loader2, Globe } from "lucide-react";
 // Import company logo
 // Use inline image to avoid import issues
@@ -47,6 +47,16 @@ export default function AuthPage() {
   const { user, isLoading, loginMutation, registerMutation } = useAuth();
   const { t } = useTranslation();
   const { language, setLanguage, isRTL } = useLanguage();
+  const [, setLocation] = useLocation();
+  
+  // Effect to handle redirection when user authentication state changes
+  useEffect(() => {
+    if (user) {
+      const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
+      sessionStorage.removeItem("redirectAfterLogin");
+      setLocation(redirectPath);
+    }
+  }, [user, setLocation]);
 
   // Create login form
   const loginForm = useForm<LoginFormValues>({

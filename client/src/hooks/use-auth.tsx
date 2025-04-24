@@ -47,9 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Update user data in cache
       queryClient.setQueryData(["/api/user"], user);
       
-      // Invalidate all queries to force refetch after login
-      queryClient.invalidateQueries();
-      
       toast({
         title: "Login successful",
         description: `Welcome back, ${user.name}!`,
@@ -59,7 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Redirect to home page or saved redirect location
       const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
       sessionStorage.removeItem("redirectAfterLogin");
-      setLocation(redirectPath);
+      
+      // Use setTimeout to ensure the redirect happens after React Query has processed cache updates
+      setTimeout(() => {
+        setLocation(redirectPath);
+      }, 0);
+      
+      // Invalidate all queries to force refetch after login (but after redirect)
+      queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
       toast({
@@ -79,9 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Update user data in cache
       queryClient.setQueryData(["/api/user"], user);
       
-      // Invalidate all queries to force refetch after registration
-      queryClient.invalidateQueries();
-      
       toast({
         title: "Registration successful",
         description: `Welcome, ${user.name}!`,
@@ -89,7 +90,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // Redirect to home page after registration
-      setLocation("/");
+      setTimeout(() => {
+        setLocation("/");
+      }, 0);
+      
+      // Invalidate all queries to force refetch after registration (but after redirect)
+      queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
       toast({
