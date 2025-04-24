@@ -1,335 +1,325 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { API_ENDPOINTS } from "@/lib/constants";
-import { apiRequest } from "@/lib/queryClient";
-import { formatDateString } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
-import { FinalProduct, JobOrder, CustomerProduct, Order, Customer } from "@shared/schema";
+import { Loader2, Search, CheckCircle, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-export default function FinalProducts() {
-  const queryClient = useQueryClient();
-  const [formOpen, setFormOpen] = useState(false);
-  const [editProduct, setEditProduct] = useState<FinalProduct | null>(null);
-  const [deletingProduct, setDeletingProduct] = useState<FinalProduct | null>(null);
-  
-  // Form state
-  const [jobOrderId, setJobOrderId] = useState<number>(0);
+interface JobOrder {
+  id: number;
+  orderId: number;
+  customerProductId: number;
+  quantity: number;
+  productionQty: number;
+  status: string;
+  customerId: string;
+  customerName?: string;
+  productName?: string;
+  orderDate?: string;
+}
+
+interface FinalProduct {
+  id: number;
+  jobOrderId: number;
+  quantity: number;
+  completedDate: string;
+  status: string;
+}
+
+export default function FinalProductsPage() {
+  const { t } = useTranslation();
+  const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [quantity, setQuantity] = useState<number>(0);
-  const [status, setStatus] = useState("in-stock");
 
-  // Fetch final products and related data
-  const { data: finalProducts, isLoading } = useQuery<FinalProduct[]>({
-    queryKey: [API_ENDPOINTS.FINAL_PRODUCTS],
+  // Fetch job orders with production quantity
+  const { data: jobOrders = [], isLoading } = useQuery<JobOrder[]>({
+    queryKey: ['/api/job-orders/with-production'],
+    refetchOnWindowFocus: false,
   });
 
-  const { data: jobOrders } = useQuery<JobOrder[]>({
-    queryKey: [API_ENDPOINTS.JOB_ORDERS],
+  // Fetch final products to know which job orders have been confirmed
+  const { data: finalProducts = [] } = useQuery<FinalProduct[]>({
+    queryKey: ['/api/final-products'],
+    refetchOnWindowFocus: false,
   });
 
-  const { data: customerProducts } = useQuery<CustomerProduct[]>({
-    queryKey: [API_ENDPOINTS.CUSTOMER_PRODUCTS],
-  });
-
-  const { data: orders } = useQuery<Order[]>({
-    queryKey: [API_ENDPOINTS.ORDERS],
-  });
-
-  const { data: customers } = useQuery<Customer[]>({
-    queryKey: [API_ENDPOINTS.CUSTOMERS],
-  });
-
-  // Create/Update mutation
-  const saveMutation = useMutation({
-    mutationFn: async (data: { jobOrderId: number; quantity: number; status: string }) => {
-      if (editProduct) {
-        await apiRequest("PUT", `${API_ENDPOINTS.FINAL_PRODUCTS}/${editProduct.id}`, data);
-      } else {
-        await apiRequest("POST", API_ENDPOINTS.FINAL_PRODUCTS, data);
-      }
-    },
+  // Create final product mutation
+  const createFinalProduct = useMutation({
+    mutationFn: (data: { jobOrderId: number; quantity: number }) => 
+      apiRequest('/api/final-products', 'POST', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.FINAL_PRODUCTS] });
       toast({
-        title: `Final Product ${editProduct ? "Updated" : "Created"}`,
-        description: `The final product has been ${editProduct ? "updated" : "created"} successfully.`,
+        title: t("success"),
+        description: t("finalProduct.confirmSuccess"),
       });
-      handleCloseForm();
+      setConfirmOpen(false);
+      setSelectedJobOrder(null);
+      queryClient.invalidateQueries({ queryKey: ['/api/final-products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/job-orders/with-production'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: `Failed to ${editProduct ? "update" : "create"} final product: ${error}`,
+        title: t("error"),
+        description: error.message || t("finalProduct.confirmError"),
         variant: "destructive",
       });
-    },
+    }
   });
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `${API_ENDPOINTS.FINAL_PRODUCTS}/${id}`, null);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.FINAL_PRODUCTS] });
-      toast({
-        title: "Final Product Deleted",
-        description: "The final product has been deleted successfully.",
-      });
-      setDeletingProduct(null);
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: `Failed to delete final product: ${error}`,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleEdit = (product: FinalProduct) => {
-    setEditProduct(product);
-    setJobOrderId(product.jobOrderId);
-    setQuantity(product.quantity);
-    setStatus(product.status);
-    setFormOpen(true);
-  };
-
-  const handleDelete = (product: FinalProduct) => {
-    setDeletingProduct(product);
-  };
-
-  const handleSave = () => {
-    if (jobOrderId <= 0 || quantity <= 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields with valid values.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    saveMutation.mutate({ jobOrderId, quantity, status });
-  };
-
-  const handleCloseForm = () => {
-    setFormOpen(false);
-    setEditProduct(null);
-    setJobOrderId(0);
-    setQuantity(0);
-    setStatus("in-stock");
-  };
-
-  const confirmDelete = () => {
-    if (deletingProduct) {
-      deleteMutation.mutate(deletingProduct.id);
-    }
-  };
-
-  // Helper functions
-  const getJobOrderDetails = (jobOrderId: number) => {
-    const jobOrder = jobOrders?.find(jo => jo.id === jobOrderId);
-    if (!jobOrder) return { orderNumber: "Unknown", productName: "Unknown", customer: "Unknown" };
-    
-    const order = orders?.find(o => o.id === jobOrder.orderId);
-    const product = customerProducts?.find(cp => cp.id === jobOrder.customerProductId);
-    const customer = order ? customers?.find(c => c.id === order.customerId) : null;
-    
-    return {
-      orderNumber: order?.id.toString() || "Unknown",
-      productName: product?.itemId || "Unknown",
-      customer: customer?.name || "Unknown"
-    };
-  };
-
-  const columns = [
-    {
-      header: "ID",
-      accessorKey: "id",
-    },
-    {
-      header: "Order",
-      accessorKey: "jobOrderId",
-      cell: (row: { jobOrderId: number }) => {
-        const details = getJobOrderDetails(row.jobOrderId);
-        return `#${details.orderNumber}`;
-      },
-    },
-    {
-      header: "Customer",
-      accessorKey: "jobOrderId",
-      cell: (row: { jobOrderId: number }) => {
-        const details = getJobOrderDetails(row.jobOrderId);
-        return details.customer;
-      },
-    },
-    {
-      header: "Product",
-      accessorKey: "jobOrderId",
-      cell: (row: { jobOrderId: number }) => {
-        const details = getJobOrderDetails(row.jobOrderId);
-        return details.productName;
-      },
-    },
-    {
-      header: "Quantity (Kg)",
-      accessorKey: "quantity",
-    },
-    {
-      header: "Completion Date",
-      accessorKey: "completedDate",
-      cell: (row: { completedDate: string }) => formatDateString(row.completedDate),
-    },
-    {
-      header: "Status",
-      accessorKey: "status",
-      cell: (row: { status: string }) => <StatusBadge status={row.status} />,
-    },
-    {
-      header: "Actions",
-      cell: (row: FinalProduct) => (
-        <div className="flex space-x-2">
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
-            <span className="material-icons text-sm">edit</span>
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
-            <span className="material-icons text-sm">delete</span>
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
-  const tableActions = (
-    <Button onClick={() => setFormOpen(true)}>
-      <span className="material-icons text-sm mr-1">add</span>
-      Add Final Product
-    </Button>
+  // Filter job orders based on search term
+  const filteredJobOrders = jobOrders.filter(
+    (jobOrder) =>
+      jobOrder.id.toString().includes(searchTerm) ||
+      (jobOrder.customerName && jobOrder.customerName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (jobOrder.productName && jobOrder.productName.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Check if a job order has been confirmed
+  const isJobOrderConfirmed = (jobOrderId: number) => {
+    return finalProducts.some(fp => fp.jobOrderId === jobOrderId);
+  };
+
+  // Handle confirm dialog open
+  const handleConfirmClick = (jobOrder: JobOrder) => {
+    setSelectedJobOrder(jobOrder);
+    setQuantity(jobOrder.productionQty);
+    setConfirmOpen(true);
+  };
+
+  // Handle confirm final product
+  const handleConfirm = () => {
+    if (selectedJobOrder && quantity > 0) {
+      createFinalProduct.mutate({
+        jobOrderId: selectedJobOrder.id,
+        quantity: quantity
+      });
+    } else {
+      toast({
+        title: t("error"),
+        description: t("finalProduct.quantityRequired"),
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="container py-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Final Products</h1>
+        <h1 className="text-2xl font-bold">{t("finalProduct.title")}</h1>
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder={t("search")}
+            className="w-full md:w-[200px] pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            <span>Manage Final Products</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DataTable 
-            data={finalProducts || []}
-            columns={columns}
-            isLoading={isLoading}
-            actions={tableActions}
-          />
-        </CardContent>
-      </Card>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <>
+          {isMobile ? (
+            // Mobile view with cards
+            <div className="grid gap-4">
+              {filteredJobOrders.map((jobOrder) => {
+                const confirmed = isJobOrderConfirmed(jobOrder.id);
+                return (
+                  <Card key={jobOrder.id} className={confirmed ? "border-green-200 bg-green-50 dark:bg-green-950/20" : ""}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle>
+                          {t("jobOrder.number")}: {jobOrder.id}
+                        </CardTitle>
+                        <Badge variant={confirmed ? "success" : "outline"}>
+                          {confirmed ? t("finalProduct.confirmed") : t("finalProduct.pending")}
+                        </Badge>
+                      </div>
+                      <CardDescription>
+                        {jobOrder.customerName} - {jobOrder.productName}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label>{t("jobOrder.quantity")}</Label>
+                          <p className="font-semibold">{jobOrder.quantity} kg</p>
+                        </div>
+                        <div>
+                          <Label>{t("finalProduct.productionQty")}</Label>
+                          <p className="font-semibold">{jobOrder.productionQty} kg</p>
+                        </div>
+                        <div>
+                          <Label>{t("jobOrder.status")}</Label>
+                          <p className="font-semibold">
+                            {t(`jobOrder.statuses.${jobOrder.status}`)}
+                          </p>
+                        </div>
+                        <div>
+                          <Label>{t("order.date")}</Label>
+                          <p className="font-semibold">{jobOrder.orderDate}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      {!confirmed && (
+                        <Button 
+                          onClick={() => handleConfirmClick(jobOrder)}
+                          className="w-full"
+                          disabled={jobOrder.productionQty <= 0}
+                        >
+                          {t("finalProduct.confirmButton")}
+                        </Button>
+                      )}
+                      {confirmed && (
+                        <div className="flex items-center w-full text-green-600 gap-2 justify-center">
+                          <CheckCircle className="h-5 w-5" />
+                          <span>{t("finalProduct.alreadyConfirmed")}</span>
+                        </div>
+                      )}
+                    </CardFooter>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            // Desktop view with table
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("jobOrder.number")}</TableHead>
+                  <TableHead>{t("customer.title")}</TableHead>
+                  <TableHead>{t("item.name")}</TableHead>
+                  <TableHead>{t("order.date")}</TableHead>
+                  <TableHead className="text-right">{t("jobOrder.quantity")}</TableHead>
+                  <TableHead className="text-right">{t("finalProduct.productionQty")}</TableHead>
+                  <TableHead>{t("status")}</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredJobOrders.map((jobOrder) => {
+                  const confirmed = isJobOrderConfirmed(jobOrder.id);
+                  return (
+                    <TableRow key={jobOrder.id} className={confirmed ? "bg-green-50 dark:bg-green-950/20" : ""}>
+                      <TableCell>{jobOrder.id}</TableCell>
+                      <TableCell>{jobOrder.customerName}</TableCell>
+                      <TableCell>{jobOrder.productName}</TableCell>
+                      <TableCell>{jobOrder.orderDate}</TableCell>
+                      <TableCell className="text-right">{jobOrder.quantity} kg</TableCell>
+                      <TableCell className="text-right">{jobOrder.productionQty} kg</TableCell>
+                      <TableCell>
+                        <Badge variant={confirmed ? "success" : "outline"}>
+                          {confirmed ? t("finalProduct.confirmed") : t("finalProduct.pending")}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {!confirmed && (
+                          <Button 
+                            onClick={() => handleConfirmClick(jobOrder)}
+                            size="sm"
+                            disabled={jobOrder.productionQty <= 0}
+                          >
+                            {t("finalProduct.confirmButton")}
+                          </Button>
+                        )}
+                        {confirmed && (
+                          <div className="flex items-center text-green-600 gap-1">
+                            <CheckCircle className="h-4 w-4" />
+                            <span>{t("finalProduct.confirmed")}</span>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </>
+      )}
 
-      {/* Add/Edit Final Product Dialog */}
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editProduct ? "Edit Final Product" : "Add New Final Product"}
-            </DialogTitle>
+            <DialogTitle>{t("finalProduct.confirmTitle")}</DialogTitle>
+            <DialogDescription>
+              {selectedJobOrder && (
+                <>
+                  {t("finalProduct.confirmDescription")}
+                  <div className="mt-2">
+                    <p><strong>{t("jobOrder.number")}:</strong> {selectedJobOrder.id}</p>
+                    <p><strong>{t("customer.title")}:</strong> {selectedJobOrder.customerName}</p>
+                    <p><strong>{t("item.name")}:</strong> {selectedJobOrder.productName}</p>
+                  </div>
+                </>
+              )}
+            </DialogDescription>
           </DialogHeader>
+          
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="jobOrder" className="text-right">
-                Job Order
-              </Label>
-              <Select value={jobOrderId.toString()} onValueChange={(value) => setJobOrderId(parseInt(value))}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a job order" />
-                </SelectTrigger>
-                <SelectContent>
-                  {jobOrders?.map((jo) => {
-                    const details = getJobOrderDetails(jo.id);
-                    return (
-                      <SelectItem key={jo.id} value={jo.id.toString()}>
-                        Order #{details.orderNumber} - {details.productName}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="quantity" className="text-right">
-                Quantity (Kg)
+                {t("finalProduct.quantity")}
               </Label>
               <Input
                 id="quantity"
                 type="number"
                 value={quantity}
-                onChange={(e) => setQuantity(parseFloat(e.target.value))}
+                onChange={(e) => setQuantity(Number(e.target.value))}
                 className="col-span-3"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
-                Status
-              </Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="in-stock">In Stock</SelectItem>
-                  <SelectItem value="reserved">Reserved</SelectItem>
-                  <SelectItem value="shipped">Shipped</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
+          
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseForm}>
-              Cancel
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+              {t("cancel")}
             </Button>
-            <Button onClick={handleSave} disabled={saveMutation.isPending}>
-              {saveMutation.isPending
-                ? editProduct ? "Updating..." : "Creating..."
-                : editProduct ? "Update" : "Create"
-              }
+            <Button 
+              onClick={handleConfirm} 
+              disabled={createFinalProduct.isPending || quantity <= 0}
+            >
+              {createFinalProduct.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t("processing")}
+                </>
+              ) : (
+                t("finalProduct.confirmButton")
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deletingProduct} onOpenChange={(open) => !open && setDeletingProduct(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this final product entry.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDelete}
-              className="bg-error-500 hover:bg-error-600"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {filteredJobOrders.length === 0 && !isLoading && (
+        <div className="flex flex-col items-center justify-center h-64 text-center">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium">{t("noDataFound")}</h3>
+          <p className="text-muted-foreground">
+            {searchTerm ? t("noSearchResults") : t("finalProduct.noJobOrders")}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
