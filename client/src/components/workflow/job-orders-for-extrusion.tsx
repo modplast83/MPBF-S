@@ -191,7 +191,7 @@ export function JobOrdersForExtrusion() {
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
     if (!product) return "Unknown Product";
     
-    return `${product.sizeCaption || ""} ${product.thickness ? product.thickness + 'mm' : ""}`;
+    return `${product.sizeCaption || ""} ${product.thickness ? product.thickness + 'μm' : ""}`;
   };
 
   // Filter job orders for the extrusion stage (pending or in_progress)

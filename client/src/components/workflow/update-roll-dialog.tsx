@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -340,7 +340,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[70vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditing && roll.currentStage === "cutting" ? t("production.roll_management.update_cutting_qty") : t("production.roll_management.roll_details")}
@@ -351,6 +351,9 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
               </span>
             </Badge>
           </DialogTitle>
+          <DialogDescription>
+            {t("common.roll_information", "Roll information and processing details")}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -422,31 +425,28 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
               
               {/* User Tracking Information */}
               {!isEditing && (
-                <Card className="p-3 bg-secondary-50">
-                  <div className="grid gap-2">
+                <Card className="p-2 bg-secondary-50">
+                  <div className="grid gap-1">
                     <div className="text-sm font-medium">{t("production.roll_management.processing_info")}</div>
-                    <div className="grid gap-2">
+                    <div className="grid gap-1">
                       {roll.createdById && (
-                        <div>
-                          <div className="text-xs text-secondary-500">{t("production.roll_management.created_by")}</div>
-                          <div className="text-sm font-medium">{roll.createdById}</div>
-                          {roll.createdAt && <div className="text-xs text-secondary-400">{new Date(roll.createdAt).toLocaleString()}</div>}
+                        <div className="flex justify-between text-xs">
+                          <span className="text-secondary-500">{t("production.roll_management.created_by")}</span>
+                          <span className="font-medium">{roll.createdById}</span>
                         </div>
                       )}
                       
                       {roll.printedById && roll.currentStage !== "extrusion" && (
-                        <div>
-                          <div className="text-xs text-secondary-500">{t("production.roll_management.printed_by")}</div>
-                          <div className="text-sm font-medium">{roll.printedById}</div>
-                          {roll.printedAt && <div className="text-xs text-secondary-400">{new Date(roll.printedAt).toLocaleString()}</div>}
+                        <div className="flex justify-between text-xs">
+                          <span className="text-secondary-500">{t("production.roll_management.printed_by")}</span>
+                          <span className="font-medium">{roll.printedById}</span>
                         </div>
                       )}
                       
                       {roll.cutById && roll.currentStage === "completed" && (
-                        <div>
-                          <div className="text-xs text-secondary-500">{t("production.roll_management.cut_by")}</div>
-                          <div className="text-sm font-medium">{roll.cutById}</div>
-                          {roll.cutAt && <div className="text-xs text-secondary-400">{new Date(roll.cutAt).toLocaleString()}</div>}
+                        <div className="flex justify-between text-xs">
+                          <span className="text-secondary-500">{t("production.roll_management.cut_by")}</span>
+                          <span className="font-medium">{roll.cutById}</span>
                         </div>
                       )}
                     </div>

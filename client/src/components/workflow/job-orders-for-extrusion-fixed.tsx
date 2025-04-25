@@ -226,7 +226,7 @@ export function JobOrdersForExtrusion() {
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
     if (!product) return t("common.unknown");
     
-    return product.thickness ? `${product.thickness} mm` : t("common.not_available");
+    return product.thickness ? `${product.thickness} μm` : t("common.not_available");
   };
   
   // Get raw material for a job order
@@ -257,7 +257,7 @@ export function JobOrdersForExtrusion() {
     const product = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
     if (!product) return t("common.unknown_product");
     
-    return `${product.sizeCaption || ""} ${product.thickness ? product.thickness + 'mm' : ""}`;
+    return `${product.sizeCaption || ""} ${product.thickness ? product.thickness + 'μm' : ""}`;
   };
 
   // Filter job orders for the extrusion stage (pending or in_progress)
@@ -341,7 +341,7 @@ export function JobOrdersForExtrusion() {
                         <span className="material-icons text-primary-600 text-sm sm:text-base">description</span>
                       </div>
                       <div className="text-left">
-                        <h4 className="font-medium text-sm sm:text-base">{t("orders.job_order")} #{jobOrder.id}</h4>
+                        <h4 className="font-medium text-sm sm:text-base">{t("job order")} #{jobOrder.id}</h4>
                         <p className="text-xs sm:text-sm text-secondary-500 truncate max-w-[200px] sm:max-w-none">{getCustomerName(jobOrder)}</p>
                       </div>
                     </div>

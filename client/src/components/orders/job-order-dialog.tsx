@@ -139,7 +139,7 @@ export function JobOrderDialog({
                     <SelectContent>
                       {getFilteredCustomerProducts().map((product) => (
                         <SelectItem key={product.id} value={product.id.toString()}>
-                          {product.sizeCaption} {product.thickness}mm {product.rawMaterial || ""}
+                          {product.sizeCaption} {product.thickness}μm {product.rawMaterial || ""}
                         </SelectItem>
                       ))}
                     </SelectContent>
