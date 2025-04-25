@@ -132,9 +132,6 @@ export const jobOrders = pgTable("job_orders", {
   quantity: doublePrecision("quantity").notNull(), // Qty Kg
   status: text("status").default("pending").notNull(), // Status (pending, in_progress, extrusion_completed, completed, cancelled)
   customerId: text("customer_id").references(() => customers.id), // Customer ID
-  productionQty: doublePrecision("production_qty"), // Production Qty (sum of cutting rolls)
-  confirmedByUserId: text("confirmed_by_user_id").references(() => users.id), // User who confirmed the production quantity
-  confirmedAt: timestamp("confirmed_at"), // When the production was confirmed
 }, (table) => {
   return {
     jobOrderUnique: unique().on(table.orderId, table.customerProductId),

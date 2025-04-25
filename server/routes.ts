@@ -1054,95 +1054,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Endpoint to confirm job order production quantity
-  app.post("/api/job-orders/:id/confirm-production", requireAuth, async (req: Request, res: Response) => {
-    try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
-      const jobOrderId = parseInt(req.params.id);
-      if (isNaN(jobOrderId)) {
-        return res.status(400).json({ message: "Invalid job order ID" });
-      }
-      
-      const existingJobOrder = await storage.getJobOrder(jobOrderId);
-      if (!existingJobOrder) {
-        return res.status(404).json({ message: "Job order not found" });
-      }
-      
-      // Verify production quantity
-      const { productionQty } = req.body;
-      if (typeof productionQty !== 'number' || productionQty <= 0) {
-        return res.status(400).json({ message: "Invalid production quantity" });
-      }
-      
-      // Update job order with production quantity and confirmation details
-      const updatedJobOrder = await storage.updateJobOrder(jobOrderId, {
-        ...existingJobOrder,
-        productionQty: productionQty,
-        confirmedByUserId: req.user.id,
-        confirmedAt: new Date()
-      });
-      
-      res.json(updatedJobOrder);
-    } catch (error) {
-      console.error("Error confirming job order production:", error);
-      res.status(500).json({ message: "Failed to confirm job order production" });
-    }
-  });
-  
-  // Endpoint to confirm multiple job order productions
-  app.post("/api/job-orders/confirm-batch", requireAuth, async (req: Request, res: Response) => {
-    try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
-      const { jobOrders } = req.body;
-      if (!Array.isArray(jobOrders) || jobOrders.length === 0) {
-        return res.status(400).json({ message: "Invalid job orders data" });
-      }
-      
-      const results = [];
-      const errors = [];
-      
-      // Process each job order
-      for (const item of jobOrders) {
-        const { id, productionQty } = item;
-        
-        if (!id || typeof productionQty !== 'number' || productionQty <= 0) {
-          errors.push({ id, error: "Invalid data format" });
-          continue;
-        }
-        
-        try {
-          const existingJobOrder = await storage.getJobOrder(id);
-          if (!existingJobOrder) {
-            errors.push({ id, error: "Job order not found" });
-            continue;
-          }
-          
-          const updatedJobOrder = await storage.updateJobOrder(id, {
-            ...existingJobOrder,
-            productionQty: productionQty,
-            confirmedByUserId: req.user.id,
-            confirmedAt: new Date()
-          });
-          
-          results.push(updatedJobOrder);
-        } catch (err) {
-          errors.push({ id, error: "Failed to update" });
-        }
-      }
-      
-      res.json({ results, errors });
-    } catch (error) {
-      console.error("Error confirming batch job orders:", error);
-      res.status(500).json({ message: "Failed to confirm batch job orders" });
-    }
-  });
-  
   // Rolls
   app.get("/api/rolls", async (_req: Request, res: Response) => {
     try {
@@ -1401,39 +1312,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(finalProducts);
     } catch (error) {
       res.status(500).json({ message: "Failed to get final products" });
-    }
-  });
-  
-  // Get completed job orders with cutting rolls info
-  app.get("/api/job-orders/completed", async (_req: Request, res: Response) => {
-    try {
-      // Get job orders with status "completed"
-      const jobOrders = await storage.getJobOrdersByStatus("completed");
-      
-      // For each job order, get the rolls that have current_stage = "completed"
-      const completedJobOrdersWithRolls = await Promise.all(
-        jobOrders.map(async (jobOrder) => {
-          const rolls = await storage.getRollsByJobOrder(jobOrder.id);
-          const completedRolls = rolls.filter(roll => roll.currentStage === "cutting" && roll.status === "completed");
-          
-          // Calculate total cutting quantity
-          const totalCuttingQty = completedRolls.reduce((sum, roll) => {
-            return sum + (roll.cuttingQty || 0);
-          }, 0);
-          
-          return {
-            ...jobOrder,
-            rolls: completedRolls,
-            totalCuttingQty: totalCuttingQty,
-            isConfirmed: !!jobOrder.productionQty,
-          };
-        })
-      );
-      
-      res.json(completedJobOrdersWithRolls);
-    } catch (error) {
-      console.error("Error fetching completed job orders:", error);
-      res.status(500).json({ message: "Failed to get completed job orders" });
     }
   });
   

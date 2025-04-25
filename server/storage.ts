@@ -128,7 +128,6 @@ export interface IStorage {
   // Job Orders
   getJobOrders(): Promise<JobOrder[]>;
   getJobOrdersByOrder(orderId: number): Promise<JobOrder[]>;
-  getJobOrdersByStatus(status: string): Promise<JobOrder[]>;
   getJobOrder(id: number): Promise<JobOrder | undefined>;
   createJobOrder(jobOrder: InsertJobOrder): Promise<JobOrder>;
   updateJobOrder(id: number, jobOrder: Partial<JobOrder>): Promise<JobOrder | undefined>;

@@ -352,10 +352,6 @@ export class DatabaseStorage implements IStorage {
   async getJobOrdersByOrder(orderId: number): Promise<JobOrder[]> {
     return await db.select().from(jobOrders).where(eq(jobOrders.orderId, orderId));
   }
-  
-  async getJobOrdersByStatus(status: string): Promise<JobOrder[]> {
-    return await db.select().from(jobOrders).where(eq(jobOrders.status, status));
-  }
 
   async getJobOrder(id: number): Promise<JobOrder | undefined> {
     const result = await db.select().from(jobOrders).where(eq(jobOrders.id, id));
