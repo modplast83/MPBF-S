@@ -268,6 +268,9 @@ export function OrderForm() {
     form.setValue("customerId", value);
   };
   
+  // Get filtered customers directly
+  const filteredCustomers = getFilteredCustomers();
+  
   return (
     <Card>
       <CardHeader>
@@ -276,84 +279,92 @@ export function OrderForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-6">
-            {/* Customer Selection with Fuzzy Search */}
+            {/* Customer Selection with Search */}
             <FormField
               control={form.control}
               name="customerId"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Customer</FormLabel>
-                  <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={open}
-                          className="w-full justify-between"
-                          disabled={customersLoading}
-                        >
-                          {field.value
-                            ? customers?.find((customer) => customer.id === field.value)?.name || "Select customer"
-                            : "Select customer"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[95vw] md:w-[400px] p-0 z-50" align="start" sideOffset={8} style={{ width: "100%" }}>
-                      <Command>
-                        <CommandInput 
-                          placeholder="Search by name, Arabic name, or code..." 
-                          value={searchQuery}
-                          onValueChange={setSearchQuery}
-                          className="border-b px-3 py-2"
-                        />
-                        <CommandList className="max-h-[300px]">
-                          <CommandEmpty>
+                  <div className="relative">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between"
+                      disabled={customersLoading}
+                      onClick={() => setOpen(!open)}
+                    >
+                      {field.value
+                        ? customers?.find((customer) => customer.id === field.value)?.name || "Select customer"
+                        : "Select customer"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                    
+                    {open && (
+                      <div className="absolute z-50 top-full left-0 right-0 w-full bg-popover shadow-md rounded-md border mt-1 overflow-hidden">
+                        <div className="p-2 border-b">
+                          <input
+                            type="text"
+                            className="w-full p-2 border rounded-md"
+                            placeholder="Search by name, Arabic name, or code..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            autoFocus
+                          />
+                        </div>
+                        
+                        <div className="max-h-[300px] overflow-y-auto">
+                          {filteredCustomers.length === 0 ? (
                             <div className="py-6 text-center">
                               <span className="material-icons mb-2 text-muted-foreground">search_off</span>
                               <p>No matching customer found.</p>
                               <p className="text-xs text-muted-foreground mt-1">Try a different search term</p>
                             </div>
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {getFilteredCustomers().map((customer) => (
-                              <CommandItem
-                                key={customer.id}
-                                value={customer.id}
-                                className="py-3 px-2 cursor-pointer hover:bg-accent"
-                                onSelect={(currentValue) => {
-                                  handleCustomerChange(currentValue);
-                                  setOpen(false);
-                                  setSearchQuery("");
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    field.value === customer.id ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                <div className="flex flex-col w-full">
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-base font-medium" dir="auto">{customer.name}</span>
-                                    {customer.code && (
-                                      <span className="text-xs bg-muted px-2 py-1 rounded-md ml-2">#{customer.code}</span>
-                                    )}
-                                  </div>
-                                  {customer.nameAr && (
-                                    <div className="border-t mt-2 pt-1 border-dashed border-muted">
-                                      <span className="text-sm block text-right" dir="rtl">{customer.nameAr}</span>
+                          ) : (
+                            <div className="p-1">
+                              {filteredCustomers.map((customer) => (
+                                <div
+                                  key={customer.id}
+                                  className={`py-3 px-3 cursor-pointer hover:bg-accent rounded-md ${
+                                    field.value === customer.id ? 'bg-accent' : ''
+                                  }`}
+                                  onClick={() => {
+                                    handleCustomerChange(customer.id);
+                                    setOpen(false);
+                                    setSearchQuery("");
+                                  }}
+                                >
+                                  <div className="flex items-center">
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        field.value === customer.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    <div className="flex flex-col w-full">
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-base font-medium" dir="auto">{customer.name}</span>
+                                        {customer.code && (
+                                          <span className="text-xs bg-muted px-2 py-1 rounded-md ml-2">#{customer.code}</span>
+                                        )}
+                                      </div>
+                                      {customer.nameAr && (
+                                        <div className="border-t mt-2 pt-1 border-dashed border-muted">
+                                          <span className="text-sm block text-right" dir="rtl">{customer.nameAr}</span>
+                                        </div>
+                                      )}
                                     </div>
-                                  )}
+                                  </div>
                                 </div>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
