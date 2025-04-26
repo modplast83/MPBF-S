@@ -75,32 +75,56 @@ export function OrderForm() {
   
   // When customers data is loaded, initialize Fuse
   useEffect(() => {
+    console.log('Customers data:', customers);
     if (customers && customers.length > 0) {
+      // Simplified Fuse.js configuration for debugging
       fuseRef.current = new Fuse(customers, {
-        keys: ['name'], // Search only in name field to support Arabic text
-        threshold: 0.4, // Higher threshold = more lenient matching for partial names
+        keys: ['name'],
+        threshold: 0.6, // Very lenient matching
         includeScore: true,
-        ignoreLocation: true, // Better for non-English text and partial matches
-        useExtendedSearch: true, // Enable extended search for more flexible matching
-        minMatchCharLength: 2, // Match even with just 2 characters for better Arabic support
-        distance: 100, // Increase the distance to allow for better matching in different languages
-        sortFn: (a, b) => {
-          // Prioritize exact matches first, then by score
-          if (a.score === 0) return -1;
-          if (b.score === 0) return 1;
-          return a.score - b.score;
-        }
+        ignoreLocation: true,
       });
     }
   }, [customers]);
   
-  // Get filtered customers based on search query
+  // Get filtered customers based on search query - simplified version
   const getFilteredCustomers = (): Customer[] => {
-    if (!customers.length) return [];
-    if (!searchQuery.trim() || !fuseRef.current) return customers;
+    if (!customers || !customers.length) {
+      console.log('No customers available');
+      return [];
+    }
     
-    const results = fuseRef.current.search(searchQuery);
-    return results.map(result => result.item);
+    // If no search query, return all customers
+    if (!searchQuery.trim()) {
+      console.log('No search query, showing all customers:', customers.length);
+      return customers;
+    }
+    
+    console.log('Search query:', searchQuery);
+    
+    // Search in both English and Arabic names
+    try {
+      const searchTermLower = searchQuery.toLowerCase();
+      const filteredCustomers = customers.filter(customer => {
+        if (!customer) return false;
+        
+        // Search in name (English)
+        const nameMatch = customer.name && 
+          customer.name.toLowerCase().includes(searchTermLower);
+          
+        // Search in nameAr (Arabic)
+        const nameArMatch = customer.nameAr && 
+          customer.nameAr.includes(searchQuery); // Don't lowercase for Arabic
+        
+        return nameMatch || nameArMatch;
+      });
+      
+      console.log('Filtered customers:', filteredCustomers.length);
+      return filteredCustomers;
+    } catch (error) {
+      console.error('Error in customer filtering:', error);
+      return customers;
+    }
   };
   
   // Fetch customer products when a customer is selected
@@ -245,6 +269,9 @@ export function OrderForm() {
                                 />
                                 <div className="flex flex-col">
                                   <span className="text-base font-medium" dir="auto">{customer.name}</span>
+                                  {customer.nameAr && (
+                                    <span className="text-sm mt-1" dir="rtl">{customer.nameAr}</span>
+                                  )}
                                   {customer.code && (
                                     <span className="text-xs text-muted-foreground mt-1">#{customer.code}</span>
                                   )}
