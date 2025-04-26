@@ -87,7 +87,7 @@ export function OrderForm() {
     }
   }, [customers]);
   
-  // Get filtered customers based on search query - simplified version
+  // Advanced search function to handle both Arabic and English inputs
   const getFilteredCustomers = (): Customer[] => {
     if (!customers || !customers.length) {
       console.log('No customers available');
@@ -102,24 +102,54 @@ export function OrderForm() {
     
     console.log('Search query:', searchQuery);
     
-    // Search in both English and Arabic names
     try {
-      const searchTermLower = searchQuery.toLowerCase();
+      // Normalize search query
+      const searchTerms = searchQuery.trim().split(/\s+/);
+      
+      // Enhanced multi-term search approach
       const filteredCustomers = customers.filter(customer => {
         if (!customer) return false;
         
-        // Search in name (English)
-        const nameMatch = customer.name && 
-          customer.name.toLowerCase().includes(searchTermLower);
+        // Check each search term separately to improve matching
+        for (const term of searchTerms) {
+          const termLower = term.toLowerCase();
           
-        // Search in nameAr (Arabic)
-        const nameArMatch = customer.nameAr && 
-          customer.nameAr.includes(searchQuery); // Don't lowercase for Arabic
+          // Check if name contains term (case insensitive)
+          const nameMatch = customer.name && 
+            customer.name.toLowerCase().includes(termLower);
+          
+          // For Arabic names, try different matching approaches
+          // 1. Direct match
+          const directArMatch = customer.nameAr && 
+            customer.nameAr.includes(term);
+            
+          // 2. Match without whitespace (for connected Arabic words)
+          const noSpaceArMatch = customer.nameAr && term.length > 1 && 
+            customer.nameAr.replace(/\s+/g, '').includes(term);
+            
+          // 3. Check if customer code contains the term
+          const codeMatch = customer.code && 
+            customer.code.toLowerCase().includes(termLower);
+            
+          // If any term matches, include this customer
+          if (nameMatch || directArMatch || noSpaceArMatch || codeMatch) {
+            return true;
+          }
+        }
         
-        return nameMatch || nameArMatch;
+        return false;
       });
       
+      // Log results
       console.log('Filtered customers:', filteredCustomers.length);
+      
+      // If there are too many results, limit them for better performance
+      const MAX_RESULTS = 100;
+      if (filteredCustomers.length > MAX_RESULTS) {
+        console.log(`Showing only the first ${MAX_RESULTS} results`);
+        return filteredCustomers.slice(0, MAX_RESULTS);
+      }
+      
       return filteredCustomers;
     } catch (error) {
       console.error('Error in customer filtering:', error);
@@ -241,15 +271,22 @@ export function OrderForm() {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-full p-0" align="start">
+                    <PopoverContent className="w-full p-0" align="start" sideOffset={8} style={{ maxWidth: "400px", width: "100%" }}>
                       <Command>
                         <CommandInput 
-                          placeholder="Type customer name (arabic or english)..." 
+                          placeholder="Search by name, Arabic name, or code..." 
                           value={searchQuery}
                           onValueChange={setSearchQuery}
+                          className="border-b px-3 py-2"
                         />
-                        <CommandList>
-                          <CommandEmpty>No matching customer found. Try a different name.</CommandEmpty>
+                        <CommandList className="max-h-[300px]">
+                          <CommandEmpty>
+                            <div className="py-6 text-center">
+                              <span className="material-icons mb-2 text-muted-foreground">search_off</span>
+                              <p>No matching customer found.</p>
+                              <p className="text-xs text-muted-foreground mt-1">Try a different search term</p>
+                            </div>
+                          </CommandEmpty>
                           <CommandGroup>
                             {getFilteredCustomers().map((customer) => (
                               <CommandItem
@@ -267,13 +304,17 @@ export function OrderForm() {
                                     field.value === customer.id ? "opacity-100" : "opacity-0"
                                   )}
                                 />
-                                <div className="flex flex-col">
-                                  <span className="text-base font-medium" dir="auto">{customer.name}</span>
+                                <div className="flex flex-col w-full">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-base font-medium" dir="auto">{customer.name}</span>
+                                    {customer.code && (
+                                      <span className="text-xs bg-muted px-2 py-1 rounded-md ml-2">#{customer.code}</span>
+                                    )}
+                                  </div>
                                   {customer.nameAr && (
-                                    <span className="text-sm mt-1" dir="rtl">{customer.nameAr}</span>
-                                  )}
-                                  {customer.code && (
-                                    <span className="text-xs text-muted-foreground mt-1">#{customer.code}</span>
+                                    <div className="border-t mt-2 pt-1 border-dashed border-muted">
+                                      <span className="text-sm block text-right" dir="rtl">{customer.nameAr}</span>
+                                    </div>
                                   )}
                                 </div>
                               </CommandItem>
