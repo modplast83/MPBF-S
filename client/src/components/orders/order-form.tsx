@@ -85,8 +85,8 @@ export function OrderForm() {
   }, [customers]);
   
   // Get filtered customers based on search query
-  const getFilteredCustomers = () => {
-    if (!customers) return [];
+  const getFilteredCustomers = (): Customer[] => {
+    if (!customers.length) return [];
     if (!searchQuery.trim() || !fuseRef.current) return customers;
     
     const results = fuseRef.current.search(searchQuery);
@@ -94,7 +94,7 @@ export function OrderForm() {
   };
   
   // Fetch customer products when a customer is selected
-  const { data: customerProducts = [] } = useQuery<CustomerProduct[]>({
+  const { data: customerProducts = [], isLoading: productsLoading } = useQuery<CustomerProduct[]>({
     queryKey: [`${API_ENDPOINTS.CUSTOMERS}/${selectedCustomerId}/products`],
     enabled: !!selectedCustomerId,
   });
@@ -261,7 +261,11 @@ export function OrderForm() {
                   <FormControl>
                     <Textarea 
                       placeholder="Enter additional notes for this order"
-                      {...field}
+                      onChange={field.onChange}
+                      value={field.value || ""}
+                      name={field.name}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
                     />
                   </FormControl>
                   <FormMessage />
