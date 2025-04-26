@@ -95,16 +95,40 @@ export function OrderForm() {
     }
     
     // If no search query, return all customers
-    if (!searchQuery.trim()) {
+    const trimmedQuery = searchQuery.trim();
+    if (!trimmedQuery) {
       console.log('No search query, showing all customers:', customers.length);
       return customers;
     }
     
-    console.log('Search query:', searchQuery);
+    console.log('Search query:', trimmedQuery);
     
     try {
-      // Normalize search query
-      const searchTerms = searchQuery.trim().split(/\s+/);
+      // Special cases: very short search terms might produce too many results
+      // For single characters, be more restrictive to avoid showing too many results
+      if (trimmedQuery.length === 1) {
+        // For single character searches, only match start of words
+        const char = trimmedQuery.toLowerCase();
+        const filteredCustomers = customers.filter(customer => {
+          if (!customer) return false;
+          
+          // Match start of name words
+          const nameStartsWithMatch = customer.name && 
+            (customer.name.toLowerCase().startsWith(char) || 
+             customer.name.toLowerCase().split(' ').some(word => word.startsWith(char)));
+          
+          // Match code
+          const codeMatch = customer.code && 
+            customer.code.toLowerCase().startsWith(char);
+            
+          return nameStartsWithMatch || codeMatch;
+        });
+        
+        return filteredCustomers;
+      }
+      
+      // For normal searches, normalize query and split into terms
+      const searchTerms = trimmedQuery.split(/\s+/);
       
       // Enhanced multi-term search approach
       const filteredCustomers = customers.filter(customer => {
@@ -113,6 +137,11 @@ export function OrderForm() {
         // Check each search term separately to improve matching
         for (const term of searchTerms) {
           const termLower = term.toLowerCase();
+          
+          // Skip very short terms unless they are numbers
+          if (termLower.length < 2 && !/^\d+$/.test(termLower)) {
+            continue;
+          }
           
           // Check if name contains term (case insensitive)
           const nameMatch = customer.name && 
@@ -271,7 +300,7 @@ export function OrderForm() {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-full p-0" align="start" sideOffset={8} style={{ maxWidth: "400px", width: "100%" }}>
+                    <PopoverContent className="w-[95vw] md:w-[400px] p-0 z-50" align="start" sideOffset={8} style={{ width: "100%" }}>
                       <Command>
                         <CommandInput 
                           placeholder="Search by name, Arabic name, or code..." 
@@ -292,6 +321,7 @@ export function OrderForm() {
                               <CommandItem
                                 key={customer.id}
                                 value={customer.id}
+                                className="py-3 px-2 cursor-pointer hover:bg-accent"
                                 onSelect={(currentValue) => {
                                   handleCustomerChange(currentValue);
                                   setOpen(false);
