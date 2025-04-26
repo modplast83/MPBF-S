@@ -77,9 +77,19 @@ export function OrderForm() {
   useEffect(() => {
     if (customers && customers.length > 0) {
       fuseRef.current = new Fuse(customers, {
-        keys: ['name', 'code'], // Search in both name and code fields
-        threshold: 0.3, // Lower threshold = more strict matching
-        includeScore: true
+        keys: ['name'], // Search only in name field to support Arabic text
+        threshold: 0.4, // Higher threshold = more lenient matching for partial names
+        includeScore: true,
+        ignoreLocation: true, // Better for non-English text and partial matches
+        useExtendedSearch: true, // Enable extended search for more flexible matching
+        minMatchCharLength: 2, // Match even with just 2 characters for better Arabic support
+        distance: 100, // Increase the distance to allow for better matching in different languages
+        sortFn: (a, b) => {
+          // Prioritize exact matches first, then by score
+          if (a.score === 0) return -1;
+          if (b.score === 0) return 1;
+          return a.score - b.score;
+        }
       });
     }
   }, [customers]);
@@ -210,12 +220,12 @@ export function OrderForm() {
                     <PopoverContent className="w-full p-0" align="start">
                       <Command>
                         <CommandInput 
-                          placeholder="Search customer..." 
+                          placeholder="Type customer name (arabic or english)..." 
                           value={searchQuery}
                           onValueChange={setSearchQuery}
                         />
                         <CommandList>
-                          <CommandEmpty>No customer found.</CommandEmpty>
+                          <CommandEmpty>No matching customer found. Try a different name.</CommandEmpty>
                           <CommandGroup>
                             {getFilteredCustomers().map((customer) => (
                               <CommandItem
@@ -234,9 +244,9 @@ export function OrderForm() {
                                   )}
                                 />
                                 <div className="flex flex-col">
-                                  <span>{customer.name}</span>
+                                  <span className="text-base font-medium" dir="auto">{customer.name}</span>
                                   {customer.code && (
-                                    <span className="text-xs text-muted-foreground">Code: {customer.code}</span>
+                                    <span className="text-xs text-muted-foreground mt-1">#{customer.code}</span>
                                   )}
                                 </div>
                               </CommandItem>
