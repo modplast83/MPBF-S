@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import Fuse from 'fuse.js';
 import { 
   Form, 
   FormControl, 
@@ -21,9 +22,24 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { insertOrderSchema } from "@shared/schema";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { insertOrderSchema, Customer, CustomerProduct, Item, Category } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { toast } from "@/hooks/use-toast";
@@ -45,27 +61,52 @@ export function OrderForm() {
   const queryClient = useQueryClient();
   
   // Fetch customers
-  const { data: customers, isLoading: customersLoading } = useQuery({
+  const { data: customers = [], isLoading: customersLoading } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
   });
   
   // State to track selected customer
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  // Setup fuzzy search with Fuse.js
+  const fuseRef = useRef<Fuse<Customer> | null>(null);
+  
+  // When customers data is loaded, initialize Fuse
+  useEffect(() => {
+    if (customers && customers.length > 0) {
+      fuseRef.current = new Fuse(customers, {
+        keys: ['name', 'code'], // Search in both name and code fields
+        threshold: 0.3, // Lower threshold = more strict matching
+        includeScore: true
+      });
+    }
+  }, [customers]);
+  
+  // Get filtered customers based on search query
+  const getFilteredCustomers = () => {
+    if (!customers) return [];
+    if (!searchQuery.trim() || !fuseRef.current) return customers;
+    
+    const results = fuseRef.current.search(searchQuery);
+    return results.map(result => result.item);
+  };
   
   // Fetch customer products when a customer is selected
-  const { data: customerProducts, isLoading: productsLoading } = useQuery({
+  const { data: customerProducts = [] } = useQuery<CustomerProduct[]>({
     queryKey: [`${API_ENDPOINTS.CUSTOMERS}/${selectedCustomerId}/products`],
     enabled: !!selectedCustomerId,
   });
   
   // Fetch all items to have their names available
-  const { data: items } = useQuery({
+  const { data: items = [] } = useQuery<Item[]>({
     queryKey: [API_ENDPOINTS.ITEMS],
     enabled: !!selectedCustomerId,
   });
   
   // Fetch all categories to display category names
-  const { data: categories } = useQuery({
+  const { data: categories = [] } = useQuery<Category[]>({
     queryKey: [API_ENDPOINTS.CATEGORIES],
     enabled: !!selectedCustomerId,
   });
@@ -142,31 +183,69 @@ export function OrderForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-6">
-            {/* Customer Selection */}
+            {/* Customer Selection with Fuzzy Search */}
             <FormField
               control={form.control}
               name="customerId"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Customer</FormLabel>
-                  <Select
-                    onValueChange={handleCustomerChange}
-                    defaultValue={field.value}
-                    disabled={customersLoading}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a customer" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {customers?.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          {customer.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={open}
+                          className="w-full justify-between"
+                          disabled={customersLoading}
+                        >
+                          {field.value
+                            ? customers?.find((customer) => customer.id === field.value)?.name || "Select customer"
+                            : "Select customer"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput 
+                          placeholder="Search customer..." 
+                          value={searchQuery}
+                          onValueChange={setSearchQuery}
+                        />
+                        <CommandList>
+                          <CommandEmpty>No customer found.</CommandEmpty>
+                          <CommandGroup>
+                            {getFilteredCustomers().map((customer) => (
+                              <CommandItem
+                                key={customer.id}
+                                value={customer.id}
+                                onSelect={(currentValue) => {
+                                  handleCustomerChange(currentValue);
+                                  setOpen(false);
+                                  setSearchQuery("");
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    field.value === customer.id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col">
+                                  <span>{customer.name}</span>
+                                  {customer.code && (
+                                    <span className="text-xs text-muted-foreground">Code: {customer.code}</span>
+                                  )}
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
