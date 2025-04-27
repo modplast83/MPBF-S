@@ -1,23 +1,37 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLanguage } from "@/hooks/use-language";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { API_ENDPOINTS } from "@/lib/constants";
 import { format } from "date-fns";
 
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { ChevronDown, ChevronUp, Eye, Trash, Loader } from "lucide-react";
+// UI Components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
+import { H3, H4 } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,375 +41,493 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { H3 } from "@/components/ui/typography";
+import { Loader2, Search, FileText, Trash2 } from "lucide-react";
 
-interface PlatePricingHistoryProps {
-  calculations: any[];
-}
-
-export default function PlatePricingHistory({ calculations }: PlatePricingHistoryProps) {
+export default function History() {
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const isMobile = useIsMobile();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedCalculation, setSelectedCalculation] = useState<any>(null);
-  const [expandedItems, setExpandedItems] = useState<number[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // Fetch customers for name display
+  // Fetch calculations
+  const { data: calculations, isLoading } = useQuery({
+    queryKey: [API_ENDPOINTS.PLATE_CALCULATIONS],
+    enabled: true,
+  });
+
+  // Fetch customers for reference
   const { data: customers } = useQuery({
-    queryKey: ["/api/customers"],
+    queryKey: [API_ENDPOINTS.CUSTOMERS],
+    enabled: true,
   });
 
   // Delete calculation mutation
-  const deleteCalculation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/plate-calculations/${id}`, {
-        method: 'DELETE'
+      return apiRequest(`${API_ENDPOINTS.PLATE_CALCULATIONS}/${id}`, {
+        method: "DELETE",
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/plate-calculations'] });
-      setShowDeleteDialog(false);
-      setSelectedCalculation(null);
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.PLATE_CALCULATIONS] });
       toast({
-        title: t('cliches.calculationDeleted'),
-        description: t('cliches.calculationDeletedSuccess'),
+        title: t("common.success"),
+        description: t("Calculation deleted successfully"),
+      });
+      setIsDeleteDialogOpen(false);
+      setSelectedCalculation(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message || "An error occurred",
+        variant: "destructive",
       });
     },
-    onError: () => {
-      toast({
-        title: t('cliches.deleteError'),
-        description: t('common.errorTryAgain'),
-        variant: 'destructive'
-      });
-    }
   });
 
-  // Handle delete button click
-  const handleDeleteClick = (calculation: any) => {
-    setSelectedCalculation(calculation);
-    setShowDeleteDialog(true);
-  };
-
-  // Handle view details button click
+  // View calculation details
   const handleViewDetails = (calculation: any) => {
     setSelectedCalculation(calculation);
-    setShowDetailsDialog(true);
+    setIsDetailsOpen(true);
   };
 
-  // Handle confirm delete
-  const handleConfirmDelete = () => {
+  // Delete calculation
+  const handleDelete = (calculation: any) => {
+    setSelectedCalculation(calculation);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Confirm deletion
+  const confirmDelete = () => {
     if (selectedCalculation) {
-      deleteCalculation.mutate(selectedCalculation.id);
+      deleteMutation.mutate(selectedCalculation.id);
     }
-  };
-
-  // Toggle expanded state for mobile view
-  const toggleExpanded = (id: number) => {
-    setExpandedItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id) 
-        : [...prev, id]
-    );
   };
 
   // Get customer name by ID
   const getCustomerName = (customerId: string) => {
-    if (!customerId) return t('cliches.noCustomer');
-    const customer = customers?.find((c: any) => c.id === customerId);
-    return customer ? customer.name : customerId;
+    if (!customers) return t("common.unknown_customer");
+    const customer = customers.find((c: any) => c.id === customerId);
+    return customer ? (isRTL && customer.nameAr ? customer.nameAr : customer.name) : t("common.unknown_customer");
   };
 
-  // Format date
-  const formatDate = (date: string) => {
-    if (!date) return '';
-    try {
-      return format(new Date(date), 'PPP p');
-    } catch (e) {
-      return date;
-    }
-  };
+  // Filter calculations by search term
+  const filteredCalculations = calculations
+    ? calculations.filter((calc: any) => {
+        if (!searchTerm) return true;
+        
+        const searchLower = searchTerm.toLowerCase();
+        const customerName = calc.customerId 
+          ? getCustomerName(calc.customerId).toLowerCase() 
+          : "";
+        
+        return (
+          customerName.includes(searchLower) ||
+          (calc.notes && calc.notes.toLowerCase().includes(searchLower)) ||
+          calc.plateType.toLowerCase().includes(searchLower) ||
+          calc.calculatedPrice.toString().includes(searchTerm)
+        );
+      })
+    : [];
 
   return (
     <div className="space-y-6">
-      {calculations.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            {t('cliches.noCalculations')}
-          </CardContent>
-        </Card>
-      ) : (
-        <div className={`${isMobile ? 'space-y-4' : ''}`}>
-          {isMobile ? (
-            // Mobile view - collapsible cards
-            calculations.map((calculation) => (
-              <Card key={calculation.id}>
-                <Collapsible
-                  open={expandedItems.includes(calculation.id)}
-                  onOpenChange={() => toggleExpanded(calculation.id)}
-                  className="w-full"
-                >
-                  <div className="p-4 flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">
-                        {calculation.description || t('cliches.calculationNumber', { number: calculation.id })}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {formatDate(calculation.createdAt)}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="text-lg font-bold">
-                        ${calculation.calculatedPrice?.toFixed(2)}
-                      </div>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          {expandedItems.includes(calculation.id) ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </CollapsibleTrigger>
-                    </div>
-                  </div>
-                  <CollapsibleContent>
-                    <CardContent className="pt-0 pb-4 px-4">
-                      <div className="grid grid-cols-2 gap-y-2 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">{t('cliches.customer')}:</span>{' '}
-                          {getCustomerName(calculation.customerId)}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">{t('cliches.dimensions')}:</span>{' '}
-                          {calculation.width} × {calculation.height} cm
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">{t('cliches.area')}:</span>{' '}
-                          {calculation.area} cm²
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">{t('cliches.colors')}:</span>{' '}
-                          {calculation.colors}
-                        </div>
-                      </div>
-                      <div className="flex justify-end space-x-2 mt-4">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleViewDetails(calculation)}
-                        >
-                          <Eye className="h-3.5 w-3.5 mr-1" />
-                          {t('common.details')}
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-destructive" 
-                          onClick={() => handleDeleteClick(calculation)}
-                        >
-                          <Trash className="h-3.5 w-3.5 mr-1" />
-                          {t('common.delete')}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </CollapsibleContent>
-                </Collapsible>
-              </Card>
-            ))
-          ) : (
-            // Desktop view - table
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('cliches.description')}</TableHead>
-                  <TableHead>{t('common.date')}</TableHead>
-                  <TableHead>{t('cliches.customer')}</TableHead>
-                  <TableHead>{t('cliches.dimensions')}</TableHead>
-                  <TableHead>{t('cliches.area')}</TableHead>
-                  <TableHead>{t('cliches.colors')}</TableHead>
-                  <TableHead>{t('cliches.price')}</TableHead>
-                  <TableHead className="w-[100px]">{t('common.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {calculations.map((calculation) => (
-                  <TableRow key={calculation.id}>
-                    <TableCell className="font-medium">
-                      {calculation.description || t('cliches.calculationNumber', { number: calculation.id })}
-                    </TableCell>
-                    <TableCell>{formatDate(calculation.createdAt)}</TableCell>
-                    <TableCell>{getCustomerName(calculation.customerId)}</TableCell>
-                    <TableCell>{calculation.width} × {calculation.height} cm</TableCell>
-                    <TableCell>{calculation.area} cm²</TableCell>
-                    <TableCell>{calculation.colors}</TableCell>
-                    <TableCell className="font-bold">${calculation.calculatedPrice?.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-1">
-                        <Button variant="ghost" size="icon" onClick={() => handleViewDetails(calculation)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(calculation)}>
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            {t("cliches.historyTitle")}
+          </p>
         </div>
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('cliches.deleteCalculation')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('cliches.deleteCalculationConfirmation')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmDelete}
-              disabled={deleteCalculation.isPending}
-            >
-              {deleteCalculation.isPending ? (
-                <Loader className="h-4 w-4 mr-2 animate-spin" />
+        <div className="w-full sm:w-auto relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("common.search")}
+            className="pl-8 w-full sm:w-[250px]"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+      
+      <Card>
+        <CardContent className="pt-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-40">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className={isMobile ? "space-y-4" : ""}>
+              {isMobile ? (
+                <div className="space-y-4">
+                  {filteredCalculations.length > 0 ? filteredCalculations.map((calculation: any) => (
+                    <Card key={calculation.id} className="overflow-hidden">
+                      <CardHeader className="bg-muted/50 p-4">
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-base font-medium">
+                            {calculation.customerId ? getCustomerName(calculation.customerId) : t("cliches.noCustomer")}
+                          </CardTitle>
+                          <Badge variant="outline" className="ml-2">
+                            {calculation.plateType}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {format(new Date(calculation.createdAt), "MMM dd, yyyy HH:mm")}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              {t("cliches.dimensions")}
+                            </span>
+                            <span className="text-sm font-medium">
+                              {calculation.width} × {calculation.height} cm
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              {t("cliches.area")}
+                            </span>
+                            <span className="text-sm font-medium">
+                              {calculation.area.toFixed(2)} cm²
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              {t("cliches.colors")}
+                            </span>
+                            <span className="text-sm font-medium">
+                              {calculation.colors}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              {t("cliches.price")}
+                            </span>
+                            <span className="text-sm font-bold text-primary">
+                              ${calculation.calculatedPrice.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-2 mt-4">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => handleViewDetails(calculation)}
+                          >
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog
+                            open={isDeleteDialogOpen && selectedCalculation?.id === calculation.id}
+                            onOpenChange={(open) => {
+                              if (!open) setIsDeleteDialogOpen(false);
+                            }}
+                          >
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => handleDelete(calculation)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  {t("common.delete_confirmation")}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {t("common.delete_confirmation_message", { item: "calculation" })}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                  {t("common.cancel")}
+                                </AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={confirmDelete}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  {t("common.delete")}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        {searchTerm 
+                          ? t("No matching calculations found") 
+                          : t("No calculation history found")}
+                      </p>
+                    </div>
+                  )}
+                </div>
               ) : (
-                <Trash className="h-4 w-4 mr-2" />
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t("common.date")}</TableHead>
+                      <TableHead>{t("cliches.customer")}</TableHead>
+                      <TableHead>{t("cliches.dimensions")}</TableHead>
+                      <TableHead>{t("cliches.area")}</TableHead>
+                      <TableHead>{t("cliches.colors")}</TableHead>
+                      <TableHead>{t("cliches.thickness")}</TableHead>
+                      <TableHead>{t("common.type")}</TableHead>
+                      <TableHead>{t("cliches.price")}</TableHead>
+                      <TableHead className="text-right">{t("common.actions")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredCalculations.length > 0 ? filteredCalculations.map((calculation: any) => (
+                      <TableRow key={calculation.id}>
+                        <TableCell>
+                          {format(new Date(calculation.createdAt), "MMM dd, yyyy")}
+                        </TableCell>
+                        <TableCell>
+                          {calculation.customerId 
+                            ? getCustomerName(calculation.customerId) 
+                            : t("cliches.noCustomer")}
+                        </TableCell>
+                        <TableCell>
+                          {calculation.width} × {calculation.height} cm
+                        </TableCell>
+                        <TableCell>
+                          {calculation.area.toFixed(2)} cm²
+                        </TableCell>
+                        <TableCell>
+                          {calculation.colors}
+                        </TableCell>
+                        <TableCell>
+                          {calculation.thickness ? `${calculation.thickness} mm` : "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{calculation.plateType}</Badge>
+                        </TableCell>
+                        <TableCell className="font-bold text-primary">
+                          ${calculation.calculatedPrice.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleViewDetails(calculation)}
+                            >
+                              <FileText className="h-4 w-4 mr-1" />
+                              {t("common.view")}
+                            </Button>
+                            <AlertDialog
+                              open={isDeleteDialogOpen && selectedCalculation?.id === calculation.id}
+                              onOpenChange={(open) => {
+                                if (!open) setIsDeleteDialogOpen(false);
+                              }}
+                            >
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => handleDelete(calculation)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  {t("common.delete")}
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    {t("common.delete_confirmation")}
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {t("common.delete_confirmation_message", { item: "calculation" })}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>
+                                    {t("common.cancel")}
+                                  </AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={confirmDelete}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    {t("common.delete")}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )) : (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center py-6">
+                          <p className="text-muted-foreground">
+                            {searchTerm 
+                              ? t("No matching calculations found") 
+                              : t("No calculation history found")}
+                          </p>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               )}
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
       {/* Calculation Details Dialog */}
-      {selectedCalculation && (
-        <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-          <DialogContent className={`sm:max-w-[550px] ${isMobile ? 'h-[70vh] overflow-y-auto' : ''}`}>
-            <DialogHeader>
-              <DialogTitle>
-                {selectedCalculation.description || t('cliches.calculationDetails')}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="space-y-4 max-h-[calc(80vh-100px)] overflow-y-auto pr-1">
-              <div>
-                <H3>{t('cliches.calculationSummary')}</H3>
-                <Separator className="my-2" />
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {t("cliches.calculationDetails")}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedCalculation && format(new Date(selectedCalculation.createdAt), "MMMM dd, yyyy HH:mm:ss")}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedCalculation && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.customer")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    {selectedCalculation.customerId 
+                      ? getCustomerName(selectedCalculation.customerId) 
+                      : t("cliches.noCustomer")}
+                  </div>
+                </div>
                 
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                  <div>
-                    <Label>{t('cliches.price')}:</Label>
-                    <div className="text-xl font-bold text-primary">
-                      ${selectedCalculation.calculatedPrice?.toFixed(2)}
-                    </div>
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("common.type")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    {selectedCalculation.plateType}
                   </div>
-                  
-                  <div>
-                    <Label>{t('cliches.area')}:</Label>
-                    <div className="font-medium">
-                      {selectedCalculation.area} cm²
-                    </div>
+                </div>
+                
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.dimensions")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    {selectedCalculation.width} × {selectedCalculation.height} cm
                   </div>
-                  
-                  <div>
-                    <Label>{t('common.date')}:</Label>
-                    <div className="font-medium">
-                      {formatDate(selectedCalculation.createdAt)}
-                    </div>
+                </div>
+                
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.area")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    {selectedCalculation.area.toFixed(2)} cm²
                   </div>
-                  
-                  <div>
-                    <Label>{t('cliches.customer')}:</Label>
-                    <div className="font-medium">
-                      {getCustomerName(selectedCalculation.customerId)}
-                    </div>
+                </div>
+                
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.colors")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    {selectedCalculation.colors}
+                  </div>
+                </div>
+                
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.thickness")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    {selectedCalculation.thickness ? `${selectedCalculation.thickness} mm` : "-"}
                   </div>
                 </div>
               </div>
               
-              <div>
-                <H3>{t('cliches.dimensions')}</H3>
-                <Separator className="my-2" />
+              <H4>{t("cliches.pricingFactors")}</H4>
+              
+              <div className="grid grid-cols-2 gap-4 pb-2">
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.basePrice")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    ${selectedCalculation.basePricePerUnit}/cm²
+                  </div>
+                </div>
                 
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                  <div>
-                    <Label>{t('cliches.width')}:</Label>
-                    <div className="font-medium">
-                      {selectedCalculation.width} cm
-                    </div>
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.colorFactor")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    {selectedCalculation.colorMultiplier.toFixed(2)}x
                   </div>
-                  
-                  <div>
-                    <Label>{t('cliches.height')}:</Label>
-                    <div className="font-medium">
-                      {selectedCalculation.height} cm
-                    </div>
+                </div>
+                
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.thicknessFactor")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    {selectedCalculation.thicknessMultiplier.toFixed(2)}x
                   </div>
-                  
-                  <div>
-                    <Label>{t('cliches.colors')}:</Label>
-                    <div className="font-medium">
-                      {selectedCalculation.colors}
-                    </div>
+                </div>
+                
+                <div>
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.appliedDiscount")}
+                  </Label>
+                  <div className="font-medium mt-1">
+                    {selectedCalculation.customerDiscount || 0}%
                   </div>
-                  
-                  {selectedCalculation.thickness > 0 && (
-                    <div>
-                      <Label>{t('cliches.thickness')}:</Label>
-                      <div className="font-medium">
-                        {selectedCalculation.thickness} mm
-                      </div>
-                    </div>
-                  )}
-                  
-                  {selectedCalculation.customerDiscount > 0 && (
-                    <div>
-                      <Label>{t('cliches.appliedDiscount')}:</Label>
-                      <div className="font-medium">
-                        {selectedCalculation.customerDiscount}%
-                      </div>
-                    </div>
-                  )}
+                </div>
+              </div>
+              
+              <div className="bg-primary/5 p-4 rounded-lg">
+                <Label className="text-sm">{t("cliches.price")}</Label>
+                <div className="text-3xl font-bold text-primary mt-1">
+                  ${selectedCalculation.calculatedPrice.toFixed(2)}
                 </div>
               </div>
               
               {selectedCalculation.notes && (
                 <div>
-                  <H3>{t('cliches.notes')}</H3>
-                  <Separator className="my-2" />
-                  <div className="text-sm whitespace-pre-wrap">
+                  <Label className="text-sm text-muted-foreground">
+                    {t("cliches.notes")}
+                  </Label>
+                  <div className="bg-muted/30 p-3 rounded mt-1">
                     {selectedCalculation.notes}
                   </div>
                 </div>
               )}
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setIsDetailsOpen(false)}>
+              {t("common.close")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

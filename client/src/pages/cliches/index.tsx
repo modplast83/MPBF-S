@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import PageHeader from "@/components/ui/page-header";
+import { PageHeader } from "@/components/ui/page-header"; 
 import { H2 } from "@/components/ui/typography";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguage } from "@/hooks/use-language";
@@ -26,10 +26,21 @@ export default function ClichePage() {
 
   return (
     <div className={`container ${isRTL ? 'rtl' : ''} px-4 py-8 mx-auto`}>
-      <PageHeader
-        title={t("cliches.title")}
-        icon="design_services"
-      />
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} items-center gap-3`}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <span className="material-icons text-xl">design_services</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+              {t("cliches.title")}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {t("cliches.calculatorTitle")}
+            </p>
+          </div>
+        </div>
+      </div>
 
       <Card className="mt-6 overflow-hidden">
         <Tabs 

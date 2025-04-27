@@ -11,7 +11,7 @@ interface PageHeaderProps {
   className?: string;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({
+export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   description,
   icon,
@@ -42,4 +42,5 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   );
 };
 
+// Also provide a default export for backward compatibility
 export default PageHeader;

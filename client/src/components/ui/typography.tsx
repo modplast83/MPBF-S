@@ -113,3 +113,17 @@ export const Muted: FC<TypographyProps> = ({ children, className, ...props }) =>
     </p>
   );
 };
+
+// Export as a group to allow importing as a default export
+const Typography = {
+  H1,
+  H2,
+  H3,
+  H4,
+  P,
+  Large,
+  Small,
+  Muted
+};
+
+export default Typography;
