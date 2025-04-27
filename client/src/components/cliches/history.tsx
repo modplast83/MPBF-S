@@ -19,7 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { H3, H4 } from "@/components/ui/typography";
+// Import typography components
+import Typography from "@/components/ui/typography";
+const { H3, H4 } = Typography;
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
