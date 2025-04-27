@@ -621,15 +621,18 @@ export class DatabaseStorage implements IStorage {
         // Fall back to a raw SQL query which might be more reliable
         console.log('Attempting fallback with raw SQL update');
         
-        // Prepare update fields string
+        // Prepare update fields string - convert camelCase to snake_case
         const updateFields = Object.entries(permissionUpdate)
           .map(([key, value]) => {
+            // Convert camelCase to snake_case
+            const dbColumn = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+            
             if (typeof value === 'boolean') {
-              return `${key} = ${value}`;
+              return `${dbColumn} = ${value}`;
             } else if (value === null) {
-              return `${key} = NULL`;
+              return `${dbColumn} = NULL`;
             } else {
-              return `${key} = '${value}'`;
+              return `${dbColumn} = '${value}'`;
             }
           })
           .join(', ');
