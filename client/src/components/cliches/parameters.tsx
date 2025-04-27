@@ -93,24 +93,37 @@ export default function Parameters() {
     resolver: zodResolver(parameterSchema),
     defaultValues: {
       name: "",
-      value: "",
+      value: "0",
       type: "",
       description: "",
     },
   });
 
   // Fetch parameters
-  const { data: parameters, isLoading } = useQuery({
+  const { data: parameters = [], isLoading } = useQuery<any[]>({
+    queryFn: async () => {
+      const response = await fetch(API_ENDPOINTS.PLATE_PRICING_PARAMETERS);
+      if (!response.ok) {
+        throw new Error("Failed to fetch parameters");
+      }
+      return response.json();
+    },
     queryKey: [API_ENDPOINTS.PLATE_PRICING_PARAMETERS],
     enabled: true,
   });
 
   // Add parameter mutation
   const addMutation = useMutation({
-    mutationFn: async (data: ParameterFormValues) => {
-      return apiRequest(API_ENDPOINTS.PLATE_PRICING_PARAMETERS, {
+    mutationFn: async (data: any) => {
+      return fetch(API_ENDPOINTS.PLATE_PRICING_PARAMETERS, {
         method: "POST",
-        data,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }).then(res => {
+        if (!res.ok) throw new Error("Failed to save parameter");
+        return res.json();
       });
     },
     onSuccess: () => {
@@ -134,15 +147,21 @@ export default function Parameters() {
   // Update parameter mutation
   const updateMutation = useMutation({
     mutationFn: async (data: ParameterFormValues & { id: number, is_active: boolean }) => {
-      return apiRequest(`${API_ENDPOINTS.PLATE_PRICING_PARAMETERS}/${data.id}`, {
+      return fetch(`${API_ENDPOINTS.PLATE_PRICING_PARAMETERS}/${data.id}`, {
         method: "PUT",
-        data: {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           name: data.name,
           value: data.value,
           type: data.type,
           description: data.description,
           is_active: data.is_active,
-        },
+        }),
+      }).then(res => {
+        if (!res.ok) throw new Error("Failed to update parameter");
+        return res.json();
       });
     },
     onSuccess: () => {
@@ -168,8 +187,11 @@ export default function Parameters() {
   // Delete parameter mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`${API_ENDPOINTS.PLATE_PRICING_PARAMETERS}/${id}`, {
+      return fetch(`${API_ENDPOINTS.PLATE_PRICING_PARAMETERS}/${id}`, {
         method: "DELETE",
+      }).then(res => {
+        if (!res.ok) throw new Error("Failed to delete parameter");
+        return res;
       });
     },
     onSuccess: () => {
