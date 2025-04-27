@@ -63,7 +63,7 @@ import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 // Define parameter schema
 const parameterSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  value: z.string().min(1, "Value is required").transform(val => parseFloat(val)),
+  value: z.coerce.number().min(0, "Value must be a positive number"),
   type: z.string().min(1, "Type is required"),
   description: z.string().optional(),
 });
@@ -93,7 +93,7 @@ export default function Parameters() {
     resolver: zodResolver(parameterSchema),
     defaultValues: {
       name: "",
-      value: "0",
+      value: 0,
       type: "",
       description: "",
     },
@@ -146,7 +146,7 @@ export default function Parameters() {
 
   // Update parameter mutation
   const updateMutation = useMutation({
-    mutationFn: async (data: ParameterFormValues & { id: number, is_active: boolean }) => {
+    mutationFn: async (data: ParameterFormValues & { id: number, isActive: boolean }) => {
       return fetch(`${API_ENDPOINTS.PLATE_PRICING_PARAMETERS}/${data.id}`, {
         method: "PUT",
         headers: {
@@ -157,7 +157,7 @@ export default function Parameters() {
           value: data.value,
           type: data.type,
           description: data.description,
-          is_active: data.is_active,
+          isActive: data.isActive,
         }),
       }).then(res => {
         if (!res.ok) throw new Error("Failed to update parameter");
@@ -214,11 +214,10 @@ export default function Parameters() {
 
   // Form submission handler
   const onSubmit = (values: ParameterFormValues) => {
-    // Ensure value is a number
+    // Add required fields not in the form
     const formattedValues = {
       ...values,
-      value: parseFloat(values.value.toString()), // Ensure value is a number not a string
-      is_active: true // Add is_active field which is required by the schema
+      isActive: true // Add isActive field which is required by the schema
     };
     
     if (isEditing && selectedParameter) {
@@ -237,7 +236,7 @@ export default function Parameters() {
     setIsEditing(true);
     form.reset({
       name: parameter.name,
-      value: parameter.value.toString(),
+      value: parseFloat(parameter.value.toString()),
       type: parameter.type,
       description: parameter.description || "",
     });
