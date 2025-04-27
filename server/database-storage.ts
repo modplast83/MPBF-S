@@ -1110,5 +1110,190 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
   
-  // End of class
+  // Cliché (Plate) Pricing Parameters
+  async getPlatePricingParameters(): Promise<PlatePricingParameter[]> {
+    return await db.select().from(platePricingParameters).where(eq(platePricingParameters.isActive, true));
+  }
+
+  async getPlatePricingParameterByType(type: string): Promise<PlatePricingParameter | undefined> {
+    const result = await db.select()
+      .from(platePricingParameters)
+      .where(and(
+        eq(platePricingParameters.type, type),
+        eq(platePricingParameters.isActive, true)
+      ));
+    return result[0];
+  }
+
+  async getPlatePricingParameter(id: number): Promise<PlatePricingParameter | undefined> {
+    const result = await db.select().from(platePricingParameters).where(eq(platePricingParameters.id, id));
+    return result[0];
+  }
+
+  async createPlatePricingParameter(param: InsertPlatePricingParameter): Promise<PlatePricingParameter> {
+    const result = await db.insert(platePricingParameters).values({
+      ...param,
+      lastUpdated: new Date()
+    }).returning();
+    return result[0];
+  }
+
+  async updatePlatePricingParameter(id: number, update: Partial<PlatePricingParameter>): Promise<PlatePricingParameter | undefined> {
+    const result = await db.update(platePricingParameters)
+      .set({
+        ...update,
+        lastUpdated: new Date()
+      })
+      .where(eq(platePricingParameters.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deletePlatePricingParameter(id: number): Promise<boolean> {
+    const result = await db.delete(platePricingParameters).where(eq(platePricingParameters.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Plate Calculations
+  async getPlateCalculations(): Promise<PlateCalculation[]> {
+    return await db.select()
+      .from(plateCalculations)
+      .orderBy(desc(plateCalculations.createdAt));
+  }
+
+  async getPlateCalculationsByCustomer(customerId: string): Promise<PlateCalculation[]> {
+    return await db.select()
+      .from(plateCalculations)
+      .where(eq(plateCalculations.customerId, customerId))
+      .orderBy(desc(plateCalculations.createdAt));
+  }
+
+  async getPlateCalculation(id: number): Promise<PlateCalculation | undefined> {
+    const result = await db.select().from(plateCalculations).where(eq(plateCalculations.id, id));
+    return result[0];
+  }
+
+  async createPlateCalculation(calculation: InsertPlateCalculation): Promise<PlateCalculation> {
+    // Calculate area
+    const area = calculation.width * calculation.height;
+    
+    // Get pricing parameters
+    const basePriceParam = await this.getPlatePricingParameterByType('base_price');
+    const colorMultiplierParam = await this.getPlatePricingParameterByType('color_multiplier');
+    const thicknessMultiplierParam = await this.getPlatePricingParameterByType('thickness_multiplier');
+    
+    // Set default values if parameters are not found
+    const basePricePerUnit = basePriceParam?.value || 0.5; // Default $0.5 per cm²
+    const colorMultiplier = colorMultiplierParam?.value || 1.2; // Default 20% increase per color
+    const thicknessMultiplier = thicknessMultiplierParam?.value || 1.1; // Default 10% increase for thickness
+    
+    // Calculate price
+    let price = area * basePricePerUnit;
+    
+    // Apply color multiplier (colors - 1 because first color is included in base price)
+    const colors = calculation.colors || 1;
+    if (colors > 1) {
+      price = price * (1 + (colors - 1) * (colorMultiplier - 1));
+    }
+    
+    // Apply thickness multiplier if applicable
+    if (calculation.thickness && calculation.thickness > 0) {
+      price = price * thicknessMultiplier;
+    }
+    
+    // Apply customer discount if applicable
+    if (calculation.customerDiscount && calculation.customerDiscount > 0) {
+      price = price * (1 - calculation.customerDiscount / 100);
+    }
+    
+    // Insert with calculated fields
+    const result = await db.insert(plateCalculations).values({
+      ...calculation,
+      area,
+      calculatedPrice: price,
+      basePricePerUnit,
+      colorMultiplier,
+      thicknessMultiplier,
+      createdAt: new Date()
+    }).returning();
+    
+    return result[0];
+  }
+
+  async updatePlateCalculation(id: number, update: Partial<PlateCalculation>): Promise<PlateCalculation | undefined> {
+    // Get the existing calculation
+    const existing = await this.getPlateCalculation(id);
+    if (!existing) {
+      return undefined;
+    }
+    
+    // Determine if we need to recalculate the price
+    const needsRecalculation = update.width !== undefined || 
+                              update.height !== undefined || 
+                              update.colors !== undefined || 
+                              update.thickness !== undefined ||
+                              update.customerDiscount !== undefined ||
+                              update.plateType !== undefined;
+    
+    if (needsRecalculation) {
+      // Calculate the new values
+      const width = update.width || existing.width;
+      const height = update.height || existing.height;
+      const area = width * height;
+      
+      // Get pricing parameters
+      const basePriceParam = await this.getPlatePricingParameterByType('base_price');
+      const colorMultiplierParam = await this.getPlatePricingParameterByType('color_multiplier');
+      const thicknessMultiplierParam = await this.getPlatePricingParameterByType('thickness_multiplier');
+      
+      // Set default values if parameters are not found
+      const basePricePerUnit = basePriceParam?.value || existing.basePricePerUnit || 0.5;
+      const colorMultiplier = colorMultiplierParam?.value || existing.colorMultiplier || 1.2;
+      const thicknessMultiplier = thicknessMultiplierParam?.value || existing.thicknessMultiplier || 1.1;
+      
+      // Calculate price
+      let price = area * basePricePerUnit;
+      
+      // Apply color multiplier
+      const colors = update.colors || existing.colors;
+      if (colors > 1) {
+        price = price * (1 + (colors - 1) * (colorMultiplier - 1));
+      }
+      
+      // Apply thickness multiplier if applicable
+      const thickness = update.thickness || existing.thickness;
+      if (thickness && thickness > 0) {
+        price = price * thicknessMultiplier;
+      }
+      
+      // Apply customer discount if applicable
+      const customerDiscount = update.customerDiscount || existing.customerDiscount;
+      if (customerDiscount && customerDiscount > 0) {
+        price = price * (1 - customerDiscount / 100);
+      }
+      
+      // Update the calculation with new values
+      update = {
+        ...update,
+        area,
+        calculatedPrice: price,
+        basePricePerUnit,
+        colorMultiplier,
+        thicknessMultiplier
+      };
+    }
+    
+    // Update the database
+    const result = await db.update(plateCalculations)
+      .set(update)
+      .where(eq(plateCalculations.id, id))
+      .returning();
+    
+    return result[0];
+  }
+
+  async deletePlateCalculation(id: number): Promise<boolean> {
+    const result = await db.delete(plateCalculations).where(eq(plateCalculations.id, id)).returning();
+    return result.length > 0;
+  }
 }

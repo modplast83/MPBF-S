@@ -9,7 +9,9 @@ import {
   MixMaterial, InsertMixMaterial, MixItem, InsertMixItem,
   MixMachine, InsertMixMachine, mixMachines, permissions,
   Permission, InsertPermission, MaterialInput, InsertMaterialInput,
-  MaterialInputItem, InsertMaterialInputItem
+  MaterialInputItem, InsertMaterialInputItem,
+  PlatePricingParameter, InsertPlatePricingParameter,
+  PlateCalculation, InsertPlateCalculation
 } from "@shared/schema";
 import session from "express-session";
 
@@ -194,6 +196,22 @@ export interface IStorage {
   getMaterialInputItem(id: number): Promise<MaterialInputItem | undefined>;
   createMaterialInputItem(item: InsertMaterialInputItem): Promise<MaterialInputItem>;
   deleteMaterialInputItem(id: number): Promise<boolean>;
+  
+  // Cliché (Plate) Pricing Parameters methods
+  getPlatePricingParameters(): Promise<PlatePricingParameter[]>;
+  getPlatePricingParameterByType(type: string): Promise<PlatePricingParameter | undefined>;
+  getPlatePricingParameter(id: number): Promise<PlatePricingParameter | undefined>;
+  createPlatePricingParameter(param: InsertPlatePricingParameter): Promise<PlatePricingParameter>;
+  updatePlatePricingParameter(id: number, update: Partial<PlatePricingParameter>): Promise<PlatePricingParameter | undefined>;
+  deletePlatePricingParameter(id: number): Promise<boolean>;
+  
+  // Plate Calculations methods
+  getPlateCalculations(): Promise<PlateCalculation[]>;
+  getPlateCalculationsByCustomer(customerId: string): Promise<PlateCalculation[]>;
+  getPlateCalculation(id: number): Promise<PlateCalculation | undefined>;
+  createPlateCalculation(calculation: InsertPlateCalculation): Promise<PlateCalculation>;
+  updatePlateCalculation(id: number, update: Partial<PlateCalculation>): Promise<PlateCalculation | undefined>;
+  deletePlateCalculation(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
