@@ -1,377 +1,422 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
-
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
+import { plateCalculationRequestSchema } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Loader, Save, Calculator } from "lucide-react";
+import { useLanguage } from "@/hooks/use-language";
+
+// UI Components
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { H3, H4 } from "@/components/ui/typography";
+import { H2, H3, H4, P, Small } from "@/components/ui/typography";
 
-// Schema for calculation form
-const plateCalculationSchema = z.object({
-  width: z.coerce.number().min(1, { message: "Width is required and must be greater than 0" }),
-  height: z.coerce.number().min(1, { message: "Height is required and must be greater than 0" }),
-  colors: z.coerce.number().min(1, { message: "Number of colors must be at least 1" }),
-  thickness: z.coerce.number().optional(),
-  customerDiscount: z.coerce.number().min(0).max(100).optional(),
-  customerId: z.string().optional(),
-  description: z.string().optional(),
-  notes: z.string().optional()
-});
+type CalculatorFormValues = z.infer<typeof plateCalculationRequestSchema>;
 
-type PlateCalculationForm = z.infer<typeof plateCalculationSchema>;
-
-export default function CalculatorComponent() {
+export default function Calculator() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const { isRTL } = useLanguage();
   const [calculationResult, setCalculationResult] = useState<any>(null);
-  const [isCalculating, setIsCalculating] = useState(false);
 
-  // Fetch customers for dropdown
-  const { data: customers, isLoading: isLoadingCustomers } = useQuery({
-    queryKey: ["/api/customers"],
-  });
-
-  // Form definition
-  const form = useForm<PlateCalculationForm>({
-    resolver: zodResolver(plateCalculationSchema),
+  // Form setup
+  const form = useForm<CalculatorFormValues>({
+    resolver: zodResolver(plateCalculationRequestSchema),
     defaultValues: {
       width: 0,
       height: 0,
       colors: 1,
-      thickness: 0,
+      plateType: "standard",
+      thickness: 1.14,
       customerDiscount: 0,
-      customerId: "",
-      description: "",
       notes: ""
     }
   });
 
-  // Calculate price without saving
-  const handleCalculate = async (data: PlateCalculationForm) => {
-    setIsCalculating(true);
-    try {
-      const result = await apiRequest('/api/plate-calculations/calculate', {
+  // Fetch customers for dropdown
+  const { data: customers, isLoading: isLoadingCustomers } = useQuery({
+    queryKey: ['/api/customers'],
+    refetchOnWindowFocus: false,
+  });
+
+  // Calculate price mutation
+  const calculateMutation = useMutation({
+    mutationFn: async (data: CalculatorFormValues) => {
+      return await apiRequest('/api/cliches/calculate', {
         method: 'POST',
         body: JSON.stringify(data)
       });
-      setCalculationResult(result);
+    },
+    onSuccess: (data) => {
+      setCalculationResult(data);
       toast({
-        title: t('cliches.calculationSuccess'),
-        description: t('cliches.calculationComplete'),
+        title: t("cliches.calculationSuccess"),
+        description: t("cliches.calculationComplete"),
       });
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Calculation error:', error);
       toast({
-        title: t('cliches.calculationError'),
-        description: t('common.errorTryAgain'),
+        title: t("cliches.calculationError"),
+        description: error.message || 'Failed to calculate price',
         variant: 'destructive'
       });
-    } finally {
-      setIsCalculating(false);
     }
-  };
+  });
 
   // Save calculation mutation
-  const saveCalculation = useMutation({
-    mutationFn: async (data: PlateCalculationForm) => {
-      return await apiRequest('/api/plate-calculations', {
+  const saveMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('/api/cliches/save', {
         method: 'POST',
         body: JSON.stringify(data)
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/plate-calculations'] });
       toast({
-        title: t('cliches.saveSuccess'),
-        description: t('cliches.calculationSaved'),
+        title: t("cliches.saveSuccess"),
+        description: t("cliches.calculationSaved"),
       });
+      queryClient.invalidateQueries({ queryKey: ['/api/cliches/history'] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Save error:', error);
       toast({
-        title: t('cliches.saveError'),
-        description: t('common.errorTryAgain'),
+        title: t("cliches.saveError"),
+        description: error.message || 'Failed to save calculation',
         variant: 'destructive'
       });
     }
   });
 
-  // Handle save calculation
-  const handleSave = () => {
-    const values = form.getValues();
-    saveCalculation.mutate(values);
+  const onSubmit = (values: CalculatorFormValues) => {
+    calculateMutation.mutate(values);
+  };
+
+  const handleSaveCalculation = () => {
+    if (calculationResult && form.getValues()) {
+      saveMutation.mutate({
+        ...form.getValues(),
+        calculatedPrice: calculationResult.calculatedPrice,
+        area: calculationResult.area,
+        basePricePerUnit: calculationResult.basePricePerUnit,
+        colorMultiplier: calculationResult.colorMultiplier,
+        thicknessMultiplier: calculationResult.thicknessMultiplier,
+      });
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleCalculate)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Width and Height */}
-            <div className="space-y-4">
+    <div className={`${isRTL ? 'rtl' : ''}`}>
+      <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'grid-cols-2 gap-8'}`}>
+        <Card className="p-6">
+          <H3 className="mb-4">{t("cliches.dimensions")}</H3>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Customer selection */}
               <FormField
                 control={form.control}
-                name="width"
+                name="customerId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('cliches.width')} (cm)</FormLabel>
+                    <FormLabel>{t("cliches.customer")}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isLoadingCustomers}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("cliches.selectCustomer")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">{t("cliches.noCustomer")}</SelectItem>
+                        {customers && customers.map((customer: any) => (
+                          <SelectItem key={customer.id} value={customer.id}>
+                            {customer.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Width */}
+                <FormField
+                  control={form.control}
+                  name="width"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("cliches.width")} (cm)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.1" 
+                          inputMode="decimal"
+                          {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Height */}
+                <FormField
+                  control={form.control}
+                  name="height"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("cliches.height")} (cm)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.1" 
+                          inputMode="decimal"
+                          {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Colors */}
+                <FormField
+                  control={form.control}
+                  name="colors"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("cliches.numberOfColors")}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="1" 
+                          step="1" 
+                          inputMode="numeric"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Thickness */}
+                <FormField
+                  control={form.control}
+                  name="thickness"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("cliches.thickness")} (mm)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.01" 
+                          inputMode="decimal"
+                          {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Plate Type */}
+                <FormField
+                  control={form.control}
+                  name="plateType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("products.type")}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Standard" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="standard">Standard</SelectItem>
+                          <SelectItem value="premium">Premium</SelectItem>
+                          <SelectItem value="highResolution">High Resolution</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Discount */}
+                <FormField
+                  control={form.control}
+                  name="customerDiscount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("cliches.discount")} (%)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="0" 
+                          max="100" 
+                          step="0.5" 
+                          inputMode="decimal"
+                          {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Notes */}
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("cliches.notes")}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.1" {...field} />
+                      <Textarea 
+                        rows={3}
+                        placeholder={t("cliches.description")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
-              <FormField
-                control={form.control}
-                name="height"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('cliches.height')} (cm)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
-            {/* Colors and Thickness */}
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="colors"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('cliches.numberOfColors')}</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="thickness"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('cliches.thickness')} (mm)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Customer and Discount */}
-            <FormField
-              control={form.control}
-              name="customerId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('cliches.customer')}</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('cliches.selectCustomer')} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="">{t('cliches.noCustomer')}</SelectItem>
-                      {customers?.map((customer: any) => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          {customer.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="customerDiscount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('cliches.discount')} (%)</FormLabel>
-                  <FormControl>
-                    <Input type="number" min="0" max="100" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="space-y-4">
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('cliches.description')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Notes */}
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('cliches.notes')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-2 justify-start mt-6">
-            <Button type="submit" disabled={isCalculating}>
-              {isCalculating ? (
-                <Loader className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Calculator className="h-4 w-4 mr-2" />
-              )}
-              {t('cliches.calculate')}
-            </Button>
-            
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleSave}
-              disabled={!calculationResult || saveCalculation.isPending}
-            >
-              {saveCalculation.isPending ? (
-                <Loader className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              {t('cliches.save')}
-            </Button>
-          </div>
-        </form>
-      </Form>
-
-      {calculationResult && (
-        <Card className="mt-8">
-          <CardContent className="pt-6">
-            <H3>{t('cliches.calculationResults')}</H3>
-            <Separator className="my-4" />
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>{t('cliches.area')}:</Label>
-                <div className="font-medium">
-                  {calculationResult.area.toFixed(2)} cm²
-                </div>
+              <div className="flex justify-end space-x-2 pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={calculateMutation.isPending}
+                  className="w-full md:w-auto"
+                >
+                  {calculateMutation.isPending ? (
+                    <span className="flex items-center justify-center">
+                      <span className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
+                      {t("common.loading")}
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center">
+                      <span className="material-icons mr-1">calculate</span>
+                      {t("cliches.calculate")}
+                    </span>
+                  )}
+                </Button>
               </div>
-              
-              <div>
-                <Label>{t('cliches.price')}:</Label>
-                <div className="text-xl font-bold text-primary">
-                  ${calculationResult.calculatedPrice.toFixed(2)}
-                </div>
-              </div>
-              
-              <div>
-                <Label>{t('cliches.dimensions')}:</Label>
-                <div className="font-medium">
-                  {calculationResult.width} × {calculationResult.height} cm
-                </div>
-              </div>
-              
-              <div>
-                <Label>{t('cliches.colors')}:</Label>
-                <div className="font-medium">
-                  {calculationResult.colors}
-                </div>
-              </div>
-              
-              {calculationResult.thickness > 0 && (
-                <div>
-                  <Label>{t('cliches.thickness')}:</Label>
-                  <div className="font-medium">
-                    {calculationResult.thickness} mm
-                  </div>
-                </div>
-              )}
-              
-              {calculationResult.customerDiscount > 0 && (
-                <div>
-                  <Label>{t('cliches.appliedDiscount')}:</Label>
-                  <div className="font-medium">
-                    {calculationResult.customerDiscount}%
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="mt-4">
-              <H4>{t('cliches.pricingFactors')}</H4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-                <div className="text-sm">
-                  <span className="text-muted-foreground">{t('cliches.basePrice')}:</span> ${calculationResult.basePricePerUnit}/cm²
-                </div>
-                <div className="text-sm">
-                  <span className="text-muted-foreground">{t('cliches.colorFactor')}:</span> {(calculationResult.colorMultiplier - 1) * 100}%
-                </div>
-                <div className="text-sm">
-                  <span className="text-muted-foreground">{t('cliches.thicknessFactor')}:</span> {(calculationResult.thicknessMultiplier - 1) * 100}%
-                </div>
-              </div>
-            </div>
-          </CardContent>
+            </form>
+          </Form>
         </Card>
-      )}
+
+        <Card className="p-6">
+          <H3 className="mb-4">{t("cliches.calculationResults")}</H3>
+          {calculationResult ? (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-4 bg-secondary/30 rounded-md">
+                <div className="text-lg font-semibold">{t("cliches.area")}</div>
+                <div className="text-2xl font-bold">{calculationResult.area.toFixed(2)} cm²</div>
+              </div>
+
+              <div className="flex justify-between items-center p-4 bg-primary/10 rounded-md">
+                <div className="text-lg font-semibold">{t("cliches.price")}</div>
+                <div className="text-3xl font-bold text-primary">₺ {calculationResult.calculatedPrice.toFixed(2)}</div>
+              </div>
+
+              <Separator className="my-4" />
+
+              <div className="space-y-2">
+                <H4>{t("cliches.pricingFactors")}</H4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="text-sm">{t("cliches.basePrice")}:</div>
+                  <div className="text-sm font-medium text-right">₺ {calculationResult.basePricePerUnit.toFixed(2)} / cm²</div>
+                  
+                  <div className="text-sm">{t("cliches.colorFactor")}:</div>
+                  <div className="text-sm font-medium text-right">× {calculationResult.colorMultiplier.toFixed(2)}</div>
+                  
+                  <div className="text-sm">{t("cliches.thicknessFactor")}:</div>
+                  <div className="text-sm font-medium text-right">× {calculationResult.thicknessMultiplier.toFixed(2)}</div>
+                  
+                  {calculationResult.customerDiscount > 0 && (
+                    <>
+                      <div className="text-sm">{t("cliches.appliedDiscount")}:</div>
+                      <div className="text-sm font-medium text-right">- {calculationResult.customerDiscount}%</div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <Separator className="my-4" />
+
+              <div className="flex justify-end space-x-2 pt-2">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => setCalculationResult(null)}
+                  className="w-full md:w-auto"
+                >
+                  <span className="material-icons mr-1">refresh</span>
+                  {t("common.refresh")}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSaveCalculation}
+                  disabled={saveMutation.isPending}
+                  className="w-full md:w-auto"
+                >
+                  {saveMutation.isPending ? (
+                    <span className="flex items-center justify-center">
+                      <span className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
+                      {t("common.saving")}
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center">
+                      <span className="material-icons mr-1">save</span>
+                      {t("cliches.save")}
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full py-12 text-center text-muted-foreground">
+              <span className="material-icons text-4xl mb-2">calculate</span>
+              <p>{t("cliches.calculatorTitle")}</p>
+              <Small className="mt-2">{t("cliches.calculatorTitle")}</Small>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }

@@ -33,6 +33,11 @@ export const API_ENDPOINTS = {
   // Communications
   SMS_MESSAGES: "/api/sms-messages",
   
+  // Cliché (Digital Photopolymer Printing Plates)
+  PLATE_PRICING_PARAMETERS: "/api/plate-pricing-parameters",
+  PLATE_CALCULATIONS: "/api/plate-calculations",
+  CALCULATE_PLATE_PRICE: "/api/calculate-plate-price",
+  
   // Demo
   INIT_DEMO_DATA: "/api/init-demo-data",
 };
@@ -122,6 +127,7 @@ export const SIDEBAR_ITEMS = [
           { title: "Bag Weight Calculator", path: "/tools/bag-weight" },
           { title: "Ink Consumption", path: "/tools/ink-consumption" },
           { title: "Utility Tools", path: "/tools/utilities" },
+          { title: "Cliches", path: "/cliches" },
         ],
       },
       {

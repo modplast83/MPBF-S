@@ -1,100 +1,82 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Button } from "@/components/ui/button";
-import { H1 } from "@/components/ui/typography";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Loader } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import PageHeader from "@/components/ui/page-header";
+import { H2 } from "@/components/ui/typography";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useLanguage } from "@/hooks/use-language";
+import { usePermissions } from "@/hooks/use-permissions";
 
-import CalculatorComponent from "@/components/cliches/calculator";
-import PlatePricingParameters from "@/components/cliches/parameters";
-import PlatePricingHistory from "@/components/cliches/history";
+// Import component modules
+import Calculator from "@/components/cliches/calculator";
+import Parameters from "@/components/cliches/parameters";
+import History from "@/components/cliches/history";
 
-export default function ClichePageIndex() {
+export default function ClichePage() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
-  const { toast } = useToast();
+  const { isRTL } = useLanguage();
+  const { hasPermission } = usePermissions();
   const [activeTab, setActiveTab] = useState("calculator");
 
-  // Fetch calculation history
-  const { data: calculationHistory, isLoading: isHistoryLoading } = useQuery({
-    queryKey: ["/api/plate-calculations"],
-    enabled: activeTab === "history"
-  });
-
-  // Fetch pricing parameters
-  const { data: pricingParameters, isLoading: isParametersLoading } = useQuery({
-    queryKey: ["/api/plate-pricing-parameters"],
-    enabled: activeTab === "parameters"
-  });
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
-        <H1>{t("cliches.title")}</H1>
-      </div>
+    <div className={`container ${isRTL ? 'rtl' : ''} px-4 py-8 mx-auto`}>
+      <PageHeader
+        title={t("cliches.title")}
+        icon="design_services"
+      />
 
-      <Tabs
-        defaultValue="calculator"
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full"
-      >
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="calculator">{t("cliches.calculator")}</TabsTrigger>
-          <TabsTrigger value="parameters">{t("cliches.parameters")}</TabsTrigger>
-          <TabsTrigger value="history">{t("cliches.history")}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="calculator" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("cliches.calculatorTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CalculatorComponent />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="parameters" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("cliches.parametersTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isParametersLoading ? (
-                <div className="w-full flex justify-center p-8">
-                  <Loader className="animate-spin h-8 w-8" />
-                </div>
-              ) : (
-                <PlatePricingParameters parameters={pricingParameters || []} />
+      <Card className="mt-6 overflow-hidden">
+        <Tabs 
+          defaultValue="calculator" 
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full"
+        >
+          <div className={`px-4 py-2 border-b ${isMobile ? 'overflow-x-auto' : ''}`}>
+            <TabsList className={`grid w-full ${isMobile ? 'grid-cols-3' : 'max-w-md grid-cols-3'}`}>
+              <TabsTrigger value="calculator">
+                <span className="material-icons mr-1 text-lg">calculate</span>
+                <span>{t("cliches.calculator")}</span>
+              </TabsTrigger>
+              
+              {hasPermission("Parameters") && (
+                <TabsTrigger value="parameters">
+                  <span className="material-icons mr-1 text-lg">tune</span>
+                  <span>{t("cliches.parameters")}</span>
+                </TabsTrigger>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+              
+              <TabsTrigger value="history">
+                <span className="material-icons mr-1 text-lg">history</span>
+                <span>{t("cliches.history")}</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        <TabsContent value="history" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("cliches.historyTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isHistoryLoading ? (
-                <div className="w-full flex justify-center p-8">
-                  <Loader className="animate-spin h-8 w-8" />
-                </div>
-              ) : (
-                <PlatePricingHistory calculations={calculationHistory || []} />
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="calculator" className="p-4 space-y-6">
+            <H2>{t("cliches.calculatorTitle")}</H2>
+            <Calculator />
+          </TabsContent>
+
+          {hasPermission("Parameters") && (
+            <TabsContent value="parameters" className="p-4 space-y-6">
+              <H2>{t("cliches.parametersTitle")}</H2>
+              <Parameters />
+            </TabsContent>
+          )}
+
+          <TabsContent value="history" className="p-4 space-y-6">
+            <H2>{t("cliches.historyTitle")}</H2>
+            <History />
+          </TabsContent>
+        </Tabs>
+      </Card>
     </div>
   );
 }
