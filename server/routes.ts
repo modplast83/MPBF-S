@@ -13,7 +13,8 @@ import {
   insertPermissionSchema, insertMaterialInputSchema,
   insertMaterialInputItemSchema,
   insertPlatePricingParameterSchema, insertPlateCalculationSchema,
-  plateCalculationRequestSchema, PlateCalculationRequest
+  plateCalculationRequestSchema, PlateCalculationRequest,
+  User
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
@@ -2663,6 +2664,280 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting material input:", error);
       res.status(500).json({ message: "Failed to delete material input" });
+    }
+  });
+
+  // Cliché (Plate) Pricing Parameters API endpoints
+  app.get("/api/plate-pricing-parameters", async (_req: Request, res: Response) => {
+    try {
+      const parameters = await storage.getPlatePricingParameters();
+      res.json(parameters);
+    } catch (error) {
+      console.error("Error getting plate pricing parameters:", error);
+      res.status(500).json({ message: "Failed to get plate pricing parameters" });
+    }
+  });
+
+  app.get("/api/plate-pricing-parameters/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid parameter ID" });
+      }
+      
+      const parameter = await storage.getPlatePricingParameter(id);
+      if (!parameter) {
+        return res.status(404).json({ message: "Plate pricing parameter not found" });
+      }
+      res.json(parameter);
+    } catch (error) {
+      console.error("Error getting plate pricing parameter:", error);
+      res.status(500).json({ message: "Failed to get plate pricing parameter" });
+    }
+  });
+
+  app.post("/api/plate-pricing-parameters", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertPlatePricingParameterSchema.parse(req.body);
+      const parameter = await storage.createPlatePricingParameter(validatedData);
+      res.status(201).json(parameter);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid parameter data", errors: error.errors });
+      }
+      console.error("Error creating plate pricing parameter:", error);
+      res.status(500).json({ message: "Failed to create plate pricing parameter" });
+    }
+  });
+
+  app.put("/api/plate-pricing-parameters/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid parameter ID" });
+      }
+      
+      const existingParameter = await storage.getPlatePricingParameter(id);
+      if (!existingParameter) {
+        return res.status(404).json({ message: "Plate pricing parameter not found" });
+      }
+      
+      const validatedData = insertPlatePricingParameterSchema.parse(req.body);
+      const parameter = await storage.updatePlatePricingParameter(id, validatedData);
+      res.json(parameter);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid parameter data", errors: error.errors });
+      }
+      console.error("Error updating plate pricing parameter:", error);
+      res.status(500).json({ message: "Failed to update plate pricing parameter" });
+    }
+  });
+
+  app.delete("/api/plate-pricing-parameters/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid parameter ID" });
+      }
+      
+      const parameter = await storage.getPlatePricingParameter(id);
+      if (!parameter) {
+        return res.status(404).json({ message: "Plate pricing parameter not found" });
+      }
+      
+      await storage.deletePlatePricingParameter(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting plate pricing parameter:", error);
+      res.status(500).json({ message: "Failed to delete plate pricing parameter" });
+    }
+  });
+
+  // Plate Calculations API endpoints
+  app.get("/api/plate-calculations", async (_req: Request, res: Response) => {
+    try {
+      const calculations = await storage.getPlateCalculations();
+      res.json(calculations);
+    } catch (error) {
+      console.error("Error getting plate calculations:", error);
+      res.status(500).json({ message: "Failed to get plate calculations" });
+    }
+  });
+
+  app.get("/api/customers/:customerId/plate-calculations", async (req: Request, res: Response) => {
+    try {
+      const customer = await storage.getCustomer(req.params.customerId);
+      if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      
+      const calculations = await storage.getPlateCalculationsByCustomer(req.params.customerId);
+      res.json(calculations);
+    } catch (error) {
+      console.error("Error getting plate calculations for customer:", error);
+      res.status(500).json({ message: "Failed to get plate calculations" });
+    }
+  });
+
+  app.get("/api/plate-calculations/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid calculation ID" });
+      }
+      
+      const calculation = await storage.getPlateCalculation(id);
+      if (!calculation) {
+        return res.status(404).json({ message: "Plate calculation not found" });
+      }
+      res.json(calculation);
+    } catch (error) {
+      console.error("Error getting plate calculation:", error);
+      res.status(500).json({ message: "Failed to get plate calculation" });
+    }
+  });
+
+  app.post("/api/plate-calculations", async (req: Request, res: Response) => {
+    try {
+      // Validate using the request schema first
+      const requestData = plateCalculationRequestSchema.parse(req.body);
+      
+      // If customerId is provided, verify it exists
+      if (requestData.customerId) {
+        const customer = await storage.getCustomer(requestData.customerId);
+        if (!customer) {
+          return res.status(404).json({ message: "Customer not found" });
+        }
+      }
+      
+      // Get user information from session for tracking who created this calculation
+      const userId = req.user ? (req.user as any).id : undefined;
+      
+      // Create calculation with validated data
+      const calculationData = {
+        ...requestData,
+        createdById: userId
+      };
+      
+      const calculation = await storage.createPlateCalculation(calculationData);
+      res.status(201).json(calculation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid calculation data", errors: error.errors });
+      }
+      console.error("Error creating plate calculation:", error);
+      res.status(500).json({ message: "Failed to create plate calculation" });
+    }
+  });
+
+  app.put("/api/plate-calculations/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid calculation ID" });
+      }
+      
+      const existingCalculation = await storage.getPlateCalculation(id);
+      if (!existingCalculation) {
+        return res.status(404).json({ message: "Plate calculation not found" });
+      }
+      
+      // Validate using the request schema
+      const requestData = plateCalculationRequestSchema.parse(req.body);
+      
+      // If customerId is changed, verify the new one exists
+      if (requestData.customerId && requestData.customerId !== existingCalculation.customerId) {
+        const customer = await storage.getCustomer(requestData.customerId);
+        if (!customer) {
+          return res.status(404).json({ message: "Customer not found" });
+        }
+      }
+      
+      const calculation = await storage.updatePlateCalculation(id, requestData);
+      res.json(calculation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid calculation data", errors: error.errors });
+      }
+      console.error("Error updating plate calculation:", error);
+      res.status(500).json({ message: "Failed to update plate calculation" });
+    }
+  });
+
+  app.delete("/api/plate-calculations/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid calculation ID" });
+      }
+      
+      const calculation = await storage.getPlateCalculation(id);
+      if (!calculation) {
+        return res.status(404).json({ message: "Plate calculation not found" });
+      }
+      
+      await storage.deletePlateCalculation(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting plate calculation:", error);
+      res.status(500).json({ message: "Failed to delete plate calculation" });
+    }
+  });
+
+  // Special endpoint for calculating plate price without saving
+  app.post("/api/plate-calculations/calculate", async (req: Request, res: Response) => {
+    try {
+      // Validate using the request schema
+      const requestData = plateCalculationRequestSchema.parse(req.body);
+      
+      // Calculate area
+      const area = requestData.width * requestData.height;
+      
+      // Get pricing parameters
+      const basePriceParam = await storage.getPlatePricingParameterByType('base_price');
+      const colorMultiplierParam = await storage.getPlatePricingParameterByType('color_multiplier');
+      const thicknessMultiplierParam = await storage.getPlatePricingParameterByType('thickness_multiplier');
+      
+      // Set default values if parameters are not found
+      const basePricePerUnit = basePriceParam?.value || 0.5; // Default $0.5 per cm²
+      const colorMultiplier = colorMultiplierParam?.value || 1.2; // Default 20% increase per color
+      const thicknessMultiplier = thicknessMultiplierParam?.value || 1.1; // Default 10% increase for thickness
+      
+      // Calculate price
+      let price = area * basePricePerUnit;
+      
+      // Apply color multiplier (colors - 1 because first color is included in base price)
+      const colors = requestData.colors || 1;
+      if (colors > 1) {
+        price = price * (1 + (colors - 1) * (colorMultiplier - 1));
+      }
+      
+      // Apply thickness multiplier if applicable
+      if (requestData.thickness && requestData.thickness > 0) {
+        price = price * thicknessMultiplier;
+      }
+      
+      // Apply customer discount if applicable
+      if (requestData.customerDiscount && requestData.customerDiscount > 0) {
+        price = price * (1 - requestData.customerDiscount / 100);
+      }
+      
+      // Return the calculation result
+      res.json({
+        area,
+        calculatedPrice: price,
+        basePricePerUnit,
+        colorMultiplier,
+        thicknessMultiplier,
+        ...requestData
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid calculation data", errors: error.errors });
+      }
+      console.error("Error calculating plate price:", error);
+      res.status(500).json({ message: "Failed to calculate plate price" });
     }
   });
 
