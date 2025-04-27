@@ -133,7 +133,7 @@ export default function Parameters() {
 
   // Update parameter mutation
   const updateMutation = useMutation({
-    mutationFn: async (data: ParameterFormValues & { id: number }) => {
+    mutationFn: async (data: ParameterFormValues & { id: number, is_active: boolean }) => {
       return apiRequest(`${API_ENDPOINTS.PLATE_PRICING_PARAMETERS}/${data.id}`, {
         method: "PUT",
         data: {
@@ -141,6 +141,7 @@ export default function Parameters() {
           value: data.value,
           type: data.type,
           description: data.description,
+          is_active: data.is_active,
         },
       });
     },
@@ -191,13 +192,20 @@ export default function Parameters() {
 
   // Form submission handler
   const onSubmit = (values: ParameterFormValues) => {
+    // Ensure value is a number
+    const formattedValues = {
+      ...values,
+      value: parseFloat(values.value.toString()), // Ensure value is a number not a string
+      is_active: true // Add is_active field which is required by the schema
+    };
+    
     if (isEditing && selectedParameter) {
       updateMutation.mutate({
-        ...values,
+        ...formattedValues,
         id: selectedParameter.id,
       });
     } else {
-      addMutation.mutate(values);
+      addMutation.mutate(formattedValues);
     }
   };
 
