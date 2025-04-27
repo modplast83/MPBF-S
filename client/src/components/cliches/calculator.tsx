@@ -66,7 +66,7 @@ export default function Calculator() {
       colors: "1",
       plateType: "standard",
       thickness: "",
-      customerId: "",
+      customerId: "none",
       customerDiscount: "",
       notes: "",
     },
@@ -127,15 +127,26 @@ export default function Calculator() {
 
   // Form submission handler
   const onSubmit = (values: CalculatorFormValues) => {
-    calculateMutation.mutate(values);
+    // Handle "none" customer ID
+    const submissionValues = {
+      ...values,
+      customerId: values.customerId === "none" ? null : values.customerId
+    };
+    calculateMutation.mutate(submissionValues);
   };
 
   // Save calculation
   const handleSave = () => {
     if (!calculation) return;
-
+    
+    const formValues = form.getValues();
+    
+    // Convert "none" customerId to null for database storage
+    const customerId = formValues.customerId === "none" ? null : formValues.customerId;
+    
     const saveData = {
-      ...form.getValues(),
+      ...formValues,
+      customerId,
       area: calculation.area,
       calculatedPrice: calculation.calculatedPrice,
       basePricePerUnit: calculation.basePricePerUnit,
@@ -296,7 +307,7 @@ export default function Calculator() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">{t("cliches.noCustomer")}</SelectItem>
+                          <SelectItem value="none">{t("cliches.noCustomer")}</SelectItem>
                           {customers && customers.map((customer: any) => (
                             <SelectItem key={customer.id} value={customer.id}>
                               {isRTL && customer.nameAr ? customer.nameAr : customer.name}
