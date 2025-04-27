@@ -11,7 +11,9 @@ import {
   insertSmsMessageSchema, InsertSmsMessage,
   insertMixMaterialSchema, insertMixItemSchema,
   insertPermissionSchema, insertMaterialInputSchema,
-  insertMaterialInputItemSchema
+  insertMaterialInputItemSchema,
+  insertPlatePricingParameterSchema, insertPlateCalculationSchema,
+  plateCalculationRequestSchema, PlateCalculationRequest
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
