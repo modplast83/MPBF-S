@@ -24,7 +24,9 @@ import {
   MixMachine, InsertMixMachine, mixMachines,
   Permission, InsertPermission, permissions,
   MaterialInput, InsertMaterialInput, materialInputs,
-  MaterialInputItem, InsertMaterialInputItem, materialInputItems
+  MaterialInputItem, InsertMaterialInputItem, materialInputItems,
+  PlatePricingParameter, InsertPlatePricingParameter, platePricingParameters,
+  PlateCalculation, InsertPlateCalculation, plateCalculations
 } from '@shared/schema';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';

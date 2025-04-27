@@ -2,6 +2,8 @@ import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, un
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Cliché (Plate) Price Calculations related schemas
+
 // Categories table
 export const categories = pgTable("categories", {
   id: text("id").primaryKey(), // CID in the provided schema
@@ -390,3 +392,56 @@ export const insertMaterialInputItemSchema = createInsertSchema(materialInputIte
 });
 export type InsertMaterialInputItem = z.infer<typeof insertMaterialInputItemSchema>;
 export type MaterialInputItem = typeof materialInputItems.$inferSelect;
+
+// Cliché (Plate) Pricing Parameters
+export const platePricingParameters = pgTable("plate_pricing_parameters", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Parameter name (e.g., "Base price per cm²")
+  value: doublePrecision("value").notNull(), // Value of the parameter
+  description: text("description"), // Description of the parameter
+  type: text("type").notNull(), // Type of parameter (base_price, multiplier, etc.)
+  isActive: boolean("is_active").default(true),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+export const insertPlatePricingParameterSchema = createInsertSchema(platePricingParameters).omit({ id: true, lastUpdated: true });
+export type InsertPlatePricingParameter = z.infer<typeof insertPlatePricingParameterSchema>;
+export type PlatePricingParameter = typeof platePricingParameters.$inferSelect;
+
+// Plate Calculations
+export const plateCalculations = pgTable("plate_calculations", {
+  id: serial("id").primaryKey(),
+  customerId: text("customer_id").references(() => customers.id),
+  width: doublePrecision("width").notNull(), // Width in cm
+  height: doublePrecision("height").notNull(), // Height in cm
+  area: doublePrecision("area").notNull(), // Area in cm²
+  colors: integer("colors").notNull().default(1), // Number of colors
+  plateType: text("plate_type").notNull(), // Type of plate (standard, premium, etc.)
+  thickness: doublePrecision("thickness"), // Thickness in mm
+  calculatedPrice: doublePrecision("calculated_price").notNull(), // Final calculated price
+  basePricePerUnit: doublePrecision("base_price_per_unit"), // Base price per cm²
+  colorMultiplier: doublePrecision("color_multiplier"), // Multiplier based on colors
+  thicknessMultiplier: doublePrecision("thickness_multiplier"), // Multiplier based on thickness
+  customerDiscount: doublePrecision("customer_discount"), // Customer specific discount percentage
+  notes: text("notes"), // Additional notes
+  createdById: text("created_by_id").references(() => users.id), // User who created the calculation
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPlateCalculationSchema = createInsertSchema(plateCalculations).omit({ id: true, area: true, calculatedPrice: true, createdAt: true });
+export type InsertPlateCalculation = z.infer<typeof insertPlateCalculationSchema>;
+export type PlateCalculation = typeof plateCalculations.$inferSelect;
+
+// Cliché Calculation Request Schema (for the frontend)
+export const plateCalculationRequestSchema = z.object({
+  customerId: z.string().optional(),
+  width: z.number().positive("Width must be positive"),
+  height: z.number().positive("Height must be positive"),
+  colors: z.number().int().positive("Number of colors must be positive").default(1),
+  plateType: z.string(),
+  thickness: z.number().optional(),
+  customerDiscount: z.number().optional(),
+  notes: z.string().optional(),
+});
+
+export type PlateCalculationRequest = z.infer<typeof plateCalculationRequestSchema>;
