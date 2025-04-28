@@ -142,7 +142,9 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   const deleteJobOrderMutation = useMutation({
     mutationFn: async () => {
       if (!selectedJobOrder) return;
-      await apiRequest("DELETE", `${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`);
+      await apiRequest(`${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ORDERS}/${orderId}/job-orders`] });
@@ -161,13 +163,16 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
       if (!selectedJobOrder) return;
       
       // Send only the necessary data - id and serialNumber will be generated on server
-      await apiRequest("POST", API_ENDPOINTS.ROLLS, {
-        jobOrderId: selectedJobOrder.id,
-        extrudingQty: rollQuantity,
-        printingQty: rollQuantity, // Set printing quantity equal to extrusion quantity
-        cuttingQty: 0,
-        currentStage: "extrusion",
-        status: "pending",
+      await apiRequest(API_ENDPOINTS.ROLLS, {
+        method: "POST",
+        body: JSON.stringify({
+          jobOrderId: selectedJobOrder.id,
+          extrudingQty: rollQuantity,
+          printingQty: rollQuantity, // Set printing quantity equal to extrusion quantity
+          cuttingQty: 0,
+          currentStage: "extrusion",
+          status: "pending",
+        })
       });
     },
     onSuccess: () => {
