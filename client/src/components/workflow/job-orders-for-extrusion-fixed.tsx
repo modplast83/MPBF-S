@@ -83,7 +83,10 @@ export function JobOrdersForExtrusion() {
   // Mutation for creating a roll
   const createRollMutation = useMutation({
     mutationFn: (data: CreateRoll) => {
-      return apiRequest("POST", API_ENDPOINTS.ROLLS, data);
+      return apiRequest(API_ENDPOINTS.ROLLS, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: (_data, variables) => {
       // Invalidate relevant queries
@@ -115,7 +118,10 @@ export function JobOrdersForExtrusion() {
   // Mutation for updating job order status
   const updateJobOrderStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => {
-      return apiRequest("PUT", `${API_ENDPOINTS.JOB_ORDERS}/${id}`, { status });
+      return apiRequest(`${API_ENDPOINTS.JOB_ORDERS}/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ status })
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.JOB_ORDERS] });
