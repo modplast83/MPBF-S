@@ -224,17 +224,22 @@ export function OrderForm() {
   const createOrderMutation = useMutation({
     mutationFn: async (data: OrderFormValues) => {
       // First create the order
-      const order = await apiRequest("POST", API_ENDPOINTS.ORDERS, {
-        customerId: data.customerId,
-        note: data.note,
+      const orderResponse = await apiRequest(API_ENDPOINTS.ORDERS, {
+        method: "POST",
+        body: JSON.stringify({
+          customerId: data.customerId,
+          note: data.note,
+        })
       });
-      const orderResponse = await order.json();
       
       // Then create job orders
       for (const jobOrder of data.jobOrders) {
-        await apiRequest("POST", API_ENDPOINTS.JOB_ORDERS, {
-          orderId: orderResponse.id,
-          ...jobOrder,
+        await apiRequest(API_ENDPOINTS.JOB_ORDERS, {
+          method: "POST",
+          body: JSON.stringify({
+            orderId: orderResponse.id,
+            ...jobOrder,
+          })
         });
       }
       

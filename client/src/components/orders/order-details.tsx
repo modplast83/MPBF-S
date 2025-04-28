@@ -84,7 +84,10 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   // Mutation to update order status
   const updateOrderMutation = useMutation({
     mutationFn: async (status: string) => {
-      await apiRequest("PUT", `${API_ENDPOINTS.ORDERS}/${orderId}`, { status });
+      await apiRequest(`${API_ENDPOINTS.ORDERS}/${orderId}`, {
+        method: "PUT",
+        body: JSON.stringify({ status })
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
@@ -99,7 +102,10 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   // Mutation to create a new job order
   const createJobOrderMutation = useMutation({
     mutationFn: async (data: any) => {
-      await apiRequest("POST", API_ENDPOINTS.JOB_ORDERS, data);
+      await apiRequest(API_ENDPOINTS.JOB_ORDERS, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ORDERS}/${orderId}/job-orders`] });
@@ -116,7 +122,10 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   const updateJobOrderMutation = useMutation({
     mutationFn: async (data: any) => {
       if (!selectedJobOrder) return;
-      await apiRequest("PUT", `${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`, data);
+      await apiRequest(`${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`, {
+        method: "PUT", 
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ORDERS}/${orderId}/job-orders`] });
