@@ -108,7 +108,10 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
   // Mutation for updating roll
   const updateRollMutation = useMutation({
     mutationFn: (data: Partial<Roll>) => {
-      return apiRequest("PUT", `${API_ENDPOINTS.ROLLS}/${roll.id}`, data);
+      return apiRequest(`${API_ENDPOINTS.ROLLS}/${roll.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       // Invalidate and refetch relevant queries

@@ -54,7 +54,10 @@ export function RollCard({ roll }: RollCardProps) {
   // Mutations for updating roll status
   const updateRollMutation = useMutation({
     mutationFn: async (updateData: Partial<Roll>) => {
-      await apiRequest("PUT", `${API_ENDPOINTS.ROLLS}/${roll.id}`, updateData);
+      await apiRequest(`${API_ENDPOINTS.ROLLS}/${roll.id}`, {
+        method: "PUT",
+        body: JSON.stringify(updateData)
+      });
     },
     onSuccess: () => {
       // Invalidate all necessary queries to keep data consistent
