@@ -157,21 +157,29 @@ export function JobOrdersForExtrusion() {
     }
   };
 
-  // Calculate the progress percentage for a job order using rolls from all stages
+  // Calculate the progress percentage for a job order based ONLY on extruding quantity
   const calculateProgress = (jobOrder: JobOrder): number => {
+    // Use all rolls to get the complete picture of extrusion progress
     const jobOrderRolls = allRolls.filter(roll => roll.jobOrderId === jobOrder.id);
     if (!jobOrderRolls.length) return 0;
     
+    // Calculate total extruded quantity from all rolls regardless of their stage
     const totalExtrudedQty = jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
+    
+    // Cap the percentage at 100%
     return Math.min(Math.round((totalExtrudedQty / jobOrder.quantity) * 100), 100);
   };
 
-  // Check if job order is fully extruded using rolls from all stages
+  // Check if job order is fully extruded based ONLY on extruding quantity
   const isJobOrderFullyExtruded = (jobOrder: JobOrder): boolean => {
+    // Use all rolls to check if extrusion is complete
     const jobOrderRolls = allRolls.filter(roll => roll.jobOrderId === jobOrder.id);
     if (!jobOrderRolls.length) return false;
     
+    // Sum only the extrudingQty values since that's what determines extrusion completion
     const totalExtrudedQty = jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
+    
+    // Job order is fully extruded if the extruded quantity meets or exceeds the required quantity
     return totalExtrudedQty >= jobOrder.quantity;
   };
 
@@ -180,13 +188,17 @@ export function JobOrdersForExtrusion() {
     const jobOrder = jobOrders.find(jo => jo.id === jobOrderId);
     if (!jobOrder) return;
 
+    // Get all rolls for this job order, regardless of their current stage
     const jobOrderRolls = allRolls.filter(roll => roll.jobOrderId === jobOrderId);
     if (!jobOrderRolls.length) return;
     
+    // Calculate total extruded quantity ONLY based on the extrudingQty field
     const totalExtrudedQty = jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
     
-    // If job order is fully extruded, update status
+    // If job order is fully extruded (based on extrudingQty), update status to extrusion_completed
     if (totalExtrudedQty >= jobOrder.quantity && jobOrder.status !== "extrusion_completed") {
+      console.log(`Job order ${jobOrderId} extruded quantity (${totalExtrudedQty}) meets or exceeds required quantity (${jobOrder.quantity}). Marking as extrusion_completed.`);
+      
       updateJobOrderStatusMutation.mutate({
         id: jobOrderId,
         status: "extrusion_completed",
