@@ -102,6 +102,13 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
       form.reset({
         cuttingQty: roll.cuttingQty || 0,
       });
+      
+      // Automatically enter editing mode if we're in the cutting stage with "processing" status
+      if (roll.currentStage === "cutting" && roll.status === "processing") {
+        setIsEditing(true);
+      } else {
+        setIsEditing(false);
+      }
     }
   }, [roll, form]);
 
@@ -346,7 +353,9 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
       <DialogContent className="sm:max-w-[425px] max-h-[70vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {isEditing && roll.currentStage === "cutting" ? t("production.roll_management.update_cutting_qty") : t("production.roll_management.roll_details")}
+            {roll.currentStage === "cutting" && roll.status === "processing" 
+              ? t("production.roll_management.update_cutting_qty") 
+              : t("production.roll_management.roll_details")}
             <Badge variant="outline" className="ml-2">
               <span className="flex items-center">
                 <span className="material-icons text-sm mr-1">info</span>
@@ -457,7 +466,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                 </Card>
               )}
 
-              {isEditing && roll.currentStage === "cutting" && (
+              {(isEditing || (roll.currentStage === "cutting" && roll.status === "processing")) && (
                 <>
                   <div className="grid gap-2">
                     <div className="text-sm font-medium">{t("production.roll_management.printing_qty_source")}</div>
@@ -505,7 +514,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
             </div>
 
             <DialogFooter>
-              {!isEditing && roll.currentStage === "cutting" && roll.status !== "completed" && (
+              {!isEditing && roll.currentStage === "cutting" && roll.status !== "completed" && roll.status !== "processing" && (
                 <Button 
                   type="button" 
                   onClick={() => setIsEditing(true)}
@@ -516,12 +525,18 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                 </Button>
               )}
               
-              {isEditing && roll.currentStage === "cutting" && (
+              {(isEditing || (roll.currentStage === "cutting" && roll.status === "processing")) && roll.currentStage === "cutting" && (
                 <>
                   <Button 
                     type="button" 
                     variant="outline" 
-                    onClick={() => setIsEditing(false)}
+                    onClick={() => {
+                      if (roll.status === "processing") {
+                        onOpenChange(false);
+                      } else {
+                        setIsEditing(false);
+                      }
+                    }}
                   >
                     {t("common.cancel")}
                   </Button>
@@ -534,7 +549,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                 </>
               )}
               
-              {(!isEditing || roll.currentStage !== "cutting" || roll.status === "completed") && (
+              {(!isEditing && !(roll.currentStage === "cutting" && roll.status === "processing")) && (
                 <>
                   <Button 
                     type="button" 

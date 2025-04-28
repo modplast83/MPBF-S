@@ -80,21 +80,18 @@ export function RollCard({ roll }: RollCardProps) {
     let nextStage = roll.currentStage;
     let nextStatus = "completed";
     
-    // Create basic update data with only the required fields
-    const updateData: Partial<Roll> = {};
-    
     // Hard-coded current user ID for demo - in real app, this would come from auth context
     const currentUserId = "00U1"; // Admin user ID from the database
+    
+    // If we're in the cutting stage, just open the dialog to input cutting quantity
+    if (roll.currentStage === "cutting") {
+      setIsDialogOpen(true);
+      return;
+    }
     
     if (roll.currentStage === "extrusion") {
       nextStage = "printing";
       nextStatus = "pending";
-      
-      // Only including the necessary fields for the stage change
-      updateData.currentStage = nextStage;
-      updateData.status = nextStatus;
-      updateData.printingQty = roll.extrudingQty;
-      updateData.printedById = currentUserId;
       
       // Use string value instead of Date object
       updateRollMutation.mutate({
@@ -108,25 +105,12 @@ export function RollCard({ roll }: RollCardProps) {
       nextStage = "cutting";
       nextStatus = "pending";
       
-      // For printing to cutting stage
-      updateData.currentStage = nextStage;
-      updateData.status = nextStatus;
-      updateData.cutById = currentUserId;
-      
       updateRollMutation.mutate({
         status: nextStatus,
         currentStage: nextStage,
         cutById: currentUserId
       });
       
-    } else if (roll.currentStage === "cutting") {
-      nextStage = "completed";
-      nextStatus = "completed";
-      
-      updateRollMutation.mutate({
-        status: nextStatus,
-        currentStage: nextStage
-      });
     } else {
       // Default case - just update status
       updateRollMutation.mutate({
