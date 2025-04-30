@@ -51,6 +51,12 @@ export function RollCard({ roll }: RollCardProps) {
     enabled: !!customerProduct?.itemId,
   });
   
+  // Fetch creator user data
+  const { data: creator } = useQuery<any>({
+    queryKey: [roll.createdById ? `${API_ENDPOINTS.USERS}/${roll.createdById}` : null],
+    enabled: !!roll.createdById,
+  });
+  
   // Mutations for updating roll status
   const updateRollMutation = useMutation({
     mutationFn: async (updateData: Partial<Roll>) => {
@@ -182,13 +188,13 @@ export function RollCard({ roll }: RollCardProps) {
                     ? roll.printingQty 
                     : roll.cuttingQty
               } Kg
-              <span className="ml-1 text-secondary-500">
-                {t("common.created_by")}: {roll.createdById || "Admin"}
-              </span>
             </p>
             {roll.currentStage === "printing" && customerProduct?.printingCylinder && (
               <p><span className="font-medium">{t("production.printing_cylinder")}:</span> {customerProduct.printingCylinder} {t("common.inch")}</p>
             )}
+            <p className="text-secondary-500 text-xs pt-1">
+              {t("common.created_by")}: {creator?.name || "Admin"}
+            </p>
           </div>
           
           {/* Mobile-optimized action buttons */}
