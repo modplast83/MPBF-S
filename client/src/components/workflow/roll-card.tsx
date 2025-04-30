@@ -160,7 +160,7 @@ export function RollCard({ roll }: RollCardProps) {
           {/* Mobile-optimized header */}
           <div className="flex justify-between items-center mb-2 md:mb-3">
             <span className="font-medium text-base md:text-lg truncate max-w-[65%]">
-              {t("rolls.title")} #{roll.serialNumber}
+              JO #{roll.jobOrderId}-{t("rolls.title")} #{roll.serialNumber}
             </span>
             <StatusBadge status={roll.status} />
           </div>
@@ -174,13 +174,17 @@ export function RollCard({ roll }: RollCardProps) {
               {item?.name || customerProduct?.itemId} 
               <span className="ml-1">({customerProduct?.sizeCaption})</span>
             </p>
-            <p><span className="font-medium">{t("orders.quantity")}:</span> {
+            <p>
+              <span className="font-medium">{t("orders.quantity")}:</span> {
                 roll.currentStage === "extrusion" 
                   ? roll.extrudingQty 
                   : roll.currentStage === "printing" 
                     ? roll.printingQty 
                     : roll.cuttingQty
               } Kg
+              <span className="ml-1 text-secondary-500">
+                {t("common.created_by")}: {roll.createdById || "Admin"}
+              </span>
             </p>
             {roll.currentStage === "printing" && customerProduct?.printingCylinder && (
               <p><span className="font-medium">{t("production.printing_cylinder")}:</span> {customerProduct.printingCylinder} {t("common.inch")}</p>
