@@ -98,30 +98,40 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
     >
       <div className={`p-4 border-b border-gray-700/50 ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className="flex justify-between items-center">
-          <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <div className="bg-white/10 backdrop-blur-sm p-2 rounded-lg shadow-inner">
-              <img 
-                src="/assets/company-logo.png" 
-                alt="Modern Plastic Bag Factory" 
-                className="h-8 w-8 object-contain"
-              />
+          {expanded ? (
+            <div className="flex flex-col items-center w-full">
+              <div className="bg-white/10 backdrop-blur-sm p-3 rounded-lg shadow-inner mx-auto">
+                <img 
+                  src="/assets/company-logo.png" 
+                  alt="Modern Plastic Bag Factory" 
+                  className="h-12 w-12 object-contain"
+                />
+              </div>
+              <h1 className="text-sm font-semibold mt-3 whitespace-normal leading-tight text-white/90 text-center">
+                {t("app.title")}
+              </h1>
             </div>
-            {!expanded && <span className="hidden"></span>}
-          </div>
+          ) : (
+            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="bg-white/10 backdrop-blur-sm p-2 rounded-lg shadow-inner">
+                <img 
+                  src="/assets/company-logo.png" 
+                  alt="Modern Plastic Bag Factory" 
+                  className="h-10 w-10 object-contain"
+                />
+              </div>
+            </div>
+          )}
+          
           <button 
             onClick={toggle} 
-            className="text-white/80 hover:text-white focus:outline-none transition-colors"
+            className={`text-white/80 hover:text-white focus:outline-none transition-colors ${expanded ? 'absolute right-4' : ''}`}
           >
             <span className={`material-icons ${isRTL ? 'flip-in-rtl' : ''}`}>
               {expanded ? "menu_open" : "menu"}
             </span>
           </button>
         </div>
-        {expanded && (
-          <h1 className="text-sm font-semibold mt-3 whitespace-normal leading-tight text-white/90">
-            {t("app.title")}
-          </h1>
-        )}
       </div>
       
       <nav className="mt-5 flex-grow overflow-y-auto scrollbar-hide">
