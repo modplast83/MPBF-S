@@ -67,10 +67,20 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
     enabled: !!customerProduct?.itemId,
   });
   
-  // Fetch user data for the creator
+  // Fetch user data for the creator, printer, and cutter
   const { data: creator } = useQuery<User>({
     queryKey: [roll.createdById ? `${API_ENDPOINTS.USERS}/${roll.createdById}` : null],
     enabled: !!roll.createdById,
+  });
+  
+  const { data: printer } = useQuery<User>({
+    queryKey: [roll.printedById ? `${API_ENDPOINTS.USERS}/${roll.printedById}` : null],
+    enabled: !!roll.printedById,
+  });
+  
+  const { data: cutter } = useQuery<User>({
+    queryKey: [roll.cutById ? `${API_ENDPOINTS.USERS}/${roll.cutById}` : null],
+    enabled: !!roll.cutById,
   });
   
   // Get the maximum available quantity for cutting (from printing stage)
@@ -359,6 +369,8 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
           <div class="footer">
             Printed on ${new Date().toLocaleString()}<br>
             Created by: ${creator?.name || roll.createdById || 'System User'}
+            ${roll.printedById ? `<br>Printed by: ${printer?.name || roll.printedById}` : ''}
+            ${roll.cutById ? `<br>Cut by: ${cutter?.name || roll.cutById}` : ''}
           </div>
         </div>
       </body>
@@ -481,21 +493,21 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                       {roll.createdById && (
                         <div className="flex justify-between text-xs">
                           <span className="text-secondary-500">{t("production.roll_management.created_by")}</span>
-                          <span className="font-medium">{roll.createdById}</span>
+                          <span className="font-medium">{creator?.name || roll.createdById}</span>
                         </div>
                       )}
                       
                       {roll.printedById && roll.currentStage !== "extrusion" && (
                         <div className="flex justify-between text-xs">
                           <span className="text-secondary-500">{t("production.roll_management.printed_by")}</span>
-                          <span className="font-medium">{roll.printedById}</span>
+                          <span className="font-medium">{printer?.name || roll.printedById}</span>
                         </div>
                       )}
                       
                       {roll.cutById && roll.currentStage === "completed" && (
                         <div className="flex justify-between text-xs">
                           <span className="text-secondary-500">{t("production.roll_management.cut_by")}</span>
-                          <span className="font-medium">{roll.cutById}</span>
+                          <span className="font-medium">{cutter?.name || roll.cutById}</span>
                         </div>
                       )}
                     </div>
