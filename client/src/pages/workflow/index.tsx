@@ -71,7 +71,7 @@ export default function WorkflowIndex() {
                 <span className="material-icons text-success text-base md:text-lg">content_cut</span>
                 <span className="text-xs md:text-sm truncate">{t("rolls.cutting")}</span>
                 <span className="h-4 w-4 md:h-5 md:w-5 rounded-full bg-success-100 text-xs flex items-center justify-center">
-                  {cuttingLoading ? "-" : cuttingRolls?.length || 0}
+                  {cuttingLoading ? "-" : cuttingRolls?.filter(roll => roll.status !== "completed").length || 0}
                 </span>
               </TabsTrigger>
             </TabsList>
@@ -165,7 +165,7 @@ export default function WorkflowIndex() {
                     <p className="text-xs md:text-sm text-secondary-500">
                       {cuttingLoading 
                         ? t("production.roll_management.loading") 
-                        : `${cuttingRolls?.length || 0} ${t("production.roll_management.rolls_ready_cutting")}`}
+                        : `${cuttingRolls?.filter(roll => roll.status !== "completed").length || 0} ${t("production.roll_management.rolls_ready_cutting")}`}
                     </p>
                     <p className="text-xs text-secondary-400 italic">
                       {t("production.roll_management.cutting_note")}
@@ -180,9 +180,12 @@ export default function WorkflowIndex() {
                       <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
                     </>
                   ) : cuttingRolls && cuttingRolls.length > 0 ? (
-                    cuttingRolls.map((roll) => (
-                      <RollCard key={roll.id} roll={roll} />
-                    ))
+                    // Filter out completed rolls from the cutting stage view
+                    cuttingRolls
+                      .filter(roll => roll.status !== "completed")
+                      .map((roll) => (
+                        <RollCard key={roll.id} roll={roll} />
+                      ))
                   ) : (
                     <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                       <span className="material-icons text-3xl mb-2">hourglass_empty</span>

@@ -196,7 +196,14 @@ export default function FinalProducts() {
     };
   };
 
-  const columns = [
+  // Define the column types explicitly
+  type FinalProductColumnDef = {
+    header: string;
+    accessorKey?: keyof FinalProduct;
+    cell?: (row: FinalProduct) => React.ReactNode;
+  };
+
+  const columns: FinalProductColumnDef[] = [
     {
       header: "ID",
       accessorKey: "id",
@@ -204,7 +211,7 @@ export default function FinalProducts() {
     {
       header: "Order",
       accessorKey: "jobOrderId",
-      cell: (row: { jobOrderId: number }) => {
+      cell: (row) => {
         const details = getJobOrderDetails(row.jobOrderId);
         return `#${details.orderNumber}`;
       },
@@ -212,7 +219,7 @@ export default function FinalProducts() {
     {
       header: "Customer",
       accessorKey: "jobOrderId",
-      cell: (row: { jobOrderId: number }) => {
+      cell: (row) => {
         const details = getJobOrderDetails(row.jobOrderId);
         return details.customer;
       },
@@ -220,7 +227,7 @@ export default function FinalProducts() {
     {
       header: "Product",
       accessorKey: "jobOrderId",
-      cell: (row: { jobOrderId: number }) => {
+      cell: (row) => {
         const details = getJobOrderDetails(row.jobOrderId);
         return details.productName;
       },
@@ -232,16 +239,16 @@ export default function FinalProducts() {
     {
       header: "Completion Date",
       accessorKey: "completedDate",
-      cell: (row: { completedDate: string }) => formatDateString(row.completedDate),
+      cell: (row) => formatDateString(row.completedDate),
     },
     {
       header: "Status",
       accessorKey: "status",
-      cell: (row: { status: string }) => <StatusBadge status={row.status} />,
+      cell: (row) => <StatusBadge status={row.status} />,
     },
     {
       header: "Actions",
-      cell: (row: FinalProduct) => (
+      cell: (row) => (
         <div className="flex space-x-2">
           <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
             <span className="material-icons text-sm">edit</span>
