@@ -8,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
@@ -353,19 +354,25 @@ export default function RawMaterials() {
         <h1 className="text-2xl font-bold text-secondary-900">Raw Materials</h1>
         {isMobile && (
           <div className="flex space-x-2">
-            <Button 
-              onClick={() => setInputFormOpen(true)} 
-              variant="outline"
-              className="rounded-full h-10 w-10 p-0"
-            >
-              <span className="material-icons text-base">add_shopping_cart</span>
-            </Button>
-            <Button 
-              onClick={() => setFormOpen(true)} 
-              className="rounded-full h-10 w-10 p-0"
-            >
-              <span className="material-icons text-base">add</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  className="rounded-full h-10 w-10 p-0"
+                >
+                  <span className="material-icons text-base">add</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setFormOpen(true)}>
+                  <span className="material-icons text-sm mr-2">add</span>
+                  Add Material
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setInputFormOpen(true)}>
+                  <span className="material-icons text-sm mr-2">add_shopping_cart</span>
+                  Input Material
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
