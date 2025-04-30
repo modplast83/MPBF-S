@@ -257,14 +257,24 @@ export default function RawMaterials() {
 
   const tableActions = (
     <div className="flex space-x-2">
-      <Button onClick={() => setFormOpen(true)}>
-        <span className="material-icons text-sm mr-1">add</span>
-        {isMobile ? "" : "Add Material"}
-      </Button>
-      <Button onClick={() => setInputFormOpen(true)} variant="outline">
-        <span className="material-icons text-sm mr-1">add_shopping_cart</span>
-        {isMobile ? "" : "Input Material"}
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button>
+            <span className="material-icons text-sm mr-1">add</span>
+            Actions
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={() => setFormOpen(true)}>
+            <span className="material-icons text-sm mr-2">add</span>
+            Add Material
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setInputFormOpen(true)}>
+            <span className="material-icons text-sm mr-2">add_shopping_cart</span>
+            Input Material
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
   
