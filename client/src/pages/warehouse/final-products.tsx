@@ -13,7 +13,7 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDateString } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { FinalProduct, JobOrder, CustomerProduct, Order, Customer, Roll } from "@shared/schema";
+import { FinalProduct, JobOrder, CustomerProduct, Order, Customer, Roll, Item } from "@shared/schema";
 
 export default function FinalProducts() {
   const queryClient = useQueryClient();
@@ -45,6 +45,10 @@ export default function FinalProducts() {
 
   const { data: customers } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
+  });
+  
+  const { data: items = [] } = useQuery<Item[]>({
+    queryKey: [API_ENDPOINTS.ITEMS],
   });
   
   // Fetch all rolls to calculate cutting quantities
@@ -161,13 +165,22 @@ export default function FinalProducts() {
     const product = customerProducts?.find(cp => cp.id === jobOrder.customerProductId);
     const customer = order ? customers?.find(c => c.id === order.customerId) : null;
     
+    // Get the actual item name from the items collection
+    let itemName = "Unknown";
+    if (product && product.itemId) {
+      const item = items.find(i => i.id === product.itemId);
+      if (item) {
+        itemName = item.name;
+      }
+    }
+    
     // Calculate total cut quantity from all completed rolls for this job order
     const jobOrderRolls = rolls.filter(roll => roll.jobOrderId === jobOrderId && roll.currentStage === "cutting" && roll.status === "completed");
     const totalCutQty = jobOrderRolls.reduce((total, roll) => total + (roll.cuttingQty || 0), 0);
     
     return {
       orderNumber: order?.id.toString() || "Unknown",
-      productName: product?.itemId || "Unknown",
+      productName: itemName,
       customer: customer?.name || "Unknown",
       totalCutQty: totalCutQty
     };
