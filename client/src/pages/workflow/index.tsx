@@ -101,9 +101,19 @@ export default function WorkflowIndex() {
                         <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
                       </>
                     ) : extrusionRolls && extrusionRolls.length > 0 ? (
-                      extrusionRolls.map((roll) => (
-                        <RollCard key={roll.id} roll={roll} />
-                      ))
+                      // Sort rolls by job order ID first, then by roll ID
+                      [...extrusionRolls]
+                        .sort((a, b) => {
+                          // First sort by job order ID
+                          if (a.jobOrderId !== b.jobOrderId) {
+                            return a.jobOrderId - b.jobOrderId;
+                          }
+                          // Then sort by roll ID
+                          return a.id.localeCompare(b.id);
+                        })
+                        .map((roll) => (
+                          <RollCard key={roll.id} roll={roll} />
+                        ))
                     ) : (
                       <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                         <span className="material-icons text-3xl mb-2">hourglass_empty</span>
@@ -141,9 +151,19 @@ export default function WorkflowIndex() {
                       <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
                     </>
                   ) : printingRolls && printingRolls.length > 0 ? (
-                    printingRolls.map((roll) => (
-                      <RollCard key={roll.id} roll={roll} />
-                    ))
+                    // Sort rolls by job order ID first, then by roll ID
+                    [...printingRolls]
+                      .sort((a, b) => {
+                        // First sort by job order ID
+                        if (a.jobOrderId !== b.jobOrderId) {
+                          return a.jobOrderId - b.jobOrderId;
+                        }
+                        // Then sort by roll ID
+                        return a.id.localeCompare(b.id);
+                      })
+                      .map((roll) => (
+                        <RollCard key={roll.id} roll={roll} />
+                      ))
                   ) : (
                     <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                       <span className="material-icons text-3xl mb-2">hourglass_empty</span>
@@ -180,9 +200,17 @@ export default function WorkflowIndex() {
                       <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
                     </>
                   ) : cuttingRolls && cuttingRolls.length > 0 ? (
-                    // Filter out completed rolls from the cutting stage view
-                    cuttingRolls
+                    // Filter out completed rolls from the cutting stage view and sort by job order ID and roll ID
+                    [...cuttingRolls]
                       .filter(roll => roll.status !== "completed")
+                      .sort((a, b) => {
+                        // First sort by job order ID
+                        if (a.jobOrderId !== b.jobOrderId) {
+                          return a.jobOrderId - b.jobOrderId;
+                        }
+                        // Then sort by roll ID
+                        return a.id.localeCompare(b.id);
+                      })
                       .map((roll) => (
                         <RollCard key={roll.id} roll={roll} />
                       ))

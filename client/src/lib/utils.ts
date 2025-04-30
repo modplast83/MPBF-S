@@ -21,13 +21,13 @@ export function formatNumber(number: number, decimals = 0): string {
   }).format(number);
 }
 
-export function formatDateString(date: string | Date): string {
-  if (!date) return "";
+export function formatDateString(date: string | Date | null): string {
+  if (!date) return "N/A";
   return formatDate(new Date(date), "dd-MMM-yyyy");
 }
 
-export function formatDateTime(date: string | Date): string {
-  if (!date) return "";
+export function formatDateTime(date: string | Date | null): string {
+  if (!date) return "N/A";
   return formatDate(new Date(date), "dd-MMM-yyyy HH:mm");
 }
 
