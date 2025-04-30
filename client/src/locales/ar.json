@@ -140,7 +140,8 @@
       "trend_more_than_yesterday": "5 أكثر من الأمس",
       "low_inventory_alert": "تنبيه: مخزون منخفض",
       "recent_orders": "أحدث الطلبات",
-      "active_orders": "الطلبات النشطة"
+      "active_orders": "الطلبات النشطة",
+      "production_trends": "اتجاهات الإنتاج"
     },
     "setup": {
       "title": "إعداد النظام",

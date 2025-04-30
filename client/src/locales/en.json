@@ -140,7 +140,8 @@
       "trend_more_than_yesterday": "5 more than yesterday",
       "low_inventory_alert": "Low inventory alert",
       "recent_orders": "Recent Orders",
-      "active_orders": "Active Orders"
+      "active_orders": "Active Orders",
+      "production_trends": "Production Trends"
     },
     "setup": {
       "title": "System Setup",
