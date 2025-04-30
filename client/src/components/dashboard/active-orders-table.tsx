@@ -327,7 +327,7 @@ export function ActiveOrdersTable() {
         <div className="flex items-center gap-1 sm:gap-2">
           <span className="material-icons text-primary-600 text-sm sm:text-base">receipt_long</span>
           <h3 className={`font-semibold text-sm sm:text-lg text-gray-800 ${isRTL ? 'text-right' : ''}`}>
-            {isMobile ? t("orders.active_orders") : t("orders.active_production_orders")}
+            {t("orders.active_orders")}
           </h3>
         </div>
         {actions}
