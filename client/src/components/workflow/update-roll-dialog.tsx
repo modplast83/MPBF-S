@@ -120,7 +120,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
         body: JSON.stringify(data)
       });
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       // Invalidate and refetch relevant queries
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${roll.jobOrderId}/rolls`] });
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/extrusion`] });
@@ -128,7 +128,8 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/cutting`] });
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ROLLS] });
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.JOB_ORDERS] }); // Also invalidate job orders
-      
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.FINAL_PRODUCTS] }); // Invalidate final products
+
       // Show success toast
       toast({
         title: t("production.roll_management.roll_updated"),
@@ -148,6 +149,30 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
     },
   });
 
+  // Create final product mutation
+  const createFinalProductMutation = useMutation({
+    mutationFn: async (data: { jobOrderId: number; quantity: number; status: string }) => {
+      return apiRequest(API_ENDPOINTS.FINAL_PRODUCTS, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.FINAL_PRODUCTS] });
+      toast({
+        title: t("warehouse.final_product_created"),
+        description: t("warehouse.final_product_created_success", { jobOrderId: roll.jobOrderId }),
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: t("common.error"),
+        description: t("warehouse.final_product_creation_failed", { error }),
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
     // Update roll with new cutting quantity and mark it as completed
     const updatedRoll: Partial<Roll> = {
@@ -158,7 +183,19 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
       wastePercentage
     };
     
-    updateRollMutation.mutate(updatedRoll);
+    // First update the roll
+    updateRollMutation.mutate(updatedRoll, {
+      onSuccess: () => {
+        // Then create a final product entry in warehouse
+        if (roll.currentStage === "cutting") {
+          createFinalProductMutation.mutate({
+            jobOrderId: roll.jobOrderId,
+            quantity: values.cuttingQty,
+            status: "in-stock"
+          });
+        }
+      }
+    });
   };
 
   const getQuantityLabel = () => {

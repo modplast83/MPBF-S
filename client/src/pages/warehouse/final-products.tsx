@@ -158,7 +158,9 @@ export default function FinalProducts() {
       orderNumber: "Unknown", 
       productName: "Unknown", 
       customer: "Unknown",
-      totalCutQty: 0
+      totalCutQty: 0,
+      totalRequiredQty: 0,
+      completionPercentage: 0
     };
     
     const order = orders?.find(o => o.id === jobOrder.orderId);
@@ -178,11 +180,19 @@ export default function FinalProducts() {
     const jobOrderRolls = rolls.filter(roll => roll.jobOrderId === jobOrderId && roll.currentStage === "cutting" && roll.status === "completed");
     const totalCutQty = jobOrderRolls.reduce((total, roll) => total + (roll.cuttingQty || 0), 0);
     
+    // Calculate completion percentage
+    const totalRequiredQty = jobOrder.quantity || 0;
+    const completionPercentage = totalRequiredQty > 0 
+      ? Math.min(100, Math.round((totalCutQty / totalRequiredQty) * 100)) 
+      : 0;
+    
     return {
       orderNumber: order?.id.toString() || "Unknown",
       productName: itemName,
       customer: customer?.name || "Unknown",
-      totalCutQty: totalCutQty
+      totalCutQty: totalCutQty,
+      totalRequiredQty: totalRequiredQty,
+      completionPercentage: completionPercentage
     };
   };
 
@@ -306,7 +316,7 @@ export default function FinalProducts() {
                     const details = getJobOrderDetails(jo.id);
                     return (
                       <SelectItem key={jo.id} value={jo.id.toString()}>
-                        JO #{jo.id} - {details.customer} - {details.productName} - Cut: {details.totalCutQty} kg
+                        JO #{jo.id} - {details.customer} - {details.productName} - {details.totalCutQty}/{details.totalRequiredQty} kg ({details.completionPercentage}%)
                       </SelectItem>
                     );
                   })}
