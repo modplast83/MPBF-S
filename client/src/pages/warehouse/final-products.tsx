@@ -13,7 +13,7 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDateString } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { FinalProduct, JobOrder, CustomerProduct, Order, Customer } from "@shared/schema";
+import { FinalProduct, JobOrder, CustomerProduct, Order, Customer, Roll } from "@shared/schema";
 
 export default function FinalProducts() {
   const queryClient = useQueryClient();
@@ -46,14 +46,25 @@ export default function FinalProducts() {
   const { data: customers } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
   });
+  
+  // Fetch all rolls to calculate cutting quantities
+  const { data: rolls = [] } = useQuery<Roll[]>({
+    queryKey: [API_ENDPOINTS.ROLLS],
+  });
 
   // Create/Update mutation
   const saveMutation = useMutation({
     mutationFn: async (data: { jobOrderId: number; quantity: number; status: string }) => {
       if (editProduct) {
-        await apiRequest("PUT", `${API_ENDPOINTS.FINAL_PRODUCTS}/${editProduct.id}`, data);
+        await apiRequest(`${API_ENDPOINTS.FINAL_PRODUCTS}/${editProduct.id}`, {
+          method: "PUT", 
+          body: JSON.stringify(data)
+        });
       } else {
-        await apiRequest("POST", API_ENDPOINTS.FINAL_PRODUCTS, data);
+        await apiRequest(API_ENDPOINTS.FINAL_PRODUCTS, {
+          method: "POST", 
+          body: JSON.stringify(data)
+        });
       }
     },
     onSuccess: () => {
@@ -76,7 +87,9 @@ export default function FinalProducts() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `${API_ENDPOINTS.FINAL_PRODUCTS}/${id}`, null);
+      await apiRequest(`${API_ENDPOINTS.FINAL_PRODUCTS}/${id}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.FINAL_PRODUCTS] });
@@ -137,16 +150,26 @@ export default function FinalProducts() {
   // Helper functions
   const getJobOrderDetails = (jobOrderId: number) => {
     const jobOrder = jobOrders?.find(jo => jo.id === jobOrderId);
-    if (!jobOrder) return { orderNumber: "Unknown", productName: "Unknown", customer: "Unknown" };
+    if (!jobOrder) return { 
+      orderNumber: "Unknown", 
+      productName: "Unknown", 
+      customer: "Unknown",
+      totalCutQty: 0
+    };
     
     const order = orders?.find(o => o.id === jobOrder.orderId);
     const product = customerProducts?.find(cp => cp.id === jobOrder.customerProductId);
     const customer = order ? customers?.find(c => c.id === order.customerId) : null;
     
+    // Calculate total cut quantity from all completed rolls for this job order
+    const jobOrderRolls = rolls.filter(roll => roll.jobOrderId === jobOrderId && roll.currentStage === "cutting" && roll.status === "completed");
+    const totalCutQty = jobOrderRolls.reduce((total, roll) => total + (roll.cuttingQty || 0), 0);
+    
     return {
       orderNumber: order?.id.toString() || "Unknown",
       productName: product?.itemId || "Unknown",
-      customer: customer?.name || "Unknown"
+      customer: customer?.name || "Unknown",
+      totalCutQty: totalCutQty
     };
   };
 
@@ -250,7 +273,18 @@ export default function FinalProducts() {
               <Label htmlFor="jobOrder" className="text-right">
                 Job Order
               </Label>
-              <Select value={jobOrderId.toString()} onValueChange={(value) => setJobOrderId(parseInt(value))}>
+              <Select 
+                value={jobOrderId.toString()} 
+                onValueChange={(value) => {
+                  const id = parseInt(value);
+                  setJobOrderId(id);
+                  
+                  // Auto-set quantity to total cut quantity when selecting a job order
+                  const details = getJobOrderDetails(id);
+                  if (details.totalCutQty > 0) {
+                    setQuantity(details.totalCutQty);
+                  }
+                }}>
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a job order" />
                 </SelectTrigger>
@@ -259,7 +293,7 @@ export default function FinalProducts() {
                     const details = getJobOrderDetails(jo.id);
                     return (
                       <SelectItem key={jo.id} value={jo.id.toString()}>
-                        Order #{details.orderNumber} - {details.productName}
+                        JO #{jo.id} - {details.customer} - {details.productName} - Cut: {details.totalCutQty} kg
                       </SelectItem>
                     );
                   })}
