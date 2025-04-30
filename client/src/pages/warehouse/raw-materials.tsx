@@ -403,7 +403,6 @@ export default function RawMaterials() {
             <DataTable 
               data={materials || []}
               columns={columns as any}
-              actions={!isMobile ? tableActions : undefined}
             />
           )}
         </CardContent>
