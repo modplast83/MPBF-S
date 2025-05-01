@@ -383,7 +383,14 @@
       "cutting": "Cutting",
       "completed": "Completed",
       "pending": "Pending",
-      "processing": "Processing"
+      "processing": "Processing",
+      "roll_quantity": "Roll Quantity (kg)",
+      "enter_quantity": "Enter quantity",
+      "create_roll": "Create Roll",
+      "already_extruded": "Already Extruded",
+      "remaining_quantity": "Remaining Quantity",
+      "quantity_exceeds": "The quantity exceeds the remaining job order quantity by {{amount}} kg",
+      "quantity_error": "Quantity must be greater than 0"
     },
     "language": {
       "en": "English",

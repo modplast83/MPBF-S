@@ -383,7 +383,14 @@
       "cutting": "القص",
       "completed": "مكتمل",
       "pending": "معلق",
-      "processing": "قيد المعالجة"
+      "processing": "قيد المعالجة",
+      "roll_quantity": "كمية الرول (كجم)",
+      "enter_quantity": "أدخل الكمية",
+      "create_roll": "إنشاء رول",
+      "already_extruded": "تم انتاجه بالفعل",
+      "remaining_quantity": "الكمية المتبقية",
+      "quantity_exceeds": "الكمية تتجاوز كمية أمر العمل المتبقية بمقدار {{amount}} كجم",
+      "quantity_error": "يجب أن تكون الكمية أكبر من صفر"
     },
     "language": {
       "en": "English",

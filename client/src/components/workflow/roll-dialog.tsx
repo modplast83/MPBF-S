@@ -10,6 +10,8 @@ import { z } from "zod";
 import { JobOrder, CreateRoll, Roll } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import { API_ENDPOINTS } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 
 interface RollDialogProps {
   open: boolean;
@@ -20,6 +22,8 @@ interface RollDialogProps {
 }
 
 export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }: RollDialogProps) {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const [stage] = useState<string>("extrusion");
   const [currentQty, setCurrentQty] = useState<number>(0);
   const [exceedsLimit, setExceedsLimit] = useState<boolean>(false);
@@ -40,7 +44,7 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
   const formSchema = z.object({
     extrudingQty: z.coerce
       .number()
-      .positive("Quantity must be greater than 0"),
+      .positive(t('rolls.quantity_error')),
     jobOrderId: z.number().positive(),
   });
 
@@ -97,15 +101,15 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={`sm:max-w-[425px] ${isRTL ? 'rtl' : ''}`}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Create New Roll
-            <Badge variant="outline" className="ml-2">
+            {t('rolls.new_roll')}
+            <Badge variant="outline" className={`${isRTL ? 'mr-2' : 'ml-2'}`}>
               {stage === "extrusion" && (
                 <span className="flex items-center text-primary-500">
-                  <span className="material-icons text-sm mr-1">merge_type</span>
-                  Extrusion
+                  <span className={`material-icons text-sm ${isRTL ? 'ml-1' : 'mr-1'}`}>merge_type</span>
+                  {t('rolls.extrusion')}
                 </span>
               )}
             </Badge>
@@ -117,30 +121,30 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
             <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
               <div className="grid gap-4 py-2">
                 <div className="grid gap-1">
-                  <div className="text-sm font-medium">Job Order</div>
+                  <div className="text-sm font-medium">{t('job_orders.title')}</div>
                   <div className="text-sm">#{jobOrder.id}</div>
                 </div>
 
                 <div className="grid gap-1 bg-secondary-50 p-3 rounded-md">
-                  <div className="text-sm font-medium">Job Order Details</div>
+                  <div className="text-sm font-medium">{t('job_orders.title')} {t('common.details')}</div>
                   <div className="grid grid-cols-2 gap-2 mt-1">
                     <div>
-                      <div className="text-xs text-secondary-500">Total Quantity</div>
+                      <div className="text-xs text-secondary-500">{t('orders.total_quantity')}</div>
                       <div className="text-sm font-medium">{jobOrder.quantity} kg</div>
                     </div>
                     <div>
-                      <div className="text-xs text-secondary-500">Already Extruded</div>
+                      <div className="text-xs text-secondary-500">{t('rolls.already_extruded')}</div>
                       <div className="text-sm font-medium">{totalExtrudedQty} kg</div>
                     </div>
                     <div>
-                      <div className="text-xs text-secondary-500">Remaining Quantity</div>
+                      <div className="text-xs text-secondary-500">{t('rolls.remaining_quantity')}</div>
                       <div className="text-sm font-medium text-primary-600">{remainingQty} kg</div>
                     </div>
                   </div>
                   {exceedsLimit && (
-                    <div className="mt-2 text-xs text-warning-600 bg-warning-50 p-2 rounded border border-warning-200 flex items-center">
-                      <span className="material-icons text-sm mr-1">warning</span>
-                      The quantity exceeds the remaining job order quantity by {excessAmount.toFixed(2)} kg
+                    <div className={`mt-2 text-xs text-warning-600 bg-warning-50 p-2 rounded border border-warning-200 flex items-center ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <span className={`material-icons text-sm ${isRTL ? 'ml-1' : 'mr-1'}`}>warning</span>
+                      {t('rolls.quantity_exceeds', { amount: excessAmount.toFixed(2) })}
                     </div>
                   )}
                 </div>
@@ -150,13 +154,13 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
                   name="extrudingQty"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Roll Quantity (kg)</FormLabel>
+                      <FormLabel>{t('rolls.roll_quantity')}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           step="0.01"
                           min="0"
-                          placeholder="Enter quantity"
+                          placeholder={t('rolls.enter_quantity')}
                           {...field}
                         />
                       </FormControl>
@@ -166,19 +170,19 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
                 />
               </div>
 
-              <DialogFooter>
+              <DialogFooter className={isRTL ? 'flex-row-reverse' : ''}>
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={() => onOpenChange(false)}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={isLoading || Number(form.getValues().extrudingQty) <= 0}
                 >
-                  {isLoading ? "Creating..." : "Create Roll"}
+                  {isLoading ? t('common.creating') : t('rolls.create_roll')}
                 </Button>
               </DialogFooter>
             </form>
