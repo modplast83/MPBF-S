@@ -361,7 +361,7 @@ export default function RawMaterials() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Raw Materials</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t('warehouse.raw_materials')}</h1>
         {isMobile && (
           <div className="flex space-x-2">
             <DropdownMenu>
@@ -374,12 +374,12 @@ export default function RawMaterials() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setFormOpen(true)}>
-                  <span className="material-icons text-sm mr-2">add</span>
-                  Add Material
+                  <span className={`material-icons text-sm ${isRTL ? 'ml-2' : 'mr-2'}`}>add</span>
+                  {t('warehouse.add_material')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setInputFormOpen(true)}>
-                  <span className="material-icons text-sm mr-2">add_shopping_cart</span>
-                  Input Material
+                  <span className={`material-icons text-sm ${isRTL ? 'ml-2' : 'mr-2'}`}>add_shopping_cart</span>
+                  {t('warehouse.input_material')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -390,7 +390,7 @@ export default function RawMaterials() {
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Manage Raw Materials</span>
+            <span>{t('warehouse.manage_raw_materials')}</span>
             {!isMobile && tableActions}
           </CardTitle>
         </CardHeader>

@@ -275,7 +275,22 @@
     "warehouse": {
       "title": "Warehouse",
       "raw_materials": "Raw Materials",
-      "final_products": "Final Products" 
+      "final_products": "Final Products",
+      "manage_raw_materials": "Manage Raw Materials",
+      "manage_final_products": "Manage Final Products",
+      "add_material": "Add Material",
+      "edit_material": "Edit Material",
+      "input_material": "Input Material",
+      "add_new_material": "Add New Material",
+      "name": "Name",
+      "type": "Type", 
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "select_unit": "Select a unit",
+      "select_material": "Select a material",
+      "add_to_list": "Add to List",
+      "added_materials": "Added Materials",
+      "actions": "Actions"
     },
     "performance": {
       "title": "Performance Metrics",

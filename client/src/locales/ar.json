@@ -202,7 +202,7 @@
         "extrusion_stage": "مرحلة الفيلم",
         "printing_stage": "مرحلة الطباعة",
         "cutting_stage": "مرحلة القص",
-        "create_rolls": "إنشاء رول من أوامر العمل النشطة",
+        "create_rolls": "إنشاء رول من أوامر الإنتاج النشطة",
         "rolls_in_extrusion": "الرولات في مرحلة الفيلم",
         "no_rolls_extrusion": "لا توجد رولات حاليا في مرحلة الفيلم",
         "rolls_ready_printing": "رولات جاهزة للطباعة",
@@ -217,7 +217,7 @@
         "stage_completed": "تم الانتهاء من {{stage}}",
         "roll_moved": "تم نقل الرول #{{rollNumber}} إلى مرحلة {{nextStage}}",
         "started_stage": "بدأت {{stage}}",
-        "processing_begun": "بدأت معالجة اللفة #{{rollNumber}}",
+        "processing_begun": "بدأت معالجة الرول #{{rollNumber}}",
         "roll_details": "تفاصيل الرول",
         "update_cutting_qty": "تحديث كمية القص",
         "roll_updated": "تم تحديث الرول",
@@ -275,7 +275,22 @@
     "warehouse": {
       "title": "المستودع",
       "raw_materials": "المواد الخام",
-      "final_products": "المنتجات النهائية" 
+      "final_products": "المنتجات النهائية",
+      "manage_raw_materials": "إدارة المواد الخام",
+      "manage_final_products": "إدارة المنتجات النهائية",
+      "add_material": "إضافة مادة",
+      "edit_material": "تعديل المادة",
+      "input_material": "إدخال مادة",
+      "add_new_material": "إضافة مادة جديدة",
+      "name": "الاسم",
+      "type": "النوع", 
+      "quantity": "الكمية",
+      "unit": "الوحدة",
+      "select_unit": "اختر وحدة",
+      "select_material": "اختر مادة",
+      "add_to_list": "إضافة للقائمة",
+      "added_materials": "المواد المضافة",
+      "actions": "إجراءات"
     },
     "performance": {
       "title": "مؤشرات الأداء",
@@ -349,9 +364,9 @@
       "product": "المنتج"
     },
     "job_orders": {
-      "title": "أوامر العمل",
-      "new_job_order": "أمر عمل جديد",
-      "job_order_id": "رقم أمر العمل",
+      "title": "أمر إنتاج",
+      "new_job_order": "أمر إنتاج جديد",
+      "job_order_id": "رقم أمر الإنتاج",
       "order_id": "رقم الطلب",
       "customer_product": "المنتج",
       "quantity": "الكمية (كجم)",
@@ -366,7 +381,7 @@
       "title": "رول",
       "new_roll": "رول جديدة",
       "roll_id": "رقم الرول",
-      "job_order_id": "رقم أمر العمل",
+      "job_order_id": "رقم أمر الإنتاج",
       "serial_number": "الرقم التسلسلي",
       "extruding_qty": "كمية الفيلم",
       "printing_qty": "كمية الطباعة",
@@ -384,12 +399,12 @@
       "completed": "مكتمل",
       "pending": "معلق",
       "processing": "قيد المعالجة",
-      "roll_quantity": "كمية الرول (كجم)",
+      "roll_quantity": "وزن الرول (كجم)",
       "enter_quantity": "أدخل الكمية",
       "create_roll": "إنشاء رول",
       "already_extruded": "تم انتاجه بالفعل",
       "remaining_quantity": "الكمية المتبقية",
-      "quantity_exceeds": "الكمية تتجاوز كمية أمر العمل المتبقية بمقدار {{amount}} كجم",
+      "quantity_exceeds": "الكمية تتجاوز كمية أمر الإنتاج المتبقية بمقدار {{amount}} كجم",
       "quantity_error": "يجب أن تكون الكمية أكبر من صفر"
     },
     "language": {
@@ -426,7 +441,7 @@
       "item_name": "اسم العنصر"
     },
     "cliches": {
-      "title": "تسعير الكليشيهات (اللوحات)",
+      "title": "تسعير الكليشيهات (الربلات)",
       "calculator": "الحاسبة",
       "parameters": "المعاملات",
       "history": "السجل",
