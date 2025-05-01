@@ -140,8 +140,8 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
   const addMaterial = () => {
     if (!selectedRawMaterial) {
       toast({
-        title: "Error",
-        description: "Please select a raw material",
+        title: t('common.error'),
+        description: t('production.mix_materials.select_material'),
         variant: "destructive",
       });
       return;
@@ -150,8 +150,8 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
     const quantity = parseFloat(rawMaterialQuantity);
     if (isNaN(quantity) || quantity <= 0) {
       toast({
-        title: "Error",
-        description: "Please enter a valid quantity greater than zero",
+        title: t('common.error'),
+        description: t('production.mix_materials.enter_quantity'),
         variant: "destructive",
       });
       return;
@@ -160,8 +160,8 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
     // Check if we already have this material
     if (materials.some(m => m.rawMaterialId === selectedRawMaterial)) {
       toast({
-        title: "Error",
-        description: "This material is already added to the mix",
+        title: t('common.error'),
+        description: t('production.mix_materials.add_material_failed'),
         variant: "destructive",
       });
       return;
@@ -184,8 +184,8 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
   const onSubmit = () => {
     if (materials.length === 0) {
       toast({
-        title: "Error",
-        description: "Please add at least one material to the mix",
+        title: t('common.error'),
+        description: t('production.mix_materials.no_materials'),
         variant: "destructive",
       });
       return;
@@ -197,7 +197,7 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
   // Get the material name by ID
   const getMaterialName = (id: number) => {
     const material = rawMaterials.find(m => m.id === id);
-    return material ? material.name : `Unknown Material (${id})`;
+    return material ? material.name : `${t('common.unknown')} ${t('production.mix_materials.material')} (${id})`;
   };
 
   // Calculate total weight of the mix
