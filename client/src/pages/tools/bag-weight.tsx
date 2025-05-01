@@ -38,6 +38,7 @@ export default function BagWeightCalculator() {
   const [results, setResults] = useState<{
     singleBagWeight: number;
     totalWeight: number;
+    bagsPerKg: number;
     area: number;
     volume: number;
   } | null>(null);
@@ -95,10 +96,14 @@ export default function BagWeightCalculator() {
     
     // Calculate total weight for the given quantity
     const totalWeight = singleBagWeight * quantity / 1000; // in kg
+    
+    // Calculate bags per kg
+    const bagsPerKg = 1000 / singleBagWeight; // 1000g = 1kg
 
     setResults({
       singleBagWeight,
       totalWeight,
+      bagsPerKg,
       area,
       volume,
     });
@@ -295,7 +300,7 @@ export default function BagWeightCalculator() {
           <CardContent>
             {results ? (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <h3 className="text-sm font-semibold text-muted-foreground">Single Bag Weight</h3>
                     <p className="text-2xl font-bold">
@@ -306,6 +311,12 @@ export default function BagWeightCalculator() {
                     <h3 className="text-sm font-semibold text-muted-foreground">Total Weight</h3>
                     <p className="text-2xl font-bold">
                       {results.totalWeight.toFixed(2)} kg
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground">Bags/KG</h3>
+                    <p className="text-2xl font-bold">
+                      {results.bagsPerKg.toFixed(0)}
                     </p>
                   </div>
                 </div>
@@ -341,6 +352,10 @@ export default function BagWeightCalculator() {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Quantity:</span>
                       <span>{form.getValues("quantity")} bags</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Bags per KG:</span>
+                      <span>{results.bagsPerKg.toFixed(0)} bags</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Bag Type:</span>
