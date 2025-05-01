@@ -435,7 +435,11 @@
       "approved": "Approved",
       "rejected": "Rejected",
       "active": "Active",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "in_stock": "In Stock",
+      "reserved": "Reserved",
+      "shipped": "Shipped",
+      "delivered": "Delivered"
     },
     "products": {
       "thickness": "Thickness", 

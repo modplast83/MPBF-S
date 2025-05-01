@@ -7,10 +7,14 @@
     "common": {
       "loading": "جاري التحميل...",
       "save": "حفظ",
+      "saving": "جاري الحفظ...",
       "cancel": "إلغاء",
       "delete": "حذف",
       "edit": "تعديل",
       "create": "إنشاء",
+      "creating": "جاري الإنشاء...",
+      "update": "تحديث",
+      "updating": "جاري التحديث...",
       "search": "بحث",
       "filter": "تصفية",
       "sort": "ترتيب",
@@ -24,6 +28,8 @@
       "export": "تصدير",
       "size": "الحجم",
       "out_of_stock": "غير متوفر",
+      "are_you_sure": "هل أنت متأكد؟",
+      "delete_confirmation": "سيتم حذف {{item}} نهائياً. لا يمكن التراجع عن هذا الإجراء.",
       "submit": "إرسال",
       "logout": "تسجيل الخروج",
       "login": "تسجيل الدخول",
@@ -290,7 +296,8 @@
       "select_material": "اختر مادة",
       "add_to_list": "إضافة للقائمة",
       "added_materials": "المواد المضافة",
-      "actions": "إجراءات"
+      "actions": "إجراءات",
+      "add_quantities_desc": "إضافة كميات إلى المواد الخام الموجودة"
     },
     "performance": {
       "title": "مؤشرات الأداء",

@@ -14,12 +14,18 @@ import { apiRequest } from "@/lib/queryClient";
 import { formatDateString } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { FinalProduct, JobOrder, CustomerProduct, Order, Customer, Roll, Item } from "@shared/schema";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function FinalProducts() {
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<FinalProduct | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<FinalProduct | null>(null);
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+  const isMobile = useIsMobile();
   
   // Form state
   const [jobOrderId, setJobOrderId] = useState<number>(0);
@@ -205,11 +211,11 @@ export default function FinalProducts() {
 
   const columns: FinalProductColumnDef[] = [
     {
-      header: "ID",
+      header: t('common.id'),
       accessorKey: "id",
     },
     {
-      header: "Order",
+      header: t('orders.title'),
       accessorKey: "jobOrderId",
       cell: (row) => {
         const details = getJobOrderDetails(row.jobOrderId);
@@ -217,7 +223,7 @@ export default function FinalProducts() {
       },
     },
     {
-      header: "Customer",
+      header: t('setup.customers.title'),
       accessorKey: "jobOrderId",
       cell: (row) => {
         const details = getJobOrderDetails(row.jobOrderId);
@@ -225,7 +231,7 @@ export default function FinalProducts() {
       },
     },
     {
-      header: "Product",
+      header: t('orders.product'),
       accessorKey: "jobOrderId",
       cell: (row) => {
         const details = getJobOrderDetails(row.jobOrderId);
@@ -233,23 +239,23 @@ export default function FinalProducts() {
       },
     },
     {
-      header: "Quantity (Kg)",
+      header: t('warehouse.quantity') + " (Kg)",
       accessorKey: "quantity",
     },
     {
-      header: "Completion Date",
+      header: t('rolls.completed'),
       accessorKey: "completedDate",
       cell: (row) => formatDateString(row.completedDate),
     },
     {
-      header: "Status",
+      header: t('common.status'),
       accessorKey: "status",
       cell: (row) => <StatusBadge status={row.status} />,
     },
     {
-      header: "Actions",
+      header: t('common.actions'),
       cell: (row) => (
-        <div className="flex space-x-2">
+        <div className={`flex ${isRTL ? "space-x-reverse" : "space-x-2"}`}>
           <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
             <span className="material-icons text-sm">edit</span>
           </Button>
@@ -264,20 +270,20 @@ export default function FinalProducts() {
   const tableActions = (
     <Button onClick={() => setFormOpen(true)}>
       <span className="material-icons text-sm mr-1">add</span>
-      Add Final Product
+      {t('warehouse.add_new_material')}
     </Button>
   );
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Final Products</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t('warehouse.final_products')}</h1>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Manage Final Products</span>
+            <span>{t('warehouse.manage_final_products')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -292,16 +298,16 @@ export default function FinalProducts() {
 
       {/* Add/Edit Final Product Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent>
+        <DialogContent className={isRTL ? "rtl" : ""}>
           <DialogHeader>
             <DialogTitle>
-              {editProduct ? "Edit Final Product" : "Add New Final Product"}
+              {editProduct ? t('warehouse.edit_material') : t('warehouse.add_new_material')}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="jobOrder" className="text-right">
-                Job Order
+            <div className={`grid ${isMobile ? "" : "grid-cols-4"} items-center gap-4`}>
+              <Label htmlFor="jobOrder" className={isMobile ? "" : "text-right"}>
+                {t('job_orders.title')}
               </Label>
               <Select 
                 value={jobOrderId.toString()} 
@@ -315,8 +321,8 @@ export default function FinalProducts() {
                     setQuantity(details.totalCutQty);
                   }
                 }}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a job order" />
+                <SelectTrigger className={isMobile ? "w-full" : "col-span-3"}>
+                  <SelectValue placeholder={t('job_orders.select_job_order')} />
                 </SelectTrigger>
                 <SelectContent>
                   {jobOrders?.map((jo) => {
@@ -330,43 +336,47 @@ export default function FinalProducts() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="quantity" className="text-right">
-                Quantity (Kg)
+            <div className={`grid ${isMobile ? "" : "grid-cols-4"} items-center gap-4`}>
+              <Label htmlFor="quantity" className={isMobile ? "" : "text-right"}>
+                {t('warehouse.quantity')} (Kg)
               </Label>
               <Input
                 id="quantity"
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(parseFloat(e.target.value))}
-                className="col-span-3"
+                className={isMobile ? "w-full" : "col-span-3"}
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
-                Status
+            <div className={`grid ${isMobile ? "" : "grid-cols-4"} items-center gap-4`}>
+              <Label htmlFor="status" className={isMobile ? "" : "text-right"}>
+                {t('common.status')}
               </Label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select status" />
+                <SelectTrigger className={isMobile ? "w-full" : "col-span-3"}>
+                  <SelectValue placeholder={t('warehouse.select_status')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="in-stock">In Stock</SelectItem>
-                  <SelectItem value="reserved">Reserved</SelectItem>
-                  <SelectItem value="shipped">Shipped</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="in-stock">{t('status.in_stock')}</SelectItem>
+                  <SelectItem value="reserved">{t('status.reserved')}</SelectItem>
+                  <SelectItem value="shipped">{t('status.shipped')}</SelectItem>
+                  <SelectItem value="delivered">{t('status.delivered')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseForm}>
-              Cancel
+          <DialogFooter className={`${isMobile ? "flex flex-col space-y-2" : ""} ${isRTL ? "flex-row-reverse" : ""}`}>
+            <Button variant="outline" onClick={handleCloseForm} className={isMobile ? "w-full" : ""}>
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleSave} disabled={saveMutation.isPending}>
+            <Button 
+              onClick={handleSave} 
+              disabled={saveMutation.isPending}
+              className={isMobile ? "w-full" : ""}
+            >
               {saveMutation.isPending
-                ? editProduct ? "Updating..." : "Creating..."
-                : editProduct ? "Update" : "Create"
+                ? editProduct ? t('common.updating') : t('common.creating')
+                : editProduct ? t('common.update') : t('common.create')
               }
             </Button>
           </DialogFooter>
@@ -375,21 +385,20 @@ export default function FinalProducts() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deletingProduct} onOpenChange={(open) => !open && setDeletingProduct(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className={isRTL ? "rtl" : ""}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common.are_you_sure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this final product entry.
-              This action cannot be undone.
+              {t('common.delete_confirmation', { item: t('warehouse.final_products') })}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className={isRTL ? "flex-row-reverse" : ""}>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
               className="bg-error-500 hover:bg-error-600"
             >
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
