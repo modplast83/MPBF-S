@@ -410,10 +410,10 @@ export default function RawMaterials() {
 
       {/* Add/Edit Material Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className={isMobile ? "max-w-[95vw] p-4 sm:p-6" : ""}>
+        <DialogContent className={`${isMobile ? "max-w-[95vw] p-4 sm:p-6" : ""} ${isRTL ? "rtl" : ""}`}>
           <DialogHeader>
             <DialogTitle>
-              {editMaterial ? "Edit Material" : "Add New Material"}
+              {editMaterial ? t('warehouse.edit_material') : t('warehouse.add_new_material')}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -421,7 +421,7 @@ export default function RawMaterials() {
               // Mobile form layout (stacked)
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="name">{t('warehouse.name')}</Label>
                   <Input
                     id="name"
                     value={name}
@@ -429,7 +429,7 @@ export default function RawMaterials() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="type">Type</Label>
+                  <Label htmlFor="type">{t('warehouse.type')}</Label>
                   <Input
                     id="type"
                     value={type}
@@ -437,7 +437,7 @@ export default function RawMaterials() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="quantity">Quantity</Label>
+                  <Label htmlFor="quantity">{t('warehouse.quantity')}</Label>
                   <Input
                     id="quantity"
                     type="number"
@@ -446,10 +446,10 @@ export default function RawMaterials() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="unit">Unit</Label>
+                  <Label htmlFor="unit">{t('warehouse.unit')}</Label>
                   <Select value={unit} onValueChange={setUnit}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a unit" />
+                      <SelectValue placeholder={t('warehouse.select_unit')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Kg">Kilogram (Kg)</SelectItem>
@@ -466,8 +466,8 @@ export default function RawMaterials() {
               // Desktop form layout (side by side labels and inputs)
               <>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="desktop-name" className="text-right">
-                    Name
+                  <Label htmlFor="desktop-name" className={`${isRTL ? "text-left" : "text-right"}`}>
+                    {t('warehouse.name')}
                   </Label>
                   <Input
                     id="desktop-name"
@@ -477,8 +477,8 @@ export default function RawMaterials() {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="desktop-type" className="text-right">
-                    Type
+                  <Label htmlFor="desktop-type" className={`${isRTL ? "text-left" : "text-right"}`}>
+                    {t('warehouse.type')}
                   </Label>
                   <Input
                     id="desktop-type"
@@ -488,8 +488,8 @@ export default function RawMaterials() {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="desktop-quantity" className="text-right">
-                    Quantity
+                  <Label htmlFor="desktop-quantity" className={`${isRTL ? "text-left" : "text-right"}`}>
+                    {t('warehouse.quantity')}
                   </Label>
                   <Input
                     id="desktop-quantity"
@@ -500,12 +500,12 @@ export default function RawMaterials() {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="desktop-unit" className="text-right">
-                    Unit
+                  <Label htmlFor="desktop-unit" className={`${isRTL ? "text-left" : "text-right"}`}>
+                    {t('warehouse.unit')}
                   </Label>
                   <Select value={unit} onValueChange={setUnit}>
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select a unit" />
+                      <SelectValue placeholder={t('warehouse.select_unit')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Kg">Kilogram (Kg)</SelectItem>
@@ -520,13 +520,13 @@ export default function RawMaterials() {
               </>
             )}
           </div>
-          <DialogFooter className={isMobile ? "flex flex-col space-y-2" : ""}>
+          <DialogFooter className={`${isMobile ? "flex flex-col space-y-2" : ""} ${isRTL ? "flex-row-reverse" : ""}`}>
             <Button 
               variant="outline" 
               onClick={handleCloseForm}
               className={isMobile ? "w-full" : ""}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button 
               onClick={handleSave} 
@@ -534,8 +534,8 @@ export default function RawMaterials() {
               className={isMobile ? "w-full" : ""}
             >
               {saveMutation.isPending
-                ? editMaterial ? "Updating..." : "Creating..."
-                : editMaterial ? "Update" : "Create"
+                ? editMaterial ? t('common.updating') : t('common.creating')
+                : editMaterial ? t('common.update') : t('common.create')
               }
             </Button>
           </DialogFooter>
@@ -544,24 +544,22 @@ export default function RawMaterials() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deletingMaterial} onOpenChange={(open) => !open && setDeletingMaterial(null)}>
-        <AlertDialogContent className={isMobile ? "max-w-[95vw] p-4 sm:p-6" : ""}>
+        <AlertDialogContent className={`${isMobile ? "max-w-[95vw] p-4 sm:p-6" : ""} ${isRTL ? "rtl" : ""}`}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common.are_you_sure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the material{' '}
-              <span className="font-semibold">"{deletingMaterial?.name}"</span>.
-              This action cannot be undone.
+              {t('common.delete_confirmation', { item: deletingMaterial?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className={isMobile ? "flex flex-col space-y-2" : ""}>
+          <AlertDialogFooter className={`${isMobile ? "flex flex-col space-y-2" : ""} ${isRTL ? "flex-row-reverse" : ""}`}>
             <AlertDialogCancel className={isMobile ? "w-full mt-0" : ""}>
-              Cancel
+              {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
               className={`bg-error-500 hover:bg-error-600 ${isMobile ? "w-full" : ""}`}
             >
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -569,11 +567,11 @@ export default function RawMaterials() {
       
       {/* Input Material Dialog */}
       <Dialog open={inputFormOpen} onOpenChange={setInputFormOpen}>
-        <DialogContent className={isMobile ? "max-w-[95vw] p-4 sm:p-6" : ""}>
+        <DialogContent className={`${isMobile ? "max-w-[95vw] p-4 sm:p-6" : ""} ${isRTL ? "rtl" : ""}`}>
           <DialogHeader>
-            <DialogTitle>Input Material</DialogTitle>
+            <DialogTitle>{t('warehouse.input_material')}</DialogTitle>
             <DialogDescription>
-              Add quantities to existing raw materials.
+              {t('warehouse.add_quantities_desc')}
             </DialogDescription>
           </DialogHeader>
           
@@ -581,13 +579,13 @@ export default function RawMaterials() {
             {/* Add material form */}
             <div className={isMobile ? "space-y-4" : "grid grid-cols-10 gap-4 items-end"}>
               <div className={isMobile ? "space-y-2" : "col-span-6"}>
-                <Label htmlFor="material-select">Material</Label>
+                <Label htmlFor="material-select">{t('warehouse.name')}</Label>
                 <Select 
                   value={selectedRawMaterialId?.toString() || ""} 
                   onValueChange={(value) => setSelectedRawMaterialId(parseInt(value))}
                 >
                   <SelectTrigger id="material-select">
-                    <SelectValue placeholder="Select a material" />
+                    <SelectValue placeholder={t('warehouse.select_material')} />
                   </SelectTrigger>
                   <SelectContent>
                     {materials?.map((material) => (
@@ -600,7 +598,7 @@ export default function RawMaterials() {
               </div>
               
               <div className={isMobile ? "space-y-2" : "col-span-3"}>
-                <Label htmlFor="input-quantity">Quantity</Label>
+                <Label htmlFor="input-quantity">{t('warehouse.quantity')}</Label>
                 <Input
                   id="input-quantity"
                   type="number"
@@ -615,14 +613,14 @@ export default function RawMaterials() {
                 size={isMobile ? "default" : "icon"}
                 type="button"
               >
-                {isMobile ? "Add to List" : <span className="material-icons">add</span>}
+                {isMobile ? t('warehouse.add_to_list') : <span className="material-icons">add</span>}
               </Button>
             </div>
             
             {/* Input items list */}
             {inputItems.length > 0 && (
               <div className="space-y-3 pt-4 border-t">
-                <h3 className="font-medium text-sm">Materials to Input:</h3>
+                <h3 className="font-medium text-sm">{t('warehouse.added_materials')}:</h3>
                 <div className="space-y-2">
                   {inputItems.map((item) => {
                     const material = materials?.find(m => m.id === item.rawMaterialId);
@@ -653,20 +651,20 @@ export default function RawMaterials() {
             )}
           </div>
           
-          <DialogFooter className={isMobile ? "flex flex-col space-y-2" : ""}>
+          <DialogFooter className={`${isMobile ? "flex flex-col space-y-2" : ""} ${isRTL ? "flex-row-reverse" : ""}`}>
             <Button 
               variant="outline" 
               onClick={handleCloseInputForm}
               className={isMobile ? "w-full" : ""}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button 
               onClick={handleSaveInput} 
               disabled={inputMaterialMutation.isPending || inputItems.length === 0}
               className={isMobile ? "w-full" : ""}
             >
-              {inputMaterialMutation.isPending ? "Saving..." : "Save"}
+              {inputMaterialMutation.isPending ? t('common.saving') : t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
