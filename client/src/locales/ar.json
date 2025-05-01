@@ -53,7 +53,11 @@
       "close": "إغلاق",
       "saving": "جاري الحفظ...",
       "view": "عرض",
-      "view_details": "عرض التفاصيل"
+      "view_details": "عرض التفاصيل",
+      "unit": "وحدة",
+      "reset": "إعادة تعيين",
+      "creating": "جاري الإنشاء...",
+      "user": "مستخدم"
     },
     "auth": {
       "username": "اسم المستخدم",
@@ -259,7 +263,13 @@
         "print_label": "طباعة الملصق",
         "add_material_to_mix": "إضافة مادة للخلطة",
         "no_materials": "لا توجد مواد مضافة إلى هذا الخلطة حتى الآن",
-        "mix_label": "ملصق خلطة المواد"
+        "mix_label": "ملصق خلطة المواد",
+        "select_material": "اختر المادة",
+        "enter_quantity": "أدخل الكمية بالكيلوجرام",
+        "create_mix": "إنشاء خلطة",
+        "mix_created_success": "تم إنشاء خلطة المواد بنجاح!",
+        "mix_creation_failed": "فشل في إنشاء الخلطة",
+        "add_material_failed": "فشل في إضافة المادة إلى الخلطة"
       }
     },
     "warehouse": {

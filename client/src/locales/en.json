@@ -53,7 +53,11 @@
       "close": "Close",
       "saving": "Saving...",
       "view": "View",
-      "view_details": "View Details"
+      "view_details": "View Details",
+      "unit": "Unit",
+      "reset": "Reset",
+      "creating": "Creating...",
+      "user": "User"
     },
     "auth": {
       "username": "Username",
@@ -259,7 +263,13 @@
         "print_label": "Print Label",
         "add_material_to_mix": "Add Material to Mix",
         "no_materials": "No materials added to this mix yet",
-        "mix_label": "MIX MATERIAL LABEL"
+        "mix_label": "MIX MATERIAL LABEL",
+        "select_material": "Select material",
+        "enter_quantity": "Enter quantity in kg",
+        "create_mix": "Create Mix",
+        "mix_created_success": "Mix material created successfully!",
+        "mix_creation_failed": "Failed to create mix",
+        "add_material_failed": "Failed to add material to mix"
       }
     },
     "warehouse": {

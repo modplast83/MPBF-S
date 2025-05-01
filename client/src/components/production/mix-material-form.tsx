@@ -2,6 +2,8 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 import { 
   Form, 
   FormControl, 
@@ -46,6 +48,8 @@ interface MixMaterialFormProps {
 }
 
 export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProps) {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedRawMaterial, setSelectedRawMaterial] = useState<number | null>(null);
@@ -118,16 +122,16 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MIX_MATERIALS] });
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.RAW_MATERIALS] });
       toast({
-        title: "Success",
-        description: "Mix material created successfully!",
+        title: t('common.success'),
+        description: t('production.mix_materials.mix_created_success'),
         variant: "destructive",
       });
       onSuccess?.();
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create mix material",
+        title: t('common.error'),
+        description: error.message || t('production.mix_materials.mix_creation_failed'),
         variant: "destructive",
       });
     },
@@ -200,30 +204,30 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
   const totalWeight = materials.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${isRTL ? 'rtl' : ''}`}>
       <Form {...form}>
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4 pt-2">
           {/* Current Operator Display */}
           <Alert className="bg-muted">
-            <AlertTitle>Current Operator</AlertTitle>
+            <AlertTitle>{t('production.mix_materials.operator')}</AlertTitle>
             <AlertDescription>
-              {currentUser?.name || "Loading user information..."}
+              {currentUser?.name || t('common.loading')}
             </AlertDescription>
           </Alert>
 
           {/* Material Selection */}
           <div className="space-y-4 border rounded-md p-4">
-            <h3 className="text-lg font-medium">Add Materials</h3>
+            <h3 className="text-lg font-medium">{t('production.mix_materials.add_material')}</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
               <div className="md:col-span-2">
-                <FormLabel>Raw Material</FormLabel>
+                <FormLabel>{t('warehouse.raw_materials')}</FormLabel>
                 <Select
                   value={selectedRawMaterial?.toString() || ""}
                   onValueChange={(value) => setSelectedRawMaterial(parseInt(value))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select material" />
+                    <SelectValue placeholder={t('production.mix_materials.select_material')} />
                   </SelectTrigger>
                   <SelectContent>
                     {rawMaterials.map((material) => (
@@ -236,14 +240,14 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
               </div>
               
               <div className="md:col-span-2">
-                <FormLabel>Quantity (kg)</FormLabel>
+                <FormLabel>{t('production.mix_materials.quantity')}</FormLabel>
                 <Input
                   type="number"
                   min="0.1"
                   step="0.1"
                   value={rawMaterialQuantity}
                   onChange={(e) => setRawMaterialQuantity(e.target.value)}
-                  placeholder="Enter quantity in kg"
+                  placeholder={t('production.mix_materials.enter_quantity')}
                 />
               </div>
               
@@ -253,7 +257,7 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
                   onClick={addMaterial}
                   className="w-full"
                 >
-                  Add
+                  {t('common.add')}
                 </Button>
               </div>
             </div>
@@ -261,17 +265,17 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
 
           {/* Material List */}
           <div className="border rounded-md p-4">
-            <h3 className="text-lg font-medium mb-2">Mix Composition</h3>
+            <h3 className="text-lg font-medium mb-2">{t('production.mix_materials.composition')}</h3>
             
             {materials.length === 0 ? (
-              <p className="text-sm text-gray-500 italic">No materials added yet</p>
+              <p className="text-sm text-gray-500 italic">{t('production.mix_materials.no_materials')}</p>
             ) : (
               <div className="space-y-2">
                 <div className="grid grid-cols-12 gap-2 font-medium text-sm px-2">
-                  <div className="col-span-5">Material</div>
-                  <div className="col-span-2">Quantity</div>
-                  <div className="col-span-2">Unit</div>
-                  <div className="col-span-2">Percentage</div>
+                  <div className="col-span-5">{t('production.mix_materials.material')}</div>
+                  <div className="col-span-2">{t('production.mix_materials.quantity')}</div>
+                  <div className="col-span-2">{t('common.unit')}</div>
+                  <div className="col-span-2">{t('production.mix_materials.percentage')}</div>
                   <div className="col-span-1"></div>
                 </div>
                 
@@ -303,7 +307,7 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
                 })}
                 
                 <div className="grid grid-cols-12 gap-2 font-medium text-sm mt-2 pt-2 border-t">
-                  <div className="col-span-5">Total</div>
+                  <div className="col-span-5">{t('common.total')}</div>
                   <div className="col-span-2">{totalWeight.toFixed(1)}</div>
                   <div className="col-span-2">kg</div>
                   <div className="col-span-2">100.0%</div>
@@ -313,13 +317,13 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
             )}
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
+          <div className={`flex justify-end ${isRTL ? 'space-x-reverse' : 'space-x-2'} pt-4`}>
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => setMaterials([])}
             >
-              Reset
+              {t('common.reset')}
             </Button>
             <Button 
               type="submit" 
@@ -327,11 +331,11 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
             >
               {createMixMutation.isPending ? (
                 <>
-                  <span className="animate-spin mr-2">◌</span>
-                  Creating...
+                  <span className={`animate-spin ${isRTL ? 'ml-2' : 'mr-2'}`}>◌</span>
+                  {t('common.creating')}
                 </>
               ) : (
-                "Create Mix"
+                t('production.mix_materials.create_mix')
               )}
             </Button>
           </div>
