@@ -294,6 +294,7 @@
       "unit": "الوحدة",
       "select_unit": "اختر وحدة",
       "select_material": "اختر مادة",
+      "select_status": "اختر الحالة",
       "add_to_list": "إضافة للقائمة",
       "added_materials": "المواد المضافة",
       "actions": "إجراءات",
@@ -382,7 +383,8 @@
       "in_progress": "قيد التنفيذ",
       "extrusion_completed": "تم انتاج الفيلم",
       "completed": "مكتمل",
-      "cancelled": "ملغى"
+      "cancelled": "ملغى",
+      "select_job_order": "اختر أمر إنتاج"
     },
     "rolls": {
       "title": "رول",
@@ -436,7 +438,11 @@
       "approved": "معتمد",
       "rejected": "مرفوض",
       "active": "نشط",
-      "inactive": "غير نشط"
+      "inactive": "غير نشط",
+      "in_stock": "في المخزون",
+      "reserved": "محجوز",
+      "shipped": "تم الشحن",
+      "delivered": "تم التسليم"
     },
     "products": {
       "thickness": "السماكة", 

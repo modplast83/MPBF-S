@@ -49,9 +49,15 @@ export default function RawMaterials() {
   const saveMutation = useMutation({
     mutationFn: async (data: { name: string; type: string; quantity: number; unit: string }) => {
       if (editMaterial) {
-        await apiRequest("PUT", `${API_ENDPOINTS.RAW_MATERIALS}/${editMaterial.id}`, data);
+        await apiRequest(`${API_ENDPOINTS.RAW_MATERIALS}/${editMaterial.id}`, {
+          method: "PUT",
+          body: JSON.stringify(data)
+        });
       } else {
-        await apiRequest("POST", API_ENDPOINTS.RAW_MATERIALS, data);
+        await apiRequest(API_ENDPOINTS.RAW_MATERIALS, {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
       }
     },
     onSuccess: () => {
@@ -74,7 +80,9 @@ export default function RawMaterials() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `${API_ENDPOINTS.RAW_MATERIALS}/${id}`, null);
+      await apiRequest(`${API_ENDPOINTS.RAW_MATERIALS}/${id}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.RAW_MATERIALS] });
@@ -96,9 +104,12 @@ export default function RawMaterials() {
   // Input Material mutation
   const inputMaterialMutation = useMutation({
     mutationFn: async (data: { items: { rawMaterialId: number, quantity: number }[] }) => {
-      return await apiRequest("POST", API_ENDPOINTS.MATERIAL_INPUTS, {
-        date: new Date(),
-        items: data.items
+      return await apiRequest(API_ENDPOINTS.MATERIAL_INPUTS, {
+        method: "POST",
+        body: JSON.stringify({
+          date: new Date(),
+          items: data.items
+        })
       });
     },
     onSuccess: () => {

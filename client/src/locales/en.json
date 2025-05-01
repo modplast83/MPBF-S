@@ -294,9 +294,11 @@
       "unit": "Unit",
       "select_unit": "Select a unit",
       "select_material": "Select a material",
+      "select_status": "Select status",
       "add_to_list": "Add to List",
       "added_materials": "Added Materials",
-      "actions": "Actions"
+      "actions": "Actions",
+      "add_quantities_desc": "Add quantities to existing raw materials"
     },
     "performance": {
       "title": "Performance Metrics",
@@ -381,7 +383,8 @@
       "in_progress": "In Progress",
       "extrusion_completed": "Extrusion Completed",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "select_job_order": "Select a job order"
     },
     "rolls": {
       "title": "Rolls",
