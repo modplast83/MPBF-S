@@ -63,7 +63,11 @@
       "unit": "وحدة",
       "reset": "إعادة تعيين",
       "creating": "جاري الإنشاء...",
-      "user": "مستخدم"
+      "user": "مستخدم",
+      "customer": "العميل",
+      "quantity": "الكمية",
+      "raw_material": "المادة الخام",
+      "required": "المطلوب"
     },
     "auth": {
       "username": "اسم المستخدم",
@@ -203,6 +207,23 @@
       "orders": "الطلبات",
       "workflow": "سير العمل",
       "printing_cylinder": "اسطوانة الطباعة",
+      "aba_calculator": {
+        "title": "حاسبة ABA",
+        "job_order_selection": "اختيار أمر الإنتاج",
+        "select_job_order": "اختر أمر إنتاج",
+        "manual_calculation": "حساب يدوي",
+        "quantity": "الكمية (كجم)",
+        "calculate": "حساب",
+        "result": "نتيجة الحساب",
+        "mix_id": "رقم الخلطة",
+        "date": "التاريخ",
+        "aba_formula": "صيغة ABA",
+        "screw_a": "برغي A",
+        "screw_b": "برغي B",
+        "per_material": "لكل مادة",
+        "material_type": "نوع المادة",
+        "ratio": "النسبة"
+      },
       "roll_management": {
         "title": "إدارة الرولات",
         "extrusion_stage": "مرحلة الفيلم",
