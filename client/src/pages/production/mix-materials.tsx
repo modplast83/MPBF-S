@@ -12,8 +12,10 @@ import { formatDateString } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MixMaterialForm } from "@/components/production/mix-material-form";
 import { MixDetails } from "@/components/production/mix-details";
+import { AbaCalculator, AbaPrintTemplate } from "@/components/production/aba-calculator";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -53,9 +55,13 @@ export default function MixMaterialsPage() {
   });
   
   // Delete mix mutation
+  const [abaCalculationData, setAbaCalculationData] = useState<any>(null);
+
   const deleteMixMutation = useMutation({
     mutationFn: async (mixId: number) => {
-      await apiRequest("DELETE", `${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`);
+      await apiRequest(`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       toast({
@@ -367,40 +373,73 @@ export default function MixMaterialsPage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            <span>{t('production.mix_materials.title')}</span>
-            {!isMobile && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetchMixes()}
-                className="ml-auto"
-              >
-                <span className="material-icons text-sm mr-1">refresh</span>
-                {t('common.refresh')}
-              </Button>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {mixLoading ? (
-            isMobile ? renderMobileLoadingState() : <div className="h-32 bg-gray-100 rounded animate-pulse"></div>
-          ) : isMobile ? (
-            renderMobileCards()
-          ) : (
-            <DataTable 
-              data={mixMaterials || []}
-              columns={mixColumns as any}
-              onRowClick={(row) => {
-                setSelectedMixId(row.id);
-                setIsViewDialogOpen(true);
-              }}
-            />
-          )}
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="mix_materials" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsTrigger value="mix_materials">
+            <span className="material-icons text-sm mr-1">science</span>
+            {t('production.mix_materials.title')}
+          </TabsTrigger>
+          <TabsTrigger value="aba_calculator">
+            <span className="material-icons text-sm mr-1">calculate</span>
+            {t('production.aba_calculator.title', 'ABA Calculator')}
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="mix_materials">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex justify-between items-center">
+                <span>{t('production.mix_materials.title')}</span>
+                {!isMobile && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refetchMixes()}
+                    className="ml-auto"
+                  >
+                    <span className="material-icons text-sm mr-1">refresh</span>
+                    {t('common.refresh')}
+                  </Button>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {mixLoading ? (
+                isMobile ? renderMobileLoadingState() : <div className="h-32 bg-gray-100 rounded animate-pulse"></div>
+              ) : isMobile ? (
+                renderMobileCards()
+              ) : (
+                <DataTable 
+                  data={mixMaterials || []}
+                  columns={mixColumns as any}
+                  onRowClick={(row) => {
+                    setSelectedMixId(row.id);
+                    setIsViewDialogOpen(true);
+                  }}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="aba_calculator">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('production.aba_calculator.title', 'ABA Calculator')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AbaCalculator 
+                onPrint={(data) => {
+                  setAbaCalculationData(data);
+                  setTimeout(() => {
+                    window.print();
+                  }, 100);
+                }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Mix details dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
@@ -420,7 +459,7 @@ export default function MixMaterialsPage() {
 
       {/* Hidden printable label that will only show when printing */}
       <div className="hidden print:block print:m-0 print:p-0">
-        <PrintableLabel />
+        {abaCalculationData ? <AbaPrintTemplate data={abaCalculationData} /> : <PrintableLabel />}
       </div>
 
       {/* Delete confirmation dialog */}
