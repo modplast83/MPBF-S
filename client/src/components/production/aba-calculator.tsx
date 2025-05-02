@@ -493,18 +493,18 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
                   <div className="overflow-x-auto">
                     <table className="min-w-full border-collapse">
                       <thead>
-                        <tr className="bg-muted/50 text-left">
+                        <tr className="bg-muted/50 text-center">
                           <th className="p-2 border text-sm font-medium">
-                            {t('production.aba_calculator.screw_a')}
+                            A
                           </th>
                           <th className="p-2 border text-sm font-medium">
-                            {t('common.raw_material')}
+                            Material
                           </th>
                           <th className="p-2 border text-sm font-medium">
-                            {t('production.aba_calculator.screw_b')}
+                            B
                           </th>
                           <th className="p-2 border text-sm font-medium">
-                            {t('common.required')}
+                            A+B Kg
                           </th>
                           <th className="p-2 border text-sm font-medium">
                             A+B %
@@ -519,7 +519,7 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
                       </thead>
                       <tbody>
                         {calculationResult.items.map((item, index) => (
-                          <tr key={index} className="border">
+                          <tr key={index} className="border text-center">
                             <td className="p-2 border text-sm">{item.screwA} KG</td>
                             <td className="p-2 border text-sm font-medium">{item.material}</td>
                             <td className="p-2 border text-sm">{item.screwB} KG</td>
@@ -530,11 +530,11 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
                           </tr>
                         ))}
                         {/* Total row */}
-                        <tr className="bg-muted/30">
+                        <tr className="bg-muted/30 text-center">
                           <td className="p-2 border text-sm font-bold">
                             {calculationResult.totals.screwA} KG
                           </td>
-                          <td className="p-2 border text-sm font-bold text-center">
+                          <td className="p-2 border text-sm font-bold">
                             {t('common.total')}
                           </td>
                           <td className="p-2 border text-sm font-bold">
@@ -591,10 +591,10 @@ export function AbaPrintTemplate({ data }: { data: AbaCalculationResult }) {
       <table className="w-full border-collapse mb-4">
         <thead>
           <tr>
-            <th className="p-2 border bg-red-200 text-center">Screw A</th>
-            <th className="p-2 border bg-red-200 text-center">Raw Materials</th>
-            <th className="p-2 border bg-orange-200 text-center">Screw B</th>
-            <th className="p-2 border bg-yellow-200 text-center">Required<br/>Qty</th>
+            <th className="p-2 border bg-red-200 text-center">A</th>
+            <th className="p-2 border bg-red-200 text-center">Material</th>
+            <th className="p-2 border bg-orange-200 text-center">B</th>
+            <th className="p-2 border bg-yellow-200 text-center">A+B Kg</th>
             <th className="p-2 border text-center">A+B %</th>
             <th className="p-2 border text-center">A %</th>
             <th className="p-2 border text-center">B %</th>
