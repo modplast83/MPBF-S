@@ -232,15 +232,50 @@ export function OrderForm() {
         })
       });
       
-      // Then create job orders
+      // Then create job orders with adjusted quantities based on category
       for (const jobOrder of data.jobOrders) {
-        await apiRequest(API_ENDPOINTS.JOB_ORDERS, {
-          method: "POST",
-          body: JSON.stringify({
-            orderId: orderResponse.id,
-            ...jobOrder,
-          })
-        });
+        // Find the customer product to get its category
+        const customerProduct = customerProducts?.find(cp => cp.id === jobOrder.customerProductId);
+        
+        if (customerProduct) {
+          // Get the category
+          const category = categories?.find(cat => cat.id === customerProduct.categoryId);
+          
+          // Calculate adjusted quantity based on category
+          let adjustedQuantity = jobOrder.quantity;
+          
+          if (category) {
+            if (category.name === "T-Shirt Bag") {
+              // Add 20% to quantity for T-Shirt Bags
+              adjustedQuantity = jobOrder.quantity * 1.2;
+            } else if (category.name === "Calendar Bag") {
+              // Add 10% to quantity for Calendar Bags
+              adjustedQuantity = jobOrder.quantity * 1.1;
+            } else {
+              // Add 5% to quantity for all other categories
+              adjustedQuantity = jobOrder.quantity * 1.05;
+            }
+          }
+          
+          // Create job order with adjusted quantity
+          await apiRequest(API_ENDPOINTS.JOB_ORDERS, {
+            method: "POST",
+            body: JSON.stringify({
+              orderId: orderResponse.id,
+              customerProductId: jobOrder.customerProductId,
+              quantity: adjustedQuantity,
+            })
+          });
+        } else {
+          // Fallback if customer product is not found
+          await apiRequest(API_ENDPOINTS.JOB_ORDERS, {
+            method: "POST",
+            body: JSON.stringify({
+              orderId: orderResponse.id,
+              ...jobOrder,
+            })
+          });
+        }
       }
       
       return orderResponse;
