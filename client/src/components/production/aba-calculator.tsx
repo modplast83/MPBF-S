@@ -402,8 +402,8 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle>{t('production.aba_calculator.job_order_selection')}</CardTitle>
           </CardHeader>
@@ -454,7 +454,7 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
         </Card>
 
         {calculationResult && (
-          <Card>
+          <Card className="md:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t('production.aba_calculator.result')}</CardTitle>
               <Button onClick={handlePrint} variant="outline" size="sm" className="ml-auto">
