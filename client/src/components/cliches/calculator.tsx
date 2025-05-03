@@ -255,7 +255,7 @@ export default function Calculator() {
                   name="plateType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("common.type")}</FormLabel>
+                      <FormLabel>Plate Type</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
