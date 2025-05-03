@@ -83,7 +83,7 @@ export default function Calculator() {
     mutationFn: async (data: CalculatorFormValues) => {
       return apiRequest(`${API_ENDPOINTS.CALCULATE_PLATE_PRICE}`, {
         method: "POST",
-        data,
+        body: JSON.stringify(data),
       });
     },
     onSuccess: (data) => {
@@ -107,7 +107,7 @@ export default function Calculator() {
     mutationFn: async (data: any) => {
       return apiRequest(`${API_ENDPOINTS.PLATE_CALCULATIONS}`, {
         method: "POST",
-        data,
+        body: JSON.stringify(data),
       });
     },
     onSuccess: () => {
