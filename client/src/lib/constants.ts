@@ -36,7 +36,7 @@ export const API_ENDPOINTS = {
   // Cliché (Digital Photopolymer Printing Plates)
   PLATE_PRICING_PARAMETERS: "/api/plate-pricing-parameters",
   PLATE_CALCULATIONS: "/api/plate-calculations",
-  CALCULATE_PLATE_PRICE: "/api/calculate-plate-price",
+  CALCULATE_PLATE_PRICE: "/api/plate-calculations/calculate",
   
   // Demo
   INIT_DEMO_DATA: "/api/init-demo-data",
