@@ -128,17 +128,24 @@ export default function Calculator() {
   const handleSave = () => {
     if (!calculation) return;
     
-    const formValues = form.getValues();
+    // Get the raw form values
+    const rawValues = form.getValues();
     
+    // Convert string values to numbers as required by the API
     const saveData = {
-      ...formValues,
-      customerId: null, // No customer association
-      area: calculation.area,
-      calculatedPrice: calculation.calculatedPrice,
+      width: parseFloat(rawValues.width),
+      height: parseFloat(rawValues.height),
+      colors: parseInt(rawValues.colors),
+      plateType: rawValues.plateType,
+      thickness: rawValues.thickness ? parseFloat(rawValues.thickness) : undefined,
+      customerDiscount: rawValues.customerDiscount ? parseFloat(rawValues.customerDiscount) : undefined,
+      notes: rawValues.notes,
+      // Include calculated values from the calculation result
       basePricePerUnit: calculation.basePricePerUnit,
       colorMultiplier: calculation.colorMultiplier,
       thicknessMultiplier: calculation.thicknessMultiplier,
-      customerDiscount: calculation.customerDiscount || 0,
+      area: calculation.area,
+      calculatedPrice: calculation.calculatedPrice
     };
 
     saveMutation.mutate(saveData);
