@@ -1,13 +1,22 @@
-import { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useTranslation } from 'react-i18next';
-import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
-import { RawMaterial } from '@shared/schema';
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { RawMaterial } from "@shared/schema";
+import { useLanguage } from "@/hooks/use-language";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger 
+} from "@/components/ui/tooltip";
 
+// Material distribution interface for ABA calculations
 export interface MaterialDistribution {
   id: string;
   materialId: number;
@@ -24,346 +33,468 @@ interface AbaMaterialsDndProps {
 }
 
 export function AbaMaterialsDnd({ 
-  rawMaterials,
+  rawMaterials, 
   onSave,
-  initialDistributions
+  initialDistributions = []
 }: AbaMaterialsDndProps) {
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+
+  // State for the three lists (unassigned, screw A, screw B)
+  const [unassignedMaterials, setUnassignedMaterials] = useState<MaterialDistribution[]>([]);
   const [screwAMaterials, setScrewAMaterials] = useState<MaterialDistribution[]>([]);
   const [screwBMaterials, setScrewBMaterials] = useState<MaterialDistribution[]>([]);
-  const [unassignedMaterials, setUnassignedMaterials] = useState<MaterialDistribution[]>([]);
-  
-  // Initialize the component with raw materials
+
+  // Initialize materials from raw materials and initial distributions
   useEffect(() => {
-    if (initialDistributions && initialDistributions.length > 0) {
-      const screwA: MaterialDistribution[] = [];
-      const screwB: MaterialDistribution[] = [];
-      const unassigned: MaterialDistribution[] = [];
-      
-      initialDistributions.forEach(dist => {
-        if (dist.screwAPercentage > 0 && dist.screwBPercentage === 0) {
-          screwA.push(dist);
-        } else if (dist.screwBPercentage > 0 && dist.screwAPercentage === 0) {
-          screwB.push(dist);
-        } else {
-          unassigned.push(dist);
-        }
-      });
-      
-      setScrewAMaterials(screwA);
-      setScrewBMaterials(screwB);
-      setUnassignedMaterials(unassigned);
-    } else {
-      // Initialize with raw materials from props
-      const initialUnassigned = rawMaterials.map(material => ({
-        id: `material-${material.id}`,
-        materialId: material.id,
-        materialName: material.name,
-        screwAPercentage: 0,
-        screwBPercentage: 0,
-        totalPercentage: 50 // Default percentage
-      }));
-      
-      setUnassignedMaterials(initialUnassigned);
-      setScrewAMaterials([]);
-      setScrewBMaterials([]);
+    if (rawMaterials.length > 0) {
+      // If we have initial distributions, use them
+      if (initialDistributions && initialDistributions.length > 0) {
+        // Extract materials from each list based on percentages
+        const screwA: MaterialDistribution[] = [];
+        const screwB: MaterialDistribution[] = [];
+        const unassigned: MaterialDistribution[] = [];
+
+        initialDistributions.forEach(dist => {
+          // Find the material from rawMaterials
+          const material = rawMaterials.find(m => m.id === dist.materialId);
+          if (!material) return;
+
+          if (dist.screwAPercentage > 0) {
+            screwA.push({...dist});
+          } else if (dist.screwBPercentage > 0) {
+            screwB.push({...dist});
+          } else {
+            unassigned.push({...dist});
+          }
+        });
+
+        setScrewAMaterials(screwA);
+        setScrewBMaterials(screwB);
+        
+        // Add any raw materials that aren't in the initial distributions to unassigned
+        const assignedMaterialIds = initialDistributions.map(d => d.materialId);
+        const newUnassigned = [...unassigned];
+        
+        rawMaterials.forEach(material => {
+          if (!assignedMaterialIds.includes(material.id)) {
+            newUnassigned.push({
+              id: `material-${material.id}`,
+              materialId: material.id,
+              materialName: material.name,
+              screwAPercentage: 0,
+              screwBPercentage: 0,
+              totalPercentage: 0
+            });
+          }
+        });
+        
+        setUnassignedMaterials(newUnassigned);
+      } else {
+        // Initialize all materials as unassigned
+        const initialMaterials = rawMaterials.map(material => ({
+          id: `material-${material.id}`,
+          materialId: material.id,
+          materialName: material.name,
+          screwAPercentage: 0,
+          screwBPercentage: 0,
+          totalPercentage: 0
+        }));
+        setUnassignedMaterials(initialMaterials);
+        setScrewAMaterials([]);
+        setScrewBMaterials([]);
+      }
     }
   }, [rawMaterials, initialDistributions]);
-  
+
+  // Handle drag end
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
     
-    // Dropped outside a droppable area
+    // If dropped outside a droppable area
     if (!destination) return;
     
-    // No change in position
+    // If dropped in the same position
     if (
       source.droppableId === destination.droppableId &&
       source.index === destination.index
     ) return;
     
-    // Handle drag between lists
+    // Get the appropriate source and destination arrays
     let sourceList: MaterialDistribution[];
-    let destinationList: MaterialDistribution[];
+    let destList: MaterialDistribution[];
+    let setSourceList: React.Dispatch<React.SetStateAction<MaterialDistribution[]>>;
+    let setDestList: React.Dispatch<React.SetStateAction<MaterialDistribution[]>>;
     
     // Determine source list
-    if (source.droppableId === 'screw-a') {
-      sourceList = [...screwAMaterials];
-    } else if (source.droppableId === 'screw-b') {
-      sourceList = [...screwBMaterials];
-    } else {
-      sourceList = [...unassignedMaterials];
+    switch (source.droppableId) {
+      case 'unassigned':
+        sourceList = unassignedMaterials;
+        setSourceList = setUnassignedMaterials;
+        break;
+      case 'screwA':
+        sourceList = screwAMaterials;
+        setSourceList = setScrewAMaterials;
+        break;
+      case 'screwB':
+        sourceList = screwBMaterials;
+        setSourceList = setScrewBMaterials;
+        break;
+      default:
+        return;
     }
     
     // Determine destination list
-    if (destination.droppableId === 'screw-a') {
-      destinationList = [...screwAMaterials];
-    } else if (destination.droppableId === 'screw-b') {
-      destinationList = [...screwBMaterials];
-    } else {
-      destinationList = [...unassignedMaterials];
+    switch (destination.droppableId) {
+      case 'unassigned':
+        destList = unassignedMaterials;
+        setDestList = setUnassignedMaterials;
+        break;
+      case 'screwA':
+        destList = screwAMaterials;
+        setDestList = setScrewAMaterials;
+        break;
+      case 'screwB':
+        destList = screwBMaterials;
+        setDestList = setScrewBMaterials;
+        break;
+      default:
+        return;
     }
     
-    // Same list rearrangement
+    // If moving within the same list
     if (source.droppableId === destination.droppableId) {
-      const [removed] = sourceList.splice(source.index, 1);
-      sourceList.splice(destination.index, 0, removed);
+      const reorderedItems = [...sourceList];
+      const [movedItem] = reorderedItems.splice(source.index, 1);
+      reorderedItems.splice(destination.index, 0, movedItem);
+      setSourceList(reorderedItems);
+    } else {
+      // Moving between different lists
+      const sourceClone = [...sourceList];
+      const destClone = [...destList];
+      const [movedItem] = sourceClone.splice(source.index, 1);
       
-      // Update the appropriate state
-      if (source.droppableId === 'screw-a') {
-        setScrewAMaterials(sourceList);
-      } else if (source.droppableId === 'screw-b') {
-        setScrewBMaterials(sourceList);
-      } else {
-        setUnassignedMaterials(sourceList);
+      // Reset percentages when moving to/from unassigned
+      if (destination.droppableId === 'unassigned') {
+        movedItem.screwAPercentage = 0;
+        movedItem.screwBPercentage = 0;
+        movedItem.totalPercentage = 0;
+      } else if (destination.droppableId === 'screwA') {
+        movedItem.screwAPercentage = 100;
+        movedItem.screwBPercentage = 0;
+        movedItem.totalPercentage = 100;
+      } else if (destination.droppableId === 'screwB') {
+        movedItem.screwAPercentage = 0;
+        movedItem.screwBPercentage = 100;
+        movedItem.totalPercentage = 100;
       }
       
-      return;
-    }
-    
-    // Moving between different lists
-    const [removed] = sourceList.splice(source.index, 1);
-    
-    // Reset percentages based on destination
-    let updatedItem = { ...removed };
-    
-    if (destination.droppableId === 'screw-a') {
-      updatedItem.screwAPercentage = 100;
-      updatedItem.screwBPercentage = 0;
-    } else if (destination.droppableId === 'screw-b') {
-      updatedItem.screwAPercentage = 0;
-      updatedItem.screwBPercentage = 100;
-    } else {
-      updatedItem.screwAPercentage = 0;
-      updatedItem.screwBPercentage = 0;
-    }
-    
-    destinationList.splice(destination.index, 0, updatedItem);
-    
-    // Update states
-    if (source.droppableId === 'screw-a') {
-      setScrewAMaterials(sourceList);
-    } else if (source.droppableId === 'screw-b') {
-      setScrewBMaterials(sourceList);
-    } else {
-      setUnassignedMaterials(sourceList);
-    }
-    
-    if (destination.droppableId === 'screw-a') {
-      setScrewAMaterials(destinationList);
-    } else if (destination.droppableId === 'screw-b') {
-      setScrewBMaterials(destinationList);
-    } else {
-      setUnassignedMaterials(destinationList);
+      destClone.splice(destination.index, 0, movedItem);
+      
+      setSourceList(sourceClone);
+      setDestList(destClone);
     }
   };
-  
-  const handlePercentageChange = (materialId: string, value: number, screw: 'a' | 'b') => {
-    if (screw === 'a') {
-      const updatedMaterials = screwAMaterials.map(item => 
-        item.id === materialId 
-          ? { ...item, totalPercentage: value } 
-          : item
-      );
-      setScrewAMaterials(updatedMaterials);
-    } else {
-      const updatedMaterials = screwBMaterials.map(item => 
-        item.id === materialId 
-          ? { ...item, totalPercentage: value } 
-          : item
-      );
-      setScrewBMaterials(updatedMaterials);
-    }
+
+  // Handle slider change for screw A materials
+  const handleScrewASliderChange = (index: number, value: number[]) => {
+    const percentage = value[0];
+    const newScrewAMaterials = [...screwAMaterials];
+    newScrewAMaterials[index].screwAPercentage = percentage;
+    newScrewAMaterials[index].totalPercentage = percentage;
+    setScrewAMaterials(newScrewAMaterials);
   };
-  
+
+  // Handle slider change for screw B materials
+  const handleScrewBSliderChange = (index: number, value: number[]) => {
+    const percentage = value[0];
+    const newScrewBMaterials = [...screwBMaterials];
+    newScrewBMaterials[index].screwBPercentage = percentage;
+    newScrewBMaterials[index].totalPercentage = percentage;
+    setScrewBMaterials(newScrewBMaterials);
+  };
+
+  // Validate configuration and compile all materials for saving
   const handleSaveConfiguration = () => {
-    // Combine all materials with their current assignments
+    // Combine all materials
     const allMaterials = [
-      ...screwAMaterials.map(m => ({ ...m, screwAPercentage: 100, screwBPercentage: 0 })),
-      ...screwBMaterials.map(m => ({ ...m, screwAPercentage: 0, screwBPercentage: 100 })),
-      ...unassignedMaterials
+      ...unassignedMaterials,
+      ...screwAMaterials,
+      ...screwBMaterials
     ];
     
+    // Call the onSave callback with the compiled distributions
     onSave(allMaterials);
   };
-  
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end mb-4">
-        <Button onClick={handleSaveConfiguration}>
-          {t('common.save')} {t('production.aba_calculator.configuration')}
-        </Button>
-      </div>
-      
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Screw A */}
-          <Card>
-            <CardHeader className="bg-red-100">
-              <CardTitle>{t('production.aba_calculator.screw_a')}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <Droppable droppableId="screw-a">
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="min-h-[200px] border border-dashed rounded-md p-2"
-                  >
-                    {screwAMaterials.map((material, index) => (
-                      <Draggable key={material.id} draggableId={material.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="bg-white shadow-sm rounded-md p-3 mb-2 border"
-                          >
-                            <div className="flex justify-between items-center">
-                              <h4 className="font-medium">{material.materialName}</h4>
-                              <Badge className="bg-red-200 text-red-800">A</Badge>
-                            </div>
-                            <div className="mt-2">
-                              <Label htmlFor={`slider-${material.id}`} className="text-xs flex justify-between">
-                                <span>{t('production.aba_calculator.percentage')}</span>
-                                <span>{material.totalPercentage}%</span>
-                              </Label>
-                              <Slider
-                                id={`slider-${material.id}`}
-                                value={[material.totalPercentage]}
-                                min={1}
-                                max={100}
-                                step={1}
-                                onValueChange={([value]) => handlePercentageChange(material.id, value, 'a')}
-                                className="mt-1"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                    {screwAMaterials.length === 0 && (
-                      <div className="text-center py-8 text-muted-foreground">
-                        {t('production.aba_calculator.drag_materials_here')}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Droppable>
-            </CardContent>
-          </Card>
-          
-          {/* Unassigned Materials */}
-          <Card>
-            <CardHeader className="bg-gray-100">
-              <CardTitle>{t('production.aba_calculator.available_materials')}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-3 gap-4">
+        {/* Unassigned Materials */}
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-gray-50 p-4">
+            <CardTitle className="text-md flex items-center">
+              <span className="material-icons text-lg mr-2">view_list</span>
+              {t('production.aba_calculator.available_materials')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 min-h-[300px]">
+            <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="unassigned">
-                {(provided) => (
+                {(provided, snapshot) => (
                   <div
-                    ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="min-h-[200px] border border-dashed rounded-md p-2"
+                    ref={provided.innerRef}
+                    className={`min-h-[250px] p-2 rounded ${
+                      snapshot.isDraggingOver ? 'bg-gray-100' : ''
+                    }`}
                   >
-                    {unassignedMaterials.map((material, index) => (
-                      <Draggable key={material.id} draggableId={material.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="bg-white shadow-sm rounded-md p-3 mb-2 border"
-                          >
-                            <div className="flex justify-between items-center">
-                              <h4 className="font-medium">{material.materialName}</h4>
-                              <Badge className="bg-gray-200 text-gray-800">
-                                {t('production.aba_calculator.unassigned')}
-                              </Badge>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                    {unassignedMaterials.length === 0 && (
-                      <div className="text-center py-8 text-muted-foreground">
-                        {t('production.aba_calculator.no_available_materials')}
+                    {unassignedMaterials.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <span className="material-icons text-gray-300 text-3xl mb-2">
+                          science
+                        </span>
+                        <p className="text-gray-500 text-center">
+                          {t('production.aba_calculator.no_available_materials')}
+                        </p>
                       </div>
+                    ) : (
+                      unassignedMaterials.map((material, index) => (
+                        <Draggable
+                          key={material.id}
+                          draggableId={material.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`p-3 mb-2 rounded border ${
+                                snapshot.isDragging
+                                  ? 'bg-primary-50 border-primary-200'
+                                  : 'bg-white border-gray-200'
+                              } shadow-sm`}
+                            >
+                              <div className="flex items-center">
+                                <span className="material-icons text-sm text-gray-500 mr-2">
+                                  drag_indicator
+                                </span>
+                                <span>{material.materialName}</span>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))
                     )}
+                    {provided.placeholder}
                   </div>
                 )}
               </Droppable>
-            </CardContent>
-          </Card>
-          
-          {/* Screw B */}
-          <Card>
-            <CardHeader className="bg-orange-100">
-              <CardTitle>{t('production.aba_calculator.screw_b')}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <Droppable droppableId="screw-b">
-                {(provided) => (
+            </DragDropContext>
+          </CardContent>
+          <CardFooter className="border-t p-4 bg-gray-50">
+            <div className="text-sm text-gray-500">
+              {t('production.aba_calculator.drag_materials_here')}
+            </div>
+          </CardFooter>
+        </Card>
+
+        {/* Screw A */}
+        <Card className="overflow-hidden border-primary-200">
+          <CardHeader className="bg-primary-50 p-4">
+            <CardTitle className="text-md flex items-center">
+              <span className="material-icons text-lg mr-2">settings</span>
+              {t('production.aba_calculator.screw_a')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 min-h-[300px]">
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="screwA">
+                {(provided, snapshot) => (
                   <div
-                    ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="min-h-[200px] border border-dashed rounded-md p-2"
+                    ref={provided.innerRef}
+                    className={`min-h-[250px] p-2 rounded ${
+                      snapshot.isDraggingOver ? 'bg-primary-50' : ''
+                    }`}
                   >
-                    {screwBMaterials.map((material, index) => (
-                      <Draggable key={material.id} draggableId={material.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="bg-white shadow-sm rounded-md p-3 mb-2 border"
-                          >
-                            <div className="flex justify-between items-center">
-                              <h4 className="font-medium">{material.materialName}</h4>
-                              <Badge className="bg-orange-200 text-orange-800">B</Badge>
-                            </div>
-                            <div className="mt-2">
-                              <Label htmlFor={`slider-${material.id}`} className="text-xs flex justify-between">
-                                <span>{t('production.aba_calculator.percentage')}</span>
-                                <span>{material.totalPercentage}%</span>
-                              </Label>
-                              <Slider
-                                id={`slider-${material.id}`}
-                                value={[material.totalPercentage]}
-                                min={1}
-                                max={100}
-                                step={1}
-                                onValueChange={([value]) => handlePercentageChange(material.id, value, 'b')}
-                                className="mt-1"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                    {screwBMaterials.length === 0 && (
-                      <div className="text-center py-8 text-muted-foreground">
-                        {t('production.aba_calculator.drag_materials_here')}
+                    {screwAMaterials.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <span className="material-icons text-gray-300 text-3xl mb-2">
+                          settings
+                        </span>
+                        <p className="text-gray-500 text-center">
+                          {t('production.aba_calculator.unassigned')}
+                        </p>
                       </div>
+                    ) : (
+                      screwAMaterials.map((material, index) => (
+                        <Draggable
+                          key={material.id}
+                          draggableId={material.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`p-3 mb-4 rounded border ${
+                                snapshot.isDragging
+                                  ? 'bg-primary-100 border-primary-300'
+                                  : 'bg-white border-gray-200'
+                              } shadow-sm`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span>{material.materialName}</span>
+                                <Badge variant="outline">
+                                  {material.screwAPercentage}%
+                                </Badge>
+                              </div>
+                              <div className="pt-2">
+                                <Label className="text-xs text-gray-500 mb-2 block">
+                                  {t('production.aba_calculator.percentage')}
+                                </Label>
+                                <Slider
+                                  value={[material.screwAPercentage]}
+                                  min={0}
+                                  max={100}
+                                  step={5}
+                                  className={`${isRTL ? 'rtl-slider' : ''}`}
+                                  onValueChange={(value) => handleScrewASliderChange(index, value)}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))
                     )}
+                    {provided.placeholder}
                   </div>
                 )}
               </Droppable>
-            </CardContent>
-          </Card>
-        </div>
-      </DragDropContext>
-      
-      <div className="bg-muted p-4 rounded-md mt-4">
-        <h3 className="font-medium mb-2">{t('production.aba_calculator.configuration_help')}</h3>
-        <ul className="list-disc list-inside space-y-1 text-sm">
-          <li>{t('production.aba_calculator.drag_help')}</li>
-          <li>{t('production.aba_calculator.slider_help')}</li>
-          <li>{t('production.aba_calculator.save_help')}</li>
-        </ul>
+            </DragDropContext>
+          </CardContent>
+          <CardFooter className="border-t p-4 bg-primary-50">
+            <div className="text-sm text-primary-700">
+              {t('production.aba_calculator.a_description')}
+            </div>
+          </CardFooter>
+        </Card>
+
+        {/* Screw B */}
+        <Card className="overflow-hidden border-secondary-200">
+          <CardHeader className="bg-secondary-50 p-4">
+            <CardTitle className="text-md flex items-center">
+              <span className="material-icons text-lg mr-2">settings</span>
+              {t('production.aba_calculator.screw_b')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 min-h-[300px]">
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="screwB">
+                {(provided, snapshot) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className={`min-h-[250px] p-2 rounded ${
+                      snapshot.isDraggingOver ? 'bg-secondary-50' : ''
+                    }`}
+                  >
+                    {screwBMaterials.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <span className="material-icons text-gray-300 text-3xl mb-2">
+                          settings
+                        </span>
+                        <p className="text-gray-500 text-center">
+                          {t('production.aba_calculator.unassigned')}
+                        </p>
+                      </div>
+                    ) : (
+                      screwBMaterials.map((material, index) => (
+                        <Draggable
+                          key={material.id}
+                          draggableId={material.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`p-3 mb-4 rounded border ${
+                                snapshot.isDragging
+                                  ? 'bg-secondary-100 border-secondary-300'
+                                  : 'bg-white border-gray-200'
+                              } shadow-sm`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span>{material.materialName}</span>
+                                <Badge variant="outline">
+                                  {material.screwBPercentage}%
+                                </Badge>
+                              </div>
+                              <div className="pt-2">
+                                <Label className="text-xs text-gray-500 mb-2 block">
+                                  {t('production.aba_calculator.percentage')}
+                                </Label>
+                                <Slider
+                                  value={[material.screwBPercentage]}
+                                  min={0}
+                                  max={100}
+                                  step={5}
+                                  className={`${isRTL ? 'rtl-slider' : ''}`}
+                                  onValueChange={(value) => handleScrewBSliderChange(index, value)}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))
+                    )}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </CardContent>
+          <CardFooter className="border-t p-4 bg-secondary-50">
+            <div className="text-sm text-secondary-700">
+              {t('production.aba_calculator.b_description')}
+            </div>
+          </CardFooter>
+        </Card>
+      </div>
+
+      <Separator />
+
+      <div className="flex justify-between items-center">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center text-gray-500 text-sm">
+                <span className="material-icons text-primary-500 text-base mr-1">help_outline</span>
+                {t('production.aba_calculator.configuration_help')}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              <div className="space-y-2">
+                <p>{t('production.aba_calculator.drag_help')}</p>
+                <p>{t('production.aba_calculator.slider_help')}</p>
+                <p>{t('production.aba_calculator.save_help')}</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <Button 
+          onClick={handleSaveConfiguration}
+          className="flex items-center"
+        >
+          <span className="material-icons text-sm mr-1">save</span>
+          {t('common.save')}
+        </Button>
       </div>
     </div>
   );

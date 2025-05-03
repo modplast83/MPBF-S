@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -58,6 +58,19 @@ export default function MixMaterialsPage() {
   // Delete mix mutation
   const [abaCalculationData, setAbaCalculationData] = useState<any>(null);
   const [materialDistributions, setMaterialDistributions] = useState<MaterialDistribution[]>([]);
+  
+  // Load saved ABA material distributions from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedConfig = localStorage.getItem('aba-material-config');
+      if (savedConfig) {
+        const parsedConfig = JSON.parse(savedConfig);
+        setMaterialDistributions(parsedConfig);
+      }
+    } catch (error) {
+      console.error("Failed to load ABA material configuration:", error);
+    }
+  }, []);
 
   const deleteMixMutation = useMutation({
     mutationFn: async (mixId: number) => {
