@@ -222,7 +222,17 @@
         "screw_b": "برغي B",
         "per_material": "لكل مادة",
         "material_type": "نوع المادة",
-        "ratio": "النسبة"
+        "ratio": "النسبة",
+        "configuration": "الإعدادات",
+        "available_materials": "المواد المتاحة",
+        "unassigned": "غير مخصص",
+        "drag_materials_here": "اسحب المواد هنا",
+        "no_available_materials": "لا توجد مواد متاحة",
+        "configuration_help": "مساعدة الإعدادات",
+        "drag_help": "اسحب المواد بين الأعمدة لتخصيصها للبراغي",
+        "slider_help": "استخدم أشرطة التمرير لضبط نسب المواد",
+        "save_help": "احفظ الإعدادات لتطبيقها في الحسابات المستقبلية",
+        "percentage": "النسبة المئوية"
       },
       "roll_management": {
         "title": "إدارة الرولات",

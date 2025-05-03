@@ -222,7 +222,17 @@
         "screw_b": "Screw B",
         "per_material": "Per Material",
         "material_type": "Material Type",
-        "ratio": "Ratio"
+        "ratio": "Ratio",
+        "configuration": "Configuration",
+        "available_materials": "Available Materials",
+        "unassigned": "Unassigned",
+        "drag_materials_here": "Drag materials here",
+        "no_available_materials": "No available materials",
+        "configuration_help": "Configuration Help",
+        "drag_help": "Drag materials between columns to assign them to screws",
+        "slider_help": "Use sliders to adjust material percentages",
+        "save_help": "Save configuration to apply for future calculations",
+        "percentage": "Percentage"
       },
       "roll_management": {
         "title": "Roll Management",
