@@ -232,7 +232,9 @@
         "drag_help": "Drag materials between columns to assign them to screws",
         "slider_help": "Use sliders to adjust material percentages",
         "save_help": "Save configuration to apply for future calculations",
-        "percentage": "Percentage"
+        "percentage": "Percentage",
+        "configuration_saved": "ABA Calculator configuration saved successfully",
+        "config_tab": "Configuration"
       },
       "roll_management": {
         "title": "Roll Management",

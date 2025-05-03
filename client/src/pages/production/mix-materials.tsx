@@ -57,6 +57,7 @@ export default function MixMaterialsPage() {
   
   // Delete mix mutation
   const [abaCalculationData, setAbaCalculationData] = useState<any>(null);
+  const [materialDistributions, setMaterialDistributions] = useState<MaterialDistribution[]>([]);
 
   const deleteMixMutation = useMutation({
     mutationFn: async (mixId: number) => {
@@ -345,6 +346,20 @@ export default function MixMaterialsPage() {
       </div>
     );
   };
+  
+  // Handle saving ABA material configurations
+  const handleSaveAbaConfig = (distributions: MaterialDistribution[]) => {
+    setMaterialDistributions(distributions);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('aba-material-config', JSON.stringify(distributions));
+    
+    toast({
+      title: t("common.success"),
+      description: t("production.aba_calculator.configuration_saved"),
+      duration: 2000,
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -375,7 +390,7 @@ export default function MixMaterialsPage() {
       </div>
 
       <Tabs defaultValue="mix_materials" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
+        <TabsList className="grid w-full grid-cols-3 mb-4">
           <TabsTrigger value="mix_materials">
             <span className="material-icons text-sm mr-1">science</span>
             {t('production.mix_materials.title')}
@@ -383,6 +398,10 @@ export default function MixMaterialsPage() {
           <TabsTrigger value="aba_calculator">
             <span className="material-icons text-sm mr-1">calculate</span>
             {t('production.aba_calculator.title', 'ABA Calculator')}
+          </TabsTrigger>
+          <TabsTrigger value="aba_config">
+            <span className="material-icons text-sm mr-1">settings</span>
+            {t('production.aba_calculator.config_tab')}
           </TabsTrigger>
         </TabsList>
         
@@ -436,6 +455,24 @@ export default function MixMaterialsPage() {
                     window.print();
                   }, 100);
                 }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="aba_config">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('production.aba_calculator.config_tab')}</CardTitle>
+              <CardDescription>
+                {t('production.aba_calculator.drag_help')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AbaMaterialsDnd
+                rawMaterials={rawMaterials || []}
+                onSave={handleSaveAbaConfig}
+                initialDistributions={materialDistributions}
               />
             </CardContent>
           </Card>
