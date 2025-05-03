@@ -93,7 +93,7 @@ export const customerProducts = pgTable("customer_products", {
   cuttingLength: doublePrecision("cutting_length_cm"), // Cutting Length (CM)
   rawMaterial: text("raw_material"), // Raw Material
   masterBatchId: text("master_batch_id").references(() => masterBatches.id), // Master Batch ID
-  printed: text("printed"), // Printed
+  printed: boolean("printed").notNull().default(false), // Printed (converted from text to boolean)
   cuttingUnit: text("cutting_unit"), // Cutting Unit
   unitWeight: doublePrecision("unit_weight_kg"), // Unit Weight (Kg)
   packing: text("packing"), // Packing
