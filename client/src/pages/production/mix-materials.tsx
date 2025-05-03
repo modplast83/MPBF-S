@@ -464,9 +464,7 @@ export default function MixMaterialsPage() {
               <AbaCalculator 
                 onPrint={(data) => {
                   setAbaCalculationData(data);
-                  setTimeout(() => {
-                    window.print();
-                  }, 100);
+                  // We won't use this callback anymore as the AbaCalculator handles printing internally
                 }}
               />
             </CardContent>

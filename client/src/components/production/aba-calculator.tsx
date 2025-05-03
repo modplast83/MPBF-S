@@ -395,9 +395,121 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
 
   // Handle print button click
   const handlePrint = () => {
-    if (calculationResult) {
-      onPrint(calculationResult);
+    if (!calculationResult) return;
+    
+    // Create printable content
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert(t('production.roll_management.popup_blocked'));
+      return;
     }
+    
+    // Apply styles and content to print window
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${t('production.aba_calculator.title')} - ${calculationResult.mixId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { font-size: 18px; text-align: center; margin-bottom: 15px; }
+            .header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+            .header-item { margin-bottom: 8px; }
+            .label { font-size: 12px; color: #666; }
+            .value { font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+            thead { background-color: #f3f4f6; }
+            .total-row { background-color: #f3f4f6; font-weight: bold; }
+            .screwA { background-color: #fee2e2; }
+            .screwB { background-color: #fef3c7; }
+            .material { background-color: #fef9c3; font-weight: 500; }
+            .total { background-color: #fefce8; }
+            .footer { margin-top: 20px; font-size: 10px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <h1>${t('production.aba_calculator.title')} - ${t('production.aba_calculator.result')}</h1>
+          
+          <div class="header">
+            <div>
+              <div class="header-item">
+                <div class="label">${t('production.aba_calculator.mix_id')}</div>
+                <div class="value">${calculationResult.mixId}</div>
+              </div>
+              <div class="header-item">
+                <div class="label">${t('common.customer')}</div>
+                <div class="value">${calculationResult.customer}</div>
+              </div>
+            </div>
+            <div>
+              <div class="header-item">
+                <div class="label">${t('production.aba_calculator.date')}</div>
+                <div class="value">${calculationResult.mixDate}</div>
+              </div>
+              <div class="header-item">
+                <div class="label">${t('common.quantity')}</div>
+                <div class="value">${calculationResult.quantity} kg</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="header-item">
+            <div class="label">${t('common.raw_material')}</div>
+            <div class="value">${calculationResult.rawMaterial}</div>
+          </div>
+          
+          <h3>${t('production.aba_calculator.aba_formula')}</h3>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>A</th>
+                <th>${t('production.aba_calculator.material')}</th>
+                <th>B</th>
+                <th>A+B KG</th>
+                <th>A+B %</th>
+                <th>A%</th>
+                <th>B%</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${calculationResult.items.map((item, idx) => `
+                <tr>
+                  <td class="screwA">${item.screwA} KG</td>
+                  <td class="material">${item.material}</td>
+                  <td class="screwB">${item.screwB} KG</td>
+                  <td class="total">${item.total} KG</td>
+                  <td>${item.percentage}%</td>
+                  <td>${item.screwAPercentage}%</td>
+                  <td>${item.screwBPercentage}%</td>
+                </tr>
+              `).join('')}
+              <tr class="total-row">
+                <td>${calculationResult.totals.screwA} KG</td>
+                <td>Total</td>
+                <td>${calculationResult.totals.screwB} KG</td>
+                <td>${calculationResult.totals.total} KG</td>
+                <td>100%</td>
+                <td>${calculationResult.totals.screwAPercentage}%</td>
+                <td>${calculationResult.totals.screwBPercentage}%</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="footer">
+            ${new Date().toLocaleString()}<br />
+            ${t('production.aba_calculator.title')} - ${calculationResult.mixId}
+          </div>
+        </body>
+      </html>
+    `);
+    
+    // Focus and print
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
   };
 
   return (
