@@ -43,7 +43,6 @@ const calculatorSchema = z.object({
   colors: z.string().min(1, "Number of colors is required").transform(val => parseInt(val)),
   plateType: z.string().min(1, "Plate type is required"),
   thickness: z.string().transform(val => val ? parseFloat(val) : undefined),
-  customerId: z.string().optional(),
   customerDiscount: z.string().transform(val => val ? parseFloat(val) : undefined),
   notes: z.string().optional(),
 });
@@ -66,17 +65,12 @@ export default function Calculator() {
       colors: "1",
       plateType: "standard",
       thickness: "",
-      customerId: "none",
       customerDiscount: "",
       notes: "",
     },
   });
 
-  // Fetch customers for the dropdown
-  const { data: customers } = useQuery({
-    queryKey: [API_ENDPOINTS.CUSTOMERS],
-    enabled: true,
-  });
+  // No need to fetch customers as we removed the customer selection
 
   // Calculate price mutation
   const calculateMutation = useMutation({
@@ -127,12 +121,7 @@ export default function Calculator() {
 
   // Form submission handler
   const onSubmit = (values: CalculatorFormValues) => {
-    // Handle "none" customer ID
-    const submissionValues = {
-      ...values,
-      customerId: values.customerId === "none" ? null : values.customerId
-    };
-    calculateMutation.mutate(submissionValues);
+    calculateMutation.mutate(values);
   };
 
   // Save calculation
@@ -141,12 +130,9 @@ export default function Calculator() {
     
     const formValues = form.getValues();
     
-    // Convert "none" customerId to null for database storage
-    const customerId = formValues.customerId === "none" ? null : formValues.customerId;
-    
     const saveData = {
       ...formValues,
-      customerId,
+      customerId: null, // No customer association
       area: calculation.area,
       calculatedPrice: calculation.calculatedPrice,
       basePricePerUnit: calculation.basePricePerUnit,
@@ -262,7 +248,7 @@ export default function Calculator() {
                 />
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {/* Plate Type */}
                 <FormField
                   control={form.control}
@@ -283,36 +269,6 @@ export default function Calculator() {
                           <SelectItem value="standard">Standard</SelectItem>
                           <SelectItem value="premium">Premium</SelectItem>
                           <SelectItem value="digital">Digital</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                {/* Customer */}
-                <FormField
-                  control={form.control}
-                  name="customerId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("cliches.customer")}</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("cliches.selectCustomer")} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">{t("cliches.noCustomer")}</SelectItem>
-                          {customers && customers.map((customer: any) => (
-                            <SelectItem key={customer.id} value={customer.id}>
-                              {isRTL && customer.nameAr ? customer.nameAr : customer.name}
-                            </SelectItem>
-                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -426,7 +382,7 @@ export default function Calculator() {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">{t("cliches.basePrice")}</p>
                   <p className="font-medium">
-                    ${calculation.basePricePerUnit}/cm²
+                    SR {calculation.basePricePerUnit}/cm²
                   </p>
                 </div>
                 
@@ -450,7 +406,7 @@ export default function Calculator() {
               <div className="bg-primary/5 p-4 rounded-lg">
                 <p className="text-lg font-semibold">{t("cliches.price")}</p>
                 <p className="text-3xl font-bold text-primary">
-                  ${calculation.calculatedPrice.toFixed(2)}
+                  SR {calculation.calculatedPrice.toFixed(2)}
                 </p>
               </div>
               
