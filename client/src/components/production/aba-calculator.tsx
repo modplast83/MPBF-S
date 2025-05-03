@@ -464,7 +464,7 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
             <thead>
               <tr>
                 <th>A</th>
-                <th>${t('production.aba_calculator.material')}</th>
+                <th>Material</th>
                 <th>B</th>
                 <th>A+B KG</th>
                 <th>A+B %</th>
