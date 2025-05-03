@@ -52,11 +52,10 @@ export default function AuthPage() {
   // Effect to handle redirection when user authentication state changes
   useEffect(() => {
     if (user) {
-      const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
-      sessionStorage.removeItem("redirectAfterLogin");
-      setLocation(redirectPath);
+      // We'll use direct redirection from the auth hook instead of here
+      // This prevents redirection conflicts
     }
-  }, [user, setLocation]);
+  }, [user]);
 
   // Create login form
   const loginForm = useForm<LoginFormValues>({
@@ -90,9 +89,9 @@ export default function AuthPage() {
     registerMutation.mutate(data);
   }
 
-  // If user is already authenticated, redirect to home page
+  // If user is already authenticated, redirect to dashboard
   if (user) {
-    return <Redirect to="/" />;
+    return <Redirect to="/dashboard" />;
   }
 
   return (

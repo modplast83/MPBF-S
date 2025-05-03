@@ -53,18 +53,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Login successful",
         description: `Welcome back, ${user.name}!`,
         variant: "default",
+        duration: 2000, // 2 seconds
       });
       
-      // Redirect to home page or saved redirect location
-      const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
-      sessionStorage.removeItem("redirectAfterLogin");
+      // Redirect to dashboard immediately after login
+      setLocation("/dashboard");
       
-      // Use setTimeout to ensure the redirect happens after React Query has processed cache updates
-      setTimeout(() => {
-        setLocation(redirectPath);
-      }, 0);
-      
-      // Invalidate all queries to force refetch after login (but after redirect)
+      // Invalidate all queries to force refetch after login
       queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
@@ -91,14 +86,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Registration successful",
         description: `Welcome, ${user.name}!`,
         variant: "default",
+        duration: 2000, // 2 seconds
       });
       
-      // Redirect to home page after registration
-      setTimeout(() => {
-        setLocation("/");
-      }, 0);
+      // Redirect to dashboard after registration
+      setLocation("/dashboard");
       
-      // Invalidate all queries to force refetch after registration (but after redirect)
+      // Invalidate all queries to force refetch after registration
       queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
