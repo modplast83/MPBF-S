@@ -257,7 +257,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
           total: Math.round(defaultAmount),
           percentage: Math.round(defaultRatio * 100 * 10) / 10,
           screwAPercentage: 33.0,
-          screwBPercentage: 6.1
+          screwBPercentage: 6.1,
+          screwAAbsPercentage: 12.9,
+          screwBAbsPercentage: 13.3
         },
         {
           material: "Raw Material 2",
@@ -266,7 +268,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
           total: Math.round(defaultAmount),
           percentage: Math.round(defaultRatio * 100 * 10) / 10,
           screwAPercentage: 33.0,
-          screwBPercentage: 6.1
+          screwBPercentage: 6.1,
+          screwAAbsPercentage: 12.0,
+          screwBAbsPercentage: 9.8
         },
         {
           material: "Filler",
@@ -275,7 +279,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
           total: Math.round(fillerAmount),
           percentage: Math.round(fillerRatio * 100 * 10) / 10,
           screwAPercentage: 33.0,
-          screwBPercentage: 86.0
+          screwBPercentage: 86.0,
+          screwAAbsPercentage: 4.5,
+          screwBAbsPercentage: 45.5
         },
         {
           material: "MasterBatch",
@@ -284,7 +290,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
           total: Math.round(masterBatchAmount),
           percentage: Math.round(masterBatchRatio * 100 * 10) / 10,
           screwAPercentage: 1.1,
-          screwBPercentage: 1.7
+          screwBPercentage: 1.7,
+          screwAAbsPercentage: 0.6,
+          screwBAbsPercentage: 1.4
         }
       ];
 
@@ -357,7 +365,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
         total: Math.round(hdpeAmount),
         percentage: Math.round(hdpeRatio * 100 * 10) / 10,
         screwAPercentage: 33.0, // These are fixed values from the example
-        screwBPercentage: 6.1
+        screwBPercentage: 6.1,
+        screwAAbsPercentage: 12.9,
+        screwBAbsPercentage: 13.3
       },
       {
         material: "LLDPE",
@@ -366,7 +376,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
         total: Math.round(lldpeAmount),
         percentage: Math.round(lldpeRatio * 100 * 10) / 10,
         screwAPercentage: 33.0,
-        screwBPercentage: 6.1
+        screwBPercentage: 6.1,
+        screwAAbsPercentage: 12.0,
+        screwBAbsPercentage: 9.8
       },
       {
         material: "Filler",
@@ -375,7 +387,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
         total: Math.round(fillerAmount),
         percentage: Math.round(fillerRatio * 100 * 10) / 10,
         screwAPercentage: 33.0,
-        screwBPercentage: 86.0
+        screwBPercentage: 86.0,
+        screwAAbsPercentage: 4.5,
+        screwBAbsPercentage: 45.5
       },
       {
         material: "MasterBatch",
@@ -384,7 +398,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
         total: Math.round(masterBatchAmount),
         percentage: Math.round(masterBatchRatio * 100 * 10) / 10,
         screwAPercentage: 1.1,
-        screwBPercentage: 1.7
+        screwBPercentage: 1.7,
+        screwAAbsPercentage: 0.6,
+        screwBAbsPercentage: 1.4
       }
     ];
 
@@ -639,6 +655,12 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
                           <th className="p-2 border text-sm font-medium">
                             B %
                           </th>
+                          <th className="p-2 border text-sm font-medium text-orange-500">
+                            A %
+                          </th>
+                          <th className="p-2 border text-sm font-medium text-teal-500">
+                            B %
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -651,6 +673,8 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
                             <td className="p-2 border text-sm">{item.percentage}%</td>
                             <td className="p-2 border text-sm">{item.screwAPercentage}%</td>
                             <td className="p-2 border text-sm">{item.screwBPercentage}%</td>
+                            <td className="p-2 border text-sm text-orange-500">{item.screwAAbsPercentage || "-"}%</td>
+                            <td className="p-2 border text-sm text-teal-500">{item.screwBAbsPercentage || "-"}%</td>
                           </tr>
                         ))}
                         {/* Total row */}
@@ -675,6 +699,12 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
                           </td>
                           <td className="p-2 border text-sm font-bold">
                             {calculationResult.totals.screwBPercentage}%
+                          </td>
+                          <td className="p-2 border text-sm font-bold text-orange-500">
+                            30%
+                          </td>
+                          <td className="p-2 border text-sm font-bold text-teal-500">
+                            70%
                           </td>
                         </tr>
                       </tbody>
@@ -722,6 +752,8 @@ export function AbaPrintTemplate({ data }: { data: AbaCalculationResult }) {
             <th className="p-2 border bg-yellow-50 text-center">A+B %</th>
             <th className="p-2 border text-center">A %</th>
             <th className="p-2 border text-center">B %</th>
+            <th className="p-2 border text-center text-orange-500">A %</th>
+            <th className="p-2 border text-center text-teal-500">B %</th>
           </tr>
         </thead>
         <tbody>
@@ -734,6 +766,8 @@ export function AbaPrintTemplate({ data }: { data: AbaCalculationResult }) {
               <td className="p-2 border text-center">{item.percentage}%</td>
               <td className="p-2 border text-center">{item.screwAPercentage}%</td>
               <td className="p-2 border text-center">{item.screwBPercentage}%</td>
+              <td className="p-2 border text-center text-orange-500">{item.screwAAbsPercentage || "-"}%</td>
+              <td className="p-2 border text-center text-teal-500">{item.screwBAbsPercentage || "-"}%</td>
             </tr>
           ))}
           <tr className="bg-gray-200">
@@ -744,6 +778,8 @@ export function AbaPrintTemplate({ data }: { data: AbaCalculationResult }) {
             <td className="p-2 border text-center font-bold">100%</td>
             <td className="p-2 border text-center font-bold">{data.totals.screwAPercentage}%</td>
             <td className="p-2 border text-center font-bold">{data.totals.screwBPercentage}%</td>
+            <td className="p-2 border text-center font-bold text-orange-500">30%</td>
+            <td className="p-2 border text-center font-bold text-teal-500">70%</td>
           </tr>
         </tbody>
       </table>
