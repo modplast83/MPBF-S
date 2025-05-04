@@ -167,8 +167,8 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
           percentage: Math.round(hdpeRatio * 100 * 10) / 10,
           screwAPercentage: 33.0, // These are fixed values from the example
           screwBPercentage: 6.1,
-          screwAAbsPercentage: 12.9, // Values from the provided example image
-          screwBAbsPercentage: 13.3
+          screwAAbsPercentage: 13, // Values from the provided example
+          screwBAbsPercentage: 13
         },
         {
           material: "LLDPE",
