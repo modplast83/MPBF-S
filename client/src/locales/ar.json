@@ -388,6 +388,7 @@
       "quantity": "الكمية (كجم)",
       "calculate": "حساب",
       "result": "النتيجة",
+      "calculation_description": "تفاصيل تكلفة المواد والتسعير",
       "parameters": "المعايير",
       "waste_percentage": "نسبة الهدر",
       "waste": "الهدر",

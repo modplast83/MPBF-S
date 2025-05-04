@@ -7,11 +7,10 @@ export default function ToolsPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <PageHeader 
-        heading="Factory Tools" 
-        text="Specialized tools to help with factory calculations and operations"
-      >
-        <Wrench className="h-6 w-6 mb-2" />
-      </PageHeader>
+        title="Factory Tools" 
+        description="Specialized tools to help with factory calculations and operations"
+        icon="build"
+      />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/tools/bag-weight">

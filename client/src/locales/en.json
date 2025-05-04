@@ -388,6 +388,7 @@
       "quantity": "Quantity (kg)",
       "calculate": "Calculate",
       "result": "Result",
+      "calculation_description": "Detailed breakdown of materials cost and pricing",
       "parameters": "Parameters",
       "waste_percentage": "Waste Percentage",
       "waste": "Waste",

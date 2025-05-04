@@ -12,8 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { JobOrder, RawMaterial } from "@shared/schema";
-
+import { JobOrder } from "@shared/schema";
 
 // Material cost calculation result interface
 interface MaterialCost {
@@ -24,6 +23,7 @@ interface MaterialCost {
   cost: number;
 }
 
+// Overall cost calculation result interface
 interface CostCalculationResult {
   orderQuantity: number;
   wastePercentage: number;
@@ -40,67 +40,75 @@ interface CostCalculationResult {
 export default function CostCalculator() {
   const { t } = useTranslation();
   
-  // State for selected job order or manual quantity
+  // Fetch job orders
+  const { data: jobOrders, isLoading: jobOrdersLoading } = useQuery<JobOrder[]>({
+    queryKey: ['/api/job-orders'],
+    select: (data) => data.filter(job => job.status === 'pending' || job.status === 'in_progress'),
+  });
+
+  // State for selected job order
   const [selectedJobOrderId, setSelectedJobOrderId] = useState<number | null>(null);
-  const [manualQuantity, setManualQuantity] = useState<number>(500);
-  const [wastePercentage, setWastePercentage] = useState<number>(5);
-  const [fixedCostPerKg, setFixedCostPerKg] = useState<number>(2);
+  const [manualQuantity, setManualQuantity] = useState<number>(100);
   
-  // Material pricing (SAR per kg)
-  const [hdpePrice, setHdpePrice] = useState<number>(4.25);
-  const [lldpePrice, setLldpePrice] = useState<number>(4.25);
-  const [fillerPrice, setFillerPrice] = useState<number>(1.60);
-  const [masterBatchPrice, setMasterBatchPrice] = useState<number>(15.00);
+  // Cost parameters
+  const [wastePercentage, setWastePercentage] = useState<number>(5);
+  const [fixedCostPerKg, setFixedCostPerKg] = useState<number>(1.5);
+  
+  // Material prices
+  const [hdpePrice, setHdpePrice] = useState<number>(4.20);
+  const [lldpePrice, setLldpePrice] = useState<number>(4.80);
+  const [fillerPrice, setFillerPrice] = useState<number>(0.80);
+  const [masterBatchPrice, setMasterBatchPrice] = useState<number>(10.0);
   
   // Material percentages
-  const [hdpePercentage, setHdpePercentage] = useState<number>(35);
-  const [lldpePercentage, setLldpePercentage] = useState<number>(35);
-  const [fillerPercentage, setFillerPercentage] = useState<number>(25);
-  const [masterBatchPercentage, setMasterBatchPercentage] = useState<number>(5);
+  const [hdpePercentage, setHdpePercentage] = useState<number>(30);
+  const [lldpePercentage, setLldpePercentage] = useState<number>(20);
+  const [fillerPercentage, setFillerPercentage] = useState<number>(48);
+  const [masterBatchPercentage, setMasterBatchPercentage] = useState<number>(2);
+  
+  // Total percentage for validation
+  const [totalPercentage, setTotalPercentage] = useState<number>(100);
   
   // Calculation result
   const [calculationResult, setCalculationResult] = useState<CostCalculationResult | null>(null);
-
-  // Fetch job orders that are pending
-  const { data: jobOrders, isLoading: jobOrdersLoading } = useQuery({
-    queryKey: ["/api/job-orders"],
-  });
-
-  // Fetch raw materials
-  const { data: rawMaterials, isLoading: rawMaterialsLoading } = useQuery({
-    queryKey: ["/api/raw-materials"],
-  });
-
-  // Filter pending job orders
-  const pendingJobOrders = jobOrders 
-    ? (jobOrders as JobOrder[]).filter(job => job.status === "pending" || job.status === "in-progress")
-    : [];
-
-  // Calculate total percentage to validate input
-  const totalPercentage = hdpePercentage + lldpePercentage + fillerPercentage + masterBatchPercentage;
-
-  // Calculate costs when a job order is selected
+  
+  // Format number to locale string with 2 decimal places
+  const formatNumberToLocale = (value: number, decimals: number = 2): string => {
+    return value.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    });
+  };
+  
+  // Calculate total percentage whenever material percentages change
   useEffect(() => {
-    if (selectedJobOrderId && jobOrders && !jobOrdersLoading) {
-      const selectedOrder = (jobOrders as JobOrder[]).find(job => job.id === selectedJobOrderId);
-      if (selectedOrder) {
-        calculateCost(selectedOrder.quantity);
+    const total = hdpePercentage + lldpePercentage + fillerPercentage + masterBatchPercentage;
+    setTotalPercentage(parseFloat(total.toFixed(2)));
+  }, [hdpePercentage, lldpePercentage, fillerPercentage, masterBatchPercentage]);
+  
+  // Handle job order selection
+  useEffect(() => {
+    if (selectedJobOrderId && jobOrders) {
+      const jobOrder = jobOrders.find(job => job.id === selectedJobOrderId);
+      if (jobOrder) {
+        calculateCost(jobOrder.quantity);
       }
     }
-  }, [selectedJobOrderId, jobOrders, jobOrdersLoading, hdpePrice, lldpePrice, fillerPrice, masterBatchPrice, 
-      hdpePercentage, lldpePercentage, fillerPercentage, masterBatchPercentage, wastePercentage, fixedCostPerKg]);
-
-  // Calculate cost for manual quantity
+  }, [selectedJobOrderId, jobOrders]);
+  
+  // Manual calculation
   const calculateManualCost = () => {
-    if (!manualQuantity) return;
+    if (manualQuantity <= 0) {
+      return;
+    }
     calculateCost(manualQuantity);
   };
-
+  
   // Calculate cost based on quantity
   const calculateCost = (quantity: number) => {
     // Validate total percentage is 100%
     if (Math.abs(totalPercentage - 100) > 0.1) {
-      alert(t('production.cost_calculator.percentage_error'));
+      alert(t('cost_calculator.percentage_error'));
       return;
     }
 
@@ -185,7 +193,7 @@ export default function CostCalculator() {
     // Create printable content
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert(t('production.roll_management.popup_blocked'));
+      alert(t('common.popup_blocked'));
       return;
     }
     
@@ -193,7 +201,7 @@ export default function CostCalculator() {
     printWindow.document.write(`
       <html>
         <head>
-          <title>${t('production.cost_calculator.title')} - ${t('production.cost_calculator.result')}</title>
+          <title>${t('cost_calculator.title')} - ${t('cost_calculator.result')}</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 20px; }
             h1 { font-size: 18px; text-align: center; margin-bottom: 15px; }
@@ -211,7 +219,7 @@ export default function CostCalculator() {
           </style>
         </head>
         <body>
-          <h1>${t('production.cost_calculator.title')} - ${t('production.cost_calculator.result')}</h1>
+          <h1>${t('cost_calculator.title')} - ${t('cost_calculator.result')}</h1>
           
           <div class="header">
             <div>
@@ -220,32 +228,32 @@ export default function CostCalculator() {
                 <div class="value">${calculationResult.orderQuantity} kg</div>
               </div>
               <div class="header-item">
-                <div class="label">${t('production.cost_calculator.waste_percentage')}</div>
+                <div class="label">${t('cost_calculator.waste_percentage')}</div>
                 <div class="value">${calculationResult.wastePercentage}%</div>
               </div>
             </div>
             <div>
               <div class="header-item">
-                <div class="label">${t('production.cost_calculator.total_quantity')}</div>
+                <div class="label">${t('cost_calculator.total_quantity')}</div>
                 <div class="value">${Math.round(calculationResult.totalQuantity)} kg</div>
               </div>
               <div class="header-item">
-                <div class="label">${t('production.cost_calculator.fixed_cost_per_kg')}</div>
+                <div class="label">${t('cost_calculator.fixed_cost_per_kg')}</div>
                 <div class="value">SAR ${calculationResult.fixedCostPerKg.toFixed(2)}</div>
               </div>
             </div>
           </div>
           
-          <h3>${t('production.cost_calculator.material_costs')}</h3>
+          <h3>${t('cost_calculator.material_costs')}</h3>
           
           <table>
             <thead>
               <tr>
                 <th>${t('common.material')}</th>
-                <th>${t('production.cost_calculator.price_per_kg')}</th>
+                <th>${t('cost_calculator.price_per_kg')}</th>
                 <th>${t('common.percentage')}</th>
                 <th>${t('common.quantity')} (kg)</th>
-                <th>${t('production.cost_calculator.cost')} (SAR)</th>
+                <th>${t('cost_calculator.cost')} (SAR)</th>
               </tr>
             </thead>
             <tbody>
@@ -259,27 +267,27 @@ export default function CostCalculator() {
                 </tr>
               `).join('')}
               <tr class="total-row">
-                <td colspan="3">${t('production.cost_calculator.total_material_cost')}</td>
+                <td colspan="3">${t('cost_calculator.total_material_cost')}</td>
                 <td>${calculationResult.orderQuantity}</td>
                 <td class="cost-cell">SAR ${Math.round(calculationResult.totalMaterialCost)}</td>
               </tr>
               <tr>
-                <td colspan="3">${t('production.cost_calculator.waste_cost')}</td>
+                <td colspan="3">${t('cost_calculator.waste_cost')}</td>
                 <td>${Math.round(calculationResult.orderQuantity * (calculationResult.wastePercentage / 100))}</td>
                 <td class="cost-cell">SAR ${Math.round(calculationResult.wasteCost)}</td>
               </tr>
               <tr>
-                <td colspan="3">${t('production.cost_calculator.fixed_cost')}</td>
+                <td colspan="3">${t('cost_calculator.fixed_cost')}</td>
                 <td colspan="1"></td>
                 <td class="cost-cell">SAR ${Math.round(calculationResult.totalFixedCost)}</td>
               </tr>
               <tr class="total-row">
-                <td colspan="3">${t('production.cost_calculator.total_cost')}</td>
+                <td colspan="3">${t('cost_calculator.total_cost')}</td>
                 <td colspan="1"></td>
                 <td class="cost-cell">SAR ${Math.round(calculationResult.totalCost)}</td>
               </tr>
               <tr class="total-row">
-                <td colspan="3">${t('production.cost_calculator.cost_per_kg')}</td>
+                <td colspan="3">${t('cost_calculator.cost_per_kg')}</td>
                 <td colspan="1"></td>
                 <td class="cost-cell">SAR ${calculationResult.costPerKg.toFixed(2)}</td>
               </tr>
@@ -288,7 +296,7 @@ export default function CostCalculator() {
           
           <div class="footer">
             ${new Date().toLocaleString()}<br />
-            ${t('production.cost_calculator.title')}
+            ${t('cost_calculator.title')}
           </div>
         </body>
       </html>
@@ -307,21 +315,21 @@ export default function CostCalculator() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle>{t('production.cost_calculator.job_order_selection')}</CardTitle>
+            <CardTitle>{t('cost_calculator.job_order_selection')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="job-order">{t('production.cost_calculator.select_job_order')}</Label>
+                <Label htmlFor="job-order">{t('cost_calculator.select_job_order')}</Label>
                 <Select
                   onValueChange={(value) => setSelectedJobOrderId(parseInt(value))}
                   disabled={jobOrdersLoading}
                 >
                   <SelectTrigger id="job-order">
-                    <SelectValue placeholder={t('production.cost_calculator.select_job_order')} />
+                    <SelectValue placeholder={t('cost_calculator.select_job_order')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {pendingJobOrders.map((job) => (
+                    {jobOrders && jobOrders.map((job) => (
                       <SelectItem key={job.id} value={job.id.toString()}>
                         #{job.id} - ({job.quantity} kg)
                       </SelectItem>
@@ -331,10 +339,10 @@ export default function CostCalculator() {
               </div>
               
               <div className="border-t pt-4">
-                <h3 className="font-medium mb-2">{t('production.cost_calculator.manual_calculation')}</h3>
+                <h3 className="font-medium mb-2">{t('cost_calculator.manual_calculation')}</h3>
                 <div className="flex items-end gap-2">
                   <div className="flex-1">
-                    <Label htmlFor="manual-quantity">{t('production.cost_calculator.quantity')}</Label>
+                    <Label htmlFor="manual-quantity">{t('cost_calculator.quantity')}</Label>
                     <Input
                       id="manual-quantity"
                       type="number"
@@ -347,17 +355,17 @@ export default function CostCalculator() {
                     variant="outline" 
                     onClick={calculateManualCost}
                   >
-                    {t('production.cost_calculator.calculate')}
+                    {t('cost_calculator.calculate')}
                   </Button>
                 </div>
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="font-medium mb-2">{t('production.cost_calculator.parameters')}</h3>
+                <h3 className="font-medium mb-2">{t('cost_calculator.parameters')}</h3>
                 
                 <div className="space-y-3">
                   <div>
-                    <Label htmlFor="waste-percentage">{t('production.cost_calculator.waste_percentage')} (%)</Label>
+                    <Label htmlFor="waste-percentage">{t('cost_calculator.waste_percentage')} (%)</Label>
                     <Input
                       id="waste-percentage"
                       type="number"
@@ -369,7 +377,7 @@ export default function CostCalculator() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="fixed-cost">{t('production.cost_calculator.fixed_cost_per_kg')} (SAR)</Label>
+                    <Label htmlFor="fixed-cost">{t('cost_calculator.fixed_cost_per_kg')} (SAR)</Label>
                     <Input
                       id="fixed-cost"
                       type="number"
@@ -383,7 +391,7 @@ export default function CostCalculator() {
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="font-medium mb-2">{t('production.cost_calculator.material_prices')} (SAR/kg)</h3>
+                <h3 className="font-medium mb-2">{t('cost_calculator.material_prices')} (SAR/kg)</h3>
                 
                 <div className="space-y-3">
                   <div>
@@ -411,7 +419,7 @@ export default function CostCalculator() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="filler-price">{t('production.cost_calculator.filler')}</Label>
+                    <Label htmlFor="filler-price">{t('cost_calculator.filler')}</Label>
                     <Input
                       id="filler-price"
                       type="number"
@@ -423,7 +431,7 @@ export default function CostCalculator() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="mb-price">{t('production.cost_calculator.masterbatch')}</Label>
+                    <Label htmlFor="mb-price">{t('cost_calculator.masterbatch')}</Label>
                     <Input
                       id="mb-price"
                       type="number"
@@ -437,10 +445,10 @@ export default function CostCalculator() {
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="font-medium mb-2">{t('production.cost_calculator.material_percentages')} (%)</h3>
+                <h3 className="font-medium mb-2">{t('cost_calculator.material_percentages')} (%)</h3>
                 <div className={`text-xs mb-2 ${Math.abs(totalPercentage - 100) > 0.1 ? 'text-red-500' : 'text-green-500'}`}>
-                  {t('production.cost_calculator.total')}: {totalPercentage}% 
-                  {Math.abs(totalPercentage - 100) > 0.1 ? ` (${t('production.cost_calculator.should_be')} 100%)` : ''}
+                  {t('cost_calculator.total')}: {totalPercentage}% 
+                  {Math.abs(totalPercentage - 100) > 0.1 ? ` (${t('cost_calculator.should_be')} 100%)` : ''}
                 </div>
                 
                 <div className="space-y-3">
@@ -469,7 +477,7 @@ export default function CostCalculator() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="filler-percentage">{t('production.cost_calculator.filler')}</Label>
+                    <Label htmlFor="filler-percentage">{t('cost_calculator.filler')}</Label>
                     <Input
                       id="filler-percentage"
                       type="number"
@@ -481,7 +489,7 @@ export default function CostCalculator() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="mb-percentage">{t('production.cost_calculator.masterbatch')}</Label>
+                    <Label htmlFor="mb-percentage">{t('cost_calculator.masterbatch')}</Label>
                     <Input
                       id="mb-percentage"
                       type="number"
@@ -496,88 +504,88 @@ export default function CostCalculator() {
             </div>
           </CardContent>
         </Card>
-
+        
         {calculationResult && (
           <Card className="md:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{t('production.cost_calculator.result')}</CardTitle>
-              <Button onClick={handlePrint} variant="outline" size="sm" className="ml-auto">
-                <span className="material-icons text-sm mr-1">print</span>
+            <CardHeader className="flex flex-row items-start justify-between">
+              <div>
+                <CardTitle>{t('cost_calculator.result')}</CardTitle>
+                <CardDescription>{t('cost_calculator.calculation_description')}</CardDescription>
+              </div>
+              <Button onClick={handlePrint} variant="outline" size="sm">
                 {t('common.print')}
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-muted p-3 rounded-md">
-                    <p className="text-sm text-muted-foreground">{t('common.quantity')}</p>
-                    <p className="font-medium">{calculationResult.orderQuantity} kg</p>
-                  </div>
-                  <div className="bg-muted p-3 rounded-md">
-                    <p className="text-sm text-muted-foreground">{t('production.cost_calculator.waste')}</p>
-                    <p className="font-medium">{calculationResult.wastePercentage}%</p>
-                  </div>
-                  <div className="bg-muted p-3 rounded-md">
-                    <p className="text-sm text-muted-foreground">{t('production.cost_calculator.total_quantity')}</p>
-                    <p className="font-medium">{Math.round(calculationResult.totalQuantity)} kg</p>
-                  </div>
-                  <div className="bg-muted p-3 rounded-md">
-                    <p className="text-sm text-muted-foreground">{t('production.cost_calculator.fixed_cost')}</p>
-                    <p className="font-medium">SAR {calculationResult.fixedCostPerKg.toFixed(2)}/kg</p>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-2xl font-bold">{calculationResult.orderQuantity} kg</div>
+                  <p className="text-sm text-muted-foreground">{t('common.quantity')}</p>
                 </div>
-
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-2xl font-bold">{calculationResult.wastePercentage}%</div>
+                  <p className="text-sm text-muted-foreground">{t('cost_calculator.waste')}</p>
+                </div>
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-2xl font-bold">{Math.round(calculationResult.totalQuantity)} kg</div>
+                  <p className="text-sm text-muted-foreground">{t('cost_calculator.total_quantity')}</p>
+                </div>
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-2xl font-bold">SAR {formatNumberToLocale(calculationResult.fixedCostPerKg)}</div>
+                  <p className="text-sm text-muted-foreground">{t('cost_calculator.fixed_cost')}</p>
+                </div>
+              </div>
+              
+              <div className="border-t pt-4">
                 <div>
-                  <h3 className="text-lg font-medium mb-3">{t('production.cost_calculator.material_costs')}</h3>
+                  <h3 className="text-lg font-medium mb-3">{t('cost_calculator.material_costs')}</h3>
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-muted">
                           <th className="border p-2 text-left">{t('common.material')}</th>
-                          <th className="border p-2 text-right">{t('production.cost_calculator.price')} (SAR/kg)</th>
+                          <th className="border p-2 text-right">{t('cost_calculator.price')} (SAR/kg)</th>
                           <th className="border p-2 text-right">{t('common.percentage')}</th>
                           <th className="border p-2 text-right">{t('common.quantity')} (kg)</th>
-                          <th className="border p-2 text-right">{t('production.cost_calculator.cost')} (SAR)</th>
+                          <th className="border p-2 text-right">{t('cost_calculator.cost')} (SAR)</th>
                         </tr>
                       </thead>
                       <tbody>
                         {calculationResult.materials.map((material, index) => (
-                          <tr key={index} className="bg-yellow-50">
-                            <td className="border p-2 font-medium">{material.name}</td>
-                            <td className="border p-2 text-right">SAR {material.pricePerKg.toFixed(2)}</td>
+                          <tr key={index} className="even:bg-muted/50">
+                            <td className="border p-2">{material.name}</td>
+                            <td className="border p-2 text-right">{formatNumberToLocale(material.pricePerKg)}</td>
                             <td className="border p-2 text-right">{material.percentage}%</td>
                             <td className="border p-2 text-right">{Math.round(material.quantity)}</td>
-                            <td className="border p-2 text-right font-bold text-red-600">SAR {Math.round(material.cost)}</td>
+                            <td className="border p-2 text-right">{formatNumberToLocale(material.cost, 0)}</td>
                           </tr>
                         ))}
                         <tr className="bg-muted font-medium">
-                          <td className="border p-2" colSpan={3}>{t('production.cost_calculator.total_material_cost')}</td>
+                          <td className="border p-2" colSpan={3}>{t('cost_calculator.total_material_cost')}</td>
                           <td className="border p-2 text-right">{calculationResult.orderQuantity}</td>
-                          <td className="border p-2 text-right font-bold text-red-600">SAR {Math.round(calculationResult.totalMaterialCost)}</td>
+                          <td className="border p-2 text-right">{formatNumberToLocale(calculationResult.totalMaterialCost, 0)}</td>
                         </tr>
                         <tr>
-                          <td className="border p-2" colSpan={3}>{t('production.cost_calculator.waste_cost')}</td>
+                          <td className="border p-2" colSpan={3}>{t('cost_calculator.waste_cost')}</td>
                           <td className="border p-2 text-right">{Math.round(calculationResult.orderQuantity * (calculationResult.wastePercentage / 100))}</td>
-                          <td className="border p-2 text-right font-bold text-red-600">SAR {Math.round(calculationResult.wasteCost)}</td>
+                          <td className="border p-2 text-right">{formatNumberToLocale(calculationResult.wasteCost, 0)}</td>
                         </tr>
                         <tr>
-                          <td className="border p-2" colSpan={3}>{t('production.cost_calculator.fixed_cost')}</td>
+                          <td className="border p-2" colSpan={3}>{t('cost_calculator.fixed_cost')}</td>
                           <td className="border p-2 text-right"></td>
-                          <td className="border p-2 text-right font-bold text-red-600">SAR {Math.round(calculationResult.totalFixedCost)}</td>
+                          <td className="border p-2 text-right">{formatNumberToLocale(calculationResult.totalFixedCost, 0)}</td>
+                        </tr>
+                        <tr className="bg-muted font-bold">
+                          <td className="border p-2" colSpan={3}>{t('cost_calculator.total_cost')}</td>
+                          <td className="border p-2 text-right"></td>
+                          <td className="border p-2 text-right">{formatNumberToLocale(calculationResult.totalCost, 0)}</td>
+                        </tr>
+                        <tr className="bg-primary/10 font-bold">
+                          <td className="border p-2" colSpan={3}>{t('cost_calculator.cost_per_kg')}</td>
+                          <td className="border p-2 text-right"></td>
+                          <td className="border p-2 text-right">{formatNumberToLocale(calculationResult.costPerKg)}</td>
                         </tr>
                       </tbody>
-                      <tfoot>
-                        <tr className="bg-muted font-medium">
-                          <td className="border p-2" colSpan={3}>{t('production.cost_calculator.total_cost')}</td>
-                          <td className="border p-2 text-right"></td>
-                          <td className="border p-2 text-right font-bold text-red-600">SAR {Math.round(calculationResult.totalCost)}</td>
-                        </tr>
-                        <tr className="bg-muted font-medium">
-                          <td className="border p-2" colSpan={3}>{t('production.cost_calculator.cost_per_kg')}</td>
-                          <td className="border p-2 text-right"></td>
-                          <td className="border p-2 text-right font-bold text-red-600">SAR {calculationResult.costPerKg.toFixed(2)}</td>
-                        </tr>
-                      </tfoot>
                     </table>
                   </div>
                 </div>
