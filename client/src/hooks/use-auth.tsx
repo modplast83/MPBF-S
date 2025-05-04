@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // Redirect to dashboard immediately after login
-      setLocation("/dashboard");
+      setLocation("/");
       
       // Invalidate all queries to force refetch after login
       queryClient.invalidateQueries();
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // Redirect to dashboard after registration
-      setLocation("/dashboard");
+      setLocation("/");
       
       // Invalidate all queries to force refetch after registration
       queryClient.invalidateQueries();
