@@ -38,6 +38,7 @@ import ToolsPage from "@/pages/tools/ToolsPage";
 import BagWeightCalculator from "@/pages/tools/bag-weight";
 import InkConsumptionCalculator from "@/pages/tools/ink-consumption";
 import UtilityTools from "@/pages/tools/utilities";
+import CostCalculatorPage from "@/pages/tools/cost-calculator";
 import ClichePage from "@/pages/cliches/index";
 
 function App() {
@@ -84,6 +85,7 @@ function App() {
             <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} module="Bag Weight Calculator" />
             <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} module="Ink Consumption" />
             <ProtectedRoute path="/tools/utilities" component={UtilityTools} module="Utility Tools" />
+            <ProtectedRoute path="/tools/cost-calculator" component={CostCalculatorPage} module="Cost Calculator" />
             <ProtectedRoute path="/cliches" component={ClichePage} module="Cliches" />
             <Route component={NotFound} />
           </Switch>
