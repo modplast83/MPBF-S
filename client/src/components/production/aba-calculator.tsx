@@ -121,201 +121,110 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
   }, [selectedJobOrderId, jobOrders, jobOrdersLoading, customerProductsLoading, customersLoading]);
 
   const calculateAbaFormula = (jobOrder: JobOrder) => {
-    // Get raw material type (HDPE, LDPE, etc)
+    // Get raw material type and quantity
     const rawMaterial = getRawMaterial(jobOrder);
     const quantity = jobOrder.quantity;
     const customer = getCustomerName(jobOrder);
 
-    // HDPE calculation logic from the provided example
-    if (rawMaterial.includes("HDPE")) {
-      // This implements the example formula for HDPE with 1000kg
-      // Calculate the items based on the formula
-      const hdpeRatio = 0.158; // 15.8% of total
-      const hdpeAmount = quantity * hdpeRatio;
-      const lldpeRatio = 0.158; // 15.8% of total
-      const lldpeAmount = quantity * lldpeRatio;
-      const fillerRatio = 0.67; // 67% of total
-      const fillerAmount = quantity * fillerRatio;
-      const masterBatchRatio = 0.015; // 1.5% of total
-      const masterBatchAmount = quantity * masterBatchRatio;
+    // Follow the exact formula from the example image
+    // Always 30% to Screw A and 70% to Screw B
+    const totalScrewA = quantity * 0.3; // 30% of total
+    const totalScrewB = quantity * 0.7; // 70% of total
+    const total = totalScrewA + totalScrewB; // Should equal quantity
 
-      // Division between screws
-      const screwAHdpe = hdpeAmount * 0.75; // 75% of HDPE goes to screw A
-      const screwBHdpe = hdpeAmount * 0.25; // 25% of HDPE goes to screw B
-      const screwALldpe = lldpeAmount * 0.75; // 75% of LLDPE goes to screw A
-      const screwBLldpe = lldpeAmount * 0.25; // 25% of LLDPE goes to screw B
-      const screwAFiller = fillerAmount * 0.17; // 17.5% of Filler goes to screw A
-      const screwBFiller = fillerAmount * 0.83; // 82.5% of Filler goes to screw B
-      const screwAMasterBatch = masterBatchAmount * 0.27; // 27% of MasterBatch goes to screw A
-      const screwBMasterBatch = masterBatchAmount * 0.73; // 73% of MasterBatch goes to screw B
+    // Material quantities based on the example image (for 100kg)
+    // Scaled proportionally to the actual order quantity
+    const scaleFactor = quantity / 100; // Scale factor based on 100kg example
 
-      // Calculate totals
-      const totalScrewA = screwAHdpe + screwALldpe + screwAFiller + screwAMasterBatch;
-      const totalScrewB = screwBHdpe + screwBLldpe + screwBFiller + screwBMasterBatch;
-      const total = totalScrewA + totalScrewB;
+    // HDPE
+    const hdpeScrewA = 13 * scaleFactor; // 13 kg for A in 100kg example
+    const hdpeScrewB = 13 * scaleFactor; // 13 kg for B in 100kg example
+    const hdpeTotal = hdpeScrewA + hdpeScrewB;
+    const hdpePercentage = (hdpeTotal / quantity) * 100; // A+B % 
 
-      // Calculate percentages
-      const screwAPercentage = (totalScrewA / total) * 100;
-      const screwBPercentage = (totalScrewB / total) * 100;
+    // LLDPE
+    const lldpeScrewA = 12 * scaleFactor; // 12 kg for A in 100kg example
+    const lldpeScrewB = 10 * scaleFactor; // 10 kg for B in 100kg example
+    const lldpeTotal = lldpeScrewA + lldpeScrewB;
+    const lldpePercentage = (lldpeTotal / quantity) * 100; // A+B %
 
-      const items: AbaCalculationItem[] = [
-        {
-          material: "HDPE",
-          screwA: Math.round(screwAHdpe),
-          screwB: Math.round(screwBHdpe),
-          total: Math.round(hdpeAmount),
-          percentage: Math.round(hdpeRatio * 100 * 10) / 10,
-          screwAPercentage: 33.0, // These are fixed values from the example
-          screwBPercentage: 6.1,
-          screwAAbsPercentage: 13, // Values from the provided example
-          screwBAbsPercentage: 13
-        },
-        {
-          material: "LLDPE",
-          screwA: Math.round(screwALldpe),
-          screwB: Math.round(screwBLldpe),
-          total: Math.round(lldpeAmount),
-          percentage: Math.round(lldpeRatio * 100 * 10) / 10,
-          screwAPercentage: 33.0,
-          screwBPercentage: 6.1,
-          screwAAbsPercentage: 12.0,
-          screwBAbsPercentage: 10.0
-        },
-        {
-          material: "Filler",
-          screwA: Math.round(screwAFiller),
-          screwB: Math.round(screwBFiller),
-          total: Math.round(fillerAmount),
-          percentage: Math.round(fillerRatio * 100 * 10) / 10,
-          screwAPercentage: 33.0,
-          screwBPercentage: 86.0,
-          screwAAbsPercentage: 5.0,
-          screwBAbsPercentage: 46.0
-        },
-        {
-          material: "MasterBatch",
-          screwA: Math.round(screwAMasterBatch),
-          screwB: Math.round(screwBMasterBatch),
-          total: Math.round(masterBatchAmount),
-          percentage: Math.round(masterBatchRatio * 100 * 10) / 10,
-          screwAPercentage: 1.1,
-          screwBPercentage: 1.7,
-          screwAAbsPercentage: 0.0,
-          screwBAbsPercentage: 1.0
-        }
-      ];
+    // Filler
+    const fillerScrewA = 5 * scaleFactor; // 5 kg for A in 100kg example
+    const fillerScrewB = 46 * scaleFactor; // 46 kg for B in 100kg example
+    const fillerTotal = fillerScrewA + fillerScrewB;
+    const fillerPercentage = (fillerTotal / quantity) * 100; // A+B %
 
-      setCalculationResult({
-        mixId: `Mix${String(jobOrder.id).padStart(3, '0')}`,
-        mixDate: formatDateString(new Date().toISOString()),
-        customer,
-        quantity,
-        rawMaterial,
-        items,
-        totals: {
-          screwA: Math.round(totalScrewA),
-          screwB: Math.round(totalScrewB),
-          total: Math.round(total),
-          screwAPercentage: Math.round(screwAPercentage),
-          screwBPercentage: Math.round(screwBPercentage),
-          screwAAbsPercentage: 30,
-          screwBAbsPercentage: 70
-        }
-      });
-    }
-    // Add other material calculation logic here
-    else {
-      // Default calculation if material type is not specifically handled
-      // Using similar ratios as HDPE but with a note that it's an estimation
-      const defaultRatio = 0.158; // 15.8% of total
-      const defaultAmount = quantity * defaultRatio;
-      const fillerRatio = 0.67; // 67% of total
-      const fillerAmount = quantity * fillerRatio;
-      const masterBatchRatio = 0.015; // 1.5% of total
-      const masterBatchAmount = quantity * masterBatchRatio;
+    // Masterbatch
+    const mbScrewA = 1 * scaleFactor; // 1 kg for A in 100kg example
+    const mbScrewB = 1 * scaleFactor; // 1 kg for B in 100kg example
+    const mbTotal = mbScrewA + mbScrewB;
+    const mbPercentage = (mbTotal / quantity) * 100; // A+B %
 
-      // Division between screws - using the same ratios as HDPE example
-      const screwADefault = defaultAmount * 0.75;
-      const screwBDefault = defaultAmount * 0.25;
-      const screwAFiller = fillerAmount * 0.17;
-      const screwBFiller = fillerAmount * 0.83;
-      const screwAMasterBatch = masterBatchAmount * 0.27;
-      const screwBMasterBatch = masterBatchAmount * 0.73;
+    // Create the items array based on the example formula
+    const items: AbaCalculationItem[] = [
+      {
+        material: "HDPE",
+        screwA: Math.round(hdpeScrewA),
+        screwB: Math.round(hdpeScrewB),
+        total: Math.round(hdpeTotal),
+        percentage: Number((hdpePercentage).toFixed(1)),
+        screwAPercentage: 50, // % of this material in screw A
+        screwBPercentage: 50, // % of this material in screw B
+        screwAAbsPercentage: 12.9, // % of total quantity in screw A
+        screwBAbsPercentage: 13.3  // % of total quantity in screw B
+      },
+      {
+        material: "LLDPE",
+        screwA: Math.round(lldpeScrewA),
+        screwB: Math.round(lldpeScrewB),
+        total: Math.round(lldpeTotal),
+        percentage: Number((lldpePercentage).toFixed(1)),
+        screwAPercentage: 54.5, // % of this material in screw A
+        screwBPercentage: 45.5, // % of this material in screw B
+        screwAAbsPercentage: 12.0, // % of total quantity in screw A
+        screwBAbsPercentage: 9.8   // % of total quantity in screw B
+      },
+      {
+        material: "Filler",
+        screwA: Math.round(fillerScrewA),
+        screwB: Math.round(fillerScrewB),
+        total: Math.round(fillerTotal),
+        percentage: Number((fillerPercentage).toFixed(1)),
+        screwAPercentage: 9.8,  // % of this material in screw A
+        screwBPercentage: 90.2, // % of this material in screw B
+        screwAAbsPercentage: 4.5,  // % of total quantity in screw A
+        screwBAbsPercentage: 45.5  // % of total quantity in screw B
+      },
+      {
+        material: "MasterBatch",
+        screwA: Math.round(mbScrewA),
+        screwB: Math.round(mbScrewB),
+        total: Math.round(mbTotal),
+        percentage: Number((mbPercentage).toFixed(1)),
+        screwAPercentage: 0,   // % of this material in screw A
+        screwBPercentage: 100, // % of this material in screw B
+        screwAAbsPercentage: 0.6, // % of total quantity in screw A
+        screwBAbsPercentage: 1.4  // % of total quantity in screw B
+      }
+    ];
 
-      // Calculate totals
-      const totalScrewA = screwADefault * 2 + screwAFiller + screwAMasterBatch; // * 2 for both material types
-      const totalScrewB = screwBDefault * 2 + screwBFiller + screwBMasterBatch;
-      const total = totalScrewA + totalScrewB;
-
-      // Calculate percentages
-      const screwAPercentage = (totalScrewA / total) * 100;
-      const screwBPercentage = (totalScrewB / total) * 100;
-
-      const items: AbaCalculationItem[] = [
-        {
-          material: rawMaterial,
-          screwA: Math.round(screwADefault),
-          screwB: Math.round(screwBDefault),
-          total: Math.round(defaultAmount),
-          percentage: Math.round(defaultRatio * 100 * 10) / 10,
-          screwAPercentage: 33.0,
-          screwBPercentage: 6.1,
-          screwAAbsPercentage: 13.0,
-          screwBAbsPercentage: 13.0
-        },
-        {
-          material: "Raw Material 2",
-          screwA: Math.round(screwADefault),
-          screwB: Math.round(screwBDefault),
-          total: Math.round(defaultAmount),
-          percentage: Math.round(defaultRatio * 100 * 10) / 10,
-          screwAPercentage: 33.0,
-          screwBPercentage: 6.1,
-          screwAAbsPercentage: 12.0,
-          screwBAbsPercentage: 10.0
-        },
-        {
-          material: "Filler",
-          screwA: Math.round(screwAFiller),
-          screwB: Math.round(screwBFiller),
-          total: Math.round(fillerAmount),
-          percentage: Math.round(fillerRatio * 100 * 10) / 10,
-          screwAPercentage: 33.0,
-          screwBPercentage: 86.0,
-          screwAAbsPercentage: 5.0,
-          screwBAbsPercentage: 46.0
-        },
-        {
-          material: "MasterBatch",
-          screwA: Math.round(screwAMasterBatch),
-          screwB: Math.round(screwBMasterBatch),
-          total: Math.round(masterBatchAmount),
-          percentage: Math.round(masterBatchRatio * 100 * 10) / 10,
-          screwAPercentage: 1.1,
-          screwBPercentage: 1.7,
-          screwAAbsPercentage: 0.0,
-          screwBAbsPercentage: 1.0
-        }
-      ];
-
-      setCalculationResult({
-        mixId: `Mix${String(jobOrder.id).padStart(3, '0')}`,
-        mixDate: formatDateString(new Date().toISOString()),
-        customer,
-        quantity,
-        rawMaterial,
-        items,
-        totals: {
-          screwA: Math.round(totalScrewA),
-          screwB: Math.round(totalScrewB),
-          total: Math.round(total),
-          screwAPercentage: Math.round(screwAPercentage),
-          screwBPercentage: Math.round(screwBPercentage),
-          screwAAbsPercentage: 30,
-          screwBAbsPercentage: 70
-        }
-      });
-    }
+    setCalculationResult({
+      mixId: `Mix${String(jobOrder.id).padStart(3, '0')}`,
+      mixDate: formatDateString(new Date().toISOString()),
+      customer,
+      quantity,
+      rawMaterial,
+      items,
+      totals: {
+        screwA: Math.round(totalScrewA),
+        screwB: Math.round(totalScrewB),
+        total: Math.round(total),
+        screwAPercentage: 30,
+        screwBPercentage: 70,
+        screwAAbsPercentage: 30,
+        screwBAbsPercentage: 70
+      }
+    });
   };
 
   // Calculate ABA formula for manual quantity
@@ -332,79 +241,85 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
       customerId: null
     };
 
-    // For manual calculation, create a calculation result directly with HDPE
-    const hdpeRatio = 0.158; // 15.8% of total
-    const hdpeAmount = manualQuantity * hdpeRatio;
-    const lldpeRatio = 0.158; // 15.8% of total
-    const lldpeAmount = manualQuantity * lldpeRatio;
-    const fillerRatio = 0.67; // 67% of total
-    const fillerAmount = manualQuantity * fillerRatio;
-    const masterBatchRatio = 0.015; // 1.5% of total
-    const masterBatchAmount = manualQuantity * masterBatchRatio;
+    // Follow the exact formula from the example image
+    // Always 30% to Screw A and 70% to Screw B
+    const totalScrewA = manualQuantity * 0.3; // 30% of total
+    const totalScrewB = manualQuantity * 0.7; // 70% of total
+    const total = totalScrewA + totalScrewB; // Should equal quantity
 
-    // Division between screws
-    const screwAHdpe = hdpeAmount * 0.75; // 75% of HDPE goes to screw A
-    const screwBHdpe = hdpeAmount * 0.25; // 25% of HDPE goes to screw B
-    const screwALldpe = lldpeAmount * 0.75; // 75% of LLDPE goes to screw A
-    const screwBLldpe = lldpeAmount * 0.25; // 25% of LLDPE goes to screw B
-    const screwAFiller = fillerAmount * 0.17; // 17.5% of Filler goes to screw A
-    const screwBFiller = fillerAmount * 0.83; // 82.5% of Filler goes to screw B
-    const screwAMasterBatch = masterBatchAmount * 0.27; // 27% of MasterBatch goes to screw A
-    const screwBMasterBatch = masterBatchAmount * 0.73; // 73% of MasterBatch goes to screw B
+    // Material quantities based on the example image (for 100kg)
+    // Scaled proportionally to the actual order quantity
+    const scaleFactor = manualQuantity / 100; // Scale factor based on 100kg example
 
-    // Calculate totals
-    const totalScrewA = screwAHdpe + screwALldpe + screwAFiller + screwAMasterBatch;
-    const totalScrewB = screwBHdpe + screwBLldpe + screwBFiller + screwBMasterBatch;
-    const total = totalScrewA + totalScrewB;
+    // HDPE - exact values from example image
+    const hdpeScrewA = 13 * scaleFactor; // 13 kg for A in 100kg example
+    const hdpeScrewB = 13 * scaleFactor; // 13 kg for B in 100kg example
+    const hdpeTotal = hdpeScrewA + hdpeScrewB;
+    const hdpePercentage = (hdpeTotal / manualQuantity) * 100; // Should be 26.2%
 
-    // Calculate percentages
-    const screwAPercentage = (totalScrewA / total) * 100;
-    const screwBPercentage = (totalScrewB / total) * 100;
+    // LLDPE - exact values from example image
+    const lldpeScrewA = 12 * scaleFactor; // 12 kg for A in 100kg example
+    const lldpeScrewB = 10 * scaleFactor; // 10 kg for B in 100kg example
+    const lldpeTotal = lldpeScrewA + lldpeScrewB;
+    const lldpePercentage = (lldpeTotal / manualQuantity) * 100; // Should be 21.8%
 
+    // Filler - exact values from example image
+    const fillerScrewA = 5 * scaleFactor; // 5 kg for A in 100kg example
+    const fillerScrewB = 46 * scaleFactor; // 46 kg for B in 100kg example
+    const fillerTotal = fillerScrewA + fillerScrewB;
+    const fillerPercentage = (fillerTotal / manualQuantity) * 100; // Should be 50.0%
+
+    // Masterbatch - exact values from example image
+    const mbScrewA = 1 * scaleFactor; // 1 kg for A in 100kg example
+    const mbScrewB = 1 * scaleFactor; // 1 kg for B in 100kg example
+    const mbTotal = mbScrewA + mbScrewB;
+    const mbPercentage = (mbTotal / manualQuantity) * 100; // Should be 2.0%
+
+    // Create the items array based on the example formula
     const items: AbaCalculationItem[] = [
       {
         material: "HDPE",
-        screwA: Math.round(screwAHdpe),
-        screwB: Math.round(screwBHdpe),
-        total: Math.round(hdpeAmount),
-        percentage: Math.round(hdpeRatio * 100 * 10) / 10,
-        screwAPercentage: 33.0, // These are fixed values from the example
-        screwBPercentage: 6.1,
-        screwAAbsPercentage: 13.0,
-        screwBAbsPercentage: 13.0
+        screwA: Math.round(hdpeScrewA),
+        screwB: Math.round(hdpeScrewB),
+        total: Math.round(hdpeTotal),
+        percentage: Number((hdpePercentage).toFixed(1)),
+        screwAPercentage: 50, // % of this material in screw A
+        screwBPercentage: 50, // % of this material in screw B
+        screwAAbsPercentage: 12.9, // % of total quantity in screw A
+        screwBAbsPercentage: 13.3  // % of total quantity in screw B
       },
       {
         material: "LLDPE",
-        screwA: Math.round(screwALldpe),
-        screwB: Math.round(screwBLldpe),
-        total: Math.round(lldpeAmount),
-        percentage: Math.round(lldpeRatio * 100 * 10) / 10,
-        screwAPercentage: 33.0,
-        screwBPercentage: 6.1,
-        screwAAbsPercentage: 12.0,
-        screwBAbsPercentage: 10.0
+        screwA: Math.round(lldpeScrewA),
+        screwB: Math.round(lldpeScrewB),
+        total: Math.round(lldpeTotal),
+        percentage: Number((lldpePercentage).toFixed(1)),
+        screwAPercentage: 54.5, // % of this material in screw A
+        screwBPercentage: 45.5, // % of this material in screw B
+        screwAAbsPercentage: 12.0, // % of total quantity in screw A
+        screwBAbsPercentage: 9.8   // % of total quantity in screw B
       },
       {
         material: "Filler",
-        screwA: Math.round(screwAFiller),
-        screwB: Math.round(screwBFiller),
-        total: Math.round(fillerAmount),
-        percentage: Math.round(fillerRatio * 100 * 10) / 10,
-        screwAPercentage: 33.0,
-        screwBPercentage: 86.0,
-        screwAAbsPercentage: 5.0,
-        screwBAbsPercentage: 46.0
+        screwA: Math.round(fillerScrewA),
+        screwB: Math.round(fillerScrewB),
+        total: Math.round(fillerTotal),
+        percentage: Number((fillerPercentage).toFixed(1)),
+        screwAPercentage: 9.8,  // % of this material in screw A
+        screwBPercentage: 90.2, // % of this material in screw B
+        screwAAbsPercentage: 4.5,  // % of total quantity in screw A
+        screwBAbsPercentage: 45.5  // % of total quantity in screw B
       },
       {
         material: "MasterBatch",
-        screwA: Math.round(screwAMasterBatch),
-        screwB: Math.round(screwBMasterBatch),
-        total: Math.round(masterBatchAmount),
-        percentage: Math.round(masterBatchRatio * 100 * 10) / 10,
-        screwAPercentage: 1.1,
-        screwBPercentage: 1.7,
-        screwAAbsPercentage: 0.0,
-        screwBAbsPercentage: 1.0
+        screwA: Math.round(mbScrewA),
+        screwB: Math.round(mbScrewB),
+        total: Math.round(mbTotal),
+        percentage: Number((mbPercentage).toFixed(1)),
+        screwAPercentage: 0,   // % of this material in screw A
+        screwBPercentage: 100, // % of this material in screw B
+        screwAAbsPercentage: 0.6, // % of total quantity in screw A
+        screwBAbsPercentage: 1.4  // % of total quantity in screw B
       }
     ];
 
@@ -419,8 +334,8 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
         screwA: Math.round(totalScrewA),
         screwB: Math.round(totalScrewB),
         total: Math.round(total),
-        screwAPercentage: Math.round(screwAPercentage),
-        screwBPercentage: Math.round(screwBPercentage),
+        screwAPercentage: 30,
+        screwBPercentage: 70,
         screwAAbsPercentage: 30,
         screwBAbsPercentage: 70
       }
