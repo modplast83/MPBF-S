@@ -13,7 +13,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { MixMaterial, MixItem, RawMaterial } from "@shared/schema";
+import { MixMaterial, MixItem, RawMaterial, User } from "@shared/schema";
 import { formatDateString } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -41,11 +41,19 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   const { data: mixItems, isLoading: itemsLoading } = useQuery<MixItem[]>({
     queryKey: [`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}/items`],
   });
+  
+  // Fetch users to map operator IDs to names
+  const { data: users } = useQuery<User[]>({
+    queryKey: [API_ENDPOINTS.USERS],
+  });
 
   // Add mix item mutation
   const addMixItemMutation = useMutation({
     mutationFn: async (data: { mixId: number; rawMaterialId: number; quantity: number }) => {
-      return apiRequest("POST", API_ENDPOINTS.MIX_ITEMS, data);
+      return apiRequest(API_ENDPOINTS.MIX_ITEMS, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}/items`] });
@@ -72,7 +80,9 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   // Remove mix item mutation
   const removeMixItemMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `${API_ENDPOINTS.MIX_ITEMS}/${id}`);
+      return apiRequest(`${API_ENDPOINTS.MIX_ITEMS}/${id}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}/items`] });

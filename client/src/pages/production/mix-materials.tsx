@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription }
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { MixMaterial, RawMaterial } from "@shared/schema";
+import { MixMaterial, RawMaterial, User } from "@shared/schema";
 import { formatDateString } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MixMaterialForm } from "@/components/production/mix-material-form";
@@ -54,6 +54,18 @@ export default function MixMaterialsPage() {
   const { data: rawMaterials } = useQuery<RawMaterial[]>({
     queryKey: [API_ENDPOINTS.RAW_MATERIALS],
   });
+  
+  // Fetch users to map operator IDs to names
+  const { data: users } = useQuery<User[]>({
+    queryKey: [API_ENDPOINTS.USERS],
+  });
+  
+  // Function to get operator name from ID
+  const getOperatorName = (operatorId: string) => {
+    if (!users) return operatorId;
+    const user = users.find(user => user.id === operatorId);
+    return user ? user.name : operatorId;
+  };
   
   // Delete mix mutation
   const [abaCalculationData, setAbaCalculationData] = useState<any>(null);
@@ -124,6 +136,7 @@ export default function MixMaterialsPage() {
     {
       header: t('production.mix_materials.operator'),
       accessorKey: "mixPerson" as const,
+      cell: (row: any) => getOperatorName(row.mixPerson),
     },
     {
       header: t('production.mix_materials.total_weight'),
@@ -234,7 +247,7 @@ export default function MixMaterialsPage() {
           <div>{t('production.mix_materials.date')}: {formatDateString(mix.mixDate)}</div>
         </div>
         <div style={{ marginBottom: "10px" }}>
-          <div>{t('production.mix_materials.operator')}: {mix.mixPerson}</div>
+          <div>{t('production.mix_materials.operator')}: {getOperatorName(mix.mixPerson)}</div>
           <div>{t('production.mix_materials.total_weight')}: {totalWeight.toFixed(2)} kg</div>
         </div>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -310,7 +323,7 @@ export default function MixMaterialsPage() {
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div>
                   <p className="text-xs text-gray-500">{t('production.mix_materials.operator')}</p>
-                  <p className="text-sm font-medium">{mix.mixPerson}</p>
+                  <p className="text-sm font-medium">{getOperatorName(mix.mixPerson)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">{t('production.mix_materials.total_weight')}</p>
