@@ -142,6 +142,13 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
     const rawMaterial = rawMaterials.find(m => m.id === id);
     return rawMaterial ? rawMaterial.name : `Material #${id}`;
   };
+  
+  // Function to get operator name from ID
+  const getOperatorName = (operatorId: string) => {
+    if (!users) return operatorId;
+    const user = users.find(user => user.id === operatorId);
+    return user ? user.name : operatorId;
+  };
 
   // Function to generate the label content for printing
   const generatePrintableLabel = () => {
@@ -157,7 +164,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
           <div>{t('production.mix_materials.date')}: {formatDateString(mix.mixDate)}</div>
         </div>
         <div style={{ marginBottom: "10px", display: "flex", justifyContent: "space-between" }}>
-          <div>{t('production.mix_materials.operator')}: {mix.mixPerson}</div>
+          <div>{t('production.mix_materials.operator')}: {getOperatorName(mix.mixPerson)}</div>
           <div>{t('production.mix_materials.total_weight')}: {mix.totalQuantity?.toFixed(2) || "0.00"} kg</div>
         </div>
         <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "0.2in" }}>
@@ -218,7 +225,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                 </div>
                 <div>
                   <div className="font-medium text-secondary-500">{t('production.mix_materials.operator')}</div>
-                  <div>{mix.mixPerson}</div>
+                  <div>{getOperatorName(mix.mixPerson)}</div>
                 </div>
 
                 <div>
