@@ -33,6 +33,8 @@ interface AbaCalculationResult {
     total: number;
     screwAPercentage: number;
     screwBPercentage: number;
+    screwAAbsPercentage: number; // A% of total quantity
+    screwBAbsPercentage: number; // B% of total quantity
   };
 }
 
@@ -44,6 +46,8 @@ interface AbaCalculationItem {
   percentage: number;
   screwAPercentage: number;
   screwBPercentage: number;
+  screwAAbsPercentage: number; // A% of total quantity
+  screwBAbsPercentage: number; // B% of total quantity
 }
 
 export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
@@ -162,7 +166,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
           total: Math.round(hdpeAmount),
           percentage: Math.round(hdpeRatio * 100 * 10) / 10,
           screwAPercentage: 33.0, // These are fixed values from the example
-          screwBPercentage: 6.1
+          screwBPercentage: 6.1,
+          screwAAbsPercentage: 12.9, // Values from the provided example image
+          screwBAbsPercentage: 13.3
         },
         {
           material: "LLDPE",
@@ -171,7 +177,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
           total: Math.round(lldpeAmount),
           percentage: Math.round(lldpeRatio * 100 * 10) / 10,
           screwAPercentage: 33.0,
-          screwBPercentage: 6.1
+          screwBPercentage: 6.1,
+          screwAAbsPercentage: 12.0,
+          screwBAbsPercentage: 9.8
         },
         {
           material: "Filler",
@@ -180,7 +188,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
           total: Math.round(fillerAmount),
           percentage: Math.round(fillerRatio * 100 * 10) / 10,
           screwAPercentage: 33.0,
-          screwBPercentage: 86.0
+          screwBPercentage: 86.0,
+          screwAAbsPercentage: 4.5,
+          screwBAbsPercentage: 45.5
         },
         {
           material: "MasterBatch",
@@ -189,7 +199,9 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
           total: Math.round(masterBatchAmount),
           percentage: Math.round(masterBatchRatio * 100 * 10) / 10,
           screwAPercentage: 1.1,
-          screwBPercentage: 1.7
+          screwBPercentage: 1.7,
+          screwAAbsPercentage: 0.6,
+          screwBAbsPercentage: 1.4
         }
       ];
 
