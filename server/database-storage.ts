@@ -604,18 +604,21 @@ export class DatabaseStorage implements IStorage {
       
       // Execute the update query with proper error handling
       try {
-        const result = await db.update(permissions)
-          .set(permissionUpdate)
-          .where(eq(permissions.id, permissionId))
-          .returning();
+        // Use a transaction to ensure atomicity
+        return await db.transaction(async (tx) => {
+          const result = await tx.update(permissions)
+            .set(permissionUpdate)
+            .where(eq(permissions.id, permissionId))
+            .returning();
           
-        if (result.length === 0) {
-          console.log(`No permission was updated with ID ${id}`);
-          return undefined;
-        }
-        
-        console.log(`Successfully updated permission: ${JSON.stringify(result[0])}`);
-        return result[0];
+          if (result.length === 0) {
+            console.log(`No permission was updated with ID ${id}`);
+            return undefined;
+          }
+          
+          console.log(`Successfully updated permission: ${JSON.stringify(result[0])}`);
+          return result[0];
+        });
       } catch (dbError) {
         // More specific error handling for SQL issues
         console.error('SQL error during permission update:', dbError);
