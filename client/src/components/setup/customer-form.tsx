@@ -93,39 +93,46 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
 
   // Form submission handler
   const onSubmit = (values: z.infer<typeof insertCustomerSchema>) => {
+    // Make a fresh copy to avoid mutations
     const updatedValues = { ...values };
     
-    // If not editing and no ID provided, generate a new customer ID
+    // Generate a unique ID if creating a new customer and no ID was provided
     if (!isEditing && !updatedValues.id) {
-      updatedValues.id = generateCustomerId();
+      // Generate random number between 100-999
+      const generateUniqueId = () => {
+        const randomNum = Math.floor(Math.random() * 900) + 100;
+        return `CID${randomNum}`;
+      };
+      
+      updatedValues.id = generateUniqueId();
+      console.log("Generated new customer ID:", updatedValues.id);
     }
     
-    // If not editing and no code provided, use the ID as the code
+    // Set code to ID if not provided when creating a new customer
     if (!isEditing && !updatedValues.code) {
       updatedValues.code = updatedValues.id;
+      console.log("Using ID as code:", updatedValues.code);
     }
     
-    // Handle user ID - set to null if "null", ensure it's a valid user ID format otherwise
+    // Handle user ID field correctly
     if (updatedValues.userId === "null") {
+      // Set to null if "null" string was selected
       updatedValues.userId = null;
     } else if (updatedValues.userId) {
-      // Make sure user ID starts with 0U format (some are 00U, others are 0U)
-      // Only format if it's not already correct
+      // Ensure proper format if user ID was provided
+      // Some users have "00U" prefix, others have "0U" - ensure consistency
       if (!updatedValues.userId.match(/^(0U|00U)/)) {
         updatedValues.userId = `0U${updatedValues.userId.replace(/^0+U/, '')}`;
       }
+      console.log("Formatted userId:", updatedValues.userId);
     }
     
-    // Clean up empty string values to undefined (not null)
-    Object.keys(updatedValues).forEach(key => {
-      // Skip the userId as it's handled separately
-      if (key !== 'userId' && updatedValues[key as keyof typeof updatedValues] === '') {
-        // Using undefined instead of null for optional string fields
-        updatedValues[key as keyof typeof updatedValues] = undefined;
-      }
-    });
+    // Ensure all empty strings are converted to empty strings (not null or undefined)
+    // This is important because the schema expects strings for string fields
+    if (updatedValues.nameAr === "") updatedValues.nameAr = "";
+    if (updatedValues.plateDrawerCode === "") updatedValues.plateDrawerCode = "";
     
-    console.log("Submitting customer form with values:", updatedValues);
+    console.log("Submitting customer form with final values:", updatedValues);
     mutation.mutate(updatedValues);
   };
   

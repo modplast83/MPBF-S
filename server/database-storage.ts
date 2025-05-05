@@ -248,8 +248,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCustomer(customer: InsertCustomer): Promise<Customer> {
-    const result = await db.insert(customers).values(customer).returning();
-    return result[0];
+    try {
+      console.log("Creating customer with data:", customer);
+      const result = await db.insert(customers).values(customer).returning();
+      console.log("Customer creation result:", result);
+      return result[0];
+    } catch (error) {
+      console.error("Error in database createCustomer:", error);
+      throw error;
+    }
   }
 
   async updateCustomer(id: string, customerUpdate: Partial<Customer>): Promise<Customer | undefined> {
