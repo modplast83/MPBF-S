@@ -83,15 +83,17 @@ const ALL_MODULES = [
 
 // Helper to convert API format to UI format
 function apiToUiFormat(dto: PermissionDTO): Permission {
+  console.log('Converting permission:', dto); // Debug log
   return {
     id: dto.id,
     role: dto.role,
     module: dto.module,
-    canView: dto.can_view,
-    canCreate: dto.can_create,
-    canEdit: dto.can_edit,
-    canDelete: dto.can_delete,
-    isActive: dto.is_active
+    // Make sure to convert null to false and handle type conversion
+    canView: dto.can_view === true,
+    canCreate: dto.can_create === true,
+    canEdit: dto.can_edit === true,
+    canDelete: dto.can_delete === true,
+    isActive: dto.is_active === true
   };
 }
 
@@ -100,7 +102,7 @@ export default function Permissions() {
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [selectedModule, setSelectedModule] = useState("Dashboard");
-  const [showInactive, setShowInactive] = useState(false);
+  const [showInactive, setShowInactive] = useState(true);
   const { toast } = useToast();
   
   // Fetch permissions data
@@ -447,13 +449,18 @@ export default function Permissions() {
           </div>
           
           <div className="mt-6">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 p-3 bg-secondary-50 rounded-md border border-secondary-200">
               <Switch 
                 id="disable-role" 
                 checked={showInactive}
                 onCheckedChange={setShowInactive}
               />
-              <Label htmlFor="disable-role">Show inactive roles and modules</Label>
+              <Label htmlFor="disable-role" className="font-medium">
+                Show inactive roles and modules
+                <span className="text-sm block text-secondary-500">
+                  {showInactive ? "Showing all permissions" : "Only showing active permissions"}
+                </span>
+              </Label>
             </div>
           </div>
         </CardContent>
