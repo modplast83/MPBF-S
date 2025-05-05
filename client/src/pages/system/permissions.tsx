@@ -115,6 +115,18 @@ export default function Permissions() {
   // Convert API data to UI format
   const permissions: Permission[] = apiPermissions.map(apiToUiFormat);
   
+  // Group permissions by role for better organization
+  const permissionsByRole: Record<string, Permission[]> = {};
+  permissions.forEach(permission => {
+    if (!permissionsByRole[permission.role]) {
+      permissionsByRole[permission.role] = [];
+    }
+    permissionsByRole[permission.role].push(permission);
+  });
+  
+  // Get unique roles
+  const roles = Object.keys(permissionsByRole).sort();
+  
   // Update permission mutation
   const updatePermissionMutation = useMutation({
     mutationFn: async ({ id, update }: { id: number, update: Record<string, boolean> }) => {
@@ -310,69 +322,90 @@ export default function Permissions() {
             </div>
           </div>
           
-          {/* Permissions Table */}
+          {/* Role-Based Permissions Tabs */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-secondary-50 text-secondary-600 border-b border-secondary-100">
-                <tr>
-                  <th className="py-3 px-4 text-left">Role</th>
-                  <th className="py-3 px-4 text-left">Module</th>
-                  <th className="py-3 px-4 text-center">View</th>
-                  <th className="py-3 px-4 text-center">Create</th>
-                  <th className="py-3 px-4 text-center">Edit</th>
-                  <th className="py-3 px-4 text-center">Delete</th>
-                  <th className="py-3 px-4 text-center">Active</th>
-                </tr>
-              </thead>
-              <tbody className="text-secondary-800">
-                {filteredPermissions.map(permission => (
-                  <tr key={permission.id} className="border-b border-secondary-100">
-                    <td className="py-3 px-4">{permission.role}</td>
-                    <td className="py-3 px-4">{permission.module}</td>
-                    <td className="py-3 px-4 text-center">
-                      <Checkbox 
-                        checked={permission.canView}
-                        onCheckedChange={(checked) => 
-                          handlePermissionChange(permission.id, "canView", Boolean(checked))
-                        }
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <Checkbox 
-                        checked={permission.canCreate}
-                        onCheckedChange={(checked) => 
-                          handlePermissionChange(permission.id, "canCreate", Boolean(checked))
-                        }
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <Checkbox 
-                        checked={permission.canEdit}
-                        onCheckedChange={(checked) => 
-                          handlePermissionChange(permission.id, "canEdit", Boolean(checked))
-                        }
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <Checkbox 
-                        checked={permission.canDelete}
-                        onCheckedChange={(checked) => 
-                          handlePermissionChange(permission.id, "canDelete", Boolean(checked))
-                        }
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <Switch 
-                        checked={permission.isActive}
-                        onCheckedChange={(checked) => 
-                          handlePermissionChange(permission.id, "isActive", checked)
-                        }
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {roles.map(role => {
+              // Get filtered permissions for this role
+              const rolePermissions = showInactive 
+                ? permissionsByRole[role]
+                : permissionsByRole[role].filter(p => p.isActive);
+              
+              if (rolePermissions.length === 0) return null;
+              
+              return (
+                <div key={role} className="mb-8">
+                  <div className="bg-secondary-50 p-3 rounded-t-md border border-secondary-200">
+                    <h3 className="text-lg font-semibold capitalize text-primary-700 flex items-center">
+                      <span className="material-icons mr-2 text-primary-500">
+                        {role === 'administrator' ? 'admin_panel_settings' : 
+                         role === 'manager' ? 'manage_accounts' : 
+                         role === 'operator' ? 'engineering' : 'person'}
+                      </span>
+                      {role}
+                    </h3>
+                  </div>
+                  <table className="w-full text-sm border border-secondary-200 border-t-0">
+                    <thead className="bg-secondary-50 text-secondary-600 border-b border-secondary-100">
+                      <tr>
+                        <th className="py-3 px-4 text-left">Module</th>
+                        <th className="py-3 px-4 text-center">View</th>
+                        <th className="py-3 px-4 text-center">Create</th>
+                        <th className="py-3 px-4 text-center">Edit</th>
+                        <th className="py-3 px-4 text-center">Delete</th>
+                        <th className="py-3 px-4 text-center">Active</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-secondary-800">
+                      {rolePermissions.map(permission => (
+                        <tr key={permission.id} className="border-b border-secondary-100">
+                          <td className="py-3 px-4">{permission.module}</td>
+                          <td className="py-3 px-4 text-center">
+                            <Checkbox 
+                              checked={permission.canView}
+                              onCheckedChange={(checked) => 
+                                handlePermissionChange(permission.id, "canView", Boolean(checked))
+                              }
+                            />
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <Checkbox 
+                              checked={permission.canCreate}
+                              onCheckedChange={(checked) => 
+                                handlePermissionChange(permission.id, "canCreate", Boolean(checked))
+                              }
+                            />
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <Checkbox 
+                              checked={permission.canEdit}
+                              onCheckedChange={(checked) => 
+                                handlePermissionChange(permission.id, "canEdit", Boolean(checked))
+                              }
+                            />
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <Checkbox 
+                              checked={permission.canDelete}
+                              onCheckedChange={(checked) => 
+                                handlePermissionChange(permission.id, "canDelete", Boolean(checked))
+                              }
+                            />
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <Switch 
+                              checked={permission.isActive}
+                              onCheckedChange={(checked) => 
+                                handlePermissionChange(permission.id, "isActive", checked)
+                              }
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
           </div>
           
           <div className="mt-6">
