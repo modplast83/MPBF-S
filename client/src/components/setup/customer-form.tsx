@@ -84,22 +84,34 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
     },
   });
   
+  // Function to generate a unique customer ID
+  const generateCustomerId = () => {
+    // Generate a random number between 100-999 for the ID
+    const randomNum = Math.floor(Math.random() * 900) + 100;
+    return `CID${randomNum}`;
+  };
+
   // Form submission handler
   const onSubmit = (values: z.infer<typeof insertCustomerSchema>) => {
+    const updatedValues = { ...values };
+    
     // If not editing and no ID provided, generate a new customer ID
-    if (!isEditing && !values.id) {
-      // Generate a new customer ID using "CID" prefix and 3 random digits
-      const randomNum = Math.floor(Math.random() * 900) + 100; // 100-999
-      values.id = `CID${randomNum}`;
+    if (!isEditing && !updatedValues.id) {
+      updatedValues.id = generateCustomerId();
     }
     
     // If not editing and no code provided, use the ID as the code
-    if (!isEditing && !values.code) {
-      values.code = values.id;
+    if (!isEditing && !updatedValues.code) {
+      updatedValues.code = updatedValues.id;
     }
     
-    console.log("Submitting customer form with values:", values);
-    mutation.mutate(values);
+    // Ensure the userId is properly set (null if "null" string)
+    if (updatedValues.userId === "null") {
+      updatedValues.userId = null;
+    }
+    
+    console.log("Submitting customer form with values:", updatedValues);
+    mutation.mutate(updatedValues);
   };
   
   return (

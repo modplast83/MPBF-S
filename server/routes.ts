@@ -591,24 +591,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/customers", async (req: Request, res: Response) => {
     try {
+      console.log("Creating customer with data:", req.body);
       const validatedData = insertCustomerSchema.parse(req.body);
       
-      const existingCustomer = await storage.getCustomerByCode(validatedData.code);
-      if (existingCustomer) {
-        return res.status(409).json({ message: "Customer code already exists" });
+      // Check if customer with same ID already exists
+      if (validatedData.id) {
+        const existingCustomerId = await storage.getCustomer(validatedData.id);
+        if (existingCustomerId) {
+          return res.status(409).json({ message: "Customer ID already exists" });
+        }
       }
       
+      // Check if customer with same code already exists
+      if (validatedData.code) {
+        const existingCustomerCode = await storage.getCustomerByCode(validatedData.code);
+        if (existingCustomerCode) {
+          return res.status(409).json({ message: "Customer code already exists" });
+        }
+      }
+      
+      // Verify user exists if provided
       if (validatedData.userId) {
-        // Verify user exists if provided
         const user = await storage.getUser(validatedData.userId);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
       }
       
+      // Create the customer
       const customer = await storage.createCustomer(validatedData);
+      console.log("Successfully created customer:", customer);
       res.status(201).json(customer);
     } catch (error) {
+      console.error("Error creating customer:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid customer data", errors: error.errors });
       }
