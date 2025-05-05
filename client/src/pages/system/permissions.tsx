@@ -126,16 +126,27 @@ export default function Permissions() {
         body: JSON.stringify(update)
       });
       
+      // Try to parse the response as JSON first
+      let data;
       const text = await response.text();
+      
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch (e) {
+        console.error("Failed to parse response:", text);
+        data = null;
+      }
       
       if (!response.ok) {
         throw new Error(`Failed to update permission: ${text}`);
       }
       
-      return text ? JSON.parse(text) : null;
+      return data;
     },
     onSuccess: () => {
-      refetch();
+      // Force a refetch to get updated data
+      queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
+      
       toast({
         title: "Success",
         description: "Permission updated successfully"
@@ -176,7 +187,9 @@ export default function Permissions() {
       return await response.json();
     },
     onSuccess: () => {
-      refetch();
+      // Force a refetch to get updated data
+      queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
+      
       setRoleDialogOpen(false);
       setNewRoleName("");
       setSelectedModule("Dashboard");
