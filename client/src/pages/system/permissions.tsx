@@ -130,47 +130,63 @@ export default function Permissions() {
   // Update permission mutation
   const updatePermissionMutation = useMutation({
     mutationFn: async ({ id, update }: { id: number, update: Record<string, boolean> }) => {
-      console.log('Sending update:', JSON.stringify(update));
-      
-      const response = await fetch(`/api/permissions/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(update)
-      });
-      
-      // Try to parse the response as JSON first
-      let data;
-      const text = await response.text();
+      console.log('Sending update to server:', JSON.stringify(update));
       
       try {
-        data = text ? JSON.parse(text) : null;
-      } catch (e) {
-        console.error("Failed to parse response:", text);
-        data = null;
+        const response = await fetch(`/api/permissions/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(update)
+        });
+        
+        // Try to parse the response as JSON first
+        let data;
+        const text = await response.text();
+        
+        if (text) {
+          try {
+            data = JSON.parse(text);
+            console.log('Received response:', data);
+          } catch (parseError) {
+            console.error("Failed to parse response:", text);
+            data = { message: text };
+          }
+        }
+        
+        if (!response.ok) {
+          throw new Error(data?.message || `Server error: ${response.status}`);
+        }
+        
+        return data;
+      } catch (networkError) {
+        console.error('Network error during update:', networkError);
+        throw networkError;
       }
-      
-      if (!response.ok) {
-        throw new Error(`Failed to update permission: ${text}`);
-      }
-      
-      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Update successful:', data);
+      
       // Force a refetch to get updated data
       queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
       
       toast({
         title: "Success",
-        description: "Permission updated successfully"
+        description: "Permission updated successfully",
+        duration: 2000
       });
     },
     onError: (error: Error) => {
-      console.error("Update error:", error);
+      console.error("Update failed:", error);
+      
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update permission",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 3000
       });
+      
+      // Force a refetch to reset UI state
+      queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
     }
   });
   
@@ -248,10 +264,32 @@ export default function Permissions() {
     // Show optimistic update feedback
     const affectedPermission = permissions.find(p => p.id === id);
     if (affectedPermission) {
+      // Update the local state optimistically for better UX
+      const updatedPermissions = permissions.map(p => {
+        if (p.id === id) {
+          return { ...p, [field]: value };
+        }
+        return p;
+      });
+      
+      // Log the update
+      console.log(`Updating permission ${id}:`, field, value);
+      console.log('Update payload:', update);
+      
       toast({
         title: "Updating Permission",
         description: `Changing ${field} for ${affectedPermission.role} - ${affectedPermission.module}`,
+        duration: 2000
       });
+    } else {
+      console.error(`Permission with ID ${id} not found`);
+      toast({
+        title: "Error",
+        description: `Could not find permission with ID ${id}`,
+        variant: "destructive",
+        duration: 2000
+      });
+      return;
     }
     
     // Send update to server

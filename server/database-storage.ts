@@ -602,57 +602,113 @@ export class DatabaseStorage implements IStorage {
       // Make sure the id is a number
       const permissionId = Number(id);
       
-      // Execute the update query with proper error handling
+      // Convert snake_case keys from API to proper database field names
+      const normalizedUpdate: Record<string, any> = {};
+      
+      for (const [key, value] of Object.entries(permissionUpdate)) {
+        // Handle snake_case keys from API
+        if (key === 'can_view') normalizedUpdate.canView = value;
+        else if (key === 'can_create') normalizedUpdate.canCreate = value;
+        else if (key === 'can_edit') normalizedUpdate.canEdit = value;
+        else if (key === 'can_delete') normalizedUpdate.canDelete = value;
+        else if (key === 'is_active') normalizedUpdate.isActive = value;
+        else normalizedUpdate[key] = value;
+      }
+      
+      console.log('Normalized update:', normalizedUpdate);
+      
+      // Try a direct update first
       try {
-        // Use a transaction to ensure atomicity
-        return await db.transaction(async (tx) => {
-          const result = await tx.update(permissions)
-            .set(permissionUpdate)
-            .where(eq(permissions.id, permissionId))
-            .returning();
-          
-          if (result.length === 0) {
-            console.log(`No permission was updated with ID ${id}`);
-            return undefined;
-          }
-          
+        const result = await db.update(permissions)
+          .set(normalizedUpdate)
+          .where(eq(permissions.id, permissionId))
+          .returning();
+        
+        if (result.length > 0) {
           console.log(`Successfully updated permission: ${JSON.stringify(result[0])}`);
           return result[0];
-        });
-      } catch (dbError) {
-        // More specific error handling for SQL issues
-        console.error('SQL error during permission update:', dbError);
-        
-        // Fall back to a raw SQL query which might be more reliable
-        console.log('Attempting fallback with raw SQL update');
-        
-        // Prepare update fields string - convert camelCase to snake_case
-        const updateFields = Object.entries(permissionUpdate)
-          .map(([key, value]) => {
-            // Convert camelCase to snake_case
-            const dbColumn = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-            
-            if (typeof value === 'boolean') {
-              return `${dbColumn} = ${value}`;
-            } else if (value === null) {
-              return `${dbColumn} = NULL`;
-            } else {
-              return `${dbColumn} = '${value}'`;
-            }
-          })
-          .join(', ');
-        
-        // Execute raw SQL update
-        const rawResult = await db.execute(
-          `UPDATE permissions SET ${updateFields} WHERE id = ${permissionId} RETURNING *`
-        );
-        
-        if (rawResult.rows.length > 0) {
-          console.log('Raw SQL update successful:', rawResult.rows[0]);
-          return rawResult.rows[0] as Permission;
         }
         
         return undefined;
+      } catch (dbError) {
+        console.error('Direct update failed:', dbError);
+        
+        // Try a parameterized query for better safety
+        try {
+          // Build a safe parameterized query
+          const keys = Object.keys(normalizedUpdate);
+          const placeholders = keys.map((_, i) => `$${i + 1}`);
+          const values = Object.values(normalizedUpdate);
+          
+          // Convert camelCase keys to snake_case for the SQL query
+          const columns = keys.map(key => 
+            key.replace(/([A-Z])/g, (_, c) => `_${c.toLowerCase()}`)
+          );
+          
+          const setClause = columns.map((col, i) => `${col} = ${placeholders[i]}`).join(', ');
+          
+          // Add the ID as the last parameter
+          values.push(permissionId);
+          
+          const query = `
+            UPDATE permissions 
+            SET ${setClause} 
+            WHERE id = $${values.length} 
+            RETURNING *
+          `;
+          
+          console.log('Executing parameterized query:', query);
+          console.log('With values:', values);
+          
+          const result = await pool.query(query, values);
+          
+          if (result.rows.length > 0) {
+            console.log('Parameterized update successful:', result.rows[0]);
+            return result.rows[0] as Permission;
+          }
+          
+          return undefined;
+        } catch (paramError) {
+          console.error('Parameterized update failed:', paramError);
+          
+          // Last resort - direct SQL with hardcoded values (less secure but might work)
+          try {
+            const updatePairs = Object.entries(normalizedUpdate).map(([key, value]) => {
+              // Convert camelCase to snake_case
+              const column = key.replace(/([A-Z])/g, (_, c) => `_${c.toLowerCase()}`);
+              
+              if (typeof value === 'boolean') {
+                return `${column} = ${value}`;
+              } else if (value === null) {
+                return `${column} = NULL`;
+              } else {
+                const safeValue = String(value).replace(/'/g, "''");
+                return `${column} = '${safeValue}'`;
+              }
+            }).join(', ');
+            
+            const query = `
+              UPDATE "permissions" 
+              SET ${updatePairs} 
+              WHERE "id" = ${permissionId} 
+              RETURNING *
+            `;
+            
+            console.log('Final attempt with direct SQL:', query);
+            
+            const result = await pool.query(query);
+            
+            if (result.rows.length > 0) {
+              console.log('Direct SQL update successful:', result.rows[0]);
+              return result.rows[0] as Permission;
+            }
+            
+            return undefined;
+          } catch (finalError) {
+            console.error('All update attempts failed:', finalError);
+            throw finalError;
+          }
+        }
       }
     } catch (error) {
       console.error('Permission update error:', error);
