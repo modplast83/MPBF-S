@@ -54,10 +54,16 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
   // Create mutation for adding/updating customer
   const mutation = useMutation({
     mutationFn: async (values: z.infer<typeof insertCustomerSchema>) => {
-      if (isEditing) {
-        await apiRequest("PUT", `${API_ENDPOINTS.CUSTOMERS}/${customer.id}`, values);
-      } else {
-        await apiRequest("POST", API_ENDPOINTS.CUSTOMERS, values);
+      try {
+        console.log("Starting customer mutation with values:", values);
+        if (isEditing) {
+          return await apiRequest("PUT", `${API_ENDPOINTS.CUSTOMERS}/${customer!.id}`, values);
+        } else {
+          return await apiRequest("POST", API_ENDPOINTS.CUSTOMERS, values);
+        }
+      } catch (error) {
+        console.error("Error in customer mutation:", error);
+        throw error;
       }
     },
     onSuccess: () => {
