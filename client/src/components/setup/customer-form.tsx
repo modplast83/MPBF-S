@@ -105,10 +105,25 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
       updatedValues.code = updatedValues.id;
     }
     
-    // Ensure the userId is properly set (null if "null" string)
+    // Handle user ID - set to null if "null", ensure it's a valid user ID format otherwise
     if (updatedValues.userId === "null") {
       updatedValues.userId = null;
+    } else if (updatedValues.userId) {
+      // Make sure user ID starts with 0U format (some are 00U, others are 0U)
+      // Only format if it's not already correct
+      if (!updatedValues.userId.match(/^(0U|00U)/)) {
+        updatedValues.userId = `0U${updatedValues.userId.replace(/^0+U/, '')}`;
+      }
     }
+    
+    // Clean up empty string values to undefined (not null)
+    Object.keys(updatedValues).forEach(key => {
+      // Skip the userId as it's handled separately
+      if (key !== 'userId' && updatedValues[key as keyof typeof updatedValues] === '') {
+        // Using undefined instead of null for optional string fields
+        updatedValues[key as keyof typeof updatedValues] = undefined;
+      }
+    });
     
     console.log("Submitting customer form with values:", updatedValues);
     mutation.mutate(updatedValues);

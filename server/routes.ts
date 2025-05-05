@@ -610,11 +610,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Verify user exists if provided
+      // Verify user exists if provided (userId could be null)
       if (validatedData.userId) {
-        const user = await storage.getUser(validatedData.userId);
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
+        try {
+          console.log("Checking for user:", validatedData.userId);
+          const user = await storage.getUser(validatedData.userId);
+          if (!user) {
+            console.log("User not found:", validatedData.userId);
+            return res.status(404).json({ message: `User not found: ${validatedData.userId}` });
+          }
+        } catch (userError) {
+          console.error("Error checking user:", userError);
+          return res.status(500).json({ message: `Error validating user: ${userError}` });
         }
       }
       
@@ -647,11 +654,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Verify user exists if provided (userId could be null)
       if (validatedData.userId) {
-        // Verify user exists if provided
-        const user = await storage.getUser(validatedData.userId);
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
+        try {
+          console.log("Checking for user in update:", validatedData.userId);
+          const user = await storage.getUser(validatedData.userId);
+          if (!user) {
+            console.log("User not found in update:", validatedData.userId);
+            return res.status(404).json({ message: `User not found: ${validatedData.userId}` });
+          }
+        } catch (userError) {
+          console.error("Error checking user in update:", userError);
+          return res.status(500).json({ message: `Error validating user: ${userError}` });
         }
       }
       
