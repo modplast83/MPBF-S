@@ -80,6 +80,19 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
   
   // Form submission handler
   const onSubmit = (values: z.infer<typeof insertCustomerSchema>) => {
+    // If not editing and no ID provided, generate a new customer ID
+    if (!isEditing && !values.id) {
+      // Generate a new customer ID using "CID" prefix and 3 random digits
+      const randomNum = Math.floor(Math.random() * 900) + 100; // 100-999
+      values.id = `CID${randomNum}`;
+    }
+    
+    // If not editing and no code provided, use the ID as the code
+    if (!isEditing && !values.code) {
+      values.code = values.id;
+    }
+    
+    console.log("Submitting customer form with values:", values);
     mutation.mutate(values);
   };
   
@@ -92,10 +105,12 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
             name="id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Customer ID</FormLabel>
+                <FormLabel>
+                  Customer ID {!isEditing && <span className="text-muted-foreground text-xs font-normal">(generated automatically if empty)</span>}
+                </FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="Enter customer ID" 
+                    placeholder={isEditing ? "Customer ID" : "Leave empty for auto-generation"} 
                     {...field} 
                     disabled={isEditing}
                   />
@@ -110,7 +125,9 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
             name="code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Customer Code</FormLabel>
+                <FormLabel>
+                  Customer Code {!isEditing && <span className="text-muted-foreground text-xs font-normal">(uses ID if empty)</span>}
+                </FormLabel>
                 <FormControl>
                   <Input placeholder="Enter customer code" {...field} />
                 </FormControl>
