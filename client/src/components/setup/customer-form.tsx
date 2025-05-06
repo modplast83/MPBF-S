@@ -84,35 +84,13 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
     },
   });
   
-  // Function to generate a unique customer ID
-  const generateCustomerId = () => {
-    // Generate a random number between 100-999 for the ID
-    const randomNum = Math.floor(Math.random() * 900) + 100;
-    return `CID${randomNum}`;
-  };
-
   // Form submission handler
   const onSubmit = (values: z.infer<typeof insertCustomerSchema>) => {
     // Make a fresh copy to avoid mutations
     const updatedValues = { ...values };
     
-    // Generate a unique ID if creating a new customer and no ID was provided
-    if (!isEditing && !updatedValues.id) {
-      // Generate random number between 100-999
-      const generateUniqueId = () => {
-        const randomNum = Math.floor(Math.random() * 900) + 100;
-        return `CID${randomNum}`;
-      };
-      
-      updatedValues.id = generateUniqueId();
-      console.log("Generated new customer ID:", updatedValues.id);
-    }
-    
-    // Set code to ID if not provided when creating a new customer
-    if (!isEditing && !updatedValues.code) {
-      updatedValues.code = updatedValues.id;
-      console.log("Using ID as code:", updatedValues.code);
-    }
+    // Server will handle ID generation with proper CID#### format
+    // We don't need to generate IDs client-side anymore
     
     // Handle user ID field correctly
     if (updatedValues.userId === "null") {
