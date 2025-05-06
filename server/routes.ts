@@ -594,6 +594,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating customer with data:", req.body);
       const validatedData = insertCustomerSchema.parse(req.body);
       
+      // Auto-generate customer ID if not provided
+      if (!validatedData.id || validatedData.id.trim() === "") {
+        // Get all customers to find the highest CID number
+        const allCustomers = await storage.getCustomers();
+        let maxNumber = 0;
+        
+        // Extract numbers from existing customer IDs
+        allCustomers.forEach(customer => {
+          if (customer.id && customer.id.startsWith("CID")) {
+            const numPart = customer.id.substring(3); // Extract after "CID"
+            const num = parseInt(numPart, 10);
+            if (!isNaN(num) && num > maxNumber) {
+              maxNumber = num;
+            }
+          }
+        });
+        
+        // Generate next ID with leading zeros
+        const nextNumber = maxNumber + 1;
+        validatedData.id = `CID${nextNumber.toString().padStart(4, '0')}`;
+        console.log("Auto-generated customer ID:", validatedData.id);
+      }
+      
+      // If code is not provided, use the ID
+      if (!validatedData.code || validatedData.code.trim() === "") {
+        validatedData.code = validatedData.id;
+        console.log("Using ID as code:", validatedData.code);
+      }
+      
       // Check if customer with same ID already exists
       if (validatedData.id) {
         const existingCustomerId = await storage.getCustomer(validatedData.id);
