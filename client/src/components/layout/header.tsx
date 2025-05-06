@@ -15,6 +15,7 @@ import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
 import { Loader2, Globe, Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AuthenticationButton } from "@/components/authentication-button";
 
 interface HeaderProps {
   mobileMenuOpen?: boolean;
@@ -23,19 +24,13 @@ interface HeaderProps {
 
 export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProps) {
   const [location, setLocation] = useLocation();
-  const { user, logoutMutation } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { language, setLanguage, isRTL } = useLanguage();
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   
-  // Function to handle logout
-  const handleLogout = () => {
-    // Confirm logout
-    if (confirm(t("common.logout_confirm"))) {
-      logoutMutation.mutate();
-    }
-  };
+  // Logout is now handled by the AuthenticationButton component
   
   // Function to toggle mobile sidebar
   const toggleMobileSidebar = () => {
@@ -135,53 +130,8 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
             </>
           )}
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              {isMobile ? (
-                <Button variant="outline" size="icon" className="flex items-center justify-center text-primary-600 border-primary-200 shadow-sm hover:bg-primary-50">
-                  <div className="h-6 w-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-medium group-hover:bg-primary-200 transition-colors">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                </Button>
-              ) : (
-                <Button variant="outline" className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 pl-3 pr-2 border-primary-200 shadow-sm hover:bg-primary-50 group`}>
-                  <div className="h-7 w-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-medium mr-2 group-hover:bg-primary-200 transition-colors">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">{user?.name || 'User'}</span>
-                  <span className={`material-icons text-primary-600 text-sm ${isRTL ? 'flip-in-rtl' : ''}`}>arrow_drop_down</span>
-                </Button>
-              )}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-1 shadow-lg">
-              <DropdownMenuItem className="rounded hover:bg-primary-50 cursor-pointer focus:bg-primary-50 py-2">
-                <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-primary-600`}>person</span>
-                <span>{t("common.profile")}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="rounded hover:bg-primary-50 cursor-pointer focus:bg-primary-50 py-2">
-                <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-primary-600`}>settings</span>
-                <span>{t("common.settings")}</span>
-              </DropdownMenuItem>
-              {/* Show these options only in mobile dropdown */}
-              {isMobile && (
-                <>
-                  <DropdownMenuItem className="rounded hover:bg-primary-50 cursor-pointer focus:bg-primary-50 py-2">
-                    <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-primary-600`}>notifications</span>
-                    <span>{t("common.notifications")}</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="rounded hover:bg-primary-50 cursor-pointer focus:bg-primary-50 py-2">
-                    <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-primary-600`}>help_outline</span>
-                    <span>{t("common.help")}</span>
-                  </DropdownMenuItem>
-                </>
-              )}
-              <DropdownMenuSeparator className="my-1 bg-gray-100" />
-              <DropdownMenuItem onSelect={handleLogout} className="rounded hover:bg-red-50 cursor-pointer focus:bg-red-50 py-2">
-                <span className={`material-icons ${isRTL ? 'ml-2' : 'mr-2'} text-red-600`}>logout</span>
-                <span className="text-red-600">{t("common.logout")}</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Use new AuthenticationButton component for Replit Auth */}
+          <AuthenticationButton />
         </div>
       </div>
     </header>

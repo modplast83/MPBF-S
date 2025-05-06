@@ -22,7 +22,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Always declare all hooks at the top level, regardless of conditions
   const { expanded } = useSidebar();
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { isRTL } = useLanguage();
   const [location] = useLocation();
   const isMobile = useIsMobile();
@@ -45,10 +45,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Desktop sidebar - fixed position */}
-      {user && !isMobile && <Sidebar isMobile={false} />}
+      {isAuthenticated && !isMobile && <Sidebar isMobile={false} />}
       
       {/* Mobile sidebar as a sheet for better mobile experience */}
-      {user && isMobile && (
+      {isAuthenticated && isMobile && (
         <Sheet open={isOpen} onOpenChange={handleMobileMenuToggle}>
           <SheetContent 
             side={isRTL ? "right" : "left"} 
@@ -64,14 +64,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
       
       <div 
         className={`flex flex-col flex-1 transition-all duration-300 ${
-          !isMobile && user && expanded 
+          !isMobile && isAuthenticated && expanded 
             ? isRTL ? "mr-[250px]" : "ml-[250px]" 
-            : !isMobile && user 
+            : !isMobile && isAuthenticated 
               ? isRTL ? "mr-[64px]" : "ml-[64px]" 
               : "mx-0"
         }`}
       >
-        {user && <Header mobileMenuOpen={isOpen} setMobileMenuOpen={handleMobileMenuToggle} />}
+        {isAuthenticated && <Header mobileMenuOpen={isOpen} setMobileMenuOpen={handleMobileMenuToggle} />}
         <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 to-gray-100 p-3 sm:p-4 md:p-6">
           <div className="max-w-7xl mx-auto">
             {children}
