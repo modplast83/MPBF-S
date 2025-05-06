@@ -54,6 +54,8 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   name: text("name").notNull(), // UserName (display name)
   role: text("role").notNull(), // UserRole
+  email: text("email"),
+  phone: text("phone"),
   isActive: boolean("is_active").default(true),
   sectionId: text("section_id").references(() => sections.id), // UserSection
 });

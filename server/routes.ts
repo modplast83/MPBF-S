@@ -31,6 +31,14 @@ declare global {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Ensure admin user exists
+  try {
+    await ensureAdminUser();
+    console.log("Admin user check completed");
+  } catch (error) {
+    console.error("Error during admin user verification:", error);
+  }
+  
   // Setup authentication
   setupAuth(app);
   

@@ -1,4 +1,4 @@
-import { storage } from './database-storage';
+import { storage } from './storage';
 import { hashPassword } from './auth-utils';
 
 // Ensure admin user exists
