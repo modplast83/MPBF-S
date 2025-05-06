@@ -40,9 +40,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      return await apiRequest("POST", "/api/login", credentials);
+      console.log("Login attempt with credentials:", { username: credentials.username, passwordLength: credentials.password?.length });
+      try {
+        const result = await apiRequest("POST", "/api/login", credentials);
+        console.log("Login API response:", result);
+        return result;
+      } catch (error) {
+        console.error("Login error caught:", error);
+        throw error;
+      }
     },
     onSuccess: (user: SelectUser) => {
+      console.log("Login successful, updating user in cache:", user);
       // Update user data in cache
       queryClient.setQueryData(["/api/user"], user);
       
@@ -60,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
+      console.error("Login mutation error:", error);
       toast({
         title: "Login failed",
         description: error.message || "Invalid credentials",

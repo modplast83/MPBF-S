@@ -124,6 +124,19 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login", (req, res, next) => {
     console.log("Login attempt for username:", req.body.username);
+    console.log("Request headers:", req.headers);
+    console.log("Request origin:", req.headers.origin);
+    
+    // Explicitly set CORS headers for this route
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    // Handle preflight request
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
     
     // Validate request body
     if (!req.body.username || !req.body.password) {
@@ -135,8 +148,12 @@ export function setupAuth(app: Express) {
       passport.authenticate("local", (err: any, user: any, info: any) => {
         if (err) {
           console.error("Login error:", err);
-          // Return explicit error instead of passing to next middleware
-          return res.status(500).json({ message: "Authentication error occurred. Please try again." });
+          // Return explicit error details for debugging
+          return res.status(500).json({
+            message: "Authentication error occurred. Please try again.",
+            error: err.message || "Unknown error",
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+          });
         }
         
         if (!user) {
@@ -149,15 +166,28 @@ export function setupAuth(app: Express) {
         req.login(user, (err) => {
           if (err) {
             console.error("Session error:", err);
-            return res.status(500).json({ message: "Error establishing session. Please try again." });
+            return res.status(500).json({
+              message: "Error establishing session. Please try again.",
+              error: err.message || "Unknown error"
+            });
           }
+          
+          // Debug session data
           console.log("Login successful, session established");
+          console.log("Session ID:", req.sessionID);
+          console.log("Session cookie:", req.headers.cookie);
+          
+          // Return user data
           return res.json(user);
         });
       })(req, res, next);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Unexpected error during login:", error);
-      res.status(500).json({ message: "An unexpected error occurred. Please try again later." });
+      res.status(500).json({
+        message: "An unexpected error occurred. Please try again later.",
+        error: error.message || "Unknown error",
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
   });
 
