@@ -1,6 +1,6 @@
 import { IStorage } from './storage';
 import { db } from './db';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import {
   User, InsertUser, users,
   Customer, InsertCustomer, customers,
@@ -54,8 +54,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    console.log(`DB: Looking up user with username: "${username}"`);
+    
+    // Exact match first
     const result = await db.select().from(users).where(eq(users.username, username));
-    return result[0];
+    
+    if (result.length > 0) {
+      console.log(`DB: Found user with exact username match: ${username}`);
+      return result[0];
+    }
+    
+    // If no exact match, do a case-insensitive search using SQL LOWER function
+    const lowerCaseResults = await db.execute(
+      sql`SELECT * FROM users WHERE LOWER(username) = LOWER(${username}) LIMIT 1`
+    );
+    
+    if (lowerCaseResults.rows && lowerCaseResults.rows.length > 0) {
+      console.log(`DB: Found user with case-insensitive username match for: ${username}`);
+      return lowerCaseResults.rows[0] as User;
+    }
+    
+    console.log(`DB: No user found with username: ${username}`);
+    return undefined;
   }
 
   async createUser(user: InsertUser): Promise<User> {
