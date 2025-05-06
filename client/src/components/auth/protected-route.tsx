@@ -13,7 +13,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ path, component: Component, module }: ProtectedRouteProps) {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { hasPermission, isLoading: permissionsLoading } = usePermissions();
   const [location] = useLocation();
   const isLoading = authLoading || permissionsLoading;
@@ -33,12 +33,12 @@ export function ProtectedRoute({ path, component: Component, module }: Protected
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated) {
     // Store the current location to redirect back after login
     sessionStorage.setItem("redirectAfterLogin", location);
     return (
       <Route path={path}>
-        <Redirect to="/auth" />
+        <Redirect to="/api/login" />
       </Route>
     );
   }
