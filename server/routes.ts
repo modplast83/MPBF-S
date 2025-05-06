@@ -42,6 +42,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
   
+  // Current user endpoint
+  app.get("/api/user", async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    try {
+      // Get user ID from authenticated user object
+      const userId = (req.user as any)?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid session" });
+      }
+      
+      // Get user details from storage
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Return user without sensitive information
+      res.json(user);
+    } catch (error) {
+      console.error("Error retrieving user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
   // Setup API routes
   const apiRouter = app.route("/api");
   
