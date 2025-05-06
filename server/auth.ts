@@ -22,8 +22,8 @@ export function setupAuth(app: Express) {
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       httpOnly: true,
-      secure: false, // Allow cookies over HTTP for development and Replit environment
-      sameSite: 'lax'
+      secure: process.env.NODE_ENV === 'production', // Secure in production only
+      sameSite: 'none' // Allow cross-site cookies
     }
   };
 
@@ -125,28 +125,40 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     console.log("Login attempt for username:", req.body.username);
     
-    passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) {
-        console.error("Login error:", err);
-        return next(err);
-      }
-      
-      if (!user) {
-        console.log("Authentication failed:", info?.message || "Unknown reason");
-        return res.status(401).json({ message: info?.message || "Authentication failed" });
-      }
-      
-      console.log("User authenticated successfully:", user.username);
-      
-      req.login(user, (err) => {
+    // Validate request body
+    if (!req.body.username || !req.body.password) {
+      console.log("Missing username or password in request");
+      return res.status(400).json({ message: "Username and password are required" });
+    }
+    
+    try {
+      passport.authenticate("local", (err: any, user: any, info: any) => {
         if (err) {
-          console.error("Session error:", err);
-          return next(err);
+          console.error("Login error:", err);
+          // Return explicit error instead of passing to next middleware
+          return res.status(500).json({ message: "Authentication error occurred. Please try again." });
         }
-        console.log("Login successful, session established");
-        return res.json(user);
-      });
-    })(req, res, next);
+        
+        if (!user) {
+          console.log("Authentication failed:", info?.message || "Unknown reason");
+          return res.status(401).json({ message: info?.message || "Authentication failed" });
+        }
+        
+        console.log("User authenticated successfully:", user.username);
+        
+        req.login(user, (err) => {
+          if (err) {
+            console.error("Session error:", err);
+            return res.status(500).json({ message: "Error establishing session. Please try again." });
+          }
+          console.log("Login successful, session established");
+          return res.json(user);
+        });
+      })(req, res, next);
+    } catch (error) {
+      console.error("Unexpected error during login:", error);
+      res.status(500).json({ message: "An unexpected error occurred. Please try again later." });
+    }
   });
 
   app.post("/api/logout", (req, res) => {
