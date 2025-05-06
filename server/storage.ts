@@ -1,5 +1,5 @@
 import {
-  User, InsertUser, Customer, InsertCustomer, Category, InsertCategory,
+  User, UpsertUser, Customer, InsertCustomer, Category, InsertCategory,
   Item, InsertItem, Section, InsertSection, Machine, InsertMachine,
   MasterBatch, InsertMasterBatch, CustomerProduct, InsertCustomerProduct,
   Order, InsertOrder, JobOrder, InsertJobOrder, Roll, InsertRoll,
@@ -23,9 +23,10 @@ export interface IStorage {
   getUsers(): Promise<User[]>;
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, user: Partial<User>): Promise<User | undefined>;
   deleteUser(id: string): Promise<boolean>;
+  upsertUser(user: UpsertUser): Promise<User>;
   
   // Permissions management
   getPermissions(): Promise<Permission[]>;
@@ -360,8 +361,9 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.username === username);
   }
 
-  async createUser(user: InsertUser): Promise<User> {
-    const id = `U${this.users.size + 1}`.padStart(4, "0");
+  async createUser(user: UpsertUser): Promise<User> {
+    // For new users without an ID, generate one
+    const id = user.id || `U${this.users.size + 1}`.padStart(4, "0");
     const newUser: User = { ...user, id };
     this.users.set(id, newUser);
     return newUser;
@@ -378,6 +380,29 @@ export class MemStorage implements IStorage {
 
   async deleteUser(id: string): Promise<boolean> {
     return this.users.delete(id);
+  }
+  
+  async upsertUser(user: UpsertUser): Promise<User> {
+    // Check if the user already exists
+    const existingUser = user.id ? this.users.get(user.id) : undefined;
+    
+    if (existingUser) {
+      // Update the existing user
+      const updatedUser = { 
+        ...existingUser, 
+        ...user,
+        updatedAt: new Date()
+      };
+      this.users.set(user.id!, updatedUser);
+      return updatedUser;
+    } else {
+      // Create a new user
+      return this.createUser({
+        ...user,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    }
   }
 
   // Categories

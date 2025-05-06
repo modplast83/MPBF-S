@@ -70,7 +70,9 @@ async function migrate() {
         { name: 'first_name', type: 'VARCHAR' },
         { name: 'last_name', type: 'VARCHAR' },
         { name: 'bio', type: 'TEXT' },
-        { name: 'profile_image_url', type: 'VARCHAR' }
+        { name: 'profile_image_url', type: 'VARCHAR' },
+        { name: 'created_at', type: 'TIMESTAMP', constraint: 'DEFAULT CURRENT_TIMESTAMP' },
+        { name: 'updated_at', type: 'TIMESTAMP', constraint: 'DEFAULT CURRENT_TIMESTAMP' }
       ];
       
       for (const column of columnsToAdd) {

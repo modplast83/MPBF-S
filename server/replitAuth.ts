@@ -27,18 +27,18 @@ export function getSession() {
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: true,
+    createTableIfMissing: false,
     ttl: sessionTtl,
     tableName: "sessions",
   });
   return session({
-    secret: process.env.SESSION_SECRET ?? "session-secret-key",
+    secret: process.env.SESSION_SECRET || 'supersecretkey', // fallback for dev only
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       maxAge: sessionTtl,
     },
   });
@@ -57,16 +57,30 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
-    id: claims["sub"],
-    username: claims["username"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    bio: claims["bio"],
-    profileImageUrl: claims["profile_image_url"],
-    role: "user", // Default role, can be updated by admin later
-  });
+  try {
+    // Check if the user's ID (sub) maps to a valid field in your database
+    // The sub field is the user's unique Replit ID
+    const userId = claims["sub"];
+    
+    // Then upsert (insert or update) the user details
+    const user = await storage.upsertUser({
+      id: userId,
+      username: claims["username"],
+      email: claims["email"],
+      firstName: claims["first_name"],
+      lastName: claims["last_name"],
+      bio: claims["bio"],
+      profileImageUrl: claims["profile_image_url"],
+      // Keep existing role if it's an update or set default role
+      role: "user", // Default role for new users
+      isActive: true, // Assume active by default
+    });
+    
+    return user;
+  } catch (error) {
+    console.error("Error upserting user:", error);
+    throw error;
+  }
 }
 
 export async function setupAuth(app: Express) {
@@ -81,10 +95,15 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
+    try {
+      const user = {};
+      updateUserSession(user, tokens);
+      await upsertUser(tokens.claims());
+      verified(null, user);
+    } catch (error) {
+      console.error("Authentication error:", error);
+      verified(error as Error);
+    }
   };
 
   for (const domain of process.env
@@ -128,13 +147,28 @@ export async function setupAuth(app: Express) {
       );
     });
   });
+
+  // User info endpoint
+  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const user = req.user as any;
-
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const user = req.user as any;
+  if (!user.expires_at) {
+    return res.status(401).json({ message: "Invalid session" });
   }
 
   const now = Math.floor(Date.now() / 1000);
@@ -142,6 +176,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return next();
   }
 
+  // Token expired, try to refresh
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
     return res.redirect("/api/login");
@@ -153,6 +188,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     updateUserSession(user, tokenResponse);
     return next();
   } catch (error) {
+    console.error("Token refresh error:", error);
     return res.redirect("/api/login");
   }
 };
