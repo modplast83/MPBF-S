@@ -40,10 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      return await apiRequest("/api/login", {
-        method: "POST",
-        body: JSON.stringify(credentials)
-      });
+      return await apiRequest("POST", "/api/login", credentials);
     },
     onSuccess: (user: SelectUser) => {
       // Update user data in cache
@@ -73,10 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (userData: RegisterData) => {
-      return await apiRequest("/api/register", {
-        method: "POST",
-        body: JSON.stringify(userData)
-      });
+      return await apiRequest("POST", "/api/register", userData);
     },
     onSuccess: (user: SelectUser) => {
       // Update user data in cache
@@ -106,9 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("/api/logout", {
-        method: "POST"
-      });
+      await apiRequest("POST", "/api/logout", null);
     },
     onSuccess: () => {
       // Clear user data from cache
