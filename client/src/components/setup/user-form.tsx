@@ -23,7 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { insertUserSchema, User } from "@shared/schema";
+import { upsertUserSchema, User } from "@shared/schema";
 
 interface UserFormProps {
   user?: User;
@@ -40,49 +40,50 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
   });
   
   // Extended schema for the form
-  const userFormSchema = insertUserSchema.extend({
-    confirmPassword: isEditing 
-      ? z.string().optional()
-      : z.string().min(1, "Confirm password is required"),
-  }).refine(data => {
-    if (data.password && data.confirmPassword) {
-      return data.password === data.confirmPassword;
-    }
-    return true;
-  }, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+  const userFormSchema = upsertUserSchema.extend({
+    firstName: z.string().optional().nullable(),
+    lastName: z.string().optional().nullable(),
+    email: z.string().email().optional().nullable(),
+    phone: z.string().optional().nullable(),
+    displayName: z.string().optional(),
   });
   
   // Set up the form
   const form = useForm<z.infer<typeof userFormSchema>>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
+      id: user?.id || "",
       username: user?.username || "",
-      password: "",
-      confirmPassword: "",
-      name: user?.name || "",
+      email: user?.email || null,
+      firstName: user?.firstName || null,
+      lastName: user?.lastName || null,
+      bio: user?.bio || null,
+      profileImageUrl: user?.profileImageUrl || null,
       role: user?.role || "user",
+      phone: user?.phone || null,
       isActive: user?.isActive ?? true,
       sectionId: user?.sectionId || null,
+      displayName: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : "",
     },
   });
   
   // Create mutation for adding/updating user
   const mutation = useMutation({
     mutationFn: async (values: z.infer<typeof userFormSchema>) => {
-      // Remove confirm password field before sending
-      const { confirmPassword, ...userData } = values;
+      // Process name values
+      const { displayName, ...userData } = values;
       
-      // Don't send empty password when editing
-      const payload = isEditing && !userData.password
-        ? { ...userData, password: undefined }
-        : userData;
+      // If displayName is provided, split it into firstName and lastName
+      if (displayName && displayName.trim() !== '') {
+        const nameParts = displayName.trim().split(' ');
+        userData.firstName = nameParts[0];
+        userData.lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : null;
+      }
       
       if (isEditing && user) {
-        await apiRequest("PUT", `${API_ENDPOINTS.USERS}/${user.id}`, payload);
+        await apiRequest("PUT", `${API_ENDPOINTS.USERS}/${user.id}`, userData);
       } else {
-        await apiRequest("POST", API_ENDPOINTS.USERS, payload);
+        await apiRequest("POST", API_ENDPOINTS.USERS, userData);
       }
     },
     onSuccess: () => {
@@ -128,7 +129,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
           
           <FormField
             control={form.control}
-            name="name"
+            name="displayName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Display Name</FormLabel>
@@ -144,12 +145,16 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="password"
+            name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{isEditing ? "New Password (leave blank to keep current)" : "Password"}</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Enter password" {...field} />
+                  <Input placeholder="Enter email address" 
+                    {...field} 
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(e.target.value || null)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -158,12 +163,16 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
           
           <FormField
             control={form.control}
-            name="confirmPassword"
+            name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
+                <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Confirm password" {...field} />
+                  <Input placeholder="Enter phone number" 
+                    {...field} 
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(e.target.value || null)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

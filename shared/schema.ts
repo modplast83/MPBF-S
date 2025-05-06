@@ -1,4 +1,16 @@
-import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, unique } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  doublePrecision,
+  unique,
+  varchar,
+  jsonb,
+  index
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -47,21 +59,36 @@ export const insertMasterBatchSchema = createInsertSchema(masterBatches);
 export type InsertMasterBatch = z.infer<typeof insertMasterBatchSchema>;
 export type MasterBatch = typeof masterBatches.$inferSelect;
 
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
 // Users table
 export const users = pgTable("users", {
-  id: text("id").primaryKey(), // UID
-  username: text("username").notNull().unique(), // UserName
-  password: text("password").notNull(),
-  name: text("name").notNull(), // UserName (display name)
-  role: text("role").notNull(), // UserRole
-  email: text("email"),
+  id: varchar("id").primaryKey().notNull(), // UID (from Replit Auth)
+  username: varchar("username").unique().notNull(), // Username from Replit
+  email: varchar("email").unique(), // Email from Replit
+  firstName: varchar("first_name"), // First name from Replit
+  lastName: varchar("last_name"), // Last name from Replit
+  bio: text("bio"), // Bio from Replit
+  profileImageUrl: varchar("profile_image_url"), // Profile image URL from Replit
+  role: text("role").notNull().default("user"), // UserRole (administrator, supervisor, operator, user)
   phone: text("phone"),
   isActive: boolean("is_active").default(true),
   sectionId: text("section_id").references(() => sections.id), // UserSection
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).omit({ id: true });
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export const upsertUserSchema = createInsertSchema(users);
+export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
 // Customers table

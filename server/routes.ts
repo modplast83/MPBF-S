@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
-  insertCategorySchema, insertCustomerSchema, insertUserSchema, 
+  insertCategorySchema, insertCustomerSchema, 
   insertItemSchema, insertSectionSchema, insertMachineSchema,
   insertMasterBatchSchema, insertCustomerProductSchema,
   insertOrderSchema, insertJobOrderSchema, insertRollSchema,
@@ -14,7 +14,7 @@ import {
   insertMaterialInputItemSchema,
   insertPlatePricingParameterSchema, insertPlateCalculationSchema,
   plateCalculationRequestSchema, PlateCalculationRequest,
-  User
+  User, upsertUserSchema, UpsertUser
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
@@ -495,7 +495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/users", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertUserSchema.parse(req.body);
+      const validatedData = upsertUserSchema.parse(req.body);
       
       const existingUser = await storage.getUserByUsername(validatedData.username);
       if (existingUser) {
@@ -510,10 +510,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      const user = await storage.createUser(validatedData);
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-      res.status(201).json(userWithoutPassword);
+      const user = await storage.upsertUser(validatedData);
+      res.status(201).json(user);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid user data", errors: error.errors });
@@ -529,11 +527,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const validatedData = insertUserSchema.parse(req.body);
+      const validatedData = upsertUserSchema.parse({
+        ...req.body,
+        id: req.params.id // Ensure the ID is set for the update
+      });
       
       if (validatedData.username !== existingUser.username) {
         const usernameExists = await storage.getUserByUsername(validatedData.username);
-        if (usernameExists) {
+        if (usernameExists && usernameExists.id !== req.params.id) {
           return res.status(409).json({ message: "Username already exists" });
         }
       }
@@ -546,14 +547,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      const user = await storage.updateUser(req.params.id, validatedData);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-      res.json(userWithoutPassword);
+      const user = await storage.upsertUser(validatedData);
+      res.json(user);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid user data", errors: error.errors });
