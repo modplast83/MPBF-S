@@ -95,7 +95,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId }: Produ
       lengthCm: product?.lengthCm || undefined,
       cuttingLength: product?.cuttingLength || undefined,
       rawMaterial: product?.rawMaterial || "",
-      masterBatchId: product?.masterBatchId || "none",
+      masterBatchId: product?.masterBatchId || "",
       printed: product?.printed || "",
       cuttingUnit: product?.cuttingUnit || "",
       unitWeight: product?.unitWeight || undefined,
@@ -111,25 +111,47 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId }: Produ
   // Create mutation for adding/updating product
   const mutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      // Convert string numbers to actual numbers
+      // Handle all fields to ensure correct typing
       const payload = {
         ...values,
-        width: values.width ? Number(values.width) : null,
-        leftF: values.leftF ? Number(values.leftF) : null,
-        rightF: values.rightF ? Number(values.rightF) : null,
-        thickness: values.thickness ? Number(values.thickness) : null,
-        thicknessOne: values.thicknessOne ? Number(values.thicknessOne) : null,
-        printingCylinder: values.printingCylinder ? Number(values.printingCylinder) : null,
-        lengthCm: values.lengthCm ? Number(values.lengthCm) : null,
-        cuttingLength: values.cuttingLength ? Number(values.cuttingLength) : null,
-        unitWeight: values.unitWeight ? Number(values.unitWeight) : null,
-        masterBatchId: values.masterBatchId === "none" ? "" : values.masterBatchId,
+        // Convert number fields
+        width: values.width !== undefined ? Number(values.width) : undefined,
+        leftF: values.leftF !== undefined ? Number(values.leftF) : undefined,
+        rightF: values.rightF !== undefined ? Number(values.rightF) : undefined,
+        thickness: values.thickness !== undefined ? Number(values.thickness) : undefined,
+        thicknessOne: values.thicknessOne !== undefined ? Number(values.thicknessOne) : undefined,
+        printingCylinder: values.printingCylinder !== undefined ? Number(values.printingCylinder) : undefined,
+        lengthCm: values.lengthCm !== undefined ? Number(values.lengthCm) : undefined,
+        cuttingLength: values.cuttingLength !== undefined ? Number(values.cuttingLength) : undefined,
+        unitWeight: values.unitWeight !== undefined ? Number(values.unitWeight) : undefined,
+        
+        // Handle masterBatchId correctly
+        masterBatchId: values.masterBatchId === "" ? undefined : values.masterBatchId,
+        
+        // Ensure text fields are never null or undefined
+        sizeCaption: values.sizeCaption || "",
+        rawMaterial: values.rawMaterial || "",
+        printed: values.printed || "",
+        cuttingUnit: values.cuttingUnit || "",
+        packing: values.packing || "",
+        punching: values.punching || "",
+        cover: values.cover || "",
+        volum: values.volum || "",
+        knife: values.knife || "",
+        notes: values.notes || "",
       };
       
-      if (isEditing && product) {
-        await apiRequest("PUT", `${API_ENDPOINTS.CUSTOMER_PRODUCTS}/${product.id}`, payload);
-      } else {
-        await apiRequest("POST", API_ENDPOINTS.CUSTOMER_PRODUCTS, payload);
+      console.log("Submitting customer product with payload:", payload);
+      
+      try {
+        if (isEditing && product) {
+          await apiRequest("PUT", `${API_ENDPOINTS.CUSTOMER_PRODUCTS}/${product.id}`, payload);
+        } else {
+          await apiRequest("POST", API_ENDPOINTS.CUSTOMER_PRODUCTS, payload);
+        }
+      } catch (error) {
+        console.error("Error submitting customer product:", error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -453,7 +475,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId }: Produ
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="">None</SelectItem>
                     {masterBatches?.map((mb) => (
                       <SelectItem key={mb.id} value={mb.id}>
                         {mb.name}
