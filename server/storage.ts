@@ -1119,7 +1119,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-import { DatabaseStorage } from './database-storage';
+import { HybridStorage } from './hybrid-storage';
 
-// Use the database storage implementation
-export const storage = new DatabaseStorage();
+// Use the hybrid storage implementation that combines database auth with fallback implementations
+export const storage = new HybridStorage();
