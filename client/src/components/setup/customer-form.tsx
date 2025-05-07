@@ -211,7 +211,7 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
                     <SelectItem value="null">None</SelectItem>
                     {users?.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
-                        {user.name}
+                        {user.username || user.id}
                       </SelectItem>
                     ))}
                   </SelectContent>
