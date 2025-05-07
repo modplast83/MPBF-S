@@ -177,8 +177,8 @@ export async function setupAuth(app: Express) {
     });
   });
 
-  // User info endpoint
-  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+  // User info endpoint with explicit route binding to prevent vite interference
+  const userEndpoint = async (req: any, res: any) => {
     try {
       console.log("GET /api/auth/user - Authenticated request received");
       console.log("User claims:", req.user?.claims);
@@ -189,27 +189,33 @@ export async function setupAuth(app: Express) {
       const user = await storage.getUser(userId);
       console.log("User found in database:", !!user);
       
-      // Set explicit content type to ensure JSON response
+      // Forcefully set explicit content type and prevent further middleware processing
       res.setHeader('Content-Type', 'application/json');
       
       if (user) {
         console.log("Returning user data");
-        res.status(200).json(user);
+        return res.status(200).json(user);
       } else {
         console.log("User not found in database");
-        res.status(404).json({ message: "User not found in the database" });
+        return res.status(404).json({ message: "User not found in the database" });
       }
     } catch (error) {
       console.error("Error fetching user:", error);
-      // Set explicit content type to ensure JSON response
+      // Forcefully set explicit content type and prevent further middleware processing
       res.setHeader('Content-Type', 'application/json');
-      res.status(500).json({ 
+      return res.status(500).json({ 
         message: "Failed to fetch user",
         error: error.message,
         stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined
       });
     }
-  });
+  };
+  
+  // Register the endpoint with explicit content type middleware
+  app.get("/api/auth/user", isAuthenticated, (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+  }, userEndpoint);
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
