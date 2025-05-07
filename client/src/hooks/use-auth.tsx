@@ -72,7 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // Redirect to home page
-      setLocation("/");
+      setTimeout(() => {
+        setLocation("/");
+      }, 500);
     },
     onError: (error) => {
       console.error("Login error:", error);
@@ -105,8 +107,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome, ${userData.username}!`,
       });
       
-      // Redirect to home page immediately
-      setLocation("/");
+      // Redirect to home page
+      setTimeout(() => {
+        setLocation("/");
+      }, 500);
     },
     onError: (error) => {
       console.error("Registration error:", error);
@@ -140,7 +144,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // Redirect to auth page
-      window.location.href = "/auth"; // Use window.location to force full page reload
+      setTimeout(() => {
+        setLocation("/auth");
+      }, 500);
     },
     onError: (error) => {
       console.error("Logout error:", error);

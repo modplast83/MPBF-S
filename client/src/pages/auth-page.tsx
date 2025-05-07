@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Redirect } from "wouter";
+import { Redirect, useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "react-i18next";
@@ -42,6 +42,7 @@ export default function AuthPage() {
   const { t } = useTranslation();
   const { language, setLanguage, isRTL } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("login");
+  const [, setLocation] = useLocation();
   
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -74,7 +75,11 @@ export default function AuthPage() {
 
   // If user is already authenticated, redirect to dashboard
   if (isAuthenticated) {
-    return <Redirect to="/" />;
+    console.log("User already authenticated, redirecting to dashboard");
+    setTimeout(() => {
+      setLocation("/");
+    }, 100);
+    return null;
   }
   
   // Show loading state while checking authentication
