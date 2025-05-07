@@ -63,8 +63,11 @@ async function upsertUser(
     // The sub field is the user's unique Replit ID
     const userId = claims["sub"];
     
+    // Check if the user already exists to preserve their role
+    const existingUser = await storage.getUser(userId);
+    
     // Then upsert (insert or update) the user details
-    const user = await storage.upsertUser({
+    const userData = {
       id: userId,
       username: claims["username"],
       email: claims["email"],
@@ -73,10 +76,16 @@ async function upsertUser(
       bio: claims["bio"],
       profileImageUrl: claims["profile_image_url"],
       // Keep existing role if it's an update or set default role
-      role: "user", // Default role for new users
+      role: existingUser?.role || "user", // Preserve existing role or set default for new users
       isActive: true, // Assume active by default
-    });
+      // Preserve other fields if user exists
+      phone: existingUser?.phone || null,
+      sectionId: existingUser?.sectionId || null,
+    };
     
+    const user = await storage.upsertUser(userData);
+    
+    console.log("User upserted successfully:", userId, claims["username"]);
     return user;
   } catch (error) {
     console.error("Error upserting user:", error);
@@ -165,16 +174,29 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // For development, log authentication process
+  console.log("Authentication check, isAuthenticated:", req.isAuthenticated());
+
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   const user = req.user as any;
+  console.log("User object exists:", !!user);
+  
+  if (!user.claims || !user.claims.sub) {
+    console.error("Missing user claims or sub:", user);
+    return res.status(401).json({ message: "Invalid user claims" });
+  }
+  
   if (!user.expires_at) {
-    return res.status(401).json({ message: "Invalid session" });
+    console.error("Missing expires_at in user session:", user);
+    return res.status(401).json({ message: "Invalid session expiration" });
   }
 
   const now = Math.floor(Date.now() / 1000);
+  console.log("Token expiry check:", now, user.expires_at, now <= user.expires_at);
+  
   if (now <= user.expires_at) {
     return next();
   }
@@ -182,13 +204,16 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   // Token expired, try to refresh
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
+    console.error("Missing refresh token");
     return res.redirect("/api/login");
   }
 
   try {
+    console.log("Attempting token refresh");
     const config = await getOidcConfig();
     const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
     updateUserSession(user, tokenResponse);
+    console.log("Token refresh successful");
     return next();
   } catch (error) {
     console.error("Token refresh error:", error);

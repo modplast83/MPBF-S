@@ -38,7 +38,7 @@ export function ProtectedRoute({ path, component: Component, module }: Protected
     sessionStorage.setItem("redirectAfterLogin", location);
     return (
       <Route path={path}>
-        <Redirect to="/api/login" />
+        <Redirect to="/auth" />
       </Route>
     );
   }
