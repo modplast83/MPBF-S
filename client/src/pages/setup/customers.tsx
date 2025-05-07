@@ -71,7 +71,7 @@ export default function Customers() {
   // Helper function to get user name from userId
   const getUserName = (userId: string | null) => {
     if (!userId) return "None";
-    return users?.find(u => u.id === userId)?.name || "Unknown";
+    return users?.find(u => u.id === userId)?.username || userId || "Unknown";
   };
 
   const columns = [
