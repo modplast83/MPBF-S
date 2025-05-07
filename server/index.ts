@@ -30,6 +30,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// Add special middleware for auth API routes to ensure proper content-type
+app.use('/api/auth/*', (req, res, next) => {
+  // Force content type for all auth API routes
+  res.setHeader('Content-Type', 'application/json');
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -72,7 +79,19 @@ app.use((req, res, next) => {
     // Send the error response but don't rethrow the error
     // This prevents unhandled exceptions
     if (!res.headersSent) {
+      // Set explicit content type to ensure JSON
+      res.setHeader('Content-Type', 'application/json');
       res.status(status).json({ message });
+    }
+  });
+
+  // Add a special handler for API routes before setting up Vite
+  app.all('/api/*', (req, res, next) => {
+    // If no route has been matched yet, return a 404 JSON response
+    // This prevents Vite from returning HTML for unknown API routes
+    if (!res.headersSent) {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(404).json({ message: `API endpoint not found: ${req.path}` });
     }
   });
 

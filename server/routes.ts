@@ -49,6 +49,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Debug endpoint to check session status
   app.get("/api/auth/debug", (req: any, res: Response) => {
+    // Set explicit content type to prevent Vite from returning HTML
+    res.setHeader('Content-Type', 'application/json');
+    
     const isAuthenticated = req.isAuthenticated();
     const sessionData = {
       isAuthenticated,
@@ -69,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } : null
     };
     
-    res.json(sessionData);
+    return res.json(sessionData);
   });
   
   // Setup API routes
