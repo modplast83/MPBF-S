@@ -50,10 +50,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   // Add mix item mutation
   const addMixItemMutation = useMutation({
     mutationFn: async (data: { mixId: number; rawMaterialId: number; quantity: number }) => {
-      return apiRequest(API_ENDPOINTS.MIX_ITEMS, {
-        method: "POST",
-        body: JSON.stringify(data)
-      });
+      return apiRequest("POST", API_ENDPOINTS.MIX_ITEMS, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}/items`] });
@@ -80,9 +77,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   // Remove mix item mutation
   const removeMixItemMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`${API_ENDPOINTS.MIX_ITEMS}/${id}`, {
-        method: "DELETE"
-      });
+      return apiRequest("DELETE", `${API_ENDPOINTS.MIX_ITEMS}/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}/items`] });
@@ -147,7 +142,18 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   const getOperatorName = (operatorId: string) => {
     if (!users) return operatorId;
     const user = users.find(user => user.id === operatorId);
-    return user ? user.name : operatorId;
+    if (!user) return operatorId;
+    
+    // Combine firstName and lastName if available
+    const firstName = user.firstName || '';
+    const lastName = user.lastName || '';
+    
+    if (firstName || lastName) {
+      return `${firstName} ${lastName}`.trim();
+    }
+    
+    // Fallback to username if no name components available
+    return user.username || operatorId;
   };
 
   // Function to generate the label content for printing

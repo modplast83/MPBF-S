@@ -64,7 +64,18 @@ export default function MixMaterialsPage() {
   const getOperatorName = (operatorId: string) => {
     if (!users) return operatorId;
     const user = users.find(user => user.id === operatorId);
-    return user ? user.name : operatorId;
+    if (!user) return operatorId;
+    
+    // Combine firstName and lastName if available
+    const firstName = user.firstName || '';
+    const lastName = user.lastName || '';
+    
+    if (firstName || lastName) {
+      return `${firstName} ${lastName}`.trim();
+    }
+    
+    // Fallback to username if no name components available
+    return user.username || operatorId;
   };
   
   // Delete mix mutation
@@ -86,9 +97,7 @@ export default function MixMaterialsPage() {
 
   const deleteMixMutation = useMutation({
     mutationFn: async (mixId: number) => {
-      await apiRequest(`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`, {
-        method: "DELETE"
-      });
+      await apiRequest("DELETE", `${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`);
     },
     onSuccess: () => {
       toast({
