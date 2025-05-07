@@ -33,6 +33,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ 
       on401: "returnNull" 
     }),
+    onSuccess: (data) => {
+      console.log("Auth hook: User data received:", data);
+    },
+    onError: (err) => {
+      console.error("Auth hook: Error fetching user:", err);
+    },
+    retry: 1, // Reduce retries for faster feedback during development
   });
 
   const loginMutation = useMutation({

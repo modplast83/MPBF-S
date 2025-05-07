@@ -52,13 +52,22 @@ export default function AuthPage() {
   useEffect(() => {
     // If not authenticated, redirect to Replit Auth login
     if (!isLoading && !isAuthenticated) {
+      console.log("Auth page: User not authenticated, redirecting to Replit Auth");
       const redirectUrl = "/api/login";
       // Store current URL or intended destination to redirect back after login
       const currentUrl = window.location.pathname;
       if (currentUrl !== "/auth") {
         sessionStorage.setItem("redirectAfterLogin", currentUrl);
       }
-      window.location.href = redirectUrl;
+      
+      // Add a small delay to make sure the redirect doesn't happen too fast during debugging
+      setTimeout(() => {
+        window.location.href = redirectUrl;
+      }, 300);
+    } else if (isAuthenticated) {
+      console.log("Auth page: User is already authenticated");
+    } else {
+      console.log("Auth page: Still checking authentication status");
     }
   }, [isLoading, isAuthenticated]);
 
