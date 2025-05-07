@@ -224,11 +224,11 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
       <div className="mt-auto w-full border-t border-gray-700/50 p-4">
         <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="h-10 w-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-            {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
+            {user?.username ? user.username.charAt(0).toUpperCase() : '?'}
           </div>
           {expanded && (
             <div className={isRTL ? 'mr-3' : 'ml-3'}>
-              <p className="text-sm font-medium text-white">{user?.name || t("sidebar.user")}</p>
+              <p className="text-sm font-medium text-white">{user?.username || t("sidebar.user")}</p>
               <p className="text-xs text-gray-300">{user?.role || t("sidebar.role")}</p>
             </div>
           )}

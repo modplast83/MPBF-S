@@ -47,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
     refetchOnWindowFocus: true,
+    initialData: null // Set initial data to null to avoid undefined
   });
 
   const loginMutation = useMutation<SelectUser, Error, LoginCredentials>({
@@ -146,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: user || null,
         isLoading,
         error,
         isAuthenticated: !!user,
