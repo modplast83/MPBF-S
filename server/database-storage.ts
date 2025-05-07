@@ -17,8 +17,11 @@ export class DatabaseStorage implements IStorage {
 
   constructor() {
     const pgStore = connectPg(session);
+    // Use the holy-bonus database URL if available, otherwise fall back to the standard database URL
+    const databaseUrl = process.env.DATABASE_URL_HOLY_BONUS || process.env.DATABASE_URL;
+    
     this.sessionStore = new pgStore({
-      conString: process.env.DATABASE_URL,
+      conString: databaseUrl,
       createTableIfMissing: true,
       tableName: "sessions",
     });
