@@ -134,6 +134,23 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
+  // Add test login endpoint to check content-type
+  app.get("/api/auth/login-test", (req, res) => {
+    console.log("Testing login content-type");
+    
+    // Create response manually to avoid vite middleware
+    const jsonData = JSON.stringify({
+      message: "This is a test login endpoint",
+      timestamp: new Date().toISOString(),
+      info: "Used to verify Content-Type is working"
+    });
+    
+    // Set headers and send raw response
+    res.setHeader('Content-Type', 'application/json');
+    res.writeHead(200);
+    return res.end(jsonData);
+  });
+
   app.get("/api/login", (req, res, next) => {
     console.log("Initiating Replit Auth login flow");
     passport.authenticate(`replitauth:${req.hostname}`, {
@@ -177,8 +194,8 @@ export async function setupAuth(app: Express) {
     });
   });
 
-  // User info endpoint with explicit route binding to prevent vite interference
-  const userEndpoint = async (req: any, res: any) => {
+  // User info endpoint with direct res.send() to bypass Vite middleware
+  app.get("/api/auth/user", isAuthenticated, async (req: any, res: any) => {
     try {
       console.log("GET /api/auth/user - Authenticated request received");
       console.log("User claims:", req.user?.claims);
@@ -189,33 +206,34 @@ export async function setupAuth(app: Express) {
       const user = await storage.getUser(userId);
       console.log("User found in database:", !!user);
       
-      // Forcefully set explicit content type and prevent further middleware processing
-      res.setHeader('Content-Type', 'application/json');
+      // Create response manually to avoid vite middleware
+      const jsonData = user 
+        ? JSON.stringify(user)
+        : JSON.stringify({ message: "User not found in the database" });
       
-      if (user) {
-        console.log("Returning user data");
-        return res.status(200).json(user);
-      } else {
-        console.log("User not found in database");
-        return res.status(404).json({ message: "User not found in the database" });
-      }
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      // Forcefully set explicit content type and prevent further middleware processing
+      const statusCode = user ? 200 : 404;
+      
+      // Set headers and send raw response
       res.setHeader('Content-Type', 'application/json');
-      return res.status(500).json({ 
+      res.writeHead(statusCode);
+      return res.end(jsonData);
+      
+    } catch (error: any) {
+      console.error("Error fetching user:", error);
+      
+      // Create error response manually to avoid vite middleware
+      const errorData = JSON.stringify({ 
         message: "Failed to fetch user",
         error: error.message,
         stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined
       });
+      
+      // Set headers and send raw response
+      res.setHeader('Content-Type', 'application/json');
+      res.writeHead(500);
+      return res.end(errorData);
     }
-  };
-  
-  // Register the endpoint with explicit content type middleware
-  app.get("/api/auth/user", isAuthenticated, (req, res, next) => {
-    res.setHeader('Content-Type', 'application/json');
-    next();
-  }, userEndpoint);
+  });
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {

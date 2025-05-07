@@ -47,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect("/api/auth/user");
   });
   
-  // Debug endpoint to check session status
+  // Debug endpoint to check session status - using manual response to bypass Vite
   app.get("/api/auth/debug", (req: any, res: Response) => {
     // Set explicit content type to prevent Vite from returning HTML
     res.setHeader('Content-Type', 'application/json');
@@ -72,7 +72,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } : null
     };
     
-    return res.json(sessionData);
+    // Manual response to bypass vite middleware
+    const jsonData = JSON.stringify(sessionData);
+    res.writeHead(200);
+    return res.end(jsonData);
   });
   
   // Setup API routes

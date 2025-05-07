@@ -85,15 +85,8 @@ app.use((req, res, next) => {
     }
   });
 
-  // Add a special handler for API routes before setting up Vite
-  app.all('/api/*', (req, res, next) => {
-    // If no route has been matched yet, return a 404 JSON response
-    // This prevents Vite from returning HTML for unknown API routes
-    if (!res.headersSent) {
-      res.setHeader('Content-Type', 'application/json');
-      res.status(404).json({ message: `API endpoint not found: ${req.path}` });
-    }
-  });
+  // DO NOT add the catch-all handler here - it was causing all API requests to 404
+  // Instead, we'll rely on the explicit Content-Type headers we've added to each route
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
