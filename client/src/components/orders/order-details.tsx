@@ -84,9 +84,8 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   // Mutation to update order status
   const updateOrderMutation = useMutation({
     mutationFn: async (status: string) => {
-      await apiRequest(`${API_ENDPOINTS.ORDERS}/${orderId}`, {
-        method: "PUT",
-        body: JSON.stringify({ status })
+      await apiRequest("PUT", `${API_ENDPOINTS.ORDERS}/${orderId}`, { 
+        status 
       });
     },
     onSuccess: () => {
@@ -102,10 +101,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   // Mutation to create a new job order
   const createJobOrderMutation = useMutation({
     mutationFn: async (data: any) => {
-      await apiRequest(API_ENDPOINTS.JOB_ORDERS, {
-        method: "POST",
-        body: JSON.stringify(data)
-      });
+      await apiRequest("POST", API_ENDPOINTS.JOB_ORDERS, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ORDERS}/${orderId}/job-orders`] });
@@ -122,10 +118,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   const updateJobOrderMutation = useMutation({
     mutationFn: async (data: any) => {
       if (!selectedJobOrder) return;
-      await apiRequest(`${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`, {
-        method: "PUT", 
-        body: JSON.stringify(data)
-      });
+      await apiRequest("PUT", `${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ORDERS}/${orderId}/job-orders`] });
@@ -142,9 +135,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
   const deleteJobOrderMutation = useMutation({
     mutationFn: async () => {
       if (!selectedJobOrder) return;
-      await apiRequest(`${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`, {
-        method: "DELETE"
-      });
+      await apiRequest("DELETE", `${API_ENDPOINTS.JOB_ORDERS}/${selectedJobOrder.id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ORDERS}/${orderId}/job-orders`] });
@@ -163,16 +154,13 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
       if (!selectedJobOrder) return;
       
       // Send only the necessary data - id and serialNumber will be generated on server
-      await apiRequest(API_ENDPOINTS.ROLLS, {
-        method: "POST",
-        body: JSON.stringify({
-          jobOrderId: selectedJobOrder.id,
-          extrudingQty: rollQuantity,
-          printingQty: rollQuantity, // Set printing quantity equal to extrusion quantity
-          cuttingQty: 0,
-          currentStage: "extrusion",
-          status: "pending",
-        })
+      await apiRequest("POST", API_ENDPOINTS.ROLLS, {
+        jobOrderId: selectedJobOrder.id,
+        extrudingQty: rollQuantity,
+        printingQty: rollQuantity, // Set printing quantity equal to extrusion quantity
+        cuttingQty: 0,
+        currentStage: "extrusion",
+        status: "pending",
       });
     },
     onSuccess: () => {
