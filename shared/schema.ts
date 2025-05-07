@@ -72,13 +72,14 @@ export const sessions = pgTable(
 
 // Users table
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(), // UID (from Replit Auth)
-  username: varchar("username").unique().notNull(), // Username from Replit
-  email: varchar("email").unique(), // Email from Replit
-  firstName: varchar("first_name"), // First name from Replit
-  lastName: varchar("last_name"), // Last name from Replit
-  bio: text("bio"), // Bio from Replit
-  profileImageUrl: varchar("profile_image_url"), // Profile image URL from Replit
+  id: varchar("id").primaryKey().notNull(), // UID
+  username: varchar("username").unique().notNull(), // Username
+  password: text("password"), // Password - hashed
+  email: varchar("email").unique(), // Email
+  firstName: varchar("first_name"), // First name
+  lastName: varchar("last_name"), // Last name
+  bio: text("bio"), // Bio
+  profileImageUrl: varchar("profile_image_url"), // Profile image URL
   role: text("role").notNull().default("user"), // UserRole (administrator, supervisor, operator, user)
   phone: text("phone"),
   isActive: boolean("is_active").default(true),
