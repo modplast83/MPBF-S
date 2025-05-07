@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useAuth, login, logout } from "../hooks/useAuth";
+import { useAuth } from "../hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function AuthenticationButton() {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { user, isLoading, isAuthenticated, loginMutation, logoutMutation } = useAuth();
 
   if (isLoading) {
     return (
@@ -50,7 +50,7 @@ export function AuthenticationButton() {
           </div>
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={() => logout()}
+            onClick={() => logoutMutation.mutate()}
           >
             Logout
           </DropdownMenuItem>
@@ -60,7 +60,7 @@ export function AuthenticationButton() {
   }
 
   return (
-    <Button onClick={() => login()}>
+    <Button onClick={() => loginMutation.mutate()}>
       Login
     </Button>
   );

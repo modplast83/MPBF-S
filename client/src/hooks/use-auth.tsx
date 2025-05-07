@@ -4,8 +4,8 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { User as SelectUser, InsertUser } from "@shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
+import { User as SelectUser } from "@shared/schema";
+import { getQueryFn, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
@@ -13,13 +13,10 @@ type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
-  registerMutation: UseMutationResult<SelectUser, Error, RegisterData>;
+  isAuthenticated: boolean;
+  loginMutation: UseMutationResult<void, Error, void>;
   logoutMutation: UseMutationResult<void, Error, void>;
 };
-
-type LoginData = Pick<InsertUser, "username" | "password">;
-type RegisterData = InsertUser;
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -32,77 +29,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error,
     isLoading,
   } = useQuery<SelectUser | null, Error>({
-    queryKey: ["/api/user"],
+    queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ 
       on401: "returnNull" 
     }),
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      console.log("Login attempt with credentials:", { username: credentials.username, passwordLength: credentials.password?.length });
-      try {
-        const result = await apiRequest("POST", "/api/login", credentials);
-        console.log("Login API response:", result);
-        return result;
-      } catch (error) {
-        console.error("Login error caught:", error);
-        throw error;
-      }
-    },
-    onSuccess: (user: SelectUser) => {
-      console.log("Login successful, updating user in cache:", user);
-      // Update user data in cache
-      queryClient.setQueryData(["/api/user"], user);
-      
-      toast({
-        title: "Login successful",
-        description: `Welcome back, ${user.name}!`,
-        variant: "default",
-        duration: 2000, // 2 seconds
-      });
-      
-      // Redirect to dashboard immediately after login
-      setLocation("/");
-      
-      // Invalidate all queries to force refetch after login
-      queryClient.invalidateQueries();
+    mutationFn: async () => {
+      // Replit Auth doesn't use credentials, just redirect to /api/login
+      window.location.href = "/api/login";
     },
     onError: (error: Error) => {
-      console.error("Login mutation error:", error);
+      console.error("Login redirect error:", error);
       toast({
         title: "Login failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const registerMutation = useMutation({
-    mutationFn: async (userData: RegisterData) => {
-      return await apiRequest("POST", "/api/register", userData);
-    },
-    onSuccess: (user: SelectUser) => {
-      // Update user data in cache
-      queryClient.setQueryData(["/api/user"], user);
-      
-      toast({
-        title: "Registration successful",
-        description: `Welcome, ${user.name}!`,
-        variant: "default",
-        duration: 2000, // 2 seconds
-      });
-      
-      // Redirect to dashboard after registration
-      setLocation("/");
-      
-      // Invalidate all queries to force refetch after registration
-      queryClient.invalidateQueries();
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Registration failed",
-        description: error.message || "Could not register user",
+        description: "Could not redirect to login page",
         variant: "destructive",
       });
     },
@@ -110,22 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout", null);
-    },
-    onSuccess: () => {
-      // Clear user data from cache
-      queryClient.setQueryData(["/api/user"], null);
-      
-      // Reset query cache
-      queryClient.clear();
-      
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
-      });
-      
-      // Redirect to login page
-      setLocation("/auth");
+      // Redirect to logout endpoint
+      window.location.href = "/api/logout";
     },
     onError: (error: Error) => {
       toast({
@@ -142,8 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: user || null,
         isLoading,
         error,
+        isAuthenticated: !!user,
         loginMutation,
-        registerMutation,
         logoutMutation,
       }}
     >

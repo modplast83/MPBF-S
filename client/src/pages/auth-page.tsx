@@ -43,55 +43,38 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const [activeTab, setActiveTab] = useState("login");
-  const { user, isLoading, loginMutation, registerMutation } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const { t } = useTranslation();
   const { language, setLanguage, isRTL } = useLanguage();
   const [, setLocation] = useLocation();
   
-  // Effect to handle redirection when user authentication state changes
+  // Effect to redirect to Replit Auth when the page loads
   useEffect(() => {
-    if (user) {
-      // We'll use direct redirection from the auth hook instead of here
-      // This prevents redirection conflicts
+    // If not authenticated, redirect to Replit Auth login
+    if (!isLoading && !isAuthenticated) {
+      const redirectUrl = "/api/login";
+      // Store current URL or intended destination to redirect back after login
+      const currentUrl = window.location.pathname;
+      if (currentUrl !== "/auth") {
+        sessionStorage.setItem("redirectAfterLogin", currentUrl);
+      }
+      window.location.href = redirectUrl;
     }
-  }, [user]);
-
-  // Create login form
-  const loginForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-  });
-
-  // Create registration form
-  const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-      name: "",
-      role: "user",
-      sectionId: null,
-      isActive: true,
-    },
-  });
-
-  // Handle login form submission
-  function onLoginSubmit(data: LoginFormValues) {
-    loginMutation.mutate(data);
-  }
-
-  // Handle registration form submission
-  function onRegisterSubmit(data: RegisterFormValues) {
-    registerMutation.mutate(data);
-  }
+  }, [isLoading, isAuthenticated]);
 
   // If user is already authenticated, redirect to dashboard
-  if (user) {
-    return <Redirect to="/" />;
+  if (isAuthenticated) {
+    const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
+    return <Redirect to={redirectPath} />;
+  }
+  
+  // Show loading state while checking authentication or redirecting
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
@@ -129,174 +112,23 @@ export default function AuthPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className={isRTL ? 'rtl' : ''}>
-            <Tabs
-              defaultValue="login"
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="login">{t("auth.login")}</TabsTrigger>
-                <TabsTrigger value="register">{t("auth.register")}</TabsTrigger>
-              </TabsList>
-
-              {/* Login Form */}
-              <TabsContent value="login">
-                <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                    <FormField
-                      control={loginForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("auth.username")}</FormLabel>
-                          <FormControl>
-                            <Input placeholder={t("auth.enter_username")} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("auth.password")}</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder={t("auth.enter_password")}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={loginMutation.isPending}
-                    >
-                      {loginMutation.isPending ? (
-                        <>
-                          <Loader2 className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} /> {t("auth.logging_in")}
-                        </>
-                      ) : (
-                        t("auth.login")
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-
-              {/* Registration Form */}
-              <TabsContent value="register">
-                <Form {...registerForm}>
-                  <form
-                    onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
-                    className="space-y-4"
-                  >
-                    <FormField
-                      control={registerForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("auth.username")}</FormLabel>
-                          <FormControl>
-                            <Input placeholder={t("auth.choose_username")} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("auth.full_name")}</FormLabel>
-                          <FormControl>
-                            <Input placeholder={t("auth.enter_full_name")} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("auth.password")}</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder={t("auth.choose_password")}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="role"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("auth.role")}</FormLabel>
-                          <FormControl>
-                            <Input placeholder={t("auth.enter_role")} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={registerMutation.isPending}
-                    >
-                      {registerMutation.isPending ? (
-                        <>
-                          <Loader2 className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} /> {t("auth.registering")}
-                        </>
-                      ) : (
-                        t("auth.register")
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-            </Tabs>
+            <div className="text-center space-y-6 p-4">
+              <p className="text-lg text-muted-foreground">
+                {t("auth.redirecting_to_login")}
+              </p>
+              <Button 
+                className="w-full"
+                onClick={() => window.location.href = "/api/login"}
+              >
+                {t("auth.login_with_replit")}
+              </Button>
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
             <div className="text-xs text-center text-gray-500">
-              {activeTab === "login" ? (
-                <p>
-                  {t("auth.no_account")}{" "}
-                  <Button
-                    variant="link"
-                    onClick={() => setActiveTab("register")}
-                    className="p-0 h-auto"
-                  >
-                    {t("auth.register")}
-                  </Button>
-                </p>
-              ) : (
-                <p>
-                  {t("auth.have_account")}{" "}
-                  <Button
-                    variant="link"
-                    onClick={() => setActiveTab("login")}
-                    className="p-0 h-auto"
-                  >
-                    {t("auth.login")}
-                  </Button>
-                </p>
-              )}
+              <p>
+                {t("auth.secure_login_message")}
+              </p>
             </div>
           </CardFooter>
         </Card>
