@@ -224,12 +224,9 @@ export function OrderForm() {
   const createOrderMutation = useMutation({
     mutationFn: async (data: OrderFormValues) => {
       // First create the order
-      const orderResponse = await apiRequest(API_ENDPOINTS.ORDERS, {
-        method: "POST",
-        body: JSON.stringify({
-          customerId: data.customerId,
-          note: data.note,
-        })
+      const orderResponse = await apiRequest("POST", API_ENDPOINTS.ORDERS, {
+        customerId: data.customerId,
+        note: data.note,
       });
       
       // Then create job orders with adjusted quantities based on category
@@ -258,22 +255,16 @@ export function OrderForm() {
           }
           
           // Create job order with adjusted quantity
-          await apiRequest(API_ENDPOINTS.JOB_ORDERS, {
-            method: "POST",
-            body: JSON.stringify({
-              orderId: orderResponse.id,
-              customerProductId: jobOrder.customerProductId,
-              quantity: adjustedQuantity,
-            })
+          await apiRequest("POST", API_ENDPOINTS.JOB_ORDERS, {
+            orderId: orderResponse.id,
+            customerProductId: jobOrder.customerProductId,
+            quantity: adjustedQuantity,
           });
         } else {
           // Fallback if customer product is not found
-          await apiRequest(API_ENDPOINTS.JOB_ORDERS, {
-            method: "POST",
-            body: JSON.stringify({
-              orderId: orderResponse.id,
-              ...jobOrder,
-            })
+          await apiRequest("POST", API_ENDPOINTS.JOB_ORDERS, {
+            orderId: orderResponse.id,
+            ...jobOrder,
           });
         }
       }
