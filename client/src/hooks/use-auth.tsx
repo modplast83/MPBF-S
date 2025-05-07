@@ -51,18 +51,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation<SelectUser, Error, LoginCredentials>({
     mutationFn: async (credentials) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
+      const response = await apiRequest("POST", "/api/login", credentials);
+      return response;
     },
     onSuccess: (userData) => {
+      // Set the user data in the cache
       queryClient.setQueryData(["/api/user"], userData);
+      
+      // Force refetch to make sure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.username}!`,
       });
-      setLocation("/");
+      
+      // Short delay before redirecting to make sure the new data is loaded
+      setTimeout(() => {
+        setLocation("/");
+      }, 100);
     },
     onError: (error) => {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
         description: error.message || "Invalid username or password. Please try again.",
@@ -73,18 +83,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation<SelectUser, Error, RegisterData>({
     mutationFn: async (userData) => {
-      const res = await apiRequest("POST", "/api/register", userData);
-      return await res.json();
+      const response = await apiRequest("POST", "/api/register", userData);
+      return response;
     },
     onSuccess: (userData) => {
+      // Set the user data in the cache
       queryClient.setQueryData(["/api/user"], userData);
+      
+      // Force refetch to make sure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "Registration successful",
         description: `Welcome, ${userData.username}!`,
       });
-      setLocation("/");
+      
+      // Short delay before redirecting to make sure the new data is loaded
+      setTimeout(() => {
+        setLocation("/");
+      }, 100);
     },
     onError: (error) => {
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
         description: error.message || "Could not create account. Please try again.",
@@ -95,17 +115,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation<void, Error, void>({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      const response = await apiRequest("POST", "/api/logout");
+      return response;
     },
     onSuccess: () => {
+      // Clear the query cache for user data
       queryClient.setQueryData(["/api/user"], null);
+      
+      // Clear all queries to ensure fresh data on next login
+      queryClient.clear();
+      
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
+      
+      // Redirect to auth page
       setLocation("/auth");
     },
     onError: (error) => {
+      console.error("Logout error:", error);
       toast({
         title: "Logout failed",
         description: error.message,
