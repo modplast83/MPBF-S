@@ -31,9 +31,29 @@ app.use((req, res, next) => {
 });
 
 // Add special middleware for auth API routes to ensure proper content-type
-app.use('/api/auth/*', (req, res, next) => {
-  // Force content type for all auth API routes
-  res.setHeader('Content-Type', 'application/json');
+app.use('/api/auth', (req, res, next) => {
+  console.log(`Intercepted auth API request: ${req.path}`);
+  
+  // Capture the original send method
+  const originalSend = res.send;
+  
+  // Override the send method to ensure JSON content type
+  res.send = function(body) {
+    // Only modify JSON responses
+    if (typeof body === 'object') {
+      res.setHeader('Content-Type', 'application/json');
+      return originalSend.call(this, JSON.stringify(body));
+    }
+    return originalSend.apply(this, arguments);
+  };
+  
+  // Override the JSON method
+  const originalJson = res.json;
+  res.json = function(body) {
+    res.setHeader('Content-Type', 'application/json');
+    return originalJson.call(this, body);
+  };
+  
   next();
 });
 
@@ -97,15 +117,13 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // ALWAYS serve the app on port 5000 - this is the main frontend port
+  const mainPort = 5000;
   server.listen({
-    port,
+    port: mainPort,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`serving on port ${mainPort}`);
   });
 })();
