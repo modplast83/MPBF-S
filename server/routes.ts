@@ -47,6 +47,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect("/api/auth/user");
   });
   
+  // Debug endpoint to check session status
+  app.get("/api/auth/debug", (req: any, res: Response) => {
+    const isAuthenticated = req.isAuthenticated();
+    const sessionData = {
+      isAuthenticated,
+      session: req.session ? { 
+        id: req.session.id,
+        cookie: req.session.cookie,
+        // Don't expose sensitive data
+        hasUser: !!req.user
+      } : null,
+      user: req.user ? {
+        hasClaims: !!req.user.claims,
+        hasRefreshToken: !!req.user.refresh_token,
+        hasExpiresAt: !!req.user.expires_at,
+        claimsSubExists: req.user.claims?.sub ? true : false,
+        expiresAt: req.user.expires_at,
+        nowTime: Math.floor(Date.now() / 1000),
+        tokenExpired: req.user.expires_at ? Math.floor(Date.now() / 1000) > req.user.expires_at : null
+      } : null
+    };
+    
+    res.json(sessionData);
+  });
+  
   // Setup API routes
   const apiRouter = app.route("/api");
   

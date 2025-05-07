@@ -180,12 +180,34 @@ export async function setupAuth(app: Express) {
   // User info endpoint
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
+      console.log("GET /api/auth/user - Authenticated request received");
+      console.log("User claims:", req.user?.claims);
+      
       const userId = req.user.claims.sub;
+      console.log("Looking up user with ID:", userId);
+      
       const user = await storage.getUser(userId);
-      res.json(user);
+      console.log("User found in database:", !!user);
+      
+      // Set explicit content type to ensure JSON response
+      res.setHeader('Content-Type', 'application/json');
+      
+      if (user) {
+        console.log("Returning user data");
+        res.status(200).json(user);
+      } else {
+        console.log("User not found in database");
+        res.status(404).json({ message: "User not found in the database" });
+      }
     } catch (error) {
       console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      // Set explicit content type to ensure JSON response
+      res.setHeader('Content-Type', 'application/json');
+      res.status(500).json({ 
+        message: "Failed to fetch user",
+        error: error.message,
+        stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined
+      });
     }
   });
 }
@@ -222,7 +244,13 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
     console.error("Missing refresh token");
-    return res.redirect("/api/login");
+    // Check if this is an API request or a browser request
+    const isApiRequest = req.xhr || req.path.startsWith('/api/');
+    if (isApiRequest) {
+      return res.status(401).json({ message: "Authentication token expired, please login again" });
+    } else {
+      return res.redirect("/api/login");
+    }
   }
 
   try {
@@ -234,6 +262,12 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return next();
   } catch (error) {
     console.error("Token refresh error:", error);
-    return res.redirect("/api/login");
+    // Check if this is an API request or a browser request
+    const isApiRequest = req.xhr || req.path.startsWith('/api/');
+    if (isApiRequest) {
+      return res.status(401).json({ message: "Token refresh failed, please login again" });
+    } else {
+      return res.redirect("/api/login");
+    }
   }
 };
