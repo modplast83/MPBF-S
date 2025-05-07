@@ -95,7 +95,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId }: Produ
       lengthCm: product?.lengthCm || undefined,
       cuttingLength: product?.cuttingLength || undefined,
       rawMaterial: product?.rawMaterial || "",
-      masterBatchId: product?.masterBatchId || "",
+      masterBatchId: product?.masterBatchId || "none",
       printed: product?.printed || "",
       cuttingUnit: product?.cuttingUnit || "",
       unitWeight: product?.unitWeight || undefined,
@@ -126,7 +126,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId }: Produ
         unitWeight: values.unitWeight !== undefined ? Number(values.unitWeight) : undefined,
         
         // Handle masterBatchId correctly
-        masterBatchId: values.masterBatchId === "" ? undefined : values.masterBatchId,
+        masterBatchId: values.masterBatchId === "none" ? undefined : values.masterBatchId,
         
         // Ensure text fields are never null or undefined
         sizeCaption: values.sizeCaption || "",
@@ -475,7 +475,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId }: Produ
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {masterBatches?.map((mb) => (
                       <SelectItem key={mb.id} value={mb.id}>
                         {mb.name}
