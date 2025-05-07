@@ -42,10 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
   
-  // Keep the old endpoint for backward compatibility
-  app.get("/api/user", async (req: Request, res: Response) => {
-    res.redirect("/api/auth/user");
-  });
+  // User is now handled directly by auth.ts
   
   // Debug endpoint to check session status - using manual response to bypass Vite
   app.get("/api/auth/debug", (req: any, res: Response) => {
