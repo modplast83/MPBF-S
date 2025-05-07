@@ -117,90 +117,106 @@ export function setupAuth(app: Express) {
 
   // Login endpoint
   app.post("/api/login", (req, res, next) => {
+    console.log("Login attempt for user:", req.body.username);
+    
     passport.authenticate("local", (err, user, info) => {
       if (err) {
+        console.error("Login error:", err);
         return next(err);
       }
       
       if (!user) {
+        console.log("Authentication failed:", info?.message);
         return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
       
       req.login(user, (err) => {
         if (err) {
+          console.error("Login session error:", err);
           return next(err);
         }
+        
+        console.log("User logged in successfully:", user.username);
         
         // Return user without password
         const { password: _, ...userWithoutPassword } = user;
         
-        // Ensure response is properly initialized before using json method
-        if (typeof res.json !== 'function') {
-          console.error('Response object does not have json method');
-          res.setHeader('Content-Type', 'application/json');
-          const jsonData = JSON.stringify(userWithoutPassword);
-          return res.end(jsonData);
-        }
+        // Set a cache control header to prevent caching
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.setHeader('Surrogate-Control', 'no-store');
         
-        return res.json(userWithoutPassword);
+        // Send the response
+        return res.status(200).json(userWithoutPassword);
       });
     })(req, res, next);
   });
 
   // Logout endpoint
   app.post("/api/logout", (req, res) => {
+    console.log("Logout request received");
+    
+    if (!req.isAuthenticated()) {
+      console.log("Logout attempted for non-authenticated session");
+      return res.status(200).json({ message: "No session to log out" });
+    }
+    
+    const username = (req.user as User)?.username || 'unknown';
+    console.log(`Logging out user: ${username}`);
+    
     req.logout((err) => {
       if (err) {
         console.error("Logout error:", err);
-        
-        // Ensure response is properly initialized before using json method
-        if (typeof res.json !== 'function') {
-          console.error('Response object does not have json method');
-          res.statusCode = 500;
-          res.setHeader('Content-Type', 'application/json');
-          return res.end(JSON.stringify({ message: "Logout failed" }));
-        }
-        
         return res.status(500).json({ message: "Logout failed" });
       }
       
-      // Ensure response is properly initialized before using json method
-      if (typeof res.json !== 'function') {
-        console.error('Response object does not have json method');
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        return res.end(JSON.stringify({ message: "Logged out successfully" }));
+      // Explicitly destroy the session
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.error("Session destruction error:", err);
+            return res.status(500).json({ message: "Error destroying session" });
+          }
+          
+          // Clear the session cookie
+          res.clearCookie('connect.sid', { 
+            path: '/',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax'
+          });
+          
+          console.log(`User ${username} logged out successfully`);
+          return res.status(200).json({ message: "Logged out successfully" });
+        });
+      } else {
+        console.log(`User ${username} logged out successfully (no session to destroy)`);
+        return res.status(200).json({ message: "Logged out successfully" });
       }
-      
-      res.status(200).json({ message: "Logged out successfully" });
     });
   });
 
   // Get current user endpoint
   app.get("/api/user", (req, res) => {
+    // Set cache control headers to prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+    
     if (!req.isAuthenticated()) {
-      // Ensure response is properly initialized before using json method
-      if (typeof res.json !== 'function') {
-        console.error('Response object does not have json method');
-        res.statusCode = 401;
-        res.setHeader('Content-Type', 'application/json');
-        return res.end(JSON.stringify({ message: "Not authenticated" }));
-      }
-      
+      console.log("Attempt to get user data with unauthenticated session");
       return res.status(401).json({ message: "Not authenticated" });
     }
+    
+    const username = (req.user as User)?.username || 'unknown';
+    console.log(`Getting user data for: ${username}`);
     
     // Return user without password
     const { password: _, ...userWithoutPassword } = req.user as User;
     
-    // Ensure response is properly initialized before using json method
-    if (typeof res.json !== 'function') {
-      console.error('Response object does not have json method');
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      return res.end(JSON.stringify(userWithoutPassword));
-    }
-    
-    res.json(userWithoutPassword);
+    // Send the response
+    return res.status(200).json(userWithoutPassword);
   });
 }

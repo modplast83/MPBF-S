@@ -52,10 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation<SelectUser, Error, LoginCredentials>({
     mutationFn: async (credentials) => {
+      console.log("Attempting login with credentials:", {username: credentials.username, hasPassword: !!credentials.password});
       const response = await apiRequest("POST", "/api/login", credentials);
+      console.log("Login response received:", response);
       return response;
     },
     onSuccess: (userData) => {
+      console.log("Login successful, user data:", userData);
+      
       // Set the user data in the cache
       queryClient.setQueryData(["/api/user"], userData);
       
@@ -67,10 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome back, ${userData.username}!`,
       });
       
-      // Short delay before redirecting to make sure the new data is loaded
-      setTimeout(() => {
-        setLocation("/");
-      }, 100);
+      // Redirect to home page
+      setLocation("/");
     },
     onError: (error) => {
       console.error("Login error:", error);
@@ -84,10 +86,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation<SelectUser, Error, RegisterData>({
     mutationFn: async (userData) => {
+      console.log("Attempting registration with data:", {username: userData.username, hasPassword: !!userData.password});
       const response = await apiRequest("POST", "/api/register", userData);
+      console.log("Registration response received:", response);
       return response;
     },
     onSuccess: (userData) => {
+      console.log("Registration successful, user data:", userData);
+      
       // Set the user data in the cache
       queryClient.setQueryData(["/api/user"], userData);
       
@@ -99,10 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome, ${userData.username}!`,
       });
       
-      // Short delay before redirecting to make sure the new data is loaded
-      setTimeout(() => {
-        setLocation("/");
-      }, 100);
+      // Redirect to home page immediately
+      setLocation("/");
     },
     onError: (error) => {
       console.error("Registration error:", error);
@@ -116,15 +120,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation<void, Error, void>({
     mutationFn: async () => {
+      console.log("Attempting logout");
       const response = await apiRequest("POST", "/api/logout");
+      console.log("Logout response received:", response);
       return response;
     },
     onSuccess: () => {
+      console.log("Logout successful");
+      
       // Clear the query cache for user data
       queryClient.setQueryData(["/api/user"], null);
       
       // Clear all queries to ensure fresh data on next login
-      queryClient.clear();
+      queryClient.removeQueries();
       
       toast({
         title: "Logged out",
@@ -132,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // Redirect to auth page
-      setLocation("/auth");
+      window.location.href = "/auth"; // Use window.location to force full page reload
     },
     onError: (error) => {
       console.error("Logout error:", error);
