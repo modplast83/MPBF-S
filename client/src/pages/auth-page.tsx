@@ -53,17 +53,26 @@ export default function AuthPage() {
     // If not authenticated, redirect to Replit Auth login
     if (!isLoading && !isAuthenticated) {
       console.log("Auth page: User not authenticated, redirecting to Replit Auth");
-      const redirectUrl = "/api/login";
-      // Store current URL or intended destination to redirect back after login
-      const currentUrl = window.location.pathname;
-      if (currentUrl !== "/auth") {
-        sessionStorage.setItem("redirectAfterLogin", currentUrl);
-      }
       
-      // Add a small delay to make sure the redirect doesn't happen too fast during debugging
-      setTimeout(() => {
-        window.location.href = redirectUrl;
-      }, 300);
+      // Store current URL or intended destination to redirect back after login
+      const redirectAfterLogin = sessionStorage.getItem("redirectAfterLogin") || "/";
+      
+      // First, inform the server about the desired redirect path
+      fetch(`/api/set-redirect?redirectTo=${encodeURIComponent(redirectAfterLogin)}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log("Set server-side redirect:", data);
+          
+          // Then redirect to login
+          setTimeout(() => {
+            window.location.href = "/api/login";
+          }, 300);
+        })
+        .catch(error => {
+          console.error("Failed to set redirect:", error);
+          // Fall back to direct login
+          window.location.href = "/api/login";
+        });
     } else if (isAuthenticated) {
       console.log("Auth page: User is already authenticated");
     } else {
@@ -127,7 +136,18 @@ export default function AuthPage() {
               </p>
               <Button 
                 className="w-full"
-                onClick={() => window.location.href = "/api/login"}
+                onClick={() => {
+                  // Store redirect path on server before login
+                  const redirectAfterLogin = sessionStorage.getItem("redirectAfterLogin") || "/";
+                  fetch(`/api/set-redirect?redirectTo=${encodeURIComponent(redirectAfterLogin)}`)
+                    .then(() => {
+                      window.location.href = "/api/login";
+                    })
+                    .catch(error => {
+                      console.error("Redirect setting failed:", error);
+                      window.location.href = "/api/login";
+                    });
+                }}
               >
                 {t("auth.login_with_replit")}
               </Button>

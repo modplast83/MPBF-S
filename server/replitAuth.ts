@@ -135,6 +135,7 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
+    console.log("Initiating Replit Auth login flow");
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
@@ -142,10 +143,26 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
+    console.log("Received callback from Replit Auth");
+    
+    // Get redirectURL from session if available
+    const redirectAfterLogin = req.session.redirectAfterLogin || "/";
+    
     passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+      successReturnToOrRedirect: redirectAfterLogin,
+      failureRedirect: "/auth",
+      failureMessage: "Authentication failed with Replit Auth",
     })(req, res, next);
+  });
+  
+  // Store redirect URL for after login completes
+  app.get("/api/set-redirect", (req, res) => {
+    const { redirectTo } = req.query;
+    if (redirectTo && typeof redirectTo === 'string') {
+      req.session.redirectAfterLogin = redirectTo;
+      console.log("Set redirect after login to:", redirectTo);
+    }
+    res.json({ success: true });
   });
 
   app.get("/api/logout", (req, res) => {

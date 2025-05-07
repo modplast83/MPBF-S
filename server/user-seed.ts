@@ -1,5 +1,5 @@
 import { storage } from './storage';
-import { hashPassword } from './auth-utils';
+import { v4 as uuidv4 } from 'uuid';
 
 // Ensure admin user exists
 export async function ensureAdminUser() {
@@ -13,18 +13,23 @@ export async function ensureAdminUser() {
       console.log("Admin user not found. Creating default admin user...");
       
       // Create admin user if it doesn't exist
-      const hashedPassword = await hashPassword('admin123');
-      
+      // For Replit Auth, we need to make sure the admin user has a valid ID
+      // We'll use a UUID as a placeholder for the Replit user ID
       const adminUser = {
+        id: uuidv4(), // Generate a UUID for the user ID
         username: 'admin',
-        password: hashedPassword,
-        name: 'Administrator',
+        firstName: 'System',
+        lastName: 'Administrator',
         role: 'administrator',
-        phone: '',
+        isActive: true,
+        phone: null,
         email: 'admin@example.com',
+        bio: null,
+        profileImageUrl: null,
+        sectionId: null,
       };
       
-      await storage.createUser(adminUser);
+      await storage.upsertUser(adminUser);
       console.log("Default admin user created successfully!");
     } else {
       console.log("Admin user already exists, no need to create.");
