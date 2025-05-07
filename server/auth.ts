@@ -132,6 +132,15 @@ export function setupAuth(app: Express) {
         
         // Return user without password
         const { password: _, ...userWithoutPassword } = user;
+        
+        // Ensure response is properly initialized before using json method
+        if (typeof res.json !== 'function') {
+          console.error('Response object does not have json method');
+          res.setHeader('Content-Type', 'application/json');
+          const jsonData = JSON.stringify(userWithoutPassword);
+          return res.end(jsonData);
+        }
+        
         return res.json(userWithoutPassword);
       });
     })(req, res, next);
@@ -141,8 +150,27 @@ export function setupAuth(app: Express) {
   app.post("/api/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
+        console.error("Logout error:", err);
+        
+        // Ensure response is properly initialized before using json method
+        if (typeof res.json !== 'function') {
+          console.error('Response object does not have json method');
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          return res.end(JSON.stringify({ message: "Logout failed" }));
+        }
+        
         return res.status(500).json({ message: "Logout failed" });
       }
+      
+      // Ensure response is properly initialized before using json method
+      if (typeof res.json !== 'function') {
+        console.error('Response object does not have json method');
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ message: "Logged out successfully" }));
+      }
+      
       res.status(200).json({ message: "Logged out successfully" });
     });
   });
@@ -150,11 +178,28 @@ export function setupAuth(app: Express) {
   // Get current user endpoint
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) {
+      // Ensure response is properly initialized before using json method
+      if (typeof res.json !== 'function') {
+        console.error('Response object does not have json method');
+        res.statusCode = 401;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ message: "Not authenticated" }));
+      }
+      
       return res.status(401).json({ message: "Not authenticated" });
     }
     
     // Return user without password
     const { password: _, ...userWithoutPassword } = req.user as User;
+    
+    // Ensure response is properly initialized before using json method
+    if (typeof res.json !== 'function') {
+      console.error('Response object does not have json method');
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify(userWithoutPassword));
+    }
+    
     res.json(userWithoutPassword);
   });
 }
