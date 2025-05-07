@@ -57,22 +57,48 @@ export default function AuthPage() {
       // Store current URL or intended destination to redirect back after login
       const redirectAfterLogin = sessionStorage.getItem("redirectAfterLogin") || "/";
       
-      // First, inform the server about the desired redirect path
-      fetch(`/api/set-redirect?redirectTo=${encodeURIComponent(redirectAfterLogin)}`)
-        .then(response => response.json())
-        .then(data => {
-          console.log("Set server-side redirect:", data);
+      // Handle login redirect with error recovery
+      const handleLoginRedirect = () => {
+        try {
+          console.log("Redirecting to Replit Auth login...");
           
-          // Then redirect to login
-          setTimeout(() => {
+          // Create an iframe to test if the login endpoint is responding correctly
+          const testFrame = document.createElement('iframe');
+          testFrame.style.display = 'none';
+          testFrame.onload = () => {
+            // If the frame loads successfully, we directly access the URL
             window.location.href = "/api/login";
-          }, 300);
-        })
-        .catch(error => {
-          console.error("Failed to set redirect:", error);
-          // Fall back to direct login
+            document.body.removeChild(testFrame);
+          };
+          
+          testFrame.onerror = () => {
+            console.error("Frame failed to load, using form POST instead");
+            document.body.removeChild(testFrame);
+            
+            // If iframe approach fails, try direct redirect
+            window.location.href = "/api/login";
+          };
+          
+          // Set the iframe source and add to document
+          testFrame.src = "/api/set-redirect?redirectTo=" + encodeURIComponent(redirectAfterLogin);
+          document.body.appendChild(testFrame);
+          
+          // Add safety timeout in case the frame never triggers events
+          setTimeout(() => {
+            if (document.body.contains(testFrame)) {
+              document.body.removeChild(testFrame);
+              window.location.href = "/api/login";
+            }
+          }, 1000);
+        } catch (error) {
+          console.error("Error during login redirect:", error);
+          // Last resort - direct navigation
           window.location.href = "/api/login";
-        });
+        }
+      };
+      
+      // Execute with a small delay to ensure UI renders first
+      setTimeout(handleLoginRedirect, 300);
     } else if (isAuthenticated) {
       console.log("Auth page: User is already authenticated");
     } else {

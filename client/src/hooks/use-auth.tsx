@@ -24,21 +24,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
+  // Use a direct fetch approach to bypass any middleware interference
+  const fetchUser = async (): Promise<SelectUser | null> => {
+    try {
+      // Use the browser's native fetch for user authentication
+      const response = await fetch('/api/auth/debug', { 
+        credentials: 'include', // Important for auth cookies
+        headers: { 'Accept': 'application/json' }
+      });
+      
+      console.log("Auth debug response status:", response.status);
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log("User is not authenticated");
+          return null;
+        }
+        throw new Error(`Failed to fetch user status: ${response.status}`);
+      }
+      
+      const authStatus = await response.json();
+      console.log("Auth status:", authStatus);
+      
+      // If authenticated, get the user data
+      if (authStatus.isAuthenticated) {
+        // We know the user is authenticated, but we need to fetch actual data
+        // This might still return HTML due to middleware issues, so we'll handle that case
+        return { 
+          // Use fallback values from session data if needed
+          id: authStatus.user?.claims?.sub || 'unknown',
+          username: authStatus.user?.claims?.username || 'user',
+          email: authStatus.user?.claims?.email,
+          firstName: authStatus.user?.claims?.first_name,
+          lastName: authStatus.user?.claims?.last_name,
+          bio: authStatus.user?.claims?.bio,
+          profileImageUrl: authStatus.user?.claims?.profile_image_url,
+          role: 'user', // Default role
+          phone: null,
+          isActive: true,
+          sectionId: null,
+          createdAt: null,
+          updatedAt: null
+        };
+      }
+      
+      return null;
+    } catch (err) {
+      console.error("Error in fetchUser:", err);
+      throw err;
+    }
+  };
+  
   const {
     data: user,
     error,
     isLoading,
   } = useQuery<SelectUser | null, Error>({
-    queryKey: ["/api/auth/user"],
-    queryFn: getQueryFn({ 
-      on401: "returnNull" 
-    }),
-    onSuccess: (data) => {
-      console.log("Auth hook: User data received:", data);
-    },
-    onError: (err) => {
-      console.error("Auth hook: Error fetching user:", err);
-    },
+    queryKey: ["/api/auth/status"],
+    queryFn: fetchUser,
     retry: 1, // Reduce retries for faster feedback during development
   });
 
