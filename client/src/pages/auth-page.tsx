@@ -1,118 +1,83 @@
-import { useState, useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
+import { Redirect } from "wouter";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
-import { Redirect, useLocation } from "wouter";
-import { Loader2, Globe } from "lucide-react";
-// Import company logo
-// Use inline image to avoid import issues
-const companyLogo = "/assets/company-logo.png";
+import { useLanguage } from "@/hooks/use-language";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-// Login form schema
+// Import company logo
+import companyLogo from "/assets/company-logo.png";
+
 const loginSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
-// Registration form schema
 const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  role: z.string().min(2, "Role is required"),
-  sectionId: z.string().optional().nullable(),
-  isActive: z.boolean().default(true),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+  email: z.string().email("Please enter a valid email").optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, loginMutation, registerMutation } = useAuth();
   const { t } = useTranslation();
   const { language, setLanguage, isRTL } = useLanguage();
-  const [, setLocation] = useLocation();
+  const [activeTab, setActiveTab] = useState<string>("login");
   
-  // Effect to redirect to Replit Auth when the page loads
-  useEffect(() => {
-    // If not authenticated, redirect to Replit Auth login
-    if (!isLoading && !isAuthenticated) {
-      console.log("Auth page: User not authenticated, redirecting to Replit Auth");
-      
-      // Store current URL or intended destination to redirect back after login
-      const redirectAfterLogin = sessionStorage.getItem("redirectAfterLogin") || "/";
-      
-      // Handle login redirect with error recovery
-      const handleLoginRedirect = () => {
-        try {
-          console.log("Redirecting to Replit Auth login...");
-          
-          // Create an iframe to test if the login endpoint is responding correctly
-          const testFrame = document.createElement('iframe');
-          testFrame.style.display = 'none';
-          testFrame.onload = () => {
-            // If the frame loads successfully, we directly access the URL
-            window.location.href = "/api/login";
-            document.body.removeChild(testFrame);
-          };
-          
-          testFrame.onerror = () => {
-            console.error("Frame failed to load, using form POST instead");
-            document.body.removeChild(testFrame);
-            
-            // If iframe approach fails, try direct redirect
-            window.location.href = "/api/login";
-          };
-          
-          // Set the iframe source and add to document
-          testFrame.src = "/api/set-redirect?redirectTo=" + encodeURIComponent(redirectAfterLogin);
-          document.body.appendChild(testFrame);
-          
-          // Add safety timeout in case the frame never triggers events
-          setTimeout(() => {
-            if (document.body.contains(testFrame)) {
-              document.body.removeChild(testFrame);
-              window.location.href = "/api/login";
-            }
-          }, 1000);
-        } catch (error) {
-          console.error("Error during login redirect:", error);
-          // Last resort - direct navigation
-          window.location.href = "/api/login";
-        }
-      };
-      
-      // Execute with a small delay to ensure UI renders first
-      setTimeout(handleLoginRedirect, 300);
-    } else if (isAuthenticated) {
-      console.log("Auth page: User is already authenticated");
-    } else {
-      console.log("Auth page: Still checking authentication status");
-    }
-  }, [isLoading, isAuthenticated]);
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+  
+  const registerForm = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      confirmPassword: "",
+      email: "",
+      firstName: "",
+      lastName: "",
+    },
+  });
+
+  function onLoginSubmit(data: LoginFormValues) {
+    loginMutation.mutate(data);
+  }
+
+  function onRegisterSubmit(data: RegisterFormValues) {
+    const { confirmPassword, ...registerData } = data;
+    registerMutation.mutate(registerData);
+  }
 
   // If user is already authenticated, redirect to dashboard
   if (isAuthenticated) {
-    const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
-    return <Redirect to={redirectPath} />;
+    return <Redirect to="/" />;
   }
   
-  // Show loading state while checking authentication or redirecting
+  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -155,65 +120,251 @@ export default function AuthPage() {
               {t("auth.sign_in_description")}
             </CardDescription>
           </CardHeader>
-          <CardContent className={isRTL ? 'rtl' : ''}>
-            <div className="text-center space-y-6 p-4">
-              <p className="text-lg text-muted-foreground">
-                {t("auth.redirecting_to_login")}
-              </p>
-              <Button 
-                className="w-full"
-                onClick={() => {
-                  // Store redirect path on server before login
-                  const redirectAfterLogin = sessionStorage.getItem("redirectAfterLogin") || "/";
-                  fetch(`/api/set-redirect?redirectTo=${encodeURIComponent(redirectAfterLogin)}`)
-                    .then(() => {
-                      window.location.href = "/api/login";
-                    })
-                    .catch(error => {
-                      console.error("Redirect setting failed:", error);
-                      window.location.href = "/api/login";
-                    });
-                }}
-              >
-                {t("auth.login_with_replit")}
-              </Button>
-            </div>
+          <CardContent>
+            <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">{t("auth.login")}</TabsTrigger>
+                <TabsTrigger value="register">{t("auth.register")}</TabsTrigger>
+              </TabsList>
+              
+              {/* Login Tab */}
+              <TabsContent value="login" className="space-y-4">
+                <Form {...loginForm}>
+                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                    <FormField
+                      control={loginForm.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.username")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t("auth.username_placeholder")}
+                              {...field}
+                              autoComplete="username"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={loginForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.password")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder={t("auth.password_placeholder")}
+                              {...field}
+                              autoComplete="current-password"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={loginMutation.isPending}
+                    >
+                      {loginMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t("auth.logging_in")}
+                        </>
+                      ) : (
+                        t("auth.login")
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              </TabsContent>
+              
+              {/* Register Tab */}
+              <TabsContent value="register" className="space-y-4">
+                <Form {...registerForm}>
+                  <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                    <FormField
+                      control={registerForm.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.username")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t("auth.username_placeholder")}
+                              {...field}
+                              autoComplete="username"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={registerForm.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("auth.first_name")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t("auth.first_name_placeholder")}
+                                {...field}
+                                autoComplete="given-name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={registerForm.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("auth.last_name")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t("auth.last_name_placeholder")}
+                                {...field}
+                                autoComplete="family-name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <FormField
+                      control={registerForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.email")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder={t("auth.email_placeholder")}
+                              {...field}
+                              autoComplete="email"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={registerForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.password")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder={t("auth.password_placeholder")}
+                              {...field}
+                              autoComplete="new-password"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={registerForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.confirm_password")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder={t("auth.confirm_password_placeholder")}
+                              {...field}
+                              autoComplete="new-password"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={registerMutation.isPending}
+                    >
+                      {registerMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t("auth.registering")}
+                        </>
+                      ) : (
+                        t("auth.register")
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              </TabsContent>
+            </Tabs>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-2">
-            <div className="text-xs text-center text-gray-500">
-              <p>
-                {t("auth.secure_login_message")}
-              </p>
-            </div>
-          </CardFooter>
         </Card>
       </div>
-
-      {/* Hero Column */}
-      <div className="hidden lg:flex flex-1 bg-primary text-primary-foreground p-12 items-center justify-center">
-        <div className="max-w-lg">
-          <h1 className="text-4xl font-bold mb-6">{t("app.full_title")}</h1>
-          <h2 className="text-2xl font-semibold mb-4">{t("auth.production_system")}</h2>
-          <p className="text-xl mb-6">
-            {t("auth.system_description")}
-          </p>
-          <ul className={`space-y-2 text-lg ${isRTL ? 'rtl text-right' : ''}`}>
-            <li className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <span className={isRTL ? 'ml-2' : 'mr-2'}>✓</span> {t("auth.feature_tracking")}
-            </li>
-            <li className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <span className={isRTL ? 'ml-2' : 'mr-2'}>✓</span> {t("auth.feature_roll")}
-            </li>
-            <li className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <span className={isRTL ? 'ml-2' : 'mr-2'}>✓</span> {t("auth.feature_quality")}
-            </li>
-            <li className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <span className={isRTL ? 'ml-2' : 'mr-2'}>✓</span> {t("auth.feature_customer")}
-            </li>
-            <li className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <span className={isRTL ? 'ml-2' : 'mr-2'}>✓</span> {t("auth.feature_production")}
-            </li>
-          </ul>
+      
+      {/* Hero Section */}
+      <div className="hidden md:flex flex-1 bg-gradient-to-r from-primary to-primary-600 text-white p-12 flex-col justify-center">
+        <div className="max-w-md mx-auto space-y-6">
+          <h1 className="text-4xl font-bold">{t("auth.hero_title")}</h1>
+          <p className="text-xl leading-relaxed">{t("auth.hero_description")}</p>
+          <div className="space-y-4 mt-8">
+            <div className="flex items-start">
+              <div className="rounded-full bg-white/20 p-2 mr-4">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium text-xl">{t("auth.feature_1_title")}</h3>
+                <p className="text-white/80 mt-1">{t("auth.feature_1_description")}</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <div className="rounded-full bg-white/20 p-2 mr-4">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium text-xl">{t("auth.feature_2_title")}</h3>
+                <p className="text-white/80 mt-1">{t("auth.feature_2_description")}</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <div className="rounded-full bg-white/20 p-2 mr-4">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium text-xl">{t("auth.feature_3_title")}</h3>
+                <p className="text-white/80 mt-1">{t("auth.feature_3_description")}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

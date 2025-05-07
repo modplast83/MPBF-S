@@ -18,7 +18,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth } from "./auth";
 import { ensureAdminUser } from "./user-seed";
 
 // Extend the Request type to include express-fileupload properties

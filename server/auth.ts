@@ -4,7 +4,8 @@ import { Express } from "express";
 import session from "express-session";
 import { User } from "@shared/schema";
 import { storage } from "./storage";
-import { comparePasswords } from "./auth-utils";
+import { comparePasswords, hashPassword } from "./auth-utils";
+import crypto from "crypto";
 
 declare global {
   namespace Express {
@@ -80,11 +81,14 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Username already exists" });
       }
       
+      // Hash the password
+      const hashedPassword = await hashPassword(password);
+      
       // Create new user
       const newUser = await storage.createUser({
         id: crypto.randomUUID(),
         username,
-        password,
+        password: hashedPassword,
         email,
         firstName,
         lastName,
