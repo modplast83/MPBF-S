@@ -11,7 +11,7 @@ import {
   CollapsibleContent 
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-v2";
 import { usePermissions } from "@/hooks/use-permissions";
 
 interface SidebarProps {

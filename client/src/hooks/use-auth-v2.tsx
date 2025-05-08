@@ -1,11 +1,11 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { User as SelectUser } from "@shared/schema";
+import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
 type AuthContextType = {
-  user: SelectUser | null;
+  user: User | null;
   isLoading: boolean;
   error: Error | null;
   isAuthenticated: boolean;
@@ -24,7 +24,7 @@ type RegisterFormData = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: (user: SelectUser | null) => ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode | ((data: AuthContextType) => ReactNode) }) {
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: (user: SelectUser | null)
     isLoading,
     error,
     refetch
-  } = useQuery<SelectUser | null>({
+  } = useQuery<User | null>({
     queryKey: ["/api/user"],
     queryFn: async () => {
       try {
@@ -77,6 +77,7 @@ export function AuthProvider({ children }: { children: (user: SelectUser | null)
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }: { username: string; password: string }) => {
+      console.log("Attempting login with credentials:", { username, hasPassword: !!password });
       const response = await fetch("/api/login", {
         method: "POST",
         credentials: "include",
@@ -93,10 +94,12 @@ export function AuthProvider({ children }: { children: (user: SelectUser | null)
         throw new Error(errorData.message || "Login failed");
       }
       
+      console.log("Login response received:", await response.json());
       return await response.json();
     },
-    onSuccess: (userData: SelectUser) => {
+    onSuccess: (userData: User) => {
       // Update the cache
+      console.log("Login successful, user data:", userData);
       queryClient.setQueryData(["/api/user"], userData);
       
       toast({
@@ -104,10 +107,13 @@ export function AuthProvider({ children }: { children: (user: SelectUser | null)
         description: `Welcome back, ${userData.username}!`,
       });
       
-      // Force a hard redirect to dashboard
+      console.log("Redirecting to dashboard with user:", userData);
+      // Force a hard navigation instead of client-side routing
+      console.log("Performing direct navigation to /");
       window.location.href = "/";
     },
     onError: (error: Error) => {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
         description: error.message || "Invalid username or password",
@@ -131,7 +137,7 @@ export function AuthProvider({ children }: { children: (user: SelectUser | null)
         throw new Error("Logout failed");
       }
       
-      return await response.json();
+      return response.status === 200;
     },
     onSuccess: () => {
       // Clear the cache
@@ -143,7 +149,7 @@ export function AuthProvider({ children }: { children: (user: SelectUser | null)
         description: "You have been successfully logged out",
       });
       
-      // Hard redirect to auth page
+      // Force a hard redirect to auth page
       window.location.href = "/auth";
     },
     onError: (error: Error) => {
@@ -174,7 +180,7 @@ export function AuthProvider({ children }: { children: (user: SelectUser | null)
       
       return await response.json();
     },
-    onSuccess: (userData: SelectUser) => {
+    onSuccess: (userData: User) => {
       // Update the cache
       queryClient.setQueryData(["/api/user"], userData);
       
@@ -210,19 +216,20 @@ export function AuthProvider({ children }: { children: (user: SelectUser | null)
     await registerMutation.mutateAsync(userData);
   };
 
+  // Return a stable context value
+  const contextValue: AuthContextType = {
+    user: user || null,
+    isLoading,
+    error: error || null,
+    isAuthenticated,
+    login,
+    logout,
+    register
+  };
+
   return (
-    <AuthContext.Provider
-      value={{
-        user: user || null,
-        isLoading,
-        error,
-        isAuthenticated,
-        login,
-        logout,
-        register
-      }}
-    >
-      {children(user || null)}
+    <AuthContext.Provider value={contextValue}>
+      {typeof children === 'function' ? children(contextValue) : children}
     </AuthContext.Provider>
   );
 }

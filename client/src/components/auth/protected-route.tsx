@@ -5,12 +5,16 @@ import { Route, Redirect, useLocation } from "wouter";
 type ProtectedRouteProps = {
   path: string;
   component: React.ComponentType;
+  module?: string; // Optional module name for permission checking
 };
 
-export function ProtectedRoute({ path, component: Component }: ProtectedRouteProps) {
+export function ProtectedRoute({ path, component: Component, module }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
-
+  const [location, setLocation] = useLocation();
+  
+  // Simplified approach to reduce race conditions and redirect issues
+  // Avoid excessive debugging and complex redirect logic
+  
   if (isLoading) {
     return (
       <Route path={path}>
@@ -21,22 +25,11 @@ export function ProtectedRoute({ path, component: Component }: ProtectedRoutePro
     );
   }
 
+  // Only show a protected component when user is authenticated
+  // Otherwise render nothing, letting the app handle navigation
   return (
     <Route path={path}>
-      {user ? (
-        <Component />
-      ) : (
-        (() => {
-          console.log("User not authenticated, redirecting to auth page");
-          // Only redirect if actually on a different page
-          if (path !== '/auth') {
-            setTimeout(() => {
-              setLocation("/auth");
-            }, 300);
-          }
-          return null;
-        })()
-      )}
+      {user ? <Component /> : null}
     </Route>
   );
 }

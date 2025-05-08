@@ -1,18 +1,16 @@
-import { useState } from "react";
-import { Redirect, useLocation } from "wouter";
-import { Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/use-auth-v2";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Loader2 } from "lucide-react";
 
 // Import company logo
 import companyLogo from "/assets/company-logo.png";
@@ -38,11 +36,11 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const { isAuthenticated, isLoading, loginMutation, registerMutation } = useAuth();
   const { t } = useTranslation();
   const { language, setLanguage, isRTL } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("login");
-  const [, setLocation] = useLocation();
+  const { isAuthenticated, isLoading, login, register: registerUser } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -64,21 +62,31 @@ export default function AuthPage() {
     },
   });
 
-  function onLoginSubmit(data: LoginFormValues) {
-    loginMutation.mutate(data);
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      console.log("User already authenticated, redirecting to dashboard");
+      window.location.href = "/";
+    }
+  }, [isAuthenticated, isLoading]);
+
+  async function onLoginSubmit(data: LoginFormValues) {
+    try {
+      setIsSubmitting(true);
+      await login(data.username, data.password);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  function onRegisterSubmit(data: RegisterFormValues) {
-    const { confirmPassword, ...registerData } = data;
-    registerMutation.mutate(registerData);
-  }
-
-  // If user is already authenticated, redirect to dashboard
-  if (isAuthenticated) {
-    console.log("User already authenticated, redirecting to dashboard");
-    // Use direct DOM navigation to avoid React Router issues
-    window.location.href = "/";
-    return null;
+  async function onRegisterSubmit(data: RegisterFormValues) {
+    try {
+      setIsSubmitting(true);
+      const { confirmPassword, ...registerData } = data;
+      await registerUser(registerData);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
   
   // Show loading state while checking authentication
@@ -88,6 +96,11 @@ export default function AuthPage() {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // Don't render the auth form if already authenticated
+  if (isAuthenticated) {
+    return null;
   }
 
   return (
@@ -175,9 +188,9 @@ export default function AuthPage() {
                     <Button 
                       type="submit" 
                       className="w-full"
-                      disabled={loginMutation.isPending}
+                      disabled={isSubmitting}
                     >
-                      {loginMutation.isPending ? (
+                      {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t("auth.logging_in")}
@@ -310,9 +323,9 @@ export default function AuthPage() {
                     <Button 
                       type="submit" 
                       className="w-full"
-                      disabled={registerMutation.isPending}
+                      disabled={isSubmitting}
                     >
-                      {registerMutation.isPending ? (
+                      {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t("auth.registering")}

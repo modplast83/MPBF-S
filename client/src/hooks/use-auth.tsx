@@ -38,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
+  // Using a more controlled query approach with explicit staleTime
   const {
     data: user,
     error,
@@ -46,7 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
+    staleTime: 60000, // Consider data fresh for 1 minute
     initialData: null // Set initial data to null to avoid undefined
   });
 
@@ -71,11 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome back, ${userData.username}!`,
       });
       
-      // Redirect to home page after a slightly longer delay to ensure cache updates
+      // Use direct navigation to ensure redirect works properly
+      console.log("Redirecting to dashboard with user:", userData);
       setTimeout(() => {
-        console.log("Redirecting to dashboard with user:", userData);
-        setLocation("/");
-      }, 800);
+        console.log("Performing direct navigation to /");
+        window.location.href = "/";
+      }, 500);
     },
     onError: (error) => {
       console.error("Login error:", error);
@@ -108,9 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome, ${userData.username}!`,
       });
       
-      // Redirect to home page
+      // Use direct navigation to ensure redirect works properly
+      console.log("Redirecting to dashboard after registration");
       setTimeout(() => {
-        setLocation("/");
+        console.log("Performing direct navigation to /");
+        window.location.href = "/";
       }, 500);
     },
     onError: (error) => {

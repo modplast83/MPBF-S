@@ -1,7 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
-import { Permission } from "@shared/schema";
+import { Permission, User } from "@shared/schema";
 
 type PermissionsContextType = {
   hasPermission: (module: string, action?: "view" | "create" | "edit" | "delete") => boolean;
@@ -10,8 +9,13 @@ type PermissionsContextType = {
 
 const PermissionsContext = createContext<PermissionsContextType | null>(null);
 
-export function PermissionsProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+export function PermissionsProvider({ 
+  children, 
+  user 
+}: { 
+  children: ReactNode;
+  user: User | null;
+}) {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   
   // Fetch permissions for the current user's role
