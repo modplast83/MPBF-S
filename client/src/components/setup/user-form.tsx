@@ -80,9 +80,23 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
         userData.lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : null;
       }
       
+      // Set the required 'name' field based on displayName or username
+      // This field is required by the database but not present in the form
+      userData.name = displayName && displayName.trim() !== '' 
+        ? displayName 
+        : userData.username || 'User';
+      
+      // When editing, we need to preserve the password field
       if (isEditing && user) {
-        await apiRequest("PUT", `${API_ENDPOINTS.USERS}/${user.id}`, userData);
+        const userDataWithPassword = {
+          ...userData,
+          // Add a placeholder value for the password field to satisfy the not-null constraint
+          // The actual password hash will remain unchanged in the database
+          password: "UNCHANGED_PASSWORD"
+        };
+        await apiRequest("PUT", `${API_ENDPOINTS.USERS}/${user.id}`, userDataWithPassword);
       } else {
+        // For new users, password is required
         await apiRequest("POST", API_ENDPOINTS.USERS, userData);
       }
     },

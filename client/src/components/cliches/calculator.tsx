@@ -75,10 +75,7 @@ export default function Calculator() {
   // Calculate price mutation
   const calculateMutation = useMutation({
     mutationFn: async (data: CalculatorFormValues) => {
-      return apiRequest(`${API_ENDPOINTS.CALCULATE_PLATE_PRICE}`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return apiRequest("POST", API_ENDPOINTS.CALCULATE_PLATE_PRICE, data);
     },
     onSuccess: (data) => {
       setCalculation(data);
@@ -99,10 +96,7 @@ export default function Calculator() {
   // Save calculation mutation
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`${API_ENDPOINTS.PLATE_CALCULATIONS}`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return apiRequest("POST", API_ENDPOINTS.PLATE_CALCULATIONS, data);
     },
     onSuccess: () => {
       toast({

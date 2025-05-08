@@ -77,6 +77,22 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     try {
       console.log("Upserting user:", userData.username);
+      
+      // Handle the special case for password updating
+      const isUpdate = !!userData.id;
+      const isPasswordUnchanged = userData.password === "UNCHANGED_PASSWORD";
+      
+      if (isUpdate && isPasswordUnchanged) {
+        // Get the existing user to keep their current password
+        const existingUser = await this.getUser(userData.id);
+        if (!existingUser) {
+          throw new Error(`User with id ${userData.id} not found`);
+        }
+        
+        // Use the existing password instead of "UNCHANGED_PASSWORD"
+        userData.password = existingUser.password;
+      }
+      
       const [user] = await db
         .insert(users)
         .values({
@@ -91,6 +107,7 @@ export class DatabaseStorage implements IStorage {
           },
         })
         .returning();
+        
       console.log("Upsert user success for:", userData.username);
       return user;
     } catch (error) {

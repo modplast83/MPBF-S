@@ -62,6 +62,11 @@ export async function apiRequest(
       await throwIfResNotOk(res);
     }
     
+    // For 204 No Content responses, return an empty object
+    if (res.status === 204) {
+      return {};
+    }
+    
     const result = await res.json();
     console.log(`API Response data:`, result);
     return result;
@@ -86,6 +91,12 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
+    
+    // For 204 No Content responses, return an empty object
+    if (res.status === 204) {
+      return {};
+    }
+    
     return await res.json();
   };
 
