@@ -108,23 +108,23 @@ export default function CorrectiveActions() {
     }
   });
 
-  const { data: actions, isLoading } = useQuery({
+  const { data: actions = [], isLoading } = useQuery<CorrectiveAction[]>({
     queryKey: ["/api/corrective-actions"],
     refetchOnWindowFocus: false,
   });
 
-  const { data: qualityChecks } = useQuery({
+  const { data: qualityChecks = [] } = useQuery<QualityCheck[]>({
     queryKey: ["/api/quality-checks"],
     refetchOnWindowFocus: false,
   });
 
-  const { data: users } = useQuery({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/users"],
     refetchOnWindowFocus: false,
   });
 
   const createMutation = useMutation({
-    mutationFn: async (values: any) => {
+    mutationFn: async (values: z.infer<typeof formSchema>) => {
       return await apiRequest("POST", "/api/corrective-actions", {
         ...values,
         dueDate: values.dueDate ? new Date(values.dueDate).toISOString() : null,
@@ -240,7 +240,7 @@ export default function CorrectiveActions() {
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
-        <PageHeader heading="Corrective Actions" text="Track and manage actions to address quality issues" />
+        <PageHeader title="Corrective Actions" description="Track and manage actions to address quality issues" />
         <Dialog open={isOpenCreate} onOpenChange={setIsOpenCreate}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">

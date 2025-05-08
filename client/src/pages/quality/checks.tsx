@@ -123,27 +123,27 @@ export default function QualityChecks() {
     }
   });
 
-  const { data: checks, isLoading } = useQuery({
+  const { data: checks = [], isLoading } = useQuery<QualityCheck[]>({
     queryKey: ["/api/quality-checks"],
     refetchOnWindowFocus: false,
   });
 
-  const { data: checkTypes } = useQuery({
+  const { data: checkTypes = [] } = useQuery<QualityCheckType[]>({
     queryKey: ["/api/quality-check-types"],
     refetchOnWindowFocus: false,
   });
 
-  const { data: rolls } = useQuery({
+  const { data: rolls = [] } = useQuery<Roll[]>({
     queryKey: ["/api/rolls"],
     refetchOnWindowFocus: false,
   });
 
-  const { data: jobOrders } = useQuery({
+  const { data: jobOrders = [] } = useQuery<JobOrder[]>({
     queryKey: ["/api/job-orders"],
     refetchOnWindowFocus: false,
   });
 
-  const { data: users } = useQuery({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/users"],
     refetchOnWindowFocus: false,
   });
@@ -246,7 +246,7 @@ export default function QualityChecks() {
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
-        <PageHeader heading="Quality Checks" text="Record and track quality inspections across production stages" />
+        <PageHeader title="Quality Checks" description="Record and track quality inspections across production stages" />
         <Dialog open={isOpenCreate} onOpenChange={setIsOpenCreate}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
