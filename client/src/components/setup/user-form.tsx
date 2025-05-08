@@ -80,11 +80,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
         userData.lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : null;
       }
       
-      // Set the required 'name' field based on displayName or username
-      // This field is required by the database but not present in the form
-      userData.name = displayName && displayName.trim() !== '' 
-        ? displayName 
-        : userData.username || 'User';
+      // Remove the old 'name' field reference since it's no longer used
       
       // When editing, we need to preserve the password field
       if (isEditing && user) {

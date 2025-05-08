@@ -90,7 +90,8 @@ interface JobOrder {
 
 interface User {
   id: string;
-  name: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 const formSchema = z.object({
@@ -239,7 +240,7 @@ export default function QualityChecks() {
 
   const getUserName = (id: string) => {
     const user = users?.find((u: User) => u.id === id);
-    return user ? user.name : id;
+    return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || id : id;
   };
 
   return (
@@ -361,7 +362,7 @@ export default function QualityChecks() {
                         <SelectContent>
                           {users && users.map((user: User) => (
                             <SelectItem key={user.id} value={user.id}>
-                              {user.name}
+                              {`${user.firstName || ''} ${user.lastName || ''}`.trim() || user.id}
                             </SelectItem>
                           ))}
                         </SelectContent>

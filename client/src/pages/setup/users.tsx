@@ -87,7 +87,9 @@ export default function Users() {
     },
     {
       header: "Name",
-      accessorKey: "name",
+      accessorKey: "firstName",
+      cell: (row: { firstName?: string, lastName?: string }) => 
+        `${row.firstName || ''} ${row.lastName || ''}`.trim() || '-',
     },
     {
       header: "Role",
@@ -174,7 +176,7 @@ export default function Users() {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently delete the user{' '}
-              <span className="font-semibold">"{deletingUser?.name}"</span>.
+              <span className="font-semibold">"{`${deletingUser?.firstName || ''} ${deletingUser?.lastName || ''}`.trim() || deletingUser?.username || ''}"</span>.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
