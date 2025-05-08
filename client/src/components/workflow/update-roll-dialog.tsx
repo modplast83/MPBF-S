@@ -125,10 +125,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
   // Mutation for updating roll
   const updateRollMutation = useMutation({
     mutationFn: (data: Partial<Roll>) => {
-      return apiRequest(`${API_ENDPOINTS.ROLLS}/${roll.id}`, {
-        method: "PUT",
-        body: JSON.stringify(data)
-      });
+      return apiRequest("PUT", `${API_ENDPOINTS.ROLLS}/${roll.id}`, data);
     },
     onSuccess: (data, variables) => {
       // Invalidate and refetch relevant queries
@@ -162,10 +159,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
   // Create final product mutation
   const createFinalProductMutation = useMutation({
     mutationFn: async (data: { jobOrderId: number; quantity: number; status: string }) => {
-      return apiRequest(API_ENDPOINTS.FINAL_PRODUCTS, {
-        method: "POST",
-        body: JSON.stringify(data)
-      });
+      return apiRequest("POST", API_ENDPOINTS.FINAL_PRODUCTS, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.FINAL_PRODUCTS] });
