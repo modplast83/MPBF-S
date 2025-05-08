@@ -73,9 +73,9 @@ export const sessions = pgTable(
 // Users table
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(), // UID
+  user: text("user"), // Legacy field in database
   username: varchar("username").unique().notNull(), // Username
   password: text("password"), // Password - hashed
-  name: text("name").notNull(), // Display name (required field in database)
   email: varchar("email").unique(), // Email
   firstName: varchar("first_name"), // First name
   lastName: varchar("last_name"), // Last name
