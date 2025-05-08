@@ -49,7 +49,7 @@ export async function apiRequest(
 
   try {
     console.log(`Fetching ${url} with options:`, {
-      method: options.method,
+      method: method,
       credentials: options.credentials,
       headers: options.headers,
       hasBody: !!options.body
@@ -66,7 +66,7 @@ export async function apiRequest(
     console.log(`API Response data:`, result);
     return result;
   } catch (error) {
-    console.error(`API Request error for ${method} ${url}:`, error);
+    console.error(`API Request error for ${method} ${endpoint}:`, error);
     throw error;
   }
 }
