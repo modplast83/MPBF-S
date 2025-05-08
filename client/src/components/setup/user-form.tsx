@@ -35,7 +35,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
   const isEditing = !!user;
   
   // Fetch sections
-  const { data: sections, isLoading: sectionsLoading } = useQuery({
+  const { data: sections, isLoading: sectionsLoading } = useQuery<{id: string, name: string}[]>({
     queryKey: [API_ENDPOINTS.SECTIONS],
   });
   
@@ -216,8 +216,8 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
               <FormItem>
                 <FormLabel>Section</FormLabel>
                 <Select
-                  onValueChange={(value) => field.onChange(value || null)}
-                  value={field.value || ""}
+                  onValueChange={(value) => field.onChange(value === "none" ? null : value)}
+                  value={field.value || "none"}
                   disabled={sectionsLoading}
                 >
                   <FormControl>
@@ -226,8 +226,8 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
-                    {sections?.map((section) => (
+                    <SelectItem value="none">None</SelectItem>
+                    {sections && sections.map((section) => (
                       <SelectItem key={section.id} value={section.id}>
                         {section.name}
                       </SelectItem>
@@ -253,7 +253,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
               </div>
               <FormControl>
                 <Switch
-                  checked={field.value}
+                  checked={!!field.value}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
