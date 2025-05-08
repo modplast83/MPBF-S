@@ -28,6 +28,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+// Define the interface for print data
+interface PrintData {
+  mix: any;
+  items: any[];
+  totalWeight: number;
+  materialNames: {[key: number]: string};
+  userData?: any[];
+}
+
 export default function MixMaterialsPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -38,12 +47,7 @@ export default function MixMaterialsPage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [mixToDelete, setMixToDelete] = useState<number | null>(null);
-  const [printableData, setPrintableData] = useState<{
-    mix: any;
-    items: any[];
-    totalWeight: number;
-    materialNames: {[key: number]: string};
-  } | null>(null);
+  const [printableData, setPrintableData] = useState<PrintData | null>(null);
 
   // Fetch all mix materials
   const { data: mixMaterials, isLoading: mixLoading, refetch: refetchMixes } = useQuery<MixMaterial[]>({
@@ -66,16 +70,12 @@ export default function MixMaterialsPage() {
     const user = users.find(user => user.id === operatorId);
     if (!user) return operatorId;
     
-    // Combine firstName and lastName if available
-    const firstName = user.firstName ? user.firstName.trim() : '';
-    const lastName = user.lastName ? user.lastName.trim() : '';
+    // Create a full name from firstName and lastName
+    const firstName = user.firstName || '';
+    const lastName = user.lastName || '';
     
-    if (firstName && lastName) {
-      return `${firstName} ${lastName}`;
-    } else if (firstName) {
-      return firstName;
-    } else if (lastName) {
-      return lastName;
+    if (firstName || lastName) {
+      return `${firstName} ${lastName}`.trim();
     }
     
     // Fallback to username if no name components available
@@ -222,12 +222,21 @@ export default function MixMaterialsPage() {
         });
       }
       
+      // Make sure we have the users data to display proper operator name
+      let userData = users;
+      if (!userData) {
+        // Fetch users if not already loaded
+        const usersResponse = await fetch(API_ENDPOINTS.USERS);
+        userData = await usersResponse.json();
+      }
+      
       // Store the data for the printable label
       setPrintableData({
         mix: mixData,
         items: mixItems,
         totalWeight,
-        materialNames
+        materialNames,
+        userData
       });
       
       // Trigger print immediately
@@ -244,11 +253,31 @@ export default function MixMaterialsPage() {
     preparePrintData(mixId);
   };
 
+
+
   // Create printable label component
   const PrintableLabel = () => {
     if (!printableData) return null;
     
-    const { mix, items, totalWeight, materialNames } = printableData;
+    const { mix, items, totalWeight, materialNames, userData } = printableData as PrintData;
+    
+    // Function to get operator name specifically for the print label
+    const getPrintOperatorName = (operatorId: string) => {
+      if (!userData) return operatorId;
+      const user = userData.find((user: any) => user.id === operatorId);
+      if (!user) return operatorId;
+      
+      // Create a full name from firstName and lastName
+      const firstName = user.firstName || '';
+      const lastName = user.lastName || '';
+      
+      if (firstName || lastName) {
+        return `${firstName} ${lastName}`.trim();
+      }
+      
+      // Fallback to username if no name components available
+      return user.username || operatorId;
+    };
     
     return (
       <div className="printable-label" style={{ width: "3in", height: "5in", padding: "0.25in" }}>
@@ -260,7 +289,7 @@ export default function MixMaterialsPage() {
           <div>{t('production.mix_materials.date')}: {formatDateString(mix.mixDate)}</div>
         </div>
         <div style={{ marginBottom: "10px" }}>
-          <div>{t('production.mix_materials.operator')}: {getOperatorName(mix.mixPerson)}</div>
+          <div>{t('production.mix_materials.operator')}: {getPrintOperatorName(mix.mixPerson)}</div>
           <div>{t('production.mix_materials.total_weight')}: {totalWeight.toFixed(2)} kg</div>
         </div>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -272,7 +301,7 @@ export default function MixMaterialsPage() {
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => {
+            {items.map((item: { id: number; quantity: number; rawMaterialId: number }) => {
               const percentage = ((item.quantity / totalWeight) * 100).toFixed(1);
               const materialName = materialNames[item.rawMaterialId] || `Material ${item.rawMaterialId}`;
               return (
