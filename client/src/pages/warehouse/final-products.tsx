@@ -66,15 +66,9 @@ export default function FinalProducts() {
   const saveMutation = useMutation({
     mutationFn: async (data: { jobOrderId: number; quantity: number; status: string }) => {
       if (editProduct) {
-        await apiRequest(`${API_ENDPOINTS.FINAL_PRODUCTS}/${editProduct.id}`, {
-          method: "PUT", 
-          body: JSON.stringify(data)
-        });
+        await apiRequest("PUT", `${API_ENDPOINTS.FINAL_PRODUCTS}/${editProduct.id}`, data);
       } else {
-        await apiRequest(API_ENDPOINTS.FINAL_PRODUCTS, {
-          method: "POST", 
-          body: JSON.stringify(data)
-        });
+        await apiRequest("POST", API_ENDPOINTS.FINAL_PRODUCTS, data);
       }
     },
     onSuccess: () => {
@@ -97,9 +91,7 @@ export default function FinalProducts() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`${API_ENDPOINTS.FINAL_PRODUCTS}/${id}`, {
-        method: "DELETE"
-      });
+      await apiRequest("DELETE", `${API_ENDPOINTS.FINAL_PRODUCTS}/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.FINAL_PRODUCTS] });
