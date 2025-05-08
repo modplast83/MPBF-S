@@ -289,8 +289,13 @@ export default function OrdersIndex() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t("common.logout_confirm")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete order #{deletingOrder?.id} and all its associated job orders.
-              Note: Orders with job orders that have rolls cannot be deleted.
+              This will permanently delete order #{deletingOrder?.id} and all its associated data including:
+              - Job orders
+              - Rolls
+              - Final products
+              - Quality checks
+              - SMS messages
+              
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

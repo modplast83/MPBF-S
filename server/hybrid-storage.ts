@@ -19,7 +19,27 @@ import {
   qualityChecks, correctiveActions, smsMessages, mixMaterials, mixItems, mixMachines
 } from "@shared/schema";
 import { db } from "./db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
+
+/**
+ * Helper function to check if a database table exists
+ * Uses parametrized SQL to avoid SQL injection
+ */
+async function checkTableExists(tableName: string): Promise<boolean> {
+  try {
+    const result = await db.execute(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = $1
+      )`,
+      [tableName]
+    );
+    return result.rows[0]?.exists === true;
+  } catch (error) {
+    console.error(`Error checking if table ${tableName} exists:`, error);
+    return false;
+  }
+}
 
 /**
  * HybridStorage class that combines DatabaseStorage for authentication
@@ -566,7 +586,103 @@ export class HybridStorage implements IStorage {
   
   async deleteOrder(id: number): Promise<boolean> {
     try {
+      // First, we need to find all job orders related to this order
+      const relatedJobOrders = await db.select().from(jobOrders).where(eq(jobOrders.orderId, id));
+      
+      if (relatedJobOrders.length > 0) {
+        console.log(`Found ${relatedJobOrders.length} job orders related to order #${id}`);
+        
+        // Get all job order IDs
+        const jobOrderIds = relatedJobOrders.map(jo => jo.id);
+        
+        // Find related rolls by job orders
+        const relatedRolls = await db.select({id: rolls.id}).from(rolls)
+          .where(or(...jobOrderIds.map(joId => eq(rolls.jobOrderId, joId))));
+        
+        if (relatedRolls.length > 0) {
+          console.log(`Found ${relatedRolls.length} rolls related to job orders of order #${id}`);
+          const rollIds = relatedRolls.map(r => r.id);
+          
+          // Delete quality checks related to these rolls (including corrective actions due to cascade)
+          if (rollIds.length > 0) {
+            try {
+              for (const rollId of rollIds) {
+                await db.delete(qualityChecks).where(eq(qualityChecks.rollId, rollId));
+              }
+              console.log(`Deleted quality checks related to rolls of order #${id}`);
+            } catch (error) {
+              console.error(`Error deleting quality checks for order #${id}:`, error);
+            }
+            
+            // Delete the rolls
+            try {
+              for (const jobOrderId of jobOrderIds) {
+                await db.delete(rolls).where(eq(rolls.jobOrderId, jobOrderId));
+              }
+              console.log(`Deleted rolls related to job orders of order #${id}`);
+            } catch (error) {
+              console.error(`Error deleting rolls for order #${id}:`, error);
+            }
+          }
+        }
+        
+        // Delete final products related to these job orders
+        try {
+          for (const jobOrderId of jobOrderIds) {
+            await db.delete(finalProducts).where(eq(finalProducts.jobOrderId, jobOrderId));
+          }
+          console.log(`Deleted final products related to job orders of order #${id}`);
+        } catch (error) {
+          console.error(`Error deleting final products for order #${id}:`, error);
+        }
+        
+        // Use direct SQL to delete SMS messages first before attempting 
+        // other deletions to avoid foreign key constraint issues
+        try {
+          // Check if SMS messages table exists
+          const smsTableExists = await checkTableExists('sms_messages');
+          if (smsTableExists) {
+            // Use direct SQL with no parameters to avoid issues
+            if (jobOrderIds.length > 0) {
+              // Delete SMS messages related to job orders
+              await db.execute(`DELETE FROM sms_messages WHERE job_order_id IN (${jobOrderIds.join(',')})`);
+            }
+            // Delete SMS messages related directly to the order
+            await db.execute(`DELETE FROM sms_messages WHERE order_id = ${id}`);
+            console.log(`Deleted SMS messages related to order #${id} and its job orders`);
+          } else {
+            console.log(`SMS messages table doesn't exist yet, skipping SMS deletion for order #${id}`);
+          }
+        } catch (error: any) {
+          console.error(`Error deleting SMS messages for order #${id}:`, error);
+          // Since SMS message deletion is critical for order deletion due to foreign key constraints,
+          // we should return false if we can't delete them
+          return false;
+        }
+        
+        // Delete quality checks related to job orders
+        try {
+          for (const jobOrderId of jobOrderIds) {
+            await db.delete(qualityChecks).where(eq(qualityChecks.jobOrderId, jobOrderId));
+          }
+          console.log(`Deleted quality checks related to job orders of order #${id}`);
+        } catch (error) {
+          console.error(`Error deleting quality checks for job orders of order #${id}:`, error);
+        }
+        
+        // Delete all related job orders
+        try {
+          await db.delete(jobOrders).where(eq(jobOrders.orderId, id));
+          console.log(`Deleted job orders related to order #${id}`);
+        } catch (error) {
+          console.error(`Error deleting job orders for order #${id}:`, error);
+          return false;
+        }
+      }
+      
+      // Finally, delete the order itself
       await db.delete(orders).where(eq(orders.id, id));
+      console.log(`Successfully deleted order #${id} and all related data`);
       return true;
     } catch (error) {
       console.error(`Failed to delete order ${id}:`, error);
