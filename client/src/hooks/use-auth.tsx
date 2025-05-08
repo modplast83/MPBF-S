@@ -32,7 +32,7 @@ type AuthContextType = {
   logoutMutation: UseMutationResult<void, Error, void>;
 };
 
-export const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
@@ -60,21 +60,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (userData) => {
       console.log("Login successful, user data:", userData);
       
-      // Set the user data in the cache
+      // Set the user data in the cache and ensure it's properly saved
       queryClient.setQueryData(["/api/user"], userData);
       
-      // Force refetch to make sure we have the latest data
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // Disable immediate refetch to avoid race conditions
+      // Instead, rely on the explicitly set cache data
       
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.username}!`,
       });
       
-      // Redirect to home page
+      // Redirect to home page after a slightly longer delay to ensure cache updates
       setTimeout(() => {
+        console.log("Redirecting to dashboard with user:", userData);
         setLocation("/");
-      }, 500);
+      }, 800);
     },
     onError: (error) => {
       console.error("Login error:", error);

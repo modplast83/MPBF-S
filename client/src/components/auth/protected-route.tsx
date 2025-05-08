@@ -28,9 +28,12 @@ export function ProtectedRoute({ path, component: Component }: ProtectedRoutePro
       ) : (
         (() => {
           console.log("User not authenticated, redirecting to auth page");
-          setTimeout(() => {
-            setLocation("/auth");
-          }, 100);
+          // Only redirect if actually on a different page
+          if (path !== '/auth') {
+            setTimeout(() => {
+              setLocation("/auth");
+            }, 300);
+          }
           return null;
         })()
       )}
