@@ -290,7 +290,7 @@ export class MemStorage implements IStorage {
     this.createUser({
       username: "admin",
       password: "admin123",
-      user: "Admin User", // Using user field as name replacement
+      name: "Admin User",
       role: "administrator",
       isActive: true,
       sectionId: null,

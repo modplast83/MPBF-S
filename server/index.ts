@@ -121,8 +121,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5001 (changed from 5000 due to port conflict)
-  const mainPort = 5001;
+  // ALWAYS serve the app on port 5000 - this is the main frontend port
+  const mainPort = 5000;
   server.listen({
     port: mainPort,
     host: "0.0.0.0",

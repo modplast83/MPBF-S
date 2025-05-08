@@ -19,7 +19,6 @@ export async function ensureAdminUser() {
       // Create admin user if it doesn't exist
       const adminUser = {
         id: uuidv4(), // Generate a UUID for the user ID
-        user: 'Admin User', // Legacy field used in place of name
         username: 'admin',
         password: hashedPassword,
         firstName: 'System',
