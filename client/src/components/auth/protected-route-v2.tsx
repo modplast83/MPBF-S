@@ -20,19 +20,18 @@ export function ProtectedRoute({
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
-    // If authentication check is complete and user is not authenticated,
-    // redirect to the auth page
-    if (!isLoading && !isAuthenticated) {
+    // Only redirect if not already on the auth page
+    if (!isLoading && !isAuthenticated && location !== "/auth") {
       console.log("User is not authenticated and not on auth page, redirecting to auth");
-      window.location.href = "/auth";
+      setLocation("/auth");
     }
     
     // If module is specified, check if user has permission
     if (!isLoading && isAuthenticated && module && !hasPermission(module)) {
       console.log(`User doesn't have permission for module: ${module}, redirecting to dashboard`);
-      window.location.href = "/";
+      setLocation("/");
     }
-  }, [isLoading, isAuthenticated, module, hasPermission, location]);
+  }, [isLoading, isAuthenticated, module, hasPermission, location, setLocation]);
 
   // Loader while checking authentication
   if (isLoading) {

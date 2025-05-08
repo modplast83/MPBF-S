@@ -94,8 +94,9 @@ export function AuthProvider({ children }: { children: ReactNode | ((data: AuthC
         throw new Error(errorData.message || "Login failed");
       }
       
-      console.log("Login response received:", await response.json());
-      return await response.json();
+      const userData = await response.json();
+      console.log("Login response received:", userData);
+      return userData;
     },
     onSuccess: (userData: User) => {
       // Update the cache
@@ -107,10 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode | ((data: AuthC
         description: `Welcome back, ${userData.username}!`,
       });
       
-      console.log("Redirecting to dashboard with user:", userData);
-      // Force a hard navigation instead of client-side routing
-      console.log("Performing direct navigation to /");
-      window.location.href = "/";
+      console.log("Authentication state updated, routing will handle navigation");
+      // navigation happens via protected route and auth page components
     },
     onError: (error: Error) => {
       console.error("Login error:", error);
@@ -149,8 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode | ((data: AuthC
         description: "You have been successfully logged out",
       });
       
-      // Force a hard redirect to auth page
-      window.location.href = "/auth";
+      // Routing will handle navigation based on authentication state
+      console.log("Logout completed, authentication state updated");
     },
     onError: (error: Error) => {
       toast({
@@ -189,8 +188,8 @@ export function AuthProvider({ children }: { children: ReactNode | ((data: AuthC
         description: `Welcome, ${userData.username}!`,
       });
       
-      // Force a hard redirect to dashboard
-      window.location.href = "/";
+      // Routing will handle navigation based on authentication state
+      console.log("Registration completed, authentication state updated");
     },
     onError: (error: Error) => {
       toast({

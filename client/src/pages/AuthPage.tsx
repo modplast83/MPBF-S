@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth-v2";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
+import { useLocation } from "wouter";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -62,13 +63,15 @@ export default function AuthPage() {
     },
   });
 
+  const [, setLocation] = useLocation();
+  
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       console.log("User already authenticated, redirecting to dashboard");
-      window.location.href = "/";
+      setLocation("/");
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, setLocation]);
 
   async function onLoginSubmit(data: LoginFormValues) {
     try {

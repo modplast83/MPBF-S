@@ -67,11 +67,15 @@ export default function MixMaterialsPage() {
     if (!user) return operatorId;
     
     // Combine firstName and lastName if available
-    const firstName = user.firstName || '';
-    const lastName = user.lastName || '';
+    const firstName = user.firstName ? user.firstName.trim() : '';
+    const lastName = user.lastName ? user.lastName.trim() : '';
     
-    if (firstName || lastName) {
-      return `${firstName} ${lastName}`.trim();
+    if (firstName && lastName) {
+      return `${firstName} ${lastName}`;
+    } else if (firstName) {
+      return firstName;
+    } else if (lastName) {
+      return lastName;
     }
     
     // Fallback to username if no name components available
