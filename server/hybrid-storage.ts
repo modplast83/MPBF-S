@@ -16,7 +16,8 @@ import {
   PlateCalculation, InsertPlateCalculation,
   categories, items, sections, machines, masterBatches, customers, customerProducts,
   orders, jobOrders, rolls, rawMaterials, finalProducts, qualityCheckTypes,
-  qualityChecks, correctiveActions, smsMessages, mixMaterials, mixItems, mixMachines
+  qualityChecks, correctiveActions, smsMessages, mixMaterials, mixItems, mixMachines,
+  platePricingParameters, plateCalculations
 } from "@shared/schema";
 import { db } from "./db";
 import { and, eq, or } from "drizzle-orm";
@@ -27,13 +28,12 @@ import { and, eq, or } from "drizzle-orm";
  */
 async function checkTableExists(tableName: string): Promise<boolean> {
   try {
-    const result = await db.execute(
-      `SELECT EXISTS (
+    const result = await pool.query(`
+      SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'public' AND table_name = $1
-      )`,
-      [tableName]
-    );
+      )
+    `, [tableName]);
     return result.rows[0]?.exists === true;
   } catch (error) {
     console.error(`Error checking if table ${tableName} exists:`, error);
@@ -1467,35 +1467,73 @@ export class HybridStorage implements IStorage {
     return false;
   }
   
-  // Plate Pricing Parameters - stub implementations
+  // Plate Pricing Parameters
   async getPlatePricingParameters(): Promise<PlatePricingParameter[]> {
-    console.warn('getPlatePricingParameters not fully implemented');
-    return [];
+    try {
+      const result = await db.select().from(platePricingParameters);
+      return result;
+    } catch (error) {
+      console.error('Error in getPlatePricingParameters:', error);
+      return [];
+    }
   }
   
   async getPlatePricingParameterByType(type: string): Promise<PlatePricingParameter | undefined> {
-    console.warn('getPlatePricingParameterByType not fully implemented');
-    return undefined;
+    try {
+      const result = await db.select().from(platePricingParameters)
+        .where(eq(platePricingParameters.type, type))
+        .limit(1);
+      return result[0];
+    } catch (error) {
+      console.error('Error in getPlatePricingParameterByType:', error);
+      return undefined;
+    }
   }
   
   async getPlatePricingParameter(id: number): Promise<PlatePricingParameter | undefined> {
-    console.warn('getPlatePricingParameter not fully implemented');
-    return undefined;
+    try {
+      const result = await db.select().from(platePricingParameters)
+        .where(eq(platePricingParameters.id, id))
+        .limit(1);
+      return result[0];
+    } catch (error) {
+      console.error('Error in getPlatePricingParameter:', error);
+      return undefined;
+    }
   }
   
   async createPlatePricingParameter(param: InsertPlatePricingParameter): Promise<PlatePricingParameter> {
-    console.warn('createPlatePricingParameter not fully implemented');
-    throw new Error('Method not implemented');
+    try {
+      const result = await db.insert(platePricingParameters).values(param).returning();
+      return result[0];
+    } catch (error) {
+      console.error('Error in createPlatePricingParameter:', error);
+      throw new Error('Failed to create pricing parameter: ' + (error as Error).message);
+    }
   }
   
   async updatePlatePricingParameter(id: number, update: Partial<PlatePricingParameter>): Promise<PlatePricingParameter | undefined> {
-    console.warn('updatePlatePricingParameter not fully implemented');
-    return undefined;
+    try {
+      const result = await db.update(platePricingParameters)
+        .set(update)
+        .where(eq(platePricingParameters.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error('Error in updatePlatePricingParameter:', error);
+      return undefined;
+    }
   }
   
   async deletePlatePricingParameter(id: number): Promise<boolean> {
-    console.warn('deletePlatePricingParameter not fully implemented');
-    return false;
+    try {
+      const result = await db.delete(platePricingParameters)
+        .where(eq(platePricingParameters.id, id));
+      return result.rowCount !== null && result.rowCount > 0;
+    } catch (error) {
+      console.error('Error in deletePlatePricingParameter:', error);
+      return false;
+    }
   }
   
   // Plate Calculations - stub implementations

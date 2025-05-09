@@ -245,14 +245,14 @@ export default function FinalProducts() {
         <title>Job Order Label - ${selectedJobOrder.id}</title>
         <style>
           @page {
-            size: 3in 5in;
+            size: 4in 6in;
             margin: 0;
           }
           body {
             margin: 0;
             padding: 0.25in;
-            width: 2.5in;
-            height: 4.5in;
+            width: 3.5in;
+            height: 5.5in;
             box-sizing: border-box;
             font-family: Arial, sans-serif;
             display: flex;
@@ -366,6 +366,11 @@ export default function FinalProducts() {
             <div class="info-value">${formatNumber(wasteQty)} kg</div>
           </div>
           
+          <div class="info-row">
+            <div class="info-label">Waste %:</div>
+            <div class="info-value">${calculateWastePercentage(selectedJobOrder.id)}%</div>
+          </div>
+          
           <div class="receipt-status ${selectedJobOrder.status === 'partially_received' ? 'partial-receipt' : 'full-receipt'}">
             ${selectedJobOrder.status === 'partially_received' ? 'PARTIALLY RECEIVED' : 'FULLY RECEIVED'}
           </div>
@@ -413,6 +418,20 @@ export default function FinalProducts() {
       roll.jobOrderId === jobOrderId
     );
     return jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
+  };
+  
+  // Calculate waste percentage for a job order
+  const calculateWastePercentage = (jobOrderId: number): string => {
+    const productionQty = getTotalExtrusionQty(jobOrderId);
+    const jobOrder = jobOrders?.find(jo => jo.id === jobOrderId);
+    
+    if (!jobOrder || productionQty === 0) return "0.00";
+    
+    const finishedQty = jobOrder.finishedQty || 0;
+    const wasteQty = Math.max(0, productionQty - finishedQty);
+    const wastePercentage = (wasteQty / productionQty) * 100;
+    
+    return wastePercentage.toFixed(2);
   };
   
   const getJobOrderDetails = (jobOrderId: number) => {
@@ -521,7 +540,7 @@ export default function FinalProducts() {
       }
     },
     {
-      header: t('warehouse.received_qty') + " (Kg)",
+      header: "Received Quantity (Kg)",
       cell: (row) => {
         return formatNumber(row.receivedQty || 0);
       }
@@ -537,6 +556,12 @@ export default function FinalProducts() {
         
         const wasteQty = Math.max(0, productionQty - finishedQty);
         return formatNumber(wasteQty);
+      }
+    },
+    {
+      header: "Waste %",
+      cell: (row) => {
+        return calculateWastePercentage(row.id) + "%";
       }
     },
     {
@@ -700,7 +725,7 @@ export default function FinalProducts() {
               
               <div className={`grid ${isMobile ? "" : "grid-cols-4"} items-center gap-4`}>
                 <Label htmlFor="receivingQty" className={isMobile ? "" : "text-right"}>
-                  {t('warehouse.received_qty')} (Kg)
+                  Received Quantity (Kg)
                 </Label>
                 <div className={isMobile ? "w-full" : "col-span-3"}>
                   <Input
@@ -777,7 +802,7 @@ export default function FinalProducts() {
               
               <div className="border rounded-md p-4 bg-secondary-50">
                 <p className="text-sm">
-                  {t('warehouse.print_label_info') || "A 3″ × 5″ label will be generated with the following information:"}
+                  {t('warehouse.print_label_info') || "A 4″ × 6″ label will be generated with the following information:"}
                 </p>
                 <ul className="text-sm list-disc list-inside mt-2 space-y-1">
                   <li>{t('job_orders.title')} #{selectedJobOrder.id}</li>
@@ -785,8 +810,9 @@ export default function FinalProducts() {
                   <li>{t('orders.product')}: {getJobOrderDetails(selectedJobOrder.id).productName}</li>
                   <li>{t('warehouse.ordered_qty')}: {formatNumber(selectedJobOrder.quantity || 0)} kg</li>
                   <li>{t('warehouse.finished_qty')}: {formatNumber(selectedJobOrder.finishedQty || 0)} kg</li>
-                  <li>{t('warehouse.received_qty')}: {formatNumber(selectedJobOrder.receivedQty || 0)} kg</li>
+                  <li>Received Quantity: {formatNumber(selectedJobOrder.receivedQty || 0)} kg</li>
                   <li>{t('warehouse.waste_qty')}: {formatNumber(Math.max(0, getTotalExtrusionQty(selectedJobOrder.id) - (selectedJobOrder.finishedQty || 0)))} kg</li>
+                  <li>Waste Percentage: {calculateWastePercentage(selectedJobOrder.id)}%</li>
                   <li>{t('common.status')}: {selectedJobOrder.status === 'partially_received' ? 'Partially Received' : 'Fully Received'}</li>
                 </ul>
               </div>
