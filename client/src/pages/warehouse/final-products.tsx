@@ -274,12 +274,7 @@ export default function FinalProducts() {
           </div>
           
           <div class="info-row">
-            <div class="info-label">Produced Qty:</div>
-            <div class="info-value">${formatNumber(productionQty)} kg</div>
-          </div>
-          
-          <div class="info-row">
-            <div class="info-label">Received Qty:</div>
+            <div class="info-label">Finished Qty:</div>
             <div class="info-value">${formatNumber(finishedQty)} kg</div>
           </div>
           
@@ -452,17 +447,7 @@ export default function FinalProducts() {
       }
     },
     {
-      header: t('warehouse.received_qty') + " (Kg)",
-      cell: (row) => {
-        // Only show received quantity for received job orders
-        if (row.status === "received") {
-          return formatNumber(row.finishedQty || 0);
-        }
-        return "-";
-      }
-    },
-    {
-      header: "Completion",
+      header: t('common.completion'),
       cell: (row) => {
         const details = getJobOrderDetails(row.id);
         return (
@@ -661,8 +646,7 @@ export default function FinalProducts() {
                   <li>{t('setup.customers.title')}: {getJobOrderDetails(selectedJobOrder.id).customer}</li>
                   <li>{t('orders.product')}: {getJobOrderDetails(selectedJobOrder.id).productName}</li>
                   <li>{t('warehouse.ordered_qty')}: {formatNumber(selectedJobOrder.quantity || 0)} kg</li>
-                  <li>{t('warehouse.production_qty')}: {formatNumber(getTotalExtrusionQty(selectedJobOrder.id))} kg</li>
-                  <li>{t('warehouse.received_qty')}: {formatNumber(selectedJobOrder.finishedQty || 0)} kg</li>
+                  <li>{t('warehouse.finished_qty')}: {formatNumber(selectedJobOrder.finishedQty || 0)} kg</li>
                   <li>{t('warehouse.waste_qty')}: {formatNumber(Math.max(0, getTotalExtrusionQty(selectedJobOrder.id) - (selectedJobOrder.finishedQty || 0)))} kg</li>
                 </ul>
               </div>
