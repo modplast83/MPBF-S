@@ -1097,11 +1097,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Job order not found" });
       }
       
-      // For status updates or finished quantity updates, we'll accept a simpler object
-      if (req.body && typeof req.body === 'object' && ('status' in req.body || 'finishedQty' in req.body)) {
+      // For status updates or quantity updates, we'll accept a simpler object
+      if (req.body && typeof req.body === 'object' && ('status' in req.body || 'finishedQty' in req.body || 'receivedQty' in req.body)) {
         const updateSchema = z.object({
-          status: z.enum(["pending", "in_progress", "extrusion_completed", "completed", "cancelled", "received"]).optional(),
+          status: z.enum(["pending", "in_progress", "extrusion_completed", "completed", "cancelled", "received", "partially_received"]).optional(),
           finishedQty: z.number().nonnegative().optional(),
+          receivedQty: z.number().nonnegative().optional(),
         });
         
         try {

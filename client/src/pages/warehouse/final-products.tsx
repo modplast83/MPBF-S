@@ -24,6 +24,7 @@ export default function FinalProducts() {
   const [printLabelDialogOpen, setPrintLabelDialogOpen] = useState(false);
   const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
   const [finishedQty, setFinishedQty] = useState<number>(0);
+  const [receivingQty, setReceivingQty] = useState<number>(0);
   const [notes, setNotes] = useState<string>("");
   const [isPrinting, setIsPrinting] = useState(false);
   const { t } = useTranslation();
@@ -58,10 +59,11 @@ export default function FinalProducts() {
 
   // Update job order mutation
   const updateJobOrderMutation = useMutation({
-    mutationFn: async (data: { id: number; status: string; finishedQty: number }) => {
+    mutationFn: async (data: { id: number; status: string; finishedQty: number; receivedQty: number }) => {
       await apiRequest("PUT", `${API_ENDPOINTS.JOB_ORDERS}/${data.id}`, {
         status: data.status,
-        finishedQty: data.finishedQty
+        finishedQty: data.finishedQty,
+        receivedQty: data.receivedQty
       });
     },
     onSuccess: () => {
@@ -102,6 +104,7 @@ export default function FinalProducts() {
     return jobOrders.filter(jo => 
       jo.status === "completed" || 
       jo.status === "received" || 
+      jo.status === "partially_received" || 
       jo.status === "extrusion_completed" ||
       jo.status === "in_progress"
     );
@@ -111,26 +114,84 @@ export default function FinalProducts() {
     setSelectedJobOrder(jobOrder);
     // Get total cutting quantity for this job order
     const totalCutQty = getTotalCuttingQty(jobOrder.id);
-    setFinishedQty(totalCutQty);
+    
+    // Set the default to the remaining amount to receive if there's already a partial receipt
+    const alreadyReceived = jobOrder.receivedQty || 0;
+    const remainingToReceive = totalCutQty - alreadyReceived;
+    
+    setFinishedQty(totalCutQty); // Still show the full finished quantity
+    setReceivingQty(remainingToReceive > 0 ? remainingToReceive : totalCutQty);
     setReceiveDialogOpen(true);
+  };
+
+  // Function to check if all job orders for an order are received
+  const checkAndUpdateOrderStatus = async (orderId: number) => {
+    const orderJobOrders = jobOrders.filter(jo => jo.orderId === orderId);
+    const allReceived = orderJobOrders.every(jo => 
+      jo.status === "received" || 
+      (jo.receivedQty || 0) >= (jo.finishedQty || 0)
+    );
+    
+    if (allReceived) {
+      try {
+        // Update order status to completed
+        await apiRequest("PUT", `${API_ENDPOINTS.ORDERS}/${orderId}`, {
+          status: "completed"
+        });
+        
+        queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
+      } catch (error) {
+        console.error("Failed to update order status:", error);
+      }
+    }
   };
 
   const handleSubmitReceive = () => {
     if (!selectedJobOrder) return;
     
-    if (finishedQty <= 0) {
+    if (receivingQty <= 0) {
       toast({
         title: "Validation Error",
-        description: "Please enter a valid finished quantity.",
+        description: "Please enter a valid receiving quantity.",
         variant: "destructive",
       });
       return;
     }
-
+    
+    // Get total finished quantity
+    const totalFinishedQty = selectedJobOrder.finishedQty || getTotalCuttingQty(selectedJobOrder.id);
+    
+    // Validate received quantity doesn't exceed finished quantity
+    if (receivingQty > totalFinishedQty) {
+      toast({
+        title: "Validation Error",
+        description: "Received quantity cannot exceed finished quantity.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Calculate total received after this receipt
+    const currentReceived = selectedJobOrder.receivedQty || 0;
+    const totalReceived = currentReceived + receivingQty;
+    
+    // Determine if this is a partial or full receipt
+    const isFullReceipt = totalReceived >= totalFinishedQty;
+    const newStatus = isFullReceipt ? "received" : "partially_received";
+    
     updateJobOrderMutation.mutate({
       id: selectedJobOrder.id,
-      status: "received",
-      finishedQty: finishedQty
+      status: newStatus,
+      finishedQty: totalFinishedQty,
+      receivedQty: totalReceived
+    },
+    {
+      onSuccess: () => {
+        // Check if all job orders for this order are now received
+        if (selectedJobOrder) {
+          checkAndUpdateOrderStatus(selectedJobOrder.orderId);
+        }
+      }
     });
   };
 
@@ -138,6 +199,7 @@ export default function FinalProducts() {
     setReceiveDialogOpen(false);
     setSelectedJobOrder(null);
     setFinishedQty(0);
+    setReceivingQty(0);
     setNotes("");
   };
 
@@ -244,6 +306,22 @@ export default function FinalProducts() {
             border-top: 1px solid #000;
             padding-top: 0.1in;
           }
+          .receipt-status {
+            font-weight: bold;
+            margin-top: 0.1in;
+            text-align: center;
+            padding: 0.05in;
+            border: 1px solid #000;
+            border-radius: 0.1in;
+          }
+          .full-receipt {
+            background-color: #d4edda;
+            color: #155724;
+          }
+          .partial-receipt {
+            background-color: #cce5ff;
+            color: #004085;
+          }
         </style>
       </head>
       <body>
@@ -279,8 +357,17 @@ export default function FinalProducts() {
           </div>
           
           <div class="info-row">
+            <div class="info-label">Received Qty:</div>
+            <div class="info-value">${formatNumber(selectedJobOrder.receivedQty || 0)} kg</div>
+          </div>
+          
+          <div class="info-row">
             <div class="info-label">Waste Qty:</div>
             <div class="info-value">${formatNumber(wasteQty)} kg</div>
+          </div>
+          
+          <div class="receipt-status ${selectedJobOrder.status === 'partially_received' ? 'partial-receipt' : 'full-receipt'}">
+            ${selectedJobOrder.status === 'partially_received' ? 'PARTIALLY RECEIVED' : 'FULLY RECEIVED'}
           </div>
           
           <div class="qr-placeholder">
@@ -425,7 +512,7 @@ export default function FinalProducts() {
     {
       header: t('warehouse.finished_qty') + " (Kg)",
       cell: (row) => {
-        if (row.status === "received") {
+        if (row.status === "received" || row.status === "partially_received") {
           return formatNumber(row.finishedQty || 0);
         } else {
           const details = getJobOrderDetails(row.id);
@@ -434,11 +521,17 @@ export default function FinalProducts() {
       }
     },
     {
+      header: t('warehouse.received_qty') + " (Kg)",
+      cell: (row) => {
+        return formatNumber(row.receivedQty || 0);
+      }
+    },
+    {
       header: t('warehouse.waste_qty') + " (Kg)",
       cell: (row) => {
         // Production quantity - Finished quantity
         const productionQty = getTotalExtrusionQty(row.id);
-        const finishedQty = row.status === "received" ? 
+        const finishedQty = row.status === "received" || row.status === "partially_received" ? 
           (row.finishedQty || 0) : 
           getJobOrderDetails(row.id).totalCutQty;
         
@@ -447,7 +540,7 @@ export default function FinalProducts() {
       }
     },
     {
-      header: t('common.completion'),
+      header: "Completion",
       cell: (row) => {
         const details = getJobOrderDetails(row.id);
         return (
@@ -476,11 +569,13 @@ export default function FinalProducts() {
         if (row.status === "cutting_completed") variant = "secondary";
         if (row.status === "completed") variant = "secondary";
         if (row.status === "received") variant = "default";
+        if (row.status === "partially_received") variant = "default";
         
         // Apply additional styling based on status
         let className = "capitalize whitespace-nowrap ";
         if (row.status === "completed") className += "bg-amber-500 text-white hover:bg-amber-600";
         if (row.status === "received") className += "bg-green-500 text-white hover:bg-green-600";
+        if (row.status === "partially_received") className += "bg-blue-500 text-white hover:bg-blue-600";
         
         return (
           <Badge variant={variant} className={className}>
@@ -493,7 +588,7 @@ export default function FinalProducts() {
       header: t('common.actions'),
       cell: (row) => (
         <div className={`flex ${isRTL ? "space-x-reverse" : "space-x-2"}`}>
-          {row.status !== "received" && (
+          {(row.status !== "received" && row.status !== "partially_received") && (
             <Button 
               variant="secondary" 
               size="sm" 
@@ -503,6 +598,28 @@ export default function FinalProducts() {
               <span className="material-icons text-sm mr-1">inventory</span>
               {t('warehouse.receive')}
             </Button>
+          )}
+          {(row.status === "partially_received") && (
+            <div className={`flex ${isRTL ? "space-x-reverse" : "space-x-2"}`}>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={() => handleReceiveJobOrder(row)}
+                className="whitespace-nowrap"
+              >
+                <span className="material-icons text-sm mr-1">inventory</span>
+                {t('warehouse.receive')}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handlePrintLabel(row)}
+                className="whitespace-nowrap"
+              >
+                <span className="material-icons text-sm mr-1">print</span>
+                {t('warehouse.print_label')}
+              </Button>
+            </div>
           )}
           {row.status === "received" && (
             <Button 
@@ -575,9 +692,30 @@ export default function FinalProducts() {
                   id="finishedQty"
                   type="number"
                   value={finishedQty}
-                  onChange={(e) => setFinishedQty(parseFloat(e.target.value) || 0)}
-                  className={isMobile ? "w-full" : "col-span-3"}
+                  readOnly
+                  disabled
+                  className={isMobile ? "w-full" : "col-span-3 bg-secondary-50"}
                 />
+              </div>
+              
+              <div className={`grid ${isMobile ? "" : "grid-cols-4"} items-center gap-4`}>
+                <Label htmlFor="receivingQty" className={isMobile ? "" : "text-right"}>
+                  {t('warehouse.received_qty')} (Kg)
+                </Label>
+                <div className={isMobile ? "w-full" : "col-span-3"}>
+                  <Input
+                    id="receivingQty"
+                    type="number"
+                    value={receivingQty}
+                    onChange={(e) => setReceivingQty(parseFloat(e.target.value) || 0)}
+                    className="w-full"
+                  />
+                  {selectedJobOrder && selectedJobOrder.receivedQty > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Already received: {formatNumber(selectedJobOrder.receivedQty)} kg
+                    </p>
+                  )}
+                </div>
               </div>
               
               <div className={`grid ${isMobile ? "" : "grid-cols-4"} items-start gap-4`}>
@@ -647,7 +785,9 @@ export default function FinalProducts() {
                   <li>{t('orders.product')}: {getJobOrderDetails(selectedJobOrder.id).productName}</li>
                   <li>{t('warehouse.ordered_qty')}: {formatNumber(selectedJobOrder.quantity || 0)} kg</li>
                   <li>{t('warehouse.finished_qty')}: {formatNumber(selectedJobOrder.finishedQty || 0)} kg</li>
+                  <li>{t('warehouse.received_qty')}: {formatNumber(selectedJobOrder.receivedQty || 0)} kg</li>
                   <li>{t('warehouse.waste_qty')}: {formatNumber(Math.max(0, getTotalExtrusionQty(selectedJobOrder.id) - (selectedJobOrder.finishedQty || 0)))} kg</li>
+                  <li>{t('common.status')}: {selectedJobOrder.status === 'partially_received' ? 'Partially Received' : 'Fully Received'}</li>
                 </ul>
               </div>
             </div>

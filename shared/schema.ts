@@ -163,7 +163,8 @@ export const jobOrders = pgTable("job_orders", {
   customerProductId: integer("customer_product_id").notNull().references(() => customerProducts.id), // Customer Product No
   quantity: doublePrecision("quantity").notNull(), // Qty Kg
   finishedQty: doublePrecision("finished_qty").default(0).notNull(), // Finished quantity (kg)
-  status: text("status").default("pending").notNull(), // Status (pending, in_progress, extrusion_completed, completed, cancelled)
+  receivedQty: doublePrecision("received_qty").default(0).notNull(), // Received quantity (kg)
+  status: text("status").default("pending").notNull(), // Status (pending, in_progress, extrusion_completed, completed, cancelled, received, partially_received)
   customerId: text("customer_id").references(() => customers.id), // Customer ID
 }, (table) => {
   return {
