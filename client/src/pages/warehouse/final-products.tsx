@@ -215,6 +215,13 @@ export default function FinalProducts() {
       },
     },
     {
+      header: t('job_orders.title'),
+      accessorKey: "jobOrderId",
+      cell: (row) => {
+        return `JO #${row.jobOrderId}`;
+      },
+    },
+    {
       header: t('setup.customers.title'),
       accessorKey: "jobOrderId",
       cell: (row) => {
