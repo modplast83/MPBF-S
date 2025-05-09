@@ -118,6 +118,10 @@ export const SIDEBAR_ITEMS = [
         title: "Reports",
         path: "/reports",
         icon: "bar_chart",
+        subItems: [
+          { title: "Performance Metrics", path: "/reports/performance" },
+          { title: "Production Health", path: "/performance/production-health" },
+        ],
       },
       {
         title: "Tools",

@@ -4,6 +4,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { ProductionChart } from "@/components/dashboard/production-chart";
 import { RecentOrders } from "@/components/dashboard/recent-orders";
 import { ActiveOrdersTable } from "@/components/dashboard/active-orders-table";
+import { ProductionHealthDashboard } from "@/components/ui/production-health-dashboard";
 import { Order, Roll, RawMaterial } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
@@ -132,6 +133,11 @@ export default function Dashboard() {
         <div className="order-1 lg:order-2">
           <RecentOrders />
         </div>
+      </div>
+
+      {/* Production Health Indicators */}
+      <div className={isRTL ? 'rtl' : ''}>
+        <ProductionHealthDashboard />
       </div>
 
       {/* Active Orders Table */}
