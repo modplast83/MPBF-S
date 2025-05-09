@@ -21,9 +21,11 @@ import { Badge } from "@/components/ui/badge";
 export default function FinalProducts() {
   const queryClient = useQueryClient();
   const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
+  const [printLabelDialogOpen, setPrintLabelDialogOpen] = useState(false);
   const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
   const [finishedQty, setFinishedQty] = useState<number>(0);
   const [notes, setNotes] = useState<string>("");
+  const [isPrinting, setIsPrinting] = useState(false);
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const isMobile = useIsMobile();
@@ -139,6 +141,174 @@ export default function FinalProducts() {
     setNotes("");
   };
 
+  // Handle print label function
+  const handlePrintLabel = (jobOrder: JobOrder) => {
+    setSelectedJobOrder(jobOrder);
+    setPrintLabelDialogOpen(true);
+  };
+
+  // Function to execute the actual printing
+  const printJobOrderLabel = () => {
+    if (!selectedJobOrder) return;
+    
+    setIsPrinting(true);
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    
+    if (!printWindow) {
+      toast({
+        title: t("common.error"),
+        description: t("common.popup_blocked"),
+        variant: "destructive",
+      });
+      setIsPrinting(false);
+      return;
+    }
+    
+    // Get job order details
+    const jobOrderDetails = getJobOrderDetails(selectedJobOrder.id);
+    const productionQty = getTotalExtrusionQty(selectedJobOrder.id);
+    const finishedQty = selectedJobOrder.finishedQty || 0;
+    const wasteQty = Math.max(0, productionQty - finishedQty);
+    
+    // Format date to display on label
+    const formattedDate = new Date().toLocaleDateString();
+    
+    // Set the content of the print window with CSS for a 3" x 5" label
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Job Order Label - ${selectedJobOrder.id}</title>
+        <style>
+          @page {
+            size: 3in 5in;
+            margin: 0;
+          }
+          body {
+            margin: 0;
+            padding: 0.25in;
+            width: 2.5in;
+            height: 4.5in;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+          }
+          .label-container {
+            border: 1px solid #ccc;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0.15in;
+            box-sizing: border-box;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #000;
+            padding-bottom: 0.1in;
+            margin-bottom: 0.1in;
+          }
+          .job-order-id {
+            font-size: 16pt;
+            font-weight: bold;
+          }
+          .info-row {
+            margin: 0.05in 0;
+            display: flex;
+          }
+          .info-label {
+            font-weight: bold;
+            width: 1in;
+          }
+          .info-value {
+            flex: 1;
+          }
+          .qr-placeholder {
+            margin-top: 0.1in;
+            height: 1in;
+            border: 1px dashed #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 8pt;
+          }
+          .footer {
+            margin-top: auto;
+            font-size: 8pt;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 0.1in;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="label-container">
+          <div class="header">
+            <div class="job-order-id">JO #${selectedJobOrder.id}</div>
+            <div>${formattedDate}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Customer:</div>
+            <div class="info-value">${jobOrderDetails.customer || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Product:</div>
+            <div class="info-value">${jobOrderDetails.productName || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Order #:</div>
+            <div class="info-value">${jobOrderDetails.orderNumber || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Ordered Qty:</div>
+            <div class="info-value">${formatNumber(selectedJobOrder.quantity || 0)} kg</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Finished Qty:</div>
+            <div class="info-value">${formatNumber(finishedQty)} kg</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Waste Qty:</div>
+            <div class="info-value">${formatNumber(wasteQty)} kg</div>
+          </div>
+          
+          <div class="qr-placeholder">
+            Scan QR code to view detailed information<br>
+            JO #${selectedJobOrder.id}
+          </div>
+          
+          <div class="footer">
+            Received in Warehouse - ${formattedDate}
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+    
+    // Print the window and close it after printing
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    
+    // Cleanup after printing
+    printWindow.onafterprint = () => {
+      printWindow.close();
+      setIsPrinting(false);
+      setPrintLabelDialogOpen(false);
+    };
+  };
+
   // Helper functions
   const getTotalCuttingQty = (jobOrderId: number): number => {
     // Calculate total cut quantity from all completed rolls for this job order
@@ -148,6 +318,14 @@ export default function FinalProducts() {
       roll.status === "completed"
     );
     return jobOrderRolls.reduce((total, roll) => total + (roll.cuttingQty || 0), 0);
+  };
+  
+  const getTotalExtrusionQty = (jobOrderId: number): number => {
+    // Calculate total extruded quantity from all rolls for this job order
+    const jobOrderRolls = rolls.filter(roll => 
+      roll.jobOrderId === jobOrderId
+    );
+    return jobOrderRolls.reduce((total, roll) => total + (roll.extrudingQty || 0), 0);
   };
   
   const getJobOrderDetails = (jobOrderId: number) => {
@@ -232,9 +410,17 @@ export default function FinalProducts() {
       },
     },
     {
-      header: t('warehouse.quantity') + " (Kg)",
+      header: t('warehouse.ordered_qty') + " (Kg)",
       accessorKey: "quantity",
       cell: (row) => formatNumber(row.quantity)
+    },
+    {
+      header: t('warehouse.production_qty') + " (Kg)",
+      cell: (row) => {
+        // Total extruded quantity (from all rolls)
+        const productionQty = getTotalExtrusionQty(row.id);
+        return formatNumber(productionQty);
+      }
     },
     {
       header: t('warehouse.finished_qty') + " (Kg)",
@@ -245,6 +431,19 @@ export default function FinalProducts() {
           const details = getJobOrderDetails(row.id);
           return formatNumber(details.totalCutQty);
         }
+      }
+    },
+    {
+      header: t('warehouse.waste_qty') + " (Kg)",
+      cell: (row) => {
+        // Production quantity - Finished quantity
+        const productionQty = getTotalExtrusionQty(row.id);
+        const finishedQty = row.status === "received" ? 
+          (row.finishedQty || 0) : 
+          getJobOrderDetails(row.id).totalCutQty;
+        
+        const wasteQty = Math.max(0, productionQty - finishedQty);
+        return formatNumber(wasteQty);
       }
     },
     {
@@ -266,20 +465,25 @@ export default function FinalProducts() {
       accessorKey: "status",
       cell: (row) => {
         // Custom status badge with appropriate color based on status
-        let variant: "default" | "outline" | "secondary" | "destructive" | "success" | "warning" = "default";
+        let variant: "default" | "outline" | "secondary" | "destructive" = "default";
         let statusText = row.status?.replace(/_/g, ' ') || '';
         
         // Map statuses to appropriate variant colors
         if (row.status === "pending") variant = "secondary";
-        if (row.status === "in_progress") variant = "warning";
-        if (row.status === "extrusion_completed") variant = "warning";
-        if (row.status === "printing_completed") variant = "warning";
-        if (row.status === "cutting_completed") variant = "warning";
-        if (row.status === "completed") variant = "warning";
-        if (row.status === "received") variant = "success";
+        if (row.status === "in_progress") variant = "secondary";
+        if (row.status === "extrusion_completed") variant = "secondary";
+        if (row.status === "printing_completed") variant = "secondary";
+        if (row.status === "cutting_completed") variant = "secondary";
+        if (row.status === "completed") variant = "secondary";
+        if (row.status === "received") variant = "default";
+        
+        // Apply additional styling based on status
+        let className = "capitalize whitespace-nowrap ";
+        if (row.status === "completed") className += "bg-amber-500 text-white hover:bg-amber-600";
+        if (row.status === "received") className += "bg-green-500 text-white hover:bg-green-600";
         
         return (
-          <Badge variant={variant} className="capitalize whitespace-nowrap">
+          <Badge variant={variant} className={className}>
             {statusText}
           </Badge>
         );
@@ -298,6 +502,17 @@ export default function FinalProducts() {
             >
               <span className="material-icons text-sm mr-1">inventory</span>
               {t('warehouse.receive')}
+            </Button>
+          )}
+          {row.status === "received" && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handlePrintLabel(row)}
+              className="whitespace-nowrap"
+            >
+              <span className="material-icons text-sm mr-1">print</span>
+              {t('warehouse.print_label')}
             </Button>
           )}
         </div>
@@ -394,6 +609,68 @@ export default function FinalProducts() {
                 ? t('common.receiving')
                 : t('warehouse.receive')
               }
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Print Label Dialog */}
+      <Dialog open={printLabelDialogOpen} onOpenChange={setPrintLabelDialogOpen}>
+        <DialogContent className={isRTL ? "rtl" : ""}>
+          <DialogHeader>
+            <DialogTitle>
+              {t('warehouse.print_label')}
+            </DialogTitle>
+            <DialogDescription>
+              {t('warehouse.print_label_description') || "Print a warehouse label for the received job order."}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedJobOrder && (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <h3 className="text-lg font-medium">
+                  {t('job_orders.title')} #{selectedJobOrder.id}
+                </h3>
+                <p className="text-sm text-secondary-500">
+                  {getJobOrderDetails(selectedJobOrder.id).customer} - {getJobOrderDetails(selectedJobOrder.id).productName}
+                </p>
+              </div>
+              
+              <div className="border rounded-md p-4 bg-secondary-50">
+                <p className="text-sm">
+                  {t('warehouse.print_label_info') || "A 3″ × 5″ label will be generated with the following information:"}
+                </p>
+                <ul className="text-sm list-disc list-inside mt-2 space-y-1">
+                  <li>{t('job_orders.title')} #{selectedJobOrder.id}</li>
+                  <li>{t('setup.customers.title')}: {getJobOrderDetails(selectedJobOrder.id).customer}</li>
+                  <li>{t('orders.product')}: {getJobOrderDetails(selectedJobOrder.id).productName}</li>
+                  <li>{t('warehouse.ordered_qty')}: {formatNumber(selectedJobOrder.quantity || 0)} kg</li>
+                  <li>{t('warehouse.finished_qty')}: {formatNumber(selectedJobOrder.finishedQty || 0)} kg</li>
+                  <li>{t('warehouse.waste_qty')}: {formatNumber(Math.max(0, getTotalExtrusionQty(selectedJobOrder.id) - (selectedJobOrder.finishedQty || 0)))} kg</li>
+                </ul>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter className={`${isMobile ? "flex flex-col space-y-2" : ""} ${isRTL ? "flex-row-reverse" : ""}`}>
+            <Button 
+              variant="outline" 
+              onClick={() => setPrintLabelDialogOpen(false)} 
+              className={isMobile ? "w-full" : ""}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button 
+              onClick={printJobOrderLabel} 
+              disabled={isPrinting}
+              className={isMobile ? "w-full" : ""}
+            >
+              {isPrinting
+                ? t('warehouse.printing_label') || "Printing Label..."
+                : t('warehouse.print_label')
+              }
+              <span className="material-icons text-sm ml-1">print</span>
             </Button>
           </DialogFooter>
         </DialogContent>
