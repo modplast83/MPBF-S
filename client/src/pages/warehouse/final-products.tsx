@@ -203,7 +203,7 @@ export default function FinalProducts() {
 
   const columns: FinalProductColumnDef[] = [
     {
-      header: t('common.id'),
+      header: "ID",
       accessorKey: "id",
     },
     {

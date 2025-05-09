@@ -353,8 +353,10 @@ export function JobOrdersForExtrusion() {
                         <span className="material-icons text-primary-600 text-sm sm:text-base">description</span>
                       </div>
                       <div className="text-left">
-                        <h4 className="font-medium text-sm sm:text-base">{t("job order")} #{jobOrder.id}</h4>
-                        <p className="text-xs sm:text-sm text-secondary-500 truncate max-w-[200px] sm:max-w-none">{getCustomerName(jobOrder)}</p>
+                        <h4 className="font-medium text-sm sm:text-base">{t("orders.title")} #{jobOrder.orderId} - {t("job order")} #{jobOrder.id}</h4>
+                        <p className="text-xs sm:text-sm text-secondary-500 truncate max-w-[200px] sm:max-w-none">
+                          {getCustomerName(jobOrder)} • {getItemName(jobOrder)}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between sm:justify-start sm:space-x-3 mt-2 sm:mt-0">

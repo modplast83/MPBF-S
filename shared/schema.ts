@@ -351,6 +351,8 @@ export const mixMaterials = pgTable("mix_materials", {
   orderId: integer("order_id").references(() => orders.id),
   totalQuantity: doublePrecision("total_quantity").default(0),
   createdAt: timestamp("created_at").defaultNow(),
+  status: text("status").default("pending"),
+  notes: text("notes"),
 });
 
 // Mix Machines junction table

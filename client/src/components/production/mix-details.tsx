@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   Select, 
@@ -12,10 +13,12 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { MixMaterial, MixItem, RawMaterial, User } from "@shared/schema";
 import { formatDateString } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { apiRequest } from "@/lib/queryClient";
 
 interface MixDetailsProps {
@@ -31,11 +34,21 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   const [selectedMaterial, setSelectedMaterial] = useState<number | null>(null);
   const [quantity, setQuantity] = useState("");
   const [isAddingMaterial, setIsAddingMaterial] = useState(false);
+  const [status, setStatus] = useState<string>("pending");
+  const [notes, setNotes] = useState<string>("");
 
   // Fetch mix details
   const { data: mix, isLoading: mixLoading } = useQuery<MixMaterial>({
     queryKey: [`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`],
   });
+
+  // Set status and notes when mix data is loaded
+  useEffect(() => {
+    if (mix) {
+      if (mix.status) setStatus(mix.status);
+      if (mix.notes) setNotes(mix.notes);
+    }
+  }, [mix]);
 
   // Fetch mix items
   const { data: mixItems, isLoading: itemsLoading } = useQuery<MixItem[]>({
@@ -97,6 +110,29 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
       });
     },
   });
+  
+  // Update mix status and notes mutation
+  const updateMixMutation = useMutation({
+    mutationFn: async (data: { status?: string; notes?: string }) => {
+      return apiRequest("PUT", `${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.MIX_MATERIALS}/${mixId}`] });
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MIX_MATERIALS] });
+      toast({
+        title: t("common.success"),
+        description: t("production.mix_materials.update_success"),
+        variant: "default",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("common.error"),
+        description: error.message || t("production.mix_materials.update_error"),
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleAddMaterial = () => {
     if (!selectedMaterial || !quantity) {
@@ -129,6 +165,14 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
     if (confirm("Are you sure you want to remove this material from the mix?")) {
       removeMixItemMutation.mutate(id);
     }
+  };
+  
+  // Handle updating the mix status and notes
+  const handleUpdateMix = () => {
+    updateMixMutation.mutate({
+      status,
+      notes
+    });
   };
 
   // Machine field no longer used
@@ -386,6 +430,64 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
               {t('production.mix_materials.no_materials')}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Status and Notes card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('production.mix_materials.status_and_notes')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('production.mix_materials.status')}</Label>
+              <Select
+                value={status}
+                onValueChange={(value) => setStatus(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('production.mix_materials.select_status')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">{t('status.pending')}</SelectItem>
+                  <SelectItem value="in_progress">{t('status.in_progress')}</SelectItem>
+                  <SelectItem value="completed">{t('status.completed')}</SelectItem>
+                  <SelectItem value="on_hold">{t('status.on_hold')}</SelectItem>
+                  <SelectItem value="cancelled">{t('status.cancelled')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="mt-2">
+                <StatusBadge status={status} />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>{t('production.mix_materials.notes')}</Label>
+              <Textarea
+                placeholder={t('production.mix_materials.enter_notes')}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+        </CardContent>
+        <CardContent className="pt-0">
+          <Button 
+            className="w-full" 
+            onClick={handleUpdateMix}
+            disabled={updateMixMutation.isPending}
+          >
+            {updateMixMutation.isPending ? (
+              <>
+                <span className="animate-spin mr-2">◌</span>
+                {t('common.saving')}...
+              </>
+            ) : (
+              t('common.save_changes')
+            )}
+          </Button>
         </CardContent>
       </Card>
 

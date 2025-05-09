@@ -17,6 +17,7 @@ import { AbaMaterialsDnd, MaterialDistribution } from "@/components/production/a
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -157,6 +158,13 @@ export default function MixMaterialsPage() {
       cell: (row: { totalQuantity: number | null }) => row.totalQuantity?.toFixed(2) || "0.00",
     },
     {
+      header: t('common.status'),
+      accessorKey: "status" as const,
+      cell: (row: any) => (
+        <StatusBadge status={row.status || 'pending'} size="sm" />
+      ),
+    },
+    {
       header: "Actions",
       id: "actions",
       cell: (row: MixMaterial) => (
@@ -179,6 +187,8 @@ export default function MixMaterialsPage() {
             className="text-primary-500 hover:text-primary-700"
             onClick={(e) => {
               e.stopPropagation();
+              setSelectedMixId(row.id);
+              // Use the enhanced print function for a more detailed printout
               printMixLabel(row.id);
             }}
           >
@@ -253,9 +263,53 @@ export default function MixMaterialsPage() {
     preparePrintData(mixId);
   };
 
+  // Function to get the appropriate status badge color
+  const getStatusBadgeColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'in-progress':
+      case 'in progress':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'approved':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'on-hold':
+      case 'on hold':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  // Function to get the status icon
+  const getStatusIcon = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return 'pending';
+      case 'in-progress':
+      case 'in progress':
+        return 'hourglass_top';
+      case 'completed':
+        return 'check_circle';
+      case 'rejected':
+        return 'cancel';
+      case 'approved':
+        return 'verified';
+      case 'on-hold':
+      case 'on hold':
+        return 'pause_circle';
+      default:
+        return 'help';
+    }
+  };
 
 
-  // Create printable label component
+
+  // Create printable label component with full details
   const PrintableLabel = () => {
     if (!printableData) return null;
     
@@ -280,47 +334,129 @@ export default function MixMaterialsPage() {
     };
     
     return (
-      <div className="printable-label" style={{ width: "3in", height: "5in", padding: "0.25in" }}>
-        <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "10px", textAlign: "center" }}>
-          {t('production.mix_materials.mix_label')}
+      <div className="printable-label" style={{ width: "8.5in", padding: "0.5in", fontFamily: "Arial, sans-serif" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          <div style={{ fontWeight: "bold", fontSize: "24px" }}>
+            {t('production.mix_materials.mix_label')}
+          </div>
+          <div style={{ textAlign: "right", fontSize: "12px", color: "#666" }}>
+            {t('common.printed')}: {new Date().toLocaleString()}
+          </div>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", borderBottom: "1px solid #ccc", paddingBottom: "0.1in" }}>
-          <div>{t('production.mix_materials.mix_id')}: {mix.id}</div>
-          <div>{t('production.mix_materials.date')}: {formatDateString(mix.mixDate)}</div>
+        
+        {/* Mix Details Header Section */}
+        <div style={{ 
+          backgroundColor: "#f8f9fa", 
+          border: "1px solid #e9ecef", 
+          borderRadius: "5px", 
+          padding: "15px", 
+          marginBottom: "20px"
+        }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "15px" }}>
+            <div>
+              <div style={{ fontWeight: "bold", fontSize: "14px", color: "#666" }}>{t('production.mix_materials.mix_id')}</div>
+              <div style={{ fontSize: "18px", fontWeight: "bold" }}>#{mix.id}</div>
+            </div>
+            <div>
+              <div style={{ fontWeight: "bold", fontSize: "14px", color: "#666" }}>{t('production.mix_materials.date')}</div>
+              <div style={{ fontSize: "16px" }}>{formatDateString(mix.mixDate)}</div>
+            </div>
+            <div>
+              <div style={{ fontWeight: "bold", fontSize: "14px", color: "#666" }}>{t('production.mix_materials.operator')}</div>
+              <div style={{ fontSize: "16px" }}>{getPrintOperatorName(mix.mixPerson)}</div>
+            </div>
+          </div>
+          
+          <div style={{ marginTop: "15px", display: "flex", alignItems: "center" }}>
+            <div style={{ 
+              backgroundColor: "#e9f7ef", 
+              padding: "8px 15px", 
+              borderRadius: "4px", 
+              fontWeight: "bold", 
+              display: "flex", 
+              alignItems: "center", 
+              marginRight: "10px" 
+            }}>
+              <span style={{ marginRight: "5px" }}>🔢</span>
+              <span>{t('production.mix_materials.total_weight')}: {totalWeight.toFixed(2)} kg</span>
+            </div>
+            <div style={{ 
+              backgroundColor: "#edf7ff", 
+              padding: "8px 15px", 
+              borderRadius: "4px", 
+              fontWeight: "bold", 
+              display: "flex", 
+              alignItems: "center" 
+            }}>
+              <span style={{ marginRight: "5px" }}>📋</span>
+              <span>{t('production.mix_materials.materials')}: {items.length}</span>
+            </div>
+          </div>
         </div>
-        <div style={{ marginBottom: "10px" }}>
-          <div>{t('production.mix_materials.operator')}: {getPrintOperatorName(mix.mixPerson)}</div>
-          <div>{t('production.mix_materials.total_weight')}: {totalWeight.toFixed(2)} kg</div>
+        
+        {/* Materials Table */}
+        <div style={{ marginBottom: "20px" }}>
+          <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "10px", borderBottom: "2px solid #dee2e6", paddingBottom: "5px" }}>
+            {t('production.mix_materials.materials_details')}
+          </div>
+          
+          <table style={{ width: "100%", borderCollapse: "collapse", borderRadius: "5px", overflow: "hidden" }}>
+            <thead>
+              <tr style={{ backgroundColor: "#f1f3f5" }}>
+                <th style={{ border: "1px solid #dee2e6", padding: "10px", textAlign: "left" }}>{t('common.id')}</th>
+                <th style={{ border: "1px solid #dee2e6", padding: "10px", textAlign: "left" }}>{t('production.mix_materials.material')}</th>
+                <th style={{ border: "1px solid #dee2e6", padding: "10px", textAlign: "right" }}>{t('production.mix_materials.quantity')} (kg)</th>
+                <th style={{ border: "1px solid #dee2e6", padding: "10px", textAlign: "right" }}>{t('production.mix_materials.percentage')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item: { id: number; quantity: number; rawMaterialId: number }, index: number) => {
+                const percentage = ((item.quantity / totalWeight) * 100).toFixed(1);
+                const materialName = materialNames[item.rawMaterialId] || `Material ${item.rawMaterialId}`;
+                
+                return (
+                  <tr key={item.id} style={{ backgroundColor: index % 2 === 0 ? "#fff" : "#f8f9fa" }}>
+                    <td style={{ border: "1px solid #dee2e6", padding: "8px 10px" }}>{item.id}</td>
+                    <td style={{ border: "1px solid #dee2e6", padding: "8px 10px" }}>{materialName}</td>
+                    <td style={{ border: "1px solid #dee2e6", padding: "8px 10px", textAlign: "right", fontFamily: "monospace" }}>
+                      {item.quantity.toFixed(2)}
+                    </td>
+                    <td style={{ border: "1px solid #dee2e6", padding: "8px 10px", textAlign: "right", fontFamily: "monospace" }}>
+                      {percentage}%
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr style={{ backgroundColor: "#e9ecef", fontWeight: "bold" }}>
+                <td colSpan={2} style={{ border: "1px solid #dee2e6", padding: "10px", textAlign: "right" }}>
+                  {t('common.total')}:
+                </td>
+                <td style={{ border: "1px solid #dee2e6", padding: "10px", textAlign: "right", fontFamily: "monospace" }}>
+                  {totalWeight.toFixed(2)} kg
+                </td>
+                <td style={{ border: "1px solid #dee2e6", padding: "10px", textAlign: "right", fontFamily: "monospace" }}>
+                  100%
+                </td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th style={{ border: "1px solid #ccc", padding: "4px" }}>{t('production.mix_materials.material')}</th>
-              <th style={{ border: "1px solid #ccc", padding: "4px" }}>{t('production.mix_materials.quantity')}</th>
-              <th style={{ border: "1px solid #ccc", padding: "4px" }}>{t('production.mix_materials.percentage')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item: { id: number; quantity: number; rawMaterialId: number }) => {
-              const percentage = ((item.quantity / totalWeight) * 100).toFixed(1);
-              const materialName = materialNames[item.rawMaterialId] || `Material ${item.rawMaterialId}`;
-              return (
-                <tr key={item.id}>
-                  <td style={{ border: "1px solid #ccc", padding: "4px" }}>{materialName}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "4px", textAlign: "right" }}>{item.quantity.toFixed(2)}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "4px", textAlign: "right" }}>{percentage}%</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        <div style={{ borderTop: "1px solid #ccc", paddingTop: "0.1in", display: "flex", justifyContent: "space-between", fontWeight: "bold", marginTop: "10px" }}>
-          <div>Total: {items.length}</div>
-          <div>{totalWeight.toFixed(2)} kg</div>
-        </div>
-        <div style={{ textAlign: "center", fontSize: "8pt", marginTop: "0.1in" }}>
-          {new Date().toLocaleString()}<br/>
-          Size: 3" x 5"
+        
+        {/* Notes and Additional Information */}
+        {mix.notes && (
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontWeight: "bold", fontSize: "16px", marginBottom: "5px" }}>{t('common.notes')}</div>
+            <div style={{ padding: "10px", border: "1px solid #dee2e6", borderRadius: "5px", backgroundColor: "#f8f9fa" }}>
+              {mix.notes}
+            </div>
+          </div>
+        )}
+        
+        {/* Footer */}
+        <div style={{ marginTop: "30px", borderTop: "1px solid #dee2e6", paddingTop: "15px", fontSize: "12px", color: "#6c757d", textAlign: "center" }}>
+          {t('production.mix_materials.confidential_document')} &copy; {new Date().getFullYear()}
         </div>
       </div>
     );
@@ -360,6 +496,7 @@ export default function MixMaterialsPage() {
                   {formatDateString(mix.mixDate.toString())}
                 </p>
               </div>
+              <StatusBadge status={mix.status || 'pending'} size="sm" />
             </CardHeader>
             <CardContent className="p-3 pt-2">
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -379,6 +516,8 @@ export default function MixMaterialsPage() {
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
+                    setSelectedMixId(mix.id);
+                    // Use the detailed view printMixLabel function that shows all details
                     printMixLabel(mix.id);
                   }}
                   className="h-8 w-8 rounded-full text-primary-500 hover:text-primary-700 hover:bg-primary-50"

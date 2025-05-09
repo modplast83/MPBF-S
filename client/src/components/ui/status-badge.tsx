@@ -1,80 +1,102 @@
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface StatusBadgeProps {
   status: string;
+  showIcon?: boolean;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const getStatusInfo = () => {
-    switch (status.toLowerCase()) {
-      case "pending":
-        return {
-          classes: "bg-amber-50 text-amber-700 border-amber-200",
-          icon: "hourglass_empty"
-        };
-      case "processing":
-        return {
-          classes: "bg-blue-50 text-blue-700 border-blue-200",
-          icon: "sync"
-        };
-      case "completed":
-        return {
-          classes: "bg-emerald-50 text-emerald-700 border-emerald-200",
-          icon: "check_circle"
-        };
-      case "cancelled":
-      case "rejected":
-        return {
-          classes: "bg-red-50 text-red-700 border-red-200",
-          icon: "cancel"
-        };
-      case "extrusion":
-        return {
-          classes: "bg-indigo-50 text-indigo-700 border-indigo-200",
-          icon: "view_in_ar"
-        };
-      case "printing":
-        return {
-          classes: "bg-amber-50 text-amber-700 border-amber-200",
-          icon: "print"
-        };
-      case "cutting":
-        return {
-          classes: "bg-cyan-50 text-cyan-700 border-cyan-200",
-          icon: "content_cut"
-        };
-      case "on hold":
-        return {
-          classes: "bg-orange-50 text-orange-700 border-orange-200",
-          icon: "pause_circle"
-        };
-      case "in stock":
-        return {
-          classes: "bg-purple-50 text-purple-700 border-purple-200",
-          icon: "inventory_2"
-        };
+/**
+ * Status Badge Component
+ * 
+ * A reusable badge component that displays a status with appropriate colors
+ * and optional icon based on the status value.
+ */
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ 
+  status,
+  showIcon = true,
+  className = '',
+  size = 'md'
+}) => {
+  // Default to empty string if status is undefined
+  const statusText = status || '';
+  
+  // Get appropriate colors based on status
+  const getStatusStyles = () => {
+    switch (statusText.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'in-progress':
+      case 'in progress':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'approved':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'on-hold':
+      case 'on hold':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       default:
-        return {
-          classes: "bg-gray-50 text-gray-700 border-gray-200",
-          icon: "help_outline"
-        };
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
-  const { classes, icon } = getStatusInfo();
-  const displayText = status.charAt(0).toUpperCase() + status.slice(1);
-
+  
+  // Get appropriate icon based on status
+  const getStatusIcon = () => {
+    switch (statusText.toLowerCase()) {
+      case 'pending':
+        return 'pending';
+      case 'in-progress':
+      case 'in progress':
+        return 'hourglass_top';
+      case 'completed':
+        return 'check_circle';
+      case 'rejected':
+        return 'cancel';
+      case 'approved':
+        return 'verified';
+      case 'on-hold':
+      case 'on hold':
+        return 'pause_circle';
+      default:
+        return 'help';
+    }
+  };
+  
+  // Size classes
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'sm':
+        return 'text-xs px-1.5 py-0.5';
+      case 'lg':
+        return 'text-sm px-3 py-1.5';
+      case 'md':
+      default:
+        return 'text-xs px-2 py-1';
+    }
+  };
+  
   return (
-    <span
+    <span 
       className={cn(
-        "px-2.5 py-1 rounded-full text-xs font-medium border flex items-center gap-1 whitespace-nowrap",
-        classes,
+        'inline-flex items-center font-medium rounded border',
+        getStatusStyles(),
+        getSizeClasses(),
         className
       )}
     >
-      <span className="material-icons text-[13px]">{icon}</span>
-      {displayText}
+      {showIcon && (
+        <span className="material-icons text-[0.9em] mr-1" style={{ fontSize: '1em' }}>
+          {getStatusIcon()}
+        </span>
+      )}
+      <span className="capitalize">
+        {statusText.replace(/-/g, ' ')}
+      </span>
     </span>
   );
-}
+};
