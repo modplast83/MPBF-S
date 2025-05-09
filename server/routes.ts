@@ -1097,18 +1097,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Job order not found" });
       }
       
-      // For status updates, we'll accept a simpler object
-      if (req.body && typeof req.body === 'object' && 'status' in req.body) {
-        const statusSchema = z.object({
-          status: z.enum(["pending", "in_progress", "extrusion_completed", "completed", "cancelled"]),
+      // For status updates or finished quantity updates, we'll accept a simpler object
+      if (req.body && typeof req.body === 'object' && ('status' in req.body || 'finishedQty' in req.body)) {
+        const updateSchema = z.object({
+          status: z.enum(["pending", "in_progress", "extrusion_completed", "completed", "cancelled", "received"]).optional(),
+          finishedQty: z.number().nonnegative().optional(),
         });
         
         try {
-          const { status } = statusSchema.parse(req.body);
-          const updatedJobOrder = await storage.updateJobOrder(parseInt(req.params.id), { status });
+          const updateData = updateSchema.parse(req.body);
+          const updatedJobOrder = await storage.updateJobOrder(parseInt(req.params.id), updateData);
           return res.json(updatedJobOrder);
-        } catch (statusError) {
-          // Not a valid status update, continue with full validation
+        } catch (updateError) {
+          // Not a valid status or finishedQty update, continue with full validation
         }
       }
       

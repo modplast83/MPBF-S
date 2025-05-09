@@ -162,6 +162,7 @@ export const jobOrders = pgTable("job_orders", {
   orderId: integer("order_id").notNull().references(() => orders.id), // Order ID
   customerProductId: integer("customer_product_id").notNull().references(() => customerProducts.id), // Customer Product No
   quantity: doublePrecision("quantity").notNull(), // Qty Kg
+  finishedQty: doublePrecision("finished_qty").default(0).notNull(), // Finished quantity (kg)
   status: text("status").default("pending").notNull(), // Status (pending, in_progress, extrusion_completed, completed, cancelled)
   customerId: text("customer_id").references(() => customers.id), // Customer ID
 }, (table) => {
@@ -351,8 +352,6 @@ export const mixMaterials = pgTable("mix_materials", {
   orderId: integer("order_id").references(() => orders.id),
   totalQuantity: doublePrecision("total_quantity").default(0),
   createdAt: timestamp("created_at").defaultNow(),
-  status: text("status").default("pending"),
-  notes: text("notes"),
 });
 
 // Mix Machines junction table
