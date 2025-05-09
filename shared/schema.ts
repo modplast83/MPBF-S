@@ -477,3 +477,18 @@ export const plateCalculationRequestSchema = z.object({
 });
 
 export type PlateCalculationRequest = z.infer<typeof plateCalculationRequestSchema>;
+
+// ABA Material Configurations table for storing ABA calculator formulas
+export const abaMaterialConfigs = pgTable("aba_material_configs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdBy: text("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  isDefault: boolean("is_default").default(false),
+  configData: jsonb("config_data").notNull(), // Stores the MaterialDistribution[] array as JSON
+});
+
+export const insertAbaMaterialConfigSchema = createInsertSchema(abaMaterialConfigs).omit({ id: true, createdAt: true });
+export type InsertAbaMaterialConfig = z.infer<typeof insertAbaMaterialConfigSchema>;
+export type AbaMaterialConfig = typeof abaMaterialConfigs.$inferSelect;

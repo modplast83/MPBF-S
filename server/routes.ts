@@ -14,7 +14,8 @@ import {
   insertMaterialInputItemSchema,
   insertPlatePricingParameterSchema, insertPlateCalculationSchema,
   plateCalculationRequestSchema, PlateCalculationRequest,
-  User, upsertUserSchema, UpsertUser
+  User, upsertUserSchema, UpsertUser,
+  AbaMaterialConfig, insertAbaMaterialConfigSchema
 } from "@shared/schema";
 import { z } from "zod";
 import fileUpload from 'express-fileupload';
@@ -2979,6 +2980,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting plate calculation:", error);
       res.status(500).json({ message: "Failed to delete plate calculation" });
+    }
+  });
+  
+  // ABA Material Configurations API endpoints
+  app.get("/api/aba-material-configs", async (_req: Request, res: Response) => {
+    try {
+      const configs = await storage.getAbaMaterialConfigs();
+      res.json(configs);
+    } catch (error) {
+      console.error("Error getting ABA material configs:", error);
+      res.status(500).json({ message: "Failed to get ABA material configs" });
+    }
+  });
+  
+  app.get("/api/aba-material-configs/default", async (_req: Request, res: Response) => {
+    try {
+      const config = await storage.getDefaultAbaMaterialConfig();
+      if (!config) {
+        return res.status(404).json({ message: "No default ABA material config found" });
+      }
+      res.json(config);
+    } catch (error) {
+      console.error("Error getting default ABA material config:", error);
+      res.status(500).json({ message: "Failed to get default ABA material config" });
+    }
+  });
+  
+  app.get("/api/aba-material-configs/user/:userId", async (req: Request, res: Response) => {
+    try {
+      const configs = await storage.getAbaMaterialConfigsByUser(req.params.userId);
+      res.json(configs);
+    } catch (error) {
+      console.error("Error getting ABA material configs by user:", error);
+      res.status(500).json({ message: "Failed to get ABA material configs" });
+    }
+  });
+  
+  app.get("/api/aba-material-configs/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid config ID" });
+      }
+      
+      const config = await storage.getAbaMaterialConfig(id);
+      if (!config) {
+        return res.status(404).json({ message: "ABA material config not found" });
+      }
+      res.json(config);
+    } catch (error) {
+      console.error("Error getting ABA material config:", error);
+      res.status(500).json({ message: "Failed to get ABA material config" });
+    }
+  });
+  
+  app.post("/api/aba-material-configs", async (req: Request, res: Response) => {
+    try {
+      // Get user information from session for tracking who created this config
+      if (!req.user) {
+        return res.status(401).json({ message: "You must be logged in to create a config" });
+      }
+      const userId = (req.user as any).id;
+      
+      const { name, description, configData, isDefault } = req.body;
+      
+      if (!name || !configData) {
+        return res.status(400).json({ message: "Name and configData are required" });
+      }
+      
+      const newConfig = await storage.createAbaMaterialConfig({
+        name,
+        description,
+        createdBy: userId,
+        configData,
+        isDefault: isDefault || false
+      });
+      
+      res.status(201).json(newConfig);
+    } catch (error) {
+      console.error("Error creating ABA material config:", error);
+      res.status(500).json({ message: "Failed to create ABA material config" });
+    }
+  });
+  
+  app.put("/api/aba-material-configs/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid config ID" });
+      }
+      
+      const config = await storage.getAbaMaterialConfig(id);
+      if (!config) {
+        return res.status(404).json({ message: "ABA material config not found" });
+      }
+      
+      // Only allow the creator or admins to update
+      if (req.user && (req.user as any).id !== config.createdBy && (req.user as any).role !== 'administrator') {
+        return res.status(403).json({ message: "You don't have permission to update this config" });
+      }
+      
+      const { name, description, configData, isDefault } = req.body;
+      
+      const updates: Partial<AbaMaterialConfig> = {};
+      if (name !== undefined) updates.name = name;
+      if (description !== undefined) updates.description = description;
+      if (configData !== undefined) updates.configData = configData;
+      if (isDefault !== undefined) updates.isDefault = isDefault;
+      
+      const updatedConfig = await storage.updateAbaMaterialConfig(id, updates);
+      res.json(updatedConfig);
+    } catch (error) {
+      console.error("Error updating ABA material config:", error);
+      res.status(500).json({ message: "Failed to update ABA material config" });
+    }
+  });
+  
+  app.delete("/api/aba-material-configs/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid config ID" });
+      }
+      
+      const config = await storage.getAbaMaterialConfig(id);
+      if (!config) {
+        return res.status(404).json({ message: "ABA material config not found" });
+      }
+      
+      // Only allow the creator or admins to delete
+      if (req.user && (req.user as any).id !== config.createdBy && (req.user as any).role !== 'administrator') {
+        return res.status(403).json({ message: "You don't have permission to delete this config" });
+      }
+      
+      await storage.deleteAbaMaterialConfig(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting ABA material config:", error);
+      res.status(500).json({ message: "Failed to delete ABA material config" });
+    }
+  });
+  
+  app.post("/api/aba-material-configs/:id/set-default", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid config ID" });
+      }
+      
+      const config = await storage.getAbaMaterialConfig(id);
+      if (!config) {
+        return res.status(404).json({ message: "ABA material config not found" });
+      }
+      
+      // Only allow the creator or admins to set as default
+      if (req.user && (req.user as any).id !== config.createdBy && (req.user as any).role !== 'administrator') {
+        return res.status(403).json({ message: "You don't have permission to set this config as default" });
+      }
+      
+      await storage.setDefaultAbaMaterialConfig(id);
+      res.json({ message: "Config set as default successfully" });
+    } catch (error) {
+      console.error("Error setting ABA material config as default:", error);
+      res.status(500).json({ message: "Failed to set config as default" });
     }
   });
 

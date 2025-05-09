@@ -17,10 +17,11 @@ import {
   categories, items, sections, machines, masterBatches, customers, customerProducts,
   orders, jobOrders, rolls, rawMaterials, finalProducts, qualityCheckTypes,
   qualityChecks, correctiveActions, smsMessages, mixMaterials, mixItems, mixMachines,
-  platePricingParameters, plateCalculations
+  platePricingParameters, plateCalculations,
+  abaMaterialConfigs, AbaMaterialConfig, InsertAbaMaterialConfig
 } from "@shared/schema";
-import { db } from "./db";
-import { and, eq, or } from "drizzle-orm";
+import { db, pool } from "./db";
+import { and, eq, or, sql, ne } from "drizzle-orm";
 
 /**
  * Helper function to check if a database table exists
@@ -28,12 +29,12 @@ import { and, eq, or } from "drizzle-orm";
  */
 async function checkTableExists(tableName: string): Promise<boolean> {
   try {
-    const result = await pool.query(`
+    const result = await db.execute(sql`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' AND table_name = $1
+        WHERE table_schema = 'public' AND table_name = ${tableName}
       )
-    `, [tableName]);
+    `);
     return result.rows[0]?.exists === true;
   } catch (error) {
     console.error(`Error checking if table ${tableName} exists:`, error);
@@ -1565,5 +1566,145 @@ export class HybridStorage implements IStorage {
   async deletePlateCalculation(id: number): Promise<boolean> {
     console.warn('deletePlateCalculation not fully implemented');
     return false;
+  }
+  
+  // ABA Material Configurations
+  async getAbaMaterialConfigs(): Promise<AbaMaterialConfig[]> {
+    try {
+      return await db.select().from(abaMaterialConfigs);
+    } catch (error) {
+      console.error('Failed to get ABA material configs:', error);
+      return [];
+    }
+  }
+  
+  async getAbaMaterialConfigsByUser(createdBy: string): Promise<AbaMaterialConfig[]> {
+    try {
+      return await db.select().from(abaMaterialConfigs).where(eq(abaMaterialConfigs.createdBy, createdBy));
+    } catch (error) {
+      console.error(`Failed to get ABA material configs for user ${createdBy}:`, error);
+      return [];
+    }
+  }
+  
+  async getAbaMaterialConfig(id: number): Promise<AbaMaterialConfig | undefined> {
+    try {
+      const [config] = await db.select().from(abaMaterialConfigs).where(eq(abaMaterialConfigs.id, id));
+      return config;
+    } catch (error) {
+      console.error(`Failed to get ABA material config ${id}:`, error);
+      return undefined;
+    }
+  }
+  
+  async getDefaultAbaMaterialConfig(): Promise<AbaMaterialConfig | undefined> {
+    try {
+      const [config] = await db.select().from(abaMaterialConfigs).where(eq(abaMaterialConfigs.isDefault, true));
+      return config;
+    } catch (error) {
+      console.error('Failed to get default ABA material config:', error);
+      return undefined;
+    }
+  }
+  
+  async createAbaMaterialConfig(config: InsertAbaMaterialConfig): Promise<AbaMaterialConfig> {
+    try {
+      // If this is the first config or marked as default, ensure it's set as default
+      const existingConfigs = await this.getAbaMaterialConfigs();
+      
+      if (existingConfigs.length === 0 || config.isDefault) {
+        // If this is marked as default, unset any other defaults
+        if (existingConfigs.length > 0 && config.isDefault) {
+          await db.update(abaMaterialConfigs)
+            .set({ isDefault: false })
+            .where(eq(abaMaterialConfigs.isDefault, true));
+        }
+        
+        // For the first config, always set as default
+        if (existingConfigs.length === 0) {
+          config.isDefault = true;
+        }
+      }
+      
+      const [result] = await db.insert(abaMaterialConfigs)
+        .values(config)
+        .returning();
+      
+      return result;
+    } catch (error) {
+      console.error('Failed to create ABA material config:', error);
+      throw new Error('Failed to create ABA material config');
+    }
+  }
+  
+  async updateAbaMaterialConfig(id: number, update: Partial<AbaMaterialConfig>): Promise<AbaMaterialConfig | undefined> {
+    try {
+      // If this is being set as default, unset any other defaults
+      if (update.isDefault) {
+        await db.update(abaMaterialConfigs)
+          .set({ isDefault: false })
+          .where(and(
+            eq(abaMaterialConfigs.isDefault, true),
+            ne(abaMaterialConfigs.id, id)
+          ));
+      }
+      
+      const [result] = await db.update(abaMaterialConfigs)
+        .set(update)
+        .where(eq(abaMaterialConfigs.id, id))
+        .returning();
+      
+      return result;
+    } catch (error) {
+      console.error(`Failed to update ABA material config ${id}:`, error);
+      return undefined;
+    }
+  }
+  
+  async deleteAbaMaterialConfig(id: number): Promise<boolean> {
+    try {
+      // Check if this is the default config
+      const [config] = await db.select().from(abaMaterialConfigs).where(eq(abaMaterialConfigs.id, id));
+      
+      if (config && config.isDefault) {
+        // If we're deleting the default, find another config to make default
+        const [anotherConfig] = await db.select()
+          .from(abaMaterialConfigs)
+          .where(eq(abaMaterialConfigs.isDefault, false))
+          .limit(1);
+        
+        if (anotherConfig) {
+          await db.update(abaMaterialConfigs)
+            .set({ isDefault: true })
+            .where(eq(abaMaterialConfigs.id, anotherConfig.id));
+        }
+      }
+      
+      await db.delete(abaMaterialConfigs).where(eq(abaMaterialConfigs.id, id));
+      return true;
+    } catch (error) {
+      console.error(`Failed to delete ABA material config ${id}:`, error);
+      return false;
+    }
+  }
+  
+  async setDefaultAbaMaterialConfig(id: number): Promise<boolean> {
+    try {
+      // First, unset any current defaults
+      await db.update(abaMaterialConfigs)
+        .set({ isDefault: false })
+        .where(eq(abaMaterialConfigs.isDefault, true));
+      
+      // Then set the new default
+      const [result] = await db.update(abaMaterialConfigs)
+        .set({ isDefault: true })
+        .where(eq(abaMaterialConfigs.id, id))
+        .returning();
+      
+      return !!result;
+    } catch (error) {
+      console.error(`Failed to set ABA material config ${id} as default:`, error);
+      return false;
+    }
   }
 }

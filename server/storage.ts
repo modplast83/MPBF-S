@@ -11,7 +11,8 @@ import {
   Permission, InsertPermission, MaterialInput, InsertMaterialInput,
   MaterialInputItem, InsertMaterialInputItem,
   PlatePricingParameter, InsertPlatePricingParameter,
-  PlateCalculation, InsertPlateCalculation
+  PlateCalculation, InsertPlateCalculation,
+  AbaMaterialConfig, InsertAbaMaterialConfig
 } from "@shared/schema";
 import session from "express-session";
 
@@ -213,6 +214,16 @@ export interface IStorage {
   createPlateCalculation(calculation: InsertPlateCalculation): Promise<PlateCalculation>;
   updatePlateCalculation(id: number, update: Partial<PlateCalculation>): Promise<PlateCalculation | undefined>;
   deletePlateCalculation(id: number): Promise<boolean>;
+  
+  // ABA Material Configurations methods
+  getAbaMaterialConfigs(): Promise<AbaMaterialConfig[]>;
+  getAbaMaterialConfigsByUser(createdBy: string): Promise<AbaMaterialConfig[]>;
+  getAbaMaterialConfig(id: number): Promise<AbaMaterialConfig | undefined>;
+  getDefaultAbaMaterialConfig(): Promise<AbaMaterialConfig | undefined>;
+  createAbaMaterialConfig(config: InsertAbaMaterialConfig): Promise<AbaMaterialConfig>;
+  updateAbaMaterialConfig(id: number, update: Partial<AbaMaterialConfig>): Promise<AbaMaterialConfig | undefined>;
+  deleteAbaMaterialConfig(id: number): Promise<boolean>;
+  setDefaultAbaMaterialConfig(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {

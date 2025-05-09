@@ -85,19 +85,43 @@ export default function MixMaterialsPage() {
   // Delete mix mutation
   const [abaCalculationData, setAbaCalculationData] = useState<any>(null);
   const [materialDistributions, setMaterialDistributions] = useState<MaterialDistribution[]>([]);
+  const [configName, setConfigName] = useState<string>("");
+  const [configDescription, setConfigDescription] = useState<string>("");
+  const [selectedConfigId, setSelectedConfigId] = useState<number | null>(null);
   
-  // Load saved ABA material distributions from localStorage on component mount
+  // Define AbaConfig type
+  interface AbaConfig {
+    id: number;
+    name: string;
+    description: string | null;
+    configData: MaterialDistribution[];
+    isDefault: boolean;
+    createdBy: string;
+    createdAt: string;
+    updatedAt: string | null;
+  }
+  
+  // Fetch saved ABA material configurations from the database
+  const { data: abaConfigs, isLoading: configsLoading, refetch: refetchConfigs } = useQuery<AbaConfig[]>({
+    queryKey: [API_ENDPOINTS.ABA_MATERIAL_CONFIGS],
+    initialData: [],
+  });
+  
+  // Fetch the default configuration if available
+  const { data: defaultConfig } = useQuery<AbaConfig>({
+    queryKey: [`${API_ENDPOINTS.ABA_MATERIAL_CONFIGS}/default`],
+    enabled: true,
+  });
+  
+  // Update state when default config is fetched
   useEffect(() => {
-    try {
-      const savedConfig = localStorage.getItem('aba-material-config');
-      if (savedConfig) {
-        const parsedConfig = JSON.parse(savedConfig);
-        setMaterialDistributions(parsedConfig);
-      }
-    } catch (error) {
-      console.error("Failed to load ABA material configuration:", error);
+    if (defaultConfig && defaultConfig.configData) {
+      setMaterialDistributions(defaultConfig.configData);
+      setConfigName(defaultConfig.name);
+      setConfigDescription(defaultConfig.description || "");
+      setSelectedConfigId(defaultConfig.id);
     }
-  }, []);
+  }, [defaultConfig]);
 
   const deleteMixMutation = useMutation({
     mutationFn: async (mixId: number) => {
@@ -415,18 +439,212 @@ export default function MixMaterialsPage() {
     );
   };
   
+  // ABA Config selector component
+  const AbaConfigSelector = () => {
+    if (configsLoading) {
+      return <div className="h-24 animate-pulse bg-gray-100 rounded-md"></div>;
+    }
+    
+    if (abaConfigs.length === 0) {
+      return (
+        <div className="text-center py-4 px-2 bg-gray-50 rounded-md mb-4">
+          <p className="text-gray-500">{t('production.aba_calculator.no_saved_configs')}</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="mb-4">
+        <h3 className="text-sm font-medium mb-2">{t('production.aba_calculator.saved_configurations')}</h3>
+        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+          {abaConfigs.map((config) => (
+            <div 
+              key={config.id} 
+              className={`flex items-center justify-between p-2 rounded-md border ${
+                selectedConfigId === config.id ? 'border-primary-500 bg-primary-50' : 'border-gray-200'
+              }`}
+            >
+              <div className="flex-1 mr-2">
+                <div className="flex items-center">
+                  <span className="font-medium text-sm">{config.name}</span>
+                  {config.isDefault && (
+                    <span className="ml-2 px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">
+                      {t('common.default')}
+                    </span>
+                  )}
+                </div>
+                {config.description && (
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">{config.description}</p>
+                )}
+              </div>
+              <div className="flex space-x-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 rounded-full"
+                  title={t('common.load')}
+                  onClick={() => {
+                    setMaterialDistributions(config.configData);
+                    setConfigName(config.name);
+                    setConfigDescription(config.description || "");
+                    setSelectedConfigId(config.id);
+                  }}
+                >
+                  <span className="material-icons text-xs">file_open</span>
+                </Button>
+                {!config.isDefault && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 rounded-full"
+                    title={t('production.aba_calculator.set_as_default')}
+                    onClick={() => setDefaultConfigMutation.mutate(config.id)}
+                  >
+                    <span className="material-icons text-xs">star</span>
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 rounded-full text-error-500 hover:text-error-700"
+                  title={t('common.delete')}
+                  onClick={() => {
+                    if (confirm(t('common.delete_confirmation'))) {
+                      deleteConfigMutation.mutate(config.id);
+                    }
+                  }}
+                >
+                  <span className="material-icons text-xs">delete</span>
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  
+  // Create ABA material config mutation
+  const createConfigMutation = useMutation({
+    mutationFn: async (data: { name: string, description: string, configData: MaterialDistribution[], isDefault: boolean }) => {
+      return await apiRequest("POST", API_ENDPOINTS.ABA_MATERIAL_CONFIGS, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: t("common.success"),
+        description: t("production.aba_calculator.configuration_saved"),
+        duration: 2000,
+      });
+      refetchConfigs();
+    },
+    onError: (error) => {
+      toast({
+        title: t("common.error"),
+        description: `${t("common.save_error")}: ${error}`,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Update ABA material config mutation
+  const updateConfigMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number, data: { name: string, description: string, configData: MaterialDistribution[], isDefault: boolean } }) => {
+      return await apiRequest("PUT", `${API_ENDPOINTS.ABA_MATERIAL_CONFIGS}/${id}`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: t("common.success"),
+        description: t("production.aba_calculator.configuration_updated"),
+        duration: 2000,
+      });
+      refetchConfigs();
+    },
+    onError: (error) => {
+      toast({
+        title: t("common.error"),
+        description: `${t("common.update_error")}: ${error}`,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Delete ABA material config mutation
+  const deleteConfigMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `${API_ENDPOINTS.ABA_MATERIAL_CONFIGS}/${id}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: t("common.success"),
+        description: t("production.aba_calculator.configuration_deleted"),
+        duration: 2000,
+      });
+      setSelectedConfigId(null);
+      setConfigName("");
+      setConfigDescription("");
+      setMaterialDistributions([]);
+      refetchConfigs();
+    },
+    onError: (error) => {
+      toast({
+        title: t("common.error"),
+        description: `${t("common.delete_error")}: ${error}`,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Set config as default mutation
+  const setDefaultConfigMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("POST", `${API_ENDPOINTS.ABA_MATERIAL_CONFIGS}/${id}/set-default`);
+    },
+    onSuccess: () => {
+      toast({
+        title: t("common.success"),
+        description: t("production.aba_calculator.default_configuration_set"),
+        duration: 2000,
+      });
+      refetchConfigs();
+    },
+    onError: (error) => {
+      toast({
+        title: t("common.error"),
+        description: `${t("common.update_error")}: ${error}`,
+        variant: "destructive",
+      });
+    }
+  });
+  
   // Handle saving ABA material configurations
   const handleSaveAbaConfig = (distributions: MaterialDistribution[]) => {
     setMaterialDistributions(distributions);
     
-    // Save to localStorage for persistence
-    localStorage.setItem('aba-material-config', JSON.stringify(distributions));
-    
-    toast({
-      title: t("common.success"),
-      description: t("production.aba_calculator.configuration_saved"),
-      duration: 2000,
-    });
+    // If we have a selected config, update it
+    if (selectedConfigId !== null) {
+      updateConfigMutation.mutate({
+        id: selectedConfigId,
+        data: {
+          name: configName,
+          description: configDescription,
+          configData: distributions,
+          isDefault: false // Don't change default status when updating
+        }
+      });
+    } else {
+      // Otherwise, create a new config
+      // Show dialog to input name and description
+      const name = prompt(t("production.aba_calculator.enter_config_name"), "");
+      if (name) {
+        const description = prompt(t("production.aba_calculator.enter_config_description"), "");
+        createConfigMutation.mutate({
+          name,
+          description: description || "",
+          configData: distributions,
+          isDefault: false
+        });
+      }
+    }
   };
 
   return (
@@ -528,18 +746,93 @@ export default function MixMaterialsPage() {
         
         <TabsContent value="aba_config">
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-0">
               <CardTitle>{t('production.aba_calculator.config_tab')}</CardTitle>
-              <CardDescription>
-                {t('production.aba_calculator.drag_help')}
-              </CardDescription>
+              <div className="flex items-center justify-between mt-1">
+                <CardDescription>
+                  {t('production.aba_calculator.drag_help')}
+                </CardDescription>
+                <div className="flex space-x-2">
+                  {selectedConfigId && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedConfigId(null);
+                        setConfigName("");
+                        setConfigDescription("");
+                        setMaterialDistributions([]);
+                      }}
+                    >
+                      <span className="material-icons text-xs mr-1">add</span>
+                      {t('production.aba_calculator.new_config')}
+                    </Button>
+                  )}
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <AbaMaterialsDnd
-                rawMaterials={rawMaterials || []}
-                onSave={handleSaveAbaConfig}
-                initialDistributions={materialDistributions}
-              />
+              <div className="mb-4">
+                {selectedConfigId ? (
+                  <div className="p-3 mb-4 bg-gray-50 rounded-md">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-medium text-sm">{t('production.aba_calculator.editing_config')}</h3>
+                        <p className="text-primary-600 font-medium">{configName}</p>
+                        {configDescription && (
+                          <p className="text-sm text-gray-600 mt-1">{configDescription}</p>
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-primary-600"
+                        onClick={() => {
+                          const newName = prompt(t('production.aba_calculator.update_config_name'), configName);
+                          if (newName) {
+                            const newDesc = prompt(t('production.aba_calculator.update_config_desc'), configDescription);
+                            setConfigName(newName);
+                            setConfigDescription(newDesc || "");
+                            
+                            updateConfigMutation.mutate({
+                              id: selectedConfigId,
+                              data: {
+                                name: newName,
+                                description: newDesc || "",
+                                configData: materialDistributions,
+                                isDefault: false
+                              }
+                            });
+                          }
+                        }}
+                      >
+                        <span className="material-icons text-xs mr-1">edit</span>
+                        {t('common.edit')}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3 mb-4 bg-blue-50 border border-blue-100 rounded-md">
+                    <p className="text-blue-700 text-sm">
+                      <span className="material-icons text-xs mr-1 align-middle">info</span>
+                      {t('production.aba_calculator.create_new_config_info')}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
+                  <AbaMaterialsDnd
+                    rawMaterials={rawMaterials || []}
+                    onSave={handleSaveAbaConfig}
+                    initialDistributions={materialDistributions}
+                  />
+                </div>
+                <div className="lg:col-span-1">
+                  <AbaConfigSelector />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

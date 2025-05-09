@@ -38,6 +38,9 @@ export const API_ENDPOINTS = {
   PLATE_CALCULATIONS: "/api/plate-calculations",
   CALCULATE_PLATE_PRICE: "/api/plate-calculations/calculate",
   
+  // ABA Calculator
+  ABA_MATERIAL_CONFIGS: "/api/aba-material-configs",
+  
   // Demo
   INIT_DEMO_DATA: "/api/init-demo-data",
 };
