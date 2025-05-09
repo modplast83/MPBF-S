@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DataTable } from "@/components/ui/data-table";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Button } from "@/components/ui/button";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { calculateProgress } from "@/lib/utils";
@@ -213,77 +214,65 @@ export function ActiveOrdersTable() {
     </Link>
   );
   
-  // For mobile view, render a simplified card-based list
-  const renderMobileOrderList = () => {
-    if (!activeOrders || activeOrders.length === 0) {
-      return (
-        <div className="py-8 text-center text-gray-500">
-          <span className="material-icons text-gray-300 text-3xl mb-1">receipt_long</span>
-          <p>{t("orders.no_active_orders")}</p>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="space-y-3">
-        {activeOrders.slice(0, 3).map((order) => {
-          const products = getOrderProducts(order.id);
-          return (
-            <Card key={order.id} className="overflow-hidden hover:shadow-md transition-all">
-              <Link href={`/orders/${order.id}`}>
-                <CardHeader className="p-3 pb-2 flex flex-row justify-between items-start">
-                  <div>
-                    <div className="flex items-center space-x-1">
-                      <span className="material-icons text-xs text-primary-500">receipt_long</span>
-                      <CardTitle className="text-sm font-semibold">#{order.id}</CardTitle>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1 truncate max-w-[140px]">{getCustomerName(order.customerId)}</p>
-                  </div>
-                  <StatusBadge status={order.status} />
-                </CardHeader>
-                <CardContent className="p-3 pt-1">
-                  {products.length > 0 && (
-                    <div className="text-sm text-gray-600">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-gray-500 truncate max-w-[100px]">{products[0].productId}</span>
-                        <span className="text-xs font-medium">{products[0].quantity} Kg</span>
-                      </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden mt-2">
-                        <div 
-                          className="bg-primary-500 h-2 rounded-full relative"
-                          style={{ width: `${products[0].progress}%` }}
-                        >
-                          <span className="absolute inset-0 bg-white/30 h-full w-full bg-[linear-gradient(45deg,rgba(255,255,255,0.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.15)_50%,rgba(255,255,255,0.15)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[progress-bar-stripes_1s_linear_infinite]"></span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-[10px] text-gray-500">{products[0].stage}</span>
-                        <span className="text-[10px] text-gray-600 font-medium">{products[0].progress}%</span>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="p-2 pt-0 flex justify-end">
-                  <span className="text-primary-500 text-xs flex items-center">
-                    {t("common.view_details")}
-                    <span className="material-icons text-xs ml-1">arrow_forward</span>
-                  </span>
-                </CardFooter>
-              </Link>
-            </Card>
-          );
-        })}
-        <Link href="/orders">
-          <div className="text-center py-3 bg-gray-50 rounded-lg border border-gray-100 shadow-sm hover:bg-gray-100 transition-colors">
-            <p className="text-sm text-primary-600 font-medium flex items-center justify-center">
-              {t("orders.see_all_orders")}
-              <span className="material-icons text-sm ml-1">list</span>
-            </p>
-          </div>
+  // Create responsive columns for our mobile view
+  const responsiveColumns = [
+    {
+      header: t("orders.order_id"),
+      cell: (row: any) => <span className="font-medium">#{row.id}</span>,
+      meta: {
+        isTitle: true,
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("orders.customer"),
+      cell: (row: any) => getCustomerName(row.customerId),
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("job_orders.customer_product"),
+      cell: (row: any) => {
+        const products = getOrderProducts(row.id);
+        return products.length > 0 ? products[0].productId : t("common.not_available");
+      },
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("orders.quantity"),
+      cell: (row: any) => {
+        const products = getOrderProducts(row.id);
+        return products.length > 0 ? `${products[0].quantity} Kg` : t("common.not_available");
+      },
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("orders.status"),
+      cell: (row: any) => <StatusBadge status={row.status} />,
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("common.actions"),
+      cell: (row: any) => (
+        <Link href={`/orders/${row.id}`}>
+          <Button variant="outline" size="sm" className="text-primary-600 border-primary-200 hover:bg-primary-50 hover:text-primary-700 rounded-full h-8 w-8 p-0 touch-manipulation">
+            <span className="material-icons text-sm">visibility</span>
+          </Button>
         </Link>
-      </div>
-    );
-  };
+      ),
+      meta: {
+        isAction: true,
+        className: isRTL ? "text-right" : ""
+      }
+    },
+  ];
   
   if (ordersLoading) {
     return (
@@ -333,7 +322,18 @@ export function ActiveOrdersTable() {
         {actions}
       </div>
       <div className="p-3 sm:p-6">
-        {isMobile ? renderMobileOrderList() : (
+        {isMobile ? (
+          <ResponsiveTable
+            data={activeOrders || []}
+            columns={responsiveColumns as any}
+            actions={actions}
+            dir={isRTL ? 'rtl' : 'ltr'}
+            emptyMessage={t("orders.no_active_orders")}
+            getRowUrl={(row) => `/orders/${row.id}`}
+            pagination={false}
+            searchable={false}
+          />
+        ) : (
           <DataTable 
             data={activeOrders || []}
             columns={desktopColumns as any}

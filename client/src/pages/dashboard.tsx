@@ -8,6 +8,8 @@ import { Order, Roll, RawMaterial } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ResponsiveContainer, ResponsiveGrid } from "@/components/ui/responsive-grid";
+import { useResponsiveClasses } from "@/lib/mobile-utils";
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -60,14 +62,21 @@ export default function Dashboard() {
     direction: "down",
   } as const;
 
+  // Use our responsive utility hook
+  const responsive = useResponsiveClasses();
+  
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-8">
-      <h1 className="text-xl md:text-2xl font-bold text-secondary-900 mb-4 md:mb-6 px-1">
+    <ResponsiveContainer maxWidth="xl" padding={true} className="space-y-4 sm:space-y-6 md:space-y-8">
+      <h1 className={responsive.text("xl", "2xl", "bold") + " text-secondary-900 mb-4 md:mb-6 px-1"}>
         {t("sidebar.dashboard")}
       </h1>
       
       {/* Dashboard Stats */}
-      <div className={`grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 ${isRTL ? 'rtl' : ''}`}>
+      <ResponsiveGrid 
+        cols={{ xs: 1, sm: 2, lg: 4 }} 
+        gap={{ x: 3, y: 3 }} 
+        className={isRTL ? 'rtl' : ''}
+      >
         <StatCard
           title={t("dashboard.total_orders")}
           value={totalOrders}
@@ -107,13 +116,13 @@ export default function Dashboard() {
           iconBgColor="bg-error-50"
           isMobile={isMobile}
         />
-      </div>
+      </ResponsiveGrid>
 
       {/* Chart and Recent Orders - Responsive layout */}
       <div className={`grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 ${isRTL ? 'rtl' : ''}`}>
         {/* Production Chart */}
-        <div className={`bg-white rounded-lg shadow p-3 md:p-5 ${!isMobile ? 'col-span-2' : ''} ${isRTL ? 'rtl' : ''} order-2 lg:order-1`}>
-          <h2 className="text-base md:text-lg font-medium mb-3 md:mb-4">
+        <div className={`bg-white rounded-lg shadow ${responsive.padding(3, 5)} ${!isMobile ? 'col-span-2' : ''} ${isRTL ? 'rtl' : ''} order-2 lg:order-1`}>
+          <h2 className={responsive.text("base", "lg", "medium") + " mb-3 md:mb-4"}>
             {t("dashboard.production_trends")}
           </h2>
           <ProductionChart className={`${isRTL ? 'rtl' : ''}`} />
@@ -129,6 +138,6 @@ export default function Dashboard() {
       <div className={isRTL ? 'rtl' : ''}>
         <ActiveOrdersTable />
       </div>
-    </div>
+    </ResponsiveContainer>
   );
 }
