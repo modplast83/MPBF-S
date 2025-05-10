@@ -330,12 +330,15 @@ export default function QualityReportsPage() {
             
             <div>
               <label className="block text-sm font-medium mb-1">{t("reports.stage")}</label>
-              <Select value={filters.stage} onValueChange={(value) => setFilters({ ...filters, stage: value })}>
+              <Select 
+                value={filters.stage || "all_stages"} 
+                onValueChange={(value) => setFilters({ ...filters, stage: value === "all_stages" ? "" : value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("reports.all_stages")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("reports.all_stages")}</SelectItem>
+                  <SelectItem value="all_stages">{t("reports.all_stages")}</SelectItem>
                   <SelectItem value="extrusion">{t("common.extrusion")}</SelectItem>
                   <SelectItem value="printing">{t("common.printing")}</SelectItem>
                   <SelectItem value="cutting">{t("common.cutting")}</SelectItem>
@@ -346,13 +349,16 @@ export default function QualityReportsPage() {
             
             <div>
               <label className="block text-sm font-medium mb-1">{t("reports.roll_id")}</label>
-              <Select value={filters.rollId} onValueChange={(value) => setFilters({ ...filters, rollId: value })}>
+              <Select 
+                value={filters.rollId || "all_rolls"} 
+                onValueChange={(value) => setFilters({ ...filters, rollId: value === "all_rolls" ? "" : value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("reports.all_rolls")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("reports.all_rolls")}</SelectItem>
-                  {reportData && [...new Set(reportData.checks.filter(c => c.roll).map(c => c.roll?.id))].map((rollId) => (
+                  <SelectItem value="all_rolls">{t("reports.all_rolls")}</SelectItem>
+                  {reportData && Array.from(new Set(reportData.checks.filter(c => c.roll).map(c => c.roll?.id))).map((rollId) => (
                     rollId && <SelectItem key={rollId} value={rollId}>{rollId}</SelectItem>
                   ))}
                 </SelectContent>
@@ -405,7 +411,11 @@ export default function QualityReportsPage() {
                 <Progress 
                   value={reportData.passRate} 
                   className="h-2 mt-4" 
-                />
+                >
+                  <div className="h-full bg-green-500" style={{ 
+                    width: `${reportData.passRate}%` 
+                  }} />
+                </Progress>
               </CardContent>
             </Card>
             
@@ -555,8 +565,11 @@ export default function QualityReportsPage() {
                               <Progress 
                                 value={(reportData.passedChecks / reportData.totalChecks) * 100} 
                                 className="h-2 bg-gray-100" 
-                                indicatorClassName="bg-green-500"
-                              />
+                              >
+                                <div className="h-full bg-green-500" style={{ 
+                                  width: `${(reportData.passedChecks / reportData.totalChecks) * 100}%` 
+                                }} />
+                              </Progress>
                             </div>
                             <div>
                               <div className="flex justify-between mb-1">
@@ -570,8 +583,11 @@ export default function QualityReportsPage() {
                               <Progress 
                                 value={(reportData.failedChecks / reportData.totalChecks) * 100} 
                                 className="h-2 bg-gray-100" 
-                                indicatorClassName="bg-red-500"
-                              />
+                              >
+                                <div className="h-full bg-red-500" style={{ 
+                                  width: `${(reportData.failedChecks / reportData.totalChecks) * 100}%` 
+                                }} />
+                              </Progress>
                             </div>
                           </div>
                         </div>

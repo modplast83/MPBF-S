@@ -348,12 +348,15 @@ export default function ProductionReportsPage() {
             
             <div>
               <label className="block text-sm font-medium mb-1">{t("reports.customer")}</label>
-              <Select value={filters.customerId} onValueChange={(value) => setFilters({ ...filters, customerId: value })}>
+              <Select 
+                value={filters.customerId || "all_customers"} 
+                onValueChange={(value) => setFilters({ ...filters, customerId: value === "all_customers" ? "" : value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("reports.all_customers")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("reports.all_customers")}</SelectItem>
+                  <SelectItem value="all_customers">{t("reports.all_customers")}</SelectItem>
                   {customers?.map((customer) => (
                     <SelectItem key={customer.id} value={customer.id}>
                       {customer.name}
@@ -365,12 +368,15 @@ export default function ProductionReportsPage() {
             
             <div>
               <label className="block text-sm font-medium mb-1">{t("reports.status")}</label>
-              <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
+              <Select 
+                value={filters.status || "all_statuses"} 
+                onValueChange={(value) => setFilters({ ...filters, status: value === "all_statuses" ? "" : value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("reports.all_statuses")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("reports.all_statuses")}</SelectItem>
+                  <SelectItem value="all_statuses">{t("reports.all_statuses")}</SelectItem>
                   <SelectItem value="pending">{t("common.pending")}</SelectItem>
                   <SelectItem value="processing">{t("common.processing")}</SelectItem>
                   <SelectItem value="completed">{t("common.completed")}</SelectItem>

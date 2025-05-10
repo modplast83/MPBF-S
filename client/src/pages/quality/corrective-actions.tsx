@@ -77,6 +77,7 @@ interface QualityCheck {
 
 interface User {
   id: string;
+  username: string;
   firstName?: string;
   lastName?: string;
 }
@@ -231,7 +232,7 @@ export default function CorrectiveActions() {
 
   const getUserName = (id: string) => {
     const user = users?.find((u: User) => u.id === id);
-    return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || id : id;
+    return user ? user.username || `${user.firstName || ''} ${user.lastName || ''}`.trim() || id : id;
   };
 
   // Using the first user as current user (for demo purposes)
@@ -302,7 +303,7 @@ export default function CorrectiveActions() {
                         <SelectContent>
                           {users && users.map((user: User) => (
                             <SelectItem key={user.id} value={user.id}>
-                              {`${user.firstName || ''} ${user.lastName || ''}`.trim() || user.id}
+                              {user.username || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.id}
                             </SelectItem>
                           ))}
                         </SelectContent>

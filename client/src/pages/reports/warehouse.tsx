@@ -336,13 +336,16 @@ export default function WarehouseReportsPage() {
             
             <div>
               <label className="block text-sm font-medium mb-1">{t("reports.material_type")}</label>
-              <Select value={filters.materialType} onValueChange={(value) => setFilters({ ...filters, materialType: value })}>
+              <Select 
+                value={filters.materialType || "all_types"} 
+                onValueChange={(value) => setFilters({ ...filters, materialType: value === "all_types" ? "" : value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("reports.all_types")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("reports.all_types")}</SelectItem>
-                  {reportData && [...new Set(reportData.currentInventory.map(item => item.type))].map((type) => (
+                  <SelectItem value="all_types">{t("reports.all_types")}</SelectItem>
+                  {reportData && Array.from(new Set(reportData.currentInventory.map(item => item.type))).map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
@@ -353,12 +356,15 @@ export default function WarehouseReportsPage() {
             
             <div>
               <label className="block text-sm font-medium mb-1">{t("reports.material")}</label>
-              <Select value={filters.materialId} onValueChange={(value) => setFilters({ ...filters, materialId: value })}>
+              <Select 
+                value={filters.materialId || "all_materials"} 
+                onValueChange={(value) => setFilters({ ...filters, materialId: value === "all_materials" ? "" : value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("reports.all_materials")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("reports.all_materials")}</SelectItem>
+                  <SelectItem value="all_materials">{t("reports.all_materials")}</SelectItem>
                   {reportData && reportData.currentInventory.map((material) => (
                     <SelectItem key={material.id} value={material.id.toString()}>
                       {material.name}
