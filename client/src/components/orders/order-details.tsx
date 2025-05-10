@@ -751,7 +751,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
                           <td className="py-3 px-4">{product?.thickness || "N/A"}</td>
                           <td className="py-3 px-4">{product?.rawMaterial || "N/A"}</td>
                           <td className="py-3 px-4">{masterBatch?.name || "N/A"}</td>
-                          <td className="py-3 px-4">{jobOrder.quantity}</td>
+                          <td className="py-3 px-4">{Math.round(jobOrder.quantity)}</td>
                           <td className="py-3 px-4">{product?.printed || "N/A"}</td>
                           <td className="py-3 px-4">{product?.printingCylinder || "0"}</td>
                           <td className="py-3 px-4 flex space-x-2">
@@ -1003,8 +1003,9 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
               <label className="text-sm font-medium">Quantity (Kg)</label>
               <input
                 type="number"
-                value={rollQuantity}
-                onChange={(e) => setRollQuantity(parseFloat(e.target.value))}
+                step="1"
+                value={Math.round(rollQuantity)}
+                onChange={(e) => setRollQuantity(Math.round(parseFloat(e.target.value)))}
                 placeholder="Enter quantity"
                 className="w-full p-2 border rounded"
               />

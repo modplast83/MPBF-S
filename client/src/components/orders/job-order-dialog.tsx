@@ -42,7 +42,9 @@ interface JobOrderDialogProps {
 // Create a job order form schema based on the insert schema
 const jobOrderFormSchema = insertJobOrderSchema.extend({
   // You can add additional validations here if needed
-  quantity: z.number().positive("Quantity must be positive")
+  quantity: z.number()
+    .positive("Quantity must be positive")
+    .int("Quantity must be a whole number")
 });
 
 export function JobOrderDialog({
@@ -159,8 +161,9 @@ export function JobOrderDialog({
                     <Input
                       type="number"
                       placeholder="Enter quantity"
+                      step="1"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      onChange={(e) => field.onChange(Math.round(parseFloat(e.target.value)))}
                     />
                   </FormControl>
                   <FormMessage />

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { MixMaterial, RawMaterial, User } from "@shared/schema";
 import { formatDateString } from "@/lib/utils";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MixMaterialForm } from "@/components/production/mix-material-form";
 import { MixDetails } from "@/components/production/mix-details";
@@ -53,6 +54,40 @@ export default function MixMaterialsPage() {
   const { data: mixMaterials, isLoading: mixLoading, refetch: refetchMixes } = useQuery<MixMaterial[]>({
     queryKey: [API_ENDPOINTS.MIX_MATERIALS],
   });
+  
+  // Filter mix materials by date, week, or month
+  const getFilteredMixMaterials = () => {
+    if (!mixMaterials) return [];
+    
+    if (filterMode === 'all') return mixMaterials;
+    
+    return mixMaterials.filter(mix => {
+      const mixDate = parseISO(mix.mixDate.toString());
+      
+      if (filterMode === 'date' && filterDate) {
+        const filterDateObj = new Date(filterDate);
+        return format(mixDate, 'yyyy-MM-dd') === format(filterDateObj, 'yyyy-MM-dd');
+      }
+      
+      if (filterMode === 'week' && filterWeek) {
+        const [year, week] = filterWeek.split('-W');
+        const startDate = startOfWeek(new Date(parseInt(year), 0, 1 + (parseInt(week) - 1) * 7));
+        const endDate = endOfWeek(startDate);
+        
+        return isWithinInterval(mixDate, { start: startDate, end: endDate });
+      }
+      
+      if (filterMode === 'month' && filterMonth) {
+        const [year, month] = filterMonth.split('-');
+        const startDate = startOfMonth(new Date(parseInt(year), parseInt(month) - 1));
+        const endDate = endOfMonth(startDate);
+        
+        return isWithinInterval(mixDate, { start: startDate, end: endDate });
+      }
+      
+      return true;
+    });
+  };
 
   // Fetch raw materials for the select dropdown in the form
   const { data: rawMaterials } = useQuery<RawMaterial[]>({
@@ -88,6 +123,12 @@ export default function MixMaterialsPage() {
   const [configName, setConfigName] = useState<string>("");
   const [configDescription, setConfigDescription] = useState<string>("");
   const [selectedConfigId, setSelectedConfigId] = useState<number | null>(null);
+  
+  // Date filtering states
+  const [filterMode, setFilterMode] = useState<'all' | 'date' | 'week' | 'month'>('all');
+  const [filterDate, setFilterDate] = useState<Date | null>(null);
+  const [filterWeek, setFilterWeek] = useState<string | null>(null);
+  const [filterMonth, setFilterMonth] = useState<string | null>(null);
   
   // Define AbaConfig type
   interface AbaConfig {
@@ -352,7 +393,9 @@ export default function MixMaterialsPage() {
   
   // Mobile card view for mix materials
   const renderMobileCards = () => {
-    if (!mixMaterials || mixMaterials.length === 0) {
+    const filteredMixMaterials = getFilteredMixMaterials();
+    
+    if (!filteredMixMaterials || filteredMixMaterials.length === 0) {
       return (
         <div className="text-center py-8 px-4 bg-gray-50 rounded-md">
           <span className="material-icons text-gray-300 text-3xl mb-2">science</span>
@@ -363,7 +406,7 @@ export default function MixMaterialsPage() {
     
     return (
       <div className="space-y-4">
-        {mixMaterials.map((mix) => (
+        {filteredMixMaterials.map((mix) => (
           <Card 
             key={mix.id} 
             className="overflow-hidden hover:shadow-md transition-all"
@@ -696,7 +739,22 @@ export default function MixMaterialsPage() {
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 <span>{t('production.mix_materials.title')}</span>
-                {!isMobile && (
+                <div className="flex items-center gap-2">
+                  {isMobile && filterMode !== 'all' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setFilterMode('all');
+                        setFilterDate(null);
+                        setFilterWeek(null);
+                        setFilterMonth(null);
+                      }}
+                      className="h-8 w-8 p-0 rounded-full"
+                    >
+                      <span className="material-icons text-sm">filter_alt_off</span>
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -704,10 +762,159 @@ export default function MixMaterialsPage() {
                     className="ml-auto"
                   >
                     <span className="material-icons text-sm mr-1">refresh</span>
-                    {t('common.refresh')}
+                    {!isMobile && t('common.refresh')}
                   </Button>
-                )}
+                </div>
               </CardTitle>
+              
+              {/* Date/Week/Month Filter Controls */}
+              <div className="mt-4 flex flex-wrap gap-3 items-center">
+                {!isMobile ? (
+                  <>
+                    <div className="flex">
+                      <Button 
+                        variant={filterMode === 'all' ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => setFilterMode('all')}
+                        className="rounded-r-none"
+                      >
+                        All
+                      </Button>
+                      <Button 
+                        variant={filterMode === 'date' ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => setFilterMode('date')}
+                        className="rounded-none border-x-0"
+                      >
+                        Date
+                      </Button>
+                      <Button 
+                        variant={filterMode === 'week' ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => setFilterMode('week')}
+                        className="rounded-none border-r-0"
+                      >
+                        Week
+                      </Button>
+                      <Button 
+                        variant={filterMode === 'month' ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => setFilterMode('month')}
+                        className="rounded-l-none"
+                      >
+                        Month
+                      </Button>
+                    </div>
+                    
+                    {filterMode === 'date' && (
+                      <div className="flex-1 min-w-[200px]">
+                        <input 
+                          type="date" 
+                          value={filterDate ? format(new Date(filterDate), 'yyyy-MM-dd') : ''} 
+                          onChange={(e) => setFilterDate(e.target.value ? new Date(e.target.value) : null)}
+                          className="w-full px-3 py-1 border rounded"
+                        />
+                      </div>
+                    )}
+                    
+                    {filterMode === 'week' && (
+                      <div className="flex-1 min-w-[200px]">
+                        <input 
+                          type="week" 
+                          value={filterWeek || ''} 
+                          onChange={(e) => setFilterWeek(e.target.value)}
+                          className="w-full px-3 py-1 border rounded"
+                        />
+                      </div>
+                    )}
+                    
+                    {filterMode === 'month' && (
+                      <div className="flex-1 min-w-[200px]">
+                        <input 
+                          type="month" 
+                          value={filterMonth || ''} 
+                          onChange={(e) => setFilterMonth(e.target.value)}
+                          className="w-full px-3 py-1 border rounded"
+                        />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  /* Mobile filters */
+                  <div className="w-full flex gap-2">
+                    <select 
+                      className="flex-1 p-2 border rounded"
+                      value={filterMode}
+                      onChange={(e) => {
+                        setFilterMode(e.target.value as 'all' | 'date' | 'week' | 'month');
+                      }}
+                    >
+                      <option value="all">All Mixes</option>
+                      <option value="date">Filter by Date</option>
+                      <option value="week">Filter by Week</option>
+                      <option value="month">Filter by Month</option>
+                    </select>
+                    
+                    {filterMode === 'date' && (
+                      <input 
+                        type="date" 
+                        value={filterDate ? format(new Date(filterDate), 'yyyy-MM-dd') : ''} 
+                        onChange={(e) => setFilterDate(e.target.value ? new Date(e.target.value) : null)}
+                        className="flex-1 p-2 border rounded"
+                      />
+                    )}
+                    
+                    {filterMode === 'week' && (
+                      <input 
+                        type="week" 
+                        value={filterWeek || ''} 
+                        onChange={(e) => setFilterWeek(e.target.value)}
+                        className="flex-1 p-2 border rounded"
+                      />
+                    )}
+                    
+                    {filterMode === 'month' && (
+                      <input 
+                        type="month" 
+                        value={filterMonth || ''} 
+                        onChange={(e) => setFilterMonth(e.target.value)}
+                        className="flex-1 p-2 border rounded"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Filter summary */}
+              {filterMode !== 'all' && (
+                <div className="mt-3 p-2 bg-blue-50 text-blue-700 rounded-md flex justify-between items-center">
+                  <div className="flex items-center">
+                    <span className="material-icons text-sm mr-2">filter_list</span>
+                    <span className="text-sm font-medium">
+                      {filterMode === 'date' && filterDate && 
+                        `Showing mixes for: ${format(new Date(filterDate), 'MMMM d, yyyy')}`}
+                      {filterMode === 'week' && filterWeek && 
+                        `Showing mixes for week: ${filterWeek.replace('-W', ', Week ')}`}
+                      {filterMode === 'month' && filterMonth && 
+                        `Showing mixes for: ${format(new Date(`${filterMonth}-01`), 'MMMM yyyy')}`}
+                    </span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      setFilterMode('all');
+                      setFilterDate(null);
+                      setFilterWeek(null);
+                      setFilterMonth(null);
+                    }}
+                    className="h-7 text-blue-700 hover:bg-blue-100"
+                  >
+                    <span className="material-icons text-sm mr-1">clear</span>
+                    Clear
+                  </Button>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               {mixLoading ? (
@@ -716,7 +923,7 @@ export default function MixMaterialsPage() {
                 renderMobileCards()
               ) : (
                 <DataTable 
-                  data={mixMaterials || []}
+                  data={getFilteredMixMaterials()}
                   columns={mixColumns as any}
                   onRowClick={(row) => {
                     setSelectedMixId(row.id);
