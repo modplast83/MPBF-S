@@ -15,6 +15,7 @@ import { MixMaterialForm } from "@/components/production/mix-material-form";
 import { MixDetails } from "@/components/production/mix-details";
 import { AbaCalculator, AbaPrintTemplate } from "@/components/production/aba-calculator";
 import { AbaMaterialsDnd, MaterialDistribution } from "@/components/production/aba-materials-dnd";
+import { FilterSummary } from "@/components/production/filter-summary";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -977,6 +978,37 @@ export default function MixMaterialsPage() {
                   )}
                 </div>
               </div>
+              
+              {/* Filter summary */}
+              {filterMode !== 'all' && (
+                <div className="mt-3 p-2 bg-blue-50 text-blue-700 rounded-md flex justify-between items-center">
+                  <div className="flex items-center">
+                    <span className="material-icons text-sm mr-2">filter_list</span>
+                    <span className="text-sm font-medium">
+                      {filterMode === 'date' && filterDate && 
+                        `Showing mixes for: ${format(new Date(filterDate), 'MMMM d, yyyy')}`}
+                      {filterMode === 'week' && filterWeek && 
+                        `Showing mixes for week: ${filterWeek.replace('-W', ', Week ')}`}
+                      {filterMode === 'month' && filterMonth && 
+                        `Showing mixes for: ${format(new Date(`${filterMonth}-01`), 'MMMM yyyy')}`}
+                    </span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      setFilterMode('all');
+                      setFilterDate(null);
+                      setFilterWeek(null);
+                      setFilterMonth(null);
+                    }}
+                    className="h-7 text-blue-700 hover:bg-blue-100"
+                  >
+                    <span className="material-icons text-sm mr-1">clear</span>
+                    Clear
+                  </Button>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <div className="mb-4">
