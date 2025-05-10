@@ -242,30 +242,78 @@ export default function ReportsIndex() {
           </Card>
         </Link>
         
+        <Link href="/reports/production" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">{t("reports.production_report")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-orange-50 rounded mb-3">
+                <span className="material-icons text-4xl text-orange-400">precision_manufacturing</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                {t("reports.comprehensive_production_data")}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link href="/reports/warehouse" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">{t("reports.warehouse_reports")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-green-50 rounded mb-3">
+                <span className="material-icons text-4xl text-green-400">inventory_2</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                {t("reports.track_inventory")}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link href="/reports/quality" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">{t("reports.quality_report")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-purple-50 rounded mb-3">
+                <span className="material-icons text-4xl text-purple-400">verified</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                {t("reports.analyze_quality")}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
         <Card className="h-full">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Inventory Reports</CardTitle>
+            <CardTitle className="text-lg">{t("reports.efficiency_report")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center h-32 bg-green-50 rounded mb-3">
-              <span className="material-icons text-4xl text-green-400">inventory_2</span>
+            <div className="flex items-center justify-center h-32 bg-cyan-50 rounded mb-3">
+              <span className="material-icons text-4xl text-cyan-400">show_chart</span>
             </div>
             <p className="text-sm text-gray-600">
-              Track inventory levels and material usage
+              {t("reports.analyze_manufacturing_efficiency")}
             </p>
           </CardContent>
         </Card>
         
         <Card className="h-full">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Quality Reports</CardTitle>
+            <CardTitle className="text-lg">{t("reports.cost_analysis")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center h-32 bg-purple-50 rounded mb-3">
-              <span className="material-icons text-4xl text-purple-400">verified</span>
+            <div className="flex items-center justify-center h-32 bg-amber-50 rounded mb-3">
+              <span className="material-icons text-4xl text-amber-400">attach_money</span>
             </div>
             <p className="text-sm text-gray-600">
-              Analyze quality metrics and defect rates
+              {t("reports.production_cost_analysis")}
             </p>
           </CardContent>
         </Card>

@@ -3202,6 +3202,523 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to calculate plate price" });
     }
   });
+  
+  // Reports API endpoints
+  app.get("/api/reports/production", async (req: Request, res: Response) => {
+    try {
+      // Parse query parameters for filtering
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const customerId = req.query.customerId as string | undefined;
+      const statusFilter = req.query.status as string | undefined;
+      const productId = req.query.productId as string | undefined;
+      
+      // Fetch orders
+      let orders = await storage.getOrders();
+      
+      // Apply date filters
+      if (startDate) {
+        orders = orders.filter(order => new Date(order.date) >= startDate);
+      }
+      
+      if (endDate) {
+        orders = orders.filter(order => new Date(order.date) <= endDate);
+      }
+      
+      // Apply customer filter
+      if (customerId) {
+        orders = orders.filter(order => order.customerId === customerId);
+      }
+      
+      // Apply status filter
+      if (statusFilter) {
+        orders = orders.filter(order => order.status === statusFilter);
+      }
+      
+      // Fetch related data for enriching the report
+      const jobOrders = await storage.getJobOrders();
+      const rolls = await storage.getRolls();
+      const customerProducts = await storage.getCustomerProducts();
+      const customers = await storage.getCustomers();
+      
+      // Process data to create a comprehensive report
+      const productionReport = await Promise.all(orders.map(async (order) => {
+        // Get job orders for this order
+        const orderJobOrders = jobOrders.filter(jo => jo.orderId === order.id);
+        
+        // Filter by product if specified
+        const filteredJobOrders = productId 
+          ? orderJobOrders.filter(jo => {
+              const product = customerProducts.find(cp => cp.id === jo.customerProductId);
+              return product && product.itemId === productId;
+            }) 
+          : orderJobOrders;
+        
+        if (productId && filteredJobOrders.length === 0) {
+          return null; // Skip this order if it doesn't have the requested product
+        }
+        
+        const totalQuantity = filteredJobOrders.reduce((sum, jo) => sum + jo.quantity, 0);
+        
+        // Get rolls for these job orders
+        const orderRolls = rolls.filter(roll => 
+          filteredJobOrders.some(jo => jo.id === roll.jobOrderId)
+        );
+        
+        // Calculate metrics
+        const completedRolls = orderRolls.filter(roll => roll.status === "completed");
+        const completedQuantity = completedRolls.reduce((sum, roll) => 
+          sum + (roll.cuttingQty || 0), 0);
+        
+        const extrusionQuantity = orderRolls.reduce((sum, roll) => 
+          sum + (roll.extrudingQty || 0), 0);
+        
+        const printingQuantity = orderRolls.reduce((sum, roll) => 
+          sum + (roll.printingQty || 0), 0);
+        
+        // Calculate waste and efficiency
+        const wastageQuantity = extrusionQuantity > 0 
+          ? extrusionQuantity - completedQuantity 
+          : 0;
+        
+        const wastePercentage = extrusionQuantity > 0 
+          ? (wastageQuantity / extrusionQuantity) * 100 
+          : 0;
+        
+        const efficiency = totalQuantity > 0 
+          ? (completedQuantity / totalQuantity) * 100 
+          : 0;
+        
+        // Get products information
+        const products = await Promise.all(filteredJobOrders.map(async (jo) => {
+          const product = customerProducts.find(cp => cp.id === jo.customerProductId);
+          return {
+            id: product?.id || 0,
+            name: product?.itemId || "Unknown",
+            size: product?.sizeCaption || "N/A",
+            quantity: jo.quantity
+          };
+        }));
+        
+        // Get customer name
+        const customer = customers.find(c => c.id === order.customerId);
+        
+        return {
+          id: order.id,
+          date: order.date,
+          customer: {
+            id: customer?.id || "",
+            name: customer?.name || "Unknown"
+          },
+          products,
+          metrics: {
+            totalQuantity,
+            completedQuantity,
+            extrusionQuantity,
+            printingQuantity,
+            wastageQuantity,
+            wastePercentage: parseFloat(wastePercentage.toFixed(2)),
+            efficiency: parseFloat(efficiency.toFixed(2))
+          },
+          status: order.status,
+          jobOrders: filteredJobOrders.map(jo => ({
+            id: jo.id,
+            quantity: jo.quantity,
+            status: jo.status,
+            completedDate: jo.completedDate
+          }))
+        };
+      }));
+      
+      // Filter out null values (from product filtering)
+      const filteredReport = productionReport.filter(report => report !== null);
+      
+      res.json(filteredReport);
+    } catch (error) {
+      console.error("Error generating production report:", error);
+      res.status(500).json({ message: "Failed to generate production report" });
+    }
+  });
+  
+  app.get("/api/reports/warehouse", async (req: Request, res: Response) => {
+    try {
+      // Parse query parameters for filtering
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const materialType = req.query.materialType as string | undefined;
+      const materialId = req.query.materialId as string | undefined;
+      
+      // Fetch raw materials
+      let rawMaterials = await storage.getRawMaterials();
+      
+      // Apply material type filter
+      if (materialType) {
+        rawMaterials = rawMaterials.filter(material => material.type === materialType);
+      }
+      
+      // Apply specific material filter
+      if (materialId) {
+        rawMaterials = rawMaterials.filter(material => material.id === parseInt(materialId));
+      }
+      
+      // Fetch material inputs for inventory history
+      let materialInputs = await storage.getMaterialInputs();
+      
+      // Apply date filters to material inputs
+      if (startDate) {
+        materialInputs = materialInputs.filter(input => new Date(input.date) >= startDate);
+      }
+      
+      if (endDate) {
+        materialInputs = materialInputs.filter(input => new Date(input.date) <= endDate);
+      }
+      
+      // Fetch material input items
+      const materialInputItems = await storage.getMaterialInputItems();
+      
+      // Fetch users for input tracking
+      const users = await storage.getUsers();
+      
+      // Process data to create warehouse inventory report
+      const warehouseReport = {
+        currentInventory: rawMaterials.map(material => ({
+          id: material.id,
+          name: material.name,
+          type: material.type,
+          quantity: material.quantity,
+          unit: material.unit,
+          lastUpdated: material.lastUpdated
+        })),
+        inventoryHistory: await Promise.all(materialInputs.map(async (input) => {
+          // Get items for this input
+          const items = materialInputItems.filter(item => item.inputId === input.id);
+          
+          // Get user who performed the input
+          const user = users.find(u => u.id === input.userId);
+          
+          // Get materials for each item
+          const materials = await Promise.all(items.map(async (item) => {
+            const material = rawMaterials.find(rm => rm.id === item.rawMaterialId);
+            return {
+              id: item.rawMaterialId,
+              name: material?.name || "Unknown",
+              quantity: item.quantity,
+              unit: material?.unit || "kg"
+            };
+          }));
+          
+          return {
+            id: input.id,
+            date: input.date,
+            user: {
+              id: user?.id || "",
+              name: user?.username || "Unknown"
+            },
+            notes: input.notes,
+            materials
+          };
+        }))
+      };
+      
+      res.json(warehouseReport);
+    } catch (error) {
+      console.error("Error generating warehouse report:", error);
+      res.status(500).json({ message: "Failed to generate warehouse report" });
+    }
+  });
+  
+  app.get("/api/reports/quality", async (req: Request, res: Response) => {
+    try {
+      // Parse query parameters for filtering
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const stageFilter = req.query.stage as string | undefined;
+      const rollId = req.query.rollId as string | undefined;
+      const jobOrderId = req.query.jobOrderId ? parseInt(req.query.jobOrderId as string) : undefined;
+      
+      // Fetch quality checks
+      let qualityChecks = await storage.getQualityChecks();
+      
+      // Filter quality checks by job order if specified
+      if (jobOrderId) {
+        qualityChecks = await storage.getQualityChecksByJobOrder(jobOrderId);
+      }
+      
+      // Fetch related data
+      const qualityCheckTypes = await storage.getQualityCheckTypes();
+      const rolls = await storage.getRolls();
+      const jobOrders = await storage.getJobOrders();
+      const correctionActions = await storage.getCorrectiveActions();
+      
+      // Apply filters
+      if (rollId) {
+        qualityChecks = qualityChecks.filter(check => {
+          const roll = rolls.find(r => r.id === check.rollId);
+          return roll && roll.id === rollId;
+        });
+      }
+      
+      if (stageFilter) {
+        qualityChecks = qualityChecks.filter(check => {
+          const checkType = qualityCheckTypes.find(type => type.id === check.checkTypeId);
+          return checkType && checkType.stage === stageFilter;
+        });
+      }
+      
+      if (startDate || endDate) {
+        qualityChecks = qualityChecks.filter(check => {
+          const checkDate = new Date(check.checkDate);
+          if (startDate && checkDate < startDate) return false;
+          if (endDate && checkDate > endDate) return false;
+          return true;
+        });
+      }
+      
+      // Process data to create quality report
+      const qualityReport = await Promise.all(qualityChecks.map(async (check) => {
+        // Get check type
+        const checkType = qualityCheckTypes.find(type => type.id === check.checkTypeId);
+        
+        // Get roll
+        const roll = rolls.find(r => r.id === check.rollId);
+        
+        // Get job order
+        const jobOrder = roll ? jobOrders.find(jo => jo.id === roll.jobOrderId) : undefined;
+        
+        // Get corrective actions
+        const actions = correctionActions.filter(action => action.qualityCheckId === check.id);
+        
+        return {
+          id: check.id,
+          date: check.checkDate,
+          type: {
+            id: checkType?.id || "",
+            name: checkType?.name || "Unknown",
+            stage: checkType?.stage || "Unknown"
+          },
+          roll: roll ? {
+            id: roll.id,
+            serialNumber: roll.serialNumber,
+            status: roll.status
+          } : null,
+          jobOrder: jobOrder ? {
+            id: jobOrder.id,
+            status: jobOrder.status
+          } : null,
+          result: check.passed ? "Pass" : "Fail",
+          notes: check.notes,
+          correctiveActions: actions.map(action => ({
+            id: action.id,
+            action: action.action,
+            implementedBy: action.implementedBy,
+            implementationDate: action.implementationDate
+          }))
+        };
+      }));
+      
+      // Calculate summary metrics
+      const totalChecks = qualityReport.length;
+      const failedChecks = qualityReport.filter(report => report.result === "Fail").length;
+      const passRate = totalChecks > 0 ? ((totalChecks - failedChecks) / totalChecks) * 100 : 0;
+      
+      const qualitySummary = {
+        totalChecks,
+        passedChecks: totalChecks - failedChecks,
+        failedChecks,
+        passRate: parseFloat(passRate.toFixed(2)),
+        checks: qualityReport
+      };
+      
+      res.json(qualitySummary);
+    } catch (error) {
+      console.error("Error generating quality report:", error);
+      res.status(500).json({ message: "Failed to generate quality report" });
+    }
+  });
+  
+  app.get("/api/performance-metrics", async (req: Request, res: Response) => {
+    try {
+      // Fetch all the data needed for performance metrics
+      const orders = await storage.getOrders();
+      const jobOrders = await storage.getJobOrders();
+      const rolls = await storage.getRolls();
+      const qualityChecks = await storage.getQualityChecks();
+      
+      // Calculate processing times for rolls
+      const rollProcessingTimes = rolls
+        .filter(roll => roll.status === "completed" && roll.extrudedAt && roll.printedAt && roll.cutAt)
+        .map(roll => {
+          // Calculate time differences in hours
+          const extrudedDate = new Date(roll.extrudedAt!);
+          const printedDate = new Date(roll.printedAt!);
+          const cutDate = new Date(roll.cutAt!);
+          
+          const extrusionToPrinting = (printedDate.getTime() - extrudedDate.getTime()) / (1000 * 60 * 60);
+          const printingToCutting = (cutDate.getTime() - printedDate.getTime()) / (1000 * 60 * 60);
+          const totalProcessingTime = (cutDate.getTime() - extrudedDate.getTime()) / (1000 * 60 * 60);
+          
+          // Calculate waste if possible
+          const extrudingQty = roll.extrudingQty || 0;
+          const cuttingQty = roll.cuttingQty || 0;
+          const wasteQty = extrudingQty > cuttingQty ? extrudingQty - cuttingQty : 0;
+          const wastePercentage = extrudingQty > 0 ? (wasteQty / extrudingQty) * 100 : 0;
+          
+          return {
+            rollId: roll.serialNumber,
+            extrusionToPrinting,
+            printingToCutting,
+            totalProcessingTime,
+            wasteQty,
+            wastePercentage,
+            extrudedAt: roll.extrudedAt,
+            printedAt: roll.printedAt,
+            cutAt: roll.cutAt
+          };
+        });
+      
+      // Processing time averages
+      const avgExtrusionToNextStage = rollProcessingTimes.length > 0 
+        ? rollProcessingTimes.reduce((sum, item) => sum + item.extrusionToPrinting, 0) / rollProcessingTimes.length 
+        : 0;
+        
+      const avgPrintingToCutting = rollProcessingTimes.length > 0 
+        ? rollProcessingTimes.reduce((sum, item) => sum + item.printingToCutting, 0) / rollProcessingTimes.length 
+        : 0;
+        
+      const avgTotalProcessingTime = rollProcessingTimes.length > 0 
+        ? rollProcessingTimes.reduce((sum, item) => sum + item.totalProcessingTime, 0) / rollProcessingTimes.length 
+        : 0;
+      
+      // Waste metrics
+      const totalWasteQty = rollProcessingTimes.reduce((sum, item) => sum + item.wasteQty, 0);
+      const totalInputQty = rollProcessingTimes.reduce((sum, item) => sum + (item.wasteQty / (item.wastePercentage / 100)), 0);
+      const overallWastePercentage = totalInputQty > 0 ? (totalWasteQty / totalInputQty) * 100 : 0;
+      
+      // Order fulfillment times (from order creation to all job orders completed)
+      const orderFulfillmentTimes = orders
+        .filter(order => order.status === "completed")
+        .map(order => {
+          const orderJobOrders = jobOrders.filter(jo => jo.orderId === order.id);
+          
+          // Find the latest completion date among job orders
+          const completionDates = orderJobOrders
+            .map(jo => jo.completedDate)
+            .filter(date => date !== null) as Date[];
+            
+          if (completionDates.length === 0) return null;
+          
+          const latestCompletionDate = new Date(Math.max(...completionDates.map(d => new Date(d).getTime())));
+          const orderDate = new Date(order.date);
+          
+          return {
+            orderId: order.id,
+            fulfillmentTime: (latestCompletionDate.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24) // in days
+          };
+        })
+        .filter(item => item !== null) as { orderId: number; fulfillmentTime: number }[];
+      
+      // Average order fulfillment time
+      const avgOrderFulfillmentTime = orderFulfillmentTimes.length > 0
+        ? orderFulfillmentTimes.reduce((sum, item) => sum + item.fulfillmentTime, 0) / orderFulfillmentTimes.length
+        : 0;
+      
+      // Quality metrics
+      const totalQualityChecks = qualityChecks.length;
+      const failedQualityChecks = qualityChecks.filter(check => !check.passed).length;
+      const qualityFailureRate = totalQualityChecks > 0 ? (failedQualityChecks / totalQualityChecks) * 100 : 0;
+      
+      // Daily throughput for the last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      // Get all rolls completed within the last 30 days
+      const recentCompletedRolls = rolls.filter(roll => 
+        roll.status === "completed" && 
+        roll.cutAt && 
+        new Date(roll.cutAt) >= thirtyDaysAgo
+      );
+      
+      // Group by date
+      const throughputByDate = new Map<string, { count: number; totalWeight: number }>();
+      
+      recentCompletedRolls.forEach(roll => {
+        if (!roll.cutAt) return;
+        
+        const dateStr = new Date(roll.cutAt).toISOString().split('T')[0]; // YYYY-MM-DD
+        const existing = throughputByDate.get(dateStr) || { count: 0, totalWeight: 0 };
+        
+        throughputByDate.set(dateStr, {
+          count: existing.count + 1,
+          totalWeight: existing.totalWeight + (roll.cuttingQty || 0)
+        });
+      });
+      
+      // Convert to array format
+      const throughputData = Array.from(throughputByDate.entries()).map(([date, data]) => ({
+        date,
+        count: data.count,
+        totalWeight: data.totalWeight
+      }));
+      
+      // Sort by date
+      throughputData.sort((a, b) => a.date.localeCompare(b.date));
+      
+      // Format recent processing times for mobile view
+      const recentProcessingTimes = rollProcessingTimes
+        .sort((a, b) => {
+          if (!a.cutAt || !b.cutAt) return 0;
+          return new Date(b.cutAt).getTime() - new Date(a.cutAt).getTime();
+        })
+        .slice(0, 10)
+        .map(item => ({
+          rollId: parseInt(item.rollId.toString()),
+          processingTime: item.totalProcessingTime,
+          stage: "completed",
+          date: item.cutAt ? new Date(item.cutAt).toISOString().split('T')[0] : ""
+        }));
+      
+      // Compile all metrics for the response
+      const performanceMetrics = {
+        processingTimes: {
+          avgExtrusionToNextStage: parseFloat(avgExtrusionToNextStage.toFixed(2)),
+          avgPrintingToCutting: parseFloat(avgPrintingToCutting.toFixed(2)),
+          avgTotalProcessingTime: parseFloat(avgTotalProcessingTime.toFixed(2)),
+          recentProcessingTimes: rollProcessingTimes.slice(0, 10)
+        },
+        wasteMetrics: {
+          totalWasteQty: parseFloat(totalWasteQty.toFixed(2)),
+          overallWastePercentage: parseFloat(overallWastePercentage.toFixed(2)),
+          rollProcessingTimes: rollProcessingTimes.map(item => ({
+            rollId: parseInt(item.rollId.toString()),
+            wasteQty: parseFloat(item.wasteQty.toFixed(2)),
+            wastePercentage: parseFloat(item.wastePercentage.toFixed(2))
+          }))
+        },
+        orderMetrics: {
+          avgOrderFulfillmentTime: parseFloat(avgOrderFulfillmentTime.toFixed(2)),
+          orderFulfillmentTimes
+        },
+        qualityMetrics: {
+          totalQualityChecks,
+          failedQualityChecks,
+          qualityFailureRate: parseFloat(qualityFailureRate.toFixed(2))
+        },
+        throughput: throughputData,
+        mobileMetrics: {
+          avgProcessingTime: parseFloat(avgTotalProcessingTime.toFixed(2)),
+          avgOrderFulfillment: parseFloat(avgOrderFulfillmentTime.toFixed(2)),
+          wastePercentage: parseFloat(overallWastePercentage.toFixed(2)),
+          qualityFailureRate: parseFloat(qualityFailureRate.toFixed(2)),
+          recentProcessingTimes
+        }
+      };
+      
+      res.json(performanceMetrics);
+    } catch (error) {
+      console.error("Error generating performance metrics:", error);
+      res.status(500).json({ message: "Failed to generate performance metrics" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
