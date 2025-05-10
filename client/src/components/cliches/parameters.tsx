@@ -518,7 +518,6 @@ export default function Parameters() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t("cliches.parameterName")}</TableHead>
-                      <TableHead>{t("cliches.parameterType")}</TableHead>
                       <TableHead>{t("cliches.value")}</TableHead>
                       <TableHead>{t("cliches.description")}</TableHead>
                       <TableHead className="text-right">{t("common.actions")}</TableHead>
@@ -528,7 +527,6 @@ export default function Parameters() {
                     {parameters && parameters.length > 0 ? parameters.map((parameter: any) => (
                       <TableRow key={parameter.id}>
                         <TableCell className="font-medium">{parameter.name}</TableCell>
-                        <TableCell>{getParameterTypeLabel(parameter.type)}</TableCell>
                         <TableCell>{parameter.value}</TableCell>
                         <TableCell>{parameter.description || "-"}</TableCell>
                         <TableCell className="text-right">
@@ -584,7 +582,7 @@ export default function Parameters() {
                       </TableRow>
                     )) : (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-6">
+                        <TableCell colSpan={4} className="text-center py-6">
                           <p className="text-muted-foreground">
                             No parameters found. Add your first parameter to get started.
                           </p>

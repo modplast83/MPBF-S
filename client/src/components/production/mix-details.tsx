@@ -43,8 +43,9 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   });
   
   // Fetch users to map operator IDs to names
-  const { data: users } = useQuery<User[]>({
+  const { data: users, isLoading: usersLoading } = useQuery<User[]>({
     queryKey: [API_ENDPOINTS.USERS],
+    staleTime: 5 * 60 * 1000, // 5 minutes stale time
   });
 
   // Add mix item mutation
@@ -140,7 +141,11 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   
   // Function to get operator name from ID
   const getOperatorName = (operatorId: string) => {
-    if (!users) return operatorId;
+    // If users are still loading or operatorId is empty, show loading indicator
+    if (usersLoading) return `${t('common.loading')}...`;
+    if (!operatorId) return t('common.not_available');
+    if (!users || users.length === 0) return operatorId;
+    
     const user = users.find(user => user.id === operatorId);
     if (!user) return operatorId;
     
@@ -231,7 +236,10 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                 </div>
                 <div>
                   <div className="font-medium text-secondary-500">{t('production.mix_materials.operator')}</div>
-                  <div>{getOperatorName(mix.mixPerson)}</div>
+                  <div className="flex items-center">
+                    <span className="material-icons text-sm mr-2 text-gray-500">person</span>
+                    <span>{getOperatorName(mix.mixPerson)}</span>
+                  </div>
                 </div>
 
                 <div>
