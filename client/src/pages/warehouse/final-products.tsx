@@ -322,6 +322,10 @@ export default function FinalProducts() {
             background-color: #cce5ff;
             color: #004085;
           }
+          .completed-status {
+            background-color: #fff3cd;
+            color: #856404;
+          }
         </style>
       </head>
       <body>
@@ -371,8 +375,20 @@ export default function FinalProducts() {
             <div class="info-value">${calculateWastePercentage(selectedJobOrder.id)}%</div>
           </div>
           
-          <div class="receipt-status ${selectedJobOrder.status === 'partially_received' ? 'partial-receipt' : 'full-receipt'}">
-            ${selectedJobOrder.status === 'partially_received' ? 'PARTIALLY RECEIVED' : 'FULLY RECEIVED'}
+          <div class="receipt-status ${
+            selectedJobOrder.status === 'partially_received' 
+              ? 'partial-receipt' 
+              : selectedJobOrder.status === 'completed' 
+                ? 'completed-status' 
+                : 'full-receipt'
+          }">
+            ${
+              selectedJobOrder.status === 'partially_received' 
+                ? 'PARTIALLY RECEIVED' 
+                : selectedJobOrder.status === 'completed' 
+                  ? 'COMPLETED - PENDING WAREHOUSE' 
+                  : 'FULLY RECEIVED'
+            }
           </div>
           
           <div class="qr-placeholder">
@@ -381,7 +397,11 @@ export default function FinalProducts() {
           </div>
           
           <div class="footer">
-            Received in Warehouse - ${formattedDate}
+            ${
+              selectedJobOrder.status === 'completed'
+                ? 'Production Complete - Not Yet Received'
+                : 'Received in Warehouse'
+            } - ${formattedDate}
           </div>
         </div>
       </body>
@@ -614,15 +634,28 @@ export default function FinalProducts() {
       cell: (row) => (
         <div className={`flex ${isRTL ? "space-x-reverse" : "space-x-2"}`}>
           {(row.status !== "received" && row.status !== "partially_received") && (
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => handleReceiveJobOrder(row)}
-              className="whitespace-nowrap"
-            >
-              <span className="material-icons text-sm mr-1">inventory</span>
-              {t('warehouse.receive')}
-            </Button>
+            <div className={`flex ${isRTL ? "space-x-reverse" : "space-x-2"}`}>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={() => handleReceiveJobOrder(row)}
+                className="whitespace-nowrap"
+              >
+                <span className="material-icons text-sm mr-1">inventory</span>
+                {t('warehouse.receive')}
+              </Button>
+              {row.status === "completed" && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handlePrintLabel(row)}
+                  className="whitespace-nowrap"
+                >
+                  <span className="material-icons text-sm mr-1">print</span>
+                  {t('warehouse.print_label')}
+                </Button>
+              )}
+            </div>
           )}
           {(row.status === "partially_received") && (
             <div className={`flex ${isRTL ? "space-x-reverse" : "space-x-2"}`}>
@@ -785,7 +818,9 @@ export default function FinalProducts() {
               {t('warehouse.print_label')}
             </DialogTitle>
             <DialogDescription>
-              {t('warehouse.print_label_description') || "Print a warehouse label for the received job order."}
+              {selectedJobOrder?.status === 'completed' 
+                ? (t('warehouse.print_label_description_completed') || "Print a warehouse label for the completed job order that is pending warehouse receipt.")
+                : (t('warehouse.print_label_description') || "Print a warehouse label for the received job order.")}
             </DialogDescription>
           </DialogHeader>
           
@@ -813,7 +848,13 @@ export default function FinalProducts() {
                   <li>Received Quantity: {formatNumber(selectedJobOrder.receivedQty || 0)} kg</li>
                   <li>{t('warehouse.waste_qty')}: {formatNumber(Math.max(0, getTotalExtrusionQty(selectedJobOrder.id) - (selectedJobOrder.finishedQty || 0)))} kg</li>
                   <li>Waste Percentage: {calculateWastePercentage(selectedJobOrder.id)}%</li>
-                  <li>{t('common.status')}: {selectedJobOrder.status === 'partially_received' ? 'Partially Received' : 'Fully Received'}</li>
+                  <li>{t('common.status')}: {
+                    selectedJobOrder.status === 'partially_received' 
+                      ? 'Partially Received' 
+                      : selectedJobOrder.status === 'completed' 
+                        ? 'Completed - Pending Warehouse' 
+                        : 'Fully Received'
+                  }</li>
                 </ul>
               </div>
             </div>
