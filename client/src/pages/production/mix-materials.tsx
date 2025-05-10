@@ -96,18 +96,13 @@ export default function MixMaterialsPage() {
   });
   
   // Fetch users to map operator IDs to names
-  const { data: users, isLoading: usersLoading } = useQuery<User[]>({
+  const { data: users } = useQuery<User[]>({
     queryKey: [API_ENDPOINTS.USERS],
-    staleTime: 5 * 60 * 1000, // 5 minutes stale time
   });
   
   // Function to get operator name from ID
   const getOperatorName = (operatorId: string) => {
-    // If users are still loading or operatorId is empty, show loading indicator
-    if (usersLoading) return `${t('common.loading')}...`;
-    if (!operatorId) return t('common.not_available');
-    if (!users || users.length === 0) return operatorId;
-    
+    if (!users) return operatorId;
     const user = users.find(user => user.id === operatorId);
     if (!user) return operatorId;
     
@@ -220,15 +215,7 @@ export default function MixMaterialsPage() {
     {
       header: t('production.mix_materials.operator'),
       accessorKey: "mixPerson" as const,
-      cell: (row: any) => {
-        const operatorName = getOperatorName(row.mixPerson);
-        return (
-          <div className="flex items-center">
-            <span className="material-icons text-sm mr-2 text-gray-500">person</span>
-            <span>{operatorName}</span>
-          </div>
-        );
-      },
+      cell: (row: any) => getOperatorName(row.mixPerson),
     },
     {
       header: t('production.mix_materials.total_weight'),
@@ -446,10 +433,7 @@ export default function MixMaterialsPage() {
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div>
                   <p className="text-xs text-gray-500">{t('production.mix_materials.operator')}</p>
-                  <div className="flex items-center mt-1">
-                    <span className="material-icons text-xs mr-1 text-gray-500">person</span>
-                    <p className="text-sm font-medium">{getOperatorName(mix.mixPerson)}</p>
-                  </div>
+                  <p className="text-sm font-medium">{getOperatorName(mix.mixPerson)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">{t('production.mix_materials.total_weight')}</p>
