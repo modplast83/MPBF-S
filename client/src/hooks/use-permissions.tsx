@@ -168,8 +168,14 @@ export function PermissionsProvider({
     }
     
     // Special case for operators - they can view workflow and mix materials
-    if (userRole === "operator" && action === "view") {
-      if (module === "Workflow" || module === "Mix Materials") {
+    if (userRole === "operator") {
+      // Operators can always view workflow and mix materials
+      if (action === "view" && (module === "Workflow" || module === "Mix Materials")) {
+        return true;
+      }
+      
+      // Operators in Extruding section can create mix materials
+      if (userSection === "Extruding" && module === "Mix Materials" && action === "create") {
         return true;
       }
     }
