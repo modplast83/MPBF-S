@@ -7,7 +7,7 @@ import {
   QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
   CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage,
   MixMaterial, InsertMixMaterial, MixItem, InsertMixItem,
-  MixMachine, InsertMixMachine, mixMachines, permissions,
+  MixMachine, InsertMixMachine, mixMachines, permissions, users,
   Permission, InsertPermission, MaterialInput, InsertMaterialInput,
   MaterialInputItem, InsertMaterialInputItem,
   PlatePricingParameter, InsertPlatePricingParameter,
@@ -15,6 +15,8 @@ import {
   AbaMaterialConfig, InsertAbaMaterialConfig
 } from "@shared/schema";
 import session from "express-session";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -224,6 +226,75 @@ export interface IStorage {
   updateAbaMaterialConfig(id: number, update: Partial<AbaMaterialConfig>): Promise<AbaMaterialConfig | undefined>;
   deleteAbaMaterialConfig(id: number): Promise<boolean>;
   setDefaultAbaMaterialConfig(id: number): Promise<boolean>;
+}
+
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+
+  constructor() {
+    // Initialize session store with PostgreSQL
+    const PostgreSQLStore = require('connect-pg-simple')(session);
+    this.sessionStore = new PostgreSQLStore({
+      pool: require('./db').pool,
+      tableName: 'sessions' // Uses the sessions table defined in schema.ts
+    });
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  // Implement all other IStorage methods here...
+
+  // Permissions methods
+  async getPermissions(): Promise<Permission[]> {
+    return await db.select().from(permissions);
+  }
+
+  async getPermissionsByRole(role: string): Promise<Permission[]> {
+    return await db.select().from(permissions).where(eq(permissions.role, role));
+  }
+
+  async getPermission(id: number): Promise<Permission | undefined> {
+    const [permission] = await db.select().from(permissions).where(eq(permissions.id, id));
+    return permission || undefined;
+  }
+
+  async createPermission(permission: InsertPermission): Promise<Permission> {
+    const [result] = await db.insert(permissions).values(permission).returning();
+    return result;
+  }
+
+  async updatePermission(id: number, permissionData: Partial<Permission>): Promise<Permission | undefined> {
+    const [result] = await db
+      .update(permissions)
+      .set(permissionData)
+      .where(eq(permissions.id, id))
+      .returning();
+    return result || undefined;
+  }
+
+  async deletePermission(id: number): Promise<boolean> {
+    const result = await db.delete(permissions).where(eq(permissions.id, id));
+    return !!result;
+  }
+
+  // The rest of the IStorage methods...
+
 }
 
 export class MemStorage implements IStorage {
