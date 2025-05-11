@@ -23,7 +23,7 @@ const SECTION_MODULE_ACCESS: Record<string, string[]> = {
   'Extruding': ['Dashboard', 'Orders', 'Mix Materials', 'Workflow', 'Workflow-Extrusion Tab'],
   'Printing': ['Dashboard', 'Workflow', 'Workflow-Printing Tab'],
   'Cutting': ['Dashboard', 'Orders', 'Workflow', 'Workflow-Cutting Tab'],
-  'Warehouse': ['Dashboard', 'Orders', 'Warehouse', 'Raw Materials', 'Final Products']
+  'Warehouse': ['Dashboard', 'Orders', 'Warehouse', 'Raw Materials', 'Final Products', 'Inventory']
 };
 
 export function PermissionsProvider({ 
@@ -78,11 +78,8 @@ export function PermissionsProvider({
         return true;
       }
       
-      // Check for specific workflow tab permissions based on section name
+      // Check for specific workflow tab permissions based on section name and SECTION_MODULE_ACCESS mapping
       // This handles cases like "Workflow-Extrusion Tab"
-      const sectionTabModule = `Workflow-${tab.charAt(0).toUpperCase() + tab.slice(1)} Tab`;
-      
-      // Check for explicit permissions in sections using the SECTION_MODULE_ACCESS mapping
       const sectionTabModule = `Workflow-${tab.charAt(0).toUpperCase() + tab.slice(1)} Tab`;
       
       if (userSection && SECTION_MODULE_ACCESS[userSection]) {

@@ -75,9 +75,9 @@ function App() {
                   <ProtectedRoute path="/orders" component={OrdersIndex} module="Orders" />
                   <ProtectedRoute path="/orders/:id" component={OrderDetails} module="Orders" />
                   <ProtectedRoute path="/workflow" component={WorkflowIndex} module="Workflow" workflowTab="extrusion" />
-                  <ProtectedRoute path="/warehouse" component={WarehouseIndex} module="Warehouse" />
-                  <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" />
-                  <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" />
+                  <ProtectedRoute path="/warehouse" component={WarehouseIndex} module="Warehouse" sectionOnly={true} />
+                  <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" sectionOnly={true} />
+                  <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" sectionOnly={true} />
                   <ProtectedRoute path="/reports" component={ReportsIndex} module="Reports" />
                   <ProtectedRoute path="/reports/performance" component={PerformancePage} module="Performance Metrics" />
                   <ProtectedRoute path="/reports/production" component={ProductionReportsPage} module="Production Reports" />

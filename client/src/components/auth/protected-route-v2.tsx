@@ -47,10 +47,30 @@ export function ProtectedRoute({
       }
       
       // If sectionOnly is specified, ensure the user has a section assigned
-      if (sectionOnly && user && (!user.sectionId || user.sectionId === "")) {
-        console.log(`User doesn't have a section assigned, section is required for: ${path}, redirecting to dashboard`);
-        setLocation("/");
-        return;
+      // and has permissions for the specified module
+      if (sectionOnly) {
+        if (!user || !user.sectionId || user.sectionId === "") {
+          console.log(`User doesn't have a section assigned, section is required for: ${path}, redirecting to dashboard`);
+          setLocation("/");
+          return;
+        }
+        
+        // If it's the warehouse module, make sure the user is in the Warehouse section
+        // or is an administrator/supervisor
+        if (module && (
+          module === "Warehouse" || 
+          module === "Raw Materials" || 
+          module === "Final Products" || 
+          module === "Inventory"
+        )) {
+          if (user.role !== "administrator" && 
+              user.role !== "supervisor" && 
+              user.sectionId !== "Warehouse") {
+            console.log(`User is not in the Warehouse section, redirecting to dashboard`);
+            setLocation("/");
+            return;
+          }
+        }
       }
     }
   }, [
