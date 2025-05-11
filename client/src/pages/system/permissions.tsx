@@ -108,6 +108,34 @@ function apiToUiFormat(dto: PermissionDTO): Permission {
   };
 }
 
+// Helper to convert UI format to API format for updates
+function uiToApiFormat(field: keyof Permission, value: boolean): Record<string, boolean> {
+  const update: Record<string, boolean> = {};
+  
+  // Convert from UI camelCase to API snake_case format
+  switch(field) {
+    case 'canView':
+      update.can_view = value;
+      break;
+    case 'canCreate':
+      update.can_create = value;
+      break;
+    case 'canEdit':
+      update.can_edit = value;
+      break;
+    case 'canDelete':
+      update.can_delete = value;
+      break;
+    case 'isActive':
+      update.is_active = value;
+      break;
+    default:
+      break;
+  }
+  
+  return update;
+}
+
 export default function Permissions() {
   // UI state
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
@@ -250,29 +278,8 @@ export default function Permissions() {
   
   // Handle permission change directly
   const handlePermissionChange = (id: number, field: keyof Permission, value: boolean) => {
-    // Prepare update based on the field
-    const update: Record<string, boolean> = {};
-    
-    // Convert to API snake_case format
-    switch(field) {
-      case 'canView':
-        update.can_view = value;
-        break;
-      case 'canCreate':
-        update.can_create = value;
-        break;
-      case 'canEdit':
-        update.can_edit = value;
-        break;
-      case 'canDelete':
-        update.can_delete = value;
-        break;
-      case 'isActive':
-        update.is_active = value;
-        break;
-      default:
-        break;
-    }
+    // Prepare update using our conversion function
+    const update = uiToApiFormat(field, value);
     
     // Show optimistic update feedback
     const affectedPermission = permissions.find(p => p.id === id);

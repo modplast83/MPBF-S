@@ -414,24 +414,24 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>{t('production.mix_materials.aba_calculator')}</CardTitle>
+        <CardTitle>{t('production.aba_calculator.title')}</CardTitle>
         <CardDescription>
-          {t('production.mix_materials.aba_calculator_description')}
+          {t('production.aba_calculator.job_order_selection')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="calculator">{t('production.mix_materials.calculator')}</TabsTrigger>
-            <TabsTrigger value="configurations">{t('production.mix_materials.configurations')}</TabsTrigger>
-            <TabsTrigger value="result">{t('production.mix_materials.result')}</TabsTrigger>
+            <TabsTrigger value="calculator">{t('production.aba_calculator.config_tab')}</TabsTrigger>
+            <TabsTrigger value="configurations">{t('production.aba_calculator.configuration')}</TabsTrigger>
+            <TabsTrigger value="result">{t('production.aba_calculator.result')}</TabsTrigger>
           </TabsList>
 
           {/* Calculator Tab */}
           <TabsContent value="calculator" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
-                <Label htmlFor="quantity">{t('production.mix_materials.total_quantity')} (kg)</Label>
+                <Label htmlFor="quantity">{t('production.aba_calculator.total_quantity')} (kg)</Label>
                 <Input
                   id="quantity"
                   type="number"
@@ -476,7 +476,7 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
                 <h3 className="text-lg font-medium mb-3">{t('production.mix_materials.formula_settings')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="aTotalWeight">{t('production.mix_materials.a_total_weight')} (kg)</Label>
+                    <Label htmlFor="aTotalWeight">{t('production.aba_calculator.a_total_weight')} (kg)</Label>
                     <Input
                       id="aTotalWeight"
                       type="number"
@@ -488,11 +488,11 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
                       }))}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      {t('production.mix_materials.a_total_weight_help')}
+                      {t('production.aba_calculator.a_total_weight_help')}
                     </p>
                   </div>
                   <div>
-                    <Label htmlFor="bTotalWeight">{t('production.mix_materials.b_total_weight')} (kg)</Label>
+                    <Label htmlFor="bTotalWeight">{t('production.aba_calculator.b_total_weight')} (kg)</Label>
                     <Input
                       id="bTotalWeight"
                       type="number"
@@ -504,7 +504,7 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
                       }))}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      {t('production.mix_materials.b_total_weight_help')}
+                      {t('production.aba_calculator.b_total_weight_help')}
                     </p>
                   </div>
                 </div>
@@ -650,28 +650,28 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
           <TabsContent value="result" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <h3 className="text-lg font-medium mb-2">{t('production.mix_materials.input_summary')}</h3>
+                <h3 className="text-lg font-medium mb-2">{t('production.aba_calculator.input_summary')}</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>{t('production.mix_materials.total_quantity')}:</span>
+                    <span>{t('production.aba_calculator.total_quantity')}:</span>
                     <span className="font-medium">{formatNumber(quantity, 1)} kg</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>{t('production.mix_materials.total_a')}:</span>
+                    <span>{t('production.aba_calculator.total_a')}:</span>
                     <span className="font-medium">{formatNumber(scaledATotalKg, 1)} kg ({formatNumber(aPercentage, 1)}%)</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>{t('production.mix_materials.total_b')}:</span>
+                    <span>{t('production.aba_calculator.total_b')}:</span>
                     <span className="font-medium">{formatNumber(scaledBTotalKg, 1)} kg ({formatNumber(bPercentage, 1)}%)</span>
                   </div>
                   <div className="border-t pt-2 mt-2">
-                    <div className="text-sm font-medium mb-1">{t('production.mix_materials.formula_parameters')}</div>
+                    <div className="text-sm font-medium mb-1">{t('production.aba_calculator.formula_settings')}</div>
                     <div className="flex justify-between">
-                      <span>{t('production.mix_materials.a_total_weight')}:</span>
+                      <span>{t('production.aba_calculator.a_total_weight')}:</span>
                       <span className="font-medium">{formatNumber(formulaParameters.aTotalWeight, 1)} kg</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>{t('production.mix_materials.b_total_weight')}:</span>
+                      <span>{t('production.aba_calculator.b_total_weight')}:</span>
                       <span className="font-medium">{formatNumber(formulaParameters.bTotalWeight, 1)} kg</span>
                     </div>
                   </div>
