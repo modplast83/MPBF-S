@@ -8,15 +8,19 @@ type ProtectedRouteProps = {
   path: string;
   component: React.ComponentType;
   module?: string; // Optional module name for permissions
+  sectionOnly?: boolean; // If true, only allow access if user has section-specific permissions
+  workflowTab?: string; // Optional workflow tab name for section-specific access
 };
 
 export function ProtectedRoute({ 
   path, 
   component: Component,
-  module 
+  module,
+  sectionOnly = false,
+  workflowTab
 }: ProtectedRouteProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
-  const { hasPermission } = usePermissions();
+  const { hasPermission, hasWorkflowTabPermission } = usePermissions();
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
@@ -24,14 +28,44 @@ export function ProtectedRoute({
     if (!isLoading && !isAuthenticated && location !== "/auth") {
       console.log("User is not authenticated and not on auth page, redirecting to auth");
       setLocation("/auth");
+      return;
     }
     
-    // If module is specified, check if user has permission
-    if (!isLoading && isAuthenticated && module && !hasPermission(module)) {
-      console.log(`User doesn't have permission for module: ${module}, redirecting to dashboard`);
-      setLocation("/");
+    if (!isLoading && isAuthenticated) {
+      // Check for workflow tab permission if specified
+      if (workflowTab && !hasWorkflowTabPermission(workflowTab)) {
+        console.log(`User doesn't have permission for workflow tab: ${workflowTab}, redirecting to dashboard`);
+        setLocation("/");
+        return;
+      }
+      
+      // If module is specified, check if user has permission
+      if (module && !hasPermission(module)) {
+        console.log(`User doesn't have permission for module: ${module}, redirecting to dashboard`);
+        setLocation("/");
+        return;
+      }
+      
+      // If sectionOnly is specified, ensure the user has a section assigned
+      if (sectionOnly && user && (!user.sectionId || user.sectionId === "")) {
+        console.log(`User doesn't have a section assigned, section is required for: ${path}, redirecting to dashboard`);
+        setLocation("/");
+        return;
+      }
     }
-  }, [isLoading, isAuthenticated, module, hasPermission, location, setLocation]);
+  }, [
+    isLoading, 
+    isAuthenticated, 
+    module, 
+    workflowTab,
+    hasPermission, 
+    hasWorkflowTabPermission, 
+    location, 
+    setLocation,
+    sectionOnly,
+    user,
+    path
+  ]);
 
   // Loader while checking authentication
   if (isLoading) {

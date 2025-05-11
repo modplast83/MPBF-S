@@ -17,6 +17,8 @@ import { MixMaterial, MixItem, RawMaterial, User } from "@shared/schema";
 import { formatDateString } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useAuth } from "@/hooks/use-auth-v2";
 
 interface MixDetailsProps {
   mixId: number;
@@ -28,9 +30,16 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const { user } = useAuth();
   const [selectedMaterial, setSelectedMaterial] = useState<number | null>(null);
   const [quantity, setQuantity] = useState("");
   const [isAddingMaterial, setIsAddingMaterial] = useState(false);
+  
+  // Check if user has permission to edit/add to mix materials and is in the Extruding section
+  const hasExtrudingSection = user?.sectionId && user.sectionId !== "";
+  const canEdit = hasPermission("Mix Materials", "edit") && hasExtrudingSection;
+  const canDelete = hasPermission("Mix Materials", "delete") && hasExtrudingSection;
 
   // Fetch mix details
   const { data: mix, isLoading: mixLoading } = useQuery<MixMaterial>({
@@ -333,13 +342,15 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                 </div>
               </div>
             ) : (
-              <Button 
-                className="w-full justify-center"
-                onClick={() => setIsAddingMaterial(true)}
-              >
-                <span className="material-icons mr-2">add</span>
-                {t('production.mix_materials.add_material_to_mix')}
-              </Button>
+              canEdit && (
+                <Button 
+                  className="w-full justify-center"
+                  onClick={() => setIsAddingMaterial(true)}
+                >
+                  <span className="material-icons mr-2">add</span>
+                  {t('production.mix_materials.add_material_to_mix')}
+                </Button>
+              )
             )}
           </CardContent>
         </Card>
@@ -375,15 +386,17 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                     <TableCell className="text-right">{item.quantity.toFixed(2)}</TableCell>
                     <TableCell className="text-right">{item.percentage?.toFixed(2) || "0.00"}%</TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-destructive-500"
-                        onClick={() => handleRemoveMaterial(item.id)}
-                        disabled={removeMixItemMutation.isPending}
-                      >
-                        <span className="material-icons text-sm">delete</span>
-                      </Button>
+                      {canDelete && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-destructive-500"
+                          onClick={() => handleRemoveMaterial(item.id)}
+                          disabled={removeMixItemMutation.isPending}
+                        >
+                          <span className="material-icons text-sm">delete</span>
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

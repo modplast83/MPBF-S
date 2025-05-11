@@ -19,6 +19,8 @@ import { FilterSummary } from "@/components/production/filter-summary";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/use-auth-v2";
+import { usePermissions } from "@/hooks/use-permissions";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -44,12 +46,19 @@ export default function MixMaterialsPage() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { isRTL } = useLanguage();
+  const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const [selectedMixId, setSelectedMixId] = useState<number | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [mixToDelete, setMixToDelete] = useState<number | null>(null);
   const [printableData, setPrintableData] = useState<PrintData | null>(null);
+  
+  // Check if user has permissions for various actions
+  const canCreate = hasPermission("Mix Materials", "create");
+  const canEdit = hasPermission("Mix Materials", "edit");
+  const canDelete = hasPermission("Mix Materials", "delete");
 
   // Fetch all mix materials
   const { data: mixMaterials, isLoading: mixLoading, refetch: refetchMixes } = useQuery<MixMaterial[]>({
@@ -227,6 +236,7 @@ export default function MixMaterialsPage() {
       id: "actions",
       cell: (row: MixMaterial) => (
         <div className="flex space-x-2">
+          {/* View button is always available */}
           <Button 
             variant="ghost" 
             size="icon" 
@@ -239,6 +249,8 @@ export default function MixMaterialsPage() {
           >
             <span className="material-icons text-sm">visibility</span>
           </Button>
+          
+          {/* Print button is always available */}
           <Button 
             variant="ghost" 
             size="icon" 
@@ -250,17 +262,21 @@ export default function MixMaterialsPage() {
           >
             <span className="material-icons text-sm">print</span>
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-red-500 hover:text-red-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteMix(row.id);
-            }}
-          >
-            <span className="material-icons text-sm">delete</span>
-          </Button>
+          
+          {/* Delete button only if user has delete permission */}
+          {canDelete && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-red-500 hover:text-red-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteMix(row.id);
+              }}
+            >
+              <span className="material-icons text-sm">delete</span>
+            </Button>
+          )}
         </div>
       ),
     },
@@ -696,26 +712,28 @@ export default function MixMaterialsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-primary-700">{t('production.mix_materials.title')}</h1>
         <div className="flex space-x-2">
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-1">
-                <span className="material-icons text-sm">add</span>
-                {isMobile ? "" : t('production.mix_materials.new_mix')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className={isMobile ? "max-w-[95vw] p-4 sm:p-6" : "sm:max-w-[550px]"}>
-              <DialogHeader>
-                <DialogTitle>{t('production.mix_materials.new_mix')}</DialogTitle>
-              </DialogHeader>
-              <MixMaterialForm 
-                rawMaterials={rawMaterials || []}
-                onSuccess={() => {
-                  setIsCreateDialogOpen(false);
-                  refetchMixes();
-                }}
-              />
-            </DialogContent>
-          </Dialog>
+          {canCreate && (
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-1">
+                  <span className="material-icons text-sm">add</span>
+                  {isMobile ? "" : t('production.mix_materials.new_mix')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className={isMobile ? "max-w-[95vw] p-4 sm:p-6" : "sm:max-w-[550px]"}>
+                <DialogHeader>
+                  <DialogTitle>{t('production.mix_materials.new_mix')}</DialogTitle>
+                </DialogHeader>
+                <MixMaterialForm 
+                  rawMaterials={rawMaterials || []}
+                  onSuccess={() => {
+                    setIsCreateDialogOpen(false);
+                    refetchMixes();
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 

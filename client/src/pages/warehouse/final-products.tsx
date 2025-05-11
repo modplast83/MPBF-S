@@ -10,23 +10,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
-import { formatDateString, formatNumber } from "@/lib/utils";
+import { formatDateString, formatNumber, cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { JobOrder, CustomerProduct, Order, Customer, Roll, Item } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, isValid, parseISO } from "date-fns";
 
 export default function FinalProducts() {
   const queryClient = useQueryClient();
   const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
   const [printLabelDialogOpen, setPrintLabelDialogOpen] = useState(false);
+  const [batchPrintDialogOpen, setBatchPrintDialogOpen] = useState(false);
   const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
   const [finishedQty, setFinishedQty] = useState<number>(0);
   const [receivingQty, setReceivingQty] = useState<number>(0);
   const [notes, setNotes] = useState<string>("");
   const [isPrinting, setIsPrinting] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [jobOrdersToPrint, setJobOrdersToPrint] = useState<JobOrder[]>([]);
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const isMobile = useIsMobile();
@@ -209,7 +215,272 @@ export default function FinalProducts() {
     setPrintLabelDialogOpen(true);
   };
 
-  // Function to execute the actual printing
+  // Function to prepare batch printing dialog
+  const handleOpenBatchPrint = () => {
+    if (!selectedDate) {
+      toast({
+        title: "Please select a date",
+        description: "You need to select a date to print job orders for a specific day.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Filter job orders that have been received (based on receivedQty > 0)
+    // Since we don't currently have a receiveDate field in our schema,
+    // we'll just show all received job orders as a demonstration
+    
+    const filteredOrders = jobOrders.filter(order => {
+      // Only include job orders that have been received (fully or partially)
+      return order.receivedQty && order.receivedQty > 0 &&
+             (order.status === 'received' || order.status === 'partially_received');
+    });
+
+    if (filteredOrders.length === 0) {
+      toast({
+        title: "No job orders found",
+        description: `No job orders were received on ${format(selectedDate, 'MMMM dd, yyyy')}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setJobOrdersToPrint(filteredOrders);
+    setBatchPrintDialogOpen(true);
+  };
+
+  // Function to print multiple job order labels
+  const printBatchLabels = () => {
+    setIsPrinting(true);
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    
+    if (!printWindow) {
+      toast({
+        title: t("common.error"),
+        description: t("common.popup_blocked"),
+        variant: "destructive",
+      });
+      setIsPrinting(false);
+      return;
+    }
+    
+    // Start building the HTML content for all labels
+    let htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Batch Job Order Labels</title>
+        <style>
+          @page {
+            size: 4in 6in;
+            margin: 0;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+          }
+          .page-break {
+            page-break-after: always;
+          }
+          .label-container {
+            width: 4in;
+            height: 6in;
+            padding: 0.25in;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.2in;
+            font-size: 10pt;
+            font-weight: bold;
+          }
+          .job-order-id {
+            font-size: 14pt;
+            font-weight: bold;
+          }
+          .info-row {
+            display: flex;
+            margin-bottom: 0.1in;
+            font-size: 9pt;
+          }
+          .info-label {
+            width: 1.3in;
+            font-weight: bold;
+          }
+          .info-value {
+            flex: 1;
+          }
+          .qr-placeholder {
+            margin: 0.2in auto;
+            text-align: center;
+            padding: 0.5in;
+            border: 1px dashed #999;
+            font-size: 8pt;
+          }
+          .footer {
+            margin-top: auto;
+            font-size: 8pt;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 0.1in;
+          }
+          .receipt-status {
+            font-weight: bold;
+            margin-top: 0.1in;
+            text-align: center;
+            padding: 0.05in;
+            border: 1px solid #000;
+            border-radius: 0.1in;
+          }
+          .full-receipt {
+            background-color: #d4edda;
+            color: #155724;
+          }
+          .partial-receipt {
+            background-color: #cce5ff;
+            color: #004085;
+          }
+          .completed-status {
+            background-color: #fff3cd;
+            color: #856404;
+          }
+        </style>
+      </head>
+      <body>
+    `;
+    
+    // Add each job order label
+    jobOrdersToPrint.forEach((jobOrder, index) => {
+      const jobOrderDetails = getJobOrderDetails(jobOrder.id);
+      const productionQty = getTotalExtrusionQty(jobOrder.id);
+      const finishedQty = jobOrder.finishedQty || 0;
+      const wasteQty = Math.max(0, productionQty - finishedQty);
+      
+      // Format date to display on label
+      const formattedDate = new Date().toLocaleDateString();
+      
+      // Add page break between labels except for the first one
+      if (index > 0) {
+        htmlContent += '<div class="page-break"></div>';
+      }
+      
+      htmlContent += `
+        <div class="label-container">
+          <div class="header">
+            <div class="job-order-id">JO #${jobOrder.id}</div>
+            <div>${formattedDate}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Customer:</div>
+            <div class="info-value">${jobOrderDetails.customer || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Product:</div>
+            <div class="info-value">${jobOrderDetails.productName || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Order #:</div>
+            <div class="info-value">${jobOrderDetails.orderNumber || 'N/A'}</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Ordered Qty:</div>
+            <div class="info-value">${formatNumber(jobOrder.quantity || 0)} kg</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Finished Qty:</div>
+            <div class="info-value">${formatNumber(finishedQty)} kg</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Received Qty:</div>
+            <div class="info-value">${formatNumber(jobOrder.receivedQty || 0)} kg</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Waste Qty:</div>
+            <div class="info-value">${formatNumber(wasteQty)} kg</div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Waste %:</div>
+            <div class="info-value">${calculateWastePercentage(jobOrder.id)}%</div>
+          </div>
+          
+          <div class="receipt-status ${
+            jobOrder.status === 'partially_received' 
+              ? 'partial-receipt' 
+              : jobOrder.status === 'completed' 
+                ? 'completed-status' 
+                : 'full-receipt'
+          }">
+            ${
+              jobOrder.status === 'partially_received' 
+                ? 'PARTIALLY RECEIVED' 
+                : jobOrder.status === 'completed' 
+                  ? 'COMPLETED - PENDING WAREHOUSE' 
+                  : 'FULLY RECEIVED'
+            }
+          </div>
+          
+          <div class="qr-placeholder">
+            Scan QR code to view detailed information<br>
+            JO #${jobOrder.id}
+          </div>
+          
+          <div class="footer">
+            ${
+              jobOrder.status === 'completed'
+                ? 'Production Complete - Not Yet Received'
+                : 'Received in Warehouse'
+            } - ${formattedDate}
+          </div>
+        </div>
+      `;
+    });
+    
+    // Close the HTML content
+    htmlContent += `
+      </body>
+      </html>
+    `;
+    
+    // Set the HTML content of the print window
+    printWindow.document.write(htmlContent);
+    
+    // Wait for content to load, then print
+    printWindow.document.addEventListener('load', function() {
+      printWindow.print();
+      printWindow.close();
+      setIsPrinting(false);
+      setBatchPrintDialogOpen(false);
+    }, { once: true });
+    
+    // Fallback in case the load event doesn't fire
+    setTimeout(() => {
+      try {
+        printWindow.print();
+        printWindow.close();
+      } catch (e) {
+        console.error("Error printing:", e);
+      }
+      setIsPrinting(false);
+      setBatchPrintDialogOpen(false);
+    }, 1000);
+  };
+
+  // Function to execute the actual printing of a single job order
   const printJobOrderLabel = () => {
     if (!selectedJobOrder) return;
     
@@ -699,6 +970,45 @@ export default function FinalProducts() {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-secondary-900">{t('warehouse.final_products')}</h1>
+        
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <span className="material-icons mr-2 text-sm">calendar_today</span>
+                  {selectedDate ? (
+                    format(selectedDate, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            
+            <Button
+              onClick={handleOpenBatchPrint}
+              className="whitespace-nowrap"
+            >
+              <span className="material-icons mr-2 text-sm">print</span>
+              Print Daily Labels
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Card>
@@ -876,6 +1186,77 @@ export default function FinalProducts() {
               {isPrinting
                 ? t('warehouse.printing_label') || "Printing Label..."
                 : t('warehouse.print_label')
+              }
+              <span className="material-icons text-sm ml-1">print</span>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Batch Print Dialog */}
+      <Dialog open={batchPrintDialogOpen} onOpenChange={setBatchPrintDialogOpen}>
+        <DialogContent className={isRTL ? "rtl" : ""}>
+          <DialogHeader>
+            <DialogTitle>
+              {t('warehouse.batch_print_label') || "Print Multiple Labels"}
+            </DialogTitle>
+            <DialogDescription>
+              {t('warehouse.batch_print_description') || `Print labels for all job orders received on ${selectedDate ? format(selectedDate, "MMMM dd, yyyy") : "the selected date"}.`}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="grid gap-4">
+              <div className="border rounded-md p-4 bg-secondary-50">
+                <p className="text-sm font-medium">{t('warehouse.batch_print_summary') || "Summary of job orders to print:"}</p>
+                <ul className="text-sm list-disc list-inside mt-2 space-y-1">
+                  <li>{t('warehouse.orders_found', { count: jobOrdersToPrint.length }) || `${jobOrdersToPrint.length} job order(s) found`}</li>
+                  <li>{t('warehouse.total_received_kg', { kg: jobOrdersToPrint.reduce((sum, jo) => sum + (jo.receivedQty || 0), 0).toFixed(2) }) || 
+                      `Total received quantity: ${jobOrdersToPrint.reduce((sum, jo) => sum + (jo.receivedQty || 0), 0).toFixed(2)} kg`}</li>
+                </ul>
+              </div>
+              
+              {jobOrdersToPrint.length > 0 && (
+                <div className="max-h-48 overflow-y-auto border rounded-md p-2">
+                  <table className="w-full text-sm">
+                    <thead className="font-medium border-b">
+                      <tr>
+                        <th className="text-left p-2">JO #</th>
+                        <th className="text-left p-2">{t('setup.customers.title')}</th>
+                        <th className="text-left p-2">{t('warehouse.received_qty')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {jobOrdersToPrint.map(jo => (
+                        <tr key={jo.id} className="border-b border-secondary-100 hover:bg-secondary-50">
+                          <td className="p-2">#{jo.id}</td>
+                          <td className="p-2">{getJobOrderDetails(jo.id).customer}</td>
+                          <td className="p-2">{formatNumber(jo.receivedQty || 0)} kg</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter className={`${isMobile ? "flex flex-col space-y-2" : ""} ${isRTL ? "flex-row-reverse" : ""}`}>
+            <Button 
+              variant="outline" 
+              onClick={() => setBatchPrintDialogOpen(false)} 
+              className={isMobile ? "w-full" : ""}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button 
+              onClick={printBatchLabels} 
+              disabled={isPrinting || jobOrdersToPrint.length === 0}
+              className={isMobile ? "w-full" : ""}
+            >
+              {isPrinting
+                ? t('warehouse.printing_batch_labels') || "Printing Labels..."
+                : t('warehouse.print_batch_labels') || "Print All Labels"
               }
               <span className="material-icons text-sm ml-1">print</span>
             </Button>

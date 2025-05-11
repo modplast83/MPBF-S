@@ -70,10 +70,10 @@ function App() {
                   <ProtectedRoute path="/setup/machines" component={Machines} module="Machines" />
                   <ProtectedRoute path="/setup/users" component={Users} module="Users" />
                   <ProtectedRoute path="/production" component={ProductionIndex} module="Production" />
-                  <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" />
+                  <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" sectionOnly={true} />
                   <ProtectedRoute path="/orders" component={OrdersIndex} module="Orders" />
                   <ProtectedRoute path="/orders/:id" component={OrderDetails} module="Orders" />
-                  <ProtectedRoute path="/workflow" component={WorkflowIndex} module="Workflow" />
+                  <ProtectedRoute path="/workflow" component={WorkflowIndex} module="Workflow" workflowTab="extrusion" />
                   <ProtectedRoute path="/warehouse" component={WarehouseIndex} module="Warehouse" />
                   <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" />
                   <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" />
