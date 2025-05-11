@@ -3720,6 +3720,264 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Workflow Reports API endpoint - data by sections, operators, and items
+  app.get("/api/reports/workflow", async (req: Request, res: Response) => {
+    try {
+      // Parse query parameters for filtering
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+      const sectionId = req.query.sectionId as string | undefined;
+      const operatorId = req.query.operatorId as string | undefined;
+      const itemId = req.query.itemId as string | undefined;
+      
+      // Fetch all necessary data
+      const sections = await storage.getSections();
+      const users = await storage.getUsers();
+      const jobOrders = await storage.getJobOrders();
+      const rolls = await storage.getRolls();
+      const items = await storage.getItems();
+      const orders = await storage.getOrders();
+      const qualityChecks = await storage.getQualityChecks();
+      
+      // Filter rolls based on date range if specified
+      let filteredRolls = [...rolls];
+      
+      if (startDate || endDate) {
+        filteredRolls = filteredRolls.filter(roll => {
+          // Use the roll's creation or completion date
+          const rollDate = roll.completedDate ? new Date(roll.completedDate) : new Date(roll.createdAt || '');
+          
+          if (startDate && endDate) {
+            return rollDate >= startDate && rollDate <= endDate;
+          } else if (startDate) {
+            return rollDate >= startDate;
+          } else if (endDate) {
+            return rollDate <= endDate;
+          }
+          
+          return true;
+        });
+      }
+      
+      // Filter by section if specified
+      if (sectionId) {
+        filteredRolls = filteredRolls.filter(roll => roll.sectionId === sectionId);
+      }
+      
+      // Filter by operator if specified
+      if (operatorId) {
+        filteredRolls = filteredRolls.filter(roll => roll.operatorId === operatorId);
+      }
+      
+      // Get job orders related to filtered rolls
+      const rollJobOrderIds = [...new Set(filteredRolls.map(roll => roll.jobOrderId))];
+      const filteredJobOrders = jobOrders.filter(jo => rollJobOrderIds.includes(jo.id));
+      
+      // Filter by item if specified
+      let itemFilteredJobOrders = [...filteredJobOrders];
+      if (itemId) {
+        // Need to trace back from job order to order to customer product to item
+        itemFilteredJobOrders = filteredJobOrders.filter(jo => {
+          const orderItem = orders.find(order => order.id === jo.orderId);
+          if (!orderItem) return false;
+          
+          // Check if this job order involves the specified item
+          return jo.itemId === itemId;
+        });
+        
+        // Update filtered rolls to match the item-filtered job orders
+        const itemFilteredJobOrderIds = itemFilteredJobOrders.map(jo => jo.id);
+        filteredRolls = filteredRolls.filter(roll => itemFilteredJobOrderIds.includes(roll.jobOrderId));
+      }
+      
+      // Prepare section data
+      const sectionData = sections.map(section => {
+        // Get rolls for this section
+        const sectionRolls = filteredRolls.filter(roll => roll.sectionId === section.id);
+        const rollCount = sectionRolls.length;
+        
+        // Calculate total quantity
+        const totalQuantity = sectionRolls.reduce((sum, roll) => {
+          return sum + (roll.sectionId === 'extrusion' ? (roll.extrusionQty || 0) : 
+                        roll.sectionId === 'printing' ? (roll.printingQty || 0) : 
+                        roll.sectionId === 'cutting' ? (roll.cuttingQty || 0) : 0);
+        }, 0);
+        
+        // Calculate waste quantity and percentage
+        const wasteQuantity = sectionRolls.reduce((sum, roll) => {
+          const inputQty = roll.sectionId === 'extrusion' ? (roll.mixQty || 0) : 
+                           roll.sectionId === 'printing' ? (roll.extrusionQty || 0) : 
+                           roll.sectionId === 'cutting' ? (roll.printingQty || 0) : 0;
+          
+          const outputQty = roll.sectionId === 'extrusion' ? (roll.extrusionQty || 0) : 
+                            roll.sectionId === 'printing' ? (roll.printingQty || 0) : 
+                            roll.sectionId === 'cutting' ? (roll.cuttingQty || 0) : 0;
+          
+          const waste = Math.max(0, inputQty - outputQty);
+          return sum + waste;
+        }, 0);
+        
+        const wastePercentage = totalQuantity > 0 ? (wasteQuantity / (totalQuantity + wasteQuantity)) * 100 : 0;
+        
+        // Calculate efficiency
+        // For simplicity, using a ratio of output to target as efficiency
+        const targetQuantity = sectionRolls.reduce((sum, roll) => {
+          // Get the job order target quantity
+          const jobOrder = jobOrders.find(jo => jo.id === roll.jobOrderId);
+          return sum + (jobOrder ? jobOrder.quantity / jobOrder.rollsCount : 0);
+        }, 0);
+        
+        const efficiency = targetQuantity > 0 ? (totalQuantity / targetQuantity) * 100 : 0;
+        
+        // Calculate production time (in hours)
+        // Using roll completion times or average times if not available
+        const productionTime = sectionRolls.reduce((sum, roll) => {
+          // If start and end times are available, use the difference
+          if (roll.startTime && roll.completedDate) {
+            const start = new Date(roll.startTime);
+            const end = new Date(roll.completedDate);
+            return sum + ((end.getTime() - start.getTime()) / (1000 * 60 * 60)); // Convert to hours
+          }
+          
+          // Otherwise use an estimated time based on quantity
+          // Assume 1 hour per 100kg as a simple metric
+          const quantity = roll.sectionId === 'extrusion' ? (roll.extrusionQty || 0) : 
+                          roll.sectionId === 'printing' ? (roll.printingQty || 0) : 
+                          roll.sectionId === 'cutting' ? (roll.cuttingQty || 0) : 0;
+          
+          return sum + (quantity / 100);
+        }, 0);
+        
+        return {
+          id: section.id,
+          name: section.name,
+          rollCount,
+          totalQuantity,
+          wasteQuantity,
+          wastePercentage,
+          efficiency,
+          productionTime
+        };
+      }).filter(section => section.rollCount > 0); // Only include sections with data
+      
+      // Prepare operator data
+      const operatorData = users.map(user => {
+        // Get rolls processed by this operator
+        const operatorRolls = filteredRolls.filter(roll => roll.operatorId === user.id);
+        const rollsProcessed = operatorRolls.length;
+        
+        if (rollsProcessed === 0) return null; // Skip operators with no data
+        
+        // Determine which section this operator works in most
+        const sectionCounts: { [key: string]: number } = {};
+        operatorRolls.forEach(roll => {
+          sectionCounts[roll.sectionId] = (sectionCounts[roll.sectionId] || 0) + 1;
+        });
+        
+        let mostFrequentSection = '';
+        let maxCount = 0;
+        
+        Object.entries(sectionCounts).forEach(([sectionId, count]) => {
+          if (count > maxCount) {
+            mostFrequentSection = sectionId;
+            maxCount = count;
+          }
+        });
+        
+        const sectionName = sections.find(section => section.id === mostFrequentSection)?.name || mostFrequentSection;
+        
+        // Count job orders processed
+        const operatorJobOrderIds = [...new Set(operatorRolls.map(roll => roll.jobOrderId))];
+        const jobsCount = operatorJobOrderIds.length;
+        
+        // Calculate total quantity processed
+        const totalQuantity = operatorRolls.reduce((sum, roll) => {
+          return sum + (roll.sectionId === 'extrusion' ? (roll.extrusionQty || 0) : 
+                        roll.sectionId === 'printing' ? (roll.printingQty || 0) : 
+                        roll.sectionId === 'cutting' ? (roll.cuttingQty || 0) : 0);
+        }, 0);
+        
+        // Calculate production time
+        const productionTime = operatorRolls.reduce((sum, roll) => {
+          if (roll.startTime && roll.completedDate) {
+            const start = new Date(roll.startTime);
+            const end = new Date(roll.completedDate);
+            return sum + ((end.getTime() - start.getTime()) / (1000 * 60 * 60));
+          }
+          
+          const quantity = roll.sectionId === 'extrusion' ? (roll.extrusionQty || 0) : 
+                          roll.sectionId === 'printing' ? (roll.printingQty || 0) : 
+                          roll.sectionId === 'cutting' ? (roll.cuttingQty || 0) : 0;
+          
+          return sum + (quantity / 100);
+        }, 0);
+        
+        // Calculate efficiency
+        // Number of rolls processed per hour or quality rating
+        const efficiency = productionTime > 0 ? (rollsProcessed / productionTime) * 10 : 0; // Scale for better display
+        
+        return {
+          id: user.id,
+          name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username,
+          section: sectionName,
+          jobsCount,
+          rollsProcessed,
+          totalQuantity,
+          productionTime,
+          efficiency: Math.min(efficiency * 10, 100) // Cap at 100%
+        };
+      }).filter(Boolean) as any[]; // Remove null entries
+      
+      // Prepare item data
+      const itemData = items.map(item => {
+        // Find job orders for this item
+        const itemJobOrders = itemFilteredJobOrders.filter(jo => jo.itemId === item.id.toString());
+        const jobsCount = itemJobOrders.length;
+        
+        if (jobsCount === 0) return null; // Skip items with no data
+        
+        // Get rolls for these job orders
+        const itemRolls = filteredRolls.filter(roll => 
+          itemJobOrders.some(jo => jo.id === roll.jobOrderId)
+        );
+        
+        // Total ordered quantity
+        const totalQuantity = itemJobOrders.reduce((sum, jo) => sum + jo.quantity, 0);
+        
+        // Total finished quantity (from cutting section)
+        const finishedQuantity = itemRolls
+          .filter(roll => roll.stage === 'cutting' && roll.status === 'completed')
+          .reduce((sum, roll) => sum + (roll.cuttingQty || 0), 0);
+        
+        // Calculate waste
+        const wasteQuantity = totalQuantity - finishedQuantity;
+        const wastePercentage = totalQuantity > 0 ? (wasteQuantity / totalQuantity) * 100 : 0;
+        
+        return {
+          id: item.id,
+          name: item.name,
+          category: item.categoryId,
+          jobsCount,
+          totalQuantity,
+          finishedQuantity,
+          wasteQuantity,
+          wastePercentage
+        };
+      }).filter(Boolean) as any[]; // Remove null entries
+      
+      // Return combined report data
+      res.json({
+        sections: sectionData,
+        operators: operatorData,
+        items: itemData
+      });
+      
+    } catch (error) {
+      console.error("Error generating workflow report:", error);
+      res.status(500).json({ message: "Failed to generate workflow report" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

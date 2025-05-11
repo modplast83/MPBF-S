@@ -61,10 +61,10 @@ export default function ReportsIndex() {
   });
 
   // Filter and prepare report data
-  const filterByDateRange = (date: string) => {
+  const filterByDateRange = (dateStr: string | Date) => {
     if (!dateRange.start && !dateRange.end) return true;
     
-    const itemDate = new Date(date);
+    const itemDate = new Date(dateStr);
     const startDate = dateRange.start;
     const endDate = dateRange.end;
     
@@ -113,7 +113,7 @@ export default function ReportsIndex() {
       
       const completedQuantity = orderRolls
         .filter(roll => roll.status === "completed")
-        .reduce((sum, roll) => sum + roll.cuttingQty, 0);
+        .reduce((sum, roll) => sum + (roll.cuttingQty || 0), 0);
       
       // Get first product for display (in real app would handle multiple products better)
       const firstJobOrder = orderJobOrders[0];
@@ -285,6 +285,22 @@ export default function ReportsIndex() {
               </div>
               <p className="text-sm text-gray-600">
                 {t("reports.analyze_quality")}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link href="/reports/workflow" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">{t("reports.workflow_report")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-indigo-50 rounded mb-3">
+                <span className="material-icons text-4xl text-indigo-400">account_tree</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                {t("reports.analyze_by_section_operator_item")}
               </p>
             </CardContent>
           </Card>
