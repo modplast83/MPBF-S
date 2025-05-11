@@ -14,7 +14,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MixMaterialForm } from "@/components/production/mix-material-form";
 import { MixDetails } from "@/components/production/mix-details";
 import { AbaCalculator, AbaPrintTemplate } from "@/components/production/aba-calculator";
-import { AbaMaterialsDnd, MaterialDistribution } from "@/components/production/aba-materials-dnd";
+import { AbaCalculatorConfig } from "@/components/production/aba-calculator-config";
+import { AbaMaterialsDnd } from "@/components/production/aba-materials-dnd";
+import type { MaterialDistribution as ConfigMaterialDistribution } from "@/components/production/aba-calculator-config";
+import type { MaterialDistribution as DndMaterialDistribution } from "@/components/production/aba-materials-dnd";
 import { FilterSummary } from "@/components/production/filter-summary";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +43,37 @@ interface PrintData {
   materialNames: {[key: number]: string};
   userData?: any[];
 }
+
+// Helper functions to convert between different MaterialDistribution types
+const convertConfigToDnd = (configMaterials: ConfigMaterialDistribution[]): DndMaterialDistribution[] => {
+  return configMaterials.map((item, index) => ({
+    id: `material-${index}`,
+    materialId: index + 1,
+    materialName: item.material,
+    screwAPercentage: item.aPercentage,
+    screwBPercentage: item.bPercentage,
+    totalPercentage: 100 * (item.totalKg / configMaterials.reduce((sum, m) => sum + m.totalKg, 0))
+  }));
+};
+
+const convertDndToConfig = (dndMaterials: DndMaterialDistribution[]): ConfigMaterialDistribution[] => {
+  // Assuming a total of 100kg for the base distribution
+  const total = 100; 
+  return dndMaterials.map(item => {
+    const totalKg = total * (item.totalPercentage / 100);
+    const aKg = totalKg * (item.screwAPercentage / 100);
+    const bKg = totalKg * (item.screwBPercentage / 100);
+    
+    return {
+      material: item.materialName,
+      aKg,
+      bKg,
+      totalKg,
+      aPercentage: item.screwAPercentage,
+      bPercentage: item.screwBPercentage
+    };
+  });
+};
 
 export default function MixMaterialsPage() {
   const { t } = useTranslation();
@@ -129,7 +163,67 @@ export default function MixMaterialsPage() {
   
   // Delete mix mutation
   const [abaCalculationData, setAbaCalculationData] = useState<any>(null);
-  const [materialDistributions, setMaterialDistributions] = useState<MaterialDistribution[]>([]);
+  // Define types directly to avoid circular references
+  type DndMaterialType = {
+    id: string;
+    materialId: number;
+    materialName: string;
+    screwAPercentage: number;
+    screwBPercentage: number;
+    totalPercentage: number;
+  };
+
+  type ConfigMaterialType = {
+    material: string;
+    aKg: number;
+    bKg: number;
+    totalKg: number;
+    aPercentage: number;
+    bPercentage: number;
+    color?: string;
+  };
+
+  // Utility functions to convert between different material distribution formats
+  const convertConfigToDnd = (config: ConfigMaterialType[]): DndMaterialType[] => {
+    return config.map((item, index) => ({
+      id: `material-${index}`,
+      materialId: index,
+      materialName: item.material,
+      screwAPercentage: item.aPercentage,
+      screwBPercentage: item.bPercentage,
+      totalPercentage: (item.aKg + item.bKg) / (item.totalKg) * 100
+    }));
+  };
+
+  const convertDndToConfig = (
+    dnd: DndMaterialType[], 
+    aTotalWeight: number = 155, 
+    bTotalWeight: number = 515
+  ): ConfigMaterialType[] => {
+    return dnd.map((item) => {
+      // Calculate kg values based on percentages and the provided total weights
+      const aKg = (item.screwAPercentage / 100) * aTotalWeight;
+      const bKg = (item.screwBPercentage / 100) * bTotalWeight;
+      
+      return {
+        material: item.materialName,
+        aKg: aKg,
+        bKg: bKg,
+        totalKg: aKg + bKg,
+        aPercentage: item.screwAPercentage,
+        bPercentage: item.screwBPercentage,
+        color: getRandomColor() // Generate a color for visual representation
+      };
+    });
+  };
+  
+  // Function to generate a random pastel color
+  const getRandomColor = (): string => {
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 70%, 80%)`;
+  };
+  
+  const [materialDistributions, setMaterialDistributions] = useState<DndMaterialType[]>([]);
   const [configName, setConfigName] = useState<string>("");
   const [configDescription, setConfigDescription] = useState<string>("");
   const [selectedConfigId, setSelectedConfigId] = useState<number | null>(null);
@@ -145,7 +239,7 @@ export default function MixMaterialsPage() {
     id: number;
     name: string;
     description: string | null;
-    configData: MaterialDistribution[];
+    configData: DndMaterialDistribution[];
     isDefault: boolean;
     createdBy: string;
     createdAt: string;
@@ -586,7 +680,7 @@ export default function MixMaterialsPage() {
   
   // Create ABA material config mutation
   const createConfigMutation = useMutation({
-    mutationFn: async (data: { name: string, description: string, configData: MaterialDistribution[], isDefault: boolean }) => {
+    mutationFn: async (data: { name: string, description: string, configData: DndMaterialDistribution[], isDefault: boolean }) => {
       return await apiRequest("POST", API_ENDPOINTS.ABA_MATERIAL_CONFIGS, data);
     },
     onSuccess: () => {
@@ -608,7 +702,7 @@ export default function MixMaterialsPage() {
   
   // Update ABA material config mutation
   const updateConfigMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: { name: string, description: string, configData: MaterialDistribution[], isDefault: boolean } }) => {
+    mutationFn: async ({ id, data }: { id: number, data: { name: string, description: string, configData: DndMaterialDistribution[], isDefault: boolean } }) => {
       return await apiRequest("PUT", `${API_ENDPOINTS.ABA_MATERIAL_CONFIGS}/${id}`, data);
     },
     onSuccess: () => {
@@ -677,7 +771,7 @@ export default function MixMaterialsPage() {
   });
   
   // Handle saving ABA material configurations
-  const handleSaveAbaConfig = (distributions: MaterialDistribution[]) => {
+  const handleSaveAbaConfig = (distributions: DndMaterialDistribution[]) => {
     setMaterialDistributions(distributions);
     
     // If we have a selected config, update it
@@ -958,12 +1052,44 @@ export default function MixMaterialsPage() {
           <Card>
             <CardHeader>
               <CardTitle>{t('production.aba_calculator.title', 'ABA Calculator')}</CardTitle>
+              <CardDescription>
+                {t('production.aba_calculator.description', 'Calculate material distributions for A/B extruder machines')}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <AbaCalculator 
-                onPrint={(data) => {
-                  setAbaCalculationData(data);
-                  // We won't use this callback anymore as the AbaCalculator handles printing internally
+              {/* Use our improved professional ABA calculator component */}
+              <AbaCalculatorConfig 
+                rawMaterials={rawMaterials || []}
+                totalQuantity={1000}
+                onCalculate={(result) => {
+                  // Store the calculation result for display/printing
+                  setAbaCalculationData({
+                    mixId: `Mix${new Date().getTime().toString().slice(-6)}`,
+                    mixDate: formatDateString(new Date().toISOString()),
+                    customer: "Manual Calculation",
+                    quantity: result.totalQuantity,
+                    rawMaterial: "Custom Formula",
+                    items: result.items.map(item => ({
+                      material: item.material,
+                      screwA: item.aKg,
+                      screwB: item.bKg,
+                      total: item.totalKg,
+                      percentage: (item.totalKg / result.totalQuantity) * 100,
+                      screwAPercentage: item.aPercentage,
+                      screwBPercentage: item.bPercentage,
+                      screwAAbsPercentage: (item.aKg / result.totalQuantity) * 100,
+                      screwBAbsPercentage: (item.bKg / result.totalQuantity) * 100
+                    })),
+                    totals: {
+                      screwA: result.aTotalKg,
+                      screwB: result.bTotalKg,
+                      total: result.totalQuantity,
+                      screwAPercentage: result.aPercentage,
+                      screwBPercentage: result.bPercentage,
+                      screwAAbsPercentage: result.aPercentage,
+                      screwBAbsPercentage: result.bPercentage
+                    }
+                  });
                 }}
               />
             </CardContent>

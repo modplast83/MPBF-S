@@ -249,7 +249,18 @@
         "save_help": "Save configuration to apply for future calculations",
         "percentage": "Percentage",
         "configuration_saved": "ABA Calculator configuration saved successfully",
-        "config_tab": "Configuration"
+        "config_tab": "Configuration",
+        "formula_parameters": "Formula Parameters",
+        "a_total_weight": "A Total Weight",
+        "b_total_weight": "B Total Weight",
+        "formula_settings": "Formula Settings",
+        "input_summary": "Input Summary",
+        "scaled_results": "Scaled Results",
+        "overall_mix": "Overall Mix",
+        "material_distribution": "Material Distribution",
+        "total_a": "Total A",
+        "total_b": "Total B",
+        "scaled_to": "Scaled to"
       },
       "roll_management": {
         "title": "Roll Management",
