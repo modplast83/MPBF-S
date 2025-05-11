@@ -41,8 +41,9 @@ interface Permission {
   isActive: boolean;
 }
 
-// All available modules in the system
+// All available modules in the system - includes all modules mentioned in permissions.docx
 const ALL_MODULES = [
+  // Main modules
   "Dashboard", 
   "Orders", 
   "Setup", 
@@ -53,6 +54,11 @@ const ALL_MODULES = [
   "Reports", 
   "System",
   "Tools",
+  "Inventory",
+  // Section-specific workflow tabs
+  "Workflow-Extrusion Tab",
+  "Workflow-Printing Tab",
+  "Workflow-Cutting Tab",
   // Setup submodules
   "Categories", 
   "Products", 
@@ -66,6 +72,7 @@ const ALL_MODULES = [
   "Final Products",
   // Production submodules
   "Mix Materials",
+  "ABA Calculator",
   // Quality submodules
   "Check Types", 
   "Quality Checks", 
@@ -74,11 +81,15 @@ const ALL_MODULES = [
   "Bag Weight Calculator", 
   "Ink Consumption", 
   "Utility Tools",
+  "Cost",
   // System submodules
   "Database", 
   "Permissions", 
   "Import & Export", 
-  "SMS Management"
+  "SMS",
+  "SMS Management",
+  "System Settings",
+  "Cliches"
 ];
 
 // Helper to convert API format to UI format
