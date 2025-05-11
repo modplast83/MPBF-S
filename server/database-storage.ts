@@ -7,7 +7,7 @@ import {
   type InsertPermission,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { IStorage } from "./storage";
 import connectPg from "connect-pg-simple";
 import session from "express-session";
@@ -137,11 +137,48 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPermission(permission: InsertPermission): Promise<Permission> {
-    const [createdPermission] = await db
-      .insert(permissions)
-      .values(permission)
-      .returning();
-    return createdPermission;
+    try {
+      // Check if this role+module permission already exists
+      const existingPermissions = await db
+        .select()
+        .from(permissions)
+        .where(
+          and(
+            eq(permissions.role, permission.role),
+            eq(permissions.module, permission.module)
+          )
+        );
+      
+      if (existingPermissions.length > 0) {
+        console.log(`Permission for ${permission.role}/${permission.module} already exists`);
+        return existingPermissions[0];
+      }
+      
+      // Find the max ID and add 1 to get the next ID
+      const maxIdResult = await db.execute(
+        sql`SELECT MAX(id) as max_id FROM permissions`
+      );
+      
+      // Get the max ID value or default to 0
+      const maxId = maxIdResult.rows[0]?.max_id ? parseInt(maxIdResult.rows[0].max_id) : 0;
+      const nextId = maxId + 1;
+      
+      console.log(`Creating new permission for ${permission.role}/${permission.module} with ID ${nextId}`);
+      
+      // Insert new permission with manually assigned ID
+      const [createdPermission] = await db
+        .insert(permissions)
+        .values({
+          id: nextId,
+          ...permission
+        })
+        .returning();
+      
+      return createdPermission;
+    } catch (error) {
+      console.error("Error creating permission:", error);
+      throw error;
+    }
   }
 
   async updatePermission(id: number, permissionData: Partial<Permission>): Promise<Permission | undefined> {
