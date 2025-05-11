@@ -6,24 +6,24 @@ import {
   type Permission,
   type InsertPermission,
 } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq } from "drizzle-orm";
 import { IStorage } from "./storage";
 import connectPg from "connect-pg-simple";
 import session from "express-session";
+import { Pool } from "@neondatabase/serverless";
 
 export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
-    const pgStore = connectPg(session);
-    // Use the holy-bonus database URL if available, otherwise fall back to the standard database URL
-    const databaseUrl = process.env.DATABASE_URL_HOLY_BONUS || process.env.DATABASE_URL;
+    const PostgreSQLStore = connectPg(session);
     
-    this.sessionStore = new pgStore({
-      conString: databaseUrl,
-      createTableIfMissing: true,
+    // Initialize with connection string directly
+    this.sessionStore = new PostgreSQLStore({
+      conString: process.env.DATABASE_URL,
       tableName: "sessions",
+      createTableIfMissing: true
     });
   }
 
