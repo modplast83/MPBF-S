@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth-v2";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -13,27 +14,22 @@ export default function LoginPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { login, isAuthenticated } = useAuth();
+
+  // If user is already authenticated, redirect to dashboard
+  if (isAuthenticated) {
+    setLocation('/');
+    return null;
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
     
     try {
-      // Simple demo login - just accepts any credentials
-      // In a real app, this would validate against a backend
-      
       if (username.trim() && password.trim()) {
-        // Store login state in localStorage
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('username', username);
-        
-        toast({
-          title: "Login successful",
-          description: `Welcome to MPBF System, ${username}!`,
-        });
-        
-        // Redirect to dashboard
-        setLocation('/');
+        await login(username, password);
+        // Login success is handled in the auth hook with proper redirect
       } else {
         throw new Error("Please enter both username and password");
       }
