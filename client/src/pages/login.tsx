@@ -108,11 +108,11 @@ export default function LoginPage() {
               </form>
             </CardContent>
             <CardFooter className="flex flex-col items-start pt-6 p-0 mt-8 border-t border-gray-100">
-              <div className="bg-amber-50 text-amber-800 p-3 rounded-lg text-sm w-full">
+              <div className="bg-blue-50 text-blue-800 p-3 rounded-lg text-sm w-full">
                 <div className="flex items-start">
-                  <span className="material-icons text-amber-600 mr-2 mt-0.5">info</span>
+                  <span className="material-icons text-blue-600 mr-2 mt-0.5">info</span>
                   <p>
-                    <span className="font-medium">Demo Note:</span> Enter any username and password to login.
+                    <span className="font-medium">Note:</span> Enter your username and password to access the system.
                   </p>
                 </div>
               </div>
