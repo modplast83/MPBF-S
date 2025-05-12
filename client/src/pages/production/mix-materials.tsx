@@ -256,6 +256,8 @@ export default function MixMaterialsPage() {
   const { data: defaultConfig } = useQuery<AbaConfig>({
     queryKey: [`${API_ENDPOINTS.ABA_MATERIAL_CONFIGS}/default`],
     enabled: true,
+    retry: false, // Don't retry on 404
+    // Using global error handling instead of onError for TanStack Query v5
   });
   
   // Update state when default config is fetched
