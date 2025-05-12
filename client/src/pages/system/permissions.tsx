@@ -242,20 +242,40 @@ export default function Permissions() {
       can_delete: boolean;
       is_active: boolean;
     }) => {
-      const response = await fetch('/api/permissions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      console.log('Creating permission with data:', JSON.stringify(data));
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to create permission: ${errorText}`);
+      try {
+        const response = await fetch('/api/permissions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include' // Ensure cookies are sent for authentication
+        });
+        
+        // Get the response text first for debugging
+        const responseText = await response.text();
+        console.log('Server response:', responseText);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to create permission: ${responseText}`);
+        }
+        
+        // Try to parse the response as JSON if it's valid
+        let parsedResponse;
+        try {
+          parsedResponse = JSON.parse(responseText);
+        } catch (e) {
+          throw new Error(`Invalid JSON response: ${responseText}`);
+        }
+        
+        return parsedResponse;
+      } catch (err) {
+        console.error('Permission creation error:', err);
+        throw err;
       }
-      
-      return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Successfully created permission:', data);
       // Force a refetch to get updated data
       queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
       
@@ -268,6 +288,7 @@ export default function Permissions() {
       });
     },
     onError: (error: Error) => {
+      console.error('Creation error details:', error);
       toast({
         title: "Creation Failed",
         description: error.message || "Failed to create permission",
