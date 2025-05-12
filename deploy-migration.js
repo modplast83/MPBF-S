@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { Pool, neonConfig } from '@neondatabase/serverless';
-import * as schema from './shared/schema.js';
+import * as schema from './shared/schema.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,13 +12,13 @@ console.log('Starting deployment database migration...');
 
 // Function to check if a table exists
 async function tableExists(db, tableName) {
-  const result = await db.execute(`
-    SELECT EXISTS (
+  const result = await db.execute(
+    `SELECT EXISTS (
       SELECT FROM information_schema.tables 
       WHERE table_schema = 'public' 
-      AND table_name = $1
-    );
-  `, [tableName]);
+      AND table_name = '${tableName}'
+    );`
+  );
   
   return result.rows[0].exists;
 }
