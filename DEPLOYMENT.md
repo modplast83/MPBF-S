@@ -2,23 +2,33 @@
 
 This document provides instructions for deploying the MPBF System application, including setting up the database and fixing common issues.
 
-## Fixing "relation users not exist" Error
+## Fixing "relation users does not exist" Error
 
-If you encounter a "relation users not exist" error after deploying the application, it means the database tables haven't been created properly. Follow these steps to fix it:
+If you encounter a "relation users does not exist" error after deploying the application, it means the database tables haven't been created properly in your production environment. Follow these steps to fix it:
 
-### 1. Run the Database Migration Script
+### 1. Run the Production Migration Script
 
-The application includes a deployment migration script that will create all required tables:
+The application now includes a special production migration script that will create all required tables even in a constrained production environment:
 
 ```bash
-# Run the deployment migration script
-node deploy-migration.js
+# Run the production migration script
+node production-migration.js
 ```
 
 This script:
 - Checks if the users table exists
-- If not, runs the full SQL migration
-- Creates an admin user if needed
+- If not, it tries to run the full SQL migration
+- If the SQL file isn't available, it creates the essential authentication tables directly
+- Creates an admin user if needed (username: admin, password: admin123)
+- Works specifically for Neon PostgreSQL databases
+
+### Important Notes for mpbf.modplastic.com
+
+If you're deploying to the mpbf.modplastic.com production site:
+
+1. Transfer the production-migration.js file to the server
+2. Make sure node is installed and available
+3. Run the script with the DATABASE_URL environment variable set
 
 ### 2. Manual SQL Migration (Alternative)
 
