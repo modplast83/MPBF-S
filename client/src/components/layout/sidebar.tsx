@@ -58,11 +58,15 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           }
 
           // For items with subitems, check if any subitems have permission
-          const filteredSubItems = (item.subItems || []).filter(subItem => 
+          const filteredSubItems = (item.subItems || []).filter(subItem => {
+            // For Mix Materials, only show if user has a section assigned
+            if (subItem.title === 'Mix Materials') {
+              return hasPermission(subItem.title) && user?.sectionId && user.sectionId !== "";
+            }
             // Special case for operators
-            (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
-            || hasPermission(subItem.title)
-          );
+            return (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
+              || hasPermission(subItem.title);
+          });
           
           // Only keep parent item if there are visible subitems
           return filteredSubItems.length > 0;
@@ -72,11 +76,15 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           if (item.subItems) {
             return {
               ...item,
-              subItems: item.subItems.filter(subItem => 
+              subItems: item.subItems.filter(subItem => {
+                // For Mix Materials, only show if user has a section assigned
+                if (subItem.title === 'Mix Materials') {
+                  return hasPermission(subItem.title) && user?.sectionId && user.sectionId !== "";
+                }
                 // Special case for operators
-                (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
-                || hasPermission(subItem.title)
-              ),
+                return (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
+                  || hasPermission(subItem.title);
+              }),
             };
           }
           return item;
