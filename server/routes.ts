@@ -1931,6 +1931,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Use psql to restore the backup
         await execPromise(`PGPASSWORD="${dbUrl.password}" psql --host=${dbHost} --port=${dbPort} --username=${dbUser} --dbname=${dbName} --file="${backupPath}"`);
         
+        // Reinitialize the database connection pool
+        const { pool: newPool, db: newDb } = await import('./db');
+        console.log("Database connection pool reinitialized after restore");
+        
         res.json({ 
           success: true, 
           message: "Database restored successfully"
