@@ -326,7 +326,7 @@ export default function MixMaterialsPage() {
       cell: (row: { totalQuantity: number | null }) => row.totalQuantity?.toFixed(2) || "0.00",
     },
     {
-      header: "Actions",
+      header: t('common.actions'),
       id: "actions",
       cell: (row: MixMaterial) => (
         <div className="flex space-x-2">
