@@ -175,43 +175,43 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
     if (!mix || !mixItems) return null;
 
     return (
-      <div className="printable-label" style={{ width: "3in", height: "5in", padding: "0.25in", fontFamily: "Arial, sans-serif", fontSize: "10pt" }}>
-        <div style={{ fontWeight: "bold", fontSize: "14pt", marginBottom: "10px", textAlign: "center", borderBottom: "1px solid #ccc", paddingBottom: "0.1in" }}>
+      <div className="printable-label" style={{ width: "4in", height: "6in", padding: "0.25in", fontFamily: "Arial, sans-serif", fontSize: "12pt" }}>
+        <div style={{ fontWeight: "bold", fontSize: "16pt", marginBottom: "10px", textAlign: "center", borderBottom: "2px solid #000", paddingBottom: "0.1in" }}>
           {t('production.mix_materials.mix_label')}
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", borderBottom: "1px solid #ccc", paddingBottom: "0.1in" }}>
-          <div>{t('production.mix_materials.mix_id')}: {mix.id}</div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", borderBottom: "1px solid #ccc", paddingBottom: "0.1in" }}>
+          <div style={{ fontWeight: "bold" }}>{t('production.mix_materials.mix_id')}: {mix.id}</div>
           <div>{t('production.mix_materials.date')}: {formatDateString(mix.mixDate)}</div>
         </div>
-        <div style={{ marginBottom: "10px", display: "flex", justifyContent: "space-between" }}>
+        <div style={{ marginBottom: "15px", display: "flex", justifyContent: "space-between" }}>
           <div>{t('production.mix_materials.operator')}: {getOperatorName(mix.mixPerson)}</div>
-          <div>{t('production.mix_materials.total_weight')}: {mix.totalQuantity?.toFixed(2) || "0.00"} kg</div>
+          <div style={{ fontWeight: "bold" }}>{t('production.mix_materials.total_weight')}: {mix.totalQuantity?.toFixed(2) || "0.00"} kg</div>
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "0.2in" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "0.3in" }}>
           <thead>
             <tr>
-              <th style={{ border: "1px solid #ccc", padding: "4px", fontWeight: "bold" }}>{t('production.mix_materials.material')}</th>
-              <th style={{ border: "1px solid #ccc", padding: "4px", fontWeight: "bold", textAlign: "right" }}>{t('production.mix_materials.quantity')}</th>
-              <th style={{ border: "1px solid #ccc", padding: "4px", fontWeight: "bold", textAlign: "right" }}>{t('production.mix_materials.percentage')}</th>
+              <th style={{ border: "1px solid #000", padding: "6px", fontWeight: "bold", backgroundColor: "#f3f4f6" }}>{t('production.mix_materials.material')}</th>
+              <th style={{ border: "1px solid #000", padding: "6px", fontWeight: "bold", textAlign: "right", backgroundColor: "#f3f4f6" }}>{t('production.mix_materials.quantity')}</th>
+              <th style={{ border: "1px solid #000", padding: "6px", fontWeight: "bold", textAlign: "right", backgroundColor: "#f3f4f6" }}>{t('production.mix_materials.percentage')}</th>
             </tr>
           </thead>
           <tbody>
             {mixItems.map((item) => (
               <tr key={item.id}>
-                <td style={{ border: "1px solid #ccc", padding: "4px" }}>{getRawMaterialName(item.rawMaterialId)}</td>
-                <td style={{ border: "1px solid #ccc", padding: "4px", textAlign: "right" }}>{item.quantity.toFixed(2)}</td>
-                <td style={{ border: "1px solid #ccc", padding: "4px", textAlign: "right" }}>{item.percentage?.toFixed(1) || "0.0"}%</td>
+                <td style={{ border: "1px solid #000", padding: "6px" }}>{getRawMaterialName(item.rawMaterialId)}</td>
+                <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.quantity.toFixed(2)}</td>
+                <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.percentage?.toFixed(1) || "0.0"}%</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div style={{ borderTop: "1px solid #ccc", paddingTop: "0.1in", display: "flex", justifyContent: "space-between", fontWeight: "bold", marginTop: "auto" }}>
+        <div style={{ borderTop: "1px solid #000", paddingTop: "0.15in", display: "flex", justifyContent: "space-between", fontWeight: "bold", marginTop: "auto" }}>
           <div>{t('common.total')}: {mixItems.length}</div>
           <div>{mix.totalQuantity?.toFixed(2) || "0.00"} kg</div>
         </div>
-        <div style={{ textAlign: "center", fontSize: "8pt", marginTop: "0.2in" }}>
+        <div style={{ textAlign: "center", fontSize: "9pt", marginTop: "0.3in" }}>
           {new Date().toLocaleString()}<br/>
-          {t('common.size')}: 3" x 5"
+          {t('common.size')}: 4" x 6"
         </div>
       </div>
     );
@@ -258,12 +258,12 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
               </div>
               <div className="mt-4">
                 <Button 
-                  variant="outline" 
-                  className="w-full justify-center"
+                  variant="default" 
+                  className="w-full justify-center bg-blue-600 hover:bg-blue-700"
                   onClick={() => window.print()}
                 >
                   <span className="material-icons mr-2">print</span>
-                  {t('production.mix_materials.print_label')}
+                  {t('production.mix_materials.print_label')} (4" x 6")
                 </Button>
               </div>
             </div>

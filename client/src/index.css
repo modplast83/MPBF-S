@@ -70,4 +70,43 @@
   .flip-in-rtl {
     transform: scaleX(-1);
   }
+  
+  /* Print specific styles */
+  @media print {
+    /* Hide everything except the printable content */
+    body * {
+      visibility: hidden;
+    }
+    
+    /* Only show the print area */
+    .print\:block,
+    .print\:block * {
+      visibility: visible !important;
+    }
+    
+    /* Set the print dimensions and page break behavior */
+    .printable-label {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4in !important;
+      height: 6in !important;
+      page-break-after: always;
+      margin: 0 !important;
+      padding: 0.25in !important;
+      box-sizing: border-box;
+      background-color: white !important;
+      color: black !important;
+    }
+    
+    /* Hide scrollbars and other UI elements */
+    html, body {
+      overflow: hidden !important;
+      background-color: white !important;
+      width: 4in !important;
+      height: 6in !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  }
 }
