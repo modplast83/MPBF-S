@@ -1,10 +1,23 @@
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { API_ENDPOINTS } from "@/lib/constants";
+import { formatDistanceToNow } from "date-fns";
+import { Loader2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Define backup file type
+interface BackupFile {
+  name: string;
+  fileName: string;
+  size: number;
+  createdAt: string;
+}
 
 export default function Database() {
   const [backupDialogOpen, setBackupDialogOpen] = useState(false);
@@ -12,8 +25,53 @@ export default function Database() {
   const [backupName, setBackupName] = useState("");
   const [backupInProgress, setBackupInProgress] = useState(false);
   const [restoreInProgress, setRestoreInProgress] = useState(false);
+  const [backupFiles, setBackupFiles] = useState<BackupFile[]>([]);
+  const [selectedBackup, setSelectedBackup] = useState<string | null>(null);
+  const [isLoadingBackups, setIsLoadingBackups] = useState(false);
+  const [dbInfo, setDbInfo] = useState({
+    type: "PostgreSQL",
+    size: "0 KB",
+    records: 0,
+    lastBackup: "Never",
+    status: "Healthy"
+  });
 
-  const handleBackup = () => {
+  // Fetch available backups
+  useEffect(() => {
+    const fetchBackups = async () => {
+      setIsLoadingBackups(true);
+      try {
+        const response = await fetch(API_ENDPOINTS.DATABASE_BACKUPS);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch backups: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setBackupFiles(data || []);
+
+        // Update last backup info if there's at least one backup
+        if (data && data.length > 0) {
+          const mostRecentBackup = new Date(data[0].createdAt);
+          setDbInfo(prev => ({
+            ...prev,
+            lastBackup: formatDistanceToNow(mostRecentBackup, { addSuffix: true })
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching backups:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch database backups",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingBackups(false);
+      }
+    };
+
+    fetchBackups();
+  }, [restoreDialogOpen]); // Refetch after restore dialog is closed
+
+  const handleBackup = async () => {
     if (!backupName.trim()) {
       toast({
         title: "Error",
@@ -25,8 +83,22 @@ export default function Database() {
 
     setBackupInProgress(true);
     
-    // Simulate backup process
-    setTimeout(() => {
+    try {
+      const response = await fetch(API_ENDPOINTS.DATABASE_BACKUP, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: backupName }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create backup");
+      }
+
+      const result = await response.json();
+      
       setBackupInProgress(false);
       setBackupDialogOpen(false);
       toast({
@@ -34,21 +106,79 @@ export default function Database() {
         description: `Database backup "${backupName}" has been created successfully.`,
       });
       setBackupName("");
-    }, 1500);
+      
+      // Refresh the backup list
+      const backupsResponse = await fetch(API_ENDPOINTS.DATABASE_BACKUPS);
+      if (backupsResponse.ok) {
+        const backupsData = await backupsResponse.json();
+        setBackupFiles(backupsData || []);
+        
+        // Update last backup info
+        if (backupsData && backupsData.length > 0) {
+          const mostRecentBackup = new Date(backupsData[0].createdAt);
+          setDbInfo(prev => ({
+            ...prev,
+            lastBackup: formatDistanceToNow(mostRecentBackup, { addSuffix: true })
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error creating backup:", error);
+      toast({
+        title: "Error",
+        description: `Failed to create backup: ${error.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      setBackupInProgress(false);
+    }
   };
 
-  const handleRestore = () => {
+  const handleRestore = async () => {
+    if (!selectedBackup) {
+      toast({
+        title: "Error",
+        description: "Please select a backup file to restore",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setRestoreInProgress(true);
     
-    // Simulate restore process
-    setTimeout(() => {
+    try {
+      const response = await fetch(API_ENDPOINTS.DATABASE_RESTORE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fileName: selectedBackup }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to restore database");
+      }
+
+      const result = await response.json();
+      
       setRestoreInProgress(false);
       setRestoreDialogOpen(false);
       toast({
         title: "Database Restored",
         description: "The database has been restored successfully.",
       });
-    }, 2000);
+      setSelectedBackup(null);
+    } catch (error) {
+      console.error("Error restoring database:", error);
+      toast({
+        title: "Error",
+        description: `Failed to restore database: ${error.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      setRestoreInProgress(false);
+    }
   };
 
   return (
@@ -99,6 +229,7 @@ export default function Database() {
                   onClick={() => setRestoreDialogOpen(true)}
                   className="w-full"
                   variant="outline"
+                  disabled={backupFiles.length === 0}
                 >
                   <span className="material-icons text-sm mr-1">restore</span>
                   Restore from Backup
@@ -106,6 +237,52 @@ export default function Database() {
               </CardFooter>
             </Card>
           </div>
+
+          {/* Backup List */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Backup History</CardTitle>
+              <CardDescription>
+                List of available database backups
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoadingBackups ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span className="ml-2">Loading backups...</span>
+                </div>
+              ) : backupFiles.length === 0 ? (
+                <div className="text-center py-8 bg-gray-50 rounded-md">
+                  <span className="material-icons text-gray-300 text-3xl mb-2">storage</span>
+                  <p className="text-gray-500">No backup files found. Create your first backup.</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[300px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Size</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {backupFiles.map((backup) => (
+                        <TableRow key={backup.fileName}>
+                          <TableCell className="font-medium">{backup.name}</TableCell>
+                          <TableCell>{backup.size} KB</TableCell>
+                          <TableCell>
+                            {new Date(backup.createdAt).toLocaleString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader className="pb-2">
@@ -115,25 +292,21 @@ export default function Database() {
               <div className="space-y-4">
                 <div className="flex justify-between border-b pb-2">
                   <span className="text-secondary-600">Database Type</span>
-                  <span className="font-medium">In-Memory Storage</span>
+                  <span className="font-medium">{dbInfo.type}</span>
                 </div>
                 <div className="flex justify-between border-b pb-2">
                   <span className="text-secondary-600">Size</span>
-                  <span className="font-medium">0.45 MB</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="text-secondary-600">Records</span>
-                  <span className="font-medium">137</span>
+                  <span className="font-medium">{dbInfo.size}</span>
                 </div>
                 <div className="flex justify-between border-b pb-2">
                   <span className="text-secondary-600">Last Backup</span>
-                  <span className="font-medium">Never</span>
+                  <span className="font-medium">{dbInfo.lastBackup}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-secondary-600">Status</span>
                   <span className="text-success font-medium flex items-center">
                     <span className="inline-block w-2 h-2 rounded-full bg-success mr-2"></span>
-                    Healthy
+                    {dbInfo.status}
                   </span>
                 </div>
               </div>
@@ -173,7 +346,14 @@ export default function Database() {
               onClick={handleBackup}
               disabled={backupInProgress}
             >
-              {backupInProgress ? "Backing Up..." : "Create Backup"}
+              {backupInProgress ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Backing Up...
+                </>
+              ) : (
+                "Create Backup"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -195,25 +375,75 @@ export default function Database() {
               This action cannot be undone. Make sure you have a backup of your current data if needed.
             </p>
 
-            <div className="mt-4 bg-secondary-50 rounded-md p-3">
-              <p className="text-sm font-medium">Available Backups</p>
-              <p className="text-xs text-secondary-500 mt-1">No backups available</p>
+            <div className="mt-4">
+              {isLoadingBackups ? (
+                <div className="flex justify-center items-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <span className="ml-2 text-sm">Loading backups...</span>
+                </div>
+              ) : backupFiles.length === 0 ? (
+                <div className="bg-secondary-50 rounded-md p-3">
+                  <p className="text-sm font-medium">Available Backups</p>
+                  <p className="text-xs text-secondary-500 mt-1">No backups available</p>
+                </div>
+              ) : (
+                <div>
+                  <Label htmlFor="backupSelect">Select a backup to restore</Label>
+                  <ScrollArea className="h-[200px] border rounded-md mt-2 p-2">
+                    <div className="space-y-2">
+                      {backupFiles.map((backup) => (
+                        <div 
+                          key={backup.fileName}
+                          className={`p-3 rounded-md border cursor-pointer transition-colors ${
+                            selectedBackup === backup.fileName 
+                              ? 'bg-primary-50 border-primary-200' 
+                              : 'hover:bg-gray-50'
+                          }`}
+                          onClick={() => setSelectedBackup(backup.fileName)}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium text-sm">{backup.name}</p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(backup.createdAt).toLocaleString()} • {backup.size} KB
+                              </p>
+                            </div>
+                            {selectedBackup === backup.fileName && (
+                              <span className="material-icons text-primary-500">check_circle</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setRestoreDialogOpen(false)}
+              onClick={() => {
+                setRestoreDialogOpen(false);
+                setSelectedBackup(null);
+              }}
               disabled={restoreInProgress}
             >
               Cancel
             </Button>
             <Button
               onClick={handleRestore}
-              disabled={restoreInProgress}
+              disabled={restoreInProgress || !selectedBackup}
               variant="destructive"
             >
-              {restoreInProgress ? "Restoring..." : "Restore Database"}
+              {restoreInProgress ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Restoring...
+                </>
+              ) : (
+                "Restore Database"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

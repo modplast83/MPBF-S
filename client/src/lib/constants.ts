@@ -41,6 +41,11 @@ export const API_ENDPOINTS = {
   // ABA Calculator
   ABA_MATERIAL_CONFIGS: "/api/aba-material-configs",
   
+  // Database Management
+  DATABASE_BACKUP: "/api/database/backup",
+  DATABASE_RESTORE: "/api/database/restore",
+  DATABASE_BACKUPS: "/api/database/backups",
+  
   // Demo
   INIT_DEMO_DATA: "/api/init-demo-data",
 };

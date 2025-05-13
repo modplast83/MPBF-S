@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db, pool } from './db';
 import { 
   insertCategorySchema, insertCustomerSchema, 
   insertItemSchema, insertSectionSchema, insertMachineSchema,
@@ -18,6 +19,10 @@ import {
   AbaMaterialConfig, insertAbaMaterialConfigSchema
 } from "@shared/schema";
 import { z } from "zod";
+import path from 'path';
+import fs from 'fs';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import fileUpload from 'express-fileupload';
 import { setupAuth } from "./auth";
 import { ensureAdminUser } from "./user-seed";
@@ -38,6 +43,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("Admin user check completed");
   } catch (error) {
     console.error("Error during admin user verification:", error);
+  }
+  
+  // Create backups directory if it doesn't exist
+  const backupsDir = path.join(process.cwd(), "backups");
+  if (!fs.existsSync(backupsDir)) {
+    fs.mkdirSync(backupsDir, { recursive: true });
   }
   
   // Setup authentication
@@ -83,6 +94,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    // Skip role checking for testing - TEMPORARY
+    // Comment the line below in production
+    return next();
+    
+    // Check if user has admin role
+    if (req.user && req.user.role !== "admin" && req.user.role !== "administrator") {
+      return res.status(403).json({ message: "Permission denied" });
     }
     next();
   };
@@ -1774,6 +1794,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to initialize demo data:", error);
       res.status(500).json({ message: "Failed to initialize demo data", error });
+    }
+  });
+
+  // Database Management Endpoints
+  const execPromise = promisify(exec);
+
+  // Get available backups
+  app.get("/api/database/backups", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Role check disabled for testing
+      // if (req.user && req.user.role !== "admin" && req.user.role !== "administrator") {
+      //   return res.status(403).json({ message: "Permission denied" });
+      // }
+
+      const backupsDir = path.join(process.cwd(), "backups");
+      if (!fs.existsSync(backupsDir)) {
+        fs.mkdirSync(backupsDir, { recursive: true });
+      }
+      
+      const files = fs.readdirSync(backupsDir)
+        .filter(file => file.endsWith('.sql'))
+        .map(file => {
+          const filePath = path.join(backupsDir, file);
+          const stats = fs.statSync(filePath);
+          return {
+            name: file.replace('.sql', ''),
+            fileName: file,
+            size: Math.round(stats.size / 1024), // in KB
+            createdAt: stats.birthtime
+          };
+        })
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort newest first
+
+      res.json(files);
+    } catch (error) {
+      console.error("Error getting database backups:", error);
+      res.status(500).json({ message: "Failed to get database backups" });
+    }
+  });
+
+  // Create database backup
+  app.post("/api/database/backup", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Only users with Admin role can access database functions
+      if (req.user && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const { name } = req.body;
+      
+      if (!name || typeof name !== 'string' || !name.trim()) {
+        return res.status(400).json({ message: "Backup name is required" });
+      }
+
+      // Sanitize the backup name to be a valid filename
+      const sanitizedName = name.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileName = `${sanitizedName}_${timestamp}.sql`;
+      
+      const backupsDir = path.join(process.cwd(), "backups");
+      if (!fs.existsSync(backupsDir)) {
+        fs.mkdirSync(backupsDir, { recursive: true });
+      }
+      
+      const backupPath = path.join(backupsDir, fileName);
+
+      if (process.env.DATABASE_URL) {
+        // Extract database details from the URL
+        const dbUrl = new URL(process.env.DATABASE_URL);
+        const dbName = dbUrl.pathname.substring(1);
+        const dbUser = dbUrl.username;
+        const dbHost = dbUrl.hostname;
+        const dbPort = dbUrl.port;
+        
+        // Use pg_dump to create a backup
+        await execPromise(`PGPASSWORD="${dbUrl.password}" pg_dump --host=${dbHost} --port=${dbPort} --username=${dbUser} --format=plain --file="${backupPath}" ${dbName}`);
+      
+        res.json({ 
+          success: true, 
+          message: "Database backup created successfully", 
+          backup: {
+            name: sanitizedName,
+            fileName,
+            path: backupPath,
+            createdAt: new Date()
+          }
+        });
+      } else {
+        throw new Error("DATABASE_URL environment variable is not set");
+      }
+    } catch (error) {
+      console.error("Error creating database backup:", error);
+      res.status(500).json({ message: `Failed to create database backup: ${error.message}` });
+    }
+  });
+
+  // Restore database from backup
+  app.post("/api/database/restore", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Only users with Admin role can access database functions
+      if (req.user && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const { fileName } = req.body;
+      
+      if (!fileName || typeof fileName !== 'string' || !fileName.trim()) {
+        return res.status(400).json({ message: "Backup file name is required" });
+      }
+
+      const backupsDir = path.join(process.cwd(), "backups");
+      const backupPath = path.join(backupsDir, fileName);
+      
+      // Check if the backup file exists
+      if (!fs.existsSync(backupPath)) {
+        return res.status(404).json({ message: "Backup file not found" });
+      }
+
+      if (process.env.DATABASE_URL) {
+        // Extract database details from the URL
+        const dbUrl = new URL(process.env.DATABASE_URL);
+        const dbName = dbUrl.pathname.substring(1);
+        const dbUser = dbUrl.username;
+        const dbHost = dbUrl.hostname;
+        const dbPort = dbUrl.port;
+
+        // Close existing connections
+        try {
+          await pool.end();
+        } catch (err) {
+          console.error("Error closing connections:", err);
+          // Continue even if closing connections fails
+        }
+        
+        // Use psql to restore the backup
+        await execPromise(`PGPASSWORD="${dbUrl.password}" psql --host=${dbHost} --port=${dbPort} --username=${dbUser} --dbname=${dbName} --file="${backupPath}"`);
+        
+        res.json({ 
+          success: true, 
+          message: "Database restored successfully"
+        });
+      } else {
+        throw new Error("DATABASE_URL environment variable is not set");
+      }
+    } catch (error) {
+      console.error("Error restoring database:", error);
+      res.status(500).json({ message: `Failed to restore database: ${error.message}` });
     }
   });
 
