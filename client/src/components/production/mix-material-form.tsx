@@ -78,42 +78,21 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
       }
       
       // Create mix with current user as operator
-      const mixResponse = await fetch(API_ENDPOINTS.MIX_MATERIALS, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          mixPerson: currentUser.name || `User ${userId}`,
-        }),
+      const mixData = await apiRequest("POST", API_ENDPOINTS.MIX_MATERIALS, { 
+        mixPerson: currentUser.name || `User ${userId}`,
+        mixDate: new Date().toISOString(),
+        totalQuantity: materials.reduce((sum, material) => sum + material.quantity, 0)
       });
       
-      if (!mixResponse.ok) {
-        const error = await mixResponse.json();
-        throw new Error(error.message || "Failed to create mix");
-      }
-      
-      const mixData = await mixResponse.json();
       const mixId = mixData.id;
       
       // Then add all materials to the mix
       for (const material of materials) {
-        const itemResponse = await fetch(API_ENDPOINTS.MIX_ITEMS, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mixId,
-            rawMaterialId: material.rawMaterialId,
-            quantity: material.quantity,
-          }),
+        await apiRequest("POST", API_ENDPOINTS.MIX_ITEMS, {
+          mixId,
+          rawMaterialId: material.rawMaterialId,
+          quantity: material.quantity,
         });
-        
-        if (!itemResponse.ok) {
-          const error = await itemResponse.json();
-          throw new Error(error.message || "Failed to add material to mix");
-        }
       }
       
       return mixData;
