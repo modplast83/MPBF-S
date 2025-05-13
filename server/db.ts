@@ -7,8 +7,9 @@ neonConfig.webSocketConstructor = ws;
 
 // Function to create a new database connection pool
 export function createDbConnection() {
-  // Check for the holy-bonus database URL first, then fall back to the standard database URL
-  const databaseUrl = process.env.DATABASE_URL_HOLY_BONUS || process.env.DATABASE_URL;
+  // Use the specified database URL (plain-wildflower-82755165) if available,
+  // otherwise fall back to the standard database URL
+  const databaseUrl = process.env.DATABASE_URL_WILDFLOWER || process.env.DATABASE_URL;
 
   if (!databaseUrl) {
     throw new Error(
@@ -16,6 +17,8 @@ export function createDbConnection() {
     );
   }
 
+  console.log("Connecting to database...");
+  
   const newPool = new Pool({ connectionString: databaseUrl });
   const newDb = drizzle(newPool, { schema });
   
