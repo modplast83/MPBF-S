@@ -34,9 +34,9 @@ import CorrectiveActions from "@/pages/quality/corrective-actions";
 import AuthPage from "@/pages/auth-page"; // Updated import to match file name
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
-import { AuthProvider } from "@/hooks/use-auth-v2";
+import { AuthProvider } from "@/hooks/useAuth";
 import { PermissionsProvider } from "@/hooks/use-permissions";
-import { ProtectedRoute } from "@/components/auth/protected-route-v2";
+import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useEffect } from "react";
 import ToolsPage from "@/pages/tools/ToolsPage";
 import BagWeightCalculator from "@/pages/tools/bag-weight";
@@ -54,13 +54,12 @@ function App() {
 
   return (
     <AuthProvider>
-      {(authContext) => (
-        <PermissionsProvider user={authContext.user}>
-          <Switch>
-            <Route path="/auth" component={AuthPage} />
-            <Route path="*">
-              <MainLayout>
-                <Switch>
+      <PermissionsProvider>
+        <Switch>
+          <Route path="/auth" component={AuthPage} />
+          <Route path="*">
+            <MainLayout>
+              <Switch>
                   <ProtectedRoute path="/" component={Dashboard} />
                   <ProtectedRoute path="/setup" component={SetupIndex} module="Setup" />
                   <ProtectedRoute path="/setup/categories" component={Categories} module="Categories" />
@@ -105,8 +104,7 @@ function App() {
             </Route>
           </Switch>
         </PermissionsProvider>
-      )}
-    </AuthProvider>
+      </AuthProvider>
   );
 }
 

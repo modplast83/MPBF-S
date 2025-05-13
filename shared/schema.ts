@@ -84,6 +84,7 @@ export const users = pgTable("users", {
   phone: text("phone"),
   isActive: boolean("is_active").default(true),
   sectionId: text("section_id").references(() => sections.id), // UserSection
+  user: text("user").notNull(), // Legacy user column - keeping for compatibility
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

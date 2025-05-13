@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth-v2";
+import { useAuth } from "@/hooks/useAuth"; // Changed to match the correct hook file
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -87,8 +87,8 @@ export default function AuthPage() {
   // If user is already authenticated, redirect to dashboard
   if (isAuthenticated) {
     console.log("User already authenticated, redirecting to dashboard");
-    // Use direct DOM navigation to avoid React Router issues
-    window.location.href = "/";
+    // Use wouter navigation
+    setLocation("/");
     return null;
   }
   
@@ -182,6 +182,10 @@ export default function AuthPage() {
                         </FormItem>
                       )}
                     />
+                    
+                    <div className="text-muted-foreground text-sm text-center">
+                      <strong>Demo account:</strong> AbuKhalid / Ibr@haj1
+                    </div>
                     
                     <Button 
                       type="submit" 

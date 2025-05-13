@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Permission, User } from "@shared/schema";
+import { useAuth } from "./useAuth";
 
 type PermissionsContextType = {
   hasPermission: (module: string, action?: "view" | "create" | "edit" | "delete") => boolean;
@@ -27,12 +28,11 @@ const SECTION_MODULE_ACCESS: Record<string, string[]> = {
 };
 
 export function PermissionsProvider({ 
-  children, 
-  user 
+  children 
 }: { 
   children: ReactNode;
-  user: User | null;
 }) {
+  const { user } = useAuth();
   const [permissions, setPermissions] = useState<Permission[]>([]);
   
   // Fetch permissions for the current user's role

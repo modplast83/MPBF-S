@@ -30,6 +30,7 @@ export async function ensureAdminUser() {
         bio: null,
         profileImageUrl: null,
         sectionId: null,
+        user: `admin_${Date.now()}`, // Make sure the user value is unique
         createdAt: new Date(),
         updatedAt: new Date()
       };
