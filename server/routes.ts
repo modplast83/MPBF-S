@@ -2257,25 +2257,45 @@ COMMIT;
   app.post("/api/mix-materials", requireAuth, async (req: Request, res: Response) => {
     try {
       const { machineIds, ...mixData } = req.body;
-      const validatedData = insertMixMaterialSchema.parse(mixData);
+      
+      // Set mixPerson to current user ID from authentication
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      mixData.mixPerson = (req.user as any).id;
+      console.log("Setting mixPerson to user ID:", (req.user as any).id);
+      
+      // Convert mixDate from string to Date object
+      if (typeof mixData.mixDate === 'string') {
+        mixData.mixDate = new Date(mixData.mixDate);
+        console.log("Converted mixDate to Date object:", mixData.mixDate);
+      }
+      
+      // Validate the modified data
+      console.log("Data before validation:", JSON.stringify(mixData));
+      let mixMaterialData;
+      try {
+        mixMaterialData = insertMixMaterialSchema.parse(mixData);
+      } catch (validationError) {
+        console.error("Validation error:", validationError);
+        return res.status(400).json({ 
+          message: "Invalid mix material data",
+          details: validationError 
+        });
+      }
       
       // Validate orderId if provided
-      if (validatedData.orderId) {
-        const order = await storage.getOrder(validatedData.orderId);
+      if (mixMaterialData.orderId) {
+        const order = await storage.getOrder(mixMaterialData.orderId);
         if (!order) {
           return res.status(404).json({ message: "Order not found" });
         }
       }
       
-      // Set mixPerson to current user ID
-      if (req.user) {
-        validatedData.mixPerson = (req.user as any).id;
-      } else {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
       // Create the mix material
-      const mixMaterial = await storage.createMixMaterial(validatedData);
+      console.log("Validated data for mix material creation:", mixMaterialData);
+      const mixMaterial = await storage.createMixMaterial(mixMaterialData);
       
       // Process machine associations if provided
       if (machineIds && Array.isArray(machineIds) && machineIds.length > 0) {
