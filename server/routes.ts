@@ -2305,6 +2305,8 @@ COMMIT;
       res.status(201).json(result);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Zod validation error:", JSON.stringify(error.errors, null, 2));
+        console.error("Request body:", JSON.stringify(req.body, null, 2));
         return res.status(400).json({ message: "Invalid mix material data", errors: error.errors });
       }
       console.error("Error creating mix material:", error);

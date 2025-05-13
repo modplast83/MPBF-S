@@ -78,9 +78,11 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
       }
       
       // Create mix with current user as operator
+      const date = new Date();
+      console.log("Submitting mix data - user will be set on server");
       const mixData = await apiRequest("POST", API_ENDPOINTS.MIX_MATERIALS, { 
-        mixPerson: currentUser.name || `User ${userId}`,
-        mixDate: new Date().toISOString(),
+        // Don't send mixPerson - it will be set on the server from the auth token
+        mixDate: date.toISOString(), // Make sure date is properly formatted
         totalQuantity: materials.reduce((sum, material) => sum + material.quantity, 0)
       });
       
