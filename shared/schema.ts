@@ -366,8 +366,6 @@ export const mixMachines = pgTable("mix_machines", {
 
 export const insertMixMaterialSchema = createInsertSchema(mixMaterials).omit({ 
   id: true, 
-  mixDate: true, 
-  totalQuantity: true,
   createdAt: true 
 });
 
