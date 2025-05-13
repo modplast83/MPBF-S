@@ -1931,14 +1931,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Use psql to restore the backup
         await execPromise(`PGPASSWORD="${dbUrl.password}" psql --host=${dbHost} --port=${dbPort} --username=${dbUser} --dbname=${dbName} --file="${backupPath}"`);
         
-        // Reinitialize the database connection pool
-        const { pool: newPool, db: newDb } = await import('./db');
-        console.log("Database connection pool reinitialized after restore");
-        
+        // Don't try to reinitialize the database connection - it needs a server restart
+        // Send successful response
         res.json({ 
           success: true, 
-          message: "Database restored successfully"
+          message: "Database restored successfully. Server will restart to apply changes."
         });
+        
+        // Schedule a server restart after response is sent
+        setTimeout(() => {
+          console.log("Restarting server to apply database restore...");
+          process.exit(0); // Exit with success code to trigger restart
+        }, 1000);
       } else {
         throw new Error("DATABASE_URL environment variable is not set");
       }
