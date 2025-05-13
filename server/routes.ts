@@ -1919,30 +1919,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const dbUser = dbUrl.username;
         const dbHost = dbUrl.hostname;
         const dbPort = dbUrl.port;
+        const dbPassword = dbUrl.password;
 
-        // Close existing connections
+        // Create a temporary SQL file to handle the drop tables first
+        const tempSqlPath = path.join(backupsDir, `temp_${Date.now()}.sql`);
+        
         try {
-          await pool.end();
+          // First, get a list of all tables to drop
+          const tableListCommand = `PGPASSWORD="${dbPassword}" psql --host=${dbHost} --port=${dbPort} --username=${dbUser} --dbname=${dbName} -t -c "SELECT tablename FROM pg_tables WHERE schemaname='public';"`;
+          const tableList = await execPromise(tableListCommand);
+          
+          // Create drop statements for all tables (in reverse order to handle foreign key constraints)
+          const tables = tableList.trim().split('\n').filter(table => table.trim() !== '');
+          
+          if (tables.length > 0) {
+            // Create a temporary SQL file with drop statements
+            const dropStatements = `
+BEGIN;
+-- Disable foreign key constraints temporarily
+SET session_replication_role = 'replica';
+
+-- Drop all tables
+${tables.map(table => `DROP TABLE IF EXISTS "${table.trim()}" CASCADE;`).join('\n')}
+
+-- Re-enable foreign key constraints
+SET session_replication_role = 'origin';
+COMMIT;
+            `;
+            
+            fs.writeFileSync(tempSqlPath, dropStatements);
+            
+            // Execute the drop statements
+            await execPromise(`PGPASSWORD="${dbPassword}" psql --host=${dbHost} --port=${dbPort} --username=${dbUser} --dbname=${dbName} --file="${tempSqlPath}"`);
+          }
+          
+          // Now restore from the backup file
+          await execPromise(`PGPASSWORD="${dbPassword}" psql --host=${dbHost} --port=${dbPort} --username=${dbUser} --dbname=${dbName} --file="${backupPath}"`);
+          
+          // Clean up the temporary file
+          if (fs.existsSync(tempSqlPath)) {
+            fs.unlinkSync(tempSqlPath);
+          }
+          
+          // Send successful response
+          res.json({ 
+            success: true, 
+            message: "Database restored successfully. Server will restart to apply changes."
+          });
+          
+          // Close existing connections (after response is sent)
+          setTimeout(async () => {
+            try {
+              await pool.end();
+              console.log("Database connections closed");
+            } catch (err) {
+              console.error("Error closing connections:", err);
+            }
+            
+            // Schedule a server restart after connections are closed
+            console.log("Restarting server to apply database restore...");
+            process.exit(0); // Exit with success code to trigger restart
+          }, 1000);
+          
         } catch (err) {
-          console.error("Error closing connections:", err);
-          // Continue even if closing connections fails
+          // Clean up temporary file if it exists
+          if (fs.existsSync(tempSqlPath)) {
+            fs.unlinkSync(tempSqlPath);
+          }
+          throw err;
         }
-        
-        // Use psql to restore the backup
-        await execPromise(`PGPASSWORD="${dbUrl.password}" psql --host=${dbHost} --port=${dbPort} --username=${dbUser} --dbname=${dbName} --file="${backupPath}"`);
-        
-        // Don't try to reinitialize the database connection - it needs a server restart
-        // Send successful response
-        res.json({ 
-          success: true, 
-          message: "Database restored successfully. Server will restart to apply changes."
-        });
-        
-        // Schedule a server restart after response is sent
-        setTimeout(() => {
-          console.log("Restarting server to apply database restore...");
-          process.exit(0); // Exit with success code to trigger restart
-        }, 1000);
       } else {
         throw new Error("DATABASE_URL environment variable is not set");
       }
