@@ -53,12 +53,7 @@ export class HybridStorage implements IStorage {
   constructor() {
     // Create an instance of DatabaseStorage to handle authentication
     this.dbStorage = new DatabaseStorage();
-    
-    // Use the session store from DatabaseStorage
-    // which is already correctly configured
     this.sessionStore = this.dbStorage.sessionStore;
-    
-    console.log("Initialized HybridStorage with connection to database");
   }
   
   // =========================================================================

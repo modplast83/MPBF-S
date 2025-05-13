@@ -5,16 +5,14 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-if (!process.env.DATABASE_URL) {
+// Check for the holy-bonus database URL first, then fall back to the standard database URL
+const databaseUrl = process.env.DATABASE_URL_HOLY_BONUS || process.env.DATABASE_URL;
+
+if (!databaseUrl) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",
   );
 }
 
-export const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+export const pool = new Pool({ connectionString: databaseUrl });
 export const db = drizzle(pool, { schema });

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth-v2";
+import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -38,7 +38,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const { isAuthenticated, isLoading, login, register } = useAuth();
+  const { isAuthenticated, isLoading, loginMutation, registerMutation } = useAuth();
   const { t } = useTranslation();
   const { language, setLanguage, isRTL } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("login");
@@ -64,30 +64,13 @@ export default function AuthPage() {
     },
   });
 
-  const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
-  const [isSubmittingRegister, setIsSubmittingRegister] = useState(false);
-
-  async function onLoginSubmit(data: LoginFormValues) {
-    try {
-      setIsSubmittingLogin(true);
-      await login(data.username, data.password);
-    } catch (error) {
-      console.error("Login error:", error);
-    } finally {
-      setIsSubmittingLogin(false);
-    }
+  function onLoginSubmit(data: LoginFormValues) {
+    loginMutation.mutate(data);
   }
 
-  async function onRegisterSubmit(data: RegisterFormValues) {
-    try {
-      setIsSubmittingRegister(true);
-      const { confirmPassword, ...registerData } = data;
-      await register(registerData);
-    } catch (error) {
-      console.error("Registration error:", error);
-    } finally {
-      setIsSubmittingRegister(false);
-    }
+  function onRegisterSubmit(data: RegisterFormValues) {
+    const { confirmPassword, ...registerData } = data;
+    registerMutation.mutate(registerData);
   }
 
   // If user is already authenticated, redirect to dashboard
@@ -192,9 +175,9 @@ export default function AuthPage() {
                     <Button 
                       type="submit" 
                       className="w-full"
-                      disabled={isSubmittingLogin}
+                      disabled={loginMutation.isPending}
                     >
-                      {isSubmittingLogin ? (
+                      {loginMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t("auth.logging_in")}
@@ -327,9 +310,9 @@ export default function AuthPage() {
                     <Button 
                       type="submit" 
                       className="w-full"
-                      disabled={isSubmittingRegister}
+                      disabled={registerMutation.isPending}
                     >
-                      {isSubmittingRegister ? (
+                      {registerMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t("auth.registering")}

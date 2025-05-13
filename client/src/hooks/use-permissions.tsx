@@ -93,10 +93,10 @@ export function PermissionsProvider({
       
       // Fall back to permission check
       const permission = permissions.find(
-        p => p.role === userSection && p.module === sectionTabModule && p.is_active
+        p => p.role === userSection && p.module === sectionTabModule && p.isActive
       );
       
-      if (permission && permission.can_view) {
+      if (permission && permission.canView) {
         return true;
       }
     }
@@ -125,15 +125,15 @@ export function PermissionsProvider({
     if (userRole === "supervisor") {
       // Check if there are specific supervisor permissions defined
       const supervisorPermission = permissions.find(
-        p => p.role === "supervisor" && p.module === module && p.is_active
+        p => p.role === "supervisor" && p.module === module && p.isActive
       );
       
       if (supervisorPermission) {
-        // Check for the specific permission action (using snake_case to match database columns)
-        if (action === "view") return supervisorPermission.can_view === true;
-        if (action === "create") return supervisorPermission.can_create === true;
-        if (action === "edit") return supervisorPermission.can_edit === true;
-        if (action === "delete") return supervisorPermission.can_delete === true;
+        // Check for the specific permission action
+        if (action === "view") return supervisorPermission.canView === true;
+        if (action === "create") return supervisorPermission.canCreate === true;
+        if (action === "edit") return supervisorPermission.canEdit === true;
+        if (action === "delete") return supervisorPermission.canDelete === true;
         return false;
       }
       
@@ -154,15 +154,15 @@ export function PermissionsProvider({
       // For non-view actions or if the view permission wasn't granted above
       // Check if there's a specific permission defined for this section and module
       const sectionPermission = permissions.find(
-        p => p.role === userSection && p.module === module && p.is_active
+        p => p.role === userSection && p.module === module && p.isActive
       );
       
       if (sectionPermission) {
-        // Check for the specific permission action (using snake_case to match database columns)
-        if (action === "view") return sectionPermission.can_view === true;
-        if (action === "create") return sectionPermission.can_create === true;
-        if (action === "edit") return sectionPermission.can_edit === true;
-        if (action === "delete") return sectionPermission.can_delete === true;
+        // Check for the specific permission action
+        if (action === "view") return sectionPermission.canView === true;
+        if (action === "create") return sectionPermission.canCreate === true;
+        if (action === "edit") return sectionPermission.canEdit === true;
+        if (action === "delete") return sectionPermission.canDelete === true;
         return false;
       }
     }
@@ -182,17 +182,17 @@ export function PermissionsProvider({
     
     // Find the permission for this role and module
     const permission = permissions.find(
-      p => p.role === userRole && p.module === module && p.is_active
+      p => p.role === userRole && p.module === module && p.isActive
     );
     
     // If no permission found, deny access
     if (!permission) return false;
     
-    // Check for the specific permission action (using snake_case to match database columns)
-    if (action === "view") return permission.can_view === true;
-    if (action === "create") return permission.can_create === true;
-    if (action === "edit") return permission.can_edit === true;
-    if (action === "delete") return permission.can_delete === true;
+    // Check for the specific permission action
+    if (action === "view") return permission.canView === true;
+    if (action === "create") return permission.canCreate === true;
+    if (action === "edit") return permission.canEdit === true;
+    if (action === "delete") return permission.canDelete === true;
     return false;
   };
 

@@ -16,13 +16,12 @@ declare global {
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'mpbf_session_secret',
-    resave: false,
-    saveUninitialized: false,
-    proxy: true, // Add trust proxy setting
+    resave: true,
+    saveUninitialized: true,
     store: storage.sessionStore,
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-      secure: false, // Set to false to allow non-SSL connections for now
+      secure: process.env.NODE_ENV === 'production', // Only secure in production
       httpOnly: true,
       sameSite: 'lax',
       path: '/'

@@ -121,8 +121,6 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
   // Fetch default configuration
   const { data: defaultConfig, isLoading: defaultConfigLoading } = useQuery<AbaMaterialConfig>({
     queryKey: [`${API_ENDPOINTS.ABA_MATERIAL_CONFIGS}/default`],
-    retry: false // Don't retry on 404
-    // Using global error handling instead of onError for TanStack Query v5
   });
 
   // Process default config when it's loaded

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth-v2";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -14,22 +13,27 @@ export default function LoginPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const { login, isAuthenticated } = useAuth();
-
-  // If user is already authenticated, redirect to dashboard
-  if (isAuthenticated) {
-    setLocation('/');
-    return null;
-  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
     
     try {
+      // Simple demo login - just accepts any credentials
+      // In a real app, this would validate against a backend
+      
       if (username.trim() && password.trim()) {
-        await login(username, password);
-        // Login success is handled in the auth hook with proper redirect
+        // Store login state in localStorage
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', username);
+        
+        toast({
+          title: "Login successful",
+          description: `Welcome to MPBF System, ${username}!`,
+        });
+        
+        // Redirect to dashboard
+        setLocation('/');
       } else {
         throw new Error("Please enter both username and password");
       }
@@ -108,11 +112,11 @@ export default function LoginPage() {
               </form>
             </CardContent>
             <CardFooter className="flex flex-col items-start pt-6 p-0 mt-8 border-t border-gray-100">
-              <div className="bg-blue-50 text-blue-800 p-3 rounded-lg text-sm w-full">
+              <div className="bg-amber-50 text-amber-800 p-3 rounded-lg text-sm w-full">
                 <div className="flex items-start">
-                  <span className="material-icons text-blue-600 mr-2 mt-0.5">info</span>
+                  <span className="material-icons text-amber-600 mr-2 mt-0.5">info</span>
                   <p>
-                    <span className="font-medium">Note:</span> Enter your username and password to access the system.
+                    <span className="font-medium">Demo Note:</span> Enter any username and password to login.
                   </p>
                 </div>
               </div>
