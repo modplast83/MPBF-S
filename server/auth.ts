@@ -7,9 +7,14 @@ import { storage } from "./storage";
 import { comparePasswords, hashPassword } from "./auth-utils";
 import crypto from "crypto";
 
+// Import the necessary type
+import { User as UserSchema } from "@shared/schema";
+
+// Extend Express.User interface with our User type
 declare global {
   namespace Express {
-    interface User extends User {}
+    // Define User interface to match our schema, inheriting from the shared schema
+    interface User extends UserSchema {}
   }
 }
 
@@ -61,7 +66,7 @@ export function setupAuth(app: Express) {
     }),
   );
 
-  passport.serializeUser((user, done) => {
+  passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
   });
 
@@ -71,7 +76,8 @@ export function setupAuth(app: Express) {
       if (!user) {
         return done(null, false);
       }
-      done(null, user);
+      // Cast to Express.User to match the expected type
+      done(null, user as Express.User);
     } catch (error) {
       done(error);
     }
@@ -125,7 +131,7 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     console.log("Login attempt for user:", req.body.username);
     
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: any, user: Express.User | false, info: { message: string } | undefined) => {
       if (err) {
         console.error("Login error:", err);
         return next(err);
@@ -136,7 +142,7 @@ export function setupAuth(app: Express) {
         return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
       
-      req.login(user, (err) => {
+      req.login(user as Express.User, (err) => {
         if (err) {
           console.error("Login session error:", err);
           return next(err);

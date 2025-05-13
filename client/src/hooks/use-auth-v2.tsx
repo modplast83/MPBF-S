@@ -78,25 +78,45 @@ export function AuthProvider({ children }: { children: ReactNode | ((data: AuthC
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }: { username: string; password: string }) => {
       console.log("Attempting login with credentials:", { username, hasPassword: !!password });
-      const response = await fetch("/api/login", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          "Pragma": "no-cache"
-        },
-        body: JSON.stringify({ username, password })
-      });
+      console.log("Sending request to /api/login with data:", { username, passwordLength: password?.length });
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Login failed" }));
-        throw new Error(errorData.message || "Login failed");
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache"
+          },
+          body: JSON.stringify({ username, password })
+        });
+        
+        console.log("Login response status:", response.status);
+        console.log("Login response headers:", Object.fromEntries([...response.headers.entries()]));
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.log("Error response text:", errorText);
+          
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch (e) {
+            errorData = { message: "Login failed with non-JSON response" };
+          }
+          
+          console.error("Login failed with status:", response.status, "Error:", errorData);
+          throw new Error(errorData.message || "Login failed");
+        }
+        
+        const userData = await response.json();
+        console.log("Login response received:", userData);
+        return userData;
+      } catch (error) {
+        console.error("Error during login request:", error);
+        throw error;
       }
-      
-      const userData = await response.json();
-      console.log("Login response received:", userData);
-      return userData;
     },
     onSuccess: (userData: User) => {
       // Update the cache

@@ -321,9 +321,9 @@ export default function AuthPage() {
                     <Button 
                       type="submit" 
                       className="w-full"
-                      disabled={registerMutation.isPending}
+                      disabled={isSubmitting}
                     >
-                      {registerMutation.isPending ? (
+                      {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t("auth.registering")}

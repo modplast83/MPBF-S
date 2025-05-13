@@ -31,7 +31,7 @@ import QualityIndex from "@/pages/quality/index";
 import QualityCheckTypes from "@/pages/quality/check-types";
 import QualityChecks from "@/pages/quality/checks";
 import CorrectiveActions from "@/pages/quality/corrective-actions";
-import AuthPage from "@/pages/AuthPage";
+import AuthPage from "@/pages/auth-page"; // Updated import to match file name
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
 import { AuthProvider } from "@/hooks/use-auth-v2";
