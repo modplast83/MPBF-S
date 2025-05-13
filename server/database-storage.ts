@@ -625,7 +625,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(rolls)
-      .where(eq(rolls.status, stage));
+      .where(eq(rolls.currentStage, stage));
   }
 
   async getRoll(id: string): Promise<Roll | undefined> {
