@@ -414,17 +414,17 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>{t('production.mix_materials.aba_calculator')}</CardTitle>
+        <CardTitle>{t('production.aba_calculator.title')}</CardTitle>
         <CardDescription>
-          {t('production.mix_materials.aba_calculator_description')}
+          {t('production.aba_calculator.description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="calculator">{t('production.mix_materials.calculator')}</TabsTrigger>
-            <TabsTrigger value="configurations">{t('production.mix_materials.configurations')}</TabsTrigger>
-            <TabsTrigger value="result">{t('production.mix_materials.result')}</TabsTrigger>
+            <TabsTrigger value="calculator">{t('production.aba_calculator.formula_parameters')}</TabsTrigger>
+            <TabsTrigger value="configurations">{t('production.aba_calculator.configurations')}</TabsTrigger>
+            <TabsTrigger value="result">{t('production.aba_calculator.result')}</TabsTrigger>
           </TabsList>
 
           {/* Calculator Tab */}
@@ -650,7 +650,7 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
           <TabsContent value="result" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <h3 className="text-lg font-medium mb-2">{t('production.mix_materials.input_summary')}</h3>
+                <h3 className="text-lg font-medium mb-2">{t('production.aba_calculator.input_summary')}</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>{t('production.mix_materials.total_quantity')}:</span>
@@ -678,9 +678,9 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
                 </div>
               </div>
               <div>
-                <h3 className="text-lg font-medium mb-2">{t('production.mix_materials.scaled_results')}</h3>
+                <h3 className="text-lg font-medium mb-2">{t('production.aba_calculator.scaled_results')}</h3>
                 <p className="text-sm text-secondary-500 mb-2">
-                  {t('production.mix_materials.scaled_results_description')}
+                  {t('production.aba_calculator.scaled_to')} {formatNumber(quantity, 1)} kg
                 </p>
                 <Button variant="outline" onClick={() => window.print()}>
                   <span className="material-icons text-sm mr-2">print</span>

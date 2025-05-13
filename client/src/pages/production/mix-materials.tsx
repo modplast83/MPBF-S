@@ -839,7 +839,7 @@ export default function MixMaterialsPage() {
           </TabsTrigger>
           <TabsTrigger value="aba_calculator">
             <span className="material-icons text-sm mr-1">calculate</span>
-            {t('production.aba_calculator.title', 'ABA Calculator')}
+            {t('production.aba_calculator.title')}
           </TabsTrigger>
           <TabsTrigger value="aba_config">
             <span className="material-icons text-sm mr-1">settings</span>
@@ -1051,9 +1051,9 @@ export default function MixMaterialsPage() {
         <TabsContent value="aba_calculator">
           <Card>
             <CardHeader>
-              <CardTitle>{t('production.aba_calculator.title', 'ABA Calculator')}</CardTitle>
+              <CardTitle>{t('production.aba_calculator.title')}</CardTitle>
               <CardDescription>
-                {t('production.aba_calculator.description', 'Calculate material distributions for A/B extruder machines')}
+                {t('production.aba_calculator.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
