@@ -1929,8 +1929,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const tableListCommand = `PGPASSWORD="${dbPassword}" psql --host=${dbHost} --port=${dbPort} --username=${dbUser} --dbname=${dbName} -t -c "SELECT tablename FROM pg_tables WHERE schemaname='public';"`;
           const tableList = await execPromise(tableListCommand);
           
+          // Make sure tableList is a string and process it properly
+          const tableListStr = tableList ? tableList.toString() : '';
+          
           // Create drop statements for all tables (in reverse order to handle foreign key constraints)
-          const tables = tableList.trim().split('\n').filter(table => table.trim() !== '');
+          const tables = tableListStr.trim().split('\n').filter(table => table.trim() !== '');
+          
+          console.log(`Found ${tables.length} tables to drop before restore`);
           
           if (tables.length > 0) {
             // Create a temporary SQL file with drop statements
