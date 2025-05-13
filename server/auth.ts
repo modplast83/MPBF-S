@@ -41,15 +41,21 @@ export function setupAuth(app: Express) {
           return done(null, false, { message: "Incorrect username" });
         }
         
+        console.log(`Found user ${username}, attempting password verification`);
+        console.log(`Stored password format for ${username}: ${user.password ? (user.password.includes('.') ? 'hashed.salt' : 'legacy') : 'empty'}`);
+        
         // Verify password
         const isPasswordValid = await comparePasswords(password, user.password || "");
         
         if (!isPasswordValid) {
+          console.log(`Password verification failed for ${username}`);
           return done(null, false, { message: "Incorrect password" });
         }
         
+        console.log(`Password verification succeeded for ${username}`);
         return done(null, user);
       } catch (error) {
+        console.error(`Error during authentication:`, error);
         return done(error);
       }
     }),

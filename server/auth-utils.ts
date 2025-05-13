@@ -13,12 +13,14 @@ export async function comparePasswords(supplied: string, stored: string) {
   try {
     if (!supplied || !stored) {
       console.log("Password comparison failed: empty password provided");
+      console.log(`Supplied: ${supplied ? 'provided' : 'empty'}, Stored: ${stored ? 'exists' : 'empty'}`);
       return false;
     }
     
     // Check if stored password is in the expected format (has a salt)
     if (!stored.includes('.')) {
       console.log("Password in legacy format (no salt), performing direct comparison");
+      console.log(`Direct comparison result: ${supplied === stored ? 'matched' : 'not matched'}`);
       // For compatibility with initial setup or unencrypted passwords
       // Simply compare the raw passwords as a fallback
       return supplied === stored;
@@ -38,6 +40,8 @@ export async function comparePasswords(supplied: string, stored: string) {
       return false;
     }
     
+    console.log(`Secure comparison using salt: ${salt.substring(0, 4)}... (partial)`);
+    
     const hashedBuf = Buffer.from(hashed, "hex");
     const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
     
@@ -46,7 +50,10 @@ export async function comparePasswords(supplied: string, stored: string) {
       return false;
     }
     
-    return timingSafeEqual(hashedBuf, suppliedBuf);
+    const isEqual = timingSafeEqual(hashedBuf, suppliedBuf);
+    console.log(`Secure comparison result: ${isEqual ? 'matched' : 'not matched'}`);
+    
+    return isEqual;
   } catch (error) {
     console.error("Error during password comparison:", error);
     return false;
