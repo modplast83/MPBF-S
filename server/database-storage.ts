@@ -145,21 +145,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updatePermission(id: number, permissionData: Partial<Permission>): Promise<Permission | undefined> {
-    try {
-      // Log the incoming data for debugging
-      console.log(`Updating permission ${id} with data:`, permissionData);
-      
-      const [updatedPermission] = await db
-        .update(permissions)
-        .set(permissionData)
-        .where(eq(permissions.id, id))
-        .returning();
-      
-      return updatedPermission;
-    } catch (error) {
-      console.error(`Permission update error:`, error);
-      throw error;
-    }
+    const [updatedPermission] = await db
+      .update(permissions)
+      .set(permissionData)
+      .where(eq(permissions.id, id))
+      .returning();
+    return updatedPermission;
   }
 
   async deletePermission(id: number): Promise<boolean> {

@@ -41,9 +41,8 @@ interface Permission {
   isActive: boolean;
 }
 
-// All available modules in the system - includes all modules mentioned in permissions.docx
+// All available modules in the system
 const ALL_MODULES = [
-  // Main modules
   "Dashboard", 
   "Orders", 
   "Setup", 
@@ -54,11 +53,6 @@ const ALL_MODULES = [
   "Reports", 
   "System",
   "Tools",
-  "Inventory",
-  // Section-specific workflow tabs
-  "Workflow-Extrusion Tab",
-  "Workflow-Printing Tab",
-  "Workflow-Cutting Tab",
   // Setup submodules
   "Categories", 
   "Products", 
@@ -72,7 +66,6 @@ const ALL_MODULES = [
   "Final Products",
   // Production submodules
   "Mix Materials",
-  "ABA Calculator",
   // Quality submodules
   "Check Types", 
   "Quality Checks", 
@@ -81,15 +74,11 @@ const ALL_MODULES = [
   "Bag Weight Calculator", 
   "Ink Consumption", 
   "Utility Tools",
-  "Cost",
   // System submodules
   "Database", 
   "Permissions", 
   "Import & Export", 
-  "SMS",
-  "SMS Management",
-  "System Settings",
-  "Cliches"
+  "SMS Management"
 ];
 
 // Helper to convert API format to UI format
@@ -106,34 +95,6 @@ function apiToUiFormat(dto: PermissionDTO): Permission {
     canDelete: dto.can_delete === true,
     isActive: dto.is_active === true
   };
-}
-
-// Helper to convert UI format to API format for updates
-function uiToApiFormat(field: keyof Permission, value: boolean): Record<string, boolean> {
-  const update: Record<string, boolean> = {};
-  
-  // Convert from UI camelCase to API snake_case format
-  switch(field) {
-    case 'canView':
-      update.can_view = value;
-      break;
-    case 'canCreate':
-      update.can_create = value;
-      break;
-    case 'canEdit':
-      update.can_edit = value;
-      break;
-    case 'canDelete':
-      update.can_delete = value;
-      break;
-    case 'isActive':
-      update.is_active = value;
-      break;
-    default:
-      break;
-  }
-  
-  return update;
 }
 
 export default function Permissions() {
@@ -278,8 +239,29 @@ export default function Permissions() {
   
   // Handle permission change directly
   const handlePermissionChange = (id: number, field: keyof Permission, value: boolean) => {
-    // Prepare update using our conversion function
-    const update = uiToApiFormat(field, value);
+    // Prepare update based on the field
+    const update: Record<string, boolean> = {};
+    
+    // Convert to API snake_case format
+    switch(field) {
+      case 'canView':
+        update.can_view = value;
+        break;
+      case 'canCreate':
+        update.can_create = value;
+        break;
+      case 'canEdit':
+        update.can_edit = value;
+        break;
+      case 'canDelete':
+        update.can_delete = value;
+        break;
+      case 'isActive':
+        update.is_active = value;
+        break;
+      default:
+        break;
+    }
     
     // Show optimistic update feedback
     const affectedPermission = permissions.find(p => p.id === id);

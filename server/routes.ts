@@ -2603,18 +2603,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Send the validated data to storage
-      try {
-        const permission = await storage.updatePermission(id, validatedData);
-        
-        if (!permission) {
-          return res.status(404).json({ message: "Failed to update permission" });
-        }
-        
-        res.json(permission);
-      } catch (updateError) {
-        console.error("Permission update error in route handler:", updateError);
-        return res.status(500).json({ message: "Failed to update permission", error: updateError.message });
+      const permission = await storage.updatePermission(id, validatedData);
+      
+      if (!permission) {
+        return res.status(404).json({ message: "Failed to update permission" });
       }
+      
+      res.json(permission);
     } catch (error) {
       console.error("Permission update error:", error);
       if (error instanceof z.ZodError) {

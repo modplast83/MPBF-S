@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Route, Redirect, useLocation } from "wouter";
 
@@ -6,11 +6,9 @@ type ProtectedRouteProps = {
   path: string;
   component: React.ComponentType;
   module?: string; // Optional module name for permission checking
-  workflowTab?: string; // For workflow specific routes
-  sectionOnly?: boolean; // For section specific routes
 };
 
-export function ProtectedRoute({ path, component: Component, module, workflowTab, sectionOnly }: ProtectedRouteProps) {
+export function ProtectedRoute({ path, component: Component, module }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
   

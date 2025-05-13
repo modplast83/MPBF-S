@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth"; // Changed to match the correct hook file
+import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -38,11 +38,10 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const { isAuthenticated, isLoading, login, register } = useAuth();
+  const { isAuthenticated, isLoading, loginMutation, registerMutation } = useAuth();
   const { t } = useTranslation();
   const { language, setLanguage, isRTL } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("login");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [, setLocation] = useLocation();
   
   const loginForm = useForm<LoginFormValues>({
@@ -65,30 +64,20 @@ export default function AuthPage() {
     },
   });
 
-  async function onLoginSubmit(data: LoginFormValues) {
-    try {
-      setIsSubmitting(true);
-      await login(data.username, data.password);
-    } finally {
-      setIsSubmitting(false);
-    }
+  function onLoginSubmit(data: LoginFormValues) {
+    loginMutation.mutate(data);
   }
 
-  async function onRegisterSubmit(data: RegisterFormValues) {
-    try {
-      setIsSubmitting(true);
-      const { confirmPassword, ...registerData } = data;
-      await register(registerData);
-    } finally {
-      setIsSubmitting(false);
-    }
+  function onRegisterSubmit(data: RegisterFormValues) {
+    const { confirmPassword, ...registerData } = data;
+    registerMutation.mutate(registerData);
   }
 
   // If user is already authenticated, redirect to dashboard
   if (isAuthenticated) {
     console.log("User already authenticated, redirecting to dashboard");
-    // Use wouter navigation
-    setLocation("/");
+    // Use direct DOM navigation to avoid React Router issues
+    window.location.href = "/";
     return null;
   }
   
@@ -183,16 +172,12 @@ export default function AuthPage() {
                       )}
                     />
                     
-                    <div className="text-muted-foreground text-sm text-center">
-                      <strong>Demo account:</strong> AbuKhalid / Ibr@haj1
-                    </div>
-                    
                     <Button 
                       type="submit" 
                       className="w-full"
-                      disabled={isSubmitting}
+                      disabled={loginMutation.isPending}
                     >
-                      {isSubmitting ? (
+                      {loginMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t("auth.logging_in")}
@@ -325,9 +310,9 @@ export default function AuthPage() {
                     <Button 
                       type="submit" 
                       className="w-full"
-                      disabled={isSubmitting}
+                      disabled={registerMutation.isPending}
                     >
-                      {isSubmitting ? (
+                      {registerMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t("auth.registering")}

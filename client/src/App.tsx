@@ -31,12 +31,12 @@ import QualityIndex from "@/pages/quality/index";
 import QualityCheckTypes from "@/pages/quality/check-types";
 import QualityChecks from "@/pages/quality/checks";
 import CorrectiveActions from "@/pages/quality/corrective-actions";
-import AuthPage from "@/pages/auth-page"; // Updated import to match file name
+import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider } from "@/hooks/use-auth-v2";
 import { PermissionsProvider } from "@/hooks/use-permissions";
-import { ProtectedRoute } from "@/components/auth/protected-route";
+import { ProtectedRoute } from "@/components/auth/protected-route-v2";
 import { useEffect } from "react";
 import ToolsPage from "@/pages/tools/ToolsPage";
 import BagWeightCalculator from "@/pages/tools/bag-weight";
@@ -54,12 +54,13 @@ function App() {
 
   return (
     <AuthProvider>
-      <PermissionsProvider>
-        <Switch>
-          <Route path="/auth" component={AuthPage} />
-          <Route path="*">
-            <MainLayout>
-              <Switch>
+      {(authContext) => (
+        <PermissionsProvider user={authContext.user}>
+          <Switch>
+            <Route path="/auth" component={AuthPage} />
+            <Route path="*">
+              <MainLayout>
+                <Switch>
                   <ProtectedRoute path="/" component={Dashboard} />
                   <ProtectedRoute path="/setup" component={SetupIndex} module="Setup" />
                   <ProtectedRoute path="/setup/categories" component={Categories} module="Categories" />
@@ -74,9 +75,9 @@ function App() {
                   <ProtectedRoute path="/orders" component={OrdersIndex} module="Orders" />
                   <ProtectedRoute path="/orders/:id" component={OrderDetails} module="Orders" />
                   <ProtectedRoute path="/workflow" component={WorkflowIndex} module="Workflow" workflowTab="extrusion" />
-                  <ProtectedRoute path="/warehouse" component={WarehouseIndex} module="Warehouse" sectionOnly={true} />
-                  <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" sectionOnly={true} />
-                  <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" sectionOnly={true} />
+                  <ProtectedRoute path="/warehouse" component={WarehouseIndex} module="Warehouse" />
+                  <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" />
+                  <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" />
                   <ProtectedRoute path="/reports" component={ReportsIndex} module="Reports" />
                   <ProtectedRoute path="/reports/performance" component={PerformancePage} module="Performance Metrics" />
                   <ProtectedRoute path="/reports/production" component={ProductionReportsPage} module="Production Reports" />
@@ -104,7 +105,8 @@ function App() {
             </Route>
           </Switch>
         </PermissionsProvider>
-      </AuthProvider>
+      )}
+    </AuthProvider>
   );
 }
 

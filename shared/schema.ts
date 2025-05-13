@@ -84,7 +84,6 @@ export const users = pgTable("users", {
   phone: text("phone"),
   isActive: boolean("is_active").default(true),
   sectionId: text("section_id").references(() => sections.id), // UserSection
-  user: text("user").notNull(), // Legacy user column - keeping for compatibility
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -215,11 +214,11 @@ export const permissions = pgTable("permissions", {
   id: serial("id").primaryKey(),
   role: text("role").notNull(),
   module: text("module").notNull(),
-  can_view: boolean("can_view").default(false),
-  can_create: boolean("can_create").default(false),
-  can_edit: boolean("can_edit").default(false),
-  can_delete: boolean("can_delete").default(false),
-  is_active: boolean("is_active").default(true),
+  canView: boolean("can_view").default(false),
+  canCreate: boolean("can_create").default(false),
+  canEdit: boolean("can_edit").default(false),
+  canDelete: boolean("can_delete").default(false),
+  isActive: boolean("is_active").default(true),
 }, (table) => ({
   uniqueIndex: unique().on(table.role, table.module),
 }));

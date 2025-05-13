@@ -7,14 +7,9 @@ import { storage } from "./storage";
 import { comparePasswords, hashPassword } from "./auth-utils";
 import crypto from "crypto";
 
-// Import the necessary type
-import { User as UserSchema } from "@shared/schema";
-
-// Extend Express.User interface with our User type
 declare global {
   namespace Express {
-    // Define User interface to match our schema, inheriting from the shared schema
-    interface User extends UserSchema {}
+    interface User extends User {}
   }
 }
 
@@ -46,27 +41,21 @@ export function setupAuth(app: Express) {
           return done(null, false, { message: "Incorrect username" });
         }
         
-        console.log(`Found user ${username}, attempting password verification`);
-        console.log(`Stored password format for ${username}: ${user.password ? (user.password.includes('.') ? 'hashed.salt' : 'legacy') : 'empty'}`);
-        
         // Verify password
         const isPasswordValid = await comparePasswords(password, user.password || "");
         
         if (!isPasswordValid) {
-          console.log(`Password verification failed for ${username}`);
           return done(null, false, { message: "Incorrect password" });
         }
         
-        console.log(`Password verification succeeded for ${username}`);
         return done(null, user);
       } catch (error) {
-        console.error(`Error during authentication:`, error);
         return done(error);
       }
     }),
   );
 
-  passport.serializeUser((user: Express.User, done) => {
+  passport.serializeUser((user, done) => {
     done(null, user.id);
   });
 
@@ -76,8 +65,7 @@ export function setupAuth(app: Express) {
       if (!user) {
         return done(null, false);
       }
-      // Cast to Express.User to match the expected type
-      done(null, user as Express.User);
+      done(null, user);
     } catch (error) {
       done(error);
     }
@@ -131,7 +119,7 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     console.log("Login attempt for user:", req.body.username);
     
-    passport.authenticate("local", (err: any, user: Express.User | false, info: { message: string } | undefined) => {
+    passport.authenticate("local", (err, user, info) => {
       if (err) {
         console.error("Login error:", err);
         return next(err);
@@ -142,7 +130,7 @@ export function setupAuth(app: Express) {
         return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
       
-      req.login(user as Express.User, (err) => {
+      req.login(user, (err) => {
         if (err) {
           console.error("Login session error:", err);
           return next(err);

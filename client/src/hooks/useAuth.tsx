@@ -24,7 +24,7 @@ type RegisterFormData = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: (user: SelectUser | null) => ReactNode }) {
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
@@ -222,7 +222,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register
       }}
     >
-      {children}
+      {children(user || null)}
     </AuthContext.Provider>
   );
 }
