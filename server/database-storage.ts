@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import {
   users,
   type User,

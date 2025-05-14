@@ -2919,13 +2919,41 @@ COMMIT;
         module: z.string(),
         can_view: z.boolean().optional(),
         can_create: z.boolean().optional(),
-        can_edit: z.boolean().optional(),
+        can_edit: z.boolean().optional(), 
         can_delete: z.boolean().optional(),
-        is_active: z.boolean().optional()
+        is_active: z.boolean().optional(),
+        // Also accept camelCase versions
+        canView: z.boolean().optional(),
+        canCreate: z.boolean().optional(),
+        canEdit: z.boolean().optional(),
+        canDelete: z.boolean().optional(),
+        isActive: z.boolean().optional()
       });
 
       // Validate the request body
-      const validatedData = createSchema.parse(req.body);
+      const rawData = createSchema.parse(req.body);
+      
+      // Convert camelCase to snake_case if needed
+      const validatedData: Record<string, any> = {
+        role: rawData.role,
+        module: rawData.module
+      };
+      
+      // Handle each field, preferring snake_case if both formats are present
+      if (rawData.can_view !== undefined) validatedData.can_view = rawData.can_view;
+      else if (rawData.canView !== undefined) validatedData.can_view = rawData.canView;
+      
+      if (rawData.can_create !== undefined) validatedData.can_create = rawData.can_create;
+      else if (rawData.canCreate !== undefined) validatedData.can_create = rawData.canCreate;
+      
+      if (rawData.can_edit !== undefined) validatedData.can_edit = rawData.can_edit;
+      else if (rawData.canEdit !== undefined) validatedData.can_edit = rawData.canEdit;
+      
+      if (rawData.can_delete !== undefined) validatedData.can_delete = rawData.can_delete;
+      else if (rawData.canDelete !== undefined) validatedData.can_delete = rawData.canDelete;
+      
+      if (rawData.is_active !== undefined) validatedData.is_active = rawData.is_active;
+      else if (rawData.isActive !== undefined) validatedData.is_active = rawData.isActive;
       
       console.log("Creating permission with data:", JSON.stringify(validatedData));
       
@@ -2960,12 +2988,40 @@ COMMIT;
         can_edit: z.boolean().optional(),
         can_delete: z.boolean().optional(),
         is_active: z.boolean().optional(),
+        canView: z.boolean().optional(), // Also accept camelCase format
+        canCreate: z.boolean().optional(),
+        canEdit: z.boolean().optional(),
+        canDelete: z.boolean().optional(),
+        isActive: z.boolean().optional(),
         role: z.string().optional(),
         module: z.string().optional()
       });
 
       // Validate the request body
-      const validatedData = updateSchema.parse(req.body);
+      const rawData = updateSchema.parse(req.body);
+      
+      // Convert camelCase to snake_case if needed
+      const validatedData: Record<string, any> = {};
+      
+      // Handle each field, preferring snake_case if both formats are present
+      if (rawData.can_view !== undefined) validatedData.can_view = rawData.can_view;
+      else if (rawData.canView !== undefined) validatedData.can_view = rawData.canView;
+      
+      if (rawData.can_create !== undefined) validatedData.can_create = rawData.can_create;
+      else if (rawData.canCreate !== undefined) validatedData.can_create = rawData.canCreate;
+      
+      if (rawData.can_edit !== undefined) validatedData.can_edit = rawData.can_edit;
+      else if (rawData.canEdit !== undefined) validatedData.can_edit = rawData.canEdit;
+      
+      if (rawData.can_delete !== undefined) validatedData.can_delete = rawData.can_delete;
+      else if (rawData.canDelete !== undefined) validatedData.can_delete = rawData.canDelete;
+      
+      if (rawData.is_active !== undefined) validatedData.is_active = rawData.is_active;
+      else if (rawData.isActive !== undefined) validatedData.is_active = rawData.isActive;
+      
+      // Direct pass-through for role and module
+      if (rawData.role !== undefined) validatedData.role = rawData.role;
+      if (rawData.module !== undefined) validatedData.module = rawData.module;
       
       console.log(`Updating permission ${id} with data:`, JSON.stringify(validatedData));
       

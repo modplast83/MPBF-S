@@ -24,7 +24,7 @@ import QualityReportsPage from "@/pages/reports/quality";
 import WorkflowReportsPage from "@/pages/reports/workflow";
 import SystemIndex from "@/pages/system/index";
 import Database from "@/pages/system/database";
-import Permissions from "@/pages/system/permissions";
+import Permissions from "@/pages/system/permissions-fixed";
 import ImportExport from "@/pages/system/import-export";
 import SmsIndex from "@/pages/system/sms/index";
 import QualityIndex from "@/pages/quality/index";
