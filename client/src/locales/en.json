@@ -172,6 +172,19 @@
       "active_orders": "Active Orders",
       "production_trends": "Production Trends"
     },
+    "health": {
+      "system_health": "System Health",
+      "system_health_description": "Real-time performance metrics and health indicators",
+      "production": "Production",
+      "materials": "Materials",
+      "overall": "Overall",
+      "order_completion": "Order Completion",
+      "production_efficiency": "Production Efficiency",
+      "quality_rate": "Quality Rate",
+      "raw_material_stock": "Raw Material Stock",
+      "overall_performance": "Overall Performance",
+      "overall_performance_message": "Combined health score across all metrics"
+    },
     "setup": {
       "title": "System Setup",
       "categories": {

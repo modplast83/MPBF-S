@@ -2501,8 +2501,23 @@ COMMIT;
         });
       }
       
-      const mixItem = await storage.createMixItem(validatedData);
-      res.status(201).json(mixItem);
+      // Using a transaction to ensure both operations succeed or fail together
+      try {
+        // 1. Create the mix item
+        const mixItem = await storage.createMixItem(validatedData);
+        
+        // 2. Update the raw material quantity by subtracting the used amount
+        const newQuantity = rawMaterial.quantity! - validatedData.quantity;
+        await storage.updateRawMaterial(validatedData.rawMaterialId, {
+          quantity: newQuantity,
+          lastUpdated: new Date()
+        });
+        
+        res.status(201).json(mixItem);
+      } catch (error) {
+        console.error("Error during mix item creation:", error);
+        throw error;
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid mix item data", errors: error.errors });
@@ -2536,8 +2551,45 @@ COMMIT;
         return res.status(400).json({ message: "Quantity must be greater than zero" });
       }
       
-      const updatedMixItem = await storage.updateMixItem(id, { quantity });
-      res.json(updatedMixItem);
+      // Get the raw material
+      const rawMaterial = await storage.getRawMaterial(existingMixItem.rawMaterialId);
+      if (!rawMaterial) {
+        return res.status(404).json({ message: "Raw material not found" });
+      }
+      
+      // Calculate the quantity difference
+      const quantityDifference = quantity - existingMixItem.quantity;
+      
+      // Check if we have enough raw material for the increase
+      if (quantityDifference > 0) {
+        const availableQuantity = rawMaterial.quantity !== null ? rawMaterial.quantity : 0;
+        if (availableQuantity < quantityDifference) {
+          return res.status(400).json({ 
+            message: `Insufficient quantity of raw material ${rawMaterial.name}`,
+            available: availableQuantity,
+            requested: quantityDifference
+          });
+        }
+      }
+      
+      try {
+        // 1. Update the mix item
+        const updatedMixItem = await storage.updateMixItem(id, { quantity });
+        
+        // 2. Update the raw material quantity
+        // If quantityDifference is positive, we're using more raw material
+        // If negative, we're returning some to inventory
+        const newRawMaterialQuantity = (rawMaterial.quantity || 0) - quantityDifference;
+        await storage.updateRawMaterial(existingMixItem.rawMaterialId, {
+          quantity: newRawMaterialQuantity,
+          lastUpdated: new Date()
+        });
+        
+        res.json(updatedMixItem);
+      } catch (error) {
+        console.error("Error during mix item update:", error);
+        throw error;
+      }
     } catch (error) {
       if (error instanceof Error) {
         return res.status(400).json({ message: error.message });
@@ -2745,8 +2797,29 @@ COMMIT;
         return res.status(404).json({ message: "Mix item not found" });
       }
       
-      await storage.deleteMixItem(id);
-      res.status(204).send();
+      // Get the raw material to restore its quantity
+      const rawMaterial = await storage.getRawMaterial(mixItem.rawMaterialId);
+      if (!rawMaterial) {
+        return res.status(404).json({ message: "Raw material not found" });
+      }
+      
+      try {
+        // Using a transaction to ensure both operations succeed or fail together
+        // 1. Delete the mix item
+        await storage.deleteMixItem(id);
+        
+        // 2. Restore the raw material quantity by adding back the amount that was used
+        const newQuantity = (rawMaterial.quantity || 0) + mixItem.quantity;
+        await storage.updateRawMaterial(mixItem.rawMaterialId, {
+          quantity: newQuantity,
+          lastUpdated: new Date()
+        });
+        
+        res.status(204).send();
+      } catch (error) {
+        console.error("Error during mix item deletion:", error);
+        throw error;
+      }
     } catch (error) {
       if (error instanceof Error) {
         return res.status(400).json({ message: error.message });

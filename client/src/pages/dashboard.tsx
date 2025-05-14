@@ -4,7 +4,8 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { ProductionChart } from "@/components/dashboard/production-chart";
 import { RecentOrders } from "@/components/dashboard/recent-orders";
 import { ActiveOrdersTable } from "@/components/dashboard/active-orders-table";
-import { Order, Roll, RawMaterial } from "@shared/schema";
+import { PerformanceHealth } from "@/components/dashboard/performance-health";
+import { Order, Roll, RawMaterial, JobOrder } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -19,6 +20,10 @@ export default function Dashboard() {
   // Fetch data for dashboard statistics
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: [API_ENDPOINTS.ORDERS],
+  });
+
+  const { data: jobOrders, isLoading: jobOrdersLoading } = useQuery<JobOrder[]>({
+    queryKey: [API_ENDPOINTS.JOB_ORDERS],
   });
 
   const { data: rolls, isLoading: rollsLoading } = useQuery<Roll[]>({
@@ -118,18 +123,28 @@ export default function Dashboard() {
         />
       </ResponsiveGrid>
 
-      {/* Chart and Recent Orders - Responsive layout */}
+      {/* Chart, Health Dashboard and Recent Orders - Responsive layout */}
       <div className={`grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 ${isRTL ? 'rtl' : ''}`}>
         {/* Production Chart */}
-        <div className={`bg-white rounded-lg shadow ${responsive.padding(3, 5)} ${!isMobile ? 'col-span-2' : ''} ${isRTL ? 'rtl' : ''} order-2 lg:order-1`}>
+        <div className={`bg-white rounded-lg shadow ${responsive.padding(3, 5)} ${!isMobile ? 'lg:col-span-2' : ''} ${isRTL ? 'rtl' : ''} order-2 lg:order-1`}>
           <h2 className={responsive.text("base", "lg", "medium") + " mb-3 md:mb-4"}>
             {t("dashboard.production_trends")}
           </h2>
           <ProductionChart className={`${isRTL ? 'rtl' : ''}`} />
         </div>
 
+        {/* Performance Health Dashboard */}
+        <div className={`order-3 lg:order-2 ${!isMobile ? 'lg:row-span-2' : ''}`}>
+          <PerformanceHealth
+            orders={orders || []}
+            jobOrders={jobOrders || []}
+            rolls={rolls || []}
+            rawMaterials={rawMaterials || []}
+          />
+        </div>
+
         {/* Recent Orders - Display first on mobile */}
-        <div className="order-1 lg:order-2">
+        <div className="order-1 lg:order-3">
           <RecentOrders />
         </div>
       </div>

@@ -157,6 +157,19 @@
       "active_orders": "الطلبات النشطة",
       "production_trends": "اتجاهات الإنتاج"
     },
+    "health": {
+      "system_health": "صحة النظام",
+      "system_health_description": "مؤشرات صحة وأداء النظام بالوقت الحقيقي",
+      "production": "الإنتاج",
+      "materials": "المواد",
+      "overall": "الإجمالي",
+      "order_completion": "إنجاز الطلبات",
+      "production_efficiency": "كفاءة الإنتاج",
+      "quality_rate": "معدل الجودة",
+      "raw_material_stock": "مخزون المواد الخام",
+      "overall_performance": "الأداء العام",
+      "overall_performance_message": "الدرجة الصحية المجمعة عبر جميع المؤشرات"
+    },
     "setup": {
       "title": "إعداد النظام",
       "categories": {

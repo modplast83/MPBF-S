@@ -559,10 +559,85 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteOrder(id: number): Promise<boolean> {
-    await db
-      .delete(orders)
-      .where(eq(orders.id, id));
-    return true;
+    try {
+      // Using a transaction to ensure all deletes succeed or fail together
+      await db.transaction(async (tx) => {
+        // 1. Get all job orders related to this order
+        const relatedJobOrders = await tx
+          .select()
+          .from(jobOrders)
+          .where(eq(jobOrders.orderId, id));
+        
+        // 2. For each job order, delete related entities
+        for (const jobOrder of relatedJobOrders) {
+          // 2.1 Get and delete rolls related to this job order
+          const relatedRolls = await tx
+            .select()
+            .from(rolls)
+            .where(eq(rolls.jobOrderId, jobOrder.id));
+          
+          for (const roll of relatedRolls) {
+            // 2.1.1 Delete quality checks related to this roll
+            const rollQualityChecks = await tx
+              .select()
+              .from(qualityChecks)
+              .where(eq(qualityChecks.rollId, roll.id));
+            
+            for (const check of rollQualityChecks) {
+              // 2.1.1.1 Delete corrective actions related to this quality check
+              await tx
+                .delete(correctiveActions)
+                .where(eq(correctiveActions.qualityCheckId, check.id));
+            }
+            
+            // 2.1.1.2 Delete the quality checks
+            await tx
+              .delete(qualityChecks)
+              .where(eq(qualityChecks.rollId, roll.id));
+          }
+          
+          // 2.1.2 Delete the rolls
+          await tx
+            .delete(rolls)
+            .where(eq(rolls.jobOrderId, jobOrder.id));
+          
+          // 2.2 Delete quality checks related directly to the job order (not through rolls)
+          await tx
+            .delete(qualityChecks)
+            .where(eq(qualityChecks.jobOrderId, jobOrder.id));
+          
+          // 2.3 Delete SMS messages related to the job order
+          await tx
+            .delete(smsMessages)
+            .where(eq(smsMessages.jobOrderId, jobOrder.id));
+            
+          // 2.4 Delete final products related to the job order
+          await tx
+            .delete(finalProducts)
+            .where(eq(finalProducts.jobOrderId, jobOrder.id));
+        }
+        
+        // 3. Delete all job orders for this order
+        await tx
+          .delete(jobOrders)
+          .where(eq(jobOrders.orderId, id));
+        
+        // 4. Delete SMS messages related directly to the order
+        await tx
+          .delete(smsMessages)
+          .where(eq(smsMessages.orderId, id));
+        
+        // 5. Finally delete the order itself
+        await tx
+          .delete(orders)
+          .where(eq(orders.id, id));
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      throw error;
+    }
   }
 
   // Job Orders methods
@@ -700,6 +775,13 @@ export class DatabaseStorage implements IStorage {
   // Final Products methods
   async getFinalProducts(): Promise<FinalProduct[]> {
     return await db.select().from(finalProducts);
+  }
+  
+  async getFinalProductsByJobOrder(jobOrderId: number): Promise<FinalProduct[]> {
+    return await db
+      .select()
+      .from(finalProducts)
+      .where(eq(finalProducts.jobOrderId, jobOrderId));
   }
 
   async getFinalProduct(id: number): Promise<FinalProduct | undefined> {
@@ -962,10 +1044,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteMixMaterial(id: number): Promise<boolean> {
-    await db
-      .delete(mixMaterials)
-      .where(eq(mixMaterials.id, id));
-    return true;
+    try {
+      // Using a transaction to ensure all deletes succeed or fail together
+      await db.transaction(async (tx) => {
+        // 1. Delete all mix items associated with this mix material
+        await tx
+          .delete(mixItems)
+          .where(eq(mixItems.mixId, id));
+        
+        // 2. Delete all mix machine associations
+        await tx
+          .delete(mixMachines)
+          .where(eq(mixMachines.mixId, id));
+        
+        // 3. Finally delete the mix material itself
+        await tx
+          .delete(mixMaterials)
+          .where(eq(mixMaterials.id, id));
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting mix material:", error);
+      throw error;
+    }
   }
 
   // Mix Machines methods

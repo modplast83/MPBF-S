@@ -381,7 +381,7 @@ export type MixMachine = typeof mixMachines.$inferSelect;
 // Mix Items table
 export const mixItems = pgTable("mix_items", {
   id: serial("id").primaryKey(),
-  mixId: integer("mix_id").notNull().references(() => mixMaterials.id),
+  mixId: integer("mix_id").notNull().references(() => mixMaterials.id, { onDelete: "cascade" }),
   rawMaterialId: integer("raw_material_id").notNull().references(() => rawMaterials.id),
   quantity: doublePrecision("quantity").notNull(),
   percentage: doublePrecision("percentage").default(0),

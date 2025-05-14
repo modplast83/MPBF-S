@@ -155,6 +155,7 @@ export interface IStorage {
   
   // Final Products
   getFinalProducts(): Promise<FinalProduct[]>;
+  getFinalProductsByJobOrder(jobOrderId: number): Promise<FinalProduct[]>;
   getFinalProduct(id: number): Promise<FinalProduct | undefined>;
   createFinalProduct(finalProduct: InsertFinalProduct): Promise<FinalProduct>;
   updateFinalProduct(id: number, finalProduct: Partial<FinalProduct>): Promise<FinalProduct | undefined>;
@@ -244,6 +245,9 @@ export class MemStorage implements IStorage {
   private mixMaterials: Map<number, MixMaterial>;
   private mixMachines: Map<number, MixMachine>;
   private mixItems: Map<number, MixItem>;
+  private qualityChecks: Map<number, QualityCheck>;
+  private correctiveActions: Map<number, CorrectiveAction>;
+  private permissions: Map<number, Permission>;
   
   private currentCustomerProductId: number;
   private currentOrderId: number;
@@ -254,6 +258,9 @@ export class MemStorage implements IStorage {
   private currentMixMaterialId: number;
   private currentMixMachineId: number;
   private currentMixItemId: number;
+  private currentQualityCheckId: number;
+  private currentCorrectiveActionId: number;
+  private currentPermissionId: number;
   
   sessionStore: session.Store;
 
@@ -281,6 +288,9 @@ export class MemStorage implements IStorage {
     this.mixMaterials = new Map();
     this.mixMachines = new Map();
     this.mixItems = new Map();
+    this.qualityChecks = new Map();
+    this.correctiveActions = new Map();
+    this.permissions = new Map();
     
     this.currentCustomerProductId = 1;
     this.currentOrderId = 1;
@@ -291,6 +301,9 @@ export class MemStorage implements IStorage {
     this.currentMixMaterialId = 1;
     this.currentMixMachineId = 1;
     this.currentMixItemId = 1;
+    this.currentQualityCheckId = 1;
+    this.currentCorrectiveActionId = 1;
+    this.currentPermissionId = 1;
     
     // Initialize with sample data
     this.initializeData();
@@ -664,7 +677,73 @@ export class MemStorage implements IStorage {
   }
 
   async deleteOrder(id: number): Promise<boolean> {
-    return this.orders.delete(id);
+    try {
+      // 1. Get all job orders related to this order
+      const relatedJobOrders = await this.getJobOrdersByOrder(id);
+      
+      // 2. For each job order, delete related rolls, quality checks, etc.
+      for (const jobOrder of relatedJobOrders) {
+        // 2.1 Get and delete rolls related to this job order
+        const rolls = await this.getRollsByJobOrder(jobOrder.id);
+        for (const roll of rolls) {
+          // 2.1.1 Get and delete quality checks related to this roll
+          const qualityChecks = await this.getQualityChecksByRoll(roll.id);
+          for (const check of qualityChecks) {
+            // 2.1.1.1 Delete corrective actions related to this quality check
+            const correctiveActions = await this.getCorrectiveActionsByQualityCheck(check.id);
+            for (const action of correctiveActions) {
+              await this.deleteCorrectiveAction(action.id);
+            }
+            
+            // 2.1.1.2 Delete the quality check
+            await this.deleteQualityCheck(check.id);
+          }
+          
+          // 2.1.2 Delete the roll
+          await this.deleteRoll(roll.id);
+        }
+        
+        // 2.2 Delete quality checks related directly to the job order (not through rolls)
+        const jobOrderQualityChecks = await this.getQualityChecksByJobOrder(jobOrder.id);
+        for (const check of jobOrderQualityChecks) {
+          // 2.2.1 Delete corrective actions related to this quality check
+          const correctiveActions = await this.getCorrectiveActionsByQualityCheck(check.id);
+          for (const action of correctiveActions) {
+            await this.deleteCorrectiveAction(action.id);
+          }
+          
+          // 2.2.2 Delete the quality check
+          await this.deleteQualityCheck(check.id);
+        }
+        
+        // 2.3 Delete SMS messages related to the job order
+        const jobOrderSmsMessages = await this.getSmsMessagesByJobOrder(jobOrder.id);
+        for (const message of jobOrderSmsMessages) {
+          await this.deleteSmsMessage(message.id);
+        }
+        
+        // 2.4 Delete final products related to the job order
+        const finalProducts = await this.getFinalProductsByJobOrder(jobOrder.id);
+        for (const product of finalProducts) {
+          await this.deleteFinalProduct(product.id);
+        }
+        
+        // 2.5 Delete the job order
+        await this.deleteJobOrder(jobOrder.id);
+      }
+      
+      // 3. Delete SMS messages related directly to the order
+      const orderSmsMessages = await this.getSmsMessagesByOrder(id);
+      for (const message of orderSmsMessages) {
+        await this.deleteSmsMessage(message.id);
+      }
+      
+      // 4. Finally delete the order itself
+      return this.orders.delete(id);
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      throw error;
+    }
   }
 
   // Job Orders
@@ -799,6 +878,10 @@ export class MemStorage implements IStorage {
   // Final Products
   async getFinalProducts(): Promise<FinalProduct[]> {
     return Array.from(this.finalProducts.values());
+  }
+  
+  async getFinalProductsByJobOrder(jobOrderId: number): Promise<FinalProduct[]> {
+    return Array.from(this.finalProducts.values()).filter(product => product.jobOrderId === jobOrderId);
   }
 
   async getFinalProduct(id: number): Promise<FinalProduct | undefined> {
