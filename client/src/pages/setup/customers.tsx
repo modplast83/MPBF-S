@@ -68,10 +68,14 @@ export default function Customers() {
     setEditCustomer(null);
   };
 
-  // Helper function to get user name from userId
+  // Helper function to get user name from userId - using firstName instead of username
   const getUserName = (userId: string | null) => {
     if (!userId) return "None";
-    return users?.find(u => u.id === userId)?.username || userId || "Unknown";
+    const user = users?.find(u => u.id === userId);
+    if (user) {
+      return user.firstName || user.username || userId;
+    }
+    return userId || "Unknown";
   };
 
   const columns = [

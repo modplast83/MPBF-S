@@ -102,7 +102,13 @@ export default function Parameters() {
   // Fetch parameters
   const { data: parameters = [], isLoading } = useQuery<any[]>({
     queryFn: async () => {
-      const response = await fetch(API_ENDPOINTS.PLATE_PRICING_PARAMETERS);
+      const response = await fetch(API_ENDPOINTS.PLATE_PRICING_PARAMETERS, {
+        credentials: "include",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache"
+        }
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch parameters");
       }
@@ -119,7 +125,10 @@ export default function Parameters() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache"
         },
+        credentials: "include", // Add credentials for session cookies
         body: JSON.stringify(data),
       }).then(res => {
         if (!res.ok) throw new Error("Failed to save parameter");
@@ -152,12 +161,14 @@ export default function Parameters() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // Add credentials for session cookies
         body: JSON.stringify({
           name: data.name,
           value: data.value,
           type: data.type,
           description: data.description,
           isActive: data.isActive,
+          // Don't include lastUpdated as it will be handled on the server
         }),
       }).then(res => {
         if (!res.ok) throw new Error("Failed to update parameter");
@@ -189,6 +200,11 @@ export default function Parameters() {
     mutationFn: async (id: number) => {
       return fetch(`${API_ENDPOINTS.PLATE_PRICING_PARAMETERS}/${id}`, {
         method: "DELETE",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache"
+        },
+        credentials: "include", // Add credentials for session cookies
       }).then(res => {
         if (!res.ok) throw new Error("Failed to delete parameter");
         return res;
@@ -214,9 +230,13 @@ export default function Parameters() {
 
   // Form submission handler
   const onSubmit = (values: ParameterFormValues) => {
-    // Add required fields not in the form
+    // Add required fields not in the form but don't include lastUpdated
+    // as it's defaulted on the server
     const formattedValues = {
-      ...values,
+      name: values.name,
+      value: values.value,
+      type: values.type,
+      description: values.description,
       isActive: true // Add isActive field which is required by the schema
     };
     

@@ -2501,7 +2501,7 @@ COMMIT;
         });
       }
       
-      // Using a transaction to ensure both operations succeed or fail together
+      // Using a transaction to ensure all operations succeed or fail together
       try {
         // 1. Create the mix item
         const mixItem = await storage.createMixItem(validatedData);
@@ -2513,7 +2513,25 @@ COMMIT;
           lastUpdated: new Date()
         });
         
-        res.status(201).json(mixItem);
+        // 3. Get all mix items to recalculate percentages
+        const allMixItems = await storage.getMixItemsByMix(validatedData.mixId);
+        
+        // 4. Calculate total weight
+        const totalWeight = allMixItems.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // 5. Update all items with correct percentages
+        for (const item of allMixItems) {
+          const percentage = (item.quantity / totalWeight) * 100;
+          await storage.updateMixItem(item.id, { percentage });
+        }
+        
+        // 6. Update the mix total quantity
+        await storage.updateMixMaterial(validatedData.mixId, { totalQuantity: totalWeight });
+        
+        // 7. Get the updated item with correct percentage
+        const updatedMixItem = await storage.getMixItem(mixItem.id);
+        
+        res.status(201).json(updatedMixItem);
       } catch (error) {
         console.error("Error during mix item creation:", error);
         throw error;
@@ -2804,7 +2822,10 @@ COMMIT;
       }
       
       try {
-        // Using a transaction to ensure both operations succeed or fail together
+        // Using a transaction to ensure all operations succeed or fail together
+        // Save the mixId before deleting the item
+        const mixId = mixItem.mixId;
+        
         // 1. Delete the mix item
         await storage.deleteMixItem(id);
         
@@ -2814,6 +2835,21 @@ COMMIT;
           quantity: newQuantity,
           lastUpdated: new Date()
         });
+        
+        // 3. Get remaining mix items to recalculate percentages
+        const remainingItems = await storage.getMixItemsByMix(mixId);
+        
+        // 4. Calculate new total weight
+        const totalWeight = remainingItems.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // 5. Update all remaining items with correct percentages
+        for (const item of remainingItems) {
+          const percentage = totalWeight > 0 ? (item.quantity / totalWeight) * 100 : 0;
+          await storage.updateMixItem(item.id, { percentage });
+        }
+        
+        // 6. Update the mix total quantity
+        await storage.updateMixMaterial(mixId, { totalQuantity: totalWeight });
         
         res.status(204).send();
       } catch (error) {
