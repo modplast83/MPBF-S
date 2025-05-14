@@ -79,7 +79,7 @@ import {
   type AbaMaterialConfig,
   type InsertAbaMaterialConfig
 } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, and, or, sql, ne, desc, asc, isNull } from "drizzle-orm";
 import { IStorage } from "./storage";
 import connectPg from "connect-pg-simple";
@@ -210,20 +210,136 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPermission(permission: InsertPermission): Promise<Permission> {
-    const [createdPermission] = await db
-      .insert(permissions)
-      .values(permission)
-      .returning();
-    return createdPermission;
+    try {
+      // Extract field values with appropriate defaults
+      const role = permission.role;
+      const module = permission.module;
+      const can_view = permission.can_view === undefined ? true : permission.can_view;
+      const can_create = permission.can_create === undefined ? false : permission.can_create;
+      const can_edit = permission.can_edit === undefined ? false : permission.can_edit;
+      const can_delete = permission.can_delete === undefined ? false : permission.can_delete;
+      const is_active = permission.is_active === undefined ? true : permission.is_active;
+      
+      // Build a direct SQL query for insertion using string interpolation (not parameters)
+      // We're not specifying ID so the sequence is used
+      const query = `
+        INSERT INTO permissions 
+        (role, module, can_view, can_create, can_edit, can_delete, is_active) 
+        VALUES (
+          '${role}',
+          '${module}',
+          ${can_view ? 'TRUE' : 'FALSE'},
+          ${can_create ? 'TRUE' : 'FALSE'},
+          ${can_edit ? 'TRUE' : 'FALSE'},
+          ${can_delete ? 'TRUE' : 'FALSE'},
+          ${is_active ? 'TRUE' : 'FALSE'}
+        )
+        RETURNING *;
+      `;
+      
+      console.log("Executing direct SQL insert query:", query);
+      
+      // Execute the raw query using db.execute
+      const result = await db.execute(query);
+      
+      if (!result.rows.length) {
+        throw new Error("Failed to create permission - no row returned");
+      }
+      
+      const row = result.rows[0];
+      return {
+        id: Number(row.id),
+        role: row.role,
+        module: row.module,
+        can_view: Boolean(row.can_view),
+        can_create: Boolean(row.can_create),
+        can_edit: Boolean(row.can_edit),
+        can_delete: Boolean(row.can_delete),
+        is_active: Boolean(row.is_active)
+      };
+    } catch (error) {
+      console.error('Error in createPermission:', error);
+      throw error;
+    }
   }
 
   async updatePermission(id: number, permissionData: Partial<Permission>): Promise<Permission | undefined> {
-    const [updatedPermission] = await db
-      .update(permissions)
-      .set(permissionData)
-      .where(eq(permissions.id, id))
-      .returning();
-    return updatedPermission;
+    try {
+      // Get existing permission first to check if it exists
+      const existingPermission = await this.getPermission(id);
+      if (!existingPermission) {
+        return undefined;
+      }
+      
+      // Build SQL SET clauses dynamically
+      const setClauses = [];
+      
+      if (permissionData.can_view !== undefined) {
+        setClauses.push(`can_view = ${permissionData.can_view ? 'TRUE' : 'FALSE'}`);
+      }
+      
+      if (permissionData.can_create !== undefined) {
+        setClauses.push(`can_create = ${permissionData.can_create ? 'TRUE' : 'FALSE'}`);
+      }
+      
+      if (permissionData.can_edit !== undefined) {
+        setClauses.push(`can_edit = ${permissionData.can_edit ? 'TRUE' : 'FALSE'}`);
+      }
+      
+      if (permissionData.can_delete !== undefined) {
+        setClauses.push(`can_delete = ${permissionData.can_delete ? 'TRUE' : 'FALSE'}`);
+      }
+      
+      if (permissionData.is_active !== undefined) {
+        setClauses.push(`is_active = ${permissionData.is_active ? 'TRUE' : 'FALSE'}`);
+      }
+      
+      if (permissionData.role !== undefined) {
+        setClauses.push(`role = '${permissionData.role}'`);
+      }
+      
+      if (permissionData.module !== undefined) {
+        setClauses.push(`module = '${permissionData.module}'`);
+      }
+      
+      // Only proceed if we have fields to update
+      if (setClauses.length === 0) {
+        console.log("No fields to update for permission", id);
+        return existingPermission; // Return existing if no updates
+      }
+      
+      // Build full SQL query with returning
+      const query = `
+        UPDATE permissions 
+        SET ${setClauses.join(', ')}
+        WHERE id = ${id}
+        RETURNING *;
+      `;
+      
+      console.log("Executing direct SQL query:", query);
+      
+      // Execute the raw query using db.execute
+      const result = await db.execute(query);
+      
+      if (!result.rows.length) {
+        return undefined;
+      }
+      
+      const row = result.rows[0];
+      return {
+        id: Number(row.id),
+        role: row.role,
+        module: row.module,
+        can_view: Boolean(row.can_view),
+        can_create: Boolean(row.can_create),
+        can_edit: Boolean(row.can_edit),
+        can_delete: Boolean(row.can_delete),
+        is_active: Boolean(row.is_active)
+      };
+    } catch (error) {
+      console.error('Error in updatePermission:', error);
+      throw error;
+    }
   }
 
   async deletePermission(id: number): Promise<boolean> {

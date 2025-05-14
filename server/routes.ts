@@ -2958,8 +2958,26 @@ COMMIT;
       console.log("Creating permission with data:", JSON.stringify(validatedData));
       
       // Use the validated data to create the permission
-      const permission = await storage.createPermission(validatedData);
-      res.status(201).json(permission);
+      try {
+        const permission = await storage.createPermission(validatedData);
+        
+        // Transform to camelCase for client compatibility
+        const transformedPermission = {
+          id: permission.id,
+          role: permission.role,
+          module: permission.module,
+          canView: permission.can_view,
+          canCreate: permission.can_create,
+          canEdit: permission.can_edit,
+          canDelete: permission.can_delete,
+          isActive: permission.is_active
+        };
+        
+        res.status(201).json(transformedPermission);
+      } catch (createError) {
+        console.error("SQL create error:", createError);
+        return res.status(500).json({ message: "Database error creating permission", error: String(createError) });
+      }
     } catch (error) {
       console.error("Permission creation error:", error);
       if (error instanceof z.ZodError) {
@@ -3036,13 +3054,30 @@ COMMIT;
       }
       
       // Send the validated data to storage
-      const permission = await storage.updatePermission(id, validatedData);
-      
-      if (!permission) {
-        return res.status(404).json({ message: "Failed to update permission" });
+      try {
+        const permission = await storage.updatePermission(id, validatedData);
+        
+        if (!permission) {
+          return res.status(404).json({ message: "Failed to update permission" });
+        }
+        
+        // Transform to camelCase for client compatibility
+        const transformedPermission = {
+          id: permission.id,
+          role: permission.role,
+          module: permission.module,
+          canView: permission.can_view,
+          canCreate: permission.can_create,
+          canEdit: permission.can_edit,
+          canDelete: permission.can_delete,
+          isActive: permission.is_active
+        };
+        
+        res.json(transformedPermission);
+      } catch (updateError) {
+        console.error("SQL update error:", updateError);
+        return res.status(500).json({ message: "Database error updating permission", error: String(updateError) });
       }
-      
-      res.json(permission);
     } catch (error) {
       console.error("Permission update error:", error);
       if (error instanceof z.ZodError) {
