@@ -134,6 +134,7 @@ export const SIDEBAR_ITEMS = [
         subItems: [
           { title: "Bag Weight Calculator", path: "/tools/bag-weight" },
           { title: "Ink Consumption", path: "/tools/ink-consumption" },
+          { title: "Mix Colors", path: "/tools/mix-colors" },
           { title: "Utility Tools", path: "/tools/utilities" },
           { title: "Cost", path: "/tools/cost-calculator" },
           { title: "Cliches", path: "/cliches" },
