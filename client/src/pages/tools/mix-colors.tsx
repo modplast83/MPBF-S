@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -29,14 +30,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 const colorMixSchema = z.object({
   colorModel: z.enum(["cmyk", "rgb"]),
   // CMYK fields
-  cyan: z.string().transform(val => parseFloat(val)),
-  magenta: z.string().transform(val => parseFloat(val)),
-  yellow: z.string().transform(val => parseFloat(val)),
-  black: z.string().transform(val => parseFloat(val)),
+  cyan: z.union([z.string(), z.number()]).transform(val => parseFloat(String(val))),
+  magenta: z.union([z.string(), z.number()]).transform(val => parseFloat(String(val))),
+  yellow: z.union([z.string(), z.number()]).transform(val => parseFloat(String(val))),
+  black: z.union([z.string(), z.number()]).transform(val => parseFloat(String(val))),
   // RGB fields
-  red: z.string().transform(val => parseInt(val)),
-  green: z.string().transform(val => parseInt(val)),
-  blue: z.string().transform(val => parseInt(val)),
+  red: z.union([z.string(), z.number()]).transform(val => parseInt(String(val))),
+  green: z.union([z.string(), z.number()]).transform(val => parseInt(String(val))),
+  blue: z.union([z.string(), z.number()]).transform(val => parseInt(String(val))),
   // Target color (hex)
   targetColor: z.string().optional(),
 });
@@ -68,6 +69,29 @@ const standardInks = {
     { name: "Blue", colorCode: "#0000FF", rgb: [0, 0, 255] },
     { name: "Black", colorCode: "#000000", rgb: [0, 0, 0] },
     { name: "White", colorCode: "#FFFFFF", rgb: [255, 255, 255] },
+  ],
+  // Popular Pantone colors with CMYK approximations
+  pantone: [
+    { name: "Pantone 185 C", colorCode: "#E4002B", cmyk: [0, 100, 81, 0] },
+    { name: "Pantone 286 C", colorCode: "#0033A0", cmyk: [100, 75, 0, 0] },
+    { name: "Pantone 368 C", colorCode: "#7AC142", cmyk: [59, 0, 100, 0] },
+    { name: "Pantone 116 C", colorCode: "#FFCD00", cmyk: [0, 14, 100, 0] },
+    { name: "Pantone 2728 C", colorCode: "#0047BB", cmyk: [96, 69, 0, 0] },
+    { name: "Pantone 7689 C", colorCode: "#2D9CDB", cmyk: [69, 24, 0, 0] },
+    { name: "Pantone 7408 C", colorCode: "#F9BE00", cmyk: [0, 29, 100, 0] },
+    { name: "Pantone 485 C", colorCode: "#DA291C", cmyk: [0, 95, 100, 0] },
+    { name: "Pantone 3405 C", colorCode: "#00B140", cmyk: [87, 0, 86, 0] },
+    { name: "Pantone 7672 C", colorCode: "#6B5CA5", cmyk: [58, 66, 0, 0] },
+    { name: "Pantone 7579 C", colorCode: "#F26522", cmyk: [0, 69, 100, 0] },
+    { name: "Pantone 2718 C", colorCode: "#4066CF", cmyk: [76, 53, 0, 0] },
+    { name: "Pantone 166 C", colorCode: "#E35205", cmyk: [0, 76, 100, 0] },
+    { name: "Pantone 279 C", colorCode: "#4698CB", cmyk: [68, 34, 0, 0] },
+    { name: "Pantone 376 C", colorCode: "#84BD00", cmyk: [50, 0, 100, 0] },
+    { name: "Pantone 7547 C", colorCode: "#1A1F2A", cmyk: [50, 30, 0, 95] },
+    { name: "Pantone 7417 C", colorCode: "#F15B40", cmyk: [0, 77, 78, 0] },
+    { name: "Pantone 7473 C", colorCode: "#41B6AC", cmyk: [71, 0, 48, 0] },
+    { name: "Pantone 7499 C", colorCode: "#F0E3C5", cmyk: [5, 5, 25, 0] },
+    { name: "Pantone 212 C", colorCode: "#EF6AB5", cmyk: [0, 69, 0, 0] },
   ]
 };
 
@@ -321,12 +345,15 @@ async function analyzeImage(file: File): Promise<string[]> {
 }
 
 export default function MixColorsCalculator() {
+  const { t } = useTranslation();
   const [results, setResults] = useState<ColorMix[] | null>(null);
   const [extractedColors, setExtractedColors] = useState<string[]>([]);
   const [selectedExtractedColor, setSelectedExtractedColor] = useState<string | null>(null);
   const [targetColorPreview, setTargetColorPreview] = useState("#5A7D9A");
   const [mixedColorPreview, setMixedColorPreview] = useState("#5A7D9A");
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [filteredPantoneColors, setFilteredPantoneColors] = useState(standardInks.pantone);
+  const [selectedPantoneColor, setSelectedPantoneColor] = useState<typeof standardInks.pantone[0] | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Initialize form with default values
@@ -334,13 +361,13 @@ export default function MixColorsCalculator() {
     resolver: zodResolver(colorMixSchema),
     defaultValues: {
       colorModel: "cmyk",
-      cyan: "50",
-      magenta: "20",
-      yellow: "0",
-      black: "40",
-      red: "90",
-      green: "125",
-      blue: "154",
+      cyan: 50,
+      magenta: 20,
+      yellow: 0,
+      black: 40,
+      red: 90,
+      green: 125,
+      blue: 154,
       targetColor: "#5A7D9A",
     },
   });
@@ -413,34 +440,42 @@ export default function MixColorsCalculator() {
     form.setValue('targetColor', color);
     setTargetColorPreview(color);
   };
+  
+  // Handle Pantone color selection
+  const handlePantoneColorSelect = (color: typeof standardInks.pantone[0]) => {
+    setSelectedPantoneColor(color);
+    form.setValue('targetColor', color.colorCode);
+    setTargetColorPreview(color.colorCode);
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
       <PageHeader
-        title="Mix Colors Calculator"
-        description="Calculate color formulas for printing special colors"
+        title={t("mix_colors.title")}
+        description={t("mix_colors.description")}
         icon="palette"
       />
 
       <Link href="/tools" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary">
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Tools
+        {t("tools.back_to_tools")}
       </Link>
       
       <Tabs defaultValue="calculator">
         <TabsList className="mb-4">
-          <TabsTrigger value="calculator">Calculator</TabsTrigger>
-          <TabsTrigger value="upload">Upload Design</TabsTrigger>
-          <TabsTrigger value="guide">Usage Guide</TabsTrigger>
+          <TabsTrigger value="calculator">{t("mix_colors.calculator")}</TabsTrigger>
+          <TabsTrigger value="upload">{t("mix_colors.upload_design")}</TabsTrigger>
+          <TabsTrigger value="pantone">{t("mix_colors.pantone")}</TabsTrigger>
+          <TabsTrigger value="guide">{t("mix_colors.usage_guide")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="calculator">
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader className="pb-4">
-                <CardTitle>Color Specifications</CardTitle>
+                <CardTitle>{t("mix_colors.color_specifications")}</CardTitle>
                 <CardDescription>
-                  Enter color values or select a target color
+                  {t("mix_colors.color_spec_description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -451,19 +486,19 @@ export default function MixColorsCalculator() {
                       name="colorModel"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Color Model</FormLabel>
+                          <FormLabel>{t("mix_colors.color_model")}</FormLabel>
                           <Select 
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select color model" />
+                                <SelectValue placeholder={t("mix_colors.color_model")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="cmyk">CMYK (Printing)</SelectItem>
-                              <SelectItem value="rgb">RGB (Digital)</SelectItem>
+                              <SelectItem value="cmyk">{t("mix_colors.cmyk")}</SelectItem>
+                              <SelectItem value="rgb">{t("mix_colors.rgb")}</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -683,7 +718,7 @@ export default function MixColorsCalculator() {
                       
                       <Button type="submit" className="w-full mt-4">
                         <Droplets className="mr-2 h-4 w-4" />
-                        Calculate Color Mix
+                        {t("mix_colors.calculate")}
                       </Button>
                     </div>
                   </form>
@@ -757,6 +792,144 @@ export default function MixColorsCalculator() {
                       <p className="text-lg font-medium">No Color Mix Calculated</p>
                       <p className="text-sm">Enter your color specifications and click Calculate</p>
                     </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="pantone">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("mix_colors.pantone_title")}</CardTitle>
+                <CardDescription>
+                  {t("mix_colors.pantone_description")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="pantone-search">{t("mix_colors.pantone_search")}</Label>
+                    <Input 
+                      id="pantone-search" 
+                      type="text" 
+                      placeholder={t("mix_colors.select_pantone")}
+                      onChange={(e) => {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const filteredColors = standardInks.pantone.filter(color => 
+                          color.name.toLowerCase().includes(searchTerm)
+                        );
+                        setFilteredPantoneColors(searchTerm ? filteredColors : standardInks.pantone);
+                      }} 
+                    />
+                  </div>
+                  
+                  <div className="h-72 overflow-y-auto border rounded-md p-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      {filteredPantoneColors.map((color, index) => (
+                        <div 
+                          key={index}
+                          className={`flex items-center p-2 rounded cursor-pointer hover:bg-muted transition-colors ${
+                            selectedPantoneColor?.name === color.name ? 'bg-primary/10 border border-primary/30' : ''
+                          }`}
+                          onClick={() => handlePantoneColorSelect(color)}
+                        >
+                          <div 
+                            className="w-6 h-6 rounded mr-2 border" 
+                            style={{ backgroundColor: color.colorCode }}
+                          ></div>
+                          <span className="text-sm truncate">{color.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {selectedPantoneColor && (
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">{t("mix_colors.pantone_selected")}</h3>
+                      <div className="flex items-center mb-4">
+                        <div 
+                          className="w-8 h-8 rounded mr-3 border" 
+                          style={{ backgroundColor: selectedPantoneColor.colorCode }}
+                        ></div>
+                        <span className="font-medium">{selectedPantoneColor.name}</span>
+                      </div>
+                      
+                      <Button 
+                        onClick={() => {
+                          // Update form values with the Pantone color's CMYK values
+                          form.setValue('colorModel', 'cmyk');
+                          form.setValue('cyan', selectedPantoneColor.cmyk[0]);
+                          form.setValue('magenta', selectedPantoneColor.cmyk[1]); 
+                          form.setValue('yellow', selectedPantoneColor.cmyk[2]);
+                          form.setValue('black', selectedPantoneColor.cmyk[3]);
+                          form.setValue('targetColor', selectedPantoneColor.colorCode);
+                          
+                          // Calculate color mix
+                          calculateColorMix(form.getValues());
+                        }}
+                        className="w-full"
+                      >
+                        <Droplets className="mr-2 h-4 w-4" />
+                        {t("mix_colors.calculate")}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("mix_colors.color_mix_results")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {results && results.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-1">
+                        <Label>{t("mix_colors.pantone_formula")}</Label>
+                        <div className="mt-1 p-2 rounded-md bg-muted">
+                          <p className="font-mono text-sm">{selectedPantoneColor?.name}</p>
+                          <div className="flex space-x-2 mt-1">
+                            <div className="flex-1 h-8 rounded" style={{backgroundColor: selectedPantoneColor?.colorCode || '#FFF'}}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border rounded-md overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-muted">
+                            <th className="py-2 px-3 text-left">{t("mix_colors.ink")}</th>
+                            <th className="py-2 px-3 text-right">{t("mix_colors.percentage")}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {results.map((result, index) => (
+                            <tr key={index} className="border-t">
+                              <td className="py-2 px-3 flex items-center">
+                                <div 
+                                  className="w-4 h-4 rounded mr-2" 
+                                  style={{ backgroundColor: result.colorCode }}
+                                ></div>
+                                {result.name}
+                              </td>
+                              <td className="py-2 px-3 text-right font-medium">
+                                {result.percentage.toFixed(1)}%
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>{t("mix_colors.no_results")}</p>
                   </div>
                 )}
               </CardContent>
