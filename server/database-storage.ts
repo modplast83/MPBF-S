@@ -268,38 +268,58 @@ export class DatabaseStorage implements IStorage {
       // Get existing permission first to check if it exists
       const existingPermission = await this.getPermission(id);
       if (!existingPermission) {
+        console.error(`Permission with ID ${id} not found`);
         return undefined;
       }
       
-      // Build SQL SET clauses dynamically
+      console.log("Original Permission Data:", JSON.stringify(existingPermission));
+      console.log("Update Permission Data:", JSON.stringify(permissionData));
+      
+      // Build SQL SET clauses dynamically with parameter placeholders
       const setClauses = [];
+      const params = [];
+      let paramIndex = 1;
       
       if (permissionData.can_view !== undefined) {
-        setClauses.push(`can_view = ${permissionData.can_view ? 'TRUE' : 'FALSE'}`);
+        setClauses.push(`can_view = $${paramIndex}`);
+        params.push(permissionData.can_view);
+        paramIndex++;
       }
       
       if (permissionData.can_create !== undefined) {
-        setClauses.push(`can_create = ${permissionData.can_create ? 'TRUE' : 'FALSE'}`);
+        setClauses.push(`can_create = $${paramIndex}`);
+        params.push(permissionData.can_create);
+        paramIndex++;
       }
       
       if (permissionData.can_edit !== undefined) {
-        setClauses.push(`can_edit = ${permissionData.can_edit ? 'TRUE' : 'FALSE'}`);
+        setClauses.push(`can_edit = $${paramIndex}`);
+        params.push(permissionData.can_edit);
+        paramIndex++;
       }
       
       if (permissionData.can_delete !== undefined) {
-        setClauses.push(`can_delete = ${permissionData.can_delete ? 'TRUE' : 'FALSE'}`);
+        setClauses.push(`can_delete = $${paramIndex}`);
+        params.push(permissionData.can_delete);
+        paramIndex++;
       }
       
       if (permissionData.is_active !== undefined) {
-        setClauses.push(`is_active = ${permissionData.is_active ? 'TRUE' : 'FALSE'}`);
+        setClauses.push(`is_active = $${paramIndex}`);
+        params.push(permissionData.is_active);
+        paramIndex++;
       }
       
       if (permissionData.role !== undefined) {
-        setClauses.push(`role = '${permissionData.role}'`);
+        setClauses.push(`role = $${paramIndex}`);
+        params.push(permissionData.role);
+        paramIndex++;
       }
       
       if (permissionData.module !== undefined) {
-        setClauses.push(`module = '${permissionData.module}'`);
+        setClauses.push(`module = $${paramIndex}`);
+        params.push(permissionData.module);
+        paramIndex++;
       }
       
       // Only proceed if we have fields to update
@@ -308,24 +328,31 @@ export class DatabaseStorage implements IStorage {
         return existingPermission; // Return existing if no updates
       }
       
-      // Build full SQL query with returning
-      const query = `
-        UPDATE permissions 
-        SET ${setClauses.join(', ')}
-        WHERE id = ${id}
-        RETURNING *;
-      `;
+      // Build full SQL query with returning and use parameterized queries
+      const query = {
+        text: `
+          UPDATE permissions 
+          SET ${setClauses.join(', ')}
+          WHERE id = $${paramIndex}
+          RETURNING *;
+        `,
+        values: [...params, id]
+      };
       
-      console.log("Executing direct SQL query:", query);
+      console.log("Executing parameterized SQL query:", query.text);
+      console.log("With parameters:", query.values);
       
-      // Execute the raw query using db.execute
-      const result = await db.execute(query);
+      // Execute the raw query using pool.query for better parameter handling
+      const result = await pool.query(query);
       
       if (!result.rows.length) {
+        console.log("No rows returned from update query");
         return undefined;
       }
       
       const row = result.rows[0];
+      console.log("Updated permission row:", row);
+      
       return {
         id: Number(row.id),
         role: row.role,
@@ -338,6 +365,7 @@ export class DatabaseStorage implements IStorage {
       };
     } catch (error) {
       console.error('Error in updatePermission:', error);
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
       throw error;
     }
   }
