@@ -539,12 +539,12 @@ export default function Permissions() {
           
           <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
             <div className="flex flex-col sm:flex-row gap-4">
-              <Select value={filterRole || ""} onValueChange={(value) => setFilterRole(value || null)}>
+              <Select value={filterRole || "all_roles"} onValueChange={(value) => setFilterRole(value === "all_roles" ? null : value)}>
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All roles</SelectItem>
+                  <SelectItem value="all_roles">All roles</SelectItem>
                   {roles.map(role => (
                     <SelectItem key={role} value={role}>
                       {formatRoleName(role)}
@@ -553,12 +553,12 @@ export default function Permissions() {
                 </SelectContent>
               </Select>
               
-              <Select value={filterModule || ""} onValueChange={(value) => setFilterModule(value || null)}>
+              <Select value={filterModule || "all_modules"} onValueChange={(value) => setFilterModule(value === "all_modules" ? null : value)}>
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Filter by module" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All modules</SelectItem>
+                  <SelectItem value="all_modules">All modules</SelectItem>
                   {modules.map(module => (
                     <SelectItem key={module} value={module}>
                       {module}

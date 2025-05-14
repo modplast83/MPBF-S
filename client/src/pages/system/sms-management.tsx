@@ -213,12 +213,12 @@ export default function SmsManagementPage() {
               />
             </div>
             <div className="w-full md:w-48">
-              <Select value={filterType || ""} onValueChange={value => setFilterType(value || null)}>
+              <Select value={filterType || "all_entities"} onValueChange={value => setFilterType(value === "all_entities" ? null : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="All entities" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All entities</SelectItem>
+                  <SelectItem value="all_entities">All entities</SelectItem>
                   <SelectItem value="customer">Customers</SelectItem>
                   <SelectItem value="order">Orders</SelectItem>
                   <SelectItem value="jobOrder">Job Orders</SelectItem>
