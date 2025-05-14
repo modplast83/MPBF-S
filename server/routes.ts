@@ -2603,7 +2603,28 @@ COMMIT;
           lastUpdated: new Date()
         });
         
-        res.json(updatedMixItem);
+        // 3. Get all mix items to recalculate percentages
+        const allMixItems = await storage.getMixItemsByMix(existingMixItem.mixId);
+        
+        // 4. Calculate total weight
+        const totalWeight = allMixItems.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // 5. Update all items with correct percentages
+        for (const item of allMixItems) {
+          const percentage = (item.quantity / totalWeight) * 100;
+          if (item.id !== id) { // Skip the just-updated item to avoid race condition
+            await storage.updateMixItem(item.id, { percentage });
+          }
+        }
+        
+        // 6. Update the just-changed item's percentage last
+        const finalPercentage = (quantity / totalWeight) * 100;
+        const finalUpdatedItem = await storage.updateMixItem(id, { percentage: finalPercentage });
+        
+        // 7. Update the mix total quantity
+        await storage.updateMixMaterial(existingMixItem.mixId, { totalQuantity: totalWeight });
+        
+        res.json(finalUpdatedItem);
       } catch (error) {
         console.error("Error during mix item update:", error);
         throw error;
