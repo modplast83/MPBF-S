@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Droplet, Wrench, DollarSign } from "lucide-react";
+import { Calculator, Droplet, Wrench, DollarSign, Palette } from "lucide-react";
 
 export default function ToolsPage() {
   return (
@@ -68,6 +68,26 @@ export default function ToolsPage() {
               <p className="text-sm">
                 Calculate production costs based on material prices, percentages,
                 waste factors, and fixed costs to determine accurate per-kilogram pricing.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/tools/mix-colors">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center">
+                <Palette className="mr-2 h-5 w-5" />
+                Mix Colors Calculator
+              </CardTitle>
+              <CardDescription>
+                Calculate color formulas for printing special colors
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">
+                Calculate CMYK or RGB percentages needed to create specific colors
+                and analyze design files to extract color formulas for printing.
               </p>
             </CardContent>
           </Card>

@@ -43,6 +43,7 @@ import BagWeightCalculator from "@/pages/tools/bag-weight";
 import InkConsumptionCalculator from "@/pages/tools/ink-consumption";
 import UtilityTools from "@/pages/tools/utilities";
 import CostCalculatorPage from "@/pages/tools/cost-calculator";
+import MixColorsCalculator from "@/pages/tools/mix-colors";
 import ClichePage from "@/pages/cliches/index";
 import { User } from "@shared/schema";
 
@@ -98,6 +99,7 @@ function App() {
                   <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} module="Ink Consumption" />
                   <ProtectedRoute path="/tools/utilities" component={UtilityTools} module="Utility Tools" />
                   <ProtectedRoute path="/tools/cost-calculator" component={CostCalculatorPage} module="Cost Calculator" />
+                  <ProtectedRoute path="/tools/mix-colors" component={MixColorsCalculator} module="Mix Colors" />
                   <ProtectedRoute path="/cliches" component={ClichePage} module="Cliches" />
                   <Route component={NotFound} />
                 </Switch>
