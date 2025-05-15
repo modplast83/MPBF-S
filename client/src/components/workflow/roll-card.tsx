@@ -10,6 +10,7 @@ import { UpdateRollDialog } from "./update-roll-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/use-auth-v2";
 
 interface RollCardProps {
   roll: Roll;
@@ -21,6 +22,7 @@ export function RollCard({ roll }: RollCardProps) {
   const { toast } = useToast();
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   
   // Fetch related data
   const { data: jobOrder } = useQuery<JobOrder>({
@@ -88,13 +90,81 @@ export function RollCard({ roll }: RollCardProps) {
     },
   });
   
+  // Function to check if the current user has permission to complete this stage
+  const canCompleteStage = () => {
+    // If there's no authenticated user or no roll data, deny permission
+    if (!user || !roll) return false;
+    
+    // Admin and Supervisor roles always have permission
+    if (user.role === "administrator" || user.role === "supervisor") return true;
+    
+    // For specific stages, check if the current user matches the stage's owner
+    if (roll.currentStage === "extrusion") {
+      // Only the user who created the roll can complete extrusion
+      return roll.createdById === user.id;
+    } else if (roll.currentStage === "printing") {
+      // Only the user who started printing can complete printing
+      return roll.printedById === user.id;
+    } else if (roll.currentStage === "cutting") {
+      // Only the user who started cutting can complete cutting
+      return roll.cutById === user.id;
+    }
+    
+    // Default case
+    return false;
+  };
+  
+  // Function to check if current user can start this stage
+  const canStartStage = () => {
+    // If there's no authenticated user or no roll data, deny permission
+    if (!user || !roll) return false;
+    
+    // Admin and Supervisor roles always have permission
+    if (user.role === "administrator" || user.role === "supervisor") return true;
+    
+    // For specific stages, check permissions
+    if (roll.currentStage === "extrusion") {
+      // Only the user who created the roll can start extrusion
+      return roll.createdById === user.id;
+    } else if (roll.currentStage === "printing") {
+      // In this case, we allow the user to claim the printing stage when they start it
+      return true; 
+    } else if (roll.currentStage === "cutting") {
+      // In this case, we allow the user to claim the cutting stage when they start it
+      return true;
+    }
+    
+    // Default case
+    return false;
+  };
+
   const handleComplete = async () => {
     // Define next stage based on current stage
     let nextStage = roll.currentStage;
     let nextStatus = "completed";
     
-    // Hard-coded current user ID for demo - in real app, this would come from auth context
-    const currentUserId = "00U1"; // Admin user ID from the database
+    // Get the current user ID from auth context
+    const currentUserId = user?.id;
+    
+    // If there's no user ID, show an error and return
+    if (!currentUserId) {
+      toast({
+        title: t("common.error"),
+        description: t("production.roll_management.auth_required"),
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Check if the user has permission to complete this stage
+    if (!canCompleteStage()) {
+      toast({
+        title: t("common.unauthorized"),
+        description: t("production.roll_management.cannot_complete_stage"),
+        variant: "destructive",
+      });
+      return;
+    }
     
     // If we're in the cutting stage, just open the dialog to input cutting quantity
     if (roll.currentStage === "cutting") {
@@ -148,7 +218,42 @@ export function RollCard({ roll }: RollCardProps) {
   };
   
   const handleStart = () => {
-    updateRollMutation.mutate({ status: "processing" });
+    // Check if the user has permission to start this stage
+    if (!canStartStage()) {
+      toast({
+        title: t("common.unauthorized"),
+        description: t("production.roll_management.cannot_start_stage"),
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Get the current user ID from auth context
+    const currentUserId = user?.id;
+    
+    // If there's no user ID, show an error and return
+    if (!currentUserId) {
+      toast({
+        title: t("common.error"),
+        description: t("production.roll_management.auth_required"),
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const updateData: Partial<Roll> = { status: "processing" };
+    
+    // If this is the printing stage and there's no printedById, set it
+    if (roll.currentStage === "printing" && !roll.printedById) {
+      updateData.printedById = currentUserId;
+    }
+    
+    // If this is the cutting stage and there's no cutById, set it
+    if (roll.currentStage === "cutting" && !roll.cutById) {
+      updateData.cutById = currentUserId;
+    }
+    
+    updateRollMutation.mutate(updateData);
     
     // Get translated stage name
     const stageName = t(`rolls.${roll.currentStage}`);
@@ -206,8 +311,8 @@ export function RollCard({ roll }: RollCardProps) {
                 {t("production.roll_management.created_by")}: {creator?.firstName || roll.createdById || t("common.unknown")}
               </p>
               
-              {/* Printing operator - only show if roll has been printed */}
-              {roll.printedById && roll.currentStage !== "extrusion" && (
+              {/* Printing operator - show only if printing has been started (printedById is set) */}
+              {roll.printedById && (
                 <p>
                   {t("production.roll_management.printed_by")}: {printer?.firstName || roll.printedById}
                 </p>

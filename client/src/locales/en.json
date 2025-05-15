@@ -68,7 +68,9 @@
       "customer": "Customer",
       "quantity": "Quantity",
       "raw_material": "Raw Material",
-      "required": "Required"
+      "required": "Required",
+      "unauthorized": "Unauthorized",
+      "roll_information": "Roll information and processing details"
     },
     "auth": {
       "username": "Username",
@@ -324,7 +326,10 @@
         "quantity": "Quantity",
         "create_roll": "Create Roll",
         "no_master_batch": "No Master Batch",
-        "unknown_master_batch": "Unknown Master Batch"
+        "unknown_master_batch": "Unknown Master Batch",
+        "auth_required": "Authentication required to perform this action",
+        "cannot_start_stage": "You don't have permission to start this stage",
+        "cannot_complete_stage": "You don't have permission to complete this stage"
       },
       "mix_materials": {
         "title": "Material Mixing Management",

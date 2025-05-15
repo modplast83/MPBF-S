@@ -14,6 +14,7 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/hooks/use-auth-v2";
 
 interface UpdateRollDialogProps {
   open: boolean;
@@ -33,6 +34,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [wasteQty, setWasteQty] = useState(0);
   const [wastePercentage, setWastePercentage] = useState(0);
@@ -106,6 +108,21 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
     setWastePercentage(parseFloat(wastePercent.toFixed(2)));
   }, [watchCuttingQty, maxQuantity]);
 
+  // Check if the current user has permission to edit this roll
+  const hasEditPermission = () => {
+    if (!user) return false;
+    
+    // Admin and Supervisor roles always have permission
+    if (user.role === "administrator" || user.role === "supervisor") return true;
+    
+    // Only the user who started cutting can complete cutting
+    if (roll.currentStage === "cutting" && roll.status === "processing") {
+      return roll.cutById === user.id;
+    }
+    
+    return false;
+  };
+
   // Update form when roll changes
   useEffect(() => {
     if (roll) {
@@ -114,13 +131,14 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
       });
       
       // Automatically enter editing mode if we're in the cutting stage with "processing" status
-      if (roll.currentStage === "cutting" && roll.status === "processing") {
+      // AND the current user is the one who started cutting
+      if (roll.currentStage === "cutting" && roll.status === "processing" && hasEditPermission()) {
         setIsEditing(true);
       } else {
         setIsEditing(false);
       }
     }
-  }, [roll, form]);
+  }, [roll, form, user]);
 
   // Mutation for updating roll
   const updateRollMutation = useMutation({
@@ -557,7 +575,11 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
             </div>
 
             <DialogFooter>
-              {!isEditing && roll.currentStage === "cutting" && roll.status !== "completed" && roll.status !== "processing" && (
+              {/* Show edit button only in specific conditions and when user has permission */}
+              {!isEditing && 
+               roll.currentStage === "cutting" && 
+               roll.status === "processing" && 
+               hasEditPermission() && (
                 <Button 
                   type="button" 
                   onClick={() => setIsEditing(true)}
@@ -568,7 +590,19 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                 </Button>
               )}
               
-              {(isEditing || (roll.currentStage === "cutting" && roll.status === "processing")) && roll.currentStage === "cutting" && (
+              {/* Show unauthorized message if user doesn't have permission */}
+              {!isEditing && 
+               roll.currentStage === "cutting" && 
+               roll.status === "processing" && 
+               !hasEditPermission() && (
+                <div className="text-sm text-destructive">
+                  {t("production.roll_management.cannot_complete_stage")}
+                </div>
+              )}
+              
+              {/* Display action buttons when in editing mode or processing status */}
+              {(isEditing || (roll.currentStage === "cutting" && roll.status === "processing" && hasEditPermission())) && 
+               roll.currentStage === "cutting" && (
                 <>
                   <Button 
                     type="button" 
