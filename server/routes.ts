@@ -1259,7 +1259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serialNumber: paddedSerialNumber,
         id: `EX-${paddedJobOrderId}-${paddedSerialNumber}`,
         createdById: currentUserId,
-        createdAt: new Date()
+        createdAt: new Date(),
+        status: "processing" // Automatically set status to processing instead of the default pending
       };
       console.log("Roll data to be inserted:", rollData);
       
@@ -1317,6 +1318,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (existingRoll.currentStage === "printing" && updateData.currentStage === "cutting") {
           console.log("Adding cutAt date to update data");
           updateData.cutAt = new Date();
+        }
+        
+        // If staying in the same stage but changing from pending to processing status
+        // (This is when an operator starts working on a stage)
+        if (updateData.status === "processing" && existingRoll.status === "pending") {
+          // If starting printing stage, set printedAt
+          if (existingRoll.currentStage === "printing") {
+            console.log("Setting printedAt to now as printing process is starting");
+            updateData.printedAt = new Date();
+          }
+          
+          // If starting cutting stage, set cutAt
+          if (existingRoll.currentStage === "cutting") {
+            console.log("Setting cutAt to now as cutting process is starting");
+            updateData.cutAt = new Date();
+          }
         }
         
         const updatedRoll = await storage.updateRoll(req.params.id, updateData);

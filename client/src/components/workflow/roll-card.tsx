@@ -180,8 +180,8 @@ export function RollCard({ roll }: RollCardProps) {
       updateRollMutation.mutate({
         status: nextStatus,
         currentStage: nextStage,
-        printingQty: roll.extrudingQty,
-        printedById: currentUserId
+        printingQty: roll.extrudingQty
+        // Do not set printedById here - it should be set when printing actually starts
       });
       
     } else if (roll.currentStage === "printing") {
@@ -190,8 +190,8 @@ export function RollCard({ roll }: RollCardProps) {
       
       updateRollMutation.mutate({
         status: nextStatus,
-        currentStage: nextStage,
-        cutById: currentUserId
+        currentStage: nextStage
+        // Do not set cutById here - it should be set when cutting actually starts
       });
       
     } else {
@@ -243,14 +243,18 @@ export function RollCard({ roll }: RollCardProps) {
     
     const updateData: Partial<Roll> = { status: "processing" };
     
-    // If this is the printing stage and there's no printedById, set it
-    if (roll.currentStage === "printing" && !roll.printedById) {
+    // If this is the printing stage, always set the current user as the printer
+    if (roll.currentStage === "printing") {
       updateData.printedById = currentUserId;
+      // Also set the printedAt timestamp to now
+      updateData.printedAt = new Date();
     }
     
-    // If this is the cutting stage and there's no cutById, set it
-    if (roll.currentStage === "cutting" && !roll.cutById) {
+    // If this is the cutting stage, always set the current user as the cutter
+    if (roll.currentStage === "cutting") {
       updateData.cutById = currentUserId;
+      // Also set the cutAt timestamp to now
+      updateData.cutAt = new Date();
     }
     
     updateRollMutation.mutate(updateData);
@@ -311,15 +315,15 @@ export function RollCard({ roll }: RollCardProps) {
                 {t("production.roll_management.created_by")}: {creator?.firstName || roll.createdById || t("common.unknown")}
               </p>
               
-              {/* Printing operator - show only if printing has been started (printedById is set) */}
-              {roll.printedById && (
+              {/* Printing operator - show only when the printing has been started (printedAt is set) */}
+              {roll.printedAt && roll.printedById && (
                 <p>
                   {t("production.roll_management.printed_by")}: {printer?.firstName || roll.printedById}
                 </p>
               )}
               
-              {/* Cutting operator - only show if roll has been cut */}
-              {roll.cutById && roll.currentStage === "completed" && (
+              {/* Cutting operator - show when cutting has been started (cutAt is set) */}
+              {roll.cutAt && roll.cutById && (
                 <p>
                   {t("production.roll_management.cut_by")}: {cutter?.firstName || roll.cutById}
                 </p>
