@@ -352,6 +352,7 @@ export const mixMaterials = pgTable("mix_materials", {
   mixPerson: text("mix_person").notNull().references(() => users.id),
   orderId: integer("order_id").references(() => orders.id),
   totalQuantity: doublePrecision("total_quantity").default(0),
+  screwType: text("screw_type").default("A"), // A or B screw
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -385,7 +386,6 @@ export const mixItems = pgTable("mix_items", {
   rawMaterialId: integer("raw_material_id").notNull().references(() => rawMaterials.id),
   quantity: doublePrecision("quantity").notNull(),
   percentage: doublePrecision("percentage").default(0),
-  screwType: text("screw_type").default("A"), // A or B screw
 });
 
 export const insertMixItemSchema = createInsertSchema(mixItems).omit({ 
