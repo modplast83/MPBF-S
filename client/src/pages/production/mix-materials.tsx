@@ -326,7 +326,7 @@ export default function MixMaterialsPage() {
       cell: (row: { totalQuantity: number | null }) => row.totalQuantity?.toFixed(2) || "0.00",
     },
     {
-      header: t('production.mix_materials.screw'),
+      header: "Screw",
       accessorKey: "mixScrew" as const,
       cell: (row: { mixScrew: string | null }) => row.mixScrew || "-",
     },
