@@ -236,7 +236,7 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           </div>
           {expanded && (
             <div className={isRTL ? 'mr-3' : 'ml-3'}>
-              <p className="text-sm font-medium text-white">{user?.firstName || user?.username || t("sidebar.user")}</p>
+              <p className="text-sm font-medium text-white">{user?.username || t("sidebar.user")}</p>
               <p className="text-xs text-gray-300">{user?.role || t("sidebar.role")}</p>
             </div>
           )}

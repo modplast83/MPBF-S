@@ -34,7 +34,6 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
   const { user } = useAuth();
   const [selectedMaterial, setSelectedMaterial] = useState<number | null>(null);
   const [quantity, setQuantity] = useState("");
-  const [selectedScrewType, setSelectedScrewType] = useState<string>("A");
   const [isAddingMaterial, setIsAddingMaterial] = useState(false);
   
   // Check if user has permission to edit/add to mix materials and is in the Extruding section
@@ -60,7 +59,7 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
 
   // Add mix item mutation
   const addMixItemMutation = useMutation({
-    mutationFn: async (data: { mixId: number; rawMaterialId: number; quantity: number; screwType: string }) => {
+    mutationFn: async (data: { mixId: number; rawMaterialId: number; quantity: number }) => {
       return apiRequest("POST", API_ENDPOINTS.MIX_ITEMS, data);
     },
     onSuccess: () => {
@@ -69,7 +68,6 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.RAW_MATERIALS] });
       setSelectedMaterial(null);
       setQuantity("");
-      setSelectedScrewType("A"); // Reset to default screw type
       setIsAddingMaterial(false);
       toast({
         title: "Success",
@@ -134,7 +132,6 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
       mixId,
       rawMaterialId: selectedMaterial,
       quantity: quantityNumber,
-      screwType: selectedScrewType,
     });
   };
 
@@ -195,7 +192,6 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
             <tr>
               <th style={{ border: "1px solid #000", padding: "6px", fontWeight: "bold", backgroundColor: "#f3f4f6" }}>{t('production.mix_materials.material')}</th>
               <th style={{ border: "1px solid #000", padding: "6px", fontWeight: "bold", textAlign: "right", backgroundColor: "#f3f4f6" }}>{t('production.mix_materials.quantity')}</th>
-              <th style={{ border: "1px solid #000", padding: "6px", fontWeight: "bold", textAlign: "center", backgroundColor: "#f3f4f6" }}>{t('production.mix_materials.screw_type')}</th>
               <th style={{ border: "1px solid #000", padding: "6px", fontWeight: "bold", textAlign: "right", backgroundColor: "#f3f4f6" }}>{t('production.mix_materials.percentage')}</th>
             </tr>
           </thead>
@@ -204,18 +200,6 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
               <tr key={item.id}>
                 <td style={{ border: "1px solid #000", padding: "6px" }}>{getRawMaterialName(item.rawMaterialId)}</td>
                 <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.quantity.toFixed(2)}</td>
-                <td style={{ border: "1px solid #000", padding: "6px", textAlign: "center" }}>
-                  <span style={{ 
-                    padding: "2px 6px", 
-                    borderRadius: "4px",
-                    backgroundColor: item.screwType === 'B' ? "#10b981" : "#3b82f6",
-                    color: "white",
-                    fontSize: "10pt",
-                    fontWeight: "bold"
-                  }}>
-                    {item.screwType || 'A'}
-                  </span>
-                </td>
                 <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.percentage?.toFixed(1) || "0.0"}%</td>
               </tr>
             ))}
@@ -331,39 +315,6 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t('production.mix_materials.screw_type')}</label>
-                  <div className="flex space-x-4">
-                    <div 
-                      className={`flex items-center space-x-2 p-2 border rounded-md cursor-pointer ${
-                        selectedScrewType === 'A' ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'
-                      }`}
-                      onClick={() => setSelectedScrewType('A')}
-                    >
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        selectedScrewType === 'A' ? 'border-blue-500' : 'border-gray-300'
-                      }`}>
-                        {selectedScrewType === 'A' && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
-                      </div>
-                      <span>Screw A</span>
-                    </div>
-                    
-                    <div 
-                      className={`flex items-center space-x-2 p-2 border rounded-md cursor-pointer ${
-                        selectedScrewType === 'B' ? 'bg-green-50 border-green-500' : 'hover:bg-gray-50'
-                      }`}
-                      onClick={() => setSelectedScrewType('B')}
-                    >
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        selectedScrewType === 'B' ? 'border-green-500' : 'border-gray-300'
-                      }`}>
-                        {selectedScrewType === 'B' && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
-                      </div>
-                      <span>Screw B</span>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="flex space-x-2 justify-end">
                   <Button 
                     variant="outline" 
@@ -371,7 +322,6 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                       setIsAddingMaterial(false);
                       setSelectedMaterial(null);
                       setQuantity("");
-                      setSelectedScrewType("A");
                     }}
                   >
                     {t('common.cancel')}
@@ -423,7 +373,6 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                 <TableRow>
                   <TableHead>{t('production.mix_materials.material')}</TableHead>
                   <TableHead className="text-right">{t('production.mix_materials.quantity')}</TableHead>
-                  <TableHead className="text-center">{t('production.mix_materials.screw_type')}</TableHead>
                   <TableHead className="text-right">{t('production.mix_materials.percentage')}</TableHead>
                   <TableHead className="w-[100px] text-right">{t('common.actions')}</TableHead>
                 </TableRow>
@@ -435,13 +384,6 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                       {getRawMaterialName(item.rawMaterialId)}
                     </TableCell>
                     <TableCell className="text-right">{item.quantity.toFixed(2)}</TableCell>
-                    <TableCell className="text-center">
-                      <span className={`px-2 py-1 rounded text-white text-xs font-medium ${
-                        item.screwType === 'B' ? 'bg-green-500' : 'bg-blue-500'
-                      }`}>
-                        {t('production.mix_materials.screw_type')} {item.screwType || 'A'}
-                      </span>
-                    </TableCell>
                     <TableCell className="text-right">{item.percentage?.toFixed(2) || "0.00"}%</TableCell>
                     <TableCell className="text-right">
                       {canDelete && (

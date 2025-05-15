@@ -322,9 +322,7 @@
         "create_mix": "إنشاء خلطة",
         "mix_created_success": "تم إنشاء خلطة المواد بنجاح!",
         "mix_creation_failed": "فشل في إنشاء الخلطة",
-        "add_material_failed": "فشل في إضافة المادة إلى الخلطة",
-        "select_screw": "اختر نوع البريمة",
-        "screw_type": "نوع البريمة"
+        "add_material_failed": "فشل في إضافة المادة إلى الخلطة"
       }
     },
     "warehouse": {
