@@ -51,8 +51,8 @@ export function PermissionsProvider({
     const userRole = user.role;
     const userSection = user.sectionId;
     
-    // Administrator role has all permissions
-    if (userRole === "administrator" || userRole === "supervisor") return true;
+    // Administrator role has all permissions - case insensitive check
+    if (userRole.toLowerCase() === "administrator" || userRole.toLowerCase() === "supervisor") return true;
 
     // For section-specific roles, check if the tab matches their section
     if (userSection) {
@@ -68,16 +68,18 @@ export function PermissionsProvider({
       // This handles cases like "Workflow-Extrusion Tab"
       const sectionTabModule = `Workflow-${tab.charAt(0).toUpperCase() + tab.slice(1)} Tab`;
       const permission = permissions.find(
-        p => p.role === userRole && p.module === sectionTabModule && p.isActive
+        p => p.role.toLowerCase() === userRole.toLowerCase() && 
+           p.module === sectionTabModule && 
+           p.is_active === true
       );
       
-      if (permission && permission.canView) {
+      if (permission && permission.can_view === true) {
         return true;
       }
     }
     
     // For operators without specific section assignment
-    if (userRole === "operator") {
+    if (userRole.toLowerCase() === "operator") {
       return true; // All operators can see workflow tabs by default
     }
     
@@ -93,23 +95,29 @@ export function PermissionsProvider({
     const userRole = user.role;
     const userSection = user.sectionId;
     
-    // Administrator role has all permissions
-    if (userRole === "administrator") return true;
+    console.log(`Checking permission for module: ${module}, action: ${action}, userRole: ${userRole}`);
+    console.log(`Available permissions:`, permissions.map(p => `${p.role}:${p.module}:${p.can_view}`));
     
-    // Supervisor has broad permissions
-    if (userRole === "supervisor") {
-      // Check if there are specific supervisor permissions defined
+    // Administrator role has all permissions - case insensitive check
+    if (userRole.toLowerCase() === "administrator") return true;
+    
+    // Supervisor has broad permissions - case insensitive check
+    if (userRole.toLowerCase() === "supervisor") {
+      // Check if there are specific supervisor permissions defined - both exact and lowercase match
       const supervisorPermission = permissions.find(
-        p => p.role === "supervisor" && p.module === module && p.isActive
+        p => (p.role.toLowerCase() === "supervisor" || p.role === "Supervisor") && 
+            p.module === module && p.is_active === true
       );
       
+      console.log(`Supervisor permission found:`, supervisorPermission);
+      
       if (supervisorPermission) {
-        // Check for the specific permission action
+        // Check for the specific permission action and explicitly handle null/undefined
         switch (action) {
-          case "view": return supervisorPermission.canView === true;
-          case "create": return supervisorPermission.canCreate === true;
-          case "edit": return supervisorPermission.canEdit === true;
-          case "delete": return supervisorPermission.canDelete === true;
+          case "view": return Boolean(supervisorPermission.can_view);
+          case "create": return Boolean(supervisorPermission.can_create);
+          case "edit": return Boolean(supervisorPermission.can_edit);
+          case "delete": return Boolean(supervisorPermission.can_delete);
           default: return false;
         }
       }
@@ -122,46 +130,48 @@ export function PermissionsProvider({
     if (userSection) {
       // First check if there's a section-specific permission
       const sectionPermission = permissions.find(
-        p => p.role === userSection && p.module === module && p.isActive
+        p => p.role.toLowerCase() === userSection.toLowerCase() && p.module === module && p.is_active === true
       );
       
+      console.log(`Section permission found for section ${userSection}:`, sectionPermission);
+      
       if (sectionPermission) {
-        // Check for the specific permission action
+        // Check for the specific permission action and explicitly handle null/undefined
         switch (action) {
-          case "view": return sectionPermission.canView === true;
-          case "create": return sectionPermission.canCreate === true;
-          case "edit": return sectionPermission.canEdit === true;
-          case "delete": return sectionPermission.canDelete === true;
+          case "view": return Boolean(sectionPermission.can_view);
+          case "create": return Boolean(sectionPermission.can_create);
+          case "edit": return Boolean(sectionPermission.can_edit);
+          case "delete": return Boolean(sectionPermission.can_delete);
           default: return false;
         }
       }
     }
     
     // Special case for operators - they can view workflow and mix materials
-    if (userRole === "operator" && action === "view") {
+    if (userRole.toLowerCase() === "operator" && action === "view") {
       if (module === "Workflow" || module === "Mix Materials") {
         return true;
       }
     }
     
-    // Find the permission for this role and module
+    // Find the permission for this role and module - case insensitive match
     const permission = permissions.find(
-      p => p.role === userRole && p.module === module && p.isActive
+      p => p.role.toLowerCase() === userRole.toLowerCase() && p.module === module && p.is_active === true
     );
     
     // If no permission found, deny access
     if (!permission) return false;
     
-    // Check for the specific permission action
+    // Check for the specific permission action and handle SQL boolean values
     switch (action) {
       case "view":
-        return permission.canView === true;
+        return Boolean(permission.can_view);
       case "create":
-        return permission.canCreate === true;
+        return Boolean(permission.can_create);
       case "edit":
-        return permission.canEdit === true;
+        return Boolean(permission.can_edit);
       case "delete":
-        return permission.canDelete === true;
+        return Boolean(permission.can_delete);
       default:
         return false;
     }

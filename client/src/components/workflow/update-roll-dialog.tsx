@@ -362,9 +362,9 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
           
           <div class="footer">
             Printed on ${new Date().toLocaleString()}<br>
-            Created by: ${creator?.name || roll.createdById || 'System User'}
-            ${roll.printedById ? `<br>Printed by: ${printer?.name || roll.printedById}` : ''}
-            ${roll.cutById ? `<br>Cut by: ${cutter?.name || roll.cutById}` : ''}
+            Created by: ${creator?.firstName || roll.createdById || 'System User'}
+            ${roll.printedById ? `<br>Printed by: ${printer?.firstName || roll.printedById}` : ''}
+            ${roll.cutById ? `<br>Cut by: ${cutter?.firstName || roll.cutById}` : ''}
           </div>
         </div>
       </body>
@@ -487,7 +487,7 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                       {roll.createdById && (
                         <div className="flex justify-between text-xs">
                           <span className="text-secondary-500">{t("production.roll_management.created_by")}</span>
-                          <span className="font-medium">{creator?.name || roll.createdById}</span>
+                          <span className="font-medium">{creator?.firstName || roll.createdById}</span>
                         </div>
                       )}
                       

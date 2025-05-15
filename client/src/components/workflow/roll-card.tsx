@@ -190,7 +190,7 @@ export function RollCard({ roll }: RollCardProps) {
               <p><span className="font-medium">{t("production.printing_cylinder")}:</span> {customerProduct.printingCylinder} {t("common.inch")}</p>
             )}
             <p className="text-secondary-500 text-xs pt-1">
-              {t("production.roll_management.created_by")}: {creator?.name || roll.createdById || t("common.unknown")}
+              {t("production.roll_management.created_by")}: {creator?.firstName || roll.createdById || t("common.unknown")}
             </p>
           </div>
           
