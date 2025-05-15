@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { RollDialog } from "@/components/workflow/roll-dialog";
+import { AuthProvider } from "@/hooks/useAuth";
 import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item, MasterBatch } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
@@ -303,13 +304,17 @@ export function JobOrdersForExtrusion() {
   return (
     <div className="space-y-4">
       {/* Roll Creation Dialog */}
-      <RollDialog
-        open={isRollDialogOpen}
-        onOpenChange={setIsRollDialogOpen}
-        jobOrder={selectedJobOrder}
-        onSubmit={handleRollDialogSubmit}
-        isLoading={createRollMutation.isPending}
-      />
+      <AuthProvider>
+        {(user) => (
+          <RollDialog
+            open={isRollDialogOpen}
+            onOpenChange={setIsRollDialogOpen}
+            jobOrder={selectedJobOrder}
+            onSubmit={handleRollDialogSubmit}
+            isLoading={createRollMutation.isPending}
+          />
+        )}
+      </AuthProvider>
       
       {jobOrdersForExtrusion.length === 0 ? (
         <Card className="bg-white border border-dashed border-secondary-200">

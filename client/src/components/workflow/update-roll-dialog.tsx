@@ -494,14 +494,14 @@ export function UpdateRollDialog({ open, onOpenChange, roll }: UpdateRollDialogP
                       {roll.printedById && roll.currentStage !== "extrusion" && (
                         <div className="flex justify-between text-xs">
                           <span className="text-secondary-500">{t("production.roll_management.printed_by")}</span>
-                          <span className="font-medium">{printer?.name || roll.printedById}</span>
+                          <span className="font-medium">{printer?.firstName || roll.printedById}</span>
                         </div>
                       )}
                       
                       {roll.cutById && roll.currentStage === "completed" && (
                         <div className="flex justify-between text-xs">
                           <span className="text-secondary-500">{t("production.roll_management.cut_by")}</span>
-                          <span className="font-medium">{cutter?.name || roll.cutById}</span>
+                          <span className="font-medium">{cutter?.firstName || roll.cutById}</span>
                         </div>
                       )}
                     </div>

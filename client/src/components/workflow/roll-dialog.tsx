@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
+import { useAuth } from "@/hooks/useAuth";
 
 interface RollDialogProps {
   open: boolean;
@@ -24,6 +25,10 @@ interface RollDialogProps {
 export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }: RollDialogProps) {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
+  
+  // Get auth context safely, with fallback to prevent errors if context is missing
+  const auth = useAuth();
+  const user = auth?.user || null;
   const [stage] = useState<string>("extrusion");
   const [currentQty, setCurrentQty] = useState<number>(0);
   const [exceedsLimit, setExceedsLimit] = useState<boolean>(false);
@@ -95,7 +100,9 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
       cuttingQty: 0, // Will be filled in later at cutting stage
       currentStage: "extrusion",
       status: "pending",
+      createdById: user?.id || '0U41' // Include the current user's ID with fallback
     };
+    console.log("Creating roll with user ID:", user?.id || '0U41');
     onSubmit(rollData);
   };
 

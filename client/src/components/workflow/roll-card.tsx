@@ -51,10 +51,20 @@ export function RollCard({ roll }: RollCardProps) {
     enabled: !!customerProduct?.itemId,
   });
   
-  // Fetch creator user data
+  // Fetch creator, printer, and cutter user data
   const { data: creator } = useQuery<any>({
     queryKey: [roll.createdById ? `${API_ENDPOINTS.USERS}/${roll.createdById}` : null],
     enabled: !!roll.createdById,
+  });
+  
+  const { data: printer } = useQuery<any>({
+    queryKey: [roll.printedById ? `${API_ENDPOINTS.USERS}/${roll.printedById}` : null],
+    enabled: !!roll.printedById,
+  });
+  
+  const { data: cutter } = useQuery<any>({
+    queryKey: [roll.cutById ? `${API_ENDPOINTS.USERS}/${roll.cutById}` : null],
+    enabled: !!roll.cutById,
   });
   
   // Mutations for updating roll status
@@ -189,9 +199,27 @@ export function RollCard({ roll }: RollCardProps) {
             {roll.currentStage === "printing" && customerProduct?.printingCylinder && (
               <p><span className="font-medium">{t("production.printing_cylinder")}:</span> {customerProduct.printingCylinder} {t("common.inch")}</p>
             )}
-            <p className="text-secondary-500 text-xs pt-1">
-              {t("production.roll_management.created_by")}: {creator?.firstName || roll.createdById || t("common.unknown")}
-            </p>
+            {/* Operator information section */}
+            <div className="text-secondary-500 text-xs pt-1 space-y-0.5">
+              {/* Extrusion operator (creator) */}
+              <p>
+                {t("production.roll_management.created_by")}: {creator?.firstName || roll.createdById || t("common.unknown")}
+              </p>
+              
+              {/* Printing operator - only show if roll has been printed */}
+              {roll.printedById && roll.currentStage !== "extrusion" && (
+                <p>
+                  {t("production.roll_management.printed_by")}: {printer?.firstName || roll.printedById}
+                </p>
+              )}
+              
+              {/* Cutting operator - only show if roll has been cut */}
+              {roll.cutById && roll.currentStage === "completed" && (
+                <p>
+                  {t("production.roll_management.cut_by")}: {cutter?.firstName || roll.cutById}
+                </p>
+              )}
+            </div>
           </div>
           
           {/* Mobile-optimized action buttons */}
