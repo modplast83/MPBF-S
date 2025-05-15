@@ -290,7 +290,10 @@ export function RollCard({ roll }: RollCardProps) {
           {/* Mobile-optimized content with smaller text and tighter spacing */}
           <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-secondary-700 space-y-1 md:space-y-1.5`}>
             <p className="truncate"><span className="font-medium">{t("orders.title")}:</span> #{jobOrder?.orderId}</p>
-            <p className="truncate"><span className="font-medium">{t("orders.customer")}:</span> {customer?.name || t("common.loading")}</p>
+            <p className="truncate">
+              <span className="font-medium">{t("orders.customer")}:</span> {customer?.name || t("common.loading")}
+              {customer?.nameAr && <span className="mr-1 pr-1"> - {customer.nameAr}</span>}
+            </p>
             <p className="truncate">
               <span className="font-medium">{t("orders.product")}:</span> 
               {item?.name || customerProduct?.itemId} 

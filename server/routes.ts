@@ -1300,6 +1300,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdById: z.string().optional(),
         printedById: z.string().optional(),
         cutById: z.string().optional(),
+        printedAt: z.date().optional(),
+        cutAt: z.date().optional(),
       });
       
       // Try to validate as a status/stage update
