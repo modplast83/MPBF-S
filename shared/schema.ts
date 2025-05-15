@@ -352,6 +352,7 @@ export const mixMaterials = pgTable("mix_materials", {
   mixPerson: text("mix_person").notNull().references(() => users.id),
   orderId: integer("order_id").references(() => orders.id),
   totalQuantity: doublePrecision("total_quantity").default(0),
+  mixScrew: text("mix_screw"), // A or B for the screw type
   createdAt: timestamp("created_at").defaultNow(),
 });
 

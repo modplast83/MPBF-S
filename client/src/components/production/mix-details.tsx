@@ -255,6 +255,10 @@ export function MixDetails({ mixId, rawMaterials, onClose }: MixDetailsProps) {
                   <div className="font-medium text-secondary-500">{t('production.mix_materials.total_weight')}</div>
                   <div className="font-semibold text-primary-600">{mix.totalQuantity?.toFixed(2) || "0.00"} kg</div>
                 </div>
+                <div>
+                  <div className="font-medium text-secondary-500">{t('production.mix_materials.screw')}</div>
+                  <div>{mix.mixScrew || "-"}</div>
+                </div>
               </div>
               <div className="mt-4">
                 <Button 

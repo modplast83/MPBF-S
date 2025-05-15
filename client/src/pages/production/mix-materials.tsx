@@ -326,6 +326,11 @@ export default function MixMaterialsPage() {
       cell: (row: { totalQuantity: number | null }) => row.totalQuantity?.toFixed(2) || "0.00",
     },
     {
+      header: t('production.mix_materials.screw'),
+      accessorKey: "mixScrew" as const,
+      cell: (row: { mixScrew: string | null }) => row.mixScrew || "-",
+    },
+    {
       header: t('common.actions'),
       id: "actions",
       cell: (row: MixMaterial) => (
@@ -467,6 +472,7 @@ export default function MixMaterialsPage() {
         <div style={{ marginBottom: "10px" }}>
           <div>{t('production.mix_materials.operator')}: {getPrintOperatorName(mix.mixPerson)}</div>
           <div>{t('production.mix_materials.total_weight')}: {totalWeight.toFixed(2)} kg</div>
+          <div>{t('production.mix_materials.screw')}: {mix.mixScrew || "-"}</div>
         </div>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -540,7 +546,7 @@ export default function MixMaterialsPage() {
               </div>
             </CardHeader>
             <CardContent className="p-3 pt-2">
-              <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="grid grid-cols-3 gap-2 mb-2">
                 <div>
                   <p className="text-xs text-gray-500">{t('production.mix_materials.operator')}</p>
                   <p className="text-sm font-medium">{getOperatorName(mix.mixPerson)}</p>
@@ -548,6 +554,10 @@ export default function MixMaterialsPage() {
                 <div>
                   <p className="text-xs text-gray-500">{t('production.mix_materials.total_weight')}</p>
                   <p className="text-sm font-medium">{mix.totalQuantity?.toFixed(2) || "0.00"} kg</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{t('production.mix_materials.screw')}</p>
+                  <p className="text-sm font-medium">{mix.mixScrew || "-"}</p>
                 </div>
               </div>
               

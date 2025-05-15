@@ -55,6 +55,7 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
   const [selectedRawMaterial, setSelectedRawMaterial] = useState<number | null>(null);
   const [rawMaterialQuantity, setRawMaterialQuantity] = useState("");
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
+  const [mixScrew, setMixScrew] = useState<string>("A");
   
   // Get current user
   const { data: currentUser } = useQuery<{id: string, name: string}>({
@@ -83,7 +84,8 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
       const mixData = await apiRequest("POST", API_ENDPOINTS.MIX_MATERIALS, { 
         // Don't send mixPerson - it will be set on the server from the auth token
         mixDate: date.toISOString(), // Make sure date is properly formatted
-        totalQuantity: materials.reduce((sum, material) => sum + material.quantity, 0)
+        totalQuantity: materials.reduce((sum, material) => sum + material.quantity, 0),
+        mixScrew: mixScrew // Add the selected screw type (A or B)
       });
       
       const mixId = mixData.id;
@@ -195,6 +197,26 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
               {currentUser?.name || t('common.loading')}
             </AlertDescription>
           </Alert>
+          
+          {/* Screw Selection */}
+          <div className="space-y-2">
+            <FormLabel>{t('production.mix_materials.screw')}</FormLabel>
+            <Select
+              value={mixScrew}
+              onValueChange={setMixScrew}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t('production.mix_materials.select_screw')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A">A</SelectItem>
+                <SelectItem value="B">B</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              {t('production.mix_materials.screw_description')}
+            </FormDescription>
+          </div>
 
           {/* Material Selection */}
           <div className="space-y-4 border rounded-md p-4">
