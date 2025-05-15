@@ -40,6 +40,7 @@ type FormValues = z.infer<typeof formSchema>;
 interface MaterialItem {
   rawMaterialId: number;
   quantity: number;
+  screwType: string; // "A" or "B"
 }
 
 interface MixMaterialFormProps {
@@ -55,6 +56,7 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
   const [selectedRawMaterial, setSelectedRawMaterial] = useState<number | null>(null);
   const [rawMaterialQuantity, setRawMaterialQuantity] = useState("");
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
+  const [selectedScrewType, setSelectedScrewType] = useState<string>("A");
   
   // Get current user
   const { data: currentUser } = useQuery<{id: string, name: string}>({
@@ -94,6 +96,7 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
           mixId,
           rawMaterialId: material.rawMaterialId,
           quantity: material.quantity,
+          screwType: material.screwType,
         });
       }
       
@@ -148,8 +151,12 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
       return;
     }
 
-    // Add the material to our list
-    setMaterials([...materials, { rawMaterialId: selectedRawMaterial, quantity }]);
+    // Add the material to our list with the selected screw type
+    setMaterials([...materials, { 
+      rawMaterialId: selectedRawMaterial, 
+      quantity,
+      screwType: selectedScrewType 
+    }]);
     
     // Reset the inputs
     setSelectedRawMaterial(null);
@@ -195,6 +202,53 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
               {currentUser?.name || t('common.loading')}
             </AlertDescription>
           </Alert>
+
+          {/* Screw Type Selection */}
+          <div className="space-y-4 border rounded-md p-4 mb-4">
+            <h3 className="text-lg font-medium">{t('production.mix_materials.select_screw')}</h3>
+            
+            <div className="flex space-x-4">
+              <div className="flex items-center">
+                <div 
+                  className={`p-4 border rounded-md cursor-pointer ${
+                    selectedScrewType === 'A' 
+                      ? 'bg-primary-100 border-primary-500' 
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedScrewType('A')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      selectedScrewType === 'A' ? 'border-primary-500' : 'border-gray-300'
+                    }`}>
+                      {selectedScrewType === 'A' && <div className="w-3 h-3 rounded-full bg-primary-500"></div>}
+                    </div>
+                    <span className="font-medium">Screw A</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center">
+                <div 
+                  className={`p-4 border rounded-md cursor-pointer ${
+                    selectedScrewType === 'B' 
+                      ? 'bg-primary-100 border-primary-500' 
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedScrewType('B')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      selectedScrewType === 'B' ? 'border-primary-500' : 'border-gray-300'
+                    }`}>
+                      {selectedScrewType === 'B' && <div className="w-3 h-3 rounded-full bg-primary-500"></div>}
+                    </div>
+                    <span className="font-medium">Screw B</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Material Selection */}
           <div className="space-y-4 border rounded-md p-4">
@@ -253,9 +307,10 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
             ) : (
               <div className="space-y-2">
                 <div className="grid grid-cols-12 gap-2 font-medium text-sm px-2">
-                  <div className="col-span-5">{t('production.mix_materials.material')}</div>
+                  <div className="col-span-4">{t('production.mix_materials.material')}</div>
                   <div className="col-span-2">{t('production.mix_materials.quantity')}</div>
-                  <div className="col-span-2">{t('common.unit')}</div>
+                  <div className="col-span-1">{t('common.unit')}</div>
+                  <div className="col-span-2">{t('production.mix_materials.screw_type')}</div>
                   <div className="col-span-2">{t('production.mix_materials.percentage')}</div>
                   <div className="col-span-1"></div>
                 </div>
@@ -267,9 +322,17 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
                     
                   return (
                     <div key={index} className="grid grid-cols-12 gap-2 items-center bg-muted rounded-md p-2">
-                      <div className="col-span-5">{getMaterialName(material.rawMaterialId)}</div>
+                      <div className="col-span-4">{getMaterialName(material.rawMaterialId)}</div>
                       <div className="col-span-2">{material.quantity}</div>
-                      <div className="col-span-2">kg</div>
+                      <div className="col-span-1">kg</div>
+                      <div className="col-span-2">
+                        <Badge 
+                          variant={material.screwType === 'A' ? 'default' : 'secondary'}
+                          className={material.screwType === 'A' ? 'bg-blue-500' : 'bg-green-500'}
+                        >
+                          Screw {material.screwType}
+                        </Badge>
+                      </div>
                       <div className="col-span-2">
                         <Badge variant="outline">{percentage}%</Badge>
                       </div>
@@ -288,9 +351,10 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
                 })}
                 
                 <div className="grid grid-cols-12 gap-2 font-medium text-sm mt-2 pt-2 border-t">
-                  <div className="col-span-5">{t('common.total')}</div>
+                  <div className="col-span-4">{t('common.total')}</div>
                   <div className="col-span-2">{totalWeight.toFixed(1)}</div>
-                  <div className="col-span-2">kg</div>
+                  <div className="col-span-1">kg</div>
+                  <div className="col-span-2"></div>
                   <div className="col-span-2">100.0%</div>
                   <div className="col-span-1"></div>
                 </div>

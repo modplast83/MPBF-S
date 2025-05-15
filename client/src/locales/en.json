@@ -359,7 +359,9 @@
         "total": "Total",
         "scaled_results": "Scaled Formula Results",
         "scaled_results_description": "Results scaled to specified quantity",
-        "input_summary": "Formula Summary"
+        "input_summary": "Formula Summary",
+        "select_screw": "Select Screw Type",
+        "screw_type": "Screw Type"
       },
       "aba_calculator": {
         "title": "ABA Extrusion Calculator",

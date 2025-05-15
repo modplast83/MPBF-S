@@ -385,6 +385,7 @@ export const mixItems = pgTable("mix_items", {
   rawMaterialId: integer("raw_material_id").notNull().references(() => rawMaterials.id),
   quantity: doublePrecision("quantity").notNull(),
   percentage: doublePrecision("percentage").default(0),
+  screwType: text("screw_type").default("A"), // A or B screw
 });
 
 export const insertMixItemSchema = createInsertSchema(mixItems).omit({ 
