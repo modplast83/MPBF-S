@@ -76,6 +76,18 @@ export default function Products() {
     setEditProduct(product);
     setFormOpen(true);
   };
+  
+  const handleDuplicate = (product: CustomerProduct) => {
+    // When duplicating, we need to set the same data but allow for a new ID to be generated
+    // We just show the form populated with the same data, but the user is actually creating a new product
+    setEditProduct(null); // First set to null to ensure we're in "create" mode
+    
+    // Then in the next tick, show the form with the product data
+    setTimeout(() => {
+      setEditProduct(product); // Pass the original product as a template
+      setFormOpen(true); // Open the form for the user to modify and save
+    }, 0);
+  };
 
   const handleDelete = (product: CustomerProduct) => {
     setDeletingProduct(product);
@@ -152,10 +164,13 @@ export default function Products() {
       id: "actions",
       cell: (row: CustomerProduct) => (
         <div className="flex space-x-2">
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700" title="Edit">
             <span className="material-icons text-sm">edit</span>
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
+          <Button variant="ghost" size="icon" onClick={() => handleDuplicate(row)} className="text-secondary-500 hover:text-secondary-700" title="Duplicate">
+            <span className="material-icons text-sm">content_copy</span>
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700" title="Delete">
             <span className="material-icons text-sm">delete</span>
           </Button>
         </div>
