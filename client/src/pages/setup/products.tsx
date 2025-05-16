@@ -266,13 +266,19 @@ export default function Products() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editProduct ? "Edit Product" : "Add New Product"}
+              {isDuplicating 
+                ? "Duplicate Product" 
+                : editProduct 
+                  ? "Edit Product" 
+                  : "Add New Product"
+              }
             </DialogTitle>
           </DialogHeader>
           <ProductForm 
             product={editProduct || undefined}
             onSuccess={handleFormClose}
             preSelectedCustomerId={selectedCustomerId}
+            isDuplicate={isDuplicating}
           />
         </DialogContent>
       </Dialog>

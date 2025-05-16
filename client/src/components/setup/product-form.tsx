@@ -145,9 +145,11 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       console.log("Submitting customer product with payload:", payload);
       
       try {
-        if (isEditing && product) {
+        if (isEditing && product && !isDuplicate) {
+          // Only do an update if we're editing and not duplicating
           await apiRequest("PUT", `${API_ENDPOINTS.CUSTOMER_PRODUCTS}/${product.id}`, payload);
         } else {
+          // For both new products and duplications, create a new record
           await apiRequest("POST", API_ENDPOINTS.CUSTOMER_PRODUCTS, payload);
         }
       } catch (error) {
@@ -157,17 +159,39 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.CUSTOMER_PRODUCTS] });
+      
+      // Determine the appropriate success message based on the operation type
+      let actionTitle = "Created";
+      let actionDescription = "created";
+      
+      if (isDuplicate) {
+        actionTitle = "Duplicated";
+        actionDescription = "duplicated";
+      } else if (isEditing) {
+        actionTitle = "Updated";
+        actionDescription = "updated";
+      }
+      
       toast({
-        title: `Product ${isEditing ? "Updated" : "Created"}`,
-        description: `The product has been ${isEditing ? "updated" : "created"} successfully.`,
+        title: `Product ${actionTitle}`,
+        description: `The product has been ${actionDescription} successfully.`,
       });
+      
       form.reset();
       if (onSuccess) onSuccess();
     },
     onError: (error) => {
+      // Determine the appropriate error message based on the operation type
+      let actionType = "create";
+      if (isDuplicate) {
+        actionType = "duplicate";
+      } else if (isEditing) {
+        actionType = "update";
+      }
+      
       toast({
         title: "Error",
-        description: `Failed to ${isEditing ? "update" : "create"} product: ${error}`,
+        description: `Failed to ${actionType} product: ${error}`,
         variant: "destructive",
       });
     },
