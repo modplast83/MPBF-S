@@ -18,6 +18,7 @@ export default function Products() {
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<CustomerProduct | null>(null);
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState<CustomerProduct | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -78,15 +79,12 @@ export default function Products() {
   };
   
   const handleDuplicate = (product: CustomerProduct) => {
-    // When duplicating, we need to set the same data but allow for a new ID to be generated
-    // We just show the form populated with the same data, but the user is actually creating a new product
-    setEditProduct(null); // First set to null to ensure we're in "create" mode
-    
-    // Then in the next tick, show the form with the product data
-    setTimeout(() => {
-      setEditProduct(product); // Pass the original product as a template
-      setFormOpen(true); // Open the form for the user to modify and save
-    }, 0);
+    // Set the product data to be duplicated
+    setEditProduct(product);
+    // Set the duplicate flag
+    setIsDuplicating(true);
+    // Open the form in duplicate mode
+    setFormOpen(true);
   };
 
   const handleDelete = (product: CustomerProduct) => {
@@ -102,6 +100,7 @@ export default function Products() {
   const handleFormClose = () => {
     setFormOpen(false);
     setEditProduct(null);
+    setIsDuplicating(false); // Reset the duplicate flag
   };
   
   // Pre-select customer for new product

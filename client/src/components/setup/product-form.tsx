@@ -28,11 +28,12 @@ interface ProductFormProps {
   product?: CustomerProduct;
   onSuccess?: () => void;
   preSelectedCustomerId?: string;
+  isDuplicate?: boolean;
 }
 
-export function ProductForm({ product, onSuccess, preSelectedCustomerId }: ProductFormProps) {
+export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDuplicate = false }: ProductFormProps) {
   const queryClient = useQueryClient();
-  const isEditing = !!product;
+  const isEditing = !!product && !isDuplicate;
   
   // Fetch required data
   const { data: customers = [], isLoading: customersLoading } = useQuery<Customer[]>({
@@ -656,8 +657,8 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId }: Produ
             disabled={mutation.isPending}
           >
             {mutation.isPending
-              ? isEditing ? "Updating..." : "Creating..."
-              : isEditing ? "Update Product" : "Create Product"
+              ? isEditing ? "Updating..." : isDuplicate ? "Duplicating..." : "Creating..."
+              : isEditing ? "Update Product" : isDuplicate ? "Duplicate Product" : "Create Product"
             }
           </Button>
         </div>
