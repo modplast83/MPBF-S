@@ -28,7 +28,7 @@ const bagWeightSchema = z.object({
   thickness: z.string().transform(val => parseFloat(val)),
   gusset: z.string().transform(val => parseFloat(val)).optional(),
   density: z.string().transform(val => parseFloat(val)),
-  units: z.enum(["mm", "inch"]),
+  units: z.enum(["cm", "inch"]),
   quantity: z.string().transform(val => parseInt(val)),
 });
 
@@ -48,12 +48,12 @@ export default function BagWeightCalculator() {
     resolver: zodResolver(bagWeightSchema),
     defaultValues: {
       bagType: "flat",
-      width: "300",
-      length: "400",
+      width: "30", // in cm (previously 300mm)
+      length: "40", // in cm (previously 400mm)
       thickness: "40", // in microns
-      gusset: "0",
+      gusset: "0", // in cm
       density: "0.92", // LDPE density in g/cm³
-      units: "mm",
+      units: "cm",
       quantity: "1000",
     },
   });
@@ -67,24 +67,24 @@ export default function BagWeightCalculator() {
     const density = data.density; // g/cm³
     const quantity = data.quantity;
 
-    // Convert inch to mm if needed
+    // Convert inch to cm if needed
     if (data.units === "inch") {
-      width = width * 25.4;
-      length = length * 25.4;
-      if (gusset) gusset = gusset * 25.4;
+      width = width * 2.54;
+      length = length * 2.54;
+      if (gusset) gusset = gusset * 2.54;
     }
 
     // Calculate area in cm²
     let area: number;
     if (data.bagType === "flat") {
       // Flat bag (width * length * 2)
-      area = (width * length * 2) / 100; // Convert from mm² to cm²
+      area = width * length * 2; // Already in cm²
     } else if (data.bagType === "gusset") {
       // Gusset bag (width + (2 * gusset)) * length * 2
-      area = ((width + (2 * gusset)) * length * 2) / 100;
+      area = (width + (2 * gusset)) * length * 2;
     } else {
       // Default to flat bag calculation
-      area = (width * length * 2) / 100;
+      area = width * length * 2;
     }
 
     // Calculate volume (area * thickness) in cm³
