@@ -23,13 +23,13 @@ import { Separator } from "@/components/ui/separator";
 // Form schema with validation
 const bagWeightSchema = z.object({
   bagType: z.string({ required_error: "Please select a bag type" }),
-  width: z.string().transform(val => parseFloat(val)),
-  length: z.string().transform(val => parseFloat(val)),
-  thickness: z.string().transform(val => parseFloat(val)),
-  gusset: z.string().transform(val => parseFloat(val)).optional(),
-  density: z.string().transform(val => parseFloat(val)),
+  width: z.coerce.number(),
+  length: z.coerce.number(),
+  thickness: z.coerce.number(),
+  gusset: z.coerce.number().optional(),
+  density: z.coerce.number(),
   units: z.enum(["cm", "inch"]),
-  quantity: z.string().transform(val => parseInt(val)),
+  quantity: z.coerce.number().int(),
 });
 
 type BagWeightFormData = z.infer<typeof bagWeightSchema>;
@@ -48,13 +48,13 @@ export default function BagWeightCalculator() {
     resolver: zodResolver(bagWeightSchema),
     defaultValues: {
       bagType: "flat",
-      width: "30", // in cm (previously 300mm)
-      length: "40", // in cm (previously 400mm)
-      thickness: "40", // in microns
-      gusset: "0", // in cm
-      density: "0.92", // LDPE density in g/cm³
+      width: 30, // in cm (previously 300mm)
+      length: 40, // in cm (previously 400mm)
+      thickness: 40, // in microns
+      gusset: 0, // in cm
+      density: 0.92, // LDPE density in g/cm³
       units: "cm",
-      quantity: "1000",
+      quantity: 1000,
     },
   });
 
@@ -172,7 +172,7 @@ export default function BagWeightCalculator() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="mm">Millimeters (mm)</SelectItem>
+                          <SelectItem value="cm">Centimeters (cm)</SelectItem>
                           <SelectItem value="inch">Inches (in)</SelectItem>
                         </SelectContent>
                       </Select>
@@ -192,7 +192,7 @@ export default function BagWeightCalculator() {
                           <Input {...field} type="number" min="0" step="0.1" />
                         </FormControl>
                         <FormDescription>
-                          {form.watch("units") === "mm" ? "mm" : "inches"}
+                          {form.watch("units") === "cm" ? "cm" : "inches"}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -209,7 +209,7 @@ export default function BagWeightCalculator() {
                           <Input {...field} type="number" min="0" step="0.1" />
                         </FormControl>
                         <FormDescription>
-                          {form.watch("units") === "mm" ? "mm" : "inches"}
+                          {form.watch("units") === "cm" ? "cm" : "inches"}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -228,7 +228,7 @@ export default function BagWeightCalculator() {
                           <Input {...field} type="number" min="0" step="0.1" />
                         </FormControl>
                         <FormDescription>
-                          {form.watch("units") === "mm" ? "mm" : "inches"}
+                          {form.watch("units") === "cm" ? "cm" : "inches"}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -330,9 +330,9 @@ export default function BagWeightCalculator() {
                       <span className="text-muted-foreground">Material:</span>
                       <span>
                         {
-                          form.getValues("density") === "0.92" ? "LDPE" :
-                          form.getValues("density") === "0.95" ? "HDPE" :
-                          form.getValues("density") === "0.90" ? "PP" :
+                          form.getValues("density") === 0.92 ? "LDPE" :
+                          form.getValues("density") === 0.95 ? "HDPE" :
+                          form.getValues("density") === 0.90 ? "PP" :
                           "Custom Material"
                         }
                       </span>
