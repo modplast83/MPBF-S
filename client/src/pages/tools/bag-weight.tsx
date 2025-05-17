@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calculator, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { Separator } from "@/components/ui/separator";
 
@@ -111,12 +111,17 @@ export default function BagWeightCalculator() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <PageHeader
-        heading="Bag Weight Calculator"
-        text="Calculate the theoretical weight of plastic bags based on dimensions and material"
-      >
-        <Calculator className="h-6 w-6 mb-2" />
-      </PageHeader>
+      <div className="flex items-center space-x-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <span className="material-icons text-xl">calculate</span>
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Bag Weight Calculator</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Calculate the theoretical weight of plastic bags based on dimensions and material
+          </p>
+        </div>
+      </div>
 
       <Link href="/tools" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary">
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -408,7 +413,7 @@ export default function BagWeightCalculator() {
             ) : (
               <div className="flex items-center justify-center h-64 text-center">
                 <div>
-                  <Calculator className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+                  <span className="material-icons text-5xl text-muted-foreground mb-2 block">calculate</span>
                   <p className="text-muted-foreground">
                     Enter bag specifications and click "Calculate Weight" to see results.
                   </p>
