@@ -34,6 +34,12 @@ export default function OrdersIndex() {
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: [API_ENDPOINTS.ORDERS],
   });
+  
+  // Filter orders based on active tab
+  const filteredOrders = orders?.filter(order => {
+    if (activeTab === "all") return true;
+    return order.status === activeTab;
+  });
 
   const { data: customers } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
@@ -234,7 +240,7 @@ export default function OrdersIndex() {
 
   // Mobile card view for orders
   const renderMobileOrderList = () => {
-    if (!orders || orders.length === 0) {
+    if (!filteredOrders || filteredOrders.length === 0) {
       return (
         <div className="text-center py-8 px-4 bg-gray-50 rounded-md">
           <span className="material-icons text-gray-300 text-3xl mb-2">receipt_long</span>
@@ -245,7 +251,7 @@ export default function OrdersIndex() {
     
     return (
       <div className="space-y-4">
-        {orders.map((order) => (
+        {filteredOrders.map((order) => (
           <Card key={order.id} className="overflow-hidden hover:shadow-md transition-all">
             <Link href={`/orders/${order.id}`}>
               <CardHeader className="p-3 pb-2 flex flex-row justify-between items-start bg-gray-50">
@@ -397,18 +403,29 @@ export default function OrdersIndex() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            isMobile ? renderMobileLoadingState() : <div className="h-32 bg-gray-100 rounded animate-pulse"></div>
-          ) : isMobile ? (
-            renderMobileOrderList()
-          ) : (
-            <DataTable 
-              data={orders || []}
-              columns={columns as any}
-              actions={tableActions}
-              onRowClick={(row) => window.location.href = `/orders/${row.id}`}
-            />
-          )}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="all">All Orders</TabsTrigger>
+              <TabsTrigger value="processing">For Production</TabsTrigger>
+              <TabsTrigger value="hold">On Hold</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value={activeTab} className="mt-0">
+              {isLoading ? (
+                isMobile ? renderMobileLoadingState() : <div className="h-32 bg-gray-100 rounded animate-pulse"></div>
+              ) : isMobile ? (
+                renderMobileOrderList()
+              ) : (
+                <DataTable 
+                  data={filteredOrders || []}
+                  columns={columns as any}
+                  actions={tableActions}
+                  onRowClick={(row) => window.location.href = `/orders/${row.id}`}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
