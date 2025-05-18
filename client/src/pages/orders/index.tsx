@@ -287,18 +287,75 @@ export default function OrdersIndex() {
                   {t("common.view")}
                   <span className="material-icons text-xs ml-1">arrow_forward</span>
                 </span>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleDelete(order);
-                  }} 
-                  className="h-8 w-8 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
-                >
-                  <span className="material-icons text-sm">delete</span>
-                </Button>
+                <div className="flex space-x-1">
+                  {/* Status Change Dropdown for Mobile */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        className="h-8 w-8 rounded-full text-secondary-500 hover:text-secondary-700 hover:bg-secondary-50"
+                      >
+                        <span className="material-icons text-sm">swap_horiz</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleStatusChange(order, "pending");
+                        }}
+                        disabled={order.status === "pending"}
+                        className={order.status === "pending" ? "bg-secondary-100" : ""}
+                      >
+                        <span className="w-3 h-3 rounded-full bg-secondary-300 mr-2"></span>
+                        {t("orders.status_pending")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleStatusChange(order, "processing");
+                        }}
+                        disabled={order.status === "processing"}
+                        className={order.status === "processing" ? "bg-secondary-100" : ""}
+                      >
+                        <span className="w-3 h-3 rounded-full bg-primary-300 mr-2"></span>
+                        {t("orders.status_for_production")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleStatusChange(order, "hold");
+                        }}
+                        disabled={order.status === "hold"}
+                        className={order.status === "hold" ? "bg-secondary-100" : ""}
+                      >
+                        <span className="w-3 h-3 rounded-full bg-warning-300 mr-2"></span>
+                        {t("orders.status_hold")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(order);
+                    }} 
+                    className="h-8 w-8 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
+                  >
+                    <span className="material-icons text-sm">delete</span>
+                  </Button>
+                </div>
               </CardFooter>
             </Link>
           </Card>
