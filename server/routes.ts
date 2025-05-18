@@ -1830,6 +1830,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete corrective action" });
     }
   });
+  
+  // Quality Violations
+  app.get("/api/quality-violations", async (req: Request, res: Response) => {
+    try {
+      // Extract query parameters for filtering
+      const { qualityCheckId, reportedBy, severity, status, startDate, endDate } = req.query;
+      
+      let violations;
+      if (qualityCheckId) {
+        violations = await storage.getQualityViolationsByQualityCheck(parseInt(qualityCheckId as string));
+      } else if (reportedBy) {
+        violations = await storage.getQualityViolationsByUser(reportedBy as string);
+      } else if (severity) {
+        violations = await storage.getQualityViolationsBySeverity(severity as string);
+      } else if (status) {
+        violations = await storage.getQualityViolationsByStatus(status as string);
+      } else if (startDate && endDate) {
+        violations = await storage.getQualityViolationsByDateRange(
+          new Date(startDate as string),
+          new Date(endDate as string)
+        );
+      } else {
+        violations = await storage.getQualityViolations();
+      }
+      res.json(violations);
+    } catch (error) {
+      res.status(500).json({ message: `Failed to fetch quality violations: ${error}` });
+    }
+  });
+  
+  app.get("/api/quality-violations/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid quality violation ID" });
+    }
+    
+    try {
+      const violation = await storage.getQualityViolation(id);
+      if (!violation) {
+        return res.status(404).json({ message: "Quality violation not found" });
+      }
+      res.json(violation);
+    } catch (error) {
+      res.status(500).json({ message: `Failed to fetch quality violation: ${error}` });
+    }
+  });
+  
+  app.post("/api/quality-violations", async (req: Request, res: Response) => {
+    try {
+      // Set the reportedBy field from the authenticated user if not provided
+      if (!req.body.reportedBy && req.user && req.user.id) {
+        req.body.reportedBy = req.user.id;
+      }
+      
+      const violation = await storage.createQualityViolation(req.body);
+      res.status(201).json(violation);
+    } catch (error) {
+      res.status(500).json({ message: `Failed to create quality violation: ${error}` });
+    }
+  });
+  
+  app.patch("/api/quality-violations/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid quality violation ID" });
+    }
+    
+    try {
+      const updated = await storage.updateQualityViolation(id, req.body);
+      if (!updated) {
+        return res.status(404).json({ message: "Quality violation not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: `Failed to update quality violation: ${error}` });
+    }
+  });
+  
+  app.delete("/api/quality-violations/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid quality violation ID" });
+    }
+    
+    try {
+      const result = await storage.deleteQualityViolation(id);
+      if (!result) {
+        return res.status(404).json({ message: "Quality violation not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: `Failed to delete quality violation: ${error}` });
+    }
+  });
+  
+  // Quality Penalties
+  app.get("/api/quality-penalties", async (req: Request, res: Response) => {
+    try {
+      // Extract query parameters for filtering
+      const { violationId, assignedTo, penaltyType, status, startDate, endDate } = req.query;
+      
+      let penalties;
+      if (violationId) {
+        penalties = await storage.getQualityPenaltiesByViolation(parseInt(violationId as string));
+      } else if (assignedTo) {
+        penalties = await storage.getQualityPenaltiesByUser(assignedTo as string);
+      } else if (penaltyType) {
+        penalties = await storage.getQualityPenaltiesByType(penaltyType as string);
+      } else if (status) {
+        penalties = await storage.getQualityPenaltiesByStatus(status as string);
+      } else if (startDate && endDate) {
+        penalties = await storage.getQualityPenaltiesByDateRange(
+          new Date(startDate as string),
+          new Date(endDate as string)
+        );
+      } else {
+        penalties = await storage.getQualityPenalties();
+      }
+      res.json(penalties);
+    } catch (error) {
+      res.status(500).json({ message: `Failed to fetch quality penalties: ${error}` });
+    }
+  });
+  
+  app.get("/api/quality-penalties/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid quality penalty ID" });
+    }
+    
+    try {
+      const penalty = await storage.getQualityPenalty(id);
+      if (!penalty) {
+        return res.status(404).json({ message: "Quality penalty not found" });
+      }
+      res.json(penalty);
+    } catch (error) {
+      res.status(500).json({ message: `Failed to fetch quality penalty: ${error}` });
+    }
+  });
+  
+  app.post("/api/quality-penalties", async (req: Request, res: Response) => {
+    try {
+      // Set the assignedBy field from the authenticated user if not provided
+      if (!req.body.assignedBy && req.user && req.user.id) {
+        req.body.assignedBy = req.user.id;
+      }
+      
+      const penalty = await storage.createQualityPenalty(req.body);
+      res.status(201).json(penalty);
+    } catch (error) {
+      res.status(500).json({ message: `Failed to create quality penalty: ${error}` });
+    }
+  });
+  
+  app.patch("/api/quality-penalties/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid quality penalty ID" });
+    }
+    
+    try {
+      const updated = await storage.updateQualityPenalty(id, req.body);
+      if (!updated) {
+        return res.status(404).json({ message: "Quality penalty not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: `Failed to update quality penalty: ${error}` });
+    }
+  });
+  
+  app.delete("/api/quality-penalties/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid quality penalty ID" });
+    }
+    
+    try {
+      const result = await storage.deleteQualityPenalty(id);
+      if (!result) {
+        return res.status(404).json({ message: "Quality penalty not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: `Failed to delete quality penalty: ${error}` });
+    }
+  });
 
   // Demo data endpoint - for initializing test data
   app.post("/api/init-demo-data", async (_req: Request, res: Response) => {
