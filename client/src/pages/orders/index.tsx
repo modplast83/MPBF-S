@@ -192,7 +192,7 @@ export default function OrdersIndex() {
                 className={row.status === "pending" ? "bg-secondary-100" : ""}
               >
                 <span className="w-3 h-3 rounded-full bg-secondary-300 mr-2"></span>
-                {t("orders.status_pending")}
+                Pending
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleStatusChange(row, "processing")}
@@ -200,7 +200,7 @@ export default function OrdersIndex() {
                 className={row.status === "processing" ? "bg-secondary-100" : ""}
               >
                 <span className="w-3 h-3 rounded-full bg-primary-300 mr-2"></span>
-                {t("orders.status_for_production")}
+                For Production
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleStatusChange(row, "hold")}
@@ -208,7 +208,7 @@ export default function OrdersIndex() {
                 className={row.status === "hold" ? "bg-secondary-100" : ""}
               >
                 <span className="w-3 h-3 rounded-full bg-warning-300 mr-2"></span>
-                {t("orders.status_hold")}
+                Hold
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -314,7 +314,7 @@ export default function OrdersIndex() {
                         className={order.status === "pending" ? "bg-secondary-100" : ""}
                       >
                         <span className="w-3 h-3 rounded-full bg-secondary-300 mr-2"></span>
-                        {t("orders.status_pending")}
+                        Pending
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={(e) => {
@@ -326,7 +326,7 @@ export default function OrdersIndex() {
                         className={order.status === "processing" ? "bg-secondary-100" : ""}
                       >
                         <span className="w-3 h-3 rounded-full bg-primary-300 mr-2"></span>
-                        {t("orders.status_for_production")}
+                        For Production
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={(e) => {
@@ -338,7 +338,7 @@ export default function OrdersIndex() {
                         className={order.status === "hold" ? "bg-secondary-100" : ""}
                       >
                         <span className="w-3 h-3 rounded-full bg-warning-300 mr-2"></span>
-                        {t("orders.status_hold")}
+                        Hold
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
