@@ -44,7 +44,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
           classes: "bg-cyan-50 text-cyan-700 border-cyan-200",
           icon: "content_cut"
         };
-      case "on hold":
+      case "hold":
         return {
           classes: "bg-orange-50 text-orange-700 border-orange-200",
           icon: "pause_circle"

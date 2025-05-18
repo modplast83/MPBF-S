@@ -60,7 +60,8 @@ export const ROLL_STAGES = [
 
 export const STATUS_OPTIONS = [
   { value: "pending", label: "Pending" },
-  { value: "processing", label: "Processing" },
+  { value: "processing", label: "For Production" },
+  { value: "hold", label: "Hold" },
   { value: "completed", label: "Completed" },
 ];
 

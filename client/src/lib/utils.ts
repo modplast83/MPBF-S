@@ -85,6 +85,12 @@ export function getStatusColorClass(status: string): {
         textColor: "text-blue-700",
         borderColor: "border-blue-200",
       };
+    case "hold":
+      return {
+        bgColor: "bg-orange-100",
+        textColor: "text-orange-700",
+        borderColor: "border-orange-200",
+      };
     case "completed":
       return {
         bgColor: "bg-green-100",
