@@ -12,7 +12,9 @@ import {
   MaterialInputItem, InsertMaterialInputItem,
   PlatePricingParameter, InsertPlatePricingParameter,
   PlateCalculation, InsertPlateCalculation,
-  AbaMaterialConfig, InsertAbaMaterialConfig
+  AbaMaterialConfig, InsertAbaMaterialConfig,
+  QualityViolation, InsertQualityViolation,
+  QualityPenalty, InsertQualityPenalty
 } from "@shared/schema";
 import session from "express-session";
 
@@ -185,6 +187,30 @@ export interface IStorage {
   createCorrectiveAction(correctiveAction: InsertCorrectiveAction): Promise<CorrectiveAction>;
   updateCorrectiveAction(id: number, correctiveActionUpdate: Partial<CorrectiveAction>): Promise<CorrectiveAction | undefined>;
   deleteCorrectiveAction(id: number): Promise<boolean>;
+  
+  // Quality Violations methods
+  getQualityViolations(): Promise<QualityViolation[]>;
+  getQualityViolationsByQualityCheck(qualityCheckId: number): Promise<QualityViolation[]>;
+  getQualityViolationsByUser(reportedBy: string): Promise<QualityViolation[]>;
+  getQualityViolationsBySeverity(severity: string): Promise<QualityViolation[]>;
+  getQualityViolationsByStatus(status: string): Promise<QualityViolation[]>;
+  getQualityViolationsByDateRange(startDate: Date, endDate: Date): Promise<QualityViolation[]>;
+  getQualityViolation(id: number): Promise<QualityViolation | undefined>;
+  createQualityViolation(violation: InsertQualityViolation): Promise<QualityViolation>;
+  updateQualityViolation(id: number, violation: Partial<QualityViolation>): Promise<QualityViolation | undefined>;
+  deleteQualityViolation(id: number): Promise<boolean>;
+  
+  // Quality Penalties methods
+  getQualityPenalties(): Promise<QualityPenalty[]>;
+  getQualityPenaltiesByViolation(violationId: number): Promise<QualityPenalty[]>;
+  getQualityPenaltiesByUser(assignedTo: string): Promise<QualityPenalty[]>;
+  getQualityPenaltiesByType(penaltyType: string): Promise<QualityPenalty[]>;
+  getQualityPenaltiesByStatus(status: string): Promise<QualityPenalty[]>;
+  getQualityPenaltiesByDateRange(startDate: Date, endDate: Date): Promise<QualityPenalty[]>;
+  getQualityPenalty(id: number): Promise<QualityPenalty | undefined>;
+  createQualityPenalty(penalty: InsertQualityPenalty): Promise<QualityPenalty>;
+  updateQualityPenalty(id: number, penalty: Partial<QualityPenalty>): Promise<QualityPenalty | undefined>;
+  deleteQualityPenalty(id: number): Promise<boolean>;
   
   // Material Inputs methods
   getMaterialInputs(): Promise<MaterialInput[]>;

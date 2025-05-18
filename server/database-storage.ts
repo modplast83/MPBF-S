@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and, gte, lte } from "drizzle-orm";
 import {
   users,
   type User,
@@ -48,6 +48,12 @@ import {
   qualityChecks,
   type QualityCheck,
   type InsertQualityCheck,
+  qualityViolations,
+  type QualityViolation,
+  type InsertQualityViolation,
+  qualityPenalties,
+  type QualityPenalty,
+  type InsertQualityPenalty,
   correctiveActions,
   type CorrectiveAction,
   type InsertCorrectiveAction,
