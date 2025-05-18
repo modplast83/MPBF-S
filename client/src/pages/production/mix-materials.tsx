@@ -228,9 +228,9 @@ export default function MixMaterialsPage() {
   const [configDescription, setConfigDescription] = useState<string>("");
   const [selectedConfigId, setSelectedConfigId] = useState<number | null>(null);
   
-  // Date filtering states
-  const [filterMode, setFilterMode] = useState<'all' | 'date' | 'week' | 'month'>('all');
-  const [filterDate, setFilterDate] = useState<Date | null>(null);
+  // Date filtering states - Default to today's date filter
+  const [filterMode, setFilterMode] = useState<'all' | 'date' | 'week' | 'month'>('date');
+  const [filterDate, setFilterDate] = useState<Date | null>(new Date());
   const [filterWeek, setFilterWeek] = useState<string | null>(null);
   const [filterMonth, setFilterMonth] = useState<string | null>(null);
   
