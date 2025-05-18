@@ -358,6 +358,9 @@
         "add_material_failed": "Failed to add material to the mix",
         "total": "Total",
         "scaled_results": "Scaled Formula Results",
+        "screw": "Extruder Screw",
+        "screw_description": "Select the extruder screw for this material mix",
+        "select_screw": "Select extruder screw",
         "scaled_results_description": "Results scaled to specified quantity",
         "input_summary": "Formula Summary"
       },
