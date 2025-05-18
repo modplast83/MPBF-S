@@ -12,6 +12,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDateString } from "@/lib/utils";
@@ -24,6 +25,7 @@ import { Order, Customer } from "@shared/schema";
 export default function OrdersIndex() {
   const queryClient = useQueryClient();
   const [deletingOrder, setDeletingOrder] = useState<Order | null>(null);
+  const [activeTab, setActiveTab] = useState("all");
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const isMobile = useIsMobile();
