@@ -280,8 +280,17 @@ export function RollCard({ roll }: RollCardProps) {
       >
         <CardContent className="p-0">
           {/* Mobile-optimized header */}
+          {/* Customer name at the top in bigger, bold font */}
+          <div className="mb-2 md:mb-3">
+            <p className="font-bold text-base md:text-lg truncate">
+              {customer?.name || t("common.loading")}
+              {customer?.nameAr && <span className="mr-1 pr-1"> - {customer.nameAr}</span>}
+            </p>
+          </div>
+          
+          {/* Job order and status row */}
           <div className="flex justify-between items-center mb-2 md:mb-3">
-            <span className="font-medium text-base md:text-lg truncate max-w-[65%]">
+            <span className="font-medium text-sm md:text-base truncate max-w-[65%]">
               JO #{roll.jobOrderId}-{t("rolls.title")} #{roll.serialNumber}
             </span>
             <StatusBadge status={roll.status} />
@@ -290,10 +299,6 @@ export function RollCard({ roll }: RollCardProps) {
           {/* Mobile-optimized content with smaller text and tighter spacing */}
           <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-secondary-700 space-y-1 md:space-y-1.5`}>
             <p className="truncate"><span className="font-medium">{t("orders.title")}:</span> #{jobOrder?.orderId}</p>
-            <p className="truncate">
-              <span className="font-medium">{t("orders.customer")}:</span> {customer?.name || t("common.loading")}
-              {customer?.nameAr && <span className="mr-1 pr-1"> - {customer.nameAr}</span>}
-            </p>
             <p className="truncate">
               <span className="font-medium">{t("orders.product")}:</span> 
               {item?.name || customerProduct?.itemId} 
