@@ -2,12 +2,12 @@ import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
-import { ClipboardList, FileCheck, ShieldAlert } from "lucide-react";
+import { AlertTriangle, ClipboardList, FileCheck, FileWarning, MessageSquareWarning, PenTool, ShieldAlert, UserMinus } from "lucide-react";
 
 export default function QualityIndex() {
   return (
     <div className="container mx-auto py-6">
-      <PageHeader heading="Quality Management" text="Monitor and control quality through inspections and corrective actions" />
+      <PageHeader heading="Quality Management" text="Monitor and control quality through inspections, violations, and penalties" />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         <Card className="hover:shadow-md transition-shadow">
@@ -66,6 +66,66 @@ export default function QualityIndex() {
             </p>
             <Link href="/quality/corrective-actions">
               <Button variant="outline" className="w-full">Manage Corrective Actions</Button>
+            </Link>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:shadow-md transition-shadow border-orange-200">
+          <CardHeader className="pb-3 bg-orange-50 rounded-t-lg">
+            <CardTitle className="flex items-center gap-2">
+              <FileWarning className="h-5 w-5 text-orange-600" />
+              Violations
+            </CardTitle>
+            <CardDescription>
+              Report and track quality violations during production
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Document quality violations, classify by severity, and track resolution status for proper accountability.
+            </p>
+            <Link href="/quality/violations">
+              <Button variant="outline" className="w-full border-orange-200 hover:bg-orange-50">Manage Violations</Button>
+            </Link>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:shadow-md transition-shadow border-red-200">
+          <CardHeader className="pb-3 bg-red-50 rounded-t-lg">
+            <CardTitle className="flex items-center gap-2">
+              <UserMinus className="h-5 w-5 text-red-600" />
+              Penalties
+            </CardTitle>
+            <CardDescription>
+              Apply penalties for quality violations and monitor compliance
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Assign and track penalties for severe quality violations, including warnings, training, and financial consequences.
+            </p>
+            <Link href="/quality/penalties">
+              <Button variant="outline" className="w-full border-red-200 hover:bg-red-50">Manage Penalties</Button>
+            </Link>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:shadow-md transition-shadow border-blue-200">
+          <CardHeader className="pb-3 bg-blue-50 rounded-t-lg">
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-blue-600" />
+              Violation Reports
+            </CardTitle>
+            <CardDescription>
+              Generate and analyze comprehensive quality violation reports
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Create detailed reports on quality violations, identify trends, and track improvement initiatives across production areas.
+            </p>
+            <Link href="/quality/reports">
+              <Button variant="outline" className="w-full border-blue-200 hover:bg-blue-50">View Reports</Button>
             </Link>
           </CardContent>
         </Card>
