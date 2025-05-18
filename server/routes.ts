@@ -1018,6 +1018,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Special endpoint for updating just the order status
+  app.patch("/api/orders/:id/status", async (req: Request, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+      
+      // Validate status value
+      if (!["pending", "processing", "hold", "completed", "cancelled"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+      
+      // Check if order exists
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      // Update just the status
+      const updatedOrder = await storage.updateOrder(orderId, { status });
+      return res.json(updatedOrder);
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      return res.status(500).json({ 
+        message: "Failed to update order status", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+    }
+  });
+  
   app.delete("/api/orders/:id", async (req: Request, res: Response) => {
     try {
       const orderId = parseInt(req.params.id);
