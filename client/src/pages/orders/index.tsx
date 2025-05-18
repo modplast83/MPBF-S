@@ -38,6 +38,8 @@ export default function OrdersIndex() {
   // Filter orders based on active tab
   const filteredOrders = orders?.filter(order => {
     if (activeTab === "all") return true;
+    
+    // Match the status with the tab value
     return order.status === activeTab;
   });
 
@@ -53,9 +55,20 @@ export default function OrdersIndex() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
+      
+      // Update activeTab to match the new status
+      if (activeTab !== "all" && activeTab !== variables.status) {
+        setActiveTab(variables.status);
+      }
+      
+      // Show success message
+      let statusLabel = variables.status;
+      if (variables.status === "processing") statusLabel = "For Production";
+      if (variables.status === "hold") statusLabel = "On Hold";
+      
       toast({
         title: "Order Status Updated",
-        description: `Order #${variables.id} status changed to ${variables.status}`,
+        description: `Order #${variables.id} status changed to ${statusLabel}`,
       });
     },
     onError: (error: any) => {
@@ -244,7 +257,11 @@ export default function OrdersIndex() {
       return (
         <div className="text-center py-8 px-4 bg-gray-50 rounded-md">
           <span className="material-icons text-gray-300 text-3xl mb-2">receipt_long</span>
-          <p className="text-gray-500">{t("orders.no_orders")}</p>
+          <p className="text-gray-500">
+            {activeTab === "all" 
+              ? t("orders.no_orders") 
+              : `No ${activeTab === "processing" ? "For Production" : activeTab === "hold" ? "On Hold" : "Pending"} orders found`}
+          </p>
         </div>
       );
     }
