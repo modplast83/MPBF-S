@@ -1106,6 +1106,163 @@ export class DatabaseStorage implements IStorage {
     return true;
   }
 
+  // Quality Violations methods
+  async getQualityViolations(): Promise<QualityViolation[]> {
+    return await db.select().from(qualityViolations);
+  }
+
+  async getQualityViolationsByQualityCheck(qualityCheckId: number): Promise<QualityViolation[]> {
+    return await db
+      .select()
+      .from(qualityViolations)
+      .where(eq(qualityViolations.qualityCheckId, qualityCheckId));
+  }
+
+  async getQualityViolationsByUser(reportedBy: string): Promise<QualityViolation[]> {
+    return await db
+      .select()
+      .from(qualityViolations)
+      .where(eq(qualityViolations.reportedBy, reportedBy));
+  }
+
+  async getQualityViolationsBySeverity(severity: string): Promise<QualityViolation[]> {
+    return await db
+      .select()
+      .from(qualityViolations)
+      .where(eq(qualityViolations.severity, severity));
+  }
+
+  async getQualityViolationsByStatus(status: string): Promise<QualityViolation[]> {
+    return await db
+      .select()
+      .from(qualityViolations)
+      .where(eq(qualityViolations.status, status));
+  }
+
+  async getQualityViolationsByDateRange(startDate: Date, endDate: Date): Promise<QualityViolation[]> {
+    return await db
+      .select()
+      .from(qualityViolations)
+      .where(
+        and(
+          gte(qualityViolations.reportDate, startDate),
+          lte(qualityViolations.reportDate, endDate)
+        )
+      );
+  }
+
+  async getQualityViolation(id: number): Promise<QualityViolation | undefined> {
+    const [violation] = await db
+      .select()
+      .from(qualityViolations)
+      .where(eq(qualityViolations.id, id));
+    return violation;
+  }
+
+  async createQualityViolation(violation: InsertQualityViolation): Promise<QualityViolation> {
+    const [created] = await db
+      .insert(qualityViolations)
+      .values({
+        ...violation,
+        reportDate: new Date() 
+      })
+      .returning();
+    return created;
+  }
+
+  async updateQualityViolation(id: number, violation: Partial<QualityViolation>): Promise<QualityViolation | undefined> {
+    const [updated] = await db
+      .update(qualityViolations)
+      .set(violation)
+      .where(eq(qualityViolations.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteQualityViolation(id: number): Promise<boolean> {
+    await db
+      .delete(qualityViolations)
+      .where(eq(qualityViolations.id, id));
+    return true;
+  }
+  
+  // Quality Penalties methods
+  async getQualityPenalties(): Promise<QualityPenalty[]> {
+    return await db.select().from(qualityPenalties);
+  }
+
+  async getQualityPenaltiesByViolation(violationId: number): Promise<QualityPenalty[]> {
+    return await db
+      .select()
+      .from(qualityPenalties)
+      .where(eq(qualityPenalties.violationId, violationId));
+  }
+
+  async getQualityPenaltiesByUser(assignedTo: string): Promise<QualityPenalty[]> {
+    return await db
+      .select()
+      .from(qualityPenalties)
+      .where(eq(qualityPenalties.assignedTo, assignedTo));
+  }
+
+  async getQualityPenaltiesByType(penaltyType: string): Promise<QualityPenalty[]> {
+    return await db
+      .select()
+      .from(qualityPenalties)
+      .where(eq(qualityPenalties.penaltyType, penaltyType));
+  }
+
+  async getQualityPenaltiesByStatus(status: string): Promise<QualityPenalty[]> {
+    return await db
+      .select()
+      .from(qualityPenalties)
+      .where(eq(qualityPenalties.status, status));
+  }
+
+  async getQualityPenaltiesByDateRange(startDate: Date, endDate: Date): Promise<QualityPenalty[]> {
+    return await db
+      .select()
+      .from(qualityPenalties)
+      .where(
+        and(
+          gte(qualityPenalties.startDate, startDate),
+          lte(qualityPenalties.startDate, endDate)
+        )
+      );
+  }
+
+  async getQualityPenalty(id: number): Promise<QualityPenalty | undefined> {
+    const [penalty] = await db
+      .select()
+      .from(qualityPenalties)
+      .where(eq(qualityPenalties.id, id));
+    return penalty;
+  }
+
+  async createQualityPenalty(penalty: InsertQualityPenalty): Promise<QualityPenalty> {
+    const [created] = await db
+      .insert(qualityPenalties)
+      .values(penalty)
+      .returning();
+    return created;
+  }
+
+  async updateQualityPenalty(id: number, penalty: Partial<QualityPenalty>): Promise<QualityPenalty | undefined> {
+    const [updated] = await db
+      .update(qualityPenalties)
+      .set(penalty)
+      .where(eq(qualityPenalties.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteQualityPenalty(id: number): Promise<boolean> {
+    await db
+      .delete(qualityPenalties)
+      .where(eq(qualityPenalties.id, id));
+    return true;
+  }
+
   // SMS Messages methods
   async getSmsMessages(): Promise<SmsMessage[]> {
     return await db.select().from(smsMessages);
