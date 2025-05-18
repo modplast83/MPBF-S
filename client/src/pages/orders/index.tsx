@@ -6,6 +6,12 @@ import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDateString } from "@/lib/utils";
@@ -30,6 +36,34 @@ export default function OrdersIndex() {
   const { data: customers } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
   });
+  
+  // Status update mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number, status: string }) => {
+      const response = await apiRequest("PUT", `${API_ENDPOINTS.ORDERS}/${id}`, { status });
+      return response;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
+      toast({
+        title: "Order Status Updated",
+        description: `Order #${variables.id} status changed to ${variables.status}`,
+      });
+    },
+    onError: (error: any) => {
+      console.error("Status update error:", error);
+      const errorMessage = error?.message || "Failed to update order status";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  const handleStatusChange = (order: Order, newStatus: string) => {
+    updateStatusMutation.mutate({ id: order.id, status: newStatus });
+  };
 
   // Delete mutation
   const deleteMutation = useMutation({
@@ -143,6 +177,42 @@ export default function OrdersIndex() {
               <span className="material-icons text-sm">visibility</span>
             </Button>
           </Link>
+          
+          {/* Status Change Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-secondary-500 hover:text-secondary-700">
+                <span className="material-icons text-sm">swap_horiz</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                onClick={() => handleStatusChange(row, "pending")}
+                disabled={row.status === "pending"}
+                className={row.status === "pending" ? "bg-secondary-100" : ""}
+              >
+                <span className="w-3 h-3 rounded-full bg-secondary-300 mr-2"></span>
+                {t("orders.status_pending")}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => handleStatusChange(row, "processing")}
+                disabled={row.status === "processing"}
+                className={row.status === "processing" ? "bg-secondary-100" : ""}
+              >
+                <span className="w-3 h-3 rounded-full bg-primary-300 mr-2"></span>
+                {t("orders.status_for_production")}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => handleStatusChange(row, "hold")}
+                disabled={row.status === "hold"}
+                className={row.status === "hold" ? "bg-secondary-100" : ""}
+              >
+                <span className="w-3 h-3 rounded-full bg-warning-300 mr-2"></span>
+                {t("orders.status_hold")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
             <span className="material-icons text-sm">delete</span>
           </Button>
