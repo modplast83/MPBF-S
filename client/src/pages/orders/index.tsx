@@ -50,16 +50,30 @@ export default function OrdersIndex() {
   // Status update mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number, status: string }) => {
-      const response = await apiRequest("PUT", `${API_ENDPOINTS.ORDERS}/${id}`, { status });
-      return response;
+      try {
+        // Make direct API request with just the status change
+        const response = await fetch(`${API_ENDPOINTS.ORDERS}/${id}/status`, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to update status");
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error("Error updating status:", error);
+        throw error;
+      }
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
-      
-      // Update activeTab to match the new status
-      if (activeTab !== "all" && activeTab !== variables.status) {
-        setActiveTab(variables.status);
-      }
       
       // Show success message
       let statusLabel = variables.status;
@@ -70,6 +84,12 @@ export default function OrdersIndex() {
         title: "Order Status Updated",
         description: `Order #${variables.id} status changed to ${statusLabel}`,
       });
+      
+      // If we're on a status tab and the status changed to something else,
+      // let's switch to the new status tab or stay on "all"
+      if (activeTab !== "all" && activeTab !== variables.status) {
+        setActiveTab(variables.status);
+      }
     },
     onError: (error: any) => {
       console.error("Status update error:", error);
@@ -426,6 +446,7 @@ export default function OrdersIndex() {
               <TabsTrigger value="processing">For Production</TabsTrigger>
               <TabsTrigger value="hold">On Hold</TabsTrigger>
               <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
             </TabsList>
             
             <TabsContent value={activeTab} className="mt-0">
