@@ -2027,12 +2027,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/quality-penalties", async (req: Request, res: Response) => {
     try {
+      // Create a copy of the request body for modification
+      const penaltyData = { ...req.body };
+      
       // Set the assignedBy field from the authenticated user if not provided
-      if (!req.body.assignedBy && req.user && req.user.id) {
-        req.body.assignedBy = req.user.id;
+      if (!penaltyData.assignedBy) {
+        if (req.user && req.user.id) {
+          penaltyData.assignedBy = req.user.id;
+        } else {
+          // Use a default admin ID if user is not authenticated
+          penaltyData.assignedBy = "00U1"; // Admin user ID
+        }
       }
       
-      const penalty = await storage.createQualityPenalty(req.body);
+      // Ensure dates are properly formatted as Date objects
+      if (penaltyData.startDate && typeof penaltyData.startDate === 'string') {
+        penaltyData.startDate = new Date(penaltyData.startDate);
+      }
+      
+      if (penaltyData.endDate && typeof penaltyData.endDate === 'string') {
+        penaltyData.endDate = new Date(penaltyData.endDate);
+      }
+      
+      const penalty = await storage.createQualityPenalty(penaltyData);
       res.status(201).json(penalty);
     } catch (error) {
       res.status(500).json({ message: `Failed to create quality penalty: ${error}` });
@@ -2047,7 +2064,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const updated = await storage.updateQualityPenalty(id, req.body);
+      // Handle date format conversion for update operations
+      const penaltyData = { ...req.body };
+      
+      if (penaltyData.startDate && typeof penaltyData.startDate === 'string') {
+        penaltyData.startDate = new Date(penaltyData.startDate);
+      }
+      
+      if (penaltyData.endDate && typeof penaltyData.endDate === 'string') {
+        penaltyData.endDate = new Date(penaltyData.endDate);
+      }
+      
+      if (penaltyData.verificationDate && typeof penaltyData.verificationDate === 'string') {
+        penaltyData.verificationDate = new Date(penaltyData.verificationDate);
+      }
+      
+      const updated = await storage.updateQualityPenalty(id, penaltyData);
       if (!updated) {
         return res.status(404).json({ message: "Quality penalty not found" });
       }
