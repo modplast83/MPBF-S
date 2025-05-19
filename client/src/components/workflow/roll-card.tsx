@@ -176,11 +176,13 @@ export function RollCard({ roll }: RollCardProps) {
       nextStage = "printing";
       nextStatus = "pending";
       
-      // Use string value instead of Date object
+      // Ensure we have a valid printing quantity when moving to printing stage
+      const printingQty = roll.extrudingQty || 0;
+      
       updateRollMutation.mutate({
         status: nextStatus,
         currentStage: nextStage,
-        printingQty: roll.extrudingQty
+        printingQty: printingQty
         // Do not set printedById here - it should be set when printing actually starts
       });
       
@@ -188,9 +190,13 @@ export function RollCard({ roll }: RollCardProps) {
       nextStage = "cutting";
       nextStatus = "pending";
       
+      // Ensure we have a valid cutting quantity when moving to cutting stage
+      const cuttingQty = roll.printingQty || roll.extrudingQty || 0;
+      
       updateRollMutation.mutate({
         status: nextStatus,
-        currentStage: nextStage
+        currentStage: nextStage,
+        cuttingQty: cuttingQty
         // Do not set cutById here - it should be set when cutting actually starts
       });
       
@@ -246,17 +252,24 @@ export function RollCard({ roll }: RollCardProps) {
     // If this is the printing stage, always set the current user as the printer
     if (roll.currentStage === "printing") {
       updateData.printedById = currentUserId;
-      // Also set the printedAt timestamp to now
-      updateData.printedAt = new Date();
+      // Make sure the printing quantity is set if it's null
+      if (roll.printingQty === null) {
+        updateData.printingQty = roll.extrudingQty;
+      }
+      // We don't need to set printedAt as the server will handle this with the current timestamp
     }
     
     // If this is the cutting stage, always set the current user as the cutter
     if (roll.currentStage === "cutting") {
       updateData.cutById = currentUserId;
-      // Also set the cutAt timestamp to now
-      updateData.cutAt = new Date();
+      // Make sure the cutting quantity is set if it's null
+      if (roll.cuttingQty === null) {
+        updateData.cuttingQty = roll.printingQty;
+      }
+      // We don't need to set cutAt as the server will handle this with the current timestamp
     }
     
+    // Execute the update mutation
     updateRollMutation.mutate(updateData);
     
     // Get translated stage name
