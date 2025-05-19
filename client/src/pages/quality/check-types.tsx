@@ -99,7 +99,7 @@ export default function QualityCheckTypes() {
     }
   });
 
-  const { data: checkTypes, isLoading } = useQuery({
+  const { data: checkTypes, isLoading } = useQuery<QualityCheckType[]>({
     queryKey: ["/api/quality-check-types"],
     refetchOnWindowFocus: false,
   });
@@ -209,7 +209,7 @@ export default function QualityCheckTypes() {
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
-        <PageHeader heading="Quality Check Types" text="Define and manage quality check templates for different production stages" />
+        <PageHeader title="Quality Check Types" description="Define and manage quality check templates for different production stages" />
         <Dialog open={isOpenCreate} onOpenChange={setIsOpenCreate}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
@@ -340,7 +340,7 @@ export default function QualityCheckTypes() {
             </TableHeader>
             <TableBody>
               {checkTypes && checkTypes.length > 0 ? (
-                checkTypes.map((checkType: QualityCheckType) => (
+                checkTypes.map((checkType) => (
                   <TableRow key={checkType.id}>
                     <TableCell className="font-medium">{checkType.id}</TableCell>
                     <TableCell>{checkType.name}</TableCell>

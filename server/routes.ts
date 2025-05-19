@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db, pool } from './db';
+import { adaptToFrontend, adaptToDatabase } from './quality-adapter';
 import { 
   insertCategorySchema, insertCustomerSchema, 
   insertItemSchema, insertSectionSchema, insertMachineSchema,
@@ -1563,8 +1564,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/quality-check-types", async (_req: Request, res: Response) => {
     try {
       const qualityCheckTypes = await storage.getQualityCheckTypes();
-      res.json(qualityCheckTypes);
+      
+      // Transform database objects to frontend format
+      const adaptedCheckTypes = qualityCheckTypes.map(checkType => adaptToFrontend(checkType));
+      
+      res.json(adaptedCheckTypes);
     } catch (error) {
+      console.error("Error fetching quality check types:", error);
       res.status(500).json({ message: "Failed to fetch quality check types" });
     }
   });
@@ -1573,8 +1579,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const stage = req.params.stage;
       const qualityCheckTypes = await storage.getQualityCheckTypesByStage(stage);
-      res.json(qualityCheckTypes);
+      
+      // Transform database objects to frontend format
+      const adaptedCheckTypes = qualityCheckTypes.map(checkType => adaptToFrontend(checkType));
+      
+      res.json(adaptedCheckTypes);
     } catch (error) {
+      console.error("Error fetching quality check types by stage:", error);
       res.status(500).json({ message: "Failed to fetch quality check types by stage" });
     }
   });
@@ -1588,17 +1599,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Quality check type not found" });
       }
       
-      res.json(qualityCheckType);
+      // Transform database object to frontend format
+      const adaptedCheckType = adaptToFrontend(qualityCheckType);
+      
+      res.json(adaptedCheckType);
     } catch (error) {
+      console.error("Error fetching quality check type:", error);
       res.status(500).json({ message: "Failed to fetch quality check type" });
     }
   });
 
   app.post("/api/quality-check-types", async (req: Request, res: Response) => {
     try {
-      const qualityCheckType = await storage.createQualityCheckType(req.body);
-      res.status(201).json(qualityCheckType);
+      // Transform frontend data to database format
+      const dbFormatData = adaptToDatabase(req.body);
+      
+      // Create the quality check type in the database
+      const qualityCheckType = await storage.createQualityCheckType(dbFormatData);
+      
+      // Transform the response back to frontend format
+      const adaptedResponse = adaptToFrontend(qualityCheckType);
+      
+      res.status(201).json(adaptedResponse);
     } catch (error) {
+      console.error("Error creating quality check type:", error);
       res.status(500).json({ message: "Failed to create quality check type" });
     }
   });
@@ -1606,14 +1630,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/quality-check-types/:id", async (req: Request, res: Response) => {
     try {
       const id = req.params.id;
-      const qualityCheckType = await storage.updateQualityCheckType(id, req.body);
+      
+      // Transform frontend data to database format
+      const dbFormatData = adaptToDatabase({...req.body, id});
+      
+      // Update the quality check type in the database
+      const qualityCheckType = await storage.updateQualityCheckType(id, dbFormatData);
       
       if (!qualityCheckType) {
         return res.status(404).json({ message: "Quality check type not found" });
       }
       
-      res.json(qualityCheckType);
+      // Transform the response back to frontend format
+      const adaptedResponse = adaptToFrontend(qualityCheckType);
+      
+      res.json(adaptedResponse);
     } catch (error) {
+      console.error("Error updating quality check type:", error);
       res.status(500).json({ message: "Failed to update quality check type" });
     }
   });
