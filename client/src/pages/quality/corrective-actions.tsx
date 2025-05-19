@@ -58,12 +58,11 @@ interface CorrectiveAction {
   id: number;
   qualityCheckId: number;
   assignedTo: string;
-  description: string;
+  action: string;
   status: string;
-  dueDate: string | null;
-  completedDate: string | null;
-  verifiedBy: string | null;
-  notes: string | null;
+  createdAt: string | null;
+  completedAt: string | null;
+  completedBy: string | null;
 }
 
 interface QualityCheck {
@@ -85,10 +84,8 @@ interface User {
 const formSchema = z.object({
   qualityCheckId: z.number().min(1, "Quality check is required"),
   assignedTo: z.string().min(1, "Assignee is required"),
-  description: z.string().min(1, "Description is required"),
+  action: z.string().min(1, "Action is required"),
   status: z.string().min(1, "Status is required"),
-  dueDate: z.date().nullable(),
-  notes: z.string().nullable(),
 });
 
 export default function CorrectiveActions() {
@@ -102,10 +99,8 @@ export default function CorrectiveActions() {
     defaultValues: {
       qualityCheckId: 0,
       assignedTo: "",
-      description: "",
+      action: "",
       status: "open",
-      dueDate: null,
-      notes: "",
     }
   });
 
@@ -128,7 +123,7 @@ export default function CorrectiveActions() {
     mutationFn: async (values: z.infer<typeof formSchema>) => {
       return await apiRequest("POST", "/api/corrective-actions", {
         ...values,
-        dueDate: values.dueDate ? new Date(values.dueDate).toISOString() : null,
+        createdAt: new Date().toISOString()
       });
     },
     onSuccess: () => {
@@ -151,11 +146,11 @@ export default function CorrectiveActions() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status, verifiedBy }: { id: number, status: string, verifiedBy?: string }) => {
+    mutationFn: async ({ id, status, completedBy }: { id: number, status: string, completedBy?: string }) => {
       return await apiRequest("PATCH", `/api/corrective-actions/${id}`, {
         status,
-        verifiedBy,
-        completedDate: status === 'completed' ? new Date().toISOString() : null,
+        completedBy,
+        completedAt: status === 'completed' ? new Date().toISOString() : null,
       });
     },
     onSuccess: () => {
@@ -183,7 +178,7 @@ export default function CorrectiveActions() {
     updateStatusMutation.mutate({
       id,
       status: newStatus,
-      verifiedBy: newStatus === 'verified' ? currentUserId : undefined
+      completedBy: newStatus === 'completed' ? currentUserId : undefined
     });
   };
 
@@ -314,10 +309,10 @@ export default function CorrectiveActions() {
                 />
                 <FormField
                   control={form.control}
-                  name="description"
+                  name="action"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Action</FormLabel>
                       <FormControl>
                         <Textarea 
                           placeholder="Describe the corrective action needed" 
@@ -351,65 +346,8 @@ export default function CorrectiveActions() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="dueDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Due Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Select a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value || undefined}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date(new Date().setHours(0, 0, 0, 0))
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormDescription>Optional: Set a due date for this action</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Additional notes or instructions" 
-                          {...field} 
-                          value={field.value || ''}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
+
                 <DialogFooter>
                   <Button type="submit" disabled={createMutation.isPending}>
                     {createMutation.isPending ? "Creating..." : "Create Corrective Action"}
@@ -464,26 +402,20 @@ export default function CorrectiveActions() {
                       <p>{getUserName(action.assignedTo)}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Due Date</p>
-                      <p>{action.dueDate ? new Date(action.dueDate).toLocaleDateString() : 'Not set'}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Created At</p>
+                      <p>{action.createdAt ? new Date(action.createdAt).toLocaleDateString() : 'Not set'}</p>
                     </div>
                   </div>
-                  {action.verifiedBy && (
+                  {action.completedBy && (
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Verified By</p>
-                      <p>{getUserName(action.verifiedBy)}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Completed By</p>
+                      <p>{getUserName(action.completedBy)}</p>
                     </div>
                   )}
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Description</p>
-                    <p className="text-sm">{action.description}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Action</p>
+                    <p className="text-sm">{action.action}</p>
                   </div>
-                  {action.notes && (
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Notes</p>
-                      <p className="text-sm">{action.notes}</p>
-                    </div>
-                  )}
                 </CardContent>
                 <CardFooter className="pt-0 flex gap-2">
                   {action.status === 'open' && (

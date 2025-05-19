@@ -305,13 +305,12 @@ export type QualityCheck = typeof qualityChecks.$inferSelect;
 export const correctiveActions = pgTable("corrective_actions", {
   id: serial("id").primaryKey(),
   qualityCheckId: integer("quality_check_id").notNull().references(() => qualityChecks.id),
+  createdAt: timestamp("created_at"),
+  completedAt: timestamp("completed_at"),
   assignedTo: text("assigned_to").references(() => users.id),
-  description: text("description").notNull(),
+  completedBy: text("completed_by").references(() => users.id),
+  action: text("action"),
   status: text("status").notNull().default("open"), // open, in-progress, completed, verified
-  dueDate: timestamp("due_date"),
-  completedDate: timestamp("completed_date"),
-  verifiedBy: text("verified_by").references(() => users.id),
-  notes: text("notes"),
 });
 
 export const insertCorrectiveActionSchema = createInsertSchema(correctiveActions).omit({ id: true });
