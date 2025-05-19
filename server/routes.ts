@@ -1724,9 +1724,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/quality-checks", async (req: Request, res: Response) => {
     try {
-      const qualityCheck = await storage.createQualityCheck(req.body);
+      // Log what's being received
+      console.log("Creating quality check with data:", req.body);
+      
+      // Import the quality check adapter
+      const { adaptToDatabase } = await import('./quality-check-adapter');
+      
+      // Convert frontend data to database format
+      const dbQualityCheck = adaptToDatabase(req.body);
+      
+      // Add timestamps
+      dbQualityCheck.checked_at = new Date();
+      dbQualityCheck.created_at = new Date();
+      
+      console.log("Mapped to database fields:", dbQualityCheck);
+      
+      const qualityCheck = await storage.createQualityCheck(dbQualityCheck);
       res.status(201).json(qualityCheck);
     } catch (error) {
+      console.error("Error creating quality check:", error);
       res.status(500).json({ message: "Failed to create quality check" });
     }
   });

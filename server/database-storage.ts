@@ -1013,46 +1013,247 @@ export class DatabaseStorage implements IStorage {
 
   // Quality Checks methods
   async getQualityChecks(): Promise<QualityCheck[]> {
-    return await db.select().from(qualityChecks);
+    try {
+      // Import the pool and adapter
+      const { pool } = await import('./db');
+      const { adaptToFrontend } = await import('./quality-check-adapter');
+      
+      // Use direct SQL to get all quality checks
+      const query = `
+        SELECT * FROM quality_checks 
+        ORDER BY checked_at DESC
+      `;
+      
+      const result = await pool.query(query);
+      
+      if (!result || !result.rows) {
+        return [];
+      }
+      
+      // Convert all database records to frontend format
+      return result.rows.map(row => adaptToFrontend(row));
+    } catch (error) {
+      console.error("Error fetching quality checks:", error);
+      return [];
+    }
   }
 
   async getQualityChecksByRoll(rollId: string): Promise<QualityCheck[]> {
-    return await db
-      .select()
-      .from(qualityChecks)
-      .where(eq(qualityChecks.rollId, rollId));
+    try {
+      // Import the pool and adapter
+      const { pool } = await import('./db');
+      const { adaptToFrontend } = await import('./quality-check-adapter');
+      
+      // Use direct SQL to get quality checks for a specific roll
+      const query = `
+        SELECT * FROM quality_checks 
+        WHERE roll_id = $1
+        ORDER BY checked_at DESC
+      `;
+      
+      const result = await pool.query(query, [rollId]);
+      
+      if (!result || !result.rows) {
+        return [];
+      }
+      
+      // Convert all database records to frontend format
+      return result.rows.map(row => adaptToFrontend(row));
+    } catch (error) {
+      console.error(`Error fetching quality checks for roll ${rollId}:`, error);
+      return [];
+    }
   }
 
   async getQualityChecksByJobOrder(jobOrderId: number): Promise<QualityCheck[]> {
-    return await db
-      .select()
-      .from(qualityChecks)
-      .where(eq(qualityChecks.jobOrderId, jobOrderId));
+    try {
+      // Import the pool and adapter
+      const { pool } = await import('./db');
+      const { adaptToFrontend } = await import('./quality-check-adapter');
+      
+      // Use direct SQL to get quality checks for a specific job order
+      const query = `
+        SELECT * FROM quality_checks 
+        WHERE job_order_id = $1
+        ORDER BY checked_at DESC
+      `;
+      
+      const result = await pool.query(query, [jobOrderId]);
+      
+      if (!result || !result.rows) {
+        return [];
+      }
+      
+      // Convert all database records to frontend format
+      return result.rows.map(row => adaptToFrontend(row));
+    } catch (error) {
+      console.error(`Error fetching quality checks for job order ${jobOrderId}:`, error);
+      return [];
+    }
   }
 
   async getQualityCheck(id: number): Promise<QualityCheck | undefined> {
-    const [check] = await db
-      .select()
-      .from(qualityChecks)
-      .where(eq(qualityChecks.id, id));
-    return check;
+    try {
+      const { pool } = await import('./db');
+      const { adaptToFrontend } = await import('./quality-check-adapter');
+
+      // Use direct SQL query to match database columns
+      const query = `
+        SELECT * FROM quality_checks WHERE id = $1
+      `;
+      
+      const result = await pool.query(query, [id]);
+      
+      if (!result || !result.rows || result.rows.length === 0) {
+        return undefined;
+      }
+      
+      // Map the database record to frontend format
+      return adaptToFrontend(result.rows[0]);
+    } catch (error) {
+      console.error("Error fetching quality check:", error);
+      throw error;
+    }
   }
 
-  async createQualityCheck(qualityCheck: InsertQualityCheck): Promise<QualityCheck> {
-    const [created] = await db
-      .insert(qualityChecks)
-      .values(qualityCheck)
-      .returning();
-    return created;
+  async createQualityCheck(qualityCheckData: any): Promise<QualityCheck> {
+    try {
+      console.log("Creating quality check with data in storage function:", qualityCheckData);
+      
+      // Import the pool from db.ts and the quality check adapter
+      const { pool } = await import('./db');
+      const { adaptToFrontend } = await import('./quality-check-adapter');
+      
+      // Use direct SQL with the pool to execute the query
+      const query = `
+        INSERT INTO quality_checks 
+        (check_type_id, checked_by, job_order_id, roll_id, status, notes, checked_at, created_at)
+        VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *;
+      `;
+      
+      const values = [
+        qualityCheckData.check_type_id,
+        qualityCheckData.checked_by,
+        qualityCheckData.job_order_id,
+        qualityCheckData.roll_id,
+        qualityCheckData.status,
+        qualityCheckData.notes,
+        qualityCheckData.checked_at || new Date(),
+        qualityCheckData.created_at || new Date()
+      ];
+      
+      console.log("Executing SQL with values:", values);
+      
+      const result = await pool.query(query, values);
+      
+      if (!result || !result.rows || result.rows.length === 0) {
+        throw new Error("No result returned from quality check creation");
+      }
+      
+      console.log("Successfully created quality check:", result.rows[0]);
+      
+      // Map the database record back to the expected frontend format using the adapter
+      return adaptToFrontend(result.rows[0]);
+    } catch (error) {
+      console.error("Database error creating quality check:", error);
+      throw error;
+    }
   }
 
-  async updateQualityCheck(id: number, qualityCheck: Partial<QualityCheck>): Promise<QualityCheck | undefined> {
-    const [updated] = await db
-      .update(qualityChecks)
-      .set(qualityCheck)
-      .where(eq(qualityChecks.id, id))
-      .returning();
-    return updated;
+  async updateQualityCheck(id: number, qualityCheckData: Partial<QualityCheck>): Promise<QualityCheck | undefined> {
+    try {
+      // Import the pool and adapter functions
+      const { pool } = await import('./db');
+      const { adaptToDatabase, adaptToFrontend } = await import('./quality-check-adapter');
+      
+      // Convert frontend data to database format
+      const dbQualityCheck = adaptToDatabase(qualityCheckData);
+      
+      // Build the SET part of the query dynamically based on provided fields
+      const updateFields = [];
+      const values = [];
+      let paramIndex = 1;
+      
+      // Only include fields that are provided in the update
+      if (dbQualityCheck.check_type_id !== undefined) {
+        updateFields.push(`check_type_id = $${paramIndex++}`);
+        values.push(dbQualityCheck.check_type_id);
+      }
+      
+      if (dbQualityCheck.checked_by !== undefined) {
+        updateFields.push(`checked_by = $${paramIndex++}`);
+        values.push(dbQualityCheck.checked_by);
+      }
+      
+      if (dbQualityCheck.job_order_id !== undefined) {
+        updateFields.push(`job_order_id = $${paramIndex++}`);
+        values.push(dbQualityCheck.job_order_id);
+      }
+      
+      if (dbQualityCheck.roll_id !== undefined) {
+        updateFields.push(`roll_id = $${paramIndex++}`);
+        values.push(dbQualityCheck.roll_id);
+      }
+      
+      if (dbQualityCheck.status !== undefined) {
+        updateFields.push(`status = $${paramIndex++}`);
+        values.push(dbQualityCheck.status);
+      }
+      
+      if (dbQualityCheck.notes !== undefined) {
+        updateFields.push(`notes = $${paramIndex++}`);
+        values.push(dbQualityCheck.notes);
+      }
+      
+      if (dbQualityCheck.checklist_results !== undefined) {
+        updateFields.push(`checklist_results = $${paramIndex++}`);
+        values.push(dbQualityCheck.checklist_results);
+      }
+      
+      if (dbQualityCheck.parameter_values !== undefined) {
+        updateFields.push(`parameter_values = $${paramIndex++}`);
+        values.push(dbQualityCheck.parameter_values);
+      }
+      
+      if (dbQualityCheck.issue_severity !== undefined) {
+        updateFields.push(`issue_severity = $${paramIndex++}`);
+        values.push(dbQualityCheck.issue_severity);
+      }
+      
+      if (dbQualityCheck.image_urls !== undefined) {
+        updateFields.push(`image_urls = $${paramIndex++}`);
+        values.push(dbQualityCheck.image_urls);
+      }
+      
+      // If no fields to update, return undefined
+      if (updateFields.length === 0) {
+        return undefined;
+      }
+      
+      // Add the ID as the last parameter
+      values.push(id);
+      
+      const query = `
+        UPDATE quality_checks 
+        SET ${updateFields.join(', ')}
+        WHERE id = $${paramIndex}
+        RETURNING *
+      `;
+      
+      const result = await pool.query(query, values);
+      
+      if (!result || !result.rows || result.rows.length === 0) {
+        return undefined;
+      }
+      
+      // Map the updated database record back to frontend format
+      return adaptToFrontend(result.rows[0]);
+    } catch (error) {
+      console.error(`Error updating quality check ${id}:`, error);
+      throw error;
+    }
   }
 
   async deleteQualityCheck(id: number): Promise<boolean> {
