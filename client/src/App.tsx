@@ -34,6 +34,7 @@ import CorrectiveActions from "@/pages/quality/corrective-actions";
 import QualityViolations from "@/pages/quality/violations";
 import QualityPenalties from "@/pages/quality/penalties";
 import QualityReports from "@/pages/quality/reports";
+import SimplifiedViolations from "@/pages/quality/simplified-violations";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
@@ -92,7 +93,7 @@ function App() {
                   <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} module="Check Types" />
                   <ProtectedRoute path="/quality/checks" component={QualityChecks} module="Quality Checks" />
                   <ProtectedRoute path="/quality/corrective-actions" component={CorrectiveActions} module="Corrective Actions" />
-                  <ProtectedRoute path="/quality/violations" component={QualityViolations} module="Quality Violations" />
+                  <ProtectedRoute path="/quality/violations" component={SimplifiedViolations} module="Quality Violations" />
                   <ProtectedRoute path="/quality/penalties" component={QualityPenalties} module="Quality Penalties" />
                   <ProtectedRoute path="/quality/reports" component={QualityReports} module="Violation Reports" />
                   <ProtectedRoute path="/system" component={SystemIndex} module="System Settings" />
