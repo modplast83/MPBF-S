@@ -114,7 +114,8 @@ export const SIDEBAR_ITEMS = [
         icon: "verified",
         subItems: [
           { title: "Check Types", path: "/quality/check-types" },
-          { title: "Quality Checks", path: "/quality/checks" },
+          { title: "Checks", path: "/quality/checks" },
+          { title: "Violations", path: "/quality/violations" },
           { title: "Corrective Actions", path: "/quality/corrective-actions" },
           { title: "Penalties", path: "/quality/penalties" },
         ],
