@@ -36,11 +36,14 @@ import { z } from "zod";
 // Create form schema with validation
 const penaltyFormSchema = insertQualityPenaltySchema.extend({
   violationId: z.number().min(1, "A violation must be selected"),
+  assignedTo: z.string().min(1, "An assignee must be selected"),
   penaltyType: z.enum(["warning", "training", "suspension", "financial", "other"]),
   amount: z.number().optional().nullable(),
+  currency: z.string().optional().nullable(),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  status: z.enum(["pending", "active", "completed", "cancelled"]).default("pending"),
-  dueDate: z.date().optional().nullable(),
+  status: z.enum(["pending", "active", "completed", "appealed", "cancelled"]).default("pending"),
+  startDate: z.date().default(() => new Date()),
+  endDate: z.date().optional().nullable(),
 });
 
 type PenaltyFormValues = z.infer<typeof penaltyFormSchema>;
@@ -95,8 +98,11 @@ export default function QualityPenalties() {
       description: "",
       penaltyType: "warning",
       amount: null,
+      currency: null,
       status: "pending",
-      dueDate: null,
+      startDate: new Date(),
+      endDate: null,
+      assignedTo: "",
     },
   });
 
@@ -106,11 +112,8 @@ export default function QualityPenalties() {
   // Create penalty mutation
   const createPenalty = useMutation({
     mutationFn: async (data: PenaltyFormValues) => {
-      // Set timestamp for createdAt if not already in the data
-      if (!data.createdAt) {
-        data.createdAt = new Date();
-      }
-      
+      // Make sure we have assignedBy field - will be set by server with current user 
+      // if not provided
       const response = await fetch("/api/quality-penalties", {
         method: "POST",
         headers: {
@@ -170,8 +173,8 @@ export default function QualityPenalties() {
 
     return true;
   }).sort((a, b) => {
-    // Sort by created date (newest first)
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    // Sort by start date (newest first)
+    return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
   }) || [];
 
   // Handle status badge styling
@@ -359,30 +362,84 @@ export default function QualityPenalties() {
                     />
                     
                     {watchPenaltyType === "financial" && (
-                      <FormField
-                        control={form.control}
-                        name="amount"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Amount <span className="text-red-500">*</span></FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="number" 
-                                placeholder="Enter penalty amount"
-                                {...field}
-                                onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="amount"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Amount <span className="text-red-500">*</span></FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="Enter penalty amount"
+                                  {...field}
+                                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="currency"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Currency</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value || ""}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select currency" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="USD">USD</SelectItem>
+                                  <SelectItem value="EUR">EUR</SelectItem>
+                                  <SelectItem value="SAR">SAR</SelectItem>
+                                  <SelectItem value="AED">AED</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
                     )}
+                    
+                    <FormField
+                      control={form.control}
+                      name="assignedTo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Assigned To <span className="text-red-500">*</span></FormLabel>
+                          <Select 
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select employee" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {users?.map((user) => (
+                                <SelectItem key={user.id} value={user.id}>
+                                  {user.firstName || user.username}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     
                     {watchPenaltyType === "suspension" && (
                       <FormField
                         control={form.control}
-                        name="dueDate"
+                        name="endDate"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>End Date <span className="text-red-500">*</span></FormLabel>
@@ -406,7 +463,7 @@ export default function QualityPenalties() {
                     {watchPenaltyType === "training" && (
                       <FormField
                         control={form.control}
-                        name="dueDate"
+                        name="endDate"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Due Date <span className="text-red-500">*</span></FormLabel>
@@ -617,13 +674,13 @@ function PenaltyTable({
           <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead className="w-[80px]">ID</TableHead>
-              <TableHead className="w-[120px]">Date</TableHead>
+              <TableHead className="w-[120px]">Start Date</TableHead>
               <TableHead>Description</TableHead>
               <TableHead className="w-[100px]">Type</TableHead>
               {/* Show amount column for financial penalties */}
               <TableHead className="w-[100px]">Amount</TableHead>
               <TableHead className="w-[120px]">Status</TableHead>
-              <TableHead className="w-[120px]">Due Date</TableHead>
+              <TableHead className="w-[120px]">End Date</TableHead>
               <TableHead className="w-[120px]">Assigned To</TableHead>
               <TableHead className="w-[100px] text-right">Actions</TableHead>
             </TableRow>
@@ -632,22 +689,24 @@ function PenaltyTable({
             {penalties.map((penalty) => (
               <TableRow key={penalty.id}>
                 <TableCell className="font-medium">#{penalty.id}</TableCell>
-                <TableCell>{format(new Date(penalty.createdAt), "MMM d, yyyy")}</TableCell>
+                <TableCell>{format(new Date(penalty.startDate), "MMM d, yyyy")}</TableCell>
                 <TableCell className="max-w-xs truncate">{penalty.description}</TableCell>
                 <TableCell>{getTypeBadge(penalty.penaltyType)}</TableCell>
                 <TableCell>
                   {penalty.amount ? (
-                    <span className="font-medium">${penalty.amount.toFixed(2)}</span>
+                    <span className="font-medium">
+                      {penalty.amount.toFixed(2)} {penalty.currency || ''}
+                    </span>
                   ) : (
                     <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell>{getStatusBadge(penalty.status)}</TableCell>
                 <TableCell>
-                  {penalty.dueDate ? (
+                  {penalty.endDate ? (
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      {format(new Date(penalty.dueDate), "MMM d, yyyy")}
+                      {format(new Date(penalty.endDate), "MMM d, yyyy")}
                     </div>
                   ) : (
                     <span className="text-muted-foreground">-</span>
