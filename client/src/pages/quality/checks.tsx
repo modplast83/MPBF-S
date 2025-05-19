@@ -80,6 +80,7 @@ interface Roll {
   id: string;
   serialNumber: string;
   currentStage: string;
+  jobOrderId: number;
 }
 
 interface JobOrder {
@@ -110,6 +111,7 @@ export default function QualityChecks() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("all");
+  const [selectedJobOrder, setSelectedJobOrder] = useState<number | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -291,41 +293,18 @@ export default function QualityChecks() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="rollId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Roll ID</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(value === "none" ? null : value)} 
-                          defaultValue={field.value || "none"}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a roll" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="none">None</SelectItem>
-                            {rolls && rolls.map((roll: Roll) => (
-                              <SelectItem key={roll.id} value={roll.id}>
-                                {roll.id} - {roll.currentStage}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>Optional - select if checking a specific roll</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
                     name="jobOrderId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Job Order ID</FormLabel>
                         <Select 
-                          onValueChange={(value) => field.onChange(value === "none" ? null : parseInt(value))} 
+                          onValueChange={(value) => {
+                            const jobOrderId = value === "none" ? null : parseInt(value);
+                            field.onChange(jobOrderId);
+                            setSelectedJobOrder(jobOrderId);
+                            // Reset roll selection when job order changes
+                            form.setValue("rollId", null);
+                          }} 
                           defaultValue={field.value?.toString() || "none"}
                         >
                           <FormControl>
@@ -343,6 +322,43 @@ export default function QualityChecks() {
                           </SelectContent>
                         </Select>
                         <FormDescription>Optional - select if checking a job order</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="rollId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Roll ID</FormLabel>
+                        <Select 
+                          onValueChange={(value) => field.onChange(value === "none" ? null : value)} 
+                          defaultValue={field.value || "none"}
+                          disabled={!selectedJobOrder}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={selectedJobOrder ? "Select a roll" : "Select a job order first"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            {rolls && rolls
+                              .filter(roll => !selectedJobOrder || roll.jobOrderId === selectedJobOrder)
+                              .map((roll: Roll) => (
+                                <SelectItem key={roll.id} value={roll.id}>
+                                  {roll.serialNumber} - {roll.currentStage}
+                                </SelectItem>
+                              ))
+                            }
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          {selectedJobOrder 
+                            ? "Select a roll associated with this job order" 
+                            : "Please select a job order first"}
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
