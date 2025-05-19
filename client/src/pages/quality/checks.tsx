@@ -363,7 +363,7 @@ export default function QualityChecks() {
                         <SelectContent>
                           {users && users.map((user: User) => (
                             <SelectItem key={user.id} value={user.id}>
-                              {user.username || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.id}
+                              {`${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || user.id}
                             </SelectItem>
                           ))}
                         </SelectContent>
