@@ -116,6 +116,7 @@ export const SIDEBAR_ITEMS = [
           { title: "Check Types", path: "/quality/check-types" },
           { title: "Quality Checks", path: "/quality/checks" },
           { title: "Corrective Actions", path: "/quality/corrective-actions" },
+          { title: "Penalties", path: "/quality/penalties" },
         ],
       },
     ],
