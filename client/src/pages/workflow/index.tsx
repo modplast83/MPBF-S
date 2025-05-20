@@ -191,18 +191,18 @@ export default function WorkflowIndex() {
             {showPrintingTab && (
               <TabsContent value="printing" className="space-y-4">
                 <div className="bg-secondary-50 rounded-lg p-3 md:p-4">
-                  <div className="flex items-center mb-4">
-                    <div className="rounded-full bg-warning-100 p-2 mr-3">
+                  <div className="flex flex-wrap items-start md:items-center mb-4">
+                    <div className="rounded-full bg-warning-100 p-2 mr-3 shrink-0">
                       <span className="material-icons text-warning-500">format_color_fill</span>
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0 mt-1 md:mt-0">
                       <h4 className="font-medium text-sm md:text-base">{t("production.roll_management.printing_stage")}</h4>
-                      <p className="text-xs md:text-sm text-secondary-500">
+                      <p className="text-xs md:text-sm text-secondary-500 truncate">
                         {printingLoading 
                           ? t("production.roll_management.loading") 
                           : `${printingRolls?.length || 0} ${t("production.roll_management.rolls_ready_printing")}`}
                       </p>
-                      <p className="text-xs text-secondary-400 italic">
+                      <p className="text-xs text-secondary-400 italic line-clamp-2 md:line-clamp-none">
                         {t("production.roll_management.printing_note")}
                       </p>
                     </div>
@@ -243,18 +243,18 @@ export default function WorkflowIndex() {
             {showCuttingTab && (
               <TabsContent value="cutting" className="space-y-4">
                 <div className="bg-secondary-50 rounded-lg p-3 md:p-4">
-                  <div className="flex items-center mb-4">
-                    <div className="rounded-full bg-success-100 p-2 mr-3">
+                  <div className="flex flex-wrap items-start md:items-center mb-4">
+                    <div className="rounded-full bg-success-100 p-2 mr-3 shrink-0">
                       <span className="material-icons text-success">content_cut</span>
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0 mt-1 md:mt-0">
                       <h4 className="font-medium text-sm md:text-base">{t("production.roll_management.cutting_stage")}</h4>
-                      <p className="text-xs md:text-sm text-secondary-500">
+                      <p className="text-xs md:text-sm text-secondary-500 truncate">
                         {cuttingLoading 
                           ? t("production.roll_management.loading") 
                           : `${cuttingRolls?.filter(roll => roll.status !== "completed").length || 0} ${t("production.roll_management.rolls_ready_cutting")}`}
                       </p>
-                      <p className="text-xs text-secondary-400 italic">
+                      <p className="text-xs text-secondary-400 italic line-clamp-2 md:line-clamp-none">
                         {t("production.roll_management.cutting_note")}
                       </p>
                     </div>
