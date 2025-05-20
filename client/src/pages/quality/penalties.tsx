@@ -659,40 +659,160 @@ export default function QualityPenalties() {
         
         <TabsContent value="pending" className="mt-4">
           <PenaltyTable 
-            penalties={penalties?.filter(p => p.status === "pending").sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) || []} 
+            penalties={penalties?.filter(p => p.status === "pending").sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()) || []} 
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getTypeBadge={getTypeBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintPenalty}
           />
         </TabsContent>
         
         <TabsContent value="active" className="mt-4">
           <PenaltyTable 
-            penalties={penalties?.filter(p => p.status === "active").sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) || []} 
+            penalties={penalties?.filter(p => p.status === "active").sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()) || []} 
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getTypeBadge={getTypeBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintPenalty}
           />
         </TabsContent>
         
         <TabsContent value="completed" className="mt-4">
           <PenaltyTable 
-            penalties={penalties?.filter(p => p.status === "completed").sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) || []} 
+            penalties={penalties?.filter(p => p.status === "completed").sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()) || []} 
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getTypeBadge={getTypeBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintPenalty}
           />
         </TabsContent>
         
         <TabsContent value="cancelled" className="mt-4">
           <PenaltyTable 
-            penalties={penalties?.filter(p => p.status === "cancelled").sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) || []} 
+            penalties={penalties?.filter(p => p.status === "cancelled").sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()) || []} 
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getTypeBadge={getTypeBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintPenalty}
           />
         </TabsContent>
       </Tabs>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" /> Confirm Deletion
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this quality penalty? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="pt-4 pb-2">
+            <p className="text-sm text-muted-foreground mb-4">
+              Deleting this penalty will permanently remove it from the system along with all associated records.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleConfirmDelete}
+              disabled={deletePenalty.isPending}
+            >
+              {deletePenalty.isPending ? "Deleting..." : "Delete Penalty"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Print View (Hidden unless printing) */}
+      {penaltyToPrint && (
+        <div className="hidden print:block p-6">
+          <div className="max-w-4xl mx-auto border border-gray-200 p-6 rounded-md">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h1 className="text-2xl font-bold mb-2">Quality Penalty Report</h1>
+                <p className="text-sm text-gray-500">ID: #{penaltyToPrint.id}</p>
+                <p className="text-sm text-gray-500">Issue Date: {format(new Date(penaltyToPrint.startDate), "MMMM d, yyyy")}</p>
+              </div>
+              <div className="text-right">
+                <div className="inline-block mb-2">
+                  {getTypeBadge(penaltyToPrint.penaltyType)}
+                </div>
+                <div className="inline-block ml-2">
+                  {getStatusBadge(penaltyToPrint.status)}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2">Description</h2>
+              <p className="text-gray-800 whitespace-pre-wrap">{penaltyToPrint.description}</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <h2 className="text-lg font-semibold mb-2">Details</h2>
+                <table className="w-full text-sm">
+                  <tbody>
+                    <tr>
+                      <td className="py-1 font-medium">Assigned To:</td>
+                      <td>{penaltyToPrint.assignedTo}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1 font-medium">Assigned By:</td>
+                      <td>{penaltyToPrint.assignedBy}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1 font-medium">Start Date:</td>
+                      <td>{format(new Date(penaltyToPrint.startDate), "MMMM d, yyyy")}</td>
+                    </tr>
+                    {penaltyToPrint.endDate && (
+                      <tr>
+                        <td className="py-1 font-medium">End Date:</td>
+                        <td>{format(new Date(penaltyToPrint.endDate), "MMMM d, yyyy")}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                {penaltyToPrint.penaltyType === 'financial' && (
+                  <>
+                    <h2 className="text-lg font-semibold mb-2">Financial Details</h2>
+                    <table className="w-full text-sm">
+                      <tbody>
+                        <tr>
+                          <td className="py-1 font-medium">Amount:</td>
+                          <td>{penaltyToPrint.amount} {penaltyToPrint.currency}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2">Related Violation</h2>
+              <p className="text-gray-800">Violation ID: #{penaltyToPrint.violationId}</p>
+            </div>
+            
+            <div className="mt-8 pt-6 border-t border-gray-200 text-xs text-gray-500 text-center">
+              <p>This is an official quality penalty report generated on {format(new Date(), "MMMM d, yyyy 'at' h:mm a")}</p>
+              <p>Modern Plastic Bag Factory Quality Management System</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
