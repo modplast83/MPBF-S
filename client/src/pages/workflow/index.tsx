@@ -139,13 +139,13 @@ export default function WorkflowIndex() {
             {showExtrusionTab && (
               <TabsContent value="extrusion" className="space-y-4">
                 <div className="bg-secondary-50 rounded-lg p-3 md:p-4">
-                  <div className="flex items-center mb-4">
-                    <div className="rounded-full bg-primary-100 p-2 mr-3">
+                  <div className="flex flex-wrap items-start md:items-center mb-4">
+                    <div className="rounded-full bg-primary-100 p-2 mr-3 shrink-0">
                       <span className="material-icons text-primary-500">merge_type</span>
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0 mt-1 md:mt-0">
                       <h4 className="font-medium text-sm md:text-base">{t("production.roll_management.extrusion_stage")}</h4>
-                      <p className="text-xs md:text-sm text-secondary-500">{t("production.roll_management.create_rolls")}</p>
+                      <p className="text-xs md:text-sm text-secondary-500 truncate">{t("production.roll_management.create_rolls")}</p>
                     </div>
                   </div>
                   
