@@ -138,6 +138,37 @@ export default function QualityViolations() {
       });
     },
   });
+  
+  // Delete violation mutation
+  const deleteViolation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/quality-violations/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete violation");
+      }
+
+      return true;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Violation Deleted",
+        description: "The quality violation has been successfully deleted.",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/quality-violations"],
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   // Handle form submission
   const onSubmit = (data: ViolationFormValues) => {
