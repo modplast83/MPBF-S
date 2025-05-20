@@ -35,13 +35,16 @@ export default function OrdersIndex() {
     queryKey: [API_ENDPOINTS.ORDERS],
   });
   
-  // Filter orders based on active tab
-  const filteredOrders = orders?.filter(order => {
-    if (activeTab === "all") return true;
-    
-    // Match the status with the tab value
-    return order.status === activeTab;
-  });
+  // Filter orders based on active tab and sort by order ID descending
+  const filteredOrders = orders
+    ?.filter(order => {
+      if (activeTab === "all") return true;
+      
+      // Match the status with the tab value
+      return order.status === activeTab;
+    })
+    // Sort by order ID in descending order
+    .sort((a, b) => b.id - a.id);
 
   const { data: customers } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
