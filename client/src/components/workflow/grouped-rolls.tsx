@@ -50,15 +50,15 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
     );
   };
 
-  // Get customer name for a job order
-  const getCustomerName = (jobOrderId: number): string => {
+  // Get customer for a job order
+  const getCustomer = (jobOrderId: number): Customer | undefined => {
     const jobOrder = jobOrders.find(jo => jo.id === jobOrderId);
-    if (!jobOrder) return t("common.unknown_customer");
+    if (!jobOrder) return undefined;
 
     // First check if customerId is directly on the job order
     if (jobOrder.customerId && customers) {
       const customer = customers.find(c => c.id === jobOrder.customerId);
-      if (customer) return customer.name;
+      if (customer) return customer;
     }
 
     // Otherwise, try to get customer through customer product relation
@@ -66,11 +66,23 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
       const customerProduct = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
       if (customerProduct) {
         const customer = customers.find(c => c.id === customerProduct.customerId);
-        if (customer) return customer.name;
+        if (customer) return customer;
       }
     }
 
-    return t("common.unknown_customer");
+    return undefined;
+  };
+  
+  // Get customer name for a job order
+  const getCustomerName = (jobOrderId: number): string => {
+    const customer = getCustomer(jobOrderId);
+    return customer ? customer.name : t("common.unknown_customer");
+  };
+  
+  // Get customer Arabic name for a job order
+  const getCustomerNameAr = (jobOrderId: number): string => {
+    const customer = getCustomer(jobOrderId);
+    return customer?.nameAr || "";
   };
 
   // Get product details for a job order
@@ -148,7 +160,12 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
                     <h4 className="font-medium text-sm sm:text-base">
                       <span className="text-error-600">JO #{jobOrderId}</span>
                     </h4>
-                    <p className="text-xs sm:text-sm text-secondary-500 truncate max-w-[200px] sm:max-w-none">{getCustomerName(jobOrderId)}</p>
+                    <p className="text-xs sm:text-sm text-secondary-500 truncate max-w-[200px] sm:max-w-none">
+                      {getCustomerName(jobOrderId)}
+                      {getCustomerNameAr(jobOrderId) && 
+                        <span className="mr-1 pr-1"> - {getCustomerNameAr(jobOrderId)}</span>
+                      }
+                    </p>
                   </div>
                 </div>
                 <div className="text-xs sm:text-sm text-secondary-500 truncate">
