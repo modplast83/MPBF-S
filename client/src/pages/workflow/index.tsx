@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RollCard } from "@/components/workflow/roll-card";
 import { JobOrdersForExtrusion } from "@/components/workflow/job-orders-for-extrusion-fixed";
+import { GroupedRolls } from "@/components/workflow/grouped-rolls";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Roll } from "@shared/schema";
 import { useTranslation } from "react-i18next";
@@ -211,19 +212,7 @@ export default function WorkflowIndex() {
                         <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
                       </>
                     ) : printingRolls && printingRolls.length > 0 ? (
-                      // Sort rolls by job order ID first, then by roll ID
-                      [...printingRolls]
-                        .sort((a, b) => {
-                          // First sort by job order ID
-                          if (a.jobOrderId !== b.jobOrderId) {
-                            return a.jobOrderId - b.jobOrderId;
-                          }
-                          // Then sort by roll ID
-                          return a.id.localeCompare(b.id);
-                        })
-                        .map((roll) => (
-                          <RollCard key={roll.id} roll={roll} />
-                        ))
+                      <GroupedRolls rolls={printingRolls} stage="printing" />
                     ) : (
                       <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                         <span className="material-icons text-3xl mb-2">hourglass_empty</span>
@@ -263,20 +252,7 @@ export default function WorkflowIndex() {
                         <div className="animate-pulse bg-white p-3 rounded border border-secondary-200 h-32"></div>
                       </>
                     ) : cuttingRolls && cuttingRolls.length > 0 ? (
-                      // Filter out completed rolls from the cutting stage view and sort by job order ID and roll ID
-                      [...cuttingRolls]
-                        .filter(roll => roll.status !== "completed")
-                        .sort((a, b) => {
-                          // First sort by job order ID
-                          if (a.jobOrderId !== b.jobOrderId) {
-                            return a.jobOrderId - b.jobOrderId;
-                          }
-                          // Then sort by roll ID
-                          return a.id.localeCompare(b.id);
-                        })
-                        .map((roll) => (
-                          <RollCard key={roll.id} roll={roll} />
-                        ))
+                      <GroupedRolls rolls={cuttingRolls} stage="cutting" />
                     ) : (
                       <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                         <span className="material-icons text-3xl mb-2">hourglass_empty</span>
