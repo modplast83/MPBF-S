@@ -40,7 +40,12 @@ export default function OrdersIndex() {
     ?.filter(order => {
       if (activeTab === "all") return true;
       
-      // Match the status with the tab value
+      // Special case for "processing" tab - show both "processing" and "For Production" status orders
+      if (activeTab === "processing") {
+        return order.status === "processing" || order.status === "For Production";
+      }
+      
+      // Match the status with the tab value for other tabs
       return order.status === activeTab;
     })
     // Sort by order ID in descending order
