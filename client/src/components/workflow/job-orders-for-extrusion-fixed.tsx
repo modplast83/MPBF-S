@@ -18,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { RollDialog } from "@/components/workflow/roll-dialog";
 import { AuthProvider } from "@/hooks/useAuth";
-import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item, MasterBatch } from "@shared/schema";
+import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item, MasterBatch, Order } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
 
@@ -53,6 +53,11 @@ export function JobOrdersForExtrusion() {
   // Fetch all customers
   const { data: customers = [], isLoading: customersLoading } = useQuery<Customer[]>({
     queryKey: [API_ENDPOINTS.CUSTOMERS],
+  });
+  
+  // Fetch all orders
+  const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
+    queryKey: [API_ENDPOINTS.ORDERS],
   });
   
   // Fetch all items
@@ -273,7 +278,8 @@ export function JobOrdersForExtrusion() {
     return `${product.sizeCaption || ""} ${product.thickness ? product.thickness + 'μm' : ""}`;
   };
 
-  // Filter job orders for the extrusion stage (pending or in_progress)
+  // Filter job orders for the extrusion stage
+  // Only show job orders for orders with status "processing" or "For Production"
   // Also, remove job orders that are already fully extruded (100% progress)
   const jobOrdersForExtrusion = jobOrders.filter(job => {
     // Only include pending and in_progress job orders 
@@ -289,10 +295,16 @@ export function JobOrdersForExtrusion() {
       return false;
     }
     
-    return true;
+    // Check the parent order status - only include orders with "processing" or "For Production" status
+    const parentOrder = orders.find(order => order.id === job.orderId);
+    if (!parentOrder) {
+      return false;
+    }
+    
+    return parentOrder.status === "processing" || parentOrder.status === "For Production";
   });
 
-  if (jobOrdersLoading || customerProductsLoading || customersLoading || itemsLoading || masterBatchesLoading) {
+  if (jobOrdersLoading || customerProductsLoading || customersLoading || itemsLoading || masterBatchesLoading || ordersLoading) {
     return (
       <div className="space-y-4">
         <div className="animate-pulse bg-secondary-100 h-40 rounded-lg"></div>
