@@ -95,40 +95,36 @@ export default function WorkflowIndex() {
           <Tabs defaultValue={activeTab || undefined} onValueChange={setActiveTab}>
             {/* Dynamic TabsList based on visible tabs */}
             <TabsList 
-              className={`grid w-full ${
-                visibleTabsCount === 1 ? 'grid-cols-1' : 
-                visibleTabsCount === 2 ? 'grid-cols-2' : 
-                'grid-cols-3'
-              } mb-4 md:mb-6 overflow-hidden`}
+              className="w-full flex mb-4 md:mb-6 p-0.5 gap-0.5 md:gap-1 bg-muted overflow-hidden"
             >
               {showExtrusionTab && (
-                <TabsTrigger value="extrusion" className="flex items-center justify-center gap-1 py-2 px-0.5 md:px-1.5 h-auto text-center">
-                  <span className="material-icons text-primary-500 text-base">merge_type</span>
+                <TabsTrigger value="extrusion" className="flex-1 flex flex-col md:flex-row items-center justify-center md:gap-1.5 py-1.5 md:py-2 px-0.5 md:px-2">
+                  <span className="material-icons text-primary-500 text-sm md:text-lg">merge_type</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.extrusion")}</span>
-                  <span className="text-[10px] md:text-xs md:hidden">Ext</span>
-                  <span className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-primary-100 text-xs flex items-center justify-center">
+                  <span className="text-[9px] md:hidden">E</span>
+                  <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-primary-100 text-[9px] md:text-xs flex items-center justify-center">
                     {extrusionLoading ? "-" : extrusionRolls?.length || 0}
                   </span>
                 </TabsTrigger>
               )}
               
               {showPrintingTab && (
-                <TabsTrigger value="printing" className="flex items-center justify-center gap-1 py-2 px-0.5 md:px-1.5 h-auto text-center">
-                  <span className="material-icons text-warning-500 text-base">format_color_fill</span>
+                <TabsTrigger value="printing" className="flex-1 flex flex-col md:flex-row items-center justify-center md:gap-1.5 py-1.5 md:py-2 px-0.5 md:px-2">
+                  <span className="material-icons text-warning-500 text-sm md:text-lg">format_color_fill</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.printing")}</span>
-                  <span className="text-[10px] md:text-xs md:hidden">Print</span>
-                  <span className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-warning-100 text-xs flex items-center justify-center">
+                  <span className="text-[9px] md:hidden">P</span>
+                  <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-warning-100 text-[9px] md:text-xs flex items-center justify-center">
                     {printingLoading ? "-" : printingRolls?.length || 0}
                   </span>
                 </TabsTrigger>
               )}
               
               {showCuttingTab && (
-                <TabsTrigger value="cutting" className="flex items-center justify-center gap-1 py-2 px-0.5 md:px-1.5 h-auto text-center">
-                  <span className="material-icons text-success text-base">content_cut</span>
+                <TabsTrigger value="cutting" className="flex-1 flex flex-col md:flex-row items-center justify-center md:gap-1.5 py-1.5 md:py-2 px-0.5 md:px-2">
+                  <span className="material-icons text-success text-sm md:text-lg">content_cut</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.cutting")}</span>
-                  <span className="text-[10px] md:text-xs md:hidden">Cut</span>
-                  <span className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-success-100 text-xs flex items-center justify-center">
+                  <span className="text-[9px] md:hidden">C</span>
+                  <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-success-100 text-[9px] md:text-xs flex items-center justify-center">
                     {cuttingLoading ? "-" : cuttingRolls?.filter(roll => roll.status !== "completed").length || 0}
                   </span>
                 </TabsTrigger>
