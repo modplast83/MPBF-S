@@ -169,7 +169,13 @@ export default function QualityReportsPage() {
     
     // Group checks by date
     const checksByDate = reportData.checks.reduce((acc: {[key: string]: {passed: number; failed: number}}, check) => {
-      const date = new Date(check.date).toISOString().split('T')[0];
+      // Handle potentially invalid date
+      let date;
+      try {
+        date = new Date(check.date).toISOString().split('T')[0];
+      } catch (error) {
+        date = new Date().toISOString().split('T')[0]; // Use current date as fallback
+      }
       
       if (!acc[date]) {
         acc[date] = { passed: 0, failed: 0 };
