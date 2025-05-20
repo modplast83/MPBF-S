@@ -48,6 +48,9 @@ export default function QualityViolations() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
+  const [violationToPrint, setViolationToPrint] = useState(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [violationToDelete, setViolationToDelete] = useState(null);
 
   // Fetch violations
   const { data: violations, isLoading } = useQuery({
@@ -173,6 +176,30 @@ export default function QualityViolations() {
   // Handle form submission
   const onSubmit = (data: ViolationFormValues) => {
     createViolation.mutate(data);
+  };
+  
+  // Handle delete confirmation
+  const handleDeleteClick = (id: number) => {
+    setViolationToDelete(id);
+    setShowDeleteDialog(true);
+  };
+  
+  // Handle confirmed deletion
+  const handleConfirmDelete = () => {
+    if (violationToDelete) {
+      deleteViolation.mutate(violationToDelete);
+      setShowDeleteDialog(false);
+      setViolationToDelete(null);
+    }
+  };
+  
+  // Handle print violation
+  const handlePrintViolation = (violation) => {
+    setViolationToPrint(violation);
+    setTimeout(() => {
+      window.print();
+      setViolationToPrint(null);
+    }, 100);
   };
 
   // Filter and sort violations
@@ -504,6 +531,8 @@ export default function QualityViolations() {
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getSeverityBadge={getSeverityBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintViolation}
           />
         </TabsContent>
         
@@ -513,6 +542,8 @@ export default function QualityViolations() {
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getSeverityBadge={getSeverityBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintViolation}
           />
         </TabsContent>
         
@@ -522,6 +553,8 @@ export default function QualityViolations() {
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getSeverityBadge={getSeverityBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintViolation}
           />
         </TabsContent>
         
@@ -552,7 +585,9 @@ function ViolationTable({
   violations, 
   isLoading,
   getStatusBadge,
-  getSeverityBadge
+  getSeverityBadge,
+  onDelete,
+  onPrint
 }) {
   if (isLoading) {
     return (
@@ -605,7 +640,25 @@ function ViolationTable({
                 <TableCell>{getStatusBadge(violation.status)}</TableCell>
                 <TableCell>{violation.reportedBy}</TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">View</Button>
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      title="Print violation details"
+                      onClick={() => onPrint && onPrint(violation)}
+                    >
+                      <FileWarning className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      title="Delete violation"
+                      onClick={() => onDelete && onDelete(violation.id)}
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
