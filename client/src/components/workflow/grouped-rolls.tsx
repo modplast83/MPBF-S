@@ -153,7 +153,7 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
                 </div>
                 <div className="text-xs sm:text-sm text-secondary-500 truncate">
                   <p>{getProductDetails(jobOrderId)}</p>
-                  <p className="text-right">{t("common.rolls_count")}: {rolls.length}</p>
+                  <p className="text-right">Roll Count: {rolls.length}</p>
                 </div>
               </div>
             </AccordionTrigger>
