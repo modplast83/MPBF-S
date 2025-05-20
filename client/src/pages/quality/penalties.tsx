@@ -17,7 +17,9 @@ import {
   Clock,
   FileWarning, 
   Gavel,
-  Plus, 
+  Plus,
+  Printer,
+  Trash2, 
   UserMinus,
   XCircle
 } from "lucide-react";
@@ -187,6 +189,30 @@ export default function QualityPenalties() {
   // Handle form submission
   const onSubmit = (data: PenaltyFormValues) => {
     createPenalty.mutate(data);
+  };
+  
+  // Handle delete confirmation
+  const handleDeleteClick = (id: number) => {
+    setPenaltyToDelete(id);
+    setShowDeleteDialog(true);
+  };
+  
+  // Handle confirmed deletion
+  const handleConfirmDelete = () => {
+    if (penaltyToDelete) {
+      deletePenalty.mutate(penaltyToDelete);
+      setShowDeleteDialog(false);
+      setPenaltyToDelete(null);
+    }
+  };
+  
+  // Handle print penalty
+  const handlePrintPenalty = (penalty) => {
+    setPenaltyToPrint(penalty);
+    setTimeout(() => {
+      window.print();
+      setPenaltyToPrint(null);
+    }, 100);
   };
 
   // Filter and sort penalties
@@ -626,6 +652,8 @@ export default function QualityPenalties() {
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getTypeBadge={getTypeBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintPenalty}
           />
         </TabsContent>
         
@@ -674,7 +702,9 @@ function PenaltyTable({
   penalties, 
   isLoading,
   getStatusBadge,
-  getTypeBadge
+  getTypeBadge,
+  onDelete,
+  onPrint
 }) {
   if (isLoading) {
     return (
@@ -748,8 +778,27 @@ function PenaltyTable({
                   )}
                 </TableCell>
                 <TableCell>{penalty.assignedTo}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">View</Button>
+                <TableCell>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-blue-600"
+                      onClick={() => onPrint(penalty)}
+                    >
+                      <Printer className="h-4 w-4" />
+                      <span className="sr-only">Print</span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-red-600"
+                      onClick={() => onDelete(penalty.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
