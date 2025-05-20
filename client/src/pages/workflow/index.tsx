@@ -87,11 +87,11 @@ export default function WorkflowIndex() {
         </div>
       </div>
       
-      <Card>
-        <CardHeader className="pb-2 md:pb-6">
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-2 md:pb-6 px-3 sm:px-6">
           <CardTitle className="text-base md:text-lg">{t("production.roll_management.title")}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 sm:p-6">
           <Tabs defaultValue={activeTab || undefined} onValueChange={setActiveTab}>
             {/* Dynamic TabsList based on visible tabs */}
             <TabsList 
@@ -99,13 +99,13 @@ export default function WorkflowIndex() {
                 visibleTabsCount === 1 ? 'grid-cols-1' : 
                 visibleTabsCount === 2 ? 'grid-cols-2' : 
                 'grid-cols-3'
-              } mb-4 md:mb-6`}
+              } mb-4 md:mb-6 overflow-hidden`}
             >
               {showExtrusionTab && (
-                <TabsTrigger value="extrusion" className="flex items-center min-w-0 gap-1 py-2 px-1.5 h-auto text-center">
-                  <span className="material-icons text-primary-500 text-sm md:text-lg">merge_type</span>
+                <TabsTrigger value="extrusion" className="flex items-center justify-center gap-1 py-2 px-0.5 md:px-1.5 h-auto text-center">
+                  <span className="material-icons text-primary-500 text-base">merge_type</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.extrusion")}</span>
-                  <span className="text-xs md:text-sm md:hidden">Ext.</span>
+                  <span className="text-[10px] md:text-xs md:hidden">Ext</span>
                   <span className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-primary-100 text-xs flex items-center justify-center">
                     {extrusionLoading ? "-" : extrusionRolls?.length || 0}
                   </span>
@@ -113,10 +113,10 @@ export default function WorkflowIndex() {
               )}
               
               {showPrintingTab && (
-                <TabsTrigger value="printing" className="flex items-center min-w-0 gap-1 py-2 px-1.5 h-auto text-center">
-                  <span className="material-icons text-warning-500 text-sm md:text-lg">format_color_fill</span>
+                <TabsTrigger value="printing" className="flex items-center justify-center gap-1 py-2 px-0.5 md:px-1.5 h-auto text-center">
+                  <span className="material-icons text-warning-500 text-base">format_color_fill</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.printing")}</span>
-                  <span className="text-xs md:text-sm md:hidden">Print</span>
+                  <span className="text-[10px] md:text-xs md:hidden">Print</span>
                   <span className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-warning-100 text-xs flex items-center justify-center">
                     {printingLoading ? "-" : printingRolls?.length || 0}
                   </span>
@@ -124,10 +124,10 @@ export default function WorkflowIndex() {
               )}
               
               {showCuttingTab && (
-                <TabsTrigger value="cutting" className="flex items-center min-w-0 gap-1 py-2 px-1.5 h-auto text-center">
-                  <span className="material-icons text-success text-sm md:text-lg">content_cut</span>
+                <TabsTrigger value="cutting" className="flex items-center justify-center gap-1 py-2 px-0.5 md:px-1.5 h-auto text-center">
+                  <span className="material-icons text-success text-base">content_cut</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.cutting")}</span>
-                  <span className="text-xs md:text-sm md:hidden">Cut</span>
+                  <span className="text-[10px] md:text-xs md:hidden">Cut</span>
                   <span className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-success-100 text-xs flex items-center justify-center">
                     {cuttingLoading ? "-" : cuttingRolls?.filter(roll => roll.status !== "completed").length || 0}
                   </span>
