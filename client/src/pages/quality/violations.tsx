@@ -564,6 +564,8 @@ export default function QualityViolations() {
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getSeverityBadge={getSeverityBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintViolation}
           />
         </TabsContent>
         
@@ -573,9 +575,110 @@ export default function QualityViolations() {
             isLoading={isLoading}
             getStatusBadge={getStatusBadge}
             getSeverityBadge={getSeverityBadge}
+            onDelete={handleDeleteClick}
+            onPrint={handlePrintViolation}
           />
         </TabsContent>
       </Tabs>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" /> Confirm Deletion
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this quality violation? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="pt-4 pb-2">
+            <p className="text-sm text-muted-foreground mb-4">
+              Deleting this violation will permanently remove it from the system along with all associated records.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleConfirmDelete}
+              disabled={deleteViolation.isPending}
+            >
+              {deleteViolation.isPending ? "Deleting..." : "Delete Violation"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Print View (Hidden unless printing) */}
+      {violationToPrint && (
+        <div className="hidden print:block p-6">
+          <div className="max-w-4xl mx-auto border border-gray-200 p-6 rounded-md">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h1 className="text-2xl font-bold mb-2">Quality Violation Report</h1>
+                <p className="text-sm text-gray-500">ID: #{violationToPrint.id}</p>
+                <p className="text-sm text-gray-500">Date: {format(new Date(violationToPrint.reportDate), "MMMM d, yyyy")}</p>
+              </div>
+              <div className="text-right">
+                <div className="inline-block mb-2">
+                  {getSeverityBadge(violationToPrint.severity)}
+                </div>
+                <div className="inline-block ml-2">
+                  {getStatusBadge(violationToPrint.status)}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2">Description</h2>
+              <p className="text-gray-800 whitespace-pre-wrap">{violationToPrint.description}</p>
+            </div>
+            
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2">Business Impact</h2>
+              <p className="text-gray-800 whitespace-pre-wrap">{violationToPrint.impact}</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <h2 className="text-lg font-semibold mb-2">Details</h2>
+                <table className="w-full text-sm">
+                  <tbody>
+                    <tr>
+                      <td className="py-1 font-medium">Reported By:</td>
+                      <td>{violationToPrint.reportedBy}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1 font-medium">Type:</td>
+                      <td>{violationToPrint.violationType}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1 font-medium">Area:</td>
+                      <td>{violationToPrint.affectedArea}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                {violationToPrint.rootCause && (
+                  <>
+                    <h2 className="text-lg font-semibold mb-2">Root Cause</h2>
+                    <p className="text-gray-800 whitespace-pre-wrap">{violationToPrint.rootCause}</p>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            <div className="mt-8 pt-6 border-t border-gray-200 text-xs text-gray-500 text-center">
+              <p>This is an official quality violation report generated on {format(new Date(), "MMMM d, yyyy 'at' h:mm a")}</p>
+              <p>Modern Plastic Bag Factory Quality Management System</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

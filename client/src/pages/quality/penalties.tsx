@@ -54,6 +54,9 @@ export default function QualityPenalties() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
+  const [penaltyToPrint, setPenaltyToPrint] = useState(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [penaltyToDelete, setPenaltyToDelete] = useState(null);
 
   // Fetch penalties
   const { data: penalties, isLoading } = useQuery({
@@ -139,6 +142,38 @@ export default function QualityPenalties() {
       });
       form.reset();
       setShowForm(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Delete penalty mutation
+  const deletePenalty = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/quality-penalties/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete penalty");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Penalty Deleted",
+        description: "The quality penalty has been successfully deleted.",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/quality-penalties"],
+      });
     },
     onError: (error) => {
       toast({
