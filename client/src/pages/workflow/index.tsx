@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RollCard } from "@/components/workflow/roll-card";
-import { GroupedJobOrdersForExtrusion } from "@/components/workflow/grouped-job-orders";
+import { CollapsibleJobOrdersForExtrusion } from "@/components/workflow/collapsible-job-orders";
 import { GroupedRolls } from "@/components/workflow/grouped-rolls";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Roll } from "@shared/schema";
@@ -146,8 +146,8 @@ export default function WorkflowIndex() {
                     </div>
                   </div>
                   
-                  {/* Job Orders for Extrusion - Grouped by Order ID */}
-                  <GroupedJobOrdersForExtrusion />
+                  {/* Job Orders for Extrusion - Collapsible by Order ID */}
+                  <CollapsibleJobOrdersForExtrusion />
                   
                   {/* Active Extrusion Rolls */}
                   <div className="mt-4 md:mt-6">

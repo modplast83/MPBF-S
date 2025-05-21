@@ -1,6 +1,9 @@
-import { GroupedJobOrdersForExtrusion } from "./grouped-job-orders";
+import { CollapsibleJobOrdersForExtrusion } from "./collapsible-job-orders";
 
 // This is a wrapper component to maintain backward compatibility
 export function JobOrdersForExtrusion() {
-  return <GroupedJobOrdersForExtrusion />;
+  return <CollapsibleJobOrdersForExtrusion />;
 }
+
+// Re-export the new component
+export { CollapsibleJobOrdersForExtrusion as GroupedJobOrdersForExtrusion };
