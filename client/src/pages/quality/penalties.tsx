@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -208,9 +208,14 @@ export default function QualityPenalties() {
   
   // Handle print penalty
   const handlePrintPenalty = (penalty: QualityPenalty) => {
-    setPenaltyToPrint({...penalty});
+    // Create a clean copy of the penalty data without any internal React properties
+    const cleanPenalty = JSON.parse(JSON.stringify(penalty));
+    setPenaltyToPrint(cleanPenalty);
+    
+    // Use a timeout to ensure the printing component is rendered before printing
     setTimeout(() => {
       window.print();
+      
       // Delay resetting the print state to ensure print rendering completes
       setTimeout(() => {
         setPenaltyToPrint(null);
@@ -438,6 +443,7 @@ export default function QualityPenalties() {
                                   type="number" 
                                   placeholder="Enter penalty amount"
                                   {...field}
+                                  value={field.value?.toString() || ''}
                                   onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)} 
                                 />
                               </FormControl>
@@ -488,7 +494,7 @@ export default function QualityPenalties() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {users?.map((user) => (
+                              {users?.map((user: any) => (
                                 <SelectItem key={user.id} value={user.id}>
                                   {user.firstName || user.username}
                                 </SelectItem>
@@ -610,7 +616,7 @@ export default function QualityPenalties() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {users?.map((user) => (
+                            {users?.map((user: any) => (
                               <SelectItem key={user.id} value={user.id}>
                                 {user.firstName} {user.lastName} ({user.username})
                               </SelectItem>
