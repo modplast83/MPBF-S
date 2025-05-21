@@ -349,23 +349,23 @@ export default function OrdersIndex() {
                   {t("common.view")}
                   <span className="material-icons text-xs ml-1">arrow_forward</span>
                 </span>
-                <div className="flex space-x-1">
-                  {/* Status Change Dropdown for Mobile */}
+                <div className="flex space-x-0.5">
+                  {/* Status Change Dropdown for Mobile - Optimized for small screens */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button 
                         variant="ghost" 
-                        size="icon" 
+                        size="sm" 
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                         }}
-                        className="h-8 w-8 rounded-full text-secondary-500 hover:text-secondary-700 hover:bg-secondary-50"
+                        className="h-7 w-7 p-0 rounded-full text-secondary-500 hover:text-secondary-700 hover:bg-secondary-50"
                       >
-                        <span className="material-icons text-sm">swap_horiz</span>
+                        <span className="material-icons text-xs">swap_horiz</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="w-32">
                       <DropdownMenuItem 
                         onClick={(e) => {
                           e.preventDefault();
@@ -373,9 +373,9 @@ export default function OrdersIndex() {
                           handleStatusChange(order, "pending");
                         }}
                         disabled={order.status === "pending"}
-                        className={order.status === "pending" ? "bg-secondary-100" : ""}
+                        className={`text-xs py-1 ${order.status === "pending" ? "bg-secondary-100" : ""}`}
                       >
-                        <span className="w-3 h-3 rounded-full bg-secondary-300 mr-2"></span>
+                        <span className="w-2 h-2 rounded-full bg-secondary-300 mr-2"></span>
                         Pending
                       </DropdownMenuItem>
                       <DropdownMenuItem 
@@ -385,10 +385,10 @@ export default function OrdersIndex() {
                           handleStatusChange(order, "processing");
                         }}
                         disabled={order.status === "processing"}
-                        className={order.status === "processing" ? "bg-secondary-100" : ""}
+                        className={`text-xs py-1 ${order.status === "processing" ? "bg-secondary-100" : ""}`}
                       >
-                        <span className="w-3 h-3 rounded-full bg-primary-300 mr-2"></span>
-                        For Production
+                        <span className="w-2 h-2 rounded-full bg-primary-300 mr-2"></span>
+                        Production
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={(e) => {
@@ -397,9 +397,9 @@ export default function OrdersIndex() {
                           handleStatusChange(order, "hold");
                         }}
                         disabled={order.status === "hold"}
-                        className={order.status === "hold" ? "bg-secondary-100" : ""}
+                        className={`text-xs py-1 ${order.status === "hold" ? "bg-secondary-100" : ""}`}
                       >
-                        <span className="w-3 h-3 rounded-full bg-warning-300 mr-2"></span>
+                        <span className="w-2 h-2 rounded-full bg-warning-300 mr-2"></span>
                         Hold
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -407,15 +407,15 @@ export default function OrdersIndex() {
                   
                   <Button 
                     variant="ghost" 
-                    size="icon" 
+                    size="sm" 
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       handleDelete(order);
                     }} 
-                    className="h-8 w-8 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
+                    className="h-7 w-7 p-0 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
                   >
-                    <span className="material-icons text-sm">delete</span>
+                    <span className="material-icons text-xs">delete</span>
                   </Button>
                 </div>
               </CardFooter>
