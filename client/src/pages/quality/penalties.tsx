@@ -56,9 +56,9 @@ export default function QualityPenalties() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
-  const [penaltyToPrint, setPenaltyToPrint] = useState(null);
+  const [penaltyToPrint, setPenaltyToPrint] = useState<QualityPenalty | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [penaltyToDelete, setPenaltyToDelete] = useState(null);
+  const [penaltyToDelete, setPenaltyToDelete] = useState<number | null>(null);
 
   // Fetch penalties
   const { data: penalties, isLoading } = useQuery({
@@ -207,12 +207,15 @@ export default function QualityPenalties() {
   };
   
   // Handle print penalty
-  const handlePrintPenalty = (penalty) => {
-    setPenaltyToPrint(penalty);
+  const handlePrintPenalty = (penalty: QualityPenalty) => {
+    setPenaltyToPrint({...penalty});
     setTimeout(() => {
       window.print();
-      setPenaltyToPrint(null);
-    }, 100);
+      // Delay resetting the print state to ensure print rendering completes
+      setTimeout(() => {
+        setPenaltyToPrint(null);
+      }, 500);
+    }, 300);
   };
 
   // Filter and sort penalties
@@ -320,7 +323,7 @@ export default function QualityPenalties() {
 
   return (
     <div className="container mx-auto py-6">
-      <PageHeader heading="Quality Penalties" text="Assign and track penalties for quality violations" />
+      <PageHeader title="Quality Penalties" description="Assign and track penalties for quality violations" />
       
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6 mt-6">
         <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
@@ -825,6 +828,13 @@ function PenaltyTable({
   getTypeBadge,
   onDelete,
   onPrint
+}: {
+  penalties: QualityPenalty[];
+  isLoading: boolean;
+  getStatusBadge: (status: string) => React.ReactNode;
+  getTypeBadge: (type: string) => React.ReactNode;
+  onDelete: (id: number) => void;
+  onPrint: (penalty: QualityPenalty) => void;
 }) {
   if (isLoading) {
     return (
@@ -871,7 +881,7 @@ function PenaltyTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {penalties.map((penalty) => (
+            {penalties.map((penalty: QualityPenalty) => (
               <TableRow key={penalty.id}>
                 <TableCell className="font-medium">#{penalty.id}</TableCell>
                 <TableCell>{format(new Date(penalty.startDate), "MMM d, yyyy")}</TableCell>
