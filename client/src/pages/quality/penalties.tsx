@@ -749,22 +749,22 @@ export default function QualityPenalties() {
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h1 className="text-2xl font-bold mb-2">Quality Penalty Report</h1>
-                <p className="text-sm text-gray-500">ID: #{penaltyToPrint.id}</p>
-                <p className="text-sm text-gray-500">Issue Date: {format(new Date(penaltyToPrint.startDate), "MMMM d, yyyy")}</p>
+                <p className="text-sm text-gray-500">ID: #{penaltyToPrint.id || 'N/A'}</p>
+                <p className="text-sm text-gray-500">Issue Date: {penaltyToPrint.startDate ? format(new Date(penaltyToPrint.startDate), "MMMM d, yyyy") : 'N/A'}</p>
               </div>
               <div className="text-right">
                 <div className="inline-block mb-2">
-                  {getTypeBadge(penaltyToPrint.penaltyType)}
+                  {penaltyToPrint.penaltyType ? getTypeBadge(penaltyToPrint.penaltyType) : null}
                 </div>
                 <div className="inline-block ml-2">
-                  {getStatusBadge(penaltyToPrint.status)}
+                  {penaltyToPrint.status ? getStatusBadge(penaltyToPrint.status) : null}
                 </div>
               </div>
             </div>
             
             <div className="mb-6">
               <h2 className="text-lg font-semibold mb-2">Description</h2>
-              <p className="text-gray-800 whitespace-pre-wrap">{penaltyToPrint.description}</p>
+              <p className="text-gray-800 whitespace-pre-wrap">{penaltyToPrint.description || 'No description provided'}</p>
             </div>
             
             <div className="grid grid-cols-2 gap-4 mb-6">
@@ -774,15 +774,15 @@ export default function QualityPenalties() {
                   <tbody>
                     <tr>
                       <td className="py-1 font-medium">Assigned To:</td>
-                      <td>{penaltyToPrint.assignedTo}</td>
+                      <td>{penaltyToPrint.assignedTo || 'Not assigned'}</td>
                     </tr>
                     <tr>
                       <td className="py-1 font-medium">Assigned By:</td>
-                      <td>{penaltyToPrint.assignedBy}</td>
+                      <td>{penaltyToPrint.assignedBy || 'Not specified'}</td>
                     </tr>
                     <tr>
                       <td className="py-1 font-medium">Start Date:</td>
-                      <td>{format(new Date(penaltyToPrint.startDate), "MMMM d, yyyy")}</td>
+                      <td>{penaltyToPrint.startDate ? format(new Date(penaltyToPrint.startDate), "MMMM d, yyyy") : 'Not set'}</td>
                     </tr>
                     {penaltyToPrint.endDate && (
                       <tr>
@@ -801,7 +801,7 @@ export default function QualityPenalties() {
                       <tbody>
                         <tr>
                           <td className="py-1 font-medium">Amount:</td>
-                          <td>{penaltyToPrint.amount} {penaltyToPrint.currency}</td>
+                          <td>{penaltyToPrint.amount || 0} {penaltyToPrint.currency || ''}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -812,7 +812,7 @@ export default function QualityPenalties() {
             
             <div className="mb-6">
               <h2 className="text-lg font-semibold mb-2">Related Violation</h2>
-              <p className="text-gray-800">Violation ID: #{penaltyToPrint.violationId}</p>
+              <p className="text-gray-800">Violation ID: #{penaltyToPrint.violationId || 'N/A'}</p>
             </div>
             
             <div className="mt-8 pt-6 border-t border-gray-200 text-xs text-gray-500 text-center">
