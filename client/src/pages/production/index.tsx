@@ -7,7 +7,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { RollCard } from "@/components/workflow/roll-card";
-import { GroupedJobOrdersForExtrusion } from "@/components/workflow/grouped-job-orders";
+import { JobOrdersForExtrusion } from "@/components/workflow/job-orders-for-extrusion";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Roll, Order, Customer } from "@shared/schema";
 import { formatDateString } from "@/lib/utils";
@@ -171,8 +171,8 @@ export default function ProductionIndex() {
                       </div>
                     </div>
                     
-                    {/* Job Orders for Extrusion - Grouped by Order ID */}
-                    <GroupedJobOrdersForExtrusion />
+                    {/* Job Orders for Extrusion - Collapsible by Order ID */}
+                    <JobOrdersForExtrusion />
                     
                     {/* Active Extrusion Rolls */}
                     <div className="mt-6">
