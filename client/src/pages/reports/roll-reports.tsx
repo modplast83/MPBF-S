@@ -45,6 +45,18 @@ export default function RollReports() {
   const [activeTab, setActiveTab] = useState<string>('production');
 
   // Fetch data
+  const { data: extrusionRolls } = useQuery<Roll[]>({
+    queryKey: [API_ENDPOINTS.ROLLS_STAGE_EXTRUSION],
+  });
+  
+  const { data: printingRolls } = useQuery<Roll[]>({
+    queryKey: [API_ENDPOINTS.ROLLS_STAGE_PRINTING],
+  });
+  
+  const { data: cuttingRolls } = useQuery<Roll[]>({
+    queryKey: [API_ENDPOINTS.ROLLS_STAGE_CUTTING],
+  });
+  
   const { data: rolls } = useQuery<Roll[]>({
     queryKey: [API_ENDPOINTS.ROLLS],
   });

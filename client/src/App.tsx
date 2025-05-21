@@ -17,6 +17,10 @@ import WarehouseIndex from "@/pages/warehouse/index";
 import RawMaterials from "@/pages/warehouse/raw-materials";
 import FinalProducts from "@/pages/warehouse/final-products";
 import ReportsIndex from "@/pages/reports/index";
+import ReportsDashboard from "@/pages/reports/dashboard";
+import RollReportsPage from "@/pages/reports/roll-reports";
+import MixReportsPage from "@/pages/reports/mix-reports";
+import UserSectionReportsPage from "@/pages/reports/user-section-reports";
 import PerformancePage from "@/pages/reports/performance";
 import ProductionReportsPage from "@/pages/reports/production";
 import WarehouseReportsPage from "@/pages/reports/warehouse";
@@ -84,6 +88,10 @@ function App() {
                   <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" />
                   <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" />
                   <ProtectedRoute path="/reports" component={ReportsIndex} module="Reports" />
+                  <ProtectedRoute path="/reports/dashboard" component={ReportsDashboard} module="Reports" />
+                  <ProtectedRoute path="/reports/roll-reports" component={RollReportsPage} module="Reports" />
+                  <ProtectedRoute path="/reports/mix-reports" component={MixReportsPage} module="Reports" />
+                  <ProtectedRoute path="/reports/user-section-reports" component={UserSectionReportsPage} module="Reports" />
                   <ProtectedRoute path="/reports/performance" component={PerformancePage} module="Performance Metrics" />
                   <ProtectedRoute path="/reports/production" component={ProductionReportsPage} module="Production Reports" />
                   <ProtectedRoute path="/reports/warehouse" component={WarehouseReportsPage} module="Warehouse Reports" />

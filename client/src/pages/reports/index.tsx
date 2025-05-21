@@ -226,14 +226,94 @@ export default function ReportsIndex() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Link href="/reports/dashboard" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Reports Dashboard</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-blue-50 rounded mb-3">
+                <span className="material-icons text-4xl text-blue-400">dashboard</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Comprehensive overview of all factory operations with visual metrics
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link href="/reports/roll-reports" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Roll Reports</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-orange-50 rounded mb-3">
+                <span className="material-icons text-4xl text-orange-400">category</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Detailed analysis of roll production across all stages
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link href="/reports/mix-reports" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Mix Material Reports</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-green-50 rounded mb-3">
+                <span className="material-icons text-4xl text-green-400">blender</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Track and analyze mix material usage, patterns and trends
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link href="/reports/user-section-reports" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">User & Section Reports</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-purple-50 rounded mb-3">
+                <span className="material-icons text-4xl text-purple-400">people</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Performance analysis by user and production section
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link href="/reports/quality" className="block no-underline text-current">
+          <Card className="h-full hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">{t("reports.quality_report")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-32 bg-red-50 rounded mb-3">
+                <span className="material-icons text-4xl text-red-400">verified</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Track quality issues, violations, and corrective actions
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
         <Link href="/reports/performance" className="block no-underline text-current">
           <Card className="h-full hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">{t("performance.title")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center h-32 bg-blue-50 rounded mb-3">
-                <span className="material-icons text-4xl text-blue-400">insights</span>
+              <div className="flex items-center justify-center h-32 bg-indigo-50 rounded mb-3">
+                <span className="material-icons text-4xl text-indigo-400">insights</span>
               </div>
               <p className="text-sm text-gray-600">
                 {t("performance.production_efficiency")}
@@ -248,8 +328,8 @@ export default function ReportsIndex() {
               <CardTitle className="text-lg">{t("reports.production_report")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center h-32 bg-orange-50 rounded mb-3">
-                <span className="material-icons text-4xl text-orange-400">precision_manufacturing</span>
+              <div className="flex items-center justify-center h-32 bg-amber-50 rounded mb-3">
+                <span className="material-icons text-4xl text-amber-400">precision_manufacturing</span>
               </div>
               <p className="text-sm text-gray-600">
                 {t("reports.comprehensive_production_data")}
@@ -264,27 +344,11 @@ export default function ReportsIndex() {
               <CardTitle className="text-lg">{t("reports.warehouse_reports")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center h-32 bg-green-50 rounded mb-3">
-                <span className="material-icons text-4xl text-green-400">inventory_2</span>
+              <div className="flex items-center justify-center h-32 bg-cyan-50 rounded mb-3">
+                <span className="material-icons text-4xl text-cyan-400">inventory_2</span>
               </div>
               <p className="text-sm text-gray-600">
                 {t("reports.track_inventory")}
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-        
-        <Link href="/reports/quality" className="block no-underline text-current">
-          <Card className="h-full hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">{t("reports.quality_report")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-32 bg-purple-50 rounded mb-3">
-                <span className="material-icons text-4xl text-purple-400">verified</span>
-              </div>
-              <p className="text-sm text-gray-600">
-                {t("reports.analyze_quality")}
               </p>
             </CardContent>
           </Card>
@@ -296,8 +360,8 @@ export default function ReportsIndex() {
               <CardTitle className="text-lg">{t("reports.workflow_report")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center h-32 bg-indigo-50 rounded mb-3">
-                <span className="material-icons text-4xl text-indigo-400">account_tree</span>
+              <div className="flex items-center justify-center h-32 bg-teal-50 rounded mb-3">
+                <span className="material-icons text-4xl text-teal-400">account_tree</span>
               </div>
               <p className="text-sm text-gray-600">
                 {t("reports.analyze_by_section_operator_item")}
@@ -305,34 +369,6 @@ export default function ReportsIndex() {
             </CardContent>
           </Card>
         </Link>
-        
-        <Card className="h-full">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">{t("reports.efficiency_report")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center h-32 bg-cyan-50 rounded mb-3">
-              <span className="material-icons text-4xl text-cyan-400">show_chart</span>
-            </div>
-            <p className="text-sm text-gray-600">
-              {t("reports.analyze_manufacturing_efficiency")}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="h-full">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">{t("reports.cost_analysis")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center h-32 bg-amber-50 rounded mb-3">
-              <span className="material-icons text-4xl text-amber-400">attach_money</span>
-            </div>
-            <p className="text-sm text-gray-600">
-              {t("reports.production_cost_analysis")}
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       <Card>
