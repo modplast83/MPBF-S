@@ -308,6 +308,9 @@ export function GroupedJobOrdersForExtrusion() {
   const sortedGroupKeys = Object.keys(groupedJobOrders)
     .map(Number)
     .sort((a, b) => a - b);
+    
+  // Track which orders are expanded
+  const [expandedOrderIds, setExpandedOrderIds] = useState<number[]>([]);
 
   if (jobOrdersLoading || customerProductsLoading || customersLoading || itemsLoading || masterBatchesLoading || ordersLoading) {
     return (
@@ -351,7 +354,16 @@ export function GroupedJobOrdersForExtrusion() {
             
             return (
               <div key={orderId} className="border border-secondary-200 rounded-lg overflow-hidden bg-white shadow-sm">
-                <div className="bg-primary-50 px-4 py-3 border-b border-secondary-200">
+                <div 
+                  className={`bg-primary-50 px-4 py-3 border-b border-secondary-200 cursor-pointer hover:bg-primary-100 transition-colors ${expandedOrderIds.includes(orderId) ? 'border-b-primary-200' : 'border-b-transparent'}`}
+                  onClick={() => {
+                    setExpandedOrderIds(prev => 
+                      prev.includes(orderId) 
+                        ? prev.filter(id => id !== orderId)
+                        : [...prev, orderId]
+                    );
+                  }}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="rounded-full bg-primary-600 p-1.5 mr-3">
@@ -362,15 +374,21 @@ export function GroupedJobOrdersForExtrusion() {
                         <p className="text-xs text-secondary-600 truncate max-w-[200px] sm:max-w-[300px]">{customerName}</p>
                       </div>
                     </div>
-                    <Badge className="bg-primary-100 text-primary-700 hover:bg-primary-200 text-xs">{orderJobOrders.length} {t("orders.job_orders")}</Badge>
+                    <div className="flex items-center">
+                      <Badge className="bg-primary-100 text-primary-700 hover:bg-primary-200 text-xs mr-2">{orderJobOrders.length} {t("orders.job_orders")}</Badge>
+                      <span className="material-icons text-primary-600 text-sm transition-transform duration-200" style={{ transform: expandedOrderIds.includes(orderId) ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                        expand_more
+                      </span>
+                    </div>
                   </div>
                 </div>
                 
-                <Accordion
-                  type="multiple"
-                  value={expandedOrders.map(String)}
-                  className="divide-y divide-secondary-100"
-                >
+                {expandedOrderIds.includes(orderId) && (
+                  <Accordion
+                    type="multiple"
+                    value={expandedOrders.map(String)}
+                    className="divide-y divide-secondary-100"
+                  >
                   {orderJobOrders.map((jobOrder) => {
                     const isExpanded = expandedOrders.includes(jobOrder.id);
                     const progressPercentage = calculateProgress(jobOrder);
