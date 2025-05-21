@@ -281,7 +281,7 @@ export function JobOrdersForExtrusion() {
   // Filter job orders for the extrusion stage
   // Only show job orders for orders with status "processing" or "For Production"
   // Also, remove job orders that are already fully extruded (100% progress)
-  const jobOrdersForExtrusion = jobOrders.filter(job => {
+  const filteredJobOrders = jobOrders.filter(job => {
     // Only include pending and in_progress job orders 
     if (job.status !== "pending" && job.status !== "in_progress") {
       return false;
@@ -303,6 +303,21 @@ export function JobOrdersForExtrusion() {
     
     return parentOrder.status === "processing" || parentOrder.status === "For Production";
   });
+
+  // Group job orders by order ID
+  const groupedJobOrders = filteredJobOrders.reduce((acc, job) => {
+    const orderId = job.orderId;
+    if (!acc[orderId]) {
+      acc[orderId] = [];
+    }
+    acc[orderId].push(job);
+    return acc;
+  }, {} as Record<number, JobOrder[]>);
+
+  // Sort the groups: first by order ID
+  const sortedGroupKeys = Object.keys(groupedJobOrders)
+    .map(Number)
+    .sort((a, b) => a - b);
 
   if (jobOrdersLoading || customerProductsLoading || customersLoading || itemsLoading || masterBatchesLoading || ordersLoading) {
     return (
@@ -328,7 +343,7 @@ export function JobOrdersForExtrusion() {
         )}
       </AuthProvider>
       
-      {jobOrdersForExtrusion.length === 0 ? (
+      {filteredJobOrders.length === 0 ? (
         <Card className="bg-white border border-dashed border-secondary-200">
           <CardContent className="py-6 text-center">
             <span className="material-icons text-3xl text-secondary-400 mb-2">assignment</span>
@@ -336,26 +351,51 @@ export function JobOrdersForExtrusion() {
           </CardContent>
         </Card>
       ) : (
-        <Accordion
-          type="multiple"
-          value={expandedOrders.map(String)}
-          className="space-y-3"
-        >
-          {jobOrdersForExtrusion.map((jobOrder) => {
-            const isExpanded = expandedOrders.includes(jobOrder.id);
-            const progressPercentage = calculateProgress(jobOrder);
-            const isComplete = isJobOrderFullyExtruded(jobOrder);
-            
-            // Only get rolls when the job order is expanded
-            const jobOrderRolls = isExpanded 
-              ? extrusionRolls.filter(roll => roll.jobOrderId === jobOrder.id)
-              : [];
+        <div className="space-y-6">
+          {sortedGroupKeys.map(orderId => {
+            const orderJobOrders = groupedJobOrders[orderId];
+            const parentOrder = orders.find(order => order.id === orderId);
+            const customerName = parentOrder ? 
+              (customers.find(c => c.id === parentOrder.customerId)?.name || t("common.unknown_customer")) :
+              t("common.unknown_customer");
             
             return (
+              <div key={orderId} className="border border-secondary-200 rounded-lg overflow-hidden bg-white">
+                <div className="bg-secondary-100 px-4 py-3 border-b border-secondary-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="rounded-full bg-primary-600 p-1.5 mr-3">
+                        <span className="material-icons text-xs text-white">receipt_long</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm">{t("orders.order")} #{orderId}</h4>
+                        <p className="text-xs text-secondary-500 truncate max-w-[200px]">{customerName}</p>
+                      </div>
+                    </div>
+                    <Badge className="text-xs">{orderJobOrders.length} {t("orders.job_orders")}</Badge>
+                  </div>
+                </div>
+                
+                <Accordion
+                  type="multiple"
+                  value={expandedOrders.map(String)}
+                  className="divide-y divide-secondary-100"
+                >
+                  {orderJobOrders.map((jobOrder) => {
+                    const isExpanded = expandedOrders.includes(jobOrder.id);
+                    const progressPercentage = calculateProgress(jobOrder);
+                    const isComplete = isJobOrderFullyExtruded(jobOrder);
+                    
+                    // Only get rolls when the job order is expanded
+                    const jobOrderRolls = isExpanded 
+                      ? extrusionRolls.filter(roll => roll.jobOrderId === jobOrder.id)
+                      : [];
+                    
+                    return (
               <AccordionItem
                 key={jobOrder.id}
                 value={String(jobOrder.id)}
-                className="bg-white rounded-lg border border-secondary-200 overflow-hidden"
+                className="bg-white overflow-hidden"
               >
                 <AccordionTrigger 
                   onClick={(e) => {
