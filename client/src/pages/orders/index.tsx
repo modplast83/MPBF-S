@@ -310,27 +310,36 @@ export default function OrdersIndex() {
                 <StatusBadge status={order.status} />
               </CardHeader>
               <CardContent className="p-3 pt-2">
-                <div className="grid grid-cols-2 gap-2 mb-2">
+                <div className="grid grid-cols-1 gap-2 mb-2">
                   <div>
                     <p className="text-xs text-gray-500">{t("orders.customer")}</p>
-                    <p className="text-sm font-medium truncate">{getCustomerName(order.customerId)}</p>
+                    <p className="text-sm font-medium truncate">
+                      {/* Limit customer name to 35 characters on mobile */}
+                      {getCustomerName(order.customerId).length > 35 
+                        ? getCustomerName(order.customerId).substring(0, 35) + '...' 
+                        : getCustomerName(order.customerId)}
+                    </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500">{t("orders.customer_ar")}</p>
-                    <p className="text-sm font-medium truncate">{getCustomerNameAr(order.customerId)}</p>
-                  </div>
+                  {getCustomerNameAr(order.customerId) !== "-" && (
+                    <div>
+                      <p className="text-xs text-gray-500">{t("orders.customer_ar")}</p>
+                      <p className="text-sm font-medium truncate">{getCustomerNameAr(order.customerId)}</p>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="mt-2 pt-2 border-t border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500">{t("orders.plate_drawer_code")}</p>
-                    <p className="text-sm font-medium">{getCustomerPlateDrawerCode(order.customerId)}</p>
-                  </div>
+                  {getCustomerPlateDrawerCode(order.customerId) !== "-" && (
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs text-gray-500">{t("orders.plate_drawer_code")}</p>
+                      <p className="text-sm font-medium">{getCustomerPlateDrawerCode(order.customerId)}</p>
+                    </div>
+                  )}
                   
                   {order.note && (
                     <div className="mt-2 pt-2 border-t border-gray-100">
                       <p className="text-xs text-gray-500">{t("orders.note")}</p>
-                      <p className="text-sm mt-1 text-gray-700">{order.note}</p>
+                      <p className="text-sm mt-1 text-gray-700 line-clamp-2">{order.note}</p>
                     </div>
                   )}
                 </div>
