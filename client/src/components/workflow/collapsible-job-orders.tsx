@@ -373,7 +373,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                       </div>
                     </div>
                     <div className="flex items-center">
-                      <Badge className="bg-primary-100 text-primary-700 hover:bg-primary-200 text-xs mr-2">{orderJobOrders.length} {t("orders.job_orders")}</Badge>
+                      <Badge className="bg-primary-100 text-primary-700 hover:bg-primary-200 text-xs mr-2">{orderJobOrders.length} JO Counts</Badge>
                       <span className="material-icons text-primary-600 text-sm transition-transform duration-200" style={{ transform: expandedOrderIds.includes(orderId) ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                         expand_more
                       </span>
