@@ -296,7 +296,7 @@ export function RollCard({ roll }: RollCardProps) {
           {/* Customer name at the top in bigger, bold font */}
           <div className="mb-2 md:mb-3">
             <p className="font-bold text-base md:text-lg truncate">
-              {customer?.name || t("common.loading")}
+              {customer?.name ? (customer.name.length > 35 ? customer.name.substring(0, 35) + '...' : customer.name) : t("common.loading")}
               {customer?.nameAr && <span className="mr-1 pr-1"> - {customer.nameAr}</span>}
             </p>
           </div>
