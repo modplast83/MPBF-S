@@ -350,19 +350,19 @@ export function GroupedJobOrdersForExtrusion() {
               t("common.unknown_customer");
             
             return (
-              <div key={orderId} className="border border-secondary-200 rounded-lg overflow-hidden bg-white">
-                <div className="bg-secondary-100 px-4 py-3 border-b border-secondary-200">
+              <div key={orderId} className="border border-secondary-200 rounded-lg overflow-hidden bg-white shadow-sm">
+                <div className="bg-primary-50 px-4 py-3 border-b border-secondary-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="rounded-full bg-primary-600 p-1.5 mr-3">
                         <span className="material-icons text-xs text-white">receipt_long</span>
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm">{t("orders.order")} #{orderId}</h4>
-                        <p className="text-xs text-secondary-500 truncate max-w-[200px]">{customerName}</p>
+                        <h4 className="font-medium text-sm text-primary-700">{t("orders.order")} #{orderId}</h4>
+                        <p className="text-xs text-secondary-600 truncate max-w-[200px] sm:max-w-[300px]">{customerName}</p>
                       </div>
                     </div>
-                    <Badge className="text-xs">{orderJobOrders.length} {t("orders.job_orders")}</Badge>
+                    <Badge className="bg-primary-100 text-primary-700 hover:bg-primary-200 text-xs">{orderJobOrders.length} {t("orders.job_orders")}</Badge>
                   </div>
                 </div>
                 
