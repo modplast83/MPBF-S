@@ -368,7 +368,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                         <span className="material-icons text-xs text-white">receipt_long</span>
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm text-primary-700">{t("orders.order")} #{orderId}</h4>
+                        <h4 className="font-medium text-sm text-primary-700">O #{orderId}</h4>
                         <p className="text-xs text-secondary-600 truncate max-w-[200px] sm:max-w-[300px]">{customerName}</p>
                       </div>
                     </div>
