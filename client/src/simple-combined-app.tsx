@@ -13,6 +13,7 @@ export function SimpleCombinedApp() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
+  const [subPage, setSubPage] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -69,8 +70,9 @@ export function SimpleCombinedApp() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const navigateTo = (page: string) => {
+  const navigateTo = (page: string, sub: string = "") => {
     setCurrentPage(page);
+    setSubPage(sub);
     // Close sidebar on mobile after navigation
     setSidebarOpen(false);
   };
@@ -156,8 +158,8 @@ export function SimpleCombinedApp() {
         <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed md:hidden top-16 bottom-0 left-0 w-64 bg-white shadow-lg z-50 transition-transform duration-300 ease-in-out overflow-y-auto`}>
           <nav className="p-4">
             <h2 className="text-lg font-semibold mb-4">Navigation</h2>
-            <ul className="space-y-2">
-              <li>
+            <div className="space-y-4">
+              <div>
                 <button 
                   onClick={() => navigateTo('dashboard')}
                   className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
@@ -169,54 +171,208 @@ export function SimpleCombinedApp() {
                   </svg>
                   Dashboard
                 </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('orders')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                     <polyline points="13 2 13 9 20 9"></polyline>
                   </svg>
                   Orders
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('production')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('orders', 'list')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Order List
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('orders', 'create')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      New Order
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('orders', 'job')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Job Orders
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M18 20V10m-6 10V4M6 20v-6"></path>
                   </svg>
                   Production
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('quality')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'dashboard')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Dashboard
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'mix')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Mix Materials
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'extrusion')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Extrusion
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'printing')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Printing
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'cutting')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Cutting
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="9 11 12 14 22 4"></polyline>
                     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                   </svg>
                   Quality
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('maintenance')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('quality', 'dashboard')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Dashboard
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('quality', 'checks')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Quality Checks
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('quality', 'violations')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Violations
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('quality', 'actions')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Corrective Actions
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                   </svg>
                   Maintenance
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('maintenance', 'dashboard')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Dashboard
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('maintenance', 'requests')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Requests
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('maintenance', 'schedule')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Schedule
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('maintenance', 'spare-parts')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Spare Parts
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <button 
+                  onClick={() => navigateTo('workflow')}
+                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
+                >
+                  <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z"></path>
+                  </svg>
+                  Workflow
                 </button>
-              </li>
-              <li>
+              </div>
+              
+              <div>
+                <button 
+                  onClick={() => navigateTo('cliches')}
+                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
+                >
+                  <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                    <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                  </svg>
+                  Cliches
+                </button>
+              </div>
+              
+              <div>
                 <button 
                   onClick={() => navigateTo('reports')}
                   className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
@@ -226,31 +382,119 @@ export function SimpleCombinedApp() {
                   </svg>
                   Reports
                 </button>
-              </li>
-              <li>
+              </div>
+              
+              <div>
                 <button 
                   onClick={() => navigateTo('tools')}
                   className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
                 >
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    <path d="M14 7.63v14"></path>
+                    <path d="M10 7.63v14"></path>
+                    <path d="M6 7.63v14"></path>
+                    <path d="M18 7.63v14"></path>
+                    <path d="M4 4.63h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2Z"></path>
                   </svg>
                   Tools
                 </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('setup')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="12" r="3"></circle>
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                   </svg>
                   Setup
-                </button>
-              </li>
-            </ul>
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'products')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Products
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'customers')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Customers
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'categories')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Categories
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'machines')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Machines
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'users')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Users
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
+                  <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"></path>
+                  </svg>
+                  System
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('system', 'permissions')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Permissions
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('system', 'database')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Database
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('system', 'sms')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      SMS Management
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('system', 'settings')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Settings
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </nav>
         </div>
         
@@ -258,8 +502,8 @@ export function SimpleCombinedApp() {
         <div className="hidden md:block w-64 bg-white shadow-lg overflow-y-auto">
           <nav className="p-4">
             <h2 className="text-lg font-semibold mb-4">Navigation</h2>
-            <ul className="space-y-2">
-              <li>
+            <div className="space-y-4">
+              <div>
                 <button 
                   onClick={() => navigateTo('dashboard')}
                   className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
@@ -271,54 +515,208 @@ export function SimpleCombinedApp() {
                   </svg>
                   Dashboard
                 </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('orders')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                     <polyline points="13 2 13 9 20 9"></polyline>
                   </svg>
                   Orders
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('production')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('orders', 'list')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Order List
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('orders', 'create')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      New Order
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('orders', 'job')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Job Orders
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M18 20V10m-6 10V4M6 20v-6"></path>
                   </svg>
                   Production
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('quality')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'dashboard')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Dashboard
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'mix')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Mix Materials
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'extrusion')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Extrusion
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'printing')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Printing
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('production', 'cutting')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Cutting
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="9 11 12 14 22 4"></polyline>
                     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                   </svg>
                   Quality
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('maintenance')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('quality', 'dashboard')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Dashboard
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('quality', 'checks')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Quality Checks
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('quality', 'violations')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Violations
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('quality', 'actions')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Corrective Actions
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                   </svg>
                   Maintenance
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('maintenance', 'dashboard')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Dashboard
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('maintenance', 'requests')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Requests
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('maintenance', 'schedule')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Schedule
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('maintenance', 'spare-parts')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Spare Parts
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <button 
+                  onClick={() => navigateTo('workflow')}
+                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
+                >
+                  <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z"></path>
+                  </svg>
+                  Workflow
                 </button>
-              </li>
-              <li>
+              </div>
+              
+              <div>
+                <button 
+                  onClick={() => navigateTo('cliches')}
+                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
+                >
+                  <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                    <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                  </svg>
+                  Cliches
+                </button>
+              </div>
+              
+              <div>
                 <button 
                   onClick={() => navigateTo('reports')}
                   className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
@@ -328,31 +726,119 @@ export function SimpleCombinedApp() {
                   </svg>
                   Reports
                 </button>
-              </li>
-              <li>
+              </div>
+              
+              <div>
                 <button 
                   onClick={() => navigateTo('tools')}
                   className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
                 >
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    <path d="M14 7.63v14"></path>
+                    <path d="M10 7.63v14"></path>
+                    <path d="M6 7.63v14"></path>
+                    <path d="M18 7.63v14"></path>
+                    <path d="M4 4.63h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2Z"></path>
                   </svg>
                   Tools
                 </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => navigateTo('setup')}
-                  className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 text-left"
-                >
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
                   <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="12" r="3"></circle>
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                   </svg>
                   Setup
-                </button>
-              </li>
-            </ul>
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'products')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Products
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'customers')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Customers
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'categories')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Categories
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'machines')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Machines
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('setup', 'users')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Users
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <div className="flex items-center p-2 text-sm font-medium text-gray-600 border-b">
+                  <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"></path>
+                  </svg>
+                  System
+                </div>
+                <ul className="pl-7 mt-1 space-y-1">
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('system', 'permissions')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Permissions
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('system', 'database')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Database
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('system', 'sms')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      SMS Management
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigateTo('system', 'settings')}
+                      className="w-full text-left p-1 text-sm hover:bg-gray-100 rounded"
+                    >
+                      Settings
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </nav>
         </div>
         
