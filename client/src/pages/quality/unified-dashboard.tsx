@@ -413,9 +413,10 @@ export default function UnifiedQualityDashboard() {
                                 }>
                                   {violation.severity}
                                 </Badge>
-                                <Badge variant={violation.status === "Open" ? "outline" : "success"} className={
-                                  violation.status !== "Open" ? badgeVariants.success : ""
-                                } className="ml-2">
+                                <Badge 
+                                  variant={violation.status === "Open" ? "outline" : "success"} 
+                                  className={`${violation.status !== "Open" ? badgeVariants.success : ""} ml-2`}
+                                >
                                   {violation.status}
                                 </Badge>
                               </div>
