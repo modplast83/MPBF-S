@@ -14,7 +14,13 @@ import {
   PlateCalculation, InsertPlateCalculation,
   AbaMaterialConfig, InsertAbaMaterialConfig,
   QualityViolation, InsertQualityViolation,
-  QualityPenalty, InsertQualityPenalty
+  QualityPenalty, InsertQualityPenalty,
+  // Maintenance module imports
+  MaintenanceRequest, InsertMaintenanceRequest,
+  MaintenanceAction, InsertMaintenanceAction,
+  SparePart, InsertSparePart,
+  MaintenanceLogbook, InsertMaintenanceLogbook,
+  MaintenanceSchedule, InsertMaintenanceSchedule
 } from "@shared/schema";
 import session from "express-session";
 
@@ -30,6 +36,59 @@ export interface IStorage {
   updateUser(id: string, user: Partial<User>): Promise<User | undefined>;
   deleteUser(id: string): Promise<boolean>;
   upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Maintenance Requests
+  getMaintenanceRequests(): Promise<MaintenanceRequest[]>;
+  getMaintenanceRequestsByMachine(machineId: string): Promise<MaintenanceRequest[]>;
+  getMaintenanceRequestsByStatus(status: string): Promise<MaintenanceRequest[]>;
+  getMaintenanceRequestsByUser(userId: string): Promise<MaintenanceRequest[]>;
+  getMaintenanceRequest(id: number): Promise<MaintenanceRequest | undefined>;
+  createMaintenanceRequest(request: InsertMaintenanceRequest): Promise<MaintenanceRequest>;
+  updateMaintenanceRequest(id: number, request: Partial<MaintenanceRequest>): Promise<MaintenanceRequest | undefined>;
+  deleteMaintenanceRequest(id: number): Promise<boolean>;
+  
+  // Maintenance Actions
+  getMaintenanceActions(): Promise<MaintenanceAction[]>;
+  getMaintenanceActionsByRequest(requestId: number): Promise<MaintenanceAction[]>;
+  getMaintenanceActionsByMachine(machineId: string): Promise<MaintenanceAction[]>;
+  getMaintenanceActionsByTechnician(userId: string): Promise<MaintenanceAction[]>;
+  getMaintenanceAction(id: number): Promise<MaintenanceAction | undefined>;
+  createMaintenanceAction(action: InsertMaintenanceAction): Promise<MaintenanceAction>;
+  updateMaintenanceAction(id: number, action: Partial<MaintenanceAction>): Promise<MaintenanceAction | undefined>;
+  deleteMaintenanceAction(id: number): Promise<boolean>;
+  
+  // Spare Parts
+  getSpareParts(): Promise<SparePart[]>;
+  getSparePartsByMachine(machineId: string): Promise<SparePart[]>;
+  getSparePartsByCategory(category: string): Promise<SparePart[]>;
+  getSparePartsByType(type: string): Promise<SparePart[]>;
+  getLowStockSpareParts(): Promise<SparePart[]>;
+  getSparePart(id: number): Promise<SparePart | undefined>;
+  createSparePart(part: InsertSparePart): Promise<SparePart>;
+  updateSparePart(id: number, part: Partial<SparePart>): Promise<SparePart | undefined>;
+  deleteSparePart(id: number): Promise<boolean>;
+  
+  // Maintenance Logbook
+  getMaintenanceLogbook(): Promise<MaintenanceLogbook[]>;
+  getMaintenanceLogbookByMachine(machineId: string): Promise<MaintenanceLogbook[]>;
+  getMaintenanceLogbookByType(type: string): Promise<MaintenanceLogbook[]>;
+  getMaintenanceLogbookByTechnician(technicianId: string): Promise<MaintenanceLogbook[]>;
+  getMaintenanceLogbookEntry(id: number): Promise<MaintenanceLogbook | undefined>;
+  createMaintenanceLogbookEntry(entry: InsertMaintenanceLogbook): Promise<MaintenanceLogbook>;
+  updateMaintenanceLogbookEntry(id: number, entry: Partial<MaintenanceLogbook>): Promise<MaintenanceLogbook | undefined>;
+  deleteMaintenanceLogbookEntry(id: number): Promise<boolean>;
+  
+  // Maintenance Schedule
+  getMaintenanceSchedule(): Promise<MaintenanceSchedule[]>;
+  getMaintenanceScheduleByMachine(machineId: string): Promise<MaintenanceSchedule[]>;
+  getMaintenanceScheduleByStatus(status: string): Promise<MaintenanceSchedule[]>;
+  getMaintenanceScheduleByFrequency(frequency: string): Promise<MaintenanceSchedule[]>;
+  getOverdueMaintenance(): Promise<MaintenanceSchedule[]>;
+  getUpcomingMaintenance(daysAhead: number): Promise<MaintenanceSchedule[]>;
+  getMaintenanceScheduleTask(id: number): Promise<MaintenanceSchedule | undefined>;
+  createMaintenanceScheduleTask(task: InsertMaintenanceSchedule): Promise<MaintenanceSchedule>;
+  updateMaintenanceScheduleTask(id: number, task: Partial<MaintenanceSchedule>): Promise<MaintenanceSchedule | undefined>;
+  deleteMaintenanceScheduleTask(id: number): Promise<boolean>;
   
   // Permissions management
   getPermissions(): Promise<Permission[]>;

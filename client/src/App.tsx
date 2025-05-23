@@ -1,130 +1,245 @@
-import { Switch, Route } from "wouter";
+import { Route, Switch } from "wouter";
 import Dashboard from "@/pages/dashboard";
-import SetupIndex from "@/pages/setup/index";
-import Categories from "@/pages/setup/categories";
+import NotFound from "@/pages/not-found";
+import AuthPage from "@/pages/auth-page";
+import Sidebar from "@/components/layout/sidebar";
+import Setup from "@/pages/setup";
+import WorkflowPage from "@/pages/workflow";
+import { ProtectedRouteWrapper } from "@/components/auth/protected-route-wrapper";
 import Products from "@/pages/setup/products";
 import Customers from "@/pages/setup/customers";
+import Categories from "@/pages/setup/categories";
 import Items from "@/pages/setup/items";
 import Sections from "@/pages/setup/sections";
-import Machines from "@/pages/setup/machines";
 import Users from "@/pages/setup/users";
-import OrdersIndex from "@/pages/orders/index";
-import OrderDetails from "@/pages/orders/[id]";
-import WorkflowIndex from "@/pages/workflow/index";
-import ProductionIndex from "@/pages/production/index";
-import MixMaterialsPage from "@/pages/production/mix-materials";
-import WarehouseIndex from "@/pages/warehouse/index";
+import Machines from "@/pages/setup/machines";
+import Orders from "@/pages/orders";
+import WarehousePage from "@/pages/warehouse";
+import ReportsPage from "@/pages/reports";
 import RawMaterials from "@/pages/warehouse/raw-materials";
 import FinalProducts from "@/pages/warehouse/final-products";
-import ReportsIndex from "@/pages/reports/index";
-import ReportsDashboard from "@/pages/reports/dashboard";
-import RollReportsPage from "@/pages/reports/roll-reports";
-import MixReportsPage from "@/pages/reports/mix-reports";
-import UserSectionReportsPage from "@/pages/reports/user-section-reports";
-import PerformancePage from "@/pages/reports/performance";
-import ProductionReportsPage from "@/pages/reports/production";
-import WarehouseReportsPage from "@/pages/reports/warehouse";
-import QualityReportsPage from "@/pages/reports/quality";
-import WorkflowReportsPage from "@/pages/reports/workflow";
-import SystemIndex from "@/pages/system/index";
-import Database from "@/pages/system/database";
-import Permissions from "@/pages/system/permissions-fixed";
-import ImportExport from "@/pages/system/import-export";
-import SmsIndex from "@/pages/system/sms/index";
-import QualityIndex from "@/pages/quality/index";
+import QualityPage from "@/pages/quality";
 import QualityCheckTypes from "@/pages/quality/check-types";
 import QualityChecks from "@/pages/quality/checks";
-import CorrectiveActions from "@/pages/quality/corrective-actions";
 import QualityViolations from "@/pages/quality/violations";
+import CorrectiveActions from "@/pages/quality/corrective-actions";
 import QualityPenalties from "@/pages/quality/penalties";
-import QualityReports from "@/pages/quality/reports";
-import SimplifiedViolations from "@/pages/quality/simplified-violations";
-import AuthPage from "@/pages/AuthPage";
-import NotFound from "@/pages/not-found";
-import MainLayout from "@/components/layout/main-layout";
-import { AuthProvider } from "@/hooks/use-auth-v2";
-import { PermissionsProvider } from "@/hooks/use-permissions";
-import { ProtectedRoute } from "@/components/auth/protected-route-v2";
-import { useEffect } from "react";
-import ToolsPage from "@/pages/tools/ToolsPage";
-import BagWeightCalculator from "@/pages/tools/bag-weight";
-import InkConsumptionCalculator from "@/pages/tools/ink-consumption";
-import UtilityTools from "@/pages/tools/utilities";
-import CostCalculatorPage from "@/pages/tools/cost-calculator";
-import MixColorsCalculator from "@/pages/tools/mix-colors";
-import ClichePage from "@/pages/cliches/index";
-import { User } from "@shared/schema";
+import Permissions from "@/pages/system/permissions";
+import DatabasePage from "@/pages/system/database";
+import ClichesPage from "@/pages/cliches";
+import ToolsPage from "@/pages/tools";
+import SMSManagement from "@/pages/system/sms";
+import MixMaterials from "@/pages/production/mix-materials";
+import ProductionPage from "@/pages/production";
+import MaintenanceDashboard from "@/pages/maintenance";
+import MaintenanceRequests from "@/pages/maintenance/requests";
 
-function App() {
-  // Remove any existing demo data flag
-  useEffect(() => {
-    localStorage.removeItem('demoDataInitialized');
-  }, []);
-
+export default function App() {
   return (
-    <AuthProvider>
-      {(authContext) => (
-        <PermissionsProvider user={authContext.user}>
-          <Switch>
-            <Route path="/auth" component={AuthPage} />
-            <Route path="*">
-              <MainLayout>
-                <Switch>
-                  <ProtectedRoute path="/" component={Dashboard} />
-                  <ProtectedRoute path="/setup" component={SetupIndex} module="Setup" />
-                  <ProtectedRoute path="/setup/categories" component={Categories} module="Categories" />
-                  <ProtectedRoute path="/setup/products" component={Products} module="Products" />
-                  <ProtectedRoute path="/setup/customers" component={Customers} module="Customers" />
-                  <ProtectedRoute path="/setup/items" component={Items} module="Items" />
-                  <ProtectedRoute path="/setup/sections" component={Sections} module="Sections" />
-                  <ProtectedRoute path="/setup/machines" component={Machines} module="Machines" />
-                  <ProtectedRoute path="/setup/users" component={Users} module="Users" />
-                  <ProtectedRoute path="/production" component={ProductionIndex} module="Production" />
-                  <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" sectionOnly={true} />
-                  <ProtectedRoute path="/orders" component={OrdersIndex} module="Orders" />
-                  <ProtectedRoute path="/orders/:id" component={OrderDetails} module="Orders" />
-                  <ProtectedRoute path="/workflow" component={WorkflowIndex} module="Workflow" workflowTab="extrusion" />
-                  <ProtectedRoute path="/warehouse" component={WarehouseIndex} module="Warehouse" />
-                  <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" />
-                  <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" />
-                  <ProtectedRoute path="/reports" component={ReportsIndex} module="Reports" />
-                  <ProtectedRoute path="/reports/dashboard" component={ReportsDashboard} module="Reports" />
-                  <ProtectedRoute path="/reports/roll-reports" component={RollReportsPage} module="Reports" />
-                  <ProtectedRoute path="/reports/mix-reports" component={MixReportsPage} module="Reports" />
-                  <ProtectedRoute path="/reports/user-section-reports" component={UserSectionReportsPage} module="Reports" />
-                  <ProtectedRoute path="/reports/performance" component={PerformancePage} module="Performance Metrics" />
-                  <ProtectedRoute path="/reports/production" component={ProductionReportsPage} module="Production Reports" />
-                  <ProtectedRoute path="/reports/warehouse" component={WarehouseReportsPage} module="Warehouse Reports" />
-                  <ProtectedRoute path="/reports/quality" component={QualityReportsPage} module="Quality Reports" />
-                  <ProtectedRoute path="/reports/workflow" component={WorkflowReportsPage} module="Workflow Reports" />
-                  <ProtectedRoute path="/quality" component={QualityIndex} module="Quality" />
-                  <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} module="Check Types" />
-                  <ProtectedRoute path="/quality/checks" component={QualityChecks} module="Quality Checks" />
-                  <ProtectedRoute path="/quality/corrective-actions" component={CorrectiveActions} module="Corrective Actions" />
-                  <ProtectedRoute path="/quality/violations" component={SimplifiedViolations} module="Quality Violations" />
-                  <ProtectedRoute path="/quality/penalties" component={QualityPenalties} module="Quality Penalties" />
-                  <ProtectedRoute path="/quality/reports" component={QualityReports} module="Violation Reports" />
-                  <ProtectedRoute path="/system" component={SystemIndex} module="System Settings" />
-                  <ProtectedRoute path="/system/database" component={Database} module="Database" />
-                  <ProtectedRoute path="/system/permissions" component={Permissions} module="Permissions" />
-                  <ProtectedRoute path="/system/import-export" component={ImportExport} module="Import & Export" />
-                  <ProtectedRoute path="/system/sms" component={SmsIndex} module="SMS Management" />
-                  <ProtectedRoute path="/tools" component={ToolsPage} module="Tools" />
-                  <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} module="Bag Weight Calculator" />
-                  <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} module="Ink Consumption" />
-                  <ProtectedRoute path="/tools/utilities" component={UtilityTools} module="Utility Tools" />
-                  <ProtectedRoute path="/tools/cost-calculator" component={CostCalculatorPage} module="Cost Calculator" />
-                  <ProtectedRoute path="/tools/mix-colors" component={MixColorsCalculator} module="Mix Colors" />
-                  <ProtectedRoute path="/cliches" component={ClichePage} module="Cliches" />
-                  <Route component={NotFound} />
-                </Switch>
-              </MainLayout>
-            </Route>
-          </Switch>
-        </PermissionsProvider>
-      )}
-    </AuthProvider>
+    <div className="flex h-screen">
+      <ProtectedRoute>
+        <Sidebar />
+      </ProtectedRoute>
+      <div className="flex-1 overflow-auto">
+        <Switch>
+          <Route path="/login" component={AuthPage} />
+          
+          {/* Main dashboard */}
+          <Route path="/">
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Setup section */}
+          <Route path="/setup">
+            <ProtectedRoute requiredModules={["Setup"]}>
+              <Setup />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/setup/products">
+            <ProtectedRoute requiredModules={["Products"]}>
+              <Products />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/setup/customers">
+            <ProtectedRoute requiredModules={["Customers"]}>
+              <Customers />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/setup/categories">
+            <ProtectedRoute requiredModules={["Categories"]}>
+              <Categories />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/setup/items">
+            <ProtectedRoute requiredModules={["Items"]}>
+              <Items />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/setup/sections">
+            <ProtectedRoute requiredModules={["Sections"]}>
+              <Sections />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/setup/users">
+            <ProtectedRoute requiredModules={["Users"]}>
+              <Users />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/setup/machines">
+            <ProtectedRoute requiredModules={["Machines"]}>
+              <Machines />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Orders */}
+          <Route path="/orders">
+            <ProtectedRoute requiredModules={["Orders"]}>
+              <Orders />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Workflow */}
+          <Route path="/workflow">
+            <ProtectedRoute requiredModules={["Workflow"]}>
+              <WorkflowPage />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Production */}
+          <Route path="/production">
+            <ProtectedRoute requiredModules={["Production"]}>
+              <ProductionPage />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/production/mix-materials">
+            <ProtectedRoute requiredModules={["Mix Materials"]}>
+              <MixMaterials />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Warehouse */}
+          <Route path="/warehouse">
+            <ProtectedRoute requiredModules={["Warehouse"]}>
+              <WarehousePage />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/warehouse/raw-materials">
+            <ProtectedRoute requiredModules={["Raw Materials"]}>
+              <RawMaterials />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/warehouse/final-products">
+            <ProtectedRoute requiredModules={["Final Products"]}>
+              <FinalProducts />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Quality */}
+          <Route path="/quality">
+            <ProtectedRoute requiredModules={["Quality"]}>
+              <QualityPage />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/quality/check-types">
+            <ProtectedRoute requiredModules={["Check Types"]}>
+              <QualityCheckTypes />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/quality/checks">
+            <ProtectedRoute requiredModules={["Checks"]}>
+              <QualityChecks />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/quality/violations">
+            <ProtectedRoute requiredModules={["Violations"]}>
+              <QualityViolations />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/quality/corrective-actions">
+            <ProtectedRoute requiredModules={["Corrective Actions"]}>
+              <CorrectiveActions />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/quality/penalties">
+            <ProtectedRoute requiredModules={["Penalties"]}>
+              <QualityPenalties />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Maintenance */}
+          <Route path="/maintenance">
+            <ProtectedRoute requiredModules={["Maintenance"]}>
+              <MaintenanceDashboard />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/maintenance/requests">
+            <ProtectedRoute requiredModules={["Maintenance"]}>
+              <MaintenanceRequests />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Reports */}
+          <Route path="/reports">
+            <ProtectedRoute requiredModules={["Reports"]}>
+              <ReportsPage />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Tools */}
+          <Route path="/tools">
+            <ProtectedRoute requiredModules={["Tools"]}>
+              <ToolsPage />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Cliches */}
+          <Route path="/cliches">
+            <ProtectedRoute requiredModules={["Cliches"]}>
+              <ClichesPage />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* System settings */}
+          <Route path="/system/permissions">
+            <ProtectedRoute requiredModules={["Permissions"]}>
+              <Permissions />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/system/database">
+            <ProtectedRoute requiredModules={["Database"]}>
+              <DatabasePage />
+            </ProtectedRoute>
+          </Route>
+          
+          <Route path="/system/sms">
+            <ProtectedRoute requiredModules={["SMS Management"]}>
+              <SMSManagement />
+            </ProtectedRoute>
+          </Route>
+          
+          {/* Fallback route */}
+          <Route component={NotFound} />
+        </Switch>
+      </div>
+    </div>
   );
 }
-
-export default App;

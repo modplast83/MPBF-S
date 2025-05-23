@@ -112,6 +112,18 @@ export const SIDEBAR_ITEMS = [
         ],
       },
       {
+        title: "Maintenance",
+        path: "/maintenance",
+        icon: "tools",
+        subItems: [
+          { title: "Requests", path: "/maintenance/requests" },
+          { title: "Actions", path: "/maintenance/actions" },
+          { title: "Spare Parts", path: "/maintenance/spare-parts" },
+          { title: "Logbook", path: "/maintenance/logbook" },
+          { title: "Schedule", path: "/maintenance/schedule" },
+        ],
+      },
+      {
         title: "Quality",
         path: "/quality",
         icon: "verified",

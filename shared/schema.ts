@@ -535,3 +535,112 @@ export const abaMaterialConfigs = pgTable("aba_material_configs", {
 export const insertAbaMaterialConfigSchema = createInsertSchema(abaMaterialConfigs).omit({ id: true, createdAt: true });
 export type InsertAbaMaterialConfig = z.infer<typeof insertAbaMaterialConfigSchema>;
 export type AbaMaterialConfig = typeof abaMaterialConfigs.$inferSelect;
+
+// =================== MAINTENANCE MODULE =================== //
+
+// Maintenance Request Table
+export const maintenanceRequests = pgTable("maintenance_requests", {
+  id: serial("id").primaryKey(),
+  requestNumber: text("request_number").notNull().unique(),
+  machineId: text("machine_id").references(() => machines.id, { onDelete: "cascade" }),
+  description: text("description"),
+  priority: text("priority").default("medium"), // low, medium, high, critical
+  status: text("status").notNull().default("new"), // new, under_maintenance, fixed, rejected
+  requestedBy: text("requested_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  assignedTo: text("assigned_to"),
+  completedAt: timestamp("completed_at"),
+  notes: text("notes"),
+});
+
+export const insertMaintenanceRequestSchema = createInsertSchema(maintenanceRequests).omit({ id: true, createdAt: true, completedAt: true });
+export type InsertMaintenanceRequest = z.infer<typeof insertMaintenanceRequestSchema>;
+export type MaintenanceRequest = typeof maintenanceRequests.$inferSelect;
+
+// Spare Parts Inventory
+export const spareParts = pgTable("spare_parts", {
+  id: serial("id").primaryKey(),
+  partName: text("part_name").notNull(),
+  partNumber: text("part_number"),
+  barcode: text("barcode"),
+  serialNumber: text("serial_number"),
+  machineId: text("machine_id").references(() => machines.id, { onDelete: "set null" }),
+  category: text("category").notNull(), // electrical, mechanical, pneumatic, hydraulic, etc.
+  type: text("type").notNull(), // shaft, screw, roller, gear, motor, etc.
+  manufacturer: text("manufacturer"),
+  supplier: text("supplier"),
+  purchaseDate: timestamp("purchase_date"),
+  price: doublePrecision("price").default(0),
+  quantity: integer("quantity").default(1),
+  minQuantity: integer("min_quantity").default(0),
+  location: text("location"),
+  notes: text("notes"),
+  lastUsed: timestamp("last_used"),
+});
+
+export const insertSparePartSchema = createInsertSchema(spareParts).omit({ id: true, lastUsed: true });
+export type InsertSparePart = z.infer<typeof insertSparePartSchema>;
+export type SparePart = typeof spareParts.$inferSelect;
+
+// Maintenance Actions Table
+export const maintenanceActions = pgTable("maintenance_actions", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id").references(() => maintenanceRequests.id, { onDelete: "cascade" }),
+  machineId: text("machine_id").references(() => machines.id, { onDelete: "cascade" }),
+  actionDate: timestamp("action_date").defaultNow(),
+  actionType: text("action_type").notNull(), // workshop, replacement, adjustment, inspection
+  partReplaced: text("part_replaced"), // shaft, screw, roller, gear, motor, etc.
+  partId: integer("part_id").references(() => spareParts.id, { onDelete: "set null" }),
+  description: text("description"),
+  performedBy: text("performed_by").notNull(),
+  hours: doublePrecision("hours").default(0),
+  cost: doublePrecision("cost").default(0),
+  status: text("status").notNull().default("completed"), // in_progress, completed, pending_parts
+});
+
+export const insertMaintenanceActionSchema = createInsertSchema(maintenanceActions).omit({ id: true, actionDate: true });
+export type InsertMaintenanceAction = z.infer<typeof insertMaintenanceActionSchema>;
+export type MaintenanceAction = typeof maintenanceActions.$inferSelect;
+
+// Maintenance Logbook for historical records
+export const maintenanceLogbook = pgTable("maintenance_logbook", {
+  id: serial("id").primaryKey(),
+  machineId: text("machine_id").references(() => machines.id, { onDelete: "cascade" }),
+  maintenanceType: text("maintenance_type").notNull(), // preventive, corrective, predictive
+  description: text("description").notNull(),
+  workDone: text("work_done").notNull(),
+  partsReplaced: text("parts_replaced"),
+  technician: text("technician").notNull(),
+  completedAt: timestamp("completed_at").defaultNow(),
+  downtime: doublePrecision("downtime").default(0), // in hours
+  cost: doublePrecision("cost").default(0),
+  followUpNeeded: boolean("follow_up_needed").default(false),
+  followUpDescription: text("follow_up_description"),
+  createdBy: text("created_by").notNull(),
+  attachments: text("attachments").array(),
+});
+
+export const insertMaintenanceLogbookSchema = createInsertSchema(maintenanceLogbook).omit({ id: true, completedAt: true });
+export type InsertMaintenanceLogbook = z.infer<typeof insertMaintenanceLogbookSchema>;
+export type MaintenanceLogbook = typeof maintenanceLogbook.$inferSelect;
+
+// Preventive Maintenance Schedule
+export const maintenanceSchedule = pgTable("maintenance_schedule", {
+  id: serial("id").primaryKey(),
+  machineId: text("machine_id").references(() => machines.id, { onDelete: "cascade" }),
+  taskName: text("task_name").notNull(),
+  taskDescription: text("task_description"),
+  frequency: text("frequency").notNull(), // daily, weekly, monthly, quarterly, annually
+  lastCompleted: timestamp("last_completed"),
+  nextDue: timestamp("next_due"),
+  assignedTo: text("assigned_to"),
+  priority: text("priority").default("medium"),
+  estimatedHours: doublePrecision("estimated_hours").default(1),
+  instructions: text("instructions"),
+  status: text("status").default("pending"), // pending, in_progress, completed, overdue
+  createdBy: text("created_by").notNull(),
+});
+
+export const insertMaintenanceScheduleSchema = createInsertSchema(maintenanceSchedule).omit({ id: true, lastCompleted: true, nextDue: true });
+export type InsertMaintenanceSchedule = z.infer<typeof insertMaintenanceScheduleSchema>;
+export type MaintenanceSchedule = typeof maintenanceSchedule.$inferSelect;
