@@ -427,11 +427,11 @@ export default function UnifiedQualityDashboard() {
                                 {check.notes?.substring(0, 60) || t("common.not_available")}...
                               </div>
                               <div className="flex mt-1">
-                                <QualityBadge variant={check.passed ? "success" : "destructive"}>
-                                  {check.passed ? t("quality.passed") : t("quality.failed")}
+                                <QualityBadge variant={check.status === "Passed" ? "success" : "destructive"}>
+                                  {check.status === "Passed" ? t("quality.passed") : t("quality.failed")}
                                 </QualityBadge>
                                 <span className="text-xs text-muted-foreground ml-2 mt-0.5">
-                                  {new Date(check.checkDate).toLocaleDateString()}
+                                  {new Date(check.timestamp).toLocaleDateString()}
                                 </span>
                               </div>
                             </div>
