@@ -5177,6 +5177,56 @@ COMMIT;
     }
   });
 
+  // Maintenance Stats
+  app.get('/api/maintenance/stats', async (req, res) => {
+    try {
+      // Get all maintenance requests
+      const allRequests = await storage.getMaintenanceRequests();
+      
+      // Calculate stats
+      const stats = {
+        totalRequests: allRequests.length,
+        newRequests: allRequests.filter(r => r.status === 'new').length,
+        inProgressRequests: allRequests.filter(r => r.status === 'under_maintenance').length,
+        fixedRequests: allRequests.filter(r => r.status === 'fixed').length,
+        criticalRequests: allRequests.filter(r => r.priority === 'critical').length,
+        teamWorkload: [] // This would require more complex queries in a real implementation
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error generating maintenance stats:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
+  // Maintenance Machines Stats
+  app.get('/api/maintenance/machines/stats', async (req, res) => {
+    try {
+      // Get all maintenance requests
+      const allRequests = await storage.getMaintenanceRequests();
+      
+      // Get all machines
+      const machines = await storage.getMachines();
+      
+      // Calculate stats for each machine
+      const machineStats = machines.map(machine => {
+        const requests = allRequests.filter(r => r.machineId === machine.id);
+        return {
+          id: machine.id,
+          name: machine.name,
+          totalRequests: requests.length,
+          openRequests: requests.filter(r => r.status === 'new' || r.status === 'under_maintenance').length
+        };
+      }).filter(m => m.totalRequests > 0).sort((a, b) => b.totalRequests - a.totalRequests).slice(0, 5);
+      
+      res.json(machineStats);
+    } catch (error) {
+      console.error("Error generating machine maintenance stats:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
   // Maintenance Schedule
   app.get('/api/maintenance/schedule', async (req, res) => {
     try {
