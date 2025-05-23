@@ -1,36 +1,25 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
   DialogTrigger,
+  DialogFooter,
+  DialogDescription 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
+  TableBody,
+  TableCell
 } from "@/components/ui/table";
-import { 
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -39,42 +28,59 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { format } from "date-fns";
-
-// Define form schema
-const violationFormSchema = z.object({
-  qualityCheckId: z.string().min(1, { message: "Quality check is required" }),
-  severity: z.string().min(1, { message: "Severity is required" }),
-  description: z.string().min(5, { message: "Description must be at least 5 characters" }),
-  reportedBy: z.string().min(1, { message: "Reporter is required" }),
-  status: z.string().min(1, { message: "Status is required" }),
-});
+import { 
+  CheckCircle, 
+  XCircle, 
+  AlertCircle, 
+  Edit, 
+  Trash2, 
+  Plus, 
+  AlertTriangle, 
+  FileText, 
+  Search,
+  Filter
+} from "lucide-react";
+import { queryClient } from "@/lib/queryClient";
 
 export function QualityViolations() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedViolation, setSelectedViolation] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterSeverity, setFilterSeverity] = useState("all");
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [currentViolation, setCurrentViolation] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    reportedBy: "",
+    qualityCheckId: "",
+    description: "",
+    severity: "Medium",
+    status: "Open",
+    resolvedDate: "",
+    resolutionNotes: ""
+  });
 
-  // Fetch violations data
-  const { data: violations, isLoading: violationsLoading } = useQuery({
+  // Fetch quality violations
+  const { data: violations = [], isLoading: violationsLoading, refetch: refetchViolations } = useQuery({
     queryKey: ["/api/quality-violations"],
     queryFn: async () => {
       const response = await fetch("/api/quality-violations");
       if (!response.ok) {
-        throw new Error("Failed to fetch violations");
+        throw new Error("Failed to fetch quality violations");
       }
       return response.json();
     }
   });
 
   // Fetch quality checks for reference
-  const { data: qualityChecks, isLoading: checksLoading } = useQuery({
+  const { data: checks = [], isLoading: checksLoading } = useQuery({
     queryKey: ["/api/quality-checks"],
     queryFn: async () => {
       const response = await fetch("/api/quality-checks");
@@ -85,33 +91,23 @@ export function QualityViolations() {
     }
   });
 
-  // Fetch users for the reporter dropdown
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/users"],
+  // Fetch users for reporter selection
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/user"],
     queryFn: async () => {
-      const response = await fetch("/api/users");
+      const response = await fetch("/api/user");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
-      return response.json();
+      // If response is a single user object, wrap it in an array
+      const data = await response.json();
+      return Array.isArray(data) ? data : [data];
     }
   });
 
-  // Create form
-  const form = useForm<z.infer<typeof violationFormSchema>>({
-    resolver: zodResolver(violationFormSchema),
-    defaultValues: {
-      qualityCheckId: "",
-      severity: "Low",
-      description: "",
-      reportedBy: "",
-      status: "Open",
-    },
-  });
-
-  // Create new violation
-  const createViolation = useMutation({
-    mutationFn: async (data: z.infer<typeof violationFormSchema>) => {
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => {
       const response = await fetch("/api/quality-violations", {
         method: "POST",
         headers: {
@@ -121,20 +117,20 @@ export function QualityViolations() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create violation");
+        throw new Error("Failed to create quality violation");
       }
       
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/quality-violations"] });
       toast({
-        title: t("quality.violation_created"),
-        description: t("quality.violation_created_successfully"),
+        title: t("common.success"),
+        description: t("quality.violation_created_success"),
       });
-      form.reset();
-      setIsDialogOpen(false);
+      setShowAddDialog(false);
+      resetForm();
+      refetchViolations();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-violations"] });
     },
     onError: (error: Error) => {
       toast({
@@ -142,12 +138,12 @@ export function QualityViolations() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  // Update violation 
-  const updateViolation = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: z.infer<typeof violationFormSchema> }) => {
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const response = await fetch(`/api/quality-violations/${id}`, {
         method: "PATCH",
         headers: {
@@ -157,21 +153,20 @@ export function QualityViolations() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update violation");
+        throw new Error("Failed to update quality violation");
       }
       
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/quality-violations"] });
       toast({
-        title: t("quality.violation_updated"),
-        description: t("quality.violation_updated_successfully"),
+        title: t("common.success"),
+        description: t("quality.violation_updated_success"),
       });
-      setSelectedViolation(null);
-      form.reset();
-      setIsDialogOpen(false);
+      setShowEditDialog(false);
+      resetForm();
+      refetchViolations();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-violations"] });
     },
     onError: (error: Error) => {
       toast({
@@ -179,307 +174,557 @@ export function QualityViolations() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  // Handle form submission
-  const onSubmit = (data: z.infer<typeof violationFormSchema>) => {
-    if (selectedViolation) {
-      updateViolation.mutate({ id: selectedViolation.id, data });
-    } else {
-      createViolation.mutate(data);
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/quality-violations/${id}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete quality violation");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: t("common.success"),
+        description: t("quality.violation_deleted_success"),
+      });
+      setShowDeleteDialog(false);
+      refetchViolations();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-violations"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t("common.error"),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      reportedBy: "",
+      qualityCheckId: "",
+      description: "",
+      severity: "Medium",
+      status: "Open",
+      resolvedDate: "",
+      resolutionNotes: ""
+    });
+    setCurrentViolation(null);
+  };
+
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createMutation.mutate(formData);
+  };
+
+  const handleUpdateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentViolation) {
+      updateMutation.mutate({ id: currentViolation.id, data: formData });
     }
   };
 
-  // Open dialog for editing
-  const handleEdit = (violation: any) => {
-    setSelectedViolation(violation);
-    form.reset({
-      qualityCheckId: violation.qualityCheckId.toString(),
-      severity: violation.severity,
-      description: violation.description,
-      reportedBy: violation.reportedBy,
-      status: violation.status,
-    });
-    setIsDialogOpen(true);
+  const handleDeleteConfirm = () => {
+    if (currentViolation) {
+      deleteMutation.mutate(currentViolation.id);
+    }
   };
 
-  // Open dialog for new violation
-  const handleAddNew = () => {
-    setSelectedViolation(null);
-    form.reset({
-      qualityCheckId: "",
-      severity: "Low",
-      description: "",
-      reportedBy: "",
-      status: "Open",
+  const handleEditClick = (violation: any) => {
+    setCurrentViolation(violation);
+    setFormData({
+      reportedBy: violation.reportedBy || "",
+      qualityCheckId: violation.qualityCheckId || "",
+      description: violation.description || "",
+      severity: violation.severity || "Medium",
+      status: violation.status || "Open",
+      resolvedDate: violation.resolvedDate ? new Date(violation.resolvedDate).toISOString().split('T')[0] : "",
+      resolutionNotes: violation.resolutionNotes || ""
     });
-    setIsDialogOpen(true);
+    setShowEditDialog(true);
   };
 
-  // Determine badge color based on severity
+  const handleDeleteClick = (violation: any) => {
+    setCurrentViolation(violation);
+    setShowDeleteDialog(true);
+  };
+
+  // Filter and search functionality
+  const filteredViolations = violations.filter((violation: any) => {
+    const matchesSearch = searchQuery === "" || 
+      (violation.description && violation.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (violation.reportedBy && violation.reportedBy.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesStatus = filterStatus === "all" || violation.status === filterStatus;
+    const matchesSeverity = filterSeverity === "all" || violation.severity === filterSeverity;
+    
+    return matchesSearch && matchesStatus && matchesSeverity;
+  });
+
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
       case "High":
-        return "destructive";
+        return <Badge variant="destructive">{severity}</Badge>;
       case "Medium":
-        return "secondary";
+        return <Badge variant="warning">{severity}</Badge>;
       case "Low":
-        return "outline";
+        return <Badge variant="outline">{severity}</Badge>;
       default:
-        return "outline";
+        return <Badge>{severity}</Badge>;
     }
   };
 
-  // Determine badge color based on status
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Open":
-        return "destructive";
+        return <Badge variant="destructive">{status}</Badge>;
       case "In Progress":
-        return "secondary";
+        return <Badge variant="warning">{status}</Badge>;
       case "Resolved":
-        return "outline";
-      case "Closed":
-        return "outline";
+        return <Badge variant="success">{status}</Badge>;
       default:
-        return "outline";
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
   const isLoading = violationsLoading || checksLoading || usersLoading;
 
-  if (isLoading) {
-    return <div className="text-center py-4">{t("common.loading")}</div>;
-  }
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">{t("quality.quality_violations")}</h3>
-        <Button onClick={handleAddNew}>{t("common.add_new")}</Button>
-      </div>
-
-      {/* Violations Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("quality.id")}</TableHead>
-                <TableHead>{t("quality.severity")}</TableHead>
-                <TableHead>{t("quality.status")}</TableHead>
-                <TableHead>{t("quality.description")}</TableHead>
-                <TableHead>{t("quality.reported_by")}</TableHead>
-                <TableHead>{t("quality.reported_date")}</TableHead>
-                <TableHead>{t("common.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {violations && violations.length > 0 ? (
-                violations.map((violation: any) => (
-                  <TableRow key={violation.id}>
-                    <TableCell className="font-medium">{violation.id}</TableCell>
-                    <TableCell>
-                      <Badge variant={getSeverityBadge(violation.severity) as any}>
-                        {violation.severity}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadge(violation.status) as any}>
-                        {violation.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate">{violation.description}</TableCell>
-                    <TableCell>{violation.reportedBy}</TableCell>
-                    <TableCell>
-                      {violation.reportedDate
-                        ? format(new Date(violation.reportedDate), "MMM dd, yyyy")
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(violation)}>
-                        {t("common.edit")}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
-                    {t("quality.no_violations")}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("common.search")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
         </div>
-      </Card>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedViolation
-                ? t("quality.edit_violation")
-                : t("quality.report_violation")}
-            </DialogTitle>
-            <DialogDescription>
-              {selectedViolation
-                ? t("quality.edit_violation_description")
-                : t("quality.report_violation_description")}
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="qualityCheckId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.quality_check")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_check")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {qualityChecks?.map((check: any) => (
-                          <SelectItem key={check.id} value={check.id.toString()}>
-                            {`Check #${check.id} - ${check.passed ? t("quality.passed") : t("quality.failed")}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>{t("quality.check_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="severity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.severity")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_severity")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Low">{t("quality.low")}</SelectItem>
-                        <SelectItem value="Medium">{t("quality.medium")}</SelectItem>
-                        <SelectItem value="High">{t("quality.high")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>{t("quality.severity_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.description")}</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder={t("quality.describe_violation")}
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>{t("quality.description_help")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="reportedBy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.reported_by")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
+        
+        <div className="flex flex-wrap gap-2">
+          <div className="flex items-center">
+            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            <Select 
+              value={filterStatus} 
+              onValueChange={setFilterStatus}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder={t("common.status")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
+                <SelectItem value="Open">{t("quality.status_open")}</SelectItem>
+                <SelectItem value="In Progress">{t("quality.status_in_progress")}</SelectItem>
+                <SelectItem value="Resolved">{t("quality.status_resolved")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex items-center">
+            <AlertTriangle className="h-4 w-4 mr-2 text-muted-foreground" />
+            <Select 
+              value={filterSeverity} 
+              onValueChange={setFilterSeverity}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder={t("quality.severity")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
+                <SelectItem value="High">{t("quality.severity_high")}</SelectItem>
+                <SelectItem value="Medium">{t("quality.severity_medium")}</SelectItem>
+                <SelectItem value="Low">{t("quality.severity_low")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button variant="default" onClick={() => {
+                resetForm();
+                setShowAddDialog(true);
+              }}>
+                <Plus className="mr-2 h-4 w-4" /> {t("quality.add_violation")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>{t("quality.add_violation")}</DialogTitle>
+                <DialogDescription>{t("quality.add_violation_description")}</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleCreateSubmit}>
+                <div className="space-y-4 py-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label htmlFor="reportedBy">{t("quality.reported_by")} *</Label>
+                      <Select 
+                        value={formData.reportedBy} 
+                        onValueChange={(value) => setFormData({...formData, reportedBy: value})}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_reporter")} />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {users?.map((user: any) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.username}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.status")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
+                        <SelectContent>
+                          {users.map((user: any) => (
+                            <SelectItem key={user.id} value={user.id}>
+                              {user.firstName} {user.lastName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
+                      <Select 
+                        value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
+                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : null})}
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_status")} />
+                          <SelectValue placeholder={t("quality.select_check")} />
                         </SelectTrigger>
-                      </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">{t("common.none")}</SelectItem>
+                          {checks.map((check: any) => (
+                            <SelectItem key={check.id} value={String(check.id)}>
+                              {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="description">{t("common.description")} *</Label>
+                      <Textarea 
+                        id="description" 
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        rows={3}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="severity">{t("quality.severity")} *</Label>
+                        <Select 
+                          value={formData.severity} 
+                          onValueChange={(value) => setFormData({...formData, severity: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="High">{t("quality.severity_high")}</SelectItem>
+                            <SelectItem value="Medium">{t("quality.severity_medium")}</SelectItem>
+                            <SelectItem value="Low">{t("quality.severity_low")}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="status">{t("common.status")} *</Label>
+                        <Select 
+                          value={formData.status} 
+                          onValueChange={(value) => setFormData({...formData, status: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Open">{t("quality.status_open")}</SelectItem>
+                            <SelectItem value="In Progress">{t("quality.status_in_progress")}</SelectItem>
+                            <SelectItem value="Resolved">{t("quality.status_resolved")}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    {formData.status === "Resolved" && (
+                      <>
+                        <div>
+                          <Label htmlFor="resolvedDate">{t("quality.resolved_date")} *</Label>
+                          <Input 
+                            id="resolvedDate" 
+                            type="date" 
+                            value={formData.resolvedDate}
+                            onChange={(e) => setFormData({...formData, resolvedDate: e.target.value})}
+                            required={formData.status === "Resolved"}
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="resolutionNotes">{t("quality.resolution_notes")} *</Label>
+                          <Textarea 
+                            id="resolutionNotes" 
+                            value={formData.resolutionNotes}
+                            onChange={(e) => setFormData({...formData, resolutionNotes: e.target.value})}
+                            rows={2}
+                            required={formData.status === "Resolved"}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
+                    {t("common.cancel")}
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isPending}>
+                    {createMutation.isPending ? t("common.saving") : t("common.save")}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+      
+      {isLoading ? (
+        <div className="flex justify-center py-10">
+          <p>{t("common.loading")}</p>
+        </div>
+      ) : filteredViolations.length === 0 ? (
+        <div className="border rounded-md p-8 text-center">
+          <p className="text-muted-foreground">{t("quality.no_violations_found")}</p>
+        </div>
+      ) : (
+        <ScrollArea className="h-[calc(100vh-230px)] border rounded-md">
+          <Table>
+            <TableHeader className="sticky top-0 bg-background z-10">
+              <TableRow>
+                <TableHead>{t("common.id")}</TableHead>
+                <TableHead>{t("quality.reported_by")}</TableHead>
+                <TableHead>{t("common.description")}</TableHead>
+                <TableHead>{t("quality.severity")}</TableHead>
+                <TableHead>{t("common.status")}</TableHead>
+                <TableHead>{t("quality.reported_date")}</TableHead>
+                <TableHead className="text-right">{t("common.actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredViolations.map((violation: any) => {
+                const reporter = users.find((u: any) => u.id === violation.reportedBy);
+                const reporterName = reporter 
+                  ? `${reporter.firstName || ''} ${reporter.lastName || ''}`
+                  : violation.reportedBy || t("common.unknown");
+                
+                return (
+                  <TableRow key={violation.id}>
+                    <TableCell>#{violation.id}</TableCell>
+                    <TableCell>{reporterName}</TableCell>
+                    <TableCell className="max-w-[200px]">
+                      <div className="truncate" title={violation.description}>
+                        {violation.description}
+                      </div>
+                    </TableCell>
+                    <TableCell>{getSeverityBadge(violation.severity)}</TableCell>
+                    <TableCell>{getStatusBadge(violation.status)}</TableCell>
+                    <TableCell>
+                      {violation.reportedDate 
+                        ? format(new Date(violation.reportedDate), 'MMM d, yyyy') 
+                        : t("common.not_available")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={() => handleEditClick(violation)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon"
+                          onClick={() => handleDeleteClick(violation)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      )}
+      
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{t("quality.edit_violation")}</DialogTitle>
+            <DialogDescription>{t("quality.edit_violation_description")}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateSubmit}>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="reportedBy">{t("quality.reported_by")} *</Label>
+                  <Select 
+                    value={formData.reportedBy} 
+                    onValueChange={(value) => setFormData({...formData, reportedBy: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("quality.select_reporter")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((user: any) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.firstName} {user.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
+                  <Select 
+                    value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
+                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : null})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("quality.select_check")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">{t("common.none")}</SelectItem>
+                      {checks.map((check: any) => (
+                        <SelectItem key={check.id} value={String(check.id)}>
+                          {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="description">{t("common.description")} *</Label>
+                  <Textarea 
+                    id="description" 
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    rows={3}
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="severity">{t("quality.severity")} *</Label>
+                    <Select 
+                      value={formData.severity} 
+                      onValueChange={(value) => setFormData({...formData, severity: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Open">{t("quality.open")}</SelectItem>
-                        <SelectItem value="In Progress">{t("quality.in_progress")}</SelectItem>
-                        <SelectItem value="Resolved">{t("quality.resolved")}</SelectItem>
-                        <SelectItem value="Closed">{t("quality.closed")}</SelectItem>
+                        <SelectItem value="High">{t("quality.severity_high")}</SelectItem>
+                        <SelectItem value="Medium">{t("quality.severity_medium")}</SelectItem>
+                        <SelectItem value="Low">{t("quality.severity_low")}</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormDescription>{t("quality.status_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="status">{t("common.status")} *</Label>
+                    <Select 
+                      value={formData.status} 
+                      onValueChange={(value) => setFormData({...formData, status: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Open">{t("quality.status_open")}</SelectItem>
+                        <SelectItem value="In Progress">{t("quality.status_in_progress")}</SelectItem>
+                        <SelectItem value="Resolved">{t("quality.status_resolved")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                {formData.status === "Resolved" && (
+                  <>
+                    <div>
+                      <Label htmlFor="resolvedDate">{t("quality.resolved_date")} *</Label>
+                      <Input 
+                        id="resolvedDate" 
+                        type="date" 
+                        value={formData.resolvedDate}
+                        onChange={(e) => setFormData({...formData, resolvedDate: e.target.value})}
+                        required={formData.status === "Resolved"}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="resolutionNotes">{t("quality.resolution_notes")} *</Label>
+                      <Textarea 
+                        id="resolutionNotes" 
+                        value={formData.resolutionNotes}
+                        onChange={(e) => setFormData({...formData, resolutionNotes: e.target.value})}
+                        rows={2}
+                        required={formData.status === "Resolved"}
+                      />
+                    </div>
+                  </>
                 )}
-              />
-
-              <DialogFooter>
-                <Button type="submit" disabled={createViolation.isPending || updateViolation.isPending}>
-                  {(createViolation.isPending || updateViolation.isPending)
-                    ? t("common.saving")
-                    : selectedViolation
-                      ? t("common.update")
-                      : t("common.save")}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                {t("common.cancel")}
+              </Button>
+              <Button type="submit" disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? t("common.updating") : t("common.update")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t("common.delete_confirmation")}</DialogTitle>
+            <DialogDescription>
+              {t("quality.delete_violation_confirmation", { id: currentViolation?.id })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-destructive flex items-center">
+              <AlertCircle className="h-4 w-4 mr-2" />
+              {t("quality.delete_violation_warning")}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? t("common.deleting") : t("common.delete")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

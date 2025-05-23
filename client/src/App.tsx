@@ -27,7 +27,7 @@ import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions-fixed";
 import ImportExport from "@/pages/system/import-export";
 import SmsIndex from "@/pages/system/sms/index";
-import UnifiedQualityDashboard from "@/pages/quality/unified-dashboard";
+import UnifiedQualityDashboard from "./pages/quality/unified-dashboard";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";

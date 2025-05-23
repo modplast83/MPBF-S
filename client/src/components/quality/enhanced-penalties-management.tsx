@@ -1,35 +1,25 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  DialogDescription 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
+  TableBody,
+  TableCell
 } from "@/components/ui/table";
-import { 
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -38,107 +28,108 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { format } from "date-fns";
-
-// Define form schema
-const penaltyFormSchema = z.object({
-  violationId: z.string().min(1, { message: "Violation is required" }),
-  penaltyType: z.string().min(1, { message: "Penalty type is required" }),
-  penaltyAmount: z.string().optional(),
-  description: z.string().min(5, { message: "Description must be at least 5 characters" }),
-  assignedTo: z.string().min(1, { message: "Assignee is required" }),
-  status: z.string().min(1, { message: "Status is required" }),
-});
+import { 
+  AlertCircle, 
+  Edit, 
+  Trash2, 
+  Plus, 
+  Filter,
+  Search,
+  Printer,
+  DollarSign
+} from "lucide-react";
+import { queryClient } from "@/lib/queryClient";
 
 export function QualityPenaltiesManagement() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedPenalty, setSelectedPenalty] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterType, setFilterType] = useState("all");
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [currentPenalty, setCurrentPenalty] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    violationId: "",
+    penaltyType: "Financial",
+    penaltyAmount: "",
+    assignedTo: "",
+    assignedDate: new Date().toISOString().split('T')[0],
+    status: "Pending",
+    description: ""
+  });
 
-  // Fetch penalties data
-  const { data: penalties, isLoading: penaltiesLoading } = useQuery({
+  // Fetch penalties
+  const { data: penalties = [], isLoading: penaltiesLoading, refetch: refetchPenalties } = useQuery({
     queryKey: ["/api/quality-penalties"],
     queryFn: async () => {
       const response = await fetch("/api/quality-penalties");
       if (!response.ok) {
-        throw new Error("Failed to fetch penalties");
+        throw new Error("Failed to fetch quality penalties");
       }
       return response.json();
     }
   });
 
   // Fetch violations for reference
-  const { data: violations, isLoading: violationsLoading } = useQuery({
+  const { data: violations = [], isLoading: violationsLoading } = useQuery({
     queryKey: ["/api/quality-violations"],
     queryFn: async () => {
       const response = await fetch("/api/quality-violations");
       if (!response.ok) {
-        throw new Error("Failed to fetch violations");
+        throw new Error("Failed to fetch quality violations");
       }
       return response.json();
     }
   });
 
-  // Fetch users for the assignee dropdown
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/users"],
+  // Fetch users for user selection
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/user"],
     queryFn: async () => {
-      const response = await fetch("/api/users");
+      const response = await fetch("/api/user");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
-      return response.json();
+      // If response is a single user object, wrap it in an array
+      const data = await response.json();
+      return Array.isArray(data) ? data : [data];
     }
   });
 
-  // Create form
-  const form = useForm<z.infer<typeof penaltyFormSchema>>({
-    resolver: zodResolver(penaltyFormSchema),
-    defaultValues: {
-      violationId: "",
-      penaltyType: "Financial",
-      penaltyAmount: "",
-      description: "",
-      assignedTo: "",
-      status: "Pending",
-    },
-  });
-
-  // Create new penalty
-  const createPenalty = useMutation({
-    mutationFn: async (data: z.infer<typeof penaltyFormSchema>) => {
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => {
       const response = await fetch("/api/quality-penalties", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...data,
-          penaltyAmount: data.penaltyAmount ? Number(data.penaltyAmount) : null,
-        }),
+        body: JSON.stringify(data),
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create penalty");
+        throw new Error("Failed to create quality penalty");
       }
       
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/quality-penalties"] });
       toast({
-        title: t("quality.penalty_created"),
-        description: t("quality.penalty_created_successfully"),
+        title: t("common.success"),
+        description: t("quality.penalty_created_success"),
       });
-      form.reset();
-      setIsDialogOpen(false);
+      setShowAddDialog(false);
+      resetForm();
+      refetchPenalties();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-penalties"] });
     },
     onError: (error: Error) => {
       toast({
@@ -146,39 +137,35 @@ export function QualityPenaltiesManagement() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  // Update penalty 
-  const updatePenalty = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: z.infer<typeof penaltyFormSchema> }) => {
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const response = await fetch(`/api/quality-penalties/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...data,
-          penaltyAmount: data.penaltyAmount ? Number(data.penaltyAmount) : null,
-        }),
+        body: JSON.stringify(data),
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update penalty");
+        throw new Error("Failed to update quality penalty");
       }
       
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/quality-penalties"] });
       toast({
-        title: t("quality.penalty_updated"),
-        description: t("quality.penalty_updated_successfully"),
+        title: t("common.success"),
+        description: t("quality.penalty_updated_success"),
       });
-      setSelectedPenalty(null);
-      form.reset();
-      setIsDialogOpen(false);
+      setShowEditDialog(false);
+      resetForm();
+      refetchPenalties();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-penalties"] });
     },
     onError: (error: Error) => {
       toast({
@@ -186,342 +173,820 @@ export function QualityPenaltiesManagement() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  // Handle form submission
-  const onSubmit = (data: z.infer<typeof penaltyFormSchema>) => {
-    if (selectedPenalty) {
-      updatePenalty.mutate({ id: selectedPenalty.id, data });
-    } else {
-      createPenalty.mutate(data);
-    }
-  };
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/quality-penalties/${id}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete quality penalty");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: t("common.success"),
+        description: t("quality.penalty_deleted_success"),
+      });
+      setShowDeleteDialog(false);
+      refetchPenalties();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-penalties"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t("common.error"),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
-  // Open dialog for editing
-  const handleEdit = (penalty: any) => {
-    setSelectedPenalty(penalty);
-    form.reset({
-      violationId: penalty.violationId?.toString() || "",
-      penaltyType: penalty.penaltyType || "Financial",
-      penaltyAmount: penalty.penaltyAmount?.toString() || "",
-      description: penalty.description || "",
-      assignedTo: penalty.assignedTo || "",
-      status: penalty.status || "Pending",
-    });
-    setIsDialogOpen(true);
-  };
-
-  // Open dialog for new penalty
-  const handleAddNew = () => {
-    setSelectedPenalty(null);
-    form.reset({
+  const resetForm = () => {
+    setFormData({
       violationId: "",
       penaltyType: "Financial",
       penaltyAmount: "",
-      description: "",
       assignedTo: "",
+      assignedDate: new Date().toISOString().split('T')[0],
       status: "Pending",
+      description: ""
     });
-    setIsDialogOpen(true);
+    setCurrentPenalty(null);
   };
 
-  // Determine badge color based on penalty type
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Convert penaltyAmount to number if it's a financial penalty
+    const processedData = {
+      ...formData,
+      penaltyAmount: formData.penaltyType === "Financial" ? parseFloat(formData.penaltyAmount as string) : null
+    };
+    createMutation.mutate(processedData);
+  };
+
+  const handleUpdateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentPenalty) {
+      // Convert penaltyAmount to number if it's a financial penalty
+      const processedData = {
+        ...formData,
+        penaltyAmount: formData.penaltyType === "Financial" ? parseFloat(formData.penaltyAmount as string) : null
+      };
+      updateMutation.mutate({ id: currentPenalty.id, data: processedData });
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (currentPenalty) {
+      deleteMutation.mutate(currentPenalty.id);
+    }
+  };
+
+  const handleEditClick = (penalty: any) => {
+    setCurrentPenalty(penalty);
+    setFormData({
+      violationId: penalty.violationId ? String(penalty.violationId) : "",
+      penaltyType: penalty.penaltyType || "Financial",
+      penaltyAmount: penalty.penaltyAmount !== null ? String(penalty.penaltyAmount) : "",
+      assignedTo: penalty.assignedTo || "",
+      assignedDate: penalty.assignedDate ? new Date(penalty.assignedDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      status: penalty.status || "Pending",
+      description: penalty.description || ""
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleDeleteClick = (penalty: any) => {
+    setCurrentPenalty(penalty);
+    setShowDeleteDialog(true);
+  };
+
+  const handlePrintClick = (penalty: any) => {
+    setCurrentPenalty(penalty);
+    setShowPrintDialog(true);
+  };
+
+  const handlePrint = () => {
+    if (!currentPenalty) return;
+    
+    // Create a printable version in a new window
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        title: t("common.error"),
+        description: t("common.popup_blocked"),
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const assignedUser = users.find((u: any) => u.id === currentPenalty.assignedTo);
+    const assignedUserName = assignedUser 
+      ? `${assignedUser.firstName || ''} ${assignedUser.lastName || ''}`
+      : currentPenalty.assignedTo || t("common.unknown");
+    
+    const violation = violations.find((v: any) => v.id === currentPenalty.violationId);
+    
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${t("quality.penalty_document")} #${currentPenalty.id}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+          }
+          h1 {
+            margin: 0;
+            color: #333;
+          }
+          .document-id {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+          }
+          .section {
+            margin-bottom: 20px;
+          }
+          .section-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+          }
+          .field {
+            margin-bottom: 10px;
+          }
+          .label {
+            font-weight: bold;
+            min-width: 150px;
+            display: inline-block;
+          }
+          .value {
+            display: inline-block;
+          }
+          .footer {
+            margin-top: 50px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+          }
+          .signature-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+          }
+          .signature-box {
+            border-top: 1px solid #000;
+            width: 200px;
+            padding-top: 5px;
+            text-align: center;
+          }
+          .amount {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+          }
+          @media print {
+            body {
+              margin: 0;
+              padding: 20px;
+            }
+            button {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${t("quality.quality_penalty_notice")}</h1>
+          <div class="document-id">${t("quality.document_id")}: PEN-${currentPenalty.id}</div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">${t("quality.penalty_information")}</div>
+          <div class="field">
+            <span class="label">${t("quality.penalty_type")}:</span>
+            <span class="value">${currentPenalty.penaltyType}</span>
+          </div>
+          <div class="field">
+            <span class="label">${t("common.status")}:</span>
+            <span class="value">${currentPenalty.status}</span>
+          </div>
+          <div class="field">
+            <span class="label">${t("quality.issue_date")}:</span>
+            <span class="value">${format(new Date(currentPenalty.assignedDate), 'MMMM d, yyyy')}</span>
+          </div>
+        </div>
+        
+        ${currentPenalty.penaltyType === 'Financial' ? `
+          <div class="amount">
+            ${t("quality.amount")}: $${parseFloat(currentPenalty.penaltyAmount).toFixed(2)}
+          </div>
+        ` : ''}
+        
+        <div class="section">
+          <div class="section-title">${t("quality.assigned_to")}</div>
+          <div class="field">
+            <span class="label">${t("common.name")}:</span>
+            <span class="value">${assignedUserName}</span>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">${t("quality.violation_information")}</div>
+          <div class="field">
+            <span class="label">${t("quality.violation_id")}:</span>
+            <span class="value">#${currentPenalty.violationId || t("common.not_available")}</span>
+          </div>
+          ${violation ? `
+            <div class="field">
+              <span class="label">${t("quality.violation_description")}:</span>
+              <span class="value">${violation.description || t("common.not_available")}</span>
+            </div>
+            <div class="field">
+              <span class="label">${t("quality.violation_severity")}:</span>
+              <span class="value">${violation.severity || t("common.not_available")}</span>
+            </div>
+          ` : ''}
+        </div>
+        
+        <div class="section">
+          <div class="section-title">${t("common.description")}</div>
+          <p>${currentPenalty.description || t("common.not_available")}</p>
+        </div>
+        
+        <div class="signature-area">
+          <div class="signature-box">
+            ${t("quality.manager_signature")}
+          </div>
+          <div class="signature-box">
+            ${t("quality.employee_signature")}
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p>${t("quality.document_footer")}</p>
+        </div>
+        
+        <script>
+          // Auto print
+          window.onload = function() {
+            window.print();
+          }
+        </script>
+      </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    setShowPrintDialog(false);
+  };
+
+  // Filter and search functionality
+  const filteredPenalties = penalties.filter((penalty: any) => {
+    const matchesSearch = searchQuery === "" || 
+      (penalty.description && penalty.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesStatus = filterStatus === "all" || penalty.status === filterStatus;
+    const matchesType = filterType === "all" || penalty.penaltyType === filterType;
+    
+    return matchesSearch && matchesStatus && matchesType;
+  });
+
+  const getUserById = (id: string) => {
+    const user = users.find((user: any) => user.id === id);
+    if (user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`;
+    }
+    return id || t("common.unknown");
+  };
+
+  const getViolationById = (id: number) => {
+    return violations.find((violation: any) => violation.id === id);
+  };
+
   const getPenaltyTypeBadge = (type: string) => {
     switch (type) {
       case "Financial":
-        return "destructive";
-      case "Training":
-        return "secondary";
+        return <Badge className="bg-yellow-500">{type}</Badge>;
       case "Warning":
-        return "outline";
+        return <Badge variant="warning">{type}</Badge>;
+      case "Training":
+        return <Badge variant="outline" className="text-blue-500 border-blue-500">{type}</Badge>;
       case "Suspension":
-        return "destructive";
+        return <Badge variant="destructive">{type}</Badge>;
       default:
-        return "outline";
+        return <Badge>{type}</Badge>;
     }
   };
 
-  // Determine badge color based on status
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Pending":
-        return "secondary";
+        return <Badge variant="warning">{status}</Badge>;
       case "Active":
-        return "destructive";
+        return <Badge variant="destructive">{status}</Badge>;
       case "Completed":
-        return "outline";
-      case "Waived":
-        return "outline";
+        return <Badge variant="success" className="bg-green-500">{status}</Badge>;
+      case "Dismissed":
+        return <Badge variant="outline">{status}</Badge>;
       default:
-        return "outline";
+        return <Badge>{status}</Badge>;
     }
-  };
-
-  // Format penalty amount
-  const formatPenaltyAmount = (amount: number | null | undefined) => {
-    if (amount === null || amount === undefined) return "-";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
   };
 
   const isLoading = penaltiesLoading || violationsLoading || usersLoading;
 
-  if (isLoading) {
-    return <div className="text-center py-4">{t("common.loading")}</div>;
-  }
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">{t("quality.quality_penalties")}</h3>
-        <Button onClick={handleAddNew}>{t("common.add_new")}</Button>
-      </div>
-
-      {/* Penalties Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("quality.id")}</TableHead>
-                <TableHead>{t("quality.penalty_type")}</TableHead>
-                <TableHead>{t("quality.amount")}</TableHead>
-                <TableHead>{t("quality.status")}</TableHead>
-                <TableHead>{t("quality.assigned_to")}</TableHead>
-                <TableHead>{t("quality.issue_date")}</TableHead>
-                <TableHead>{t("common.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {penalties && penalties.length > 0 ? (
-                penalties.map((penalty: any) => (
-                  <TableRow key={penalty.id}>
-                    <TableCell className="font-medium">{penalty.id}</TableCell>
-                    <TableCell>
-                      <Badge variant={getPenaltyTypeBadge(penalty.penaltyType) as any}>
-                        {penalty.penaltyType}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatPenaltyAmount(penalty.penaltyAmount)}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadge(penalty.status) as any}>
-                        {penalty.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{penalty.assignedTo}</TableCell>
-                    <TableCell>
-                      {penalty.assignedDate
-                        ? format(new Date(penalty.assignedDate), "MMM dd, yyyy")
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(penalty)}>
-                        {t("common.edit")}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
-                    {t("quality.no_penalties")}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("common.search")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
         </div>
-      </Card>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedPenalty
-                ? t("quality.edit_penalty")
-                : t("quality.assign_penalty")}
-            </DialogTitle>
-            <DialogDescription>
-              {selectedPenalty
-                ? t("quality.edit_penalty_description")
-                : t("quality.assign_penalty_description")}
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="violationId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.violation")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
+        
+        <div className="flex flex-wrap gap-2">
+          <div className="flex items-center">
+            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            <Select 
+              value={filterStatus} 
+              onValueChange={setFilterStatus}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder={t("common.status")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
+                <SelectItem value="Pending">{t("quality.status_pending")}</SelectItem>
+                <SelectItem value="Active">{t("quality.status_active")}</SelectItem>
+                <SelectItem value="Completed">{t("quality.status_completed")}</SelectItem>
+                <SelectItem value="Dismissed">{t("quality.status_dismissed")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex items-center">
+            <DollarSign className="h-4 w-4 mr-2 text-muted-foreground" />
+            <Select 
+              value={filterType} 
+              onValueChange={setFilterType}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder={t("quality.penalty_type")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
+                <SelectItem value="Financial">{t("quality.type_financial")}</SelectItem>
+                <SelectItem value="Warning">{t("quality.type_warning")}</SelectItem>
+                <SelectItem value="Training">{t("quality.type_training")}</SelectItem>
+                <SelectItem value="Suspension">{t("quality.type_suspension")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button variant="default" onClick={() => {
+                resetForm();
+                setShowAddDialog(true);
+              }}>
+                <Plus className="mr-2 h-4 w-4" /> {t("quality.add_penalty")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>{t("quality.add_penalty")}</DialogTitle>
+                <DialogDescription>{t("quality.add_penalty_description")}</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleCreateSubmit}>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label htmlFor="violationId">{t("quality.violation")} *</Label>
+                    <Select 
+                      value={formData.violationId} 
+                      onValueChange={(value) => setFormData({...formData, violationId: value})}
                     >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_violation")} />
-                        </SelectTrigger>
-                      </FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("quality.select_violation")} />
+                      </SelectTrigger>
                       <SelectContent>
-                        {violations?.map((violation: any) => (
-                          <SelectItem key={violation.id} value={violation.id.toString()}>
-                            {`#${violation.id} - ${violation.description.substring(0, 30)}${violation.description.length > 30 ? '...' : ''}`}
+                        {violations.map((violation: any) => (
+                          <SelectItem key={violation.id} value={String(violation.id)}>
+                            #{violation.id} - {violation.description?.substring(0, 35)}...
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription>{t("quality.violation_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="penaltyType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.penalty_type")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="penaltyType">{t("quality.penalty_type")} *</Label>
+                      <Select 
+                        value={formData.penaltyType} 
+                        onValueChange={(value) => setFormData({...formData, penaltyType: value})}
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_penalty_type")} />
+                          <SelectValue placeholder={t("quality.select_type")} />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Financial">{t("quality.financial")}</SelectItem>
-                        <SelectItem value="Training">{t("quality.training")}</SelectItem>
-                        <SelectItem value="Warning">{t("quality.warning")}</SelectItem>
-                        <SelectItem value="Suspension">{t("quality.suspension")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>{t("quality.penalty_type_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("penaltyType") === "Financial" && (
-                <FormField
-                  control={form.control}
-                  name="penaltyAmount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("quality.penalty_amount")}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="0.00" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>{t("quality.amount_description")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.description")}</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder={t("quality.describe_penalty")}
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>{t("quality.penalty_description_help")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="assignedTo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.assigned_to")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_assignee")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {users?.map((user: any) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.username}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.status")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
+                        <SelectContent>
+                          <SelectItem value="Financial">{t("quality.type_financial")}</SelectItem>
+                          <SelectItem value="Warning">{t("quality.type_warning")}</SelectItem>
+                          <SelectItem value="Training">{t("quality.type_training")}</SelectItem>
+                          <SelectItem value="Suspension">{t("quality.type_suspension")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="status">{t("common.status")} *</Label>
+                      <Select 
+                        value={formData.status} 
+                        onValueChange={(value) => setFormData({...formData, status: value})}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_status")} />
                         </SelectTrigger>
-                      </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Pending">{t("quality.status_pending")}</SelectItem>
+                          <SelectItem value="Active">{t("quality.status_active")}</SelectItem>
+                          <SelectItem value="Completed">{t("quality.status_completed")}</SelectItem>
+                          <SelectItem value="Dismissed">{t("quality.status_dismissed")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {formData.penaltyType === "Financial" && (
+                    <div>
+                      <Label htmlFor="penaltyAmount">{t("quality.penalty_amount")} *</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-2">$</span>
+                        <Input 
+                          id="penaltyAmount" 
+                          type="number" 
+                          value={formData.penaltyAmount}
+                          onChange={(e) => setFormData({...formData, penaltyAmount: e.target.value})}
+                          className="pl-8"
+                          min="0"
+                          step="0.01"
+                          required={formData.penaltyType === "Financial"}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div>
+                    <Label htmlFor="assignedTo">{t("quality.assigned_to")} *</Label>
+                    <Select 
+                      value={formData.assignedTo} 
+                      onValueChange={(value) => setFormData({...formData, assignedTo: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("quality.select_user")} />
+                      </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Pending">{t("quality.pending")}</SelectItem>
-                        <SelectItem value="Active">{t("quality.active")}</SelectItem>
-                        <SelectItem value="Completed">{t("quality.completed")}</SelectItem>
-                        <SelectItem value="Waived">{t("quality.waived")}</SelectItem>
+                        {users.map((user: any) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.firstName} {user.lastName}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription>{t("quality.status_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button type="submit" disabled={createPenalty.isPending || updatePenalty.isPending}>
-                  {(createPenalty.isPending || updatePenalty.isPending)
-                    ? t("common.saving")
-                    : selectedPenalty
-                      ? t("common.update")
-                      : t("common.save")}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="assignedDate">{t("quality.assigned_date")} *</Label>
+                    <Input 
+                      id="assignedDate" 
+                      type="date" 
+                      value={formData.assignedDate}
+                      onChange={(e) => setFormData({...formData, assignedDate: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="description">{t("common.description")} *</Label>
+                    <Textarea 
+                      id="description" 
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      rows={3}
+                      required
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
+                    {t("common.cancel")}
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isPending || !formData.violationId || !formData.assignedTo || (formData.penaltyType === "Financial" && !formData.penaltyAmount) || !formData.description}>
+                    {createMutation.isPending ? t("common.saving") : t("common.save")}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+      
+      {isLoading ? (
+        <div className="flex justify-center py-10">
+          <p>{t("common.loading")}</p>
+        </div>
+      ) : filteredPenalties.length === 0 ? (
+        <div className="border rounded-md p-8 text-center">
+          <p className="text-muted-foreground">{t("quality.no_penalties_found")}</p>
+        </div>
+      ) : (
+        <ScrollArea className="h-[calc(100vh-230px)] border rounded-md">
+          <Table>
+            <TableHeader className="sticky top-0 bg-background z-10">
+              <TableRow>
+                <TableHead>{t("common.id")}</TableHead>
+                <TableHead>{t("quality.penalty_type")}</TableHead>
+                <TableHead>{t("quality.violation")}</TableHead>
+                <TableHead>{t("quality.assigned_to")}</TableHead>
+                <TableHead>{t("common.status")}</TableHead>
+                <TableHead>{t("quality.details")}</TableHead>
+                <TableHead className="text-right">{t("common.actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPenalties.map((penalty: any) => {
+                return (
+                  <TableRow key={penalty.id}>
+                    <TableCell>#{penalty.id}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        {getPenaltyTypeBadge(penalty.penaltyType)}
+                        {penalty.penaltyType === "Financial" && penalty.penaltyAmount && (
+                          <span className="text-xs text-muted-foreground">
+                            ${parseFloat(penalty.penaltyAmount).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {penalty.violationId ? (
+                        <span>#{penalty.violationId}</span>
+                      ) : (
+                        <span className="text-muted-foreground">{t("common.not_available")}</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {getUserById(penalty.assignedTo)}
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(penalty.status)}
+                    </TableCell>
+                    <TableCell className="max-w-[200px]">
+                      <div className="truncate" title={penalty.description}>
+                        {penalty.description}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={() => handlePrintClick(penalty)}
+                          title={t("quality.print_penalty")}
+                        >
+                          <Printer className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={() => handleEditClick(penalty)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon"
+                          onClick={() => handleDeleteClick(penalty)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      )}
+      
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{t("quality.edit_penalty")}</DialogTitle>
+            <DialogDescription>{t("quality.edit_penalty_description")}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateSubmit}>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="violationId">{t("quality.violation")} *</Label>
+                <Select 
+                  value={formData.violationId} 
+                  onValueChange={(value) => setFormData({...formData, violationId: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("quality.select_violation")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {violations.map((violation: any) => (
+                      <SelectItem key={violation.id} value={String(violation.id)}>
+                        #{violation.id} - {violation.description?.substring(0, 35)}...
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="penaltyType">{t("quality.penalty_type")} *</Label>
+                  <Select 
+                    value={formData.penaltyType} 
+                    onValueChange={(value) => setFormData({...formData, penaltyType: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("quality.select_type")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Financial">{t("quality.type_financial")}</SelectItem>
+                      <SelectItem value="Warning">{t("quality.type_warning")}</SelectItem>
+                      <SelectItem value="Training">{t("quality.type_training")}</SelectItem>
+                      <SelectItem value="Suspension">{t("quality.type_suspension")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="status">{t("common.status")} *</Label>
+                  <Select 
+                    value={formData.status} 
+                    onValueChange={(value) => setFormData({...formData, status: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("quality.select_status")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pending">{t("quality.status_pending")}</SelectItem>
+                      <SelectItem value="Active">{t("quality.status_active")}</SelectItem>
+                      <SelectItem value="Completed">{t("quality.status_completed")}</SelectItem>
+                      <SelectItem value="Dismissed">{t("quality.status_dismissed")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {formData.penaltyType === "Financial" && (
+                <div>
+                  <Label htmlFor="penaltyAmount">{t("quality.penalty_amount")} *</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2">$</span>
+                    <Input 
+                      id="penaltyAmount" 
+                      type="number" 
+                      value={formData.penaltyAmount}
+                      onChange={(e) => setFormData({...formData, penaltyAmount: e.target.value})}
+                      className="pl-8"
+                      min="0"
+                      step="0.01"
+                      required={formData.penaltyType === "Financial"}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <Label htmlFor="assignedTo">{t("quality.assigned_to")} *</Label>
+                <Select 
+                  value={formData.assignedTo} 
+                  onValueChange={(value) => setFormData({...formData, assignedTo: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("quality.select_user")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user: any) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="assignedDate">{t("quality.assigned_date")} *</Label>
+                <Input 
+                  id="assignedDate" 
+                  type="date" 
+                  value={formData.assignedDate}
+                  onChange={(e) => setFormData({...formData, assignedDate: e.target.value})}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="description">{t("common.description")} *</Label>
+                <Textarea 
+                  id="description" 
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  rows={3}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                {t("common.cancel")}
+              </Button>
+              <Button type="submit" disabled={updateMutation.isPending || !formData.violationId || !formData.assignedTo || (formData.penaltyType === "Financial" && !formData.penaltyAmount) || !formData.description}>
+                {updateMutation.isPending ? t("common.updating") : t("common.update")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t("common.delete_confirmation")}</DialogTitle>
+            <DialogDescription>
+              {t("quality.delete_penalty_confirmation", { id: currentPenalty?.id })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-destructive flex items-center">
+              <AlertCircle className="h-4 w-4 mr-2" />
+              {t("quality.delete_penalty_warning")}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? t("common.deleting") : t("common.delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Print Preview Dialog */}
+      <Dialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{t("quality.print_penalty")}</DialogTitle>
+            <DialogDescription>{t("quality.print_penalty_description")}</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p>{t("quality.print_confirmation")}</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPrintDialog(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={handlePrint}>
+              <Printer className="mr-2 h-4 w-4" />
+              {t("common.print")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -1,35 +1,24 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter, 
+  DialogDescription 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
+  TableBody,
+  TableCell
 } from "@/components/ui/table";
-import { 
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -37,54 +26,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Checkbox
-} from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { 
+  CheckCircle, 
+  XCircle, 
+  Edit, 
+  Trash2, 
+  Plus, 
+  Filter,
+  Search,
+  Eye
+} from "lucide-react";
+import { queryClient } from "@/lib/queryClient";
 
-// Define form schema
-const checkFormSchema = z.object({
-  checkTypeId: z.string().min(1, { message: "Check type is required" }),
-  performedBy: z.string().min(1, { message: "Performer is required" }),
-  rollId: z.string().min(1, { message: "Roll is required" }),
-  jobOrderId: z.string().min(1, { message: "Job order is required" }),
-  checkDate: z.date({
-    required_error: "Check date is required",
-  }),
-  passed: z.boolean({
-    required_error: "Pass/fail status is required",
-  }),
-  notes: z.string().optional(),
-});
-
-export function QualityCheckForm({ checkTypes, rolls, jobOrders }: { 
-  checkTypes: any[],
-  rolls: any[],
-  jobOrders: any[]
-}) {
+export function QualityCheckForm({ checkTypes = [], rolls = [], jobOrders = [] }) {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedCheck, setSelectedCheck] = useState<any>(null);
-  const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
-  const [checkDetails, setCheckDetails] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("view");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterResult, setFilterResult] = useState("all");
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [currentCheck, setCurrentCheck] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    checkTypeId: "",
+    performedBy: "",
+    checkDate: new Date().toISOString().split('T')[0],
+    rollId: "",
+    jobOrderId: null as number | null,
+    passed: true,
+    measurements: "",
+    notes: ""
+  });
 
-  // Fetch quality checks data
-  const { data: checks, isLoading: checksLoading } = useQuery({
+  // Fetch quality checks
+  const { data: checks = [], isLoading: checksLoading, refetch: refetchChecks } = useQuery({
     queryKey: ["/api/quality-checks"],
     queryFn: async () => {
       const response = await fetch("/api/quality-checks");
@@ -95,35 +87,23 @@ export function QualityCheckForm({ checkTypes, rolls, jobOrders }: {
     }
   });
 
-  // Fetch users for the performer dropdown
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/users"],
+  // Fetch users for user selection
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/user"],
     queryFn: async () => {
-      const response = await fetch("/api/users");
+      const response = await fetch("/api/user");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
-      return response.json();
+      // If response is a single user object, wrap it in an array
+      const data = await response.json();
+      return Array.isArray(data) ? data : [data];
     }
   });
 
-  // Create form
-  const form = useForm<z.infer<typeof checkFormSchema>>({
-    resolver: zodResolver(checkFormSchema),
-    defaultValues: {
-      checkTypeId: "",
-      performedBy: "",
-      rollId: "",
-      jobOrderId: "",
-      checkDate: new Date(),
-      passed: false,
-      notes: "",
-    },
-  });
-
-  // Create new quality check
-  const createCheck = useMutation({
-    mutationFn: async (data: z.infer<typeof checkFormSchema>) => {
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => {
       const response = await fetch("/api/quality-checks", {
         method: "POST",
         headers: {
@@ -133,20 +113,20 @@ export function QualityCheckForm({ checkTypes, rolls, jobOrders }: {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create quality check");
+        throw new Error("Failed to create quality check");
       }
       
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/quality-checks"] });
       toast({
-        title: t("quality.check_created"),
-        description: t("quality.check_created_successfully"),
+        title: t("common.success"),
+        description: t("quality.check_created_success"),
       });
-      form.reset();
-      setIsDialogOpen(false);
+      setShowAddDialog(false);
+      resetForm();
+      refetchChecks();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-checks"] });
     },
     onError: (error: Error) => {
       toast({
@@ -154,12 +134,12 @@ export function QualityCheckForm({ checkTypes, rolls, jobOrders }: {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  // Update quality check 
-  const updateCheck = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: z.infer<typeof checkFormSchema> }) => {
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const response = await fetch(`/api/quality-checks/${id}`, {
         method: "PATCH",
         headers: {
@@ -169,21 +149,20 @@ export function QualityCheckForm({ checkTypes, rolls, jobOrders }: {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update quality check");
+        throw new Error("Failed to update quality check");
       }
       
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/quality-checks"] });
       toast({
-        title: t("quality.check_updated"),
-        description: t("quality.check_updated_successfully"),
+        title: t("common.success"),
+        description: t("quality.check_updated_success"),
       });
-      setSelectedCheck(null);
-      form.reset();
-      setIsDialogOpen(false);
+      setShowEditDialog(false);
+      resetForm();
+      refetchChecks();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-checks"] });
     },
     onError: (error: Error) => {
       toast({
@@ -191,442 +170,638 @@ export function QualityCheckForm({ checkTypes, rolls, jobOrders }: {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  // Handle form submission
-  const onSubmit = (data: z.infer<typeof checkFormSchema>) => {
-    if (selectedCheck) {
-      updateCheck.mutate({ id: selectedCheck.id, data });
-    } else {
-      createCheck.mutate(data);
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/quality-checks/${id}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete quality check");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: t("common.success"),
+        description: t("quality.check_deleted_success"),
+      });
+      setShowDeleteDialog(false);
+      refetchChecks();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-checks"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t("common.error"),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      checkTypeId: "",
+      performedBy: "",
+      checkDate: new Date().toISOString().split('T')[0],
+      rollId: "",
+      jobOrderId: null,
+      passed: true,
+      measurements: "",
+      notes: ""
+    });
+    setCurrentCheck(null);
+  };
+
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createMutation.mutate(formData);
+  };
+
+  const handleUpdateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentCheck) {
+      updateMutation.mutate({ id: currentCheck.id, data: formData });
     }
   };
 
-  // Open dialog for editing
-  const handleEdit = (check: any) => {
-    setSelectedCheck(check);
-    form.reset({
-      checkTypeId: check.checkTypeId.toString(),
-      performedBy: check.performedBy,
-      rollId: check.rollId,
-      jobOrderId: check.jobOrderId.toString(),
-      checkDate: check.checkDate ? new Date(check.checkDate) : new Date(),
-      passed: check.passed,
-      notes: check.notes || "",
+  const handleDeleteConfirm = () => {
+    if (currentCheck) {
+      deleteMutation.mutate(currentCheck.id);
+    }
+  };
+
+  const handleEditClick = (check: any) => {
+    setCurrentCheck(check);
+    setFormData({
+      checkTypeId: check.checkTypeId || "",
+      performedBy: check.performedBy || "",
+      checkDate: check.checkDate ? new Date(check.checkDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      rollId: check.rollId || "",
+      jobOrderId: check.jobOrderId || null,
+      passed: check.passed === true || check.passed === "true",
+      measurements: check.measurements || "",
+      notes: check.notes || ""
     });
-    setIsDialogOpen(true);
+    setShowEditDialog(true);
   };
 
-  // Open dialog for new check
-  const handleAddNew = () => {
-    setSelectedCheck(null);
-    form.reset({
-      checkTypeId: "",
-      performedBy: "",
-      rollId: "",
-      jobOrderId: "",
-      checkDate: new Date(),
-      passed: false,
-      notes: "",
-    });
-    setIsDialogOpen(true);
+  const handleViewClick = (check: any) => {
+    setCurrentCheck(check);
+    setShowDetailDialog(true);
   };
 
-  // View check details
-  const handleViewDetails = (check: any) => {
-    setCheckDetails(check);
-    setViewDetailsOpen(true);
+  const handleDeleteClick = (check: any) => {
+    setCurrentCheck(check);
+    setShowDeleteDialog(true);
   };
 
-  // Get check type name by ID
-  const getCheckTypeName = (id: string) => {
-    const checkType = checkTypes.find(type => type.id === id);
-    return checkType ? checkType.name : id;
+  const handleRollChange = (rollId: string) => {
+    const selectedRoll = rolls.find((roll: any) => roll.id === rollId);
+    if (selectedRoll) {
+      setFormData({
+        ...formData,
+        rollId,
+        jobOrderId: selectedRoll.jobOrderId || null
+      });
+    } else {
+      setFormData({
+        ...formData,
+        rollId,
+        jobOrderId: null
+      });
+    }
   };
 
-  // Get roll info by ID
-  const getRollInfo = (id: string) => {
-    const roll = rolls.find(roll => roll.id === id);
-    return roll ? `${roll.id} (${roll.serialNumber || 'No SN'})` : id;
+  // Filter and search functionality
+  const filteredChecks = checks.filter((check: any) => {
+    const matchesSearch = searchQuery === "" || 
+      (check.notes && check.notes.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (check.rollId && check.rollId.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesResult = filterResult === "all" || 
+      (filterResult === "passed" && check.passed) || 
+      (filterResult === "failed" && !check.passed);
+    
+    return matchesSearch && matchesResult;
+  });
+
+  const getCheckTypeById = (id: string) => {
+    return checkTypes.find((type: any) => type.id === id);
   };
 
-  // Get job order info by ID
-  const getJobOrderInfo = (id: number) => {
-    const jobOrder = jobOrders.find(jo => jo.id === id);
-    return jobOrder ? `JO #${jobOrder.id}` : `JO #${id}`;
+  const getRollById = (id: string) => {
+    return rolls.find((roll: any) => roll.id === id);
   };
 
-  // Get user name by ID
-  const getUserName = (id: string) => {
-    const user = users?.find(user => user.id === id);
-    return user ? user.username : id;
+  const getJobOrderById = (id: number) => {
+    return jobOrders.find((jo: any) => jo.id === id);
+  };
+
+  const getUserById = (id: string) => {
+    const user = users.find((user: any) => user.id === id);
+    if (user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`;
+    }
+    return id || t("common.unknown");
   };
 
   const isLoading = checksLoading || usersLoading;
 
-  if (isLoading) {
-    return <div className="text-center py-4">{t("common.loading")}</div>;
-  }
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">{t("quality.quality_checks")}</h3>
-        <Button onClick={handleAddNew}>{t("common.add_new")}</Button>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid grid-cols-2 md:w-[400px]">
+          <TabsTrigger value="view">{t("quality.view_checks")}</TabsTrigger>
+          <TabsTrigger value="create">{t("quality.new_check")}</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="view" className="space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t("common.search")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              <div className="flex items-center">
+                <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+                <Select 
+                  value={filterResult} 
+                  onValueChange={setFilterResult}
+                >
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder={t("quality.result")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("common.all")}</SelectItem>
+                    <SelectItem value="passed">{t("quality.passed")}</SelectItem>
+                    <SelectItem value="failed">{t("quality.failed")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
 
-      {/* Checks Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("quality.id")}</TableHead>
-                <TableHead>{t("quality.check_type")}</TableHead>
-                <TableHead>{t("quality.result")}</TableHead>
-                <TableHead>{t("quality.roll")}</TableHead>
-                <TableHead>{t("quality.performed_by")}</TableHead>
-                <TableHead>{t("quality.date")}</TableHead>
-                <TableHead>{t("common.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {checks && checks.length > 0 ? (
-                checks.map((check: any) => (
-                  <TableRow key={check.id}>
-                    <TableCell className="font-medium">{check.id}</TableCell>
-                    <TableCell>
-                      {getCheckTypeName(check.checkTypeId)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={check.passed ? "outline" : "destructive"}>
-                        {check.passed ? t("quality.passed") : t("quality.failed")}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{getRollInfo(check.rollId)}</TableCell>
-                    <TableCell>{getUserName(check.performedBy)}</TableCell>
-                    <TableCell>
-                      {check.checkDate
-                        ? format(new Date(check.checkDate), "MMM dd, yyyy")
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => handleViewDetails(check)}>
-                          {t("common.details")}
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleEdit(check)}>
-                          {t("common.edit")}
-                        </Button>
-                      </div>
-                    </TableCell>
+          {isLoading ? (
+            <div className="flex justify-center py-10">
+              <p>{t("common.loading")}</p>
+            </div>
+          ) : filteredChecks.length === 0 ? (
+            <div className="border rounded-md p-8 text-center">
+              <p className="text-muted-foreground">{t("quality.no_checks_found")}</p>
+            </div>
+          ) : (
+            <ScrollArea className="h-[calc(100vh-350px)] border rounded-md">
+              <Table>
+                <TableHeader className="sticky top-0 bg-background z-10">
+                  <TableRow>
+                    <TableHead>{t("common.id")}</TableHead>
+                    <TableHead>{t("quality.check_type")}</TableHead>
+                    <TableHead>{t("quality.result")}</TableHead>
+                    <TableHead>{t("quality.check_date")}</TableHead>
+                    <TableHead>{t("quality.roll")}</TableHead>
+                    <TableHead>{t("quality.job_order")}</TableHead>
+                    <TableHead className="text-right">{t("common.actions")}</TableHead>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
-                    {t("quality.no_checks")}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedCheck
-                ? t("quality.edit_check")
-                : t("quality.create_check")}
-            </DialogTitle>
-            <DialogDescription>
-              {selectedCheck
-                ? t("quality.edit_check_description")
-                : t("quality.create_check_description")}
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="checkTypeId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.check_type")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
+                </TableHeader>
+                <TableBody>
+                  {filteredChecks.map((check: any) => {
+                    const checkType = getCheckTypeById(check.checkTypeId);
+                    return (
+                      <TableRow key={check.id}>
+                        <TableCell>#{check.id}</TableCell>
+                        <TableCell>
+                          {checkType ? checkType.name : check.checkTypeId}
+                        </TableCell>
+                        <TableCell>
+                          {check.passed ? (
+                            <Badge variant="success" className="bg-green-500">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              {t("quality.passed")}
+                            </Badge>
+                          ) : (
+                            <Badge variant="destructive">
+                              <XCircle className="h-3 w-3 mr-1" />
+                              {t("quality.failed")}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {check.checkDate 
+                            ? format(new Date(check.checkDate), 'MMM d, yyyy') 
+                            : t("common.not_available")}
+                        </TableCell>
+                        <TableCell>
+                          {check.rollId || t("common.not_available")}
+                        </TableCell>
+                        <TableCell>
+                          {check.jobOrderId ? `#${check.jobOrderId}` : t("common.not_available")}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              onClick={() => handleViewClick(check)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              onClick={() => handleEditClick(check)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="icon"
+                              onClick={() => handleDeleteClick(check)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="create">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("quality.create_new_check")}</CardTitle>
+              <CardDescription>{t("quality.create_new_check_description")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleCreateSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="checkTypeId">{t("quality.check_type")} *</Label>
+                      <Select 
+                        value={formData.checkTypeId} 
+                        onValueChange={(value) => setFormData({...formData, checkTypeId: value})}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_check_type")} />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {checkTypes?.map((type: any) => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>{t("quality.check_type_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="passed"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>{t("quality.passed")}</FormLabel>
-                      <FormDescription>
-                        {t("quality.passed_description")}
-                      </FormDescription>
+                        <SelectContent>
+                          {checkTypes.map((type: any) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="checkDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("quality.check_date")}</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>{t("quality.pick_a_date")}</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>{t("quality.check_date_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="performedBy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.performed_by")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
+                    <div>
+                      <Label htmlFor="performedBy">{t("quality.performed_by")} *</Label>
+                      <Select 
+                        value={formData.performedBy} 
+                        onValueChange={(value) => setFormData({...formData, performedBy: value})}
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_performer")} />
+                          <SelectValue placeholder={t("quality.select_user")} />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {users?.map((user: any) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.username}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <SelectContent>
+                          {users.map((user: any) => (
+                            <SelectItem key={user.id} value={user.id}>
+                              {user.firstName} {user.lastName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-              <FormField
-                control={form.control}
-                name="rollId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.roll")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
+                    <div>
+                      <Label htmlFor="checkDate">{t("quality.check_date")} *</Label>
+                      <Input 
+                        id="checkDate" 
+                        type="date" 
+                        value={formData.checkDate}
+                        onChange={(e) => setFormData({...formData, checkDate: e.target.value})}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="rollId">{t("quality.roll")} *</Label>
+                      <Select 
+                        value={formData.rollId} 
+                        onValueChange={(value) => handleRollChange(value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_roll")} />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {rolls?.map((roll: any) => (
-                          <SelectItem key={roll.id} value={roll.id}>
-                            {roll.id} ({roll.serialNumber || 'No SN'})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>{t("quality.roll_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <SelectContent>
+                          {rolls.map((roll: any) => (
+                            <SelectItem key={roll.id} value={roll.id}>
+                              {roll.id} - {t(`quality.stage_${roll.stage.toLowerCase()}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-              <FormField
-                control={form.control}
-                name="jobOrderId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.job_order")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_job_order")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {jobOrders?.map((jo: any) => (
-                          <SelectItem key={jo.id} value={jo.id.toString()}>
-                            JO #{jo.id}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>{t("quality.job_order_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.notes")}</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder={t("quality.check_notes_placeholder")}
-                        className="resize-none"
-                        {...field}
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch 
+                        id="passed" 
+                        checked={formData.passed}
+                        onCheckedChange={(checked) => setFormData({...formData, passed: checked})}
                       />
-                    </FormControl>
-                    <FormDescription>{t("quality.notes_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <Label htmlFor="passed">{t("quality.passed_check")}</Label>
+                    </div>
 
-              <DialogFooter>
-                <Button type="submit" disabled={createCheck.isPending || updateCheck.isPending}>
-                  {(createCheck.isPending || updateCheck.isPending)
-                    ? t("common.saving")
-                    : selectedCheck
-                      ? t("common.update")
-                      : t("common.save")}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                    <div>
+                      <Label htmlFor="measurements">{t("quality.measurements")}</Label>
+                      <Input 
+                        id="measurements" 
+                        value={formData.measurements}
+                        onChange={(e) => setFormData({...formData, measurements: e.target.value})}
+                        placeholder={t("quality.measurements_placeholder")}
+                      />
+                    </div>
 
-      {/* View Details Dialog */}
-      <Dialog open={viewDetailsOpen} onOpenChange={setViewDetailsOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+                    <div>
+                      <Label htmlFor="notes">{t("quality.notes")}</Label>
+                      <Textarea 
+                        id="notes" 
+                        value={formData.notes}
+                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                        rows={4}
+                        placeholder={t("quality.notes_placeholder")}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    {t("common.reset")}
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isPending || !formData.checkTypeId || !formData.performedBy || !formData.rollId || !formData.checkDate}>
+                    {createMutation.isPending ? t("common.saving") : t("common.save")}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      
+      {/* View Detail Dialog */}
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>{t("quality.check_details")}</DialogTitle>
-            <DialogDescription>
-              {t("quality.check_id")}: {checkDetails?.id}
-            </DialogDescription>
           </DialogHeader>
+          {currentCheck && (
+            <div className="py-4">
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">{t("common.id")}</dt>
+                  <dd className="mt-1 text-sm">#{currentCheck.id}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">{t("quality.check_type")}</dt>
+                  <dd className="mt-1 text-sm">
+                    {getCheckTypeById(currentCheck.checkTypeId)?.name || currentCheck.checkTypeId}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">{t("quality.result")}</dt>
+                  <dd className="mt-1 text-sm">
+                    {currentCheck.passed ? (
+                      <Badge variant="success" className="bg-green-500">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        {t("quality.passed")}
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        {t("quality.failed")}
+                      </Badge>
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">{t("quality.check_date")}</dt>
+                  <dd className="mt-1 text-sm">
+                    {currentCheck.checkDate 
+                      ? format(new Date(currentCheck.checkDate), 'MMMM d, yyyy') 
+                      : t("common.not_available")}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">{t("quality.performed_by")}</dt>
+                  <dd className="mt-1 text-sm">
+                    {getUserById(currentCheck.performedBy)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">{t("quality.roll")}</dt>
+                  <dd className="mt-1 text-sm">
+                    {currentCheck.rollId || t("common.not_available")}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">{t("quality.job_order")}</dt>
+                  <dd className="mt-1 text-sm">
+                    {currentCheck.jobOrderId ? `#${currentCheck.jobOrderId}` : t("common.not_available")}
+                  </dd>
+                </div>
+                <div className="col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">{t("quality.measurements")}</dt>
+                  <dd className="mt-1 text-sm">
+                    {currentCheck.measurements || t("common.not_available")}
+                  </dd>
+                </div>
+                <div className="col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">{t("quality.notes")}</dt>
+                  <dd className="mt-1 text-sm whitespace-pre-line">
+                    {currentCheck.notes || t("common.not_available")}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setShowDetailDialog(false)}>
+              {t("common.close")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{t("quality.edit_check")}</DialogTitle>
+            <DialogDescription>{t("quality.edit_check_description")}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="checkTypeId">{t("quality.check_type")} *</Label>
+                  <Select 
+                    value={formData.checkTypeId} 
+                    onValueChange={(value) => setFormData({...formData, checkTypeId: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("quality.select_check_type")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {checkTypes.map((type: any) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h4 className="text-sm font-medium">{t("quality.status")}:</h4>
-                <Badge variant={checkDetails?.passed ? "outline" : "destructive"}>
-                  {checkDetails?.passed ? t("quality.passed") : t("quality.failed")}
-                </Badge>
+                <div>
+                  <Label htmlFor="performedBy">{t("quality.performed_by")} *</Label>
+                  <Select 
+                    value={formData.performedBy} 
+                    onValueChange={(value) => setFormData({...formData, performedBy: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("quality.select_user")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((user: any) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.firstName} {user.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="checkDate">{t("quality.check_date")} *</Label>
+                  <Input 
+                    id="checkDate" 
+                    type="date" 
+                    value={formData.checkDate}
+                    onChange={(e) => setFormData({...formData, checkDate: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="rollId">{t("quality.roll")} *</Label>
+                  <Select 
+                    value={formData.rollId} 
+                    onValueChange={(value) => handleRollChange(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("quality.select_roll")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rolls.map((roll: any) => (
+                        <SelectItem key={roll.id} value={roll.id}>
+                          {roll.id} - {t(`quality.stage_${roll.stage.toLowerCase()}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div>
-                <h4 className="text-sm font-medium">{t("quality.check_type")}:</h4>
-                <p className="text-sm">{checkDetails ? getCheckTypeName(checkDetails.checkTypeId) : ''}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">{t("quality.performed_by")}:</h4>
-                <p className="text-sm">{checkDetails ? getUserName(checkDetails.performedBy) : ''}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">{t("quality.check_date")}:</h4>
-                <p className="text-sm">
-                  {checkDetails?.checkDate
-                    ? format(new Date(checkDetails.checkDate), "PPP")
-                    : '-'}
-                </p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">{t("quality.job_order")}:</h4>
-                <p className="text-sm">{checkDetails ? getJobOrderInfo(checkDetails.jobOrderId) : ''}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">{t("quality.roll")}:</h4>
-                <p className="text-sm">{checkDetails ? getRollInfo(checkDetails.rollId) : ''}</p>
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="passed" 
+                    checked={formData.passed}
+                    onCheckedChange={(checked) => setFormData({...formData, passed: checked})}
+                  />
+                  <Label htmlFor="passed">{t("quality.passed_check")}</Label>
+                </div>
+
+                <div>
+                  <Label htmlFor="measurements">{t("quality.measurements")}</Label>
+                  <Input 
+                    id="measurements" 
+                    value={formData.measurements}
+                    onChange={(e) => setFormData({...formData, measurements: e.target.value})}
+                    placeholder={t("quality.measurements_placeholder")}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="notes">{t("quality.notes")}</Label>
+                  <Textarea 
+                    id="notes" 
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    rows={3}
+                    placeholder={t("quality.notes_placeholder")}
+                  />
+                </div>
               </div>
             </div>
-
-            <div>
-              <h4 className="text-sm font-medium">{t("quality.notes")}:</h4>
-              <p className="text-sm">{checkDetails?.notes || t("quality.no_notes")}</p>
-            </div>
-
             <DialogFooter>
-              <Button onClick={() => handleEdit(checkDetails)} size="sm">
-                {t("common.edit")}
+              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                {t("common.cancel")}
               </Button>
-              <Button onClick={() => setViewDetailsOpen(false)} variant="outline" size="sm">
-                {t("common.close")}
+              <Button type="submit" disabled={updateMutation.isPending || !formData.checkTypeId || !formData.performedBy || !formData.rollId || !formData.checkDate}>
+                {updateMutation.isPending ? t("common.updating") : t("common.update")}
               </Button>
             </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t("common.delete_confirmation")}</DialogTitle>
+            <DialogDescription>
+              {t("quality.delete_check_confirmation", { id: currentCheck?.id })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-destructive flex items-center">
+              <XCircle className="h-4 w-4 mr-2" />
+              {t("quality.delete_check_warning")}
+            </p>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? t("common.deleting") : t("common.delete")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

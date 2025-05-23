@@ -1,35 +1,25 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  DialogDescription 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
+  TableBody,
+  TableCell
 } from "@/components/ui/table";
-import { 
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -38,40 +28,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-// Define form schema
-const actionFormSchema = z.object({
-  qualityCheckId: z.string().min(1, { message: "Quality check is required" }),
-  action: z.string().min(5, { message: "Action must be at least 5 characters" }),
-  implementedBy: z.string().min(1, { message: "Implementer is required" }),
-  implementationDate: z.date({
-    required_error: "Implementation date is required",
-  }),
-  verifiedDate: z.date().optional(),
-});
+import { 
+  CheckCircle, 
+  XCircle, 
+  AlertCircle, 
+  Edit, 
+  Trash2, 
+  Plus, 
+  Filter,
+  Search,
+  CheckCheck
+} from "lucide-react";
+import { queryClient } from "@/lib/queryClient";
 
 export function QualityCorrectiveActions() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedAction, setSelectedAction] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterVerified, setFilterVerified] = useState("all");
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [currentAction, setCurrentAction] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    qualityCheckId: "",
+    action: "",
+    implementedBy: "",
+    implementationDate: new Date().toISOString().split('T')[0],
+    verifiedBy: "",
+    verifiedDate: "",
+    verificationNotes: ""
+  });
 
-  // Fetch corrective actions data
-  const { data: actions, isLoading: actionsLoading } = useQuery({
+  // Fetch corrective actions
+  const { data: actions = [], isLoading: actionsLoading, refetch: refetchActions } = useQuery({
     queryKey: ["/api/corrective-actions"],
     queryFn: async () => {
       const response = await fetch("/api/corrective-actions");
@@ -83,7 +78,7 @@ export function QualityCorrectiveActions() {
   });
 
   // Fetch quality checks for reference
-  const { data: qualityChecks, isLoading: checksLoading } = useQuery({
+  const { data: checks = [], isLoading: checksLoading } = useQuery({
     queryKey: ["/api/quality-checks"],
     queryFn: async () => {
       const response = await fetch("/api/quality-checks");
@@ -94,32 +89,23 @@ export function QualityCorrectiveActions() {
     }
   });
 
-  // Fetch users for the assignee dropdown
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/users"],
+  // Fetch users for user selection
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/user"],
     queryFn: async () => {
-      const response = await fetch("/api/users");
+      const response = await fetch("/api/user");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
-      return response.json();
+      // If response is a single user object, wrap it in an array
+      const data = await response.json();
+      return Array.isArray(data) ? data : [data];
     }
   });
 
-  // Create form
-  const form = useForm<z.infer<typeof actionFormSchema>>({
-    resolver: zodResolver(actionFormSchema),
-    defaultValues: {
-      qualityCheckId: "",
-      action: "",
-      implementedBy: "",
-      implementationDate: new Date(),
-    },
-  });
-
-  // Create new corrective action
-  const createAction = useMutation({
-    mutationFn: async (data: z.infer<typeof actionFormSchema>) => {
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => {
       const response = await fetch("/api/corrective-actions", {
         method: "POST",
         headers: {
@@ -129,20 +115,20 @@ export function QualityCorrectiveActions() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create corrective action");
+        throw new Error("Failed to create corrective action");
       }
       
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/corrective-actions"] });
       toast({
-        title: t("quality.action_created"),
-        description: t("quality.action_created_successfully"),
+        title: t("common.success"),
+        description: t("quality.action_created_success"),
       });
-      form.reset();
-      setIsDialogOpen(false);
+      setShowAddDialog(false);
+      resetForm();
+      refetchActions();
+      queryClient.invalidateQueries({ queryKey: ["/api/corrective-actions"] });
     },
     onError: (error: Error) => {
       toast({
@@ -150,12 +136,12 @@ export function QualityCorrectiveActions() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  // Update corrective action 
-  const updateAction = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: z.infer<typeof actionFormSchema> }) => {
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const response = await fetch(`/api/corrective-actions/${id}`, {
         method: "PATCH",
         headers: {
@@ -165,21 +151,20 @@ export function QualityCorrectiveActions() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update corrective action");
+        throw new Error("Failed to update corrective action");
       }
       
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/corrective-actions"] });
       toast({
-        title: t("quality.action_updated"),
-        description: t("quality.action_updated_successfully"),
+        title: t("common.success"),
+        description: t("quality.action_updated_success"),
       });
-      setSelectedAction(null);
-      form.reset();
-      setIsDialogOpen(false);
+      setShowEditDialog(false);
+      resetForm();
+      refetchActions();
+      queryClient.invalidateQueries({ queryKey: ["/api/corrective-actions"] });
     },
     onError: (error: Error) => {
       toast({
@@ -187,67 +172,30 @@ export function QualityCorrectiveActions() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  // Handle form submission
-  const onSubmit = (data: z.infer<typeof actionFormSchema>) => {
-    if (selectedAction) {
-      updateAction.mutate({ id: selectedAction.id, data });
-    } else {
-      createAction.mutate(data);
-    }
-  };
-
-  // Open dialog for editing
-  const handleEdit = (action: any) => {
-    setSelectedAction(action);
-    form.reset({
-      qualityCheckId: action.qualityCheckId.toString(),
-      action: action.action,
-      implementedBy: action.implementedBy,
-      implementationDate: action.implementationDate ? new Date(action.implementationDate) : new Date(),
-      verifiedDate: action.verifiedDate ? new Date(action.verifiedDate) : undefined,
-    });
-    setIsDialogOpen(true);
-  };
-
-  // Open dialog for new action
-  const handleAddNew = () => {
-    setSelectedAction(null);
-    form.reset({
-      qualityCheckId: "",
-      action: "",
-      implementedBy: "",
-      implementationDate: new Date(),
-    });
-    setIsDialogOpen(true);
-  };
-
-  // Verify the corrective action
-  const verifyAction = useMutation({
+  // Delete mutation
+  const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/corrective-actions/${id}/verify`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ verifiedDate: new Date() }),
+      const response = await fetch(`/api/corrective-actions/${id}`, {
+        method: "DELETE",
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to verify corrective action");
+        throw new Error("Failed to delete corrective action");
       }
       
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/corrective-actions"] });
       toast({
-        title: t("quality.action_verified"),
-        description: t("quality.action_verified_successfully"),
+        title: t("common.success"),
+        description: t("quality.action_deleted_success"),
       });
+      setShowDeleteDialog(false);
+      refetchActions();
+      queryClient.invalidateQueries({ queryKey: ["/api/corrective-actions"] });
     },
     onError: (error: Error) => {
       toast({
@@ -255,282 +203,543 @@ export function QualityCorrectiveActions() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  const handleVerify = (id: number) => {
-    verifyAction.mutate(id);
+  const resetForm = () => {
+    setFormData({
+      qualityCheckId: "",
+      action: "",
+      implementedBy: "",
+      implementationDate: new Date().toISOString().split('T')[0],
+      verifiedBy: "",
+      verifiedDate: "",
+      verificationNotes: ""
+    });
+    setCurrentAction(null);
+  };
+
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createMutation.mutate(formData);
+  };
+
+  const handleUpdateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentAction) {
+      updateMutation.mutate({ id: currentAction.id, data: formData });
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (currentAction) {
+      deleteMutation.mutate(currentAction.id);
+    }
+  };
+
+  const handleEditClick = (action: any) => {
+    setCurrentAction(action);
+    setFormData({
+      qualityCheckId: action.qualityCheckId ? String(action.qualityCheckId) : "",
+      action: action.action || "",
+      implementedBy: action.implementedBy || "",
+      implementationDate: action.implementationDate ? new Date(action.implementationDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      verifiedBy: action.verifiedBy || "",
+      verifiedDate: action.verifiedDate ? new Date(action.verifiedDate).toISOString().split('T')[0] : "",
+      verificationNotes: action.verificationNotes || ""
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleDeleteClick = (action: any) => {
+    setCurrentAction(action);
+    setShowDeleteDialog(true);
+  };
+
+  // Filter and search functionality
+  const filteredActions = actions.filter((action: any) => {
+    const matchesSearch = searchQuery === "" || 
+      (action.action && action.action.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesVerified = filterVerified === "all" || 
+      (filterVerified === "verified" && action.verifiedDate) || 
+      (filterVerified === "pending" && !action.verifiedDate);
+    
+    return matchesSearch && matchesVerified;
+  });
+
+  const getUserById = (id: string) => {
+    const user = users.find((user: any) => user.id === id);
+    if (user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`;
+    }
+    return id || t("common.unknown");
+  };
+
+  const getCheckById = (id: number) => {
+    return checks.find((check: any) => check.id === id);
   };
 
   const isLoading = actionsLoading || checksLoading || usersLoading;
 
-  if (isLoading) {
-    return <div className="text-center py-4">{t("common.loading")}</div>;
-  }
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">{t("quality.corrective_actions")}</h3>
-        <Button onClick={handleAddNew}>{t("common.add_new")}</Button>
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("common.search")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          <div className="flex items-center">
+            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            <Select 
+              value={filterVerified} 
+              onValueChange={setFilterVerified}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder={t("quality.verification")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
+                <SelectItem value="verified">{t("quality.verified")}</SelectItem>
+                <SelectItem value="pending">{t("quality.pending_verification")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button variant="default" onClick={() => {
+                resetForm();
+                setShowAddDialog(true);
+              }}>
+                <Plus className="mr-2 h-4 w-4" /> {t("quality.add_action")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>{t("quality.add_corrective_action")}</DialogTitle>
+                <DialogDescription>{t("quality.add_corrective_action_description")}</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleCreateSubmit}>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label htmlFor="qualityCheckId">{t("quality.related_check")} *</Label>
+                    <Select 
+                      value={formData.qualityCheckId} 
+                      onValueChange={(value) => setFormData({...formData, qualityCheckId: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("quality.select_check")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {checks.map((check: any) => (
+                          <SelectItem key={check.id} value={String(check.id)}>
+                            {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="action">{t("quality.action_description")} *</Label>
+                    <Textarea 
+                      id="action" 
+                      value={formData.action}
+                      onChange={(e) => setFormData({...formData, action: e.target.value})}
+                      rows={3}
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="implementedBy">{t("quality.implemented_by")} *</Label>
+                    <Select 
+                      value={formData.implementedBy} 
+                      onValueChange={(value) => setFormData({...formData, implementedBy: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("quality.select_user")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.map((user: any) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.firstName} {user.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="implementationDate">{t("quality.implementation_date")} *</Label>
+                    <Input 
+                      id="implementationDate" 
+                      type="date" 
+                      value={formData.implementationDate}
+                      onChange={(e) => setFormData({...formData, implementationDate: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        id="isVerified" 
+                        className="mr-2" 
+                        checked={!!formData.verifiedDate}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({
+                              ...formData, 
+                              verifiedDate: new Date().toISOString().split('T')[0]
+                            });
+                          } else {
+                            setFormData({
+                              ...formData, 
+                              verifiedDate: "",
+                              verifiedBy: "",
+                              verificationNotes: ""
+                            });
+                          }
+                        }} 
+                      />
+                      <Label htmlFor="isVerified">{t("quality.is_verified")}</Label>
+                    </div>
+                    
+                    {formData.verifiedDate && (
+                      <>
+                        <div>
+                          <Label htmlFor="verifiedBy">{t("quality.verified_by")} *</Label>
+                          <Select 
+                            value={formData.verifiedBy} 
+                            onValueChange={(value) => setFormData({...formData, verifiedBy: value})}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={t("quality.select_user")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {users.map((user: any) => (
+                                <SelectItem key={user.id} value={user.id}>
+                                  {user.firstName} {user.lastName}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="verifiedDate">{t("quality.verification_date")} *</Label>
+                          <Input 
+                            id="verifiedDate" 
+                            type="date" 
+                            value={formData.verifiedDate}
+                            onChange={(e) => setFormData({...formData, verifiedDate: e.target.value})}
+                            required={!!formData.verifiedDate}
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="verificationNotes">{t("quality.verification_notes")}</Label>
+                          <Textarea 
+                            id="verificationNotes" 
+                            value={formData.verificationNotes}
+                            onChange={(e) => setFormData({...formData, verificationNotes: e.target.value})}
+                            rows={2}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
+                    {t("common.cancel")}
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isPending || !formData.qualityCheckId || !formData.action || !formData.implementedBy || !formData.implementationDate || (formData.verifiedDate && !formData.verifiedBy)}>
+                    {createMutation.isPending ? t("common.saving") : t("common.save")}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
-
-      {/* Actions Table */}
-      <Card>
-        <div className="overflow-x-auto">
+      
+      {isLoading ? (
+        <div className="flex justify-center py-10">
+          <p>{t("common.loading")}</p>
+        </div>
+      ) : filteredActions.length === 0 ? (
+        <div className="border rounded-md p-8 text-center">
+          <p className="text-muted-foreground">{t("quality.no_actions_found")}</p>
+        </div>
+      ) : (
+        <ScrollArea className="h-[calc(100vh-230px)] border rounded-md">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
-                <TableHead>{t("quality.id")}</TableHead>
-                <TableHead>{t("quality.action")}</TableHead>
-                <TableHead>{t("quality.implemented_by")}</TableHead>
-                <TableHead>{t("quality.implementation_date")}</TableHead>
+                <TableHead>{t("common.id")}</TableHead>
+                <TableHead>{t("quality.related_check")}</TableHead>
+                <TableHead>{t("quality.action_description")}</TableHead>
+                <TableHead>{t("quality.implementation_details")}</TableHead>
                 <TableHead>{t("quality.verification_status")}</TableHead>
-                <TableHead>{t("common.actions")}</TableHead>
+                <TableHead className="text-right">{t("common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {actions && actions.length > 0 ? (
-                actions.map((action: any) => (
+              {filteredActions.map((action: any) => {
+                const relatedCheck = getCheckById(action.qualityCheckId);
+                return (
                   <TableRow key={action.id}>
-                    <TableCell className="font-medium">{action.id}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{action.action}</TableCell>
-                    <TableCell>{action.implementedBy}</TableCell>
+                    <TableCell>#{action.id}</TableCell>
                     <TableCell>
-                      {action.implementationDate
-                        ? format(new Date(action.implementationDate), "MMM dd, yyyy")
-                        : "-"}
+                      {action.qualityCheckId ? (
+                        <span>#{action.qualityCheckId}</span>
+                      ) : (
+                        <span className="text-muted-foreground">{t("common.not_available")}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="max-w-[200px]">
+                      <div className="truncate" title={action.action}>
+                        {action.action}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div>{getUserById(action.implementedBy)}</div>
+                        <div className="text-muted-foreground text-xs">
+                          {action.implementationDate 
+                            ? format(new Date(action.implementationDate), 'MMM d, yyyy') 
+                            : ""}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       {action.verifiedDate ? (
-                        <Badge variant="outline">
-                          {t("quality.verified")} ({format(new Date(action.verifiedDate), "MMM dd, yyyy")})
+                        <Badge variant="success" className="flex items-center gap-1">
+                          <CheckCheck className="h-3 w-3" />
+                          {t("quality.verified")}
                         </Badge>
                       ) : (
-                        <Badge variant="secondary">{t("quality.pending_verification")}</Badge>
+                        <Badge variant="outline" className="text-orange-500 border-orange-500">
+                          {t("quality.pending_verification")}
+                        </Badge>
                       )}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => handleEdit(action)}>
-                          {t("common.edit")}
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={() => handleEditClick(action)}
+                        >
+                          <Edit className="h-4 w-4" />
                         </Button>
-                        {!action.verifiedDate && (
-                          <Button size="sm" variant="outline" onClick={() => handleVerify(action.id)}>
-                            {t("quality.verify")}
-                          </Button>
-                        )}
+                        <Button 
+                          variant="outline" 
+                          size="icon"
+                          onClick={() => handleDeleteClick(action)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    {t("quality.no_corrective_actions")}
-                  </TableCell>
-                </TableRow>
-              )}
+                );
+              })}
             </TableBody>
           </Table>
-        </div>
-      </Card>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        </ScrollArea>
+      )}
+      
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{t("quality.edit_corrective_action")}</DialogTitle>
+            <DialogDescription>{t("quality.edit_corrective_action_description")}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateSubmit}>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="qualityCheckId">{t("quality.related_check")} *</Label>
+                <Select 
+                  value={formData.qualityCheckId} 
+                  onValueChange={(value) => setFormData({...formData, qualityCheckId: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("quality.select_check")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {checks.map((check: any) => (
+                      <SelectItem key={check.id} value={String(check.id)}>
+                        {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="action">{t("quality.action_description")} *</Label>
+                <Textarea 
+                  id="action" 
+                  value={formData.action}
+                  onChange={(e) => setFormData({...formData, action: e.target.value})}
+                  rows={3}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="implementedBy">{t("quality.implemented_by")} *</Label>
+                <Select 
+                  value={formData.implementedBy} 
+                  onValueChange={(value) => setFormData({...formData, implementedBy: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("quality.select_user")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user: any) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="implementationDate">{t("quality.implementation_date")} *</Label>
+                <Input 
+                  id="implementationDate" 
+                  type="date" 
+                  value={formData.implementationDate}
+                  onChange={(e) => setFormData({...formData, implementationDate: e.target.value})}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id="isVerified" 
+                    className="mr-2" 
+                    checked={!!formData.verifiedDate}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setFormData({
+                          ...formData, 
+                          verifiedDate: new Date().toISOString().split('T')[0]
+                        });
+                      } else {
+                        setFormData({
+                          ...formData, 
+                          verifiedDate: "",
+                          verifiedBy: "",
+                          verificationNotes: ""
+                        });
+                      }
+                    }} 
+                  />
+                  <Label htmlFor="isVerified">{t("quality.is_verified")}</Label>
+                </div>
+                
+                {formData.verifiedDate && (
+                  <>
+                    <div>
+                      <Label htmlFor="verifiedBy">{t("quality.verified_by")} *</Label>
+                      <Select 
+                        value={formData.verifiedBy} 
+                        onValueChange={(value) => setFormData({...formData, verifiedBy: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("quality.select_user")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {users.map((user: any) => (
+                            <SelectItem key={user.id} value={user.id}>
+                              {user.firstName} {user.lastName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="verifiedDate">{t("quality.verification_date")} *</Label>
+                      <Input 
+                        id="verifiedDate" 
+                        type="date" 
+                        value={formData.verifiedDate}
+                        onChange={(e) => setFormData({...formData, verifiedDate: e.target.value})}
+                        required={!!formData.verifiedDate}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="verificationNotes">{t("quality.verification_notes")}</Label>
+                      <Textarea 
+                        id="verificationNotes" 
+                        value={formData.verificationNotes}
+                        onChange={(e) => setFormData({...formData, verificationNotes: e.target.value})}
+                        rows={2}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                {t("common.cancel")}
+              </Button>
+              <Button type="submit" disabled={updateMutation.isPending || !formData.qualityCheckId || !formData.action || !formData.implementedBy || !formData.implementationDate || (formData.verifiedDate && !formData.verifiedBy)}>
+                {updateMutation.isPending ? t("common.updating") : t("common.update")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>
-              {selectedAction
-                ? t("quality.edit_action")
-                : t("quality.create_action")}
-            </DialogTitle>
+            <DialogTitle>{t("common.delete_confirmation")}</DialogTitle>
             <DialogDescription>
-              {selectedAction
-                ? t("quality.edit_action_description")
-                : t("quality.create_action_description")}
+              {t("quality.delete_action_confirmation", { id: currentAction?.id })}
             </DialogDescription>
           </DialogHeader>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="qualityCheckId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.quality_check")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_check")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {qualityChecks?.map((check: any) => (
-                          <SelectItem key={check.id} value={check.id.toString()}>
-                            {`Check #${check.id} - ${check.passed ? t("quality.passed") : t("quality.failed")}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>{t("quality.check_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="action"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.action")}</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder={t("quality.describe_action")}
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>{t("quality.action_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="implementedBy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("quality.implemented_by")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_implementer")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {users?.map((user: any) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.username}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="implementationDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("quality.implementation_date")}</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>{t("quality.pick_a_date")}</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>{t("quality.implementation_date_description")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {selectedAction && (
-                <FormField
-                  control={form.control}
-                  name="verifiedDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>{t("quality.verification_date")}</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>{t("quality.not_verified")}</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormDescription>{t("quality.verification_date_description")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <DialogFooter>
-                <Button type="submit" disabled={createAction.isPending || updateAction.isPending}>
-                  {(createAction.isPending || updateAction.isPending)
-                    ? t("common.saving")
-                    : selectedAction
-                      ? t("common.update")
-                      : t("common.save")}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <div className="py-4">
+            <p className="text-destructive flex items-center">
+              <AlertCircle className="h-4 w-4 mr-2" />
+              {t("quality.delete_action_warning")}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? t("common.deleting") : t("common.delete")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
