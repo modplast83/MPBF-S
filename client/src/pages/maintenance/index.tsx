@@ -5,17 +5,17 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/lib/queryClient";
 import { 
-  ClipboardListIcon, 
-  WrenchIcon, 
-  CheckCircleIcon, 
-  AlertCircleIcon, 
+  ClipboardCheck as ClipboardListIcon, 
+  Wrench as WrenchIcon, 
+  CheckCircle as CheckCircleIcon, 
+  AlertCircle as AlertCircleIcon, 
   Clock as TimeIcon,
-  Tool as ToolIcon,
-  PlusIcon,
-  ChevronRight as ChevronRightIcon,
-  Search as SearchIcon,
-  Users as UsersIcon,
-  BarChart as ChartIcon
+  Hammer as ToolIcon,
+  Plus as PlusIcon,
+  ChevronRight,
+  Search,
+  Users,
+  BarChart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -65,18 +65,27 @@ export default function MaintenanceDashboard() {
   const { data: requests, isLoading: isLoadingRequests } = useQuery({
     queryKey: ["/api/maintenance/requests"],
     queryFn: () => apiRequest("/api/maintenance/requests"),
+    staleTime: 60000,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
   
   // Query for fetching maintenance stats
   const { data: maintenanceStats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["/api/maintenance/stats"],
     queryFn: () => apiRequest("/api/maintenance/stats"),
+    staleTime: 60000,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
   
   // Query for fetching machines with most maintenance issues
   const { data: machineStats, isLoading: isLoadingMachineStats } = useQuery({
     queryKey: ["/api/maintenance/machines/stats"],
     queryFn: () => apiRequest("/api/maintenance/machines/stats"),
+    staleTime: 60000,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
   
   // Get status icon
@@ -244,7 +253,7 @@ export default function MaintenanceDashboard() {
             </CardHeader>
             <CardContent>
               <div className="relative flex items-center mb-4">
-                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t('Search by request number or description...')}
                   className="pl-9"
@@ -279,7 +288,7 @@ export default function MaintenanceDashboard() {
                           <Badge className={priorityColors[request.priority]}>
                             {t(request.priority).toUpperCase()}
                           </Badge>
-                          <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </div>
                       </div>
                     </Link>
@@ -331,7 +340,6 @@ export default function MaintenanceDashboard() {
                     <Progress 
                       value={(requestsByStatus.new.length / (filteredRequests.length || 1)) * 100} 
                       className="h-2 bg-muted"
-                      indicatorClassName="bg-blue-500"
                     />
                   </div>
                   
@@ -452,7 +460,7 @@ export default function MaintenanceDashboard() {
                   {maintenanceStats.teamWorkload.map((member) => (
                     <div key={member.id} className="flex items-center space-x-3">
                       <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10">
-                        <UsersIcon className="h-4 w-4 text-primary" />
+                        <Users className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
@@ -469,7 +477,7 @@ export default function MaintenanceDashboard() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <UsersIcon className="h-10 w-10 text-primary/60 mb-2" />
+                  <Users className="h-10 w-10 text-primary/60 mb-2" />
                   <p className="text-muted-foreground">{t('No team workload data available')}</p>
                 </div>
               )}
