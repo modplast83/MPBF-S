@@ -27,7 +27,7 @@ import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions-fixed";
 import ImportExport from "@/pages/system/import-export";
 import SmsIndex from "@/pages/system/sms/index";
-import ProQualityDashboard from "@/pages/quality/pro-dashboard";
+import UnifiedQualityDashboard from "@/pages/quality/unified-dashboard";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
@@ -82,8 +82,8 @@ function App() {
                   <ProtectedRoute path="/reports/warehouse" component={WarehouseReportsPage} module="Warehouse Reports" />
                   <ProtectedRoute path="/reports/quality" component={QualityReportsPage} module="Quality Reports" />
                   <ProtectedRoute path="/reports/workflow" component={WorkflowReportsPage} module="Workflow Reports" />
-                  <ProtectedRoute path="/quality" component={ProQualityDashboard} module="Quality" />
-                  <ProtectedRoute path="/quality/:section" component={ProQualityDashboard} module="Quality" />
+                  <ProtectedRoute path="/quality" component={UnifiedQualityDashboard} module="Quality" />
+                  <ProtectedRoute path="/quality/:section" component={UnifiedQualityDashboard} module="Quality" />
                   <ProtectedRoute path="/system" component={SystemIndex} module="System Settings" />
                   <ProtectedRoute path="/system/database" component={Database} module="Database" />
                   <ProtectedRoute path="/system/permissions" component={Permissions} module="Permissions" />
