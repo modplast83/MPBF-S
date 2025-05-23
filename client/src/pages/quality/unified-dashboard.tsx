@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { QualityViolations } from "@/components/quality/enhanced-violation-management";
 import { QualityPenaltiesManagement } from "@/components/quality/enhanced-penalties-management";
 import { QualityCorrectiveActions } from "@/components/quality/enhanced-corrective-actions";
+import { QualityChecksManagement } from "@/components/quality/enhanced-quality-check-form";
 import { 
   PieChart, 
   BarChart, 
@@ -48,9 +49,6 @@ export default function UnifiedQualityDashboard() {
     activePenalties: 0,
     closedPenalties: 0
   };
-  
-  // Create a safe stats object that always has values
-  const [statsData, setStatsData] = useState(defaultStats);
 
   // Fetch quality statistics
   const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
@@ -127,21 +125,8 @@ export default function UnifiedQualityDashboard() {
     }
   });
   
-  // Default stats object to prevent undefined errors
-  const statsData = stats || {
-    totalChecks: 0,
-    passedChecks: 0,
-    failedChecks: 0,
-    totalViolations: 0,
-    openViolations: 0,
-    resolvedViolations: 0,
-    totalCorrectiveActions: 0,
-    pendingActions: 0,
-    completedActions: 0,
-    totalPenalties: 0,
-    activePenalties: 0,
-    closedPenalties: 0
-  };
+  // Use stats from API or default values
+  const statsData = stats || defaultStats;
   
   // Calculate total quality score
   const calculateQualityScore = () => {    
@@ -474,16 +459,10 @@ export default function UnifiedQualityDashboard() {
         </TabsContent>
 
         <TabsContent value="checks">
-          {/* Quality Check Management Component will go here */}
           <div className="rounded-lg border p-6 bg-card">
             <h2 className="text-2xl font-bold mb-4">{t("quality.quality_checks")}</h2>
             <p className="text-muted-foreground mb-6">{t("quality.quality_checks_description")}</p>
-            
-            {/* Placeholder for Quality Check Component - will be implemented separately */}
-            <div className="p-6 border border-dashed rounded-lg flex flex-col items-center justify-center">
-              <ClipboardCheck className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">{t("quality.select_tab_for_details")}</p>
-            </div>
+            <QualityChecksManagement />
           </div>
         </TabsContent>
 
