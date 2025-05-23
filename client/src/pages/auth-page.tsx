@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-v2";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
