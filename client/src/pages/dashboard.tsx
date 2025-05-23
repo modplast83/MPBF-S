@@ -1,5 +1,5 @@
-import { CustomizableDashboard } from "@/components/dashboard/customizable-dashboard";
+import { RoleBasedDashboard } from "@/components/dashboard/role-based-dashboard";
 
 export default function Dashboard() {
-  return <CustomizableDashboard />;
+  return <RoleBasedDashboard />;
 }
