@@ -35,7 +35,7 @@ export default function QualityIndex() {
             <p className="text-sm text-muted-foreground mb-4">
               Access our enhanced quality module with improved interfaces, professional functionality, and mobile optimization.
             </p>
-            <Link href="/quality/enhanced-module">
+            <Link href="/quality/enhanced">
               <Button variant="outline" className="w-full border-purple-200 hover:bg-purple-50">Open Enhanced Module</Button>
             </Link>
           </CardContent>
