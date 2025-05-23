@@ -37,203 +37,203 @@ import MaintenanceRequests from "@/pages/maintenance/requests";
 export default function App() {
   return (
     <div className="flex h-screen">
-      <ProtectedRoute>
+      <ProtectedRouteWrapper>
         <Sidebar />
-      </ProtectedRoute>
+      </ProtectedRouteWrapper>
       <div className="flex-1 overflow-auto">
         <Switch>
           <Route path="/login" component={AuthPage} />
           
           {/* Main dashboard */}
           <Route path="/">
-            <ProtectedRoute>
+            <ProtectedRouteWrapper>
               <Dashboard />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Setup section */}
           <Route path="/setup">
-            <ProtectedRoute requiredModules={["Setup"]}>
+            <ProtectedRouteWrapper requiredModules={["Setup"]}>
               <Setup />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/setup/products">
-            <ProtectedRoute requiredModules={["Products"]}>
+            <ProtectedRouteWrapper requiredModules={["Products"]}>
               <Products />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/setup/customers">
-            <ProtectedRoute requiredModules={["Customers"]}>
+            <ProtectedRouteWrapper requiredModules={["Customers"]}>
               <Customers />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/setup/categories">
-            <ProtectedRoute requiredModules={["Categories"]}>
+            <ProtectedRouteWrapper requiredModules={["Categories"]}>
               <Categories />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/setup/items">
-            <ProtectedRoute requiredModules={["Items"]}>
+            <ProtectedRouteWrapper requiredModules={["Items"]}>
               <Items />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/setup/sections">
-            <ProtectedRoute requiredModules={["Sections"]}>
+            <ProtectedRouteWrapper requiredModules={["Sections"]}>
               <Sections />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/setup/users">
-            <ProtectedRoute requiredModules={["Users"]}>
+            <ProtectedRouteWrapper requiredModules={["Users"]}>
               <Users />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/setup/machines">
-            <ProtectedRoute requiredModules={["Machines"]}>
+            <ProtectedRouteWrapper requiredModules={["Machines"]}>
               <Machines />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Orders */}
           <Route path="/orders">
-            <ProtectedRoute requiredModules={["Orders"]}>
+            <ProtectedRouteWrapper requiredModules={["Orders"]}>
               <Orders />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Workflow */}
           <Route path="/workflow">
-            <ProtectedRoute requiredModules={["Workflow"]}>
+            <ProtectedRouteWrapper requiredModules={["Workflow"]}>
               <WorkflowPage />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Production */}
           <Route path="/production">
-            <ProtectedRoute requiredModules={["Production"]}>
+            <ProtectedRouteWrapper requiredModules={["Production"]}>
               <ProductionPage />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/production/mix-materials">
-            <ProtectedRoute requiredModules={["Mix Materials"]}>
+            <ProtectedRouteWrapper requiredModules={["Mix Materials"]}>
               <MixMaterials />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Warehouse */}
           <Route path="/warehouse">
-            <ProtectedRoute requiredModules={["Warehouse"]}>
+            <ProtectedRouteWrapper requiredModules={["Warehouse"]}>
               <WarehousePage />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/warehouse/raw-materials">
-            <ProtectedRoute requiredModules={["Raw Materials"]}>
+            <ProtectedRouteWrapper requiredModules={["Raw Materials"]}>
               <RawMaterials />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/warehouse/final-products">
-            <ProtectedRoute requiredModules={["Final Products"]}>
+            <ProtectedRouteWrapper requiredModules={["Final Products"]}>
               <FinalProducts />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Quality */}
           <Route path="/quality">
-            <ProtectedRoute requiredModules={["Quality"]}>
+            <ProtectedRouteWrapper requiredModules={["Quality"]}>
               <QualityPage />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/quality/check-types">
-            <ProtectedRoute requiredModules={["Check Types"]}>
+            <ProtectedRouteWrapper requiredModules={["Check Types"]}>
               <QualityCheckTypes />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/quality/checks">
-            <ProtectedRoute requiredModules={["Checks"]}>
+            <ProtectedRouteWrapper requiredModules={["Checks"]}>
               <QualityChecks />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/quality/violations">
-            <ProtectedRoute requiredModules={["Violations"]}>
+            <ProtectedRouteWrapper requiredModules={["Violations"]}>
               <QualityViolations />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/quality/corrective-actions">
-            <ProtectedRoute requiredModules={["Corrective Actions"]}>
+            <ProtectedRouteWrapper requiredModules={["Corrective Actions"]}>
               <CorrectiveActions />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/quality/penalties">
-            <ProtectedRoute requiredModules={["Penalties"]}>
+            <ProtectedRouteWrapper requiredModules={["Penalties"]}>
               <QualityPenalties />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Maintenance */}
           <Route path="/maintenance">
-            <ProtectedRoute requiredModules={["Maintenance"]}>
+            <ProtectedRouteWrapper requiredModules={["Maintenance"]}>
               <MaintenanceDashboard />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/maintenance/requests">
-            <ProtectedRoute requiredModules={["Maintenance"]}>
+            <ProtectedRouteWrapper requiredModules={["Maintenance"]}>
               <MaintenanceRequests />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Reports */}
           <Route path="/reports">
-            <ProtectedRoute requiredModules={["Reports"]}>
+            <ProtectedRouteWrapper requiredModules={["Reports"]}>
               <ReportsPage />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Tools */}
           <Route path="/tools">
-            <ProtectedRoute requiredModules={["Tools"]}>
+            <ProtectedRouteWrapper requiredModules={["Tools"]}>
               <ToolsPage />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Cliches */}
           <Route path="/cliches">
-            <ProtectedRoute requiredModules={["Cliches"]}>
+            <ProtectedRouteWrapper requiredModules={["Cliches"]}>
               <ClichesPage />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* System settings */}
           <Route path="/system/permissions">
-            <ProtectedRoute requiredModules={["Permissions"]}>
+            <ProtectedRouteWrapper requiredModules={["Permissions"]}>
               <Permissions />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/system/database">
-            <ProtectedRoute requiredModules={["Database"]}>
+            <ProtectedRouteWrapper requiredModules={["Database"]}>
               <DatabasePage />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           <Route path="/system/sms">
-            <ProtectedRoute requiredModules={["SMS Management"]}>
+            <ProtectedRouteWrapper requiredModules={["SMS Management"]}>
               <SMSManagement />
-            </ProtectedRoute>
+            </ProtectedRouteWrapper>
           </Route>
           
           {/* Fallback route */}

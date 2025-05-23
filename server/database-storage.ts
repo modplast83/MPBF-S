@@ -48,6 +48,22 @@ import {
   qualityChecks,
   type QualityCheck,
   type InsertQualityCheck,
+  // Maintenance module imports
+  maintenanceRequests,
+  type MaintenanceRequest,
+  type InsertMaintenanceRequest,
+  maintenanceActions,
+  type MaintenanceAction,
+  type InsertMaintenanceAction,
+  spareParts,
+  type SparePart, 
+  type InsertSparePart,
+  maintenanceLogbook,
+  type MaintenanceLogbook,
+  type InsertMaintenanceLogbook,
+  maintenanceSchedule,
+  type MaintenanceSchedule,
+  type InsertMaintenanceSchedule,
   qualityViolations,
   type QualityViolation,
   type InsertQualityViolation,
@@ -1877,5 +1893,370 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return !!updated;
+  }
+
+  // ================== Maintenance Requests Methods ==================
+  async getMaintenanceRequests(): Promise<MaintenanceRequest[]> {
+    return await db.select().from(maintenanceRequests).orderBy(maintenanceRequests.createdAt);
+  }
+
+  async getMaintenanceRequestsByMachine(machineId: string): Promise<MaintenanceRequest[]> {
+    return await db
+      .select()
+      .from(maintenanceRequests)
+      .where(eq(maintenanceRequests.machineId, machineId))
+      .orderBy(maintenanceRequests.createdAt);
+  }
+
+  async getMaintenanceRequestsByStatus(status: string): Promise<MaintenanceRequest[]> {
+    return await db
+      .select()
+      .from(maintenanceRequests)
+      .where(eq(maintenanceRequests.status, status))
+      .orderBy(maintenanceRequests.createdAt);
+  }
+
+  async getMaintenanceRequestsByUser(userId: string): Promise<MaintenanceRequest[]> {
+    return await db
+      .select()
+      .from(maintenanceRequests)
+      .where(eq(maintenanceRequests.requestedBy, userId))
+      .orderBy(maintenanceRequests.createdAt);
+  }
+
+  async getMaintenanceRequest(id: number): Promise<MaintenanceRequest | undefined> {
+    const [request] = await db
+      .select()
+      .from(maintenanceRequests)
+      .where(eq(maintenanceRequests.id, id));
+    return request;
+  }
+
+  async createMaintenanceRequest(request: InsertMaintenanceRequest): Promise<MaintenanceRequest> {
+    const [created] = await db
+      .insert(maintenanceRequests)
+      .values(request)
+      .returning();
+    return created;
+  }
+
+  async updateMaintenanceRequest(id: number, request: Partial<MaintenanceRequest>): Promise<MaintenanceRequest | undefined> {
+    const [updated] = await db
+      .update(maintenanceRequests)
+      .set(request)
+      .where(eq(maintenanceRequests.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMaintenanceRequest(id: number): Promise<boolean> {
+    await db
+      .delete(maintenanceRequests)
+      .where(eq(maintenanceRequests.id, id));
+    return true;
+  }
+
+  // ================== Maintenance Actions Methods ==================
+  async getMaintenanceActions(): Promise<MaintenanceAction[]> {
+    return await db
+      .select()
+      .from(maintenanceActions)
+      .orderBy(maintenanceActions.actionDate);
+  }
+
+  async getMaintenanceActionsByRequest(requestId: number): Promise<MaintenanceAction[]> {
+    return await db
+      .select()
+      .from(maintenanceActions)
+      .where(eq(maintenanceActions.requestId, requestId))
+      .orderBy(maintenanceActions.actionDate);
+  }
+
+  async getMaintenanceActionsByMachine(machineId: string): Promise<MaintenanceAction[]> {
+    return await db
+      .select()
+      .from(maintenanceActions)
+      .where(eq(maintenanceActions.machineId, machineId))
+      .orderBy(maintenanceActions.actionDate);
+  }
+
+  async getMaintenanceActionsByTechnician(technicianId: string): Promise<MaintenanceAction[]> {
+    return await db
+      .select()
+      .from(maintenanceActions)
+      .where(eq(maintenanceActions.performedBy, technicianId))
+      .orderBy(maintenanceActions.actionDate);
+  }
+
+  async getMaintenanceAction(id: number): Promise<MaintenanceAction | undefined> {
+    const [action] = await db
+      .select()
+      .from(maintenanceActions)
+      .where(eq(maintenanceActions.id, id));
+    return action;
+  }
+
+  async createMaintenanceAction(action: InsertMaintenanceAction): Promise<MaintenanceAction> {
+    const [created] = await db
+      .insert(maintenanceActions)
+      .values({
+        ...action,
+        actionDate: new Date()
+      })
+      .returning();
+    return created;
+  }
+
+  async updateMaintenanceAction(id: number, action: Partial<MaintenanceAction>): Promise<MaintenanceAction | undefined> {
+    const [updated] = await db
+      .update(maintenanceActions)
+      .set(action)
+      .where(eq(maintenanceActions.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMaintenanceAction(id: number): Promise<boolean> {
+    await db
+      .delete(maintenanceActions)
+      .where(eq(maintenanceActions.id, id));
+    return true;
+  }
+
+  // ================== Spare Parts Methods ==================
+  async getSpareParts(): Promise<SparePart[]> {
+    return await db
+      .select()
+      .from(spareParts)
+      .orderBy(spareParts.partName);
+  }
+
+  async getSparePartsByMachine(machineId: string): Promise<SparePart[]> {
+    return await db
+      .select()
+      .from(spareParts)
+      .where(eq(spareParts.machineId, machineId))
+      .orderBy(spareParts.partName);
+  }
+
+  async getSparePartsByCategory(category: string): Promise<SparePart[]> {
+    return await db
+      .select()
+      .from(spareParts)
+      .where(eq(spareParts.category, category))
+      .orderBy(spareParts.partName);
+  }
+
+  async getSparePartsByType(type: string): Promise<SparePart[]> {
+    return await db
+      .select()
+      .from(spareParts)
+      .where(eq(spareParts.type, type))
+      .orderBy(spareParts.partName);
+  }
+
+  async getLowStockSpareParts(): Promise<SparePart[]> {
+    return await db
+      .select()
+      .from(spareParts)
+      .where(
+        gte(spareParts.minQuantity, spareParts.quantity)
+      )
+      .orderBy(spareParts.quantity);
+  }
+
+  async getSparePart(id: number): Promise<SparePart | undefined> {
+    const [part] = await db
+      .select()
+      .from(spareParts)
+      .where(eq(spareParts.id, id));
+    return part;
+  }
+
+  async createSparePart(part: InsertSparePart): Promise<SparePart> {
+    const [created] = await db
+      .insert(spareParts)
+      .values(part)
+      .returning();
+    return created;
+  }
+
+  async updateSparePart(id: number, part: Partial<SparePart>): Promise<SparePart | undefined> {
+    const [updated] = await db
+      .update(spareParts)
+      .set(part)
+      .where(eq(spareParts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSparePart(id: number): Promise<boolean> {
+    await db
+      .delete(spareParts)
+      .where(eq(spareParts.id, id));
+    return true;
+  }
+
+  // ================== Maintenance Logbook Methods ==================
+  async getMaintenanceLogbook(): Promise<MaintenanceLogbook[]> {
+    return await db
+      .select()
+      .from(maintenanceLogbook)
+      .orderBy(maintenanceLogbook.completedAt);
+  }
+
+  async getMaintenanceLogbookByMachine(machineId: string): Promise<MaintenanceLogbook[]> {
+    return await db
+      .select()
+      .from(maintenanceLogbook)
+      .where(eq(maintenanceLogbook.machineId, machineId))
+      .orderBy(maintenanceLogbook.completedAt);
+  }
+
+  async getMaintenanceLogbookByType(type: string): Promise<MaintenanceLogbook[]> {
+    return await db
+      .select()
+      .from(maintenanceLogbook)
+      .where(eq(maintenanceLogbook.maintenanceType, type))
+      .orderBy(maintenanceLogbook.completedAt);
+  }
+
+  async getMaintenanceLogbookByTechnician(technicianId: string): Promise<MaintenanceLogbook[]> {
+    return await db
+      .select()
+      .from(maintenanceLogbook)
+      .where(eq(maintenanceLogbook.technician, technicianId))
+      .orderBy(maintenanceLogbook.completedAt);
+  }
+
+  async getMaintenanceLogbookEntry(id: number): Promise<MaintenanceLogbook | undefined> {
+    const [entry] = await db
+      .select()
+      .from(maintenanceLogbook)
+      .where(eq(maintenanceLogbook.id, id));
+    return entry;
+  }
+
+  async createMaintenanceLogbookEntry(entry: InsertMaintenanceLogbook): Promise<MaintenanceLogbook> {
+    const [created] = await db
+      .insert(maintenanceLogbook)
+      .values({
+        ...entry,
+        completedAt: new Date()
+      })
+      .returning();
+    return created;
+  }
+
+  async updateMaintenanceLogbookEntry(id: number, entry: Partial<MaintenanceLogbook>): Promise<MaintenanceLogbook | undefined> {
+    const [updated] = await db
+      .update(maintenanceLogbook)
+      .set(entry)
+      .where(eq(maintenanceLogbook.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMaintenanceLogbookEntry(id: number): Promise<boolean> {
+    await db
+      .delete(maintenanceLogbook)
+      .where(eq(maintenanceLogbook.id, id));
+    return true;
+  }
+
+  // ================== Maintenance Schedule Methods ==================
+  async getMaintenanceSchedule(): Promise<MaintenanceSchedule[]> {
+    return await db
+      .select()
+      .from(maintenanceSchedule)
+      .orderBy(maintenanceSchedule.nextDue);
+  }
+
+  async getMaintenanceScheduleByMachine(machineId: string): Promise<MaintenanceSchedule[]> {
+    return await db
+      .select()
+      .from(maintenanceSchedule)
+      .where(eq(maintenanceSchedule.machineId, machineId))
+      .orderBy(maintenanceSchedule.nextDue);
+  }
+
+  async getMaintenanceScheduleByStatus(status: string): Promise<MaintenanceSchedule[]> {
+    return await db
+      .select()
+      .from(maintenanceSchedule)
+      .where(eq(maintenanceSchedule.status, status))
+      .orderBy(maintenanceSchedule.nextDue);
+  }
+
+  async getMaintenanceScheduleByFrequency(frequency: string): Promise<MaintenanceSchedule[]> {
+    return await db
+      .select()
+      .from(maintenanceSchedule)
+      .where(eq(maintenanceSchedule.frequency, frequency))
+      .orderBy(maintenanceSchedule.nextDue);
+  }
+
+  async getOverdueMaintenance(): Promise<MaintenanceSchedule[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(maintenanceSchedule)
+      .where(
+        and(
+          eq(maintenanceSchedule.status, "pending"),
+          lte(maintenanceSchedule.nextDue, now)
+        )
+      )
+      .orderBy(maintenanceSchedule.nextDue);
+  }
+
+  async getUpcomingMaintenance(daysAhead: number): Promise<MaintenanceSchedule[]> {
+    const now = new Date();
+    const future = new Date();
+    future.setDate(now.getDate() + daysAhead);
+    
+    return await db
+      .select()
+      .from(maintenanceSchedule)
+      .where(
+        and(
+          eq(maintenanceSchedule.status, "pending"),
+          gte(maintenanceSchedule.nextDue, now),
+          lte(maintenanceSchedule.nextDue, future)
+        )
+      )
+      .orderBy(maintenanceSchedule.nextDue);
+  }
+
+  async getMaintenanceScheduleTask(id: number): Promise<MaintenanceSchedule | undefined> {
+    const [task] = await db
+      .select()
+      .from(maintenanceSchedule)
+      .where(eq(maintenanceSchedule.id, id));
+    return task;
+  }
+
+  async createMaintenanceScheduleTask(task: InsertMaintenanceSchedule): Promise<MaintenanceSchedule> {
+    const [created] = await db
+      .insert(maintenanceSchedule)
+      .values(task)
+      .returning();
+    return created;
+  }
+
+  async updateMaintenanceScheduleTask(id: number, task: Partial<MaintenanceSchedule>): Promise<MaintenanceSchedule | undefined> {
+    const [updated] = await db
+      .update(maintenanceSchedule)
+      .set(task)
+      .where(eq(maintenanceSchedule.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMaintenanceScheduleTask(id: number): Promise<boolean> {
+    await db
+      .delete(maintenanceSchedule)
+      .where(eq(maintenanceSchedule.id, id));
+    return true;
   }
 }
