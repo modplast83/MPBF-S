@@ -18,17 +18,7 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-
-// Needed to fix badge color warnings - custom variants
-const badgeVariants = {
-  default: "bg-primary text-primary-foreground hover:bg-primary/80",
-  secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-  destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/80",
-  outline: "text-foreground",
-  success: "bg-green-500 text-white hover:bg-green-600",
-  warning: "bg-yellow-500 text-white hover:bg-yellow-600"
-};
+import { QualityBadge } from "@/components/quality/quality-badge";
 
 export default function UnifiedQualityDashboard() {
   const { t } = useTranslation();
@@ -354,7 +344,7 @@ export default function UnifiedQualityDashboard() {
                           <span>{t("quality.severity_critical")}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="destructive">{violationsBySeverity.Critical}</Badge>
+                          <QualityBadge variant="destructive">{violationsBySeverity.Critical}</QualityBadge>
                           <span className="text-muted-foreground text-xs">
                             {Math.round((violationsBySeverity.Critical / violations.length) * 100) || 0}%
                           </span>
@@ -366,7 +356,7 @@ export default function UnifiedQualityDashboard() {
                           <span>{t("quality.severity_major")}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="warning" className={badgeVariants.warning}>
+                          <Badge variant="warning">
                             {violationsBySeverity.Major}
                           </Badge>
                           <span className="text-muted-foreground text-xs">
