@@ -24,10 +24,10 @@ export function ProtectedRoute({
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
-    // Only redirect if not already on the login page
-    if (!isLoading && !isAuthenticated && location !== "/login") {
-      console.log("User is not authenticated and not on login page, redirecting to login");
-      setLocation("/login");
+    // Only redirect if not already on the auth page
+    if (!isLoading && !isAuthenticated && location !== "/auth") {
+      console.log("User is not authenticated and not on auth page, redirecting to auth");
+      setLocation("/auth");
       return;
     }
     

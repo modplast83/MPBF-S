@@ -22,7 +22,7 @@ export function PermissionsProvider({
   user 
 }: { 
   children: ReactNode;
-  user?: User | null;
+  user: User | null;
 }) {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   

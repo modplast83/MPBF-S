@@ -17,9 +17,6 @@ export const API_ENDPOINTS = {
   ORDERS: "/api/orders",
   JOB_ORDERS: "/api/job-orders",
   ROLLS: "/api/rolls",
-  ROLLS_STAGE_EXTRUSION: "/api/rolls/stage/extrusion",
-  ROLLS_STAGE_PRINTING: "/api/rolls/stage/printing",
-  ROLLS_STAGE_CUTTING: "/api/rolls/stage/cutting",
   MIX_MATERIALS: "/api/mix-materials",
   MIX_ITEMS: "/api/mix-items",
   
@@ -109,18 +106,6 @@ export const SIDEBAR_ITEMS = [
         subItems: [
           { title: "Raw Materials", path: "/warehouse/raw-materials" },
           { title: "Final Products", path: "/warehouse/final-products" },
-        ],
-      },
-      {
-        title: "Maintenance",
-        path: "/maintenance",
-        icon: "tools",
-        subItems: [
-          { title: "Requests", path: "/maintenance/requests" },
-          { title: "Actions", path: "/maintenance/actions" },
-          { title: "Spare Parts", path: "/maintenance/spare-parts" },
-          { title: "Logbook", path: "/maintenance/logbook" },
-          { title: "Schedule", path: "/maintenance/schedule" },
         ],
       },
       {

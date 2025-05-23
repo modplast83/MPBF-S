@@ -149,9 +149,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "You have been successfully logged out.",
       });
       
-      // Redirect to login page
+      // Redirect to auth page
       setTimeout(() => {
-        setLocation("/login");
+        setLocation("/auth");
       }, 500);
     },
     onError: (error) => {
