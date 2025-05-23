@@ -19,6 +19,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 import { QualityBadge } from "@/components/quality/quality-badge";
+import { cn } from "@/lib/utils";
 
 export default function UnifiedQualityDashboard() {
   const { t } = useTranslation();
@@ -356,9 +357,9 @@ export default function UnifiedQualityDashboard() {
                           <span>{t("quality.severity_major")}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="warning">
+                          <QualityBadge variant="warning">
                             {violationsBySeverity.Major}
-                          </Badge>
+                          </QualityBadge>
                           <span className="text-muted-foreground text-xs">
                             {Math.round((violationsBySeverity.Major / violations.length) * 100) || 0}%
                           </span>
@@ -370,7 +371,7 @@ export default function UnifiedQualityDashboard() {
                           <span>{t("quality.severity_minor")}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline">{violationsBySeverity.Minor}</Badge>
+                          <QualityBadge variant="info">{violationsBySeverity.Minor}</QualityBadge>
                           <span className="text-muted-foreground text-xs">
                             {Math.round((violationsBySeverity.Minor / violations.length) * 100) || 0}%
                           </span>
@@ -399,20 +400,19 @@ export default function UnifiedQualityDashboard() {
                                 {violation.description?.substring(0, 60) || t("common.not_available")}...
                               </div>
                               <div className="flex mt-1">
-                                <Badge variant={
+                                <QualityBadge variant={
                                   violation.severity === "Critical" ? "destructive" : 
-                                  violation.severity === "Major" ? "warning" : "outline"
-                                } className={
-                                  violation.severity === "Major" ? badgeVariants.warning : ""
+                                  violation.severity === "Major" ? "warning" : "info"
                                 }>
                                   {violation.severity}
-                                </Badge>
-                                <Badge 
-                                  variant={violation.status === "Open" ? "outline" : "success"} 
-                                  className={`${violation.status !== "Open" ? badgeVariants.success : ""} ml-2`}
+                                </QualityBadge>
+                                <QualityBadge 
+                                  variant={violation.status === "Open" ? "destructive" : 
+                                         violation.status === "In Progress" ? "warning" : "success"}
+                                  className="ml-2"
                                 >
                                   {violation.status}
-                                </Badge>
+                                </QualityBadge>
                               </div>
                             </div>
                           </div>
@@ -427,11 +427,9 @@ export default function UnifiedQualityDashboard() {
                                 {check.notes?.substring(0, 60) || t("common.not_available")}...
                               </div>
                               <div className="flex mt-1">
-                                <Badge variant={check.passed ? "success" : "destructive"} className={
-                                  check.passed ? badgeVariants.success : ""
-                                }>
+                                <QualityBadge variant={check.passed ? "success" : "destructive"}>
                                   {check.passed ? t("quality.passed") : t("quality.failed")}
-                                </Badge>
+                                </QualityBadge>
                                 <span className="text-xs text-muted-foreground ml-2 mt-0.5">
                                   {new Date(check.checkDate).toLocaleDateString()}
                                 </span>

@@ -245,7 +245,7 @@ export function QualityViolationsManagement() {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<QualityViolation>) => {
-      return apiRequest(\`/api/quality-violations/\${currentViolation?.id}\`, "PATCH", data);
+      return apiRequest(`/api/quality-violations/${currentViolation?.id}`, "PATCH", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quality-violations"] });
