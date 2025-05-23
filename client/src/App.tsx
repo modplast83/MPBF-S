@@ -97,6 +97,7 @@ function App() {
                   <ProtectedRoute path="/quality/corrective-actions" component={CorrectiveActions} module="Corrective Actions" />
                   <ProtectedRoute path="/quality/violations" component={SimplifiedViolations} module="Quality Violations" />
                   <ProtectedRoute path="/quality/violations-enhanced" component={EnhancedViolationsPage} module="Enhanced Violations" />
+                  <ProtectedRoute path="/quality/enhanced" component={EnhancedQualityModule} module="Enhanced Quality Module" />
                   <ProtectedRoute path="/quality/enhanced-module" component={EnhancedQualityModule} module="Enhanced Quality Module" />
                   <ProtectedRoute path="/quality/penalties" component={QualityPenalties} module="Quality Penalties" />
                   <ProtectedRoute path="/quality/reports" component={QualityReports} module="Violation Reports" />
