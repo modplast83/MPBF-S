@@ -5,6 +5,22 @@ import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/use-auth-v2";
 
+// Helper function for severity badges
+const getSeverityBadge = (severity: string) => {
+  const variants = {
+    low: 'secondary',
+    medium: 'default', 
+    high: 'destructive',
+    critical: 'destructive'
+  } as const;
+  
+  return (
+    <Badge variant={variants[severity as keyof typeof variants] || 'default'}>
+      {severity}
+    </Badge>
+  );
+};
+
 // UI Components
 import { Button } from "@/components/ui/button";
 import { 
@@ -358,13 +374,17 @@ export function EnhancedPenaltiesManagement({ onPenaltyCreated }: EnhancedPenalt
     
     // Set edit form values
     editForm.reset({
-      ...penalty,
+      description: penalty.description,
+      violationId: penalty.violationId,
+      assignedTo: penalty.assignedTo,
+      status: penalty.status as "pending" | "active" | "completed" | "appealed" | "cancelled",
       startDate: new Date(penalty.startDate),
       endDate: penalty.endDate ? new Date(penalty.endDate) : null,
       amount: penalty.amount ?? null,
       currency: penalty.currency ?? null,
       comments: penalty.comments ?? null,
       appealDetails: penalty.appealDetails ?? null,
+      supportingDocuments: penalty.supportingDocuments || [],
     });
     
     setIsEditOpen(true);

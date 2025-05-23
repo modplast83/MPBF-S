@@ -314,7 +314,12 @@ export function EnhancedViolationManagement({ onViolationCreated }: EnhancedViol
     
     // Set edit form values
     editForm.reset({
-      ...violation,
+      description: violation.description,
+      violationType: violation.violationType,
+      severity: violation.severity as "low" | "medium" | "high" | "critical",
+      status: violation.status as "open" | "investigating" | "resolved" | "dismissed",
+      affectedArea: violation.affectedArea,
+      reportedBy: violation.reportedBy || "",
       reportDate: new Date(violation.reportDate),
       qualityCheckId: violation.qualityCheckId || null,
       rootCause: violation.rootCause || null,

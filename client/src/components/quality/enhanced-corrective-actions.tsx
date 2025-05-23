@@ -1114,7 +1114,7 @@ export function EnhancedCorrectiveActions({ onActionCreated }: EnhancedCorrectiv
                       <div className="border rounded-md p-4">
                         <div className="flex justify-between">
                           <p className="font-medium">#{check.id} - {check.checkTypeId}</p>
-                          <Badge variant={check.result === "pass" ? "success" : "destructive"}>
+                          <Badge variant={check.result === "pass" ? "default" : "destructive"}>
                             {check.result === "pass" ? t("quality.pass") : t("quality.fail")}
                           </Badge>
                         </div>
