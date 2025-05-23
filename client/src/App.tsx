@@ -25,11 +25,17 @@ import WorkflowReportsPage from "@/pages/reports/workflow";
 import SystemIndex from "@/pages/system/index";
 // Quality Module imports
 import QualityIndex from "@/pages/quality/index";
+import QualityCheckTypes from "@/pages/quality/check-types";
+import QualityChecks from "@/pages/quality/checks";
+import QualityReports from "@/pages/quality/reports";
+import QualityViolations from "@/pages/quality/violations";
+import QualityPenalties from "@/pages/quality/penalties";
+import QualityCorrectiveActions from "@/pages/quality/corrective-actions";
+import UnifiedQualityDashboard from "@/pages/quality/unified-dashboard";
 import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions-fixed";
 import ImportExport from "@/pages/system/import-export";
 import SmsIndex from "@/pages/system/sms/index";
-import UnifiedQualityDashboard from "./pages/quality/unified-dashboard";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layout/main-layout";
@@ -85,6 +91,13 @@ function App() {
                   <ProtectedRoute path="/reports/quality" component={QualityReportsPage} module="Quality Reports" />
                   <ProtectedRoute path="/reports/workflow" component={WorkflowReportsPage} module="Workflow Reports" />
                   <ProtectedRoute path="/quality" component={QualityIndex} module="Quality" />
+                  <ProtectedRoute path="/quality/unified-dashboard" component={UnifiedQualityDashboard} module="Quality" />
+                  <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} module="Check Types" />
+                  <ProtectedRoute path="/quality/checks" component={QualityChecks} module="Checks" />
+                  <ProtectedRoute path="/quality/violations" component={QualityViolations} module="Violations" />
+                  <ProtectedRoute path="/quality/corrective-actions" component={QualityCorrectiveActions} module="Corrective Actions" />
+                  <ProtectedRoute path="/quality/penalties" component={QualityPenalties} module="Penalties" />
+                  <ProtectedRoute path="/quality/reports" component={QualityReports} module="Quality Reports" />
                   <ProtectedRoute path="/system" component={SystemIndex} module="System Settings" />
                   <ProtectedRoute path="/system/database" component={Database} module="Database" />
                   <ProtectedRoute path="/system/permissions" component={Permissions} module="Permissions" />
