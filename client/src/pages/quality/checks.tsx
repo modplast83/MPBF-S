@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
@@ -45,9 +45,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, FileText, AlertTriangle, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, FileText, AlertTriangle, CheckCircle2, AlertCircle, Pencil, Printer, Trash2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -108,12 +118,29 @@ const formSchema = z.object({
 
 export default function QualityChecks() {
   const [isOpenCreate, setIsOpenCreate] = useState(false);
+  const [isOpenEdit, setIsOpenEdit] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedCheck, setSelectedCheck] = useState<QualityCheck | null>(null);
+  const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("all");
   const [selectedJobOrder, setSelectedJobOrder] = useState<number | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      checkTypeId: "",
+      rollId: null,
+      jobOrderId: null,
+      performedBy: "",
+      notes: "",
+      status: "pending",
+      issueSeverity: null,
+    }
+  });
+  
+  const editForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       checkTypeId: "",
@@ -174,8 +201,196 @@ export default function QualityChecks() {
     }
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof formSchema> & { id: number }) => {
+      const { id, ...updateData } = values;
+      return await apiRequest("PATCH", `/api/quality-checks/${id}`, updateData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Quality check updated successfully",
+      });
+      setIsOpenEdit(false);
+      editForm.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-checks"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update quality check",
+        variant: "destructive",
+      });
+      console.error("Error updating quality check:", error);
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/quality-checks/${id}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Quality check deleted successfully",
+      });
+      setIsDeleteDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/quality-checks"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete quality check",
+        variant: "destructive",
+      });
+      console.error("Error deleting quality check:", error);
+    }
+  });
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     createMutation.mutate(values);
+  };
+
+  const onEditSubmit = (values: z.infer<typeof formSchema>) => {
+    if (selectedCheck) {
+      updateMutation.mutate({ ...values, id: selectedCheck.id });
+    }
+  };
+
+  const handleEditClick = (check: QualityCheck) => {
+    setSelectedCheck(check);
+    editForm.reset({
+      checkTypeId: check.checkTypeId,
+      rollId: check.rollId,
+      jobOrderId: check.jobOrderId,
+      performedBy: check.performedBy || "",
+      notes: check.notes || "",
+      status: check.status,
+      issueSeverity: check.issueSeverity
+    });
+    setIsOpenEdit(true);
+  };
+
+  const handleDeleteClick = (check: QualityCheck) => {
+    setSelectedCheck(check);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedCheck) {
+      deleteMutation.mutate(selectedCheck.id);
+    }
+  };
+
+  const handlePrint = (check: QualityCheck) => {
+    setSelectedCheck(check);
+    setTimeout(() => {
+      if (printRef.current) {
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+          toast({
+            title: "Warning",
+            description: "Please allow popups to print quality check reports",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Quality Check #${check.id} - Report</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .company { font-size: 24px; font-weight: bold; }
+                .title { font-size: 18px; margin: 10px 0; }
+                .section { margin-bottom: 20px; }
+                .section-title { font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+                .row { display: flex; margin-bottom: 8px; }
+                .label { font-weight: bold; width: 200px; }
+                .value { flex: 1; }
+                .status-passed { color: green; font-weight: bold; }
+                .status-failed { color: red; font-weight: bold; }
+                .status-pending { color: orange; font-weight: bold; }
+                .severity-minor { color: blue; }
+                .severity-major { color: orange; }
+                .severity-critical { color: red; }
+                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <div class="company">Modern Plastic Bag Factory</div>
+                <div class="title">Quality Check Report</div>
+                <div>Report Date: ${new Date().toLocaleDateString()}</div>
+              </div>
+
+              <div class="section">
+                <div class="section-title">Quality Check Information</div>
+                <div class="row">
+                  <div class="label">Check ID:</div>
+                  <div class="value">#${check.id}</div>
+                </div>
+                <div class="row">
+                  <div class="label">Check Type:</div>
+                  <div class="value">${getCheckTypeName(check.checkTypeId)}</div>
+                </div>
+                <div class="row">
+                  <div class="label">Status:</div>
+                  <div class="value status-${check.status}">${check.status.toUpperCase()}</div>
+                </div>
+                <div class="row">
+                  <div class="label">Date Performed:</div>
+                  <div class="value">${new Date(check.timestamp).toLocaleString()}</div>
+                </div>
+                <div class="row">
+                  <div class="label">Performed By:</div>
+                  <div class="value">${getUserName(check.performedBy || '')}</div>
+                </div>
+                ${check.issueSeverity ? `
+                <div class="row">
+                  <div class="label">Issue Severity:</div>
+                  <div class="value severity-${check.issueSeverity}">${check.issueSeverity.toUpperCase()}</div>
+                </div>` : ''}
+              </div>
+
+              <div class="section">
+                <div class="section-title">Item Information</div>
+                <div class="row">
+                  <div class="label">Roll:</div>
+                  <div class="value">${getRollNumber(check.rollId)}</div>
+                </div>
+                <div class="row">
+                  <div class="label">Job Order:</div>
+                  <div class="value">${getJobOrderInfo(check.jobOrderId)}</div>
+                </div>
+              </div>
+
+              ${check.notes ? `
+              <div class="section">
+                <div class="section-title">Notes</div>
+                <p>${check.notes}</p>
+              </div>` : ''}
+
+              <div class="footer">
+                <p>This is an automatically generated report. Please verify all information.</p>
+                <p>Modern Plastic Bag Factory Quality Management System</p>
+              </div>
+            </body>
+          </html>
+        `);
+        
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      }
+    }, 100);
   };
 
   const getStatusBadge = (status: string) => {
@@ -532,8 +747,33 @@ export default function QualityChecks() {
                     </div>
                   )}
                 </CardContent>
-                <CardFooter className="pt-0">
-                  <Button variant="outline" className="w-full">View Details</Button>
+                <CardFooter className="pt-0 flex flex-col gap-2">
+                  <div className="flex items-center justify-between w-full gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleEditClick(check)}
+                    >
+                      <Pencil className="h-4 w-4 mr-1" /> Edit
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handlePrint(check)}
+                    >
+                      <Printer className="h-4 w-4 mr-1" /> Print
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 text-red-500 hover:text-red-600"
+                      onClick={() => handleDeleteClick(check)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" /> Delete
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             ))
@@ -544,6 +784,139 @@ export default function QualityChecks() {
           )}
         </div>
       )}
+
+      {/* Edit Dialog */}
+      <Dialog open={isOpenEdit} onOpenChange={setIsOpenEdit}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Quality Check</DialogTitle>
+            <DialogDescription>
+              Update quality check information
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="checkTypeId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Check Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a check type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {checkTypes && checkTypes.map((type: QualityCheckType) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {type.name} ({type.targetStage})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="passed">Passed</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="issueSeverity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Issue Severity (if any)</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value === "none" ? null : value)} 
+                      defaultValue={field.value || "none"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select severity" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="minor">Minor</SelectItem>
+                        <SelectItem value="major">Major</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Only applicable for failed checks</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Add any notes or observations" 
+                        {...field} 
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="submit" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? "Updating..." : "Update Quality Check"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this quality check?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the quality check
+              and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Hidden Print Container */}
+      <div ref={printRef} className="hidden"></div>
     </div>
   );
 }

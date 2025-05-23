@@ -1755,7 +1755,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid quality check ID" });
       }
       
-      const qualityCheck = await storage.updateQualityCheck(id, req.body);
+      // Import the quality check adapter
+      const { adaptToDatabase } = await import('./quality-check-adapter');
+      
+      // Convert frontend data to database format
+      const dbQualityCheck = adaptToDatabase(req.body);
+      
+      console.log("Updating quality check with data:", dbQualityCheck);
+      
+      const qualityCheck = await storage.updateQualityCheck(id, dbQualityCheck);
       
       if (!qualityCheck) {
         return res.status(404).json({ message: "Quality check not found" });
@@ -1763,6 +1771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(qualityCheck);
     } catch (error) {
+      console.error("Error updating quality check:", error);
       res.status(500).json({ message: "Failed to update quality check" });
     }
   });

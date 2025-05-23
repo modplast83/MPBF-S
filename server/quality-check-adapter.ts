@@ -50,7 +50,7 @@ export function adaptToFrontend(dbCheck: DatabaseQualityCheck): FrontendQualityC
     timestamp: dbCheck.checked_at || dbCheck.created_at,
     checklistResults: dbCheck.checklist_results || [],
     parameterValues: dbCheck.parameter_values || [],
-    issueSeverity: dbCheck.issue_severity,
+    issueSeverity: dbCheck.issue_severity || null,
     imageUrls: dbCheck.image_urls || []
   };
 }
@@ -62,27 +62,23 @@ export function adaptToDatabase(frontendCheck: Partial<FrontendQualityCheck>): P
   const dbCheck: Partial<DatabaseQualityCheck> = {
     check_type_id: frontendCheck.checkTypeId,
     checked_by: frontendCheck.performedBy,
-    job_order_id: frontendCheck.jobOrderId,
-    roll_id: frontendCheck.rollId,
+    job_order_id: frontendCheck.jobOrderId || null,
+    roll_id: frontendCheck.rollId || null,
     status: frontendCheck.status,
-    notes: frontendCheck.notes,
+    notes: frontendCheck.notes || null,
   };
 
-  if (frontendCheck.checklistResults) {
-    dbCheck.checklist_results = frontendCheck.checklistResults;
-  }
+  // Initialize arrays with empty arrays even if they're undefined
+  dbCheck.checklist_results = frontendCheck.checklistResults || [];
+  dbCheck.parameter_values = frontendCheck.parameterValues || [];
+  dbCheck.image_urls = frontendCheck.imageUrls || [];
   
-  if (frontendCheck.parameterValues) {
-    dbCheck.parameter_values = frontendCheck.parameterValues;
-  }
-  
+  // Only set issue_severity if it exists
   if (frontendCheck.issueSeverity) {
     dbCheck.issue_severity = frontendCheck.issueSeverity;
+  } else {
+    dbCheck.issue_severity = null;
   }
   
-  if (frontendCheck.imageUrls) {
-    dbCheck.image_urls = frontendCheck.imageUrls;
-  }
-
   return dbCheck;
 }
