@@ -2,10 +2,12 @@ import { Route, Switch } from "wouter";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
+import SimpleLogin from "@/pages/SimpleLogin";
 import Sidebar from "@/components/layout/sidebar";
 import Setup from "@/pages/setup";
 import WorkflowPage from "@/pages/workflow";
-import { ProtectedRouteWrapper } from "@/components/auth/protected-route-wrapper";
+import { SimpleProtectedRoute } from "@/components/auth/simple-protected-route";
+import { SimpleProtectedRouteWrapper } from "@/components/auth/simple-protected-route-wrapper";
 import Products from "@/pages/setup/products";
 import Customers from "@/pages/setup/customers";
 import Categories from "@/pages/setup/categories";
@@ -42,7 +44,8 @@ export default function App() {
       </ProtectedRouteWrapper>
       <div className="flex-1 overflow-auto">
         <Switch>
-          <Route path="/login" component={AuthPage} />
+          <Route path="/login" component={SimpleLogin} />
+          <Route path="/auth" component={SimpleLogin} />
           
           {/* Main dashboard */}
           <Route path="/">
