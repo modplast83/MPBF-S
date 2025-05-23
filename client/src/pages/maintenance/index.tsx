@@ -62,34 +62,79 @@ export default function MaintenanceDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   
   // Query for fetching maintenance requests
-  const { data: requests, isLoading: isLoadingRequests } = useQuery({
+  const { data: requests = [], isLoading: isLoadingRequests } = useQuery({
     queryKey: ["/api/maintenance/requests"],
-    queryFn: () => apiRequest("/api/maintenance/requests"),
+    queryFn: async () => {
+      try {
+        const data = await apiRequest("/api/maintenance/requests");
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching maintenance requests:", err);
+        return [];
+      }
+    },
     staleTime: 60000,
     retry: 1,
     refetchOnWindowFocus: false,
   });
   
   // Query for fetching maintenance stats
-  const { data: maintenanceStats, isLoading: isLoadingStats } = useQuery({
+  const { data: maintenanceStats = { 
+    totalRequests: 0,
+    newRequests: 0,
+    inProgressRequests: 0,
+    fixedRequests: 0,
+    criticalRequests: 0,
+    teamWorkload: []
+  }, isLoading: isLoadingStats } = useQuery({
     queryKey: ["/api/maintenance/stats"],
-    queryFn: () => apiRequest("/api/maintenance/stats"),
+    queryFn: async () => {
+      try {
+        const data = await apiRequest("/api/maintenance/stats");
+        return data || { 
+          totalRequests: 0,
+          newRequests: 0,
+          inProgressRequests: 0,
+          fixedRequests: 0,
+          criticalRequests: 0,
+          teamWorkload: []
+        };
+      } catch (err) {
+        console.error("Error fetching maintenance stats:", err);
+        return { 
+          totalRequests: 0,
+          newRequests: 0,
+          inProgressRequests: 0,
+          fixedRequests: 0,
+          criticalRequests: 0,
+          teamWorkload: []
+        };
+      }
+    },
     staleTime: 60000,
     retry: 1,
     refetchOnWindowFocus: false,
   });
   
   // Query for fetching machines with most maintenance issues
-  const { data: machineStats, isLoading: isLoadingMachineStats } = useQuery({
+  const { data: machineStats = [], isLoading: isLoadingMachineStats } = useQuery({
     queryKey: ["/api/maintenance/machines/stats"],
-    queryFn: () => apiRequest("/api/maintenance/machines/stats"),
+    queryFn: async () => {
+      try {
+        const data = await apiRequest("/api/maintenance/machines/stats");
+        return data || [];
+      } catch (err) {
+        console.error("Error fetching machine stats:", err);
+        return [];
+      }
+    },
     staleTime: 60000,
     retry: 1,
     refetchOnWindowFocus: false,
   });
   
   // Get status icon
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch(status) {
       case "new":
         return <AlertCircleIcon className="h-5 w-5 text-blue-500" />;
@@ -353,7 +398,6 @@ export default function MaintenanceDashboard() {
                     <Progress 
                       value={(requestsByStatus.under_maintenance.length / (filteredRequests.length || 1)) * 100} 
                       className="h-2 bg-muted"
-                      indicatorClassName="bg-yellow-500"
                     />
                   </div>
                   
@@ -367,7 +411,6 @@ export default function MaintenanceDashboard() {
                     <Progress 
                       value={(requestsByStatus.fixed.length / (filteredRequests.length || 1)) * 100} 
                       className="h-2 bg-muted"
-                      indicatorClassName="bg-green-500"
                     />
                   </div>
                   
@@ -381,7 +424,6 @@ export default function MaintenanceDashboard() {
                     <Progress 
                       value={(requestsByStatus.rejected.length / (filteredRequests.length || 1)) * 100} 
                       className="h-2 bg-muted"
-                      indicatorClassName="bg-red-500"
                     />
                   </div>
                 </div>
