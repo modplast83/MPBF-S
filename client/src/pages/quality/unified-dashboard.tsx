@@ -33,28 +33,33 @@ export default function UnifiedQualityDashboard() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Define default stats to handle loading and error states
+  const defaultStats = {
+    totalChecks: 0,
+    passedChecks: 0,
+    failedChecks: 0,
+    totalViolations: 0,
+    openViolations: 0,
+    resolvedViolations: 0,
+    totalCorrectiveActions: 0,
+    pendingActions: 0,
+    completedActions: 0,
+    totalPenalties: 0,
+    activePenalties: 0,
+    closedPenalties: 0
+  };
+  
+  // Create a safe stats object that always has values
+  const [statsData, setStatsData] = useState(defaultStats);
+
   // Fetch quality statistics
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ["/api/quality/stats"],
     queryFn: async () => {
       try {
         const response = await fetch("/api/quality/stats");
         if (!response.ok) {
-          // If the endpoint doesn't exist yet, return mock data
-          return {
-            totalChecks: 120,
-            passedChecks: 98,
-            failedChecks: 22,
-            totalViolations: 35,
-            openViolations: 8,
-            resolvedViolations: 27,
-            totalCorrectiveActions: 42,
-            pendingActions: 5,
-            completedActions: 37,
-            totalPenalties: 18,
-            activePenalties: 4,
-            closedPenalties: 14
-          };
+          throw new Error("API error: " + response.status);
         }
         return response.json();
       } catch (error) {
@@ -122,20 +127,34 @@ export default function UnifiedQualityDashboard() {
     }
   });
   
+  // Default stats object to prevent undefined errors
+  const statsData = stats || {
+    totalChecks: 0,
+    passedChecks: 0,
+    failedChecks: 0,
+    totalViolations: 0,
+    openViolations: 0,
+    resolvedViolations: 0,
+    totalCorrectiveActions: 0,
+    pendingActions: 0,
+    completedActions: 0,
+    totalPenalties: 0,
+    activePenalties: 0,
+    closedPenalties: 0
+  };
+  
   // Calculate total quality score
-  const calculateQualityScore = () => {
-    if (!stats) return 0;
-    
-    const passRate = stats.totalChecks > 0 
-      ? (stats.passedChecks / stats.totalChecks) * 100 
+  const calculateQualityScore = () => {    
+    const passRate = statsData.totalChecks > 0 
+      ? (statsData.passedChecks / statsData.totalChecks) * 100 
       : 0;
     
-    const violationResolutionRate = stats.totalViolations > 0 
-      ? (stats.resolvedViolations / stats.totalViolations) * 100 
+    const violationResolutionRate = statsData.totalViolations > 0 
+      ? (statsData.resolvedViolations / statsData.totalViolations) * 100 
       : 100;
     
-    const actionCompletionRate = stats.totalCorrectiveActions > 0 
-      ? (stats.completedActions / stats.totalCorrectiveActions) * 100 
+    const actionCompletionRate = statsData.totalCorrectiveActions > 0 
+      ? (statsData.completedActions / statsData.totalCorrectiveActions) * 100 
       : 100;
     
     // Weighted score: 60% pass rate, 25% violation resolution, 15% action completion
@@ -273,19 +292,19 @@ export default function UnifiedQualityDashboard() {
                     <CardTitle className="text-lg">{t("quality.quality_checks")}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold mb-2">{stats.totalChecks}</div>
+                    <div className="text-3xl font-bold mb-2">{statsData.totalChecks}</div>
                     <div className="text-muted-foreground mb-4">{t("quality.total_checks")}</div>
                     <div className="flex items-end gap-2 mb-1">
                       <div className="text-green-500 font-semibold">
-                        {stats.passedChecks} <Check className="h-4 w-4 inline" />
+                        {statsData.passedChecks} <Check className="h-4 w-4 inline" />
                       </div>
                       <span className="text-muted-foreground mx-1">|</span>
                       <div className="text-red-500 font-semibold">
-                        {stats.failedChecks} <XCircle className="h-4 w-4 inline" />
+                        {statsData.failedChecks} <XCircle className="h-4 w-4 inline" />
                       </div>
                     </div>
                     <Progress 
-                      value={stats.totalChecks > 0 ? (stats.passedChecks / stats.totalChecks) * 100 : 0} 
+                      value={statsData.totalChecks > 0 ? (statsData.passedChecks / statsData.totalChecks) * 100 : 0} 
                       className="h-2" 
                     />
                   </CardContent>
@@ -296,18 +315,18 @@ export default function UnifiedQualityDashboard() {
                     <CardTitle className="text-lg">{t("quality.violations")}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold mb-2">{stats.totalViolations}</div>
+                    <div className="text-3xl font-bold mb-2">{statsData.totalViolations}</div>
                     <div className="flex items-end gap-2 mb-1">
                       <div className="text-yellow-500 font-semibold">
-                        {stats.openViolations} {t("quality.open")}
+                        {statsData.openViolations} {t("quality.open")}
                       </div>
                       <span className="text-muted-foreground mx-1">|</span>
                       <div className="text-green-500 font-semibold">
-                        {stats.resolvedViolations} {t("quality.resolved")}
+                        {statsData.resolvedViolations} {t("quality.resolved")}
                       </div>
                     </div>
                     <Progress 
-                      value={stats.totalViolations > 0 ? (stats.resolvedViolations / stats.totalViolations) * 100 : 100} 
+                      value={statsData.totalViolations > 0 ? (statsData.resolvedViolations / statsData.totalViolations) * 100 : 100} 
                       className="h-2" 
                     />
                   </CardContent>
@@ -318,18 +337,18 @@ export default function UnifiedQualityDashboard() {
                     <CardTitle className="text-lg">{t("quality.penalties")}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold mb-2">{stats.totalPenalties}</div>
+                    <div className="text-3xl font-bold mb-2">{statsData.totalPenalties}</div>
                     <div className="flex items-end gap-2 mb-1">
                       <div className="text-red-500 font-semibold">
-                        {stats.activePenalties} {t("quality.active")}
+                        {statsData.activePenalties} {t("quality.active")}
                       </div>
                       <span className="text-muted-foreground mx-1">|</span>
                       <div className="text-green-500 font-semibold">
-                        {stats.closedPenalties} {t("quality.closed")}
+                        {statsData.closedPenalties} {t("quality.closed")}
                       </div>
                     </div>
                     <Progress 
-                      value={stats.totalPenalties > 0 ? (stats.closedPenalties / stats.totalPenalties) * 100 : 100} 
+                      value={statsData.totalPenalties > 0 ? (statsData.closedPenalties / statsData.totalPenalties) * 100 : 100} 
                       className="h-2" 
                     />
                   </CardContent>
