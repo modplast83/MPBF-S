@@ -2,7 +2,18 @@ import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
-import { AlertTriangle, ClipboardList, FileCheck, FileWarning, MessageSquareWarning, PenTool, ShieldAlert, UserMinus } from "lucide-react";
+import { 
+  AlertTriangle, 
+  ClipboardList, 
+  FileCheck, 
+  FileWarning, 
+  MessageSquareWarning, 
+  PenTool, 
+  ShieldAlert, 
+  UserMinus, 
+  Sparkles, 
+  LayoutDashboard
+} from "lucide-react";
 
 export default function QualityIndex() {
   return (
@@ -10,6 +21,26 @@ export default function QualityIndex() {
       <PageHeader heading="Quality Management" text="Monitor and control quality through inspections, violations, and penalties" />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <Card className="hover:shadow-md transition-shadow border-purple-200">
+          <CardHeader className="pb-3 bg-purple-50 rounded-t-lg">
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-600" />
+              Enhanced Quality Module
+            </CardTitle>
+            <CardDescription>
+              Comprehensive quality control with enhanced professional functions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Access our enhanced quality module with improved interfaces, professional functionality, and mobile optimization.
+            </p>
+            <Link href="/quality/enhanced-module">
+              <Button variant="outline" className="w-full border-purple-200 hover:bg-purple-50">Open Enhanced Module</Button>
+            </Link>
+          </CardContent>
+        </Card>
+        
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
