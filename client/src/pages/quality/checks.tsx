@@ -108,6 +108,7 @@ const formSchema = z.object({
 
 export default function QualityChecks() {
   const [isOpenCreate, setIsOpenCreate] = useState(false);
+  const [selectedCheck, setSelectedCheck] = useState<QualityCheck | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("all");
@@ -533,7 +534,13 @@ export default function QualityChecks() {
                   )}
                 </CardContent>
                 <CardFooter className="pt-0">
-                  <Button variant="outline" className="w-full">View Details</Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setSelectedCheck(check)}
+                  >
+                    View Details
+                  </Button>
                 </CardFooter>
               </Card>
             ))
@@ -544,6 +551,96 @@ export default function QualityChecks() {
           )}
         </div>
       )}
+
+      {/* Quality Check Details Dialog */}
+      <Dialog open={!!selectedCheck} onOpenChange={() => setSelectedCheck(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Quality Check Details
+            </DialogTitle>
+            <DialogDescription>
+              View complete information for quality check #{selectedCheck?.id}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedCheck && (
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Check ID</label>
+                  <p className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">#{selectedCheck.id}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Status</label>
+                  <Badge 
+                    variant={selectedCheck.status === 'pending' ? 'secondary' : 
+                            selectedCheck.status === 'pass' ? 'default' : 'destructive'}
+                    className="ml-2"
+                  >
+                    {selectedCheck.status}
+                  </Badge>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Check Type</label>
+                  <p className="text-sm">{checkTypes.data?.find(t => t.id === selectedCheck.checkTypeId)?.name || selectedCheck.checkTypeId}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Date Performed</label>
+                  <p className="text-sm">{format(new Date(selectedCheck.timestamp), "MMM dd, yyyy 'at' HH:mm")}</p>
+                </div>
+              </div>
+
+              {/* Performed By & Job/Roll Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Performed By</label>
+                  <p className="text-sm">{users.data?.find(u => u.id === selectedCheck.performedBy)?.username || selectedCheck.performedBy}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Job Order</label>
+                  <p className="text-sm">{selectedCheck.jobOrderId ? `JO #${selectedCheck.jobOrderId}` : 'N/A'}</p>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium text-gray-600">Roll ID</label>
+                  <p className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">{selectedCheck.rollId || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* Notes */}
+              {selectedCheck.notes && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Notes</label>
+                  <p className="text-sm bg-gray-50 p-3 rounded border">{selectedCheck.notes}</p>
+                </div>
+              )}
+
+              {/* Issue Severity */}
+              {selectedCheck.issueSeverity && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Issue Severity</label>
+                  <Badge 
+                    variant={selectedCheck.issueSeverity === 'low' ? 'secondary' :
+                            selectedCheck.issueSeverity === 'medium' ? 'default' :
+                            selectedCheck.issueSeverity === 'high' ? 'destructive' : 'destructive'}
+                    className="ml-2"
+                  >
+                    {selectedCheck.issueSeverity}
+                  </Badge>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedCheck(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
