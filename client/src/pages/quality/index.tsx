@@ -18,7 +18,7 @@ import {
 export default function QualityIndex() {
   return (
     <div className="container mx-auto py-6">
-      <PageHeader heading="Quality Management" text="Monitor and control quality through inspections, violations, and penalties" />
+      <PageHeader title="Quality Management" description="Monitor and control quality through inspections, violations, and penalties" />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         <Card className="hover:shadow-md transition-shadow border-purple-200">
