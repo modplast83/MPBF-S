@@ -45,18 +45,6 @@ export default function RollReports() {
   const [activeTab, setActiveTab] = useState<string>('production');
 
   // Fetch data
-  const { data: extrusionRolls } = useQuery<Roll[]>({
-    queryKey: [API_ENDPOINTS.ROLLS_STAGE_EXTRUSION],
-  });
-  
-  const { data: printingRolls } = useQuery<Roll[]>({
-    queryKey: [API_ENDPOINTS.ROLLS_STAGE_PRINTING],
-  });
-  
-  const { data: cuttingRolls } = useQuery<Roll[]>({
-    queryKey: [API_ENDPOINTS.ROLLS_STAGE_CUTTING],
-  });
-  
   const { data: rolls } = useQuery<Roll[]>({
     queryKey: [API_ENDPOINTS.ROLLS],
   });
@@ -116,18 +104,9 @@ export default function RollReports() {
   const getFilteredRolls = () => {
     let filteredRolls = [...(rolls || [])];
     
+    // Filter by stage if selected
     if (selectedStage !== 'all') {
-      switch (selectedStage) {
-        case 'extrusion':
-          filteredRolls = [...(extrusionRolls || [])];
-          break;
-        case 'printing':
-          filteredRolls = [...(printingRolls || [])];
-          break;
-        case 'cutting':
-          filteredRolls = [...(cuttingRolls || [])];
-          break;
-      }
+      filteredRolls = filteredRolls.filter(roll => roll.currentStage === selectedStage);
     }
     
     return filteredRolls.filter(roll => {
@@ -137,18 +116,14 @@ export default function RollReports() {
       
       // User filter (creator or operator)
       const passesUserFilter = selectedUser === 'all' || 
-                              roll.createdBy === selectedUser || 
-                              roll.extrusionOperator === selectedUser ||
-                              roll.printingOperator === selectedUser ||
-                              roll.cuttingOperator === selectedUser;
+                              roll.createdById === selectedUser || 
+                              roll.printedById === selectedUser ||
+                              roll.cutById === selectedUser;
       
-      // Raw material filter
-      const passesRawMaterialFilter = selectedRawMaterial === 'all' || 
-                                     roll.rawMaterialId === parseInt(selectedRawMaterial);
-      
-      // Master batch filter
-      const passesMasterBatchFilter = selectedMasterBatch === 'all' || 
-                                     roll.masterBatchId === selectedMasterBatch;
+      // We can't filter directly by raw material or master batch as they're not in our roll schema
+      // These would need join queries or related data lookups
+      const passesRawMaterialFilter = selectedRawMaterial === 'all';
+      const passesMasterBatchFilter = selectedMasterBatch === 'all';
       
       // Section/Machine filters would require additional data relationships
       // Simplified version here, would need to be expanded based on actual data model
@@ -167,34 +142,33 @@ export default function RollReports() {
       const jobOrder = jobOrders?.find(jo => jo.id === roll.jobOrderId);
       
       // Get user information
-      const creator = users?.find(user => user.id === roll.createdBy);
+      const creator = users?.find(user => user.id === roll.createdById);
       const creatorName = creator ? (creator.firstName && creator.lastName 
         ? `${creator.firstName} ${creator.lastName}`
         : creator.username) : 'Unknown';
       
-      // Get material information
-      const rawMaterial = rawMaterials?.find(rm => rm.id === roll.rawMaterialId);
-      const masterBatch = masterBatches?.find(mb => mb.id === roll.masterBatchId);
+      // Material information would require additional data relationships
+      // Using placeholder values since we don't have direct references
       
       return {
         id: roll.id,
         createdAt: formatDateString(roll.createdAt || new Date()),
         jobOrderId: roll.jobOrderId,
-        stage: roll.stage,
+        stage: roll.currentStage,
         status: roll.status,
-        extrusionQty: roll.extrusionQty || 0,
+        extrusionQty: roll.extrudingQty || 0,
         printingQty: roll.printingQty || 0,
         cuttingQty: roll.cuttingQty || 0,
-        weight: roll.weight || 0,
-        rollWidth: roll.rollWidth || 0,
-        rawMaterial: rawMaterial?.name || 'Unknown',
-        masterBatch: masterBatch?.name || 'Unknown',
+        weight: 0, // Not directly in schema
+        rollWidth: 0, // Not directly in schema
+        rawMaterial: 'N/A', // Would need join with another table
+        masterBatch: 'N/A', // Would need join with another table
         createdBy: creatorName,
-        operator: roll.stage === 'extrusion' 
-                  ? getUserName(roll.extrusionOperator)
-                  : roll.stage === 'printing'
-                    ? getUserName(roll.printingOperator)
-                    : getUserName(roll.cuttingOperator)
+        operator: roll.currentStage === 'extrusion' 
+                  ? getUserName(roll.createdById)
+                  : roll.currentStage === 'printing'
+                    ? getUserName(roll.printedById)
+                    : getUserName(roll.cutById)
       };
     });
   };
@@ -220,11 +194,11 @@ export default function RollReports() {
     filteredRolls.forEach(roll => {
       if (roll.status === 'completed') {
         stageCounts.completed++;
-      } else if (roll.stage === 'extrusion') {
+      } else if (roll.currentStage === 'extrusion') {
         stageCounts.extrusion++;
-      } else if (roll.stage === 'printing') {
+      } else if (roll.currentStage === 'printing') {
         stageCounts.printing++;
-      } else if (roll.stage === 'cutting') {
+      } else if (roll.currentStage === 'cutting') {
         stageCounts.cutting++;
       }
     });
@@ -309,14 +283,14 @@ export default function RollReports() {
       let operatorId;
       let quantity = 0;
       
-      if (roll.stage === 'extrusion') {
-        operatorId = roll.extrusionOperator;
-        quantity = roll.extrusionQty || 0;
-      } else if (roll.stage === 'printing') {
-        operatorId = roll.printingOperator;
+      if (roll.currentStage === 'extrusion') {
+        operatorId = roll.createdById;
+        quantity = roll.extrudingQty || 0;
+      } else if (roll.currentStage === 'printing') {
+        operatorId = roll.printedById;
         quantity = roll.printingQty || 0;
-      } else if (roll.stage === 'cutting') {
-        operatorId = roll.cuttingOperator;
+      } else if (roll.currentStage === 'cutting') {
+        operatorId = roll.cutById;
         quantity = roll.cuttingQty || 0;
       }
       
@@ -426,7 +400,7 @@ export default function RollReports() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Stage</p>
-                  <p className="text-sm font-medium">{roll.stage}</p>
+                  <p className="text-sm font-medium">{roll.currentStage}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Operator</p>
@@ -444,9 +418,9 @@ export default function RollReports() {
                   <p className="text-xs text-gray-500">Quantity</p>
                   <p className="text-sm font-medium">
                     {formatNumber(
-                      roll.stage === 'extrusion' 
-                        ? roll.extrusionQty 
-                        : roll.stage === 'printing'
+                      roll.currentStage === 'extrusion' 
+                        ? roll.extrudingQty 
+                        : roll.currentStage === 'printing'
                           ? roll.printingQty
                           : roll.cuttingQty,
                       1
@@ -617,12 +591,12 @@ export default function RollReports() {
                     <DatePicker
                       selected={dateRange.start}
                       onSelect={(date) => setDateRange({ ...dateRange, start: date })}
-                      placeholderText="Start date"
+                      placeholder="Start date"
                     />
                     <DatePicker
                       selected={dateRange.end}
                       onSelect={(date) => setDateRange({ ...dateRange, end: date })}
-                      placeholderText="End date"
+                      placeholder="End date"
                     />
                   </div>
                 </div>
@@ -821,7 +795,7 @@ export default function RollReports() {
                       <p className="text-purple-600 text-sm">Total Extrusion Qty</p>
                       <p className="text-2xl font-bold">
                         {formatNumber(
-                          filteredRolls.reduce((sum, roll) => sum + (roll.extrusionQty || 0), 0),
+                          filteredRolls.reduce((sum, roll) => sum + (roll.extrudingQty || 0), 0),
                           1
                         )} Kg
                       </p>
