@@ -157,8 +157,8 @@ export default function UnifiedQualityDashboard() {
   
   // Calculate checks by result
   const checksByResult = {
-    Passed: checks.filter((c: any) => c.passed).length,
-    Failed: checks.filter((c: any) => !c.passed).length
+    Passed: checks.filter((c: any) => c.passed === true).length,
+    Failed: checks.filter((c: any) => c.passed === false || c.passed === null).length
   };
   
   // Recent violations for the dashboard
@@ -347,7 +347,7 @@ export default function UnifiedQualityDashboard() {
                         <div className="flex items-center gap-2">
                           <QualityBadge variant="destructive">{violationsBySeverity.Critical}</QualityBadge>
                           <span className="text-muted-foreground text-xs">
-                            {Math.round((violationsBySeverity.Critical / violations.length) * 100) || 0}%
+                            {violations.length > 0 ? Math.round((violationsBySeverity.Critical / violations.length) * 100) : 0}%
                           </span>
                         </div>
                       </div>
@@ -361,7 +361,7 @@ export default function UnifiedQualityDashboard() {
                             {violationsBySeverity.Major}
                           </QualityBadge>
                           <span className="text-muted-foreground text-xs">
-                            {Math.round((violationsBySeverity.Major / violations.length) * 100) || 0}%
+                            {violations.length > 0 ? Math.round((violationsBySeverity.Major / violations.length) * 100) : 0}%
                           </span>
                         </div>
                       </div>
@@ -373,7 +373,7 @@ export default function UnifiedQualityDashboard() {
                         <div className="flex items-center gap-2">
                           <QualityBadge variant="info">{violationsBySeverity.Minor}</QualityBadge>
                           <span className="text-muted-foreground text-xs">
-                            {Math.round((violationsBySeverity.Minor / violations.length) * 100) || 0}%
+                            {violations.length > 0 ? Math.round((violationsBySeverity.Minor / violations.length) * 100) : 0}%
                           </span>
                         </div>
                       </div>

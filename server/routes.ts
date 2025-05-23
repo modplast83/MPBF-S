@@ -4779,27 +4779,60 @@ COMMIT;
   // Dashboard Widget API endpoints
   app.get("/api/quality/stats", async (req: Request, res: Response) => {
     try {
-      // Get quality checks and violations data
+      // Get all the necessary data
       const checks = await storage.getQualityChecks();
       const violations = await storage.getQualityViolations();
+      const correctiveActions = await storage.getCorrectiveActions();
+      const penalties = await storage.getQualityPenalties();
       
-      // Calculate quality metrics
+      // Calculate quality metrics for checks
       const totalChecks = checks.length;
       const passedChecks = checks.filter(check => check.passed).length;
-      const pendingViolations = violations.filter(v => v.status === 'pending').length;
-      const resolvedViolations = violations.filter(v => v.status === 'resolved').length;
+      const failedChecks = totalChecks - passedChecks;
       
-      // Calculate overall quality score
-      const qualityScore = totalChecks > 0 
-        ? Math.round((passedChecks / totalChecks) * 100) 
-        : 100; // Default to 100% if no checks
+      // Calculate quality metrics for violations
+      const totalViolations = violations.length;
+      const openViolations = violations.filter(v => v.status === 'pending' || v.status === 'open').length;
+      const resolvedViolations = violations.filter(v => v.status === 'resolved' || v.status === 'closed').length;
+      
+      // Calculate metrics for corrective actions
+      const totalCorrectiveActions = correctiveActions.length;
+      const pendingActions = correctiveActions.filter(action => 
+        action.status === 'pending' || action.status === 'assigned' || action.status === 'in-progress'
+      ).length;
+      const completedActions = correctiveActions.filter(action => 
+        action.status === 'completed' || action.status === 'verified'
+      ).length;
+      
+      // Calculate metrics for penalties
+      const totalPenalties = penalties.length;
+      const activePenalties = penalties.filter(p => 
+        p.status === 'active' || p.status === 'pending'
+      ).length;
+      const closedPenalties = penalties.filter(p => 
+        p.status === 'closed' || p.status === 'completed'
+      ).length;
       
       res.json({
+        // Checks stats
         totalChecks,
         passedChecks,
-        pendingViolations,
+        failedChecks,
+        
+        // Violations stats
+        totalViolations,
+        openViolations,
         resolvedViolations,
-        qualityScore
+        
+        // Corrective actions stats
+        totalCorrectiveActions,
+        pendingActions,
+        completedActions,
+        
+        // Penalties stats
+        totalPenalties,
+        activePenalties,
+        closedPenalties
       });
     } catch (error) {
       console.error('Error fetching quality stats:', error);
