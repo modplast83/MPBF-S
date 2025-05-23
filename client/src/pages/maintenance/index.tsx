@@ -9,13 +9,13 @@ import {
   WrenchIcon, 
   CheckCircleIcon, 
   AlertCircleIcon, 
-  TimeIcon,
-  ToolIcon,
+  Clock as TimeIcon,
+  Tool as ToolIcon,
   PlusIcon,
-  ChevronRightIcon,
-  SearchIcon,
-  UsersIcon,
-  ChartIcon
+  ChevronRight as ChevronRightIcon,
+  Search as SearchIcon,
+  Users as UsersIcon,
+  BarChart as ChartIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
