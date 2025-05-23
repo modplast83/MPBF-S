@@ -1669,10 +1669,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Quality Checks
   app.get("/api/quality-checks", async (_req: Request, res: Response) => {
     try {
-      // Return an empty array as a temporary solution
-      // This allows the UI to render without errors while we work on the quality checks implementation
-      res.json([]);
+      const qualityChecks = await storage.getQualityChecks();
+      res.json(qualityChecks);
     } catch (error) {
+      console.error("Error fetching quality checks:", error);
       res.status(500).json({ message: "Failed to fetch quality checks" });
     }
   });
