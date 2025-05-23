@@ -4787,7 +4787,7 @@ COMMIT;
       
       // Calculate quality metrics for checks
       const totalChecks = checks.length;
-      const passedChecks = checks.filter(check => check.passed).length;
+      const passedChecks = checks.filter(check => check.status === 'passed').length;
       const failedChecks = totalChecks - passedChecks;
       
       // Calculate quality metrics for violations

@@ -157,8 +157,8 @@ export default function UnifiedQualityDashboard() {
   
   // Calculate checks by result
   const checksByResult = {
-    Passed: checks.filter((c: any) => c.passed === true).length,
-    Failed: checks.filter((c: any) => c.passed === false || c.passed === null).length
+    Passed: checks.filter((c: any) => c.status === 'passed').length,
+    Failed: checks.filter((c: any) => c.status === 'failed' || c.status === 'pending').length
   };
   
   // Recent violations for the dashboard
