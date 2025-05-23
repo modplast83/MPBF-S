@@ -7,13 +7,13 @@ import { Toaster } from "@/components/ui/toaster";
 import "./lib/i18n";
 import { LanguageProvider } from "@/hooks/use-language";
 import { HelmetProvider } from "react-helmet-async";
-import { LoginApp } from "./login-app";
+import { SimpleLoginApp } from "./simple-login-app";
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <HelmetProvider>
-        <LoginApp />
+        <SimpleLoginApp />
         <Toaster />
       </HelmetProvider>
     </LanguageProvider>

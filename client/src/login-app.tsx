@@ -11,7 +11,13 @@ export function LoginApp() {
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
+
+  // Toggle sidebar function
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   useEffect(() => {
     // Check if user is logged in on component mount
@@ -64,11 +70,6 @@ export function LoginApp() {
   };
 
   if (isLoggedIn) {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    
-    const toggleSidebar = () => {
-      setSidebarOpen(!sidebarOpen);
-    };
     
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
