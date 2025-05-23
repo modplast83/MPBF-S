@@ -375,11 +375,17 @@ export function QualityViolations() {
                           <SelectValue placeholder={t("quality.select_reporter")} />
                         </SelectTrigger>
                         <SelectContent>
-                          {users.map((user: any) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              {user.firstName} {user.lastName}
+                          {Array.isArray(users) ? (
+                            users.map((user: any) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.firstName} {user.lastName}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value={users.id || ""}>
+                              {users.firstName} {users.lastName}
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
