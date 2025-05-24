@@ -375,10 +375,10 @@ export function QualityViolations() {
                           <SelectValue placeholder={t("quality.select_reporter")} />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.isArray(users) ? (
+                          {Array.isArray(users) && users.length > 0 ? (
                             users.map((user: any) => (
                               <SelectItem key={user.id} value={user.id}>
-                                {user.firstName} {user.lastName}
+                                {user.firstName || ''} {user.lastName || ''}
                               </SelectItem>
                             ))
                           ) : (
@@ -386,7 +386,9 @@ export function QualityViolations() {
                               <SelectItem value={users.id}>
                                 {users.firstName || ''} {users.lastName || ''}
                               </SelectItem>
-                            ) : null
+                            ) : (
+                              <SelectItem value="loading">{t("common.loading")}</SelectItem>
+                            )
                           )}
                         </SelectContent>
                       </Select>
@@ -598,11 +600,15 @@ export function QualityViolations() {
                       <SelectValue placeholder={t("quality.select_reporter")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {users.map((user: any) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.firstName} {user.lastName}
-                        </SelectItem>
-                      ))}
+                      {Array.isArray(users) && users.length > 0 ? (
+                        users.map((user: any) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.firstName || ''} {user.lastName || ''}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="loading">{t("common.loading")}</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
