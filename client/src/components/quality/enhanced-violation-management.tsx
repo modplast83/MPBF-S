@@ -522,10 +522,17 @@ export function QualityViolations() {
             </TableHeader>
             <TableBody>
               {filteredViolations.map((violation: any) => {
-                const reporter = users.find((u: any) => u.id === violation.reportedBy);
-                const reporterName = reporter 
-                  ? `${reporter.firstName || ''} ${reporter.lastName || ''}`
-                  : violation.reportedBy || t("common.unknown");
+                // Handle reporter information whether users is array or single object
+                let reporterName = violation.reportedBy || t("common.unknown");
+                
+                if (Array.isArray(users)) {
+                  const reporter = users.find((u: any) => u.id === violation.reportedBy);
+                  if (reporter) {
+                    reporterName = `${reporter.firstName || ''} ${reporter.lastName || ''}`;
+                  }
+                } else if (users && typeof users === 'object' && users.id === violation.reportedBy) {
+                  reporterName = `${users.firstName || ''} ${users.lastName || ''}`;
+                }
                 
                 return (
                   <TableRow key={violation.id}>
