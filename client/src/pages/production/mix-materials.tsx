@@ -145,7 +145,7 @@ export default function MixMaterialsPage() {
   
   // Function to get operator name from ID
   const getOperatorName = (operatorId: string) => {
-    if (!users) return operatorId;
+    if (!users || !Array.isArray(users)) return operatorId;
     const user = users.find(user => user.id === operatorId);
     if (!user) return operatorId;
     
