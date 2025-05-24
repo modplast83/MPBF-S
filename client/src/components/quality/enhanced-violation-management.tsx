@@ -382,9 +382,11 @@ export function QualityViolations() {
                               </SelectItem>
                             ))
                           ) : (
-                            <SelectItem value={users.id || ""}>
-                              {users.firstName} {users.lastName}
-                            </SelectItem>
+                            users && typeof users === 'object' && users.id ? (
+                              <SelectItem value={users.id}>
+                                {users.firstName || ''} {users.lastName || ''}
+                              </SelectItem>
+                            ) : null
                           )}
                         </SelectContent>
                       </Select>
@@ -394,7 +396,7 @@ export function QualityViolations() {
                       <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
                       <Select 
                         value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
-                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : null})}
+                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : ""})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_check")} />
@@ -530,7 +532,7 @@ export function QualityViolations() {
                   if (reporter) {
                     reporterName = `${reporter.firstName || ''} ${reporter.lastName || ''}`;
                   }
-                } else if (users && typeof users === 'object' && users.id === violation.reportedBy) {
+                } else if (users && typeof users === 'object' && users.id && users.id === violation.reportedBy) {
                   reporterName = `${users.firstName || ''} ${users.lastName || ''}`;
                 }
                 
@@ -609,7 +611,7 @@ export function QualityViolations() {
                   <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
                   <Select 
                     value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
-                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : null})}
+                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : ""})}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t("quality.select_check")} />

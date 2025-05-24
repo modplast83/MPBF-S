@@ -610,11 +610,11 @@ export function QualityCorrectiveActions() {
                     <SelectValue placeholder={t("quality.select_user")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {users.map((user: any) => (
+                    {Array.isArray(users) ? users.map((user: any) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.firstName} {user.lastName}
                       </SelectItem>
-                    ))}
+                    )) : null}
                   </SelectContent>
                 </Select>
               </div>
@@ -668,11 +668,11 @@ export function QualityCorrectiveActions() {
                           <SelectValue placeholder={t("quality.select_user")} />
                         </SelectTrigger>
                         <SelectContent>
-                          {users.map((user: any) => (
+                          {Array.isArray(users) ? users.map((user: any) => (
                             <SelectItem key={user.id} value={user.id}>
                               {user.firstName} {user.lastName}
                             </SelectItem>
-                          ))}
+                          )) : null}
                         </SelectContent>
                       </Select>
                     </div>
