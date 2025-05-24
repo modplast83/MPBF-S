@@ -522,14 +522,14 @@ export function QualityPenaltiesManagement() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 mb-4">
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t("common.search")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
+            className="pl-8 text-sm h-9"
           />
         </div>
         
@@ -540,7 +540,7 @@ export function QualityPenaltiesManagement() {
               value={filterStatus} 
               onValueChange={setFilterStatus}
             >
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-[110px] sm:w-[140px] text-xs sm:text-sm h-9">
                 <SelectValue placeholder={t("common.status")} />
               </SelectTrigger>
               <SelectContent>
