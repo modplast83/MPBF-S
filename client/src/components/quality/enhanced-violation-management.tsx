@@ -383,9 +383,9 @@ export function QualityViolations() {
                               </SelectItem>
                             ))
                           ) : (
-                            users && typeof users === 'object' && users.id ? (
-                              <SelectItem value={users.id}>
-                                {users.firstName || ''} {users.lastName || ''}
+                            users && !Array.isArray(users) && typeof users === 'object' && 'id' in users ? (
+                              <SelectItem value={String(users.id)}>
+                                {(users as any).firstName || ''} {(users as any).lastName || ''}
                               </SelectItem>
                             ) : (
                               <SelectItem value="loading">{t("common.loading")}</SelectItem>
@@ -399,7 +399,7 @@ export function QualityViolations() {
                       <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
                       <Select 
                         value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
-                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : ""})}
+                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : null})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_check")} />
@@ -535,8 +535,8 @@ export function QualityViolations() {
                   if (reporter) {
                     reporterName = `${reporter.firstName || ''} ${reporter.lastName || ''}`;
                   }
-                } else if (users && typeof users === 'object' && users.id && users.id === violation.reportedBy) {
-                  reporterName = `${users.firstName || ''} ${users.lastName || ''}`;
+                } else if (users && !Array.isArray(users) && typeof users === 'object' && 'id' in users && users.id === violation.reportedBy) {
+                  reporterName = `${(users as any).firstName || ''} ${(users as any).lastName || ''}`;
                 }
                 
                 return (
