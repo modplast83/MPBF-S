@@ -269,6 +269,9 @@ export function QualityCorrectiveActions() {
   });
 
   const getUserById = (id: string) => {
+    if (!Array.isArray(users)) {
+      return id || t("common.unknown");
+    }
     const user = users.find((user: any) => user.id === id);
     if (user) {
       return `${user.firstName || ''} ${user.lastName || ''}`;
@@ -277,6 +280,9 @@ export function QualityCorrectiveActions() {
   };
 
   const getCheckById = (id: number) => {
+    if (!Array.isArray(checks)) {
+      return null;
+    }
     return checks.find((check: any) => check.id === id);
   };
 
