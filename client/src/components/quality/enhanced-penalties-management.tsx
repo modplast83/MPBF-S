@@ -286,12 +286,16 @@ export function QualityPenaltiesManagement() {
       return;
     }
     
-    const assignedUser = users.find((u: any) => u.id === currentPenalty.assignedTo);
+    const assignedUser = Array.isArray(users) 
+      ? users.find((u: any) => u.id === currentPenalty.assignedTo)
+      : null;
     const assignedUserName = assignedUser 
       ? `${assignedUser.firstName || ''} ${assignedUser.lastName || ''}`
       : currentPenalty.assignedTo || t("common.unknown");
     
-    const violation = violations.find((v: any) => v.id === currentPenalty.violationId);
+    const violation = Array.isArray(violations) 
+      ? violations.find((v: any) => v.id === currentPenalty.violationId)
+      : null;
     
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -469,6 +473,9 @@ export function QualityPenaltiesManagement() {
   });
 
   const getUserById = (id: string) => {
+    if (!Array.isArray(users)) {
+      return id || t("common.unknown");
+    }
     const user = users.find((user: any) => user.id === id);
     if (user) {
       return `${user.firstName || ''} ${user.lastName || ''}`;
@@ -477,6 +484,7 @@ export function QualityPenaltiesManagement() {
   };
 
   const getViolationById = (id: number) => {
+    if (!Array.isArray(violations)) return null;
     return violations.find((violation: any) => violation.id === id);
   };
 
@@ -666,11 +674,11 @@ export function QualityPenaltiesManagement() {
                         <SelectValue placeholder={t("quality.select_user")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {users.map((user: any) => (
+                        {Array.isArray(users) ? users.map((user: any) => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.firstName} {user.lastName}
                           </SelectItem>
-                        ))}
+                        )) : null}
                       </SelectContent>
                     </Select>
                   </div>
@@ -895,11 +903,11 @@ export function QualityPenaltiesManagement() {
                     <SelectValue placeholder={t("quality.select_user")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {users.map((user: any) => (
+                    {Array.isArray(users) ? users.map((user: any) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.firstName} {user.lastName}
                       </SelectItem>
-                    ))}
+                    )) : null}
                   </SelectContent>
                 </Select>
               </div>
