@@ -393,7 +393,7 @@ export function QualityPenaltiesManagement() {
           </div>
           <div class="field">
             <span class="label">${t("quality.issue_date")}:</span>
-            <span class="value">${format(new Date(currentPenalty.assignedDate), 'MMMM d, yyyy')}</span>
+            <span class="value">${currentPenalty.assignedDate ? format(new Date(currentPenalty.assignedDate), 'MMMM d, yyyy') : t("common.not_available")}</span>
           </div>
         </div>
         
