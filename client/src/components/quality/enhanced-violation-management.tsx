@@ -399,7 +399,7 @@ export function QualityViolations() {
                       <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
                       <Select 
                         value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
-                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : null})}
+                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : undefined})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_check")} />
@@ -620,7 +620,7 @@ export function QualityViolations() {
                   <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
                   <Select 
                     value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
-                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : ""})}
+                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : undefined})}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t("quality.select_check")} />
