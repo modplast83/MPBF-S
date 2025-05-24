@@ -188,26 +188,26 @@ export default function UnifiedQualityDashboard() {
         value={activeTab}
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-8">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 mb-8 overflow-x-auto gap-1">
           <TabsTrigger value="overview" className="flex items-center">
-            <PieChart className="h-4 w-4 mr-2" />
-            <span>{t("quality.overview")}</span>
+            <PieChart className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-sm">{t("quality.overview")}</span>
           </TabsTrigger>
           <TabsTrigger value="checks" className="flex items-center">
-            <ClipboardCheck className="h-4 w-4 mr-2" />
-            <span>{t("quality.quality_checks")}</span>
+            <ClipboardCheck className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-sm">{t("quality.quality_checks")}</span>
           </TabsTrigger>
           <TabsTrigger value="violations" className="flex items-center">
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            <span>{t("quality.quality_violations")}</span>
+            <AlertTriangle className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-sm">{t("quality.quality_violations")}</span>
           </TabsTrigger>
           <TabsTrigger value="actions" className="flex items-center">
-            <ShieldAlert className="h-4 w-4 mr-2" />
-            <span>{t("quality.corrective_actions")}</span>
+            <ShieldAlert className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-sm">{t("quality.corrective_actions")}</span>
           </TabsTrigger>
           <TabsTrigger value="penalties" className="flex items-center">
-            <FileWarning className="h-4 w-4 mr-2" />
-            <span>{t("quality.penalties")}</span>
+            <FileWarning className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-sm">{t("quality.penalties")}</span>
           </TabsTrigger>
         </TabsList>
 

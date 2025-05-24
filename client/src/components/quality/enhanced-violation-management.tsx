@@ -300,25 +300,25 @@ export function QualityViolations() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 mb-4">
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t("common.search")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
+            className="pl-8 text-sm"
           />
         </div>
         
         <div className="flex flex-wrap gap-2">
           <div className="flex items-center">
-            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            <Filter className="h-4 w-4 mr-1 sm:mr-2 text-muted-foreground" />
             <Select 
               value={filterStatus} 
               onValueChange={setFilterStatus}
             >
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-[110px] sm:w-[120px] text-xs sm:text-sm h-9">
                 <SelectValue placeholder={t("common.status")} />
               </SelectTrigger>
               <SelectContent>
@@ -331,12 +331,12 @@ export function QualityViolations() {
           </div>
           
           <div className="flex items-center">
-            <AlertTriangle className="h-4 w-4 mr-2 text-muted-foreground" />
+            <AlertTriangle className="h-4 w-4 mr-1 sm:mr-2 text-muted-foreground" />
             <Select 
               value={filterSeverity} 
               onValueChange={setFilterSeverity}
             >
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-[110px] sm:w-[120px] text-xs sm:text-sm h-9">
                 <SelectValue placeholder={t("quality.severity")} />
               </SelectTrigger>
               <SelectContent>
@@ -350,17 +350,18 @@ export function QualityViolations() {
           
           <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
-              <Button variant="default" onClick={() => {
+              <Button variant="default" size="sm" className="h-9" onClick={() => {
                 resetForm();
                 setShowAddDialog(true);
               }}>
-                <Plus className="mr-2 h-4 w-4" /> {t("quality.add_violation")}
+                <Plus className="mr-1 sm:mr-2 h-4 w-4" /> 
+                <span className="text-xs sm:text-sm">{t("quality.add_violation")}</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>{t("quality.add_violation")}</DialogTitle>
-                <DialogDescription>{t("quality.add_violation_description")}</DialogDescription>
+            <DialogContent className="max-w-[95vw] sm:max-w-[500px] p-4 sm:p-6">
+              <DialogHeader className="mb-2">
+                <DialogTitle className="text-lg">{t("quality.add_violation")}</DialogTitle>
+                <DialogDescription className="text-sm">{t("quality.add_violation_description")}</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateSubmit}>
                 <div className="space-y-4 py-4">
@@ -515,13 +516,13 @@ export function QualityViolations() {
           <Table>
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
-                <TableHead>{t("common.id")}</TableHead>
-                <TableHead>{t("quality.reported_by")}</TableHead>
-                <TableHead>{t("common.description")}</TableHead>
-                <TableHead>{t("quality.severity")}</TableHead>
-                <TableHead>{t("common.status")}</TableHead>
-                <TableHead>{t("quality.reported_date")}</TableHead>
-                <TableHead className="text-right">{t("common.actions")}</TableHead>
+                <TableHead className="w-12 whitespace-nowrap">{t("common.id")}</TableHead>
+                <TableHead className="hidden sm:table-cell whitespace-nowrap">{t("quality.reported_by")}</TableHead>
+                <TableHead className="max-w-[150px] sm:max-w-[200px]">{t("common.description")}</TableHead>
+                <TableHead className="whitespace-nowrap">{t("quality.severity")}</TableHead>
+                <TableHead className="whitespace-nowrap">{t("common.status")}</TableHead>
+                <TableHead className="hidden sm:table-cell whitespace-nowrap">{t("quality.reported_date")}</TableHead>
+                <TableHead className="w-16 sm:w-auto text-right">{t("common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
