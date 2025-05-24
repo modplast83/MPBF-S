@@ -383,9 +383,9 @@ export function QualityViolations() {
                               </SelectItem>
                             ))
                           ) : (
-                            users && !Array.isArray(users) && typeof users === 'object' && 'id' in users ? (
-                              <SelectItem value={String(users.id)}>
-                                {(users as any).firstName || ''} {(users as any).lastName || ''}
+                            false ? (
+                              <SelectItem value="none">
+                                No user available
                               </SelectItem>
                             ) : (
                               <SelectItem value="loading">{t("common.loading")}</SelectItem>
@@ -399,7 +399,7 @@ export function QualityViolations() {
                       <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
                       <Select 
                         value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
-                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : undefined})}
+                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? parseInt(value, 10) : null})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_check")} />
@@ -532,11 +532,9 @@ export function QualityViolations() {
                 
                 if (Array.isArray(users)) {
                   const reporter = users.find((u: any) => u.id === violation.reportedBy);
-                  if (reporter) {
+                  if (reporter && reporter.firstName) {
                     reporterName = `${reporter.firstName || ''} ${reporter.lastName || ''}`;
                   }
-                } else if (users && !Array.isArray(users) && typeof users === 'object' && 'id' in users && users.id === violation.reportedBy) {
-                  reporterName = `${(users as any).firstName || ''} ${(users as any).lastName || ''}`;
                 }
                 
                 return (
@@ -620,7 +618,7 @@ export function QualityViolations() {
                   <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
                   <Select 
                     value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
-                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? Number(value) : undefined})}
+                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? parseInt(value, 10) : null})}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t("quality.select_check")} />
