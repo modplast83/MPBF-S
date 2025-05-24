@@ -541,35 +541,37 @@ export function QualityViolations() {
                 
                 return (
                   <TableRow key={violation.id}>
-                    <TableCell>#{violation.id}</TableCell>
-                    <TableCell>{reporterName}</TableCell>
-                    <TableCell className="max-w-[200px]">
-                      <div className="truncate" title={violation.description}>
+                    <TableCell className="text-xs sm:text-sm font-medium">#{violation.id}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{reporterName}</TableCell>
+                    <TableCell className="max-w-[150px] sm:max-w-[200px]">
+                      <div className="truncate text-xs sm:text-sm" title={violation.description}>
                         {violation.description}
                       </div>
                     </TableCell>
                     <TableCell>{getSeverityBadge(violation.severity)}</TableCell>
                     <TableCell>{getStatusBadge(violation.status)}</TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
                       {violation.reportedDate 
                         ? format(new Date(violation.reportedDate), 'MMM d, yyyy') 
                         : t("common.not_available")}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1 sm:gap-2">
                         <Button 
                           variant="outline" 
-                          size="icon" 
+                          size="icon"
+                          className="h-7 w-7 sm:h-8 sm:w-8"
                           onClick={() => handleEditClick(violation)}
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="icon"
+                          className="h-7 w-7 sm:h-8 sm:w-8"
                           onClick={() => handleDeleteClick(violation)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -583,10 +585,10 @@ export function QualityViolations() {
       
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>{t("quality.edit_violation")}</DialogTitle>
-            <DialogDescription>{t("quality.edit_violation_description")}</DialogDescription>
+        <DialogContent className="max-w-[95vw] sm:max-w-[500px] p-4 sm:p-6">
+          <DialogHeader className="mb-2">
+            <DialogTitle className="text-lg">{t("quality.edit_violation")}</DialogTitle>
+            <DialogDescription className="text-sm">{t("quality.edit_violation_description")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleUpdateSubmit}>
             <div className="space-y-4 py-4">
@@ -722,25 +724,30 @@ export function QualityViolations() {
       
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{t("common.delete_confirmation")}</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-w-[95vw] sm:max-w-[425px] p-4 sm:p-6">
+          <DialogHeader className="mb-2">
+            <DialogTitle className="text-lg">{t("common.delete_confirmation")}</DialogTitle>
+            <DialogDescription className="text-sm">
               {t("quality.delete_violation_confirmation", { id: currentViolation?.id })}
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <p className="text-destructive flex items-center">
-              <AlertCircle className="h-4 w-4 mr-2" />
+          <div className="py-3">
+            <p className="text-destructive flex items-center text-xs sm:text-sm">
+              <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
               {t("quality.delete_violation_warning")}
             </p>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button 
+              variant="outline" 
+              className="w-full sm:w-auto"
+              onClick={() => setShowDeleteDialog(false)}
+            >
               {t("common.cancel")}
             </Button>
             <Button 
-              variant="destructive" 
+              variant="destructive"
+              className="w-full sm:w-auto"
               onClick={handleDeleteConfirm}
               disabled={deleteMutation.isPending}
             >

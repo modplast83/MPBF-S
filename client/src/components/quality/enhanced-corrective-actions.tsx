@@ -290,25 +290,25 @@ export function QualityCorrectiveActions() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 mb-4">
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t("common.search")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
+            className="pl-8 text-sm"
           />
         </div>
         
         <div className="flex flex-wrap gap-2">
           <div className="flex items-center">
-            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            <Filter className="h-4 w-4 mr-1 sm:mr-2 text-muted-foreground" />
             <Select 
               value={filterVerified} 
               onValueChange={setFilterVerified}
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[120px] sm:w-[140px] text-xs sm:text-sm h-9">
                 <SelectValue placeholder={t("quality.verification")} />
               </SelectTrigger>
               <SelectContent>
@@ -321,16 +321,17 @@ export function QualityCorrectiveActions() {
           
           <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
-              <Button variant="default" onClick={() => {
+              <Button variant="default" size="sm" className="h-9" onClick={() => {
                 resetForm();
                 setShowAddDialog(true);
               }}>
-                <Plus className="mr-2 h-4 w-4" /> {t("quality.add_action")}
+                <Plus className="mr-1 sm:mr-2 h-4 w-4" /> 
+                <span className="text-xs sm:text-sm">{t("quality.add_action")}</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>{t("quality.add_corrective_action")}</DialogTitle>
+            <DialogContent className="max-w-[95vw] sm:max-w-[500px] p-4 sm:p-6">
+              <DialogHeader className="mb-2">
+                <DialogTitle className="text-lg">{t("quality.add_corrective_action")}</DialogTitle>
                 <DialogDescription>{t("quality.add_corrective_action_description")}</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateSubmit}>
