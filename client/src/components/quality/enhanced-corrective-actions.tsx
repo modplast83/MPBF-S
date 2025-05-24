@@ -372,7 +372,7 @@ export function QualityCorrectiveActions() {
                       value={formData.implementedBy} 
                       onValueChange={(value) => setFormData({...formData, implementedBy: value})}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="text-xs sm:text-sm h-9">
                         <SelectValue placeholder={t("quality.select_user")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -471,7 +471,7 @@ export function QualityCorrectiveActions() {
                   <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
                     {t("common.cancel")}
                   </Button>
-                  <Button type="submit" disabled={createMutation.isPending || !formData.qualityCheckId || !formData.action || !formData.implementedBy || !formData.implementationDate || (formData.verifiedDate && !formData.verifiedBy)}>
+                  <Button type="submit" disabled={createMutation.isPending || !formData.qualityCheckId || !formData.action || !formData.implementedBy || !formData.implementationDate || (!!formData.verifiedDate && !formData.verifiedBy)}>
                     {createMutation.isPending ? t("common.saving") : t("common.save")}
                   </Button>
                 </DialogFooter>

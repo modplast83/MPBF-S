@@ -455,25 +455,25 @@ export default function UnifiedQualityDashboard() {
         </TabsContent>
 
         <TabsContent value="violations">
-          <div className="rounded-lg border p-6 bg-card">
-            <h2 className="text-2xl font-bold mb-4">{t("quality.quality_violations")}</h2>
-            <p className="text-muted-foreground mb-6">{t("quality.violations_description")}</p>
+          <div className="rounded-lg border p-3 sm:p-6 bg-card">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">{t("quality.quality_violations")}</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{t("quality.violations_description")}</p>
             <QualityViolations />
           </div>
         </TabsContent>
 
         <TabsContent value="actions">
-          <div className="rounded-lg border p-6 bg-card">
-            <h2 className="text-2xl font-bold mb-4">{t("quality.corrective_actions")}</h2>
-            <p className="text-muted-foreground mb-6">{t("quality.corrective_actions_description")}</p>
+          <div className="rounded-lg border p-3 sm:p-6 bg-card">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">{t("quality.corrective_actions")}</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{t("quality.corrective_actions_description")}</p>
             <QualityCorrectiveActions />
           </div>
         </TabsContent>
 
         <TabsContent value="penalties">
-          <div className="rounded-lg border p-6 bg-card">
-            <h2 className="text-2xl font-bold mb-4">{t("quality.penalties")}</h2>
-            <p className="text-muted-foreground mb-6">{t("quality.penalties_description")}</p>
+          <div className="rounded-lg border p-3 sm:p-6 bg-card">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">{t("quality.penalties")}</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{t("quality.penalties_description")}</p>
             <QualityPenaltiesManagement />
           </div>
         </TabsContent>
