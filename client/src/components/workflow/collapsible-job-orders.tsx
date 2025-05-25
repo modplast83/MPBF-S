@@ -218,6 +218,26 @@ export function CollapsibleJobOrdersForExtrusion() {
     return t("common.unknown_customer");
   };
 
+  // Get customer Arabic name for a job order
+  const getCustomerNameAr = (jobOrder: JobOrder): string => {
+    // First check if customerId is directly on the job order
+    if (jobOrder.customerId && customers) {
+      const customer = customers.find(c => c.id === jobOrder.customerId);
+      if (customer) return customer.nameAr || "";
+    }
+
+    // Otherwise, try to get customer through customer product relation
+    if (customerProducts && customers) {
+      const customerProduct = customerProducts.find(cp => cp.id === jobOrder.customerProductId);
+      if (customerProduct) {
+        const customer = customers.find(c => c.id === customerProduct.customerId);
+        if (customer) return customer.nameAr || "";
+      }
+    }
+
+    return "";
+  };
+
   // Get item name for a job order
   const getItemName = (jobOrder: JobOrder): string => {
     if (!customerProducts.length || !items.length) return t("common.loading");
@@ -393,56 +413,50 @@ export function CollapsibleJobOrdersForExtrusion() {
                   <Accordion
                     type="multiple"
                     value={expandedOrders.map(String)}
-                    className="divide-y divide-secondary-100"
+                    onValueChange={(values) => {
+                      setExpandedOrders(values.map(Number));
+                    }}
+                    className="border-t-0"
                   >
                     {orderJobOrders.map((jobOrder) => {
-                      const isExpanded = expandedOrders.includes(jobOrder.id);
+                      const jobOrderId = jobOrder.id;
                       const progressPercentage = calculateProgress(jobOrder);
-                      const isComplete = isJobOrderFullyExtruded(jobOrder);
-                      
-                      // Only get rolls when the job order is expanded
-                      const jobOrderRolls = isExpanded 
-                        ? extrusionRolls.filter(roll => roll.jobOrderId === jobOrder.id)
-                        : [];
+                      const isComplete = progressPercentage === 100;
+                      const jobOrderRolls = extrusionRolls.filter(roll => roll.jobOrderId === jobOrderId);
                       
                       return (
-                        <AccordionItem
-                          key={jobOrder.id}
-                          value={String(jobOrder.id)}
-                          className="bg-white overflow-hidden"
+                        <AccordionItem 
+                          key={jobOrderId} 
+                          value={jobOrderId} 
+                          className="border-b border-secondary-200 last:border-b-0"
                         >
-                          <AccordionTrigger 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              toggleExpandOrder(jobOrder.id);
-                            }}
-                            className="px-4 py-3 hover:bg-secondary-50"
-                          >
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 sm:gap-0">
-                              <div className="flex items-center space-x-3">
-                                <div className="flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-100">
-                                  <span className="material-icons text-primary-600 text-sm sm:text-base">description</span>
+                          <AccordionTrigger className="px-4 py-3 hover:bg-secondary-50 hover:no-underline">
+                            <div className="flex-1 flex flex-col sm:flex-row sm:items-center">
+                              <div className="flex items-center mb-2 sm:mb-0 sm:flex-1">
+                                <div className="rounded-full bg-secondary-200 w-7 h-7 flex items-center justify-center mr-3">
+                                  <span className="material-icons text-xs text-secondary-700">production_quantity_limits</span>
                                 </div>
-                                <div className="text-left">
-                                  <h4 className="font-medium text-sm sm:text-base">
-                                    <span className="text-error-600">JO #{jobOrder.id}</span>
-                                  </h4>
-                                  <p className="text-xs sm:text-sm text-secondary-500 truncate max-w-[200px] sm:max-w-none">{getItemName(jobOrder)}</p>
+                                <div>
+                                  <h4 className="font-medium text-sm">JO #{jobOrderId}</h4>
+                                  <p className="text-xs text-secondary-500">{getItemName(jobOrder)}</p>
                                 </div>
                               </div>
-                              <div className="flex items-center justify-between sm:justify-start sm:space-x-3 mt-2 sm:mt-0">
-                                <Badge variant={jobOrder.status === "pending" ? "outline" : "default"} className="text-xs py-0.5">
-                                  {jobOrder.status === "pending" && t("status.pending")}
-                                  {jobOrder.status === "in_progress" && t("status.in_progress")}
-                                  {jobOrder.status === "extrusion_completed" && t("status.extrusion_completed")}
-                                  {jobOrder.status === "completed" && t("status.completed")}
-                                  {jobOrder.status === "cancelled" && t("status.cancelled")}
-                                </Badge>
-                                <div className="text-right">
-                                  <span className="text-xs sm:text-sm font-medium">
-                                    {progressPercentage}% {t("common.complete")}
-                                  </span>
+                              <div className="flex-1">
+                                <div className="flex items-center mb-1 justify-between">
+                                  <Badge variant={jobOrder.status === "pending" ? "outline" : "default"} className="text-xs py-0.5">
+                                    {jobOrder.status === "pending" && t("status.pending")}
+                                    {jobOrder.status === "in_progress" && t("status.in_progress")}
+                                    {jobOrder.status === "extrusion_completed" && t("status.extrusion_completed")}
+                                    {jobOrder.status === "completed" && t("status.completed")}
+                                    {jobOrder.status === "cancelled" && t("status.cancelled")}
+                                  </Badge>
+                                  <div className="text-right">
+                                    <span className="text-xs sm:text-sm font-medium">
+                                      {progressPercentage}% {t("common.complete")}
+                                    </span>
+                                  </div>
                                 </div>
+                                <Progress value={progressPercentage} className="h-1.5" />
                               </div>
                             </div>
                           </AccordionTrigger>
@@ -453,54 +467,50 @@ export function CollapsibleJobOrdersForExtrusion() {
                                 <h5 className="font-medium">{t("common.details")}</h5>
                               </div>
                               
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-3">
                                 <div>
-                                  <p className="text-xs sm:text-sm text-secondary-500">{t("items.item_name")}</p>
-                                  <p className="font-medium text-sm">{getItemName(jobOrder)}</p>
+                                  <p className="text-xs text-secondary-500">{t("common.quantity")}</p>
+                                  <p className="text-sm font-medium">{jobOrder.quantity} kg</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs sm:text-sm text-secondary-500">{t("orders.required_quantity")}</p>
-                                  <p className="font-medium text-sm">{jobOrder.quantity} kg</p>
+                                  <p className="text-xs text-secondary-500">{t("common.raw_material")}</p>
+                                  <p className="text-sm font-medium">{getRawMaterial(jobOrder)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs sm:text-sm text-secondary-500">{t("products.thickness")}</p>
-                                  <p className="font-medium text-sm">{getThickness(jobOrder)}</p>
+                                  <p className="text-xs text-secondary-500">{t("common.thickness")}</p>
+                                  <p className="text-sm font-medium">{getThickness(jobOrder)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs sm:text-sm text-secondary-500">{t("products.raw_material")}</p>
-                                  <p className="font-medium text-sm">{getRawMaterial(jobOrder)}</p>
+                                  <p className="text-xs text-secondary-500">{t("common.master_batch")}</p>
+                                  <p className="text-sm font-medium">{getMasterBatchName(jobOrder)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs sm:text-sm text-secondary-500">{t("products.master_batch")}</p>
-                                  <p className="font-medium text-sm truncate">{getMasterBatchName(jobOrder)}</p>
+                                  <p className="text-xs text-secondary-500">{t("common.product_details")}</p>
+                                  <p className="text-sm font-medium">{getProductDetails(jobOrder)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs sm:text-sm text-secondary-500">{t("products.product_details")}</p>
-                                  <p className="font-medium text-sm truncate">{getProductDetails(jobOrder)}</p>
+                                  <p className="text-xs text-secondary-500">{t("common.status")}</p>
+                                  <Badge variant={jobOrder.status === "pending" ? "outline" : "default"} className="mt-1">
+                                    {jobOrder.status === "pending" && t("status.pending")}
+                                    {jobOrder.status === "in_progress" && t("status.in_progress")}
+                                    {jobOrder.status === "extrusion_completed" && t("status.extrusion_completed")}
+                                    {jobOrder.status === "completed" && t("status.completed")}
+                                    {jobOrder.status === "cancelled" && t("status.cancelled")}
+                                  </Badge>
                                 </div>
                               </div>
                               
-                              <div className="mt-2">
-                                <div className="flex justify-between text-sm mb-1">
-                                  <span>{t("common.progress")}</span>
-                                  <span>{progressPercentage}%</span>
-                                </div>
-                                <Progress value={progressPercentage} className="h-2" />
-                              </div>
+                              <Separator className="my-3" />
                               
-                              <Separator className="my-4" />
-                              
-                              <div className="mb-4">
-                                <h5 className="font-medium mb-2">{t("production.roll_management.rolls")}</h5>
-                                {!isExpanded ? (
-                                  <p className="text-sm text-secondary-500 py-2">{t("production.roll_management.expand_to_view_rolls")}</p>
-                                ) : jobOrderRolls.length === 0 ? (
-                                  <p className="text-sm text-secondary-500 py-2">{t("production.roll_management.no_rolls_created")}</p>
+                              <div className="mb-3">
+                                <h5 className="font-medium mb-2">{t("production.roll_management.extruded_rolls")}</h5>
+                                {jobOrderRolls.length === 0 ? (
+                                  <p className="text-xs text-secondary-500">{t("production.roll_management.no_rolls_created")}</p>
                                 ) : (
                                   <div className="space-y-2">
-                                    {jobOrderRolls.map((roll) => (
+                                    {jobOrderRolls.map(roll => (
                                       <div 
-                                        key={roll.id} 
+                                        key={roll.id}
                                         className="bg-white p-3 rounded-lg border border-secondary-200 flex justify-between items-center"
                                       >
                                         <div>
@@ -540,7 +550,6 @@ export function CollapsibleJobOrdersForExtrusion() {
                     })}
                   </Accordion>
                 )}
-              </div>
               </FadeInContent>
             );
           })}
