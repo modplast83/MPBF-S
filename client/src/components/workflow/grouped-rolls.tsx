@@ -112,10 +112,35 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
   }, {} as { [key: number]: Roll[] });
 
   // Convert to array for mapping
-  const groupArray = Object.entries(groupedRolls).map(([jobOrderId, rolls]) => ({
+  let groupArray = Object.entries(groupedRolls).map(([jobOrderId, rolls]) => ({
     jobOrderId: parseInt(jobOrderId, 10),
     rolls
   }));
+
+  // Filter out job orders based on stage requirements
+  groupArray = groupArray.filter(({ jobOrderId, rolls }) => {
+    // For printing stage: don't display job order if all rolls are completed for printing
+    if (stage === 'printing') {
+      // Check if all rolls have printing completed
+      const allPrintingCompleted = rolls.every(roll => 
+        roll.currentStage !== 'printing' || roll.status === 'completed'
+      );
+      // Only keep job orders that still have printing work to do
+      return !allPrintingCompleted;
+    }
+    
+    // For cutting stage: don't display job order if all rolls are completed for cutting
+    if (stage === 'cutting') {
+      // Check if all rolls have cutting completed
+      const allCuttingCompleted = rolls.every(roll => 
+        roll.currentStage !== 'cutting' || roll.status === 'completed'
+      );
+      // Only keep job orders that still have cutting work to do
+      return !allCuttingCompleted;
+    }
+    
+    return true;
+  });
 
   // Sort by job order ID
   groupArray.sort((a, b) => a.jobOrderId - b.jobOrderId);
