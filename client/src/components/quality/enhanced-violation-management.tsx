@@ -59,7 +59,7 @@ export function QualityViolations() {
   const [currentViolation, setCurrentViolation] = useState<any>(null);
   const [formData, setFormData] = useState({
     reportedBy: "",
-    qualityCheckId: "",
+    qualityCheckId: null as null | number,
     description: "",
     severity: "Medium",
     status: "Open",
@@ -211,7 +211,7 @@ export function QualityViolations() {
   const resetForm = () => {
     setFormData({
       reportedBy: "",
-      qualityCheckId: "",
+      qualityCheckId: null,
       description: "",
       severity: "Medium",
       status: "Open",
@@ -243,7 +243,7 @@ export function QualityViolations() {
     setCurrentViolation(violation);
     setFormData({
       reportedBy: violation.reportedBy || "",
-      qualityCheckId: violation.qualityCheckId || "",
+      qualityCheckId: violation.qualityCheckId || null,
       description: violation.description || "",
       severity: violation.severity || "Medium",
       status: violation.status || "Open",
@@ -388,7 +388,7 @@ export function QualityViolations() {
                                 No user available
                               </SelectItem>
                             ) : (
-                              <SelectItem value="loading">{t("common.loading")}</SelectItem>
+                              <SelectItem value="no-users">{t("common.loading")}</SelectItem>
                             )
                           )}
                         </SelectContent>
@@ -405,7 +405,7 @@ export function QualityViolations() {
                           <SelectValue placeholder={t("quality.select_check")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">{t("common.none")}</SelectItem>
+                          <SelectItem value="none">{t("common.none")}</SelectItem>
                           {checks.map((check: any) => (
                             <SelectItem key={check.id} value={String(check.id)}>
                               {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
@@ -624,7 +624,7 @@ export function QualityViolations() {
                       <SelectValue placeholder={t("quality.select_check")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t("common.none")}</SelectItem>
+                      <SelectItem value="none">{t("common.none")}</SelectItem>
                       {checks.map((check: any) => (
                         <SelectItem key={check.id} value={String(check.id)}>
                           {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
