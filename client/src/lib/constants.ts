@@ -114,11 +114,6 @@ export const SIDEBAR_ITEMS = [
         icon: "verified",
         subItems: [
           { title: "Unified Dashboard", path: "/quality/unified-dashboard" },
-          { title: "Check Types", path: "/quality/check-types" },
-          { title: "Checks", path: "/quality/checks" },
-          { title: "Violations", path: "/quality/violations" },
-          { title: "Corrective Actions", path: "/quality/corrective-actions" },
-          { title: "Penalties", path: "/quality/penalties" },
         ],
       },
     ],
