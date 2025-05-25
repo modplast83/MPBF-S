@@ -398,8 +398,8 @@ export function QualityViolations() {
                     <div>
                       <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
                       <Select 
-                        value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
-                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? parseInt(value, 10) : null})}
+                        value={formData.qualityCheckId ? String(formData.qualityCheckId) : "none"} 
+                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value === "none" ? null : parseInt(value, 10)})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_check")} />
@@ -617,8 +617,8 @@ export function QualityViolations() {
                 <div>
                   <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
                   <Select 
-                    value={formData.qualityCheckId ? String(formData.qualityCheckId) : ""} 
-                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? parseInt(value, 10) : null})}
+                    value={formData.qualityCheckId ? String(formData.qualityCheckId) : "none"} 
+                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value === "none" ? null : parseInt(value, 10)})}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t("quality.select_check")} />
