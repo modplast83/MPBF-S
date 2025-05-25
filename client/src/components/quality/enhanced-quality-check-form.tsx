@@ -28,34 +28,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
-  AlertCircle, 
   Edit, 
   Trash2, 
   Plus, 
   Filter,
   Search,
-  CheckCircle,
-  XCircle,
   Eye,
   CheckCircle2
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 
-// Custom badge variants for success/warning states
+// Badge variants for success/warning states
 const badgeVariants = {
-  default: "bg-primary text-primary-foreground hover:bg-primary/80",
-  secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-  destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/80",
-  outline: "text-foreground",
   success: "bg-green-500 text-white hover:bg-green-600",
-  warning: "bg-yellow-500 text-white hover:bg-yellow-600"
+  destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/80"
 };
 
 export function QualityChecksManagement() {
@@ -342,22 +334,6 @@ export function QualityChecksManagement() {
     return typeId || t("common.unknown");
   };
 
-  const getRollById = (id: string) => {
-    const roll = rolls.find((roll: any) => roll.id === id);
-    if (roll) {
-      return roll;
-    }
-    return null;
-  };
-
-  const getJobOrderById = (id: number) => {
-    const jo = jobOrders.find((jo: any) => jo.id === id);
-    if (jo) {
-      return jo;
-    }
-    return null;
-  };
-
   const getUserById = (id: string) => {
     const user = users.find((user: any) => user.id === id);
     if (user) {
@@ -370,6 +346,7 @@ export function QualityChecksManagement() {
 
   return (
     <div className="space-y-4">
+      {/* Search and filter controls */}
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -435,6 +412,7 @@ export function QualityChecksManagement() {
               </DialogHeader>
               <form onSubmit={handleCreateSubmit}>
                 <div className="space-y-4 py-4">
+                  {/* Check Type Selection */}
                   <div>
                     <Label htmlFor="checkTypeId">{t("quality.check_type")} *</Label>
                     <Select 
@@ -454,7 +432,7 @@ export function QualityChecksManagement() {
                     </Select>
                   </div>
                   
-                  {/* Job Order selection comes first */}
+                  {/* Job Order Selection - comes first */}
                   <div>
                     <Label htmlFor="jobOrderId">{t("quality.related_job_order")}</Label>
                     <Select 
@@ -487,7 +465,7 @@ export function QualityChecksManagement() {
                     </Select>
                   </div>
                   
-                  {/* Roll selection comes after and depends on job order */}
+                  {/* Roll Selection - depends on job order */}
                   <div>
                     <Label htmlFor="rollId">{t("quality.related_roll")}</Label>
                     <Select 
@@ -510,6 +488,7 @@ export function QualityChecksManagement() {
                     </Select>
                   </div>
                   
+                  {/* User Selection */}
                   <div>
                     <Label htmlFor="performedBy">{t("quality.performed_by")} *</Label>
                     <Select 
@@ -529,6 +508,7 @@ export function QualityChecksManagement() {
                     </Select>
                   </div>
                   
+                  {/* Check Date */}
                   <div>
                     <Label htmlFor="checkDate">{t("quality.check_date")} *</Label>
                     <Input
@@ -539,6 +519,7 @@ export function QualityChecksManagement() {
                     />
                   </div>
                   
+                  {/* Passed/Failed Checkbox */}
                   <div className="flex items-center space-x-2">
                     <Checkbox 
                       id="passed"
@@ -550,6 +531,7 @@ export function QualityChecksManagement() {
                     <Label htmlFor="passed">{t("quality.passed")}</Label>
                   </div>
                   
+                  {/* Notes */}
                   <div>
                     <Label htmlFor="notes">{t("quality.notes")}</Label>
                     <Textarea
@@ -574,6 +556,7 @@ export function QualityChecksManagement() {
         </div>
       </div>
 
+      {/* Quality Checks Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -717,6 +700,7 @@ export function QualityChecksManagement() {
           </DialogHeader>
           <form onSubmit={handleUpdateSubmit}>
             <div className="space-y-4 py-4">
+              {/* Check Type Selection */}
               <div>
                 <Label htmlFor="checkTypeId">{t("quality.check_type")} *</Label>
                 <Select 
@@ -736,7 +720,7 @@ export function QualityChecksManagement() {
                 </Select>
               </div>
               
-              {/* Job Order selection comes first */}
+              {/* Job Order Selection - comes first */}
               <div>
                 <Label htmlFor="jobOrderId">{t("quality.related_job_order")}</Label>
                 <Select 
@@ -769,7 +753,7 @@ export function QualityChecksManagement() {
                 </Select>
               </div>
               
-              {/* Roll selection comes after and depends on job order */}
+              {/* Roll Selection - depends on job order */}
               <div>
                 <Label htmlFor="rollId">{t("quality.related_roll")}</Label>
                 <Select 
@@ -792,6 +776,7 @@ export function QualityChecksManagement() {
                 </Select>
               </div>
               
+              {/* User Selection */}
               <div>
                 <Label htmlFor="performedBy">{t("quality.performed_by")} *</Label>
                 <Select 
@@ -811,6 +796,7 @@ export function QualityChecksManagement() {
                 </Select>
               </div>
               
+              {/* Check Date */}
               <div>
                 <Label htmlFor="checkDate">{t("quality.check_date")} *</Label>
                 <Input
@@ -821,6 +807,7 @@ export function QualityChecksManagement() {
                 />
               </div>
               
+              {/* Passed/Failed Checkbox */}
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id="passed"
@@ -832,6 +819,7 @@ export function QualityChecksManagement() {
                 <Label htmlFor="passed">{t("quality.passed")}</Label>
               </div>
               
+              {/* Notes */}
               <div>
                 <Label htmlFor="notes">{t("quality.notes")}</Label>
                 <Textarea
