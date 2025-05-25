@@ -91,7 +91,7 @@ function App() {
                   <ProtectedRoute path="/reports/quality" component={QualityReportsPage} module="Quality Reports" />
                   <ProtectedRoute path="/reports/workflow" component={WorkflowReportsPage} module="Workflow Reports" />
                   <ProtectedRoute path="/quality" component={QualityIndex} module="Quality" />
-                  <ProtectedRoute path="/quality/unified-dashboard" component={UnifiedQualityDashboard} module="Quality" />
+                  <ProtectedRoute path="/quality/unified-dashboard" component={UnifiedQualityDashboard} module="Unified Dashboard" />
                   <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} module="Check Types" />
                   <ProtectedRoute path="/quality/checks" component={QualityChecks} module="Checks" />
                   <ProtectedRoute path="/quality/violations" component={QualityViolations} module="Violations" />

@@ -135,6 +135,7 @@
       "raw_materials": "Raw Materials",
       "final_products": "Final Products",
       "quality": "Quality",
+      "unified_dashboard": "Unified Dashboard",
       "check_types": "Check Types",
       "quality_checks": "Checks",
       "checks": "Checks",
@@ -489,6 +490,7 @@
     },
     "quality": {
       "title": "Quality Management",
+      "unified_dashboard_title": "Unified Quality Dashboard",
       "description": "Monitor and control quality through inspections, violations, and penalties",
       "management": "Quality Management",
       "comprehensive_quality_control": "Comprehensive quality control and monitoring system",

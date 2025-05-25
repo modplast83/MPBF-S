@@ -23,6 +23,8 @@ import { cn } from "@/lib/utils";
 
 export default function UnifiedQualityDashboard() {
   const { t } = useTranslation();
+  // Set page title for better navigation context
+  document.title = `${t("sidebar.unified_dashboard")} | ${t("common.app_name") || "Production System"}`;
   const [activeTab, setActiveTab] = useState("overview");
 
   // Define default stats to handle loading and error states
@@ -177,7 +179,7 @@ export default function UnifiedQualityDashboard() {
     <div className="container mx-auto py-6 space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("quality.title")}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("quality.unified_dashboard_title") || t("sidebar.unified_dashboard")}</h1>
           <p className="text-muted-foreground">{t("quality.comprehensive_quality_control")}</p>
         </div>
       </div>
