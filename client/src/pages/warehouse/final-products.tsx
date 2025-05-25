@@ -133,22 +133,52 @@ export default function FinalProducts() {
   // Function to check if all job orders for an order are received
   const checkAndUpdateOrderStatus = async (orderId: number) => {
     const orderJobOrders = jobOrders.filter(jo => jo.orderId === orderId);
-    const allReceived = orderJobOrders.every(jo => 
-      jo.status === "received" || 
+    
+    // Check if ALL job orders are fully received
+    const allFullyReceived = orderJobOrders.every(jo => 
+      jo.status === "received" && 
       (jo.receivedQty || 0) >= (jo.finishedQty || 0)
     );
     
-    if (allReceived) {
-      try {
-        // Update order status to completed
+    // Check if ANY job orders are received (at least partially)
+    const anyReceived = orderJobOrders.some(jo => 
+      (jo.receivedQty || 0) > 0
+    );
+    
+    try {
+      if (allFullyReceived) {
+        // All job orders are fully received - update order status to completed
         await apiRequest("PUT", `${API_ENDPOINTS.ORDERS}/${orderId}`, {
           status: "completed"
         });
         
-        queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
-      } catch (error) {
-        console.error("Failed to update order status:", error);
+        toast({
+          title: "Order Status Updated",
+          description: `Order #${orderId} status changed to Completed as all job orders are received.`,
+        });
+      } else if (anyReceived) {
+        // Some job orders are received but not all - ensure status is "processing"
+        const order = orders.find(o => o.id === orderId);
+        if (order && order.status !== "processing") {
+          await apiRequest("PUT", `${API_ENDPOINTS.ORDERS}/${orderId}`, {
+            status: "processing"
+          });
+          
+          toast({
+            title: "Order Status Updated",
+            description: `Order #${orderId} status changed to Processing as some job orders are still pending.`,
+          });
+        }
       }
+      
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive",
+      });
     }
   };
 
