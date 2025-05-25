@@ -21,7 +21,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item, MasterBatch, Order } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
-import { ButtonPulse, FadeIn, HoverCard, SuccessCheck, AnimatedTooltip } from "@/components/ui/micro-interactions";
+import { AnimatedButton, FadeInContent, SuccessCheck } from "@/components/ui/animated-elements";
 
 export function CollapsibleJobOrdersForExtrusion() {
   const { t } = useTranslation();
@@ -344,7 +344,7 @@ export function CollapsibleJobOrdersForExtrusion() {
         </Card>
       ) : (
         <div className="space-y-6">
-          {sortedGroupKeys.map(orderId => {
+          {sortedGroupKeys.map((orderId, index) => {
             const orderJobOrders = groupedJobOrders[orderId];
             const parentOrder = orders.find(order => order.id === orderId);
             const customer = parentOrder ? 
@@ -353,8 +353,12 @@ export function CollapsibleJobOrdersForExtrusion() {
             const customerNameAr = customer?.nameAr || t("common.unknown");
             
             return (
-              <div key={orderId} className="border border-secondary-200 rounded-lg overflow-hidden bg-white shadow-sm">
-                <div 
+              <FadeInContent 
+                key={orderId} 
+                className="border border-secondary-200 rounded-lg overflow-hidden bg-white shadow-sm"
+                delay={index * 0.1}
+              >
+                <div
                   className={`bg-primary-50 px-4 py-3 border-b cursor-pointer hover:bg-primary-100 transition-colors ${expandedOrderIds.includes(orderId) ? 'border-b-primary-200' : 'border-b-transparent'}`}
                   onClick={() => {
                     setExpandedOrderIds(prev => 
@@ -519,7 +523,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                               </div>
                               
                               <div className="flex justify-end">
-                                <Button
+                                <AnimatedButton
                                   onClick={() => handleCreateRoll(jobOrder)}
                                   disabled={isComplete || createRollMutation.isPending}
                                   className="flex items-center text-xs sm:text-sm py-1 px-2 sm:py-2 sm:px-3 h-auto"
@@ -527,7 +531,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                                 >
                                   <span className="material-icons text-xs sm:text-sm mr-1">add</span>
                                   {t("production.roll_management.create_roll")}
-                                </Button>
+                                </AnimatedButton>
                               </div>
                             </div>
                           </AccordionContent>
@@ -537,6 +541,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                   </Accordion>
                 )}
               </div>
+              </FadeInContent>
             );
           })}
         </div>
