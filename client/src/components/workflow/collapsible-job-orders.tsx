@@ -21,6 +21,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item, MasterBatch, Order } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
+import { ButtonPulse, FadeIn, HoverCard, SuccessCheck, AnimatedTooltip } from "@/components/ui/micro-interactions";
 
 export function CollapsibleJobOrdersForExtrusion() {
   const { t } = useTranslation();
@@ -346,9 +347,10 @@ export function CollapsibleJobOrdersForExtrusion() {
           {sortedGroupKeys.map(orderId => {
             const orderJobOrders = groupedJobOrders[orderId];
             const parentOrder = orders.find(order => order.id === orderId);
-            const customerName = parentOrder ? 
-              (customers.find(c => c.id === parentOrder.customerId)?.name || t("common.unknown_customer")) :
-              t("common.unknown_customer");
+            const customer = parentOrder ? 
+              customers.find(c => c.id === parentOrder.customerId) : null;
+            const customerName = customer?.name || t("common.unknown_customer");
+            const customerNameAr = customer?.nameAr || t("common.unknown");
             
             return (
               <div key={orderId} className="border border-secondary-200 rounded-lg overflow-hidden bg-white shadow-sm">
@@ -369,7 +371,9 @@ export function CollapsibleJobOrdersForExtrusion() {
                       </div>
                       <div>
                         <h4 className="font-medium text-sm text-primary-700">O #{orderId}</h4>
-                        <p className="text-xs text-secondary-600 truncate max-w-[200px] sm:max-w-[300px]">{customerName}</p>
+                        <p className="text-xs text-secondary-600 truncate max-w-[200px] sm:max-w-[300px]">
+                          {customerName} {customerNameAr && <span className="font-bold mr-1 text-primary-700">({customerNameAr})</span>}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center">
