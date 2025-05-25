@@ -442,7 +442,9 @@
       "ordered_qty": "Ordered Quantity",
       "production_qty": "Production Quantity",
       "finished_qty": "Finished Quantity",
+      "received_qty": "Received Quantity",
       "waste_qty": "Waste Quantity",
+      "waste_percentage": "Waste Percentage",
       "receive": "Receive",
       "receiving": "Receiving...",
       "receive_job_order": "Receive Job Order",
@@ -466,7 +468,8 @@
       "add_to_list": "Add to List",
       "added_materials": "Added Materials",
       "actions": "Actions",
-      "add_quantities_desc": "Add quantities to existing raw materials"
+      "add_quantities_desc": "Add quantities to existing raw materials",
+      "customer_arabic_name": "Customer (Arabic)"
     },
     "performance": {
       "title": "Performance Metrics",

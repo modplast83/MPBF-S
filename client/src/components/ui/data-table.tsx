@@ -30,6 +30,7 @@ interface DataTableProps<T> {
       className?: string;
     };
     id?: string;
+    hidden?: boolean;
   }[];
   searchable?: boolean;
   pagination?: boolean;

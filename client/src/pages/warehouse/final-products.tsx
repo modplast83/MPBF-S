@@ -731,6 +731,7 @@ export default function FinalProducts() {
       orderNumber: "Unknown", 
       productName: "Unknown", 
       customer: "Unknown",
+      customerAr: "غير معروف",
       totalCutQty: 0,
       finishedQty: 0,
       totalRequiredQty: 0,
@@ -766,6 +767,7 @@ export default function FinalProducts() {
       orderNumber: order?.id.toString() || "Unknown",
       productName: itemName,
       customer: customer?.name || "Unknown",
+      customerAr: customer?.nameAr || "غير معروف",
       totalCutQty: totalCutQty,
       finishedQty: finishedQty,
       totalRequiredQty: totalRequiredQty,
@@ -778,6 +780,7 @@ export default function FinalProducts() {
     header: string;
     accessorKey?: keyof JobOrder;
     cell?: (row: JobOrder) => React.ReactNode;
+    hidden?: boolean;
   };
 
   // Create columns definition for job orders table
@@ -796,8 +799,17 @@ export default function FinalProducts() {
       header: t('setup.customers.title'),
       cell: (row) => {
         const details = getJobOrderDetails(row.id);
-        return details.customer;
+        return isRTL ? details.customerAr : details.customer;
       },
+    },
+    {
+      header: t('setup.customers.arabic_name'),
+      cell: (row) => {
+        const details = getJobOrderDetails(row.id);
+        return details.customerAr;
+      },
+      // Only show this column when not in RTL mode (since RTL mode already shows Arabic)
+      hidden: isRTL,
     },
     {
       header: t('orders.product'),
