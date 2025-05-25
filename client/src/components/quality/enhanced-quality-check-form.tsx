@@ -260,13 +260,23 @@ export function QualityChecksManagement() {
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate(formData);
+    // Convert passed boolean to status string for the database
+    const dataToSubmit = {
+      ...formData,
+      status: formData.passed ? 'passed' : 'failed'
+    };
+    createMutation.mutate(dataToSubmit);
   };
 
   const handleUpdateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (currentCheck) {
-      updateMutation.mutate({ id: currentCheck.id, data: formData });
+      // Convert passed boolean to status string for the database
+      const dataToSubmit = {
+        ...formData,
+        status: formData.passed ? 'passed' : 'failed'
+      };
+      updateMutation.mutate({ id: currentCheck.id, data: dataToSubmit });
     }
   };
 
@@ -783,7 +793,7 @@ export function QualityChecksManagement() {
                     <SelectValue placeholder={t("quality.select_job_order")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t("common.none")}</SelectItem>
+                    <SelectItem value="none">{t("common.none")}</SelectItem>
                     {jobOrders.map((jo: any) => (
                       <SelectItem key={jo.id} value={jo.id.toString()}>
                         JO #{jo.id}
