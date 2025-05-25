@@ -444,7 +444,7 @@ export function QualityChecksManagement() {
                         <SelectValue placeholder={t("quality.select_roll")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t("common.none")}</SelectItem>
+                        <SelectItem value="none">{t("common.none")}</SelectItem>
                         {rolls.map((roll: any) => (
                           <SelectItem key={roll.id} value={roll.id}>
                             {roll.id}
@@ -464,7 +464,7 @@ export function QualityChecksManagement() {
                         <SelectValue placeholder={t("quality.select_job_order")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t("common.none")}</SelectItem>
+                        <SelectItem value="none">{t("common.none")}</SelectItem>
                         {jobOrders.map((jo: any) => (
                           <SelectItem key={jo.id} value={jo.id.toString()}>
                             JO #{jo.id}
@@ -763,7 +763,7 @@ export function QualityChecksManagement() {
                     <SelectValue placeholder={t("quality.select_roll")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t("common.none")}</SelectItem>
+                    <SelectItem value="none">{t("common.none")}</SelectItem>
                     {rolls.map((roll: any) => (
                       <SelectItem key={roll.id} value={roll.id}>
                         {roll.id}
