@@ -142,7 +142,7 @@ export function DataTable<T>({
         <Table>
           <TableHeader>
             <TableRow>
-              {columns.map((column, index) => (
+              {columns.filter(column => !column.hidden).map((column, index) => (
                 <TableHead 
                   key={index} 
                   className={`font-semibold ${column.meta?.className || ''} ${isRightToLeft ? 'text-right' : ''}`}
@@ -157,7 +157,7 @@ export function DataTable<T>({
               // Loading skeleton
               Array.from({ length: 5 }).map((_, rowIndex) => (
                 <TableRow key={`skeleton-${rowIndex}`}>
-                  {columns.map((_, colIndex) => (
+                  {columns.filter(column => !column.hidden).map((_, colIndex) => (
                     <TableCell key={`skeleton-cell-${colIndex}`}>
                       <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                     </TableCell>
@@ -179,7 +179,7 @@ export function DataTable<T>({
                   }}
                   className={onRowClick ? "cursor-pointer hover:bg-secondary-50" : ""}
                 >
-                  {columns.map((column, colIndex) => (
+                  {columns.filter(column => !column.hidden).map((column, colIndex) => (
                     <TableCell 
                       key={colIndex}
                       className={column.meta?.className || ''}

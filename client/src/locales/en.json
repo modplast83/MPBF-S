@@ -250,6 +250,7 @@
         "code": "Code",
         "name": "Name",
         "name_ar": "Name (Arabic)",
+        "arabic_name": "Customer (Arabic)",
         "user_id": "Sales Representative",
         "plate_drawer_code": "Plate Drawer Code"
       },

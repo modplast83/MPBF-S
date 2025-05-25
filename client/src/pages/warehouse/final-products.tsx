@@ -803,7 +803,7 @@ export default function FinalProducts() {
       },
     },
     {
-      header: t('setup.customers.arabic_name'),
+      header: t('warehouse.customer_arabic_name'),
       cell: (row) => {
         const details = getJobOrderDetails(row.id);
         return details.customerAr;
