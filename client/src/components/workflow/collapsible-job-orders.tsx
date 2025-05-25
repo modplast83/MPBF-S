@@ -25,7 +25,7 @@ import { AnimatedButton, FadeInContent, SuccessCheck } from "@/components/ui/ani
 
 export function CollapsibleJobOrdersForExtrusion() {
   const { t } = useTranslation();
-  const [expandedOrders, setExpandedOrders] = useState<number[]>([]);
+  const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
   const [expandedOrderIds, setExpandedOrderIds] = useState<number[]>([]);
   const [selectedJobOrder, setSelectedJobOrder] = useState<JobOrder | null>(null);
   const [isRollDialogOpen, setIsRollDialogOpen] = useState(false);
@@ -122,10 +122,11 @@ export function CollapsibleJobOrdersForExtrusion() {
 
   // Toggle the expanded state of a job order
   const toggleExpandOrder = (jobOrderId: number) => {
+    const jobOrderIdStr = jobOrderId.toString();
     setExpandedOrders(prevState => 
-      prevState.includes(jobOrderId)
-        ? prevState.filter(id => id !== jobOrderId)
-        : [...prevState, jobOrderId]
+      prevState.includes(jobOrderIdStr)
+        ? prevState.filter(id => id !== jobOrderIdStr)
+        : [...prevState, jobOrderIdStr]
     );
   };
 
@@ -394,7 +395,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                         <span className="material-icons text-xs text-white">receipt_long</span>
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm text-primary-700">O #{orderId}</h4>
+                        <h4 className="font-medium text-sm text-primary-700 text-left">O #{orderId}</h4>
                         <p className="text-xs text-secondary-600 truncate max-w-[200px] sm:max-w-[300px]">
                           {customerName} {customerNameAr && <span className="font-bold mr-1 text-primary-700">({customerNameAr})</span>}
                         </p>
@@ -412,9 +413,9 @@ export function CollapsibleJobOrdersForExtrusion() {
                 {expandedOrderIds.includes(orderId) && (
                   <Accordion
                     type="multiple"
-                    value={expandedOrders.map(String)}
+                    value={expandedOrders}
                     onValueChange={(values) => {
-                      setExpandedOrders(values.map(Number));
+                      setExpandedOrders(values);
                     }}
                     className="border-t-0"
                   >
@@ -427,7 +428,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                       return (
                         <AccordionItem 
                           key={jobOrderId} 
-                          value={jobOrderId} 
+                          value={jobOrderId.toString()} 
                           className="border-b border-secondary-200 last:border-b-0"
                         >
                           <AccordionTrigger className="px-4 py-3 hover:bg-secondary-50 hover:no-underline">
@@ -437,7 +438,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                                   <span className="material-icons text-xs text-secondary-700">production_quantity_limits</span>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium text-sm">JO #{jobOrderId}</h4>
+                                  <h4 className="font-medium text-sm text-left">JO #{jobOrderId}</h4>
                                   <p className="text-xs text-secondary-500">{getItemName(jobOrder)}</p>
                                 </div>
                               </div>
