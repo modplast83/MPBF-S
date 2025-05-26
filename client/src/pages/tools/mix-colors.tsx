@@ -280,8 +280,17 @@ function suggestInkMixes(targetColor: string, colorModel: "cmyk" | "rgb") {
   return mixSuggestions.sort((a, b) => b.percentage - a.percentage);
 }
 
-// Function to analyze an image and extract dominant colors
-async function analyzeImage(file: File): Promise<string[]> {
+// Enhanced color data interface
+interface ExtractedColor {
+  hex: string;
+  rgb: { r: number; g: number; b: number };
+  cmyk: { c: number; m: number; y: number; k: number };
+  frequency: number;
+  percentage: number;
+}
+
+// Enhanced function to analyze an image and extract all design colors accurately
+async function analyzeImage(file: File): Promise<ExtractedColor[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
@@ -291,8 +300,12 @@ async function analyzeImage(file: File): Promise<string[]> {
         // Create canvas to analyze image
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        const width = img.width;
-        const height = img.height;
+        
+        // Resize for faster processing while maintaining color accuracy
+        const maxSize = 600;
+        const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+        const width = Math.floor(img.width * scale);
+        const height = Math.floor(img.height * scale);
         
         canvas.width = width;
         canvas.height = height;
@@ -305,24 +318,51 @@ async function analyzeImage(file: File): Promise<string[]> {
         // Draw image on canvas
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Sample pixels (simplified approach - sample grid points)
-        const sampleSize = Math.max(1, Math.floor(Math.min(width, height) / 20));
-        const colors: string[] = [];
+        // Get all pixel data
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const pixels = imageData.data;
+        const totalPixels = width * height;
         
-        for (let x = 0; x < width; x += sampleSize) {
-          for (let y = 0; y < height; y += sampleSize) {
-            const data = ctx.getImageData(x, y, 1, 1).data;
-            const hex = rgbToHex(data[0], data[1], data[2]);
-            colors.push(hex);
+        // Color frequency map
+        const colorMap = new Map<string, { rgb: { r: number; g: number; b: number }, count: number }>();
+        
+        // Sample every pixel for comprehensive color extraction
+        for (let i = 0; i < pixels.length; i += 4) {
+          const r = pixels[i];
+          const g = pixels[i + 1];
+          const b = pixels[i + 2];
+          const a = pixels[i + 3];
+          
+          // Skip transparent pixels
+          if (a < 128) continue;
+          
+          // Group similar colors to reduce noise
+          const groupedRgb = groupSimilarColors(r, g, b, 8);
+          const hex = rgbToHex(groupedRgb.r, groupedRgb.g, groupedRgb.b);
+          
+          if (colorMap.has(hex)) {
+            colorMap.get(hex)!.count++;
+          } else {
+            colorMap.set(hex, { rgb: groupedRgb, count: 1 });
           }
         }
         
-        // Extract dominant colors (simplified - just take unique colors)
-        const uniqueColorsSet = new Set(colors);
-        const uniqueColors = Array.from(uniqueColorsSet);
+        // Convert to array with color analysis
+        const extractedColors: ExtractedColor[] = Array.from(colorMap.entries())
+          .map(([hex, data]) => ({
+            hex,
+            rgb: data.rgb,
+            cmyk: rgbToCmyk(data.rgb.r, data.rgb.g, data.rgb.b),
+            frequency: data.count,
+            percentage: Math.round((data.count / totalPixels) * 100 * 100) / 100
+          }))
+          .filter(color => color.percentage > 0.1) // Filter out very rare colors
+          .sort((a, b) => b.frequency - a.frequency);
         
-        // Return top colors (limited to 8)
-        resolve(uniqueColors.slice(0, 8));
+        // Apply advanced color clustering for better results
+        const clusteredColors = clusterColors(extractedColors, 16);
+        
+        resolve(clusteredColors);
       };
       
       img.onerror = () => {
@@ -344,11 +384,69 @@ async function analyzeImage(file: File): Promise<string[]> {
   });
 }
 
+// Group similar colors to reduce noise
+function groupSimilarColors(r: number, g: number, b: number, tolerance: number): { r: number; g: number; b: number } {
+  return {
+    r: Math.round(r / tolerance) * tolerance,
+    g: Math.round(g / tolerance) * tolerance,
+    b: Math.round(b / tolerance) * tolerance
+  };
+}
+
+// Advanced color clustering to merge very similar colors
+function clusterColors(colors: ExtractedColor[], maxColors: number): ExtractedColor[] {
+  if (colors.length <= maxColors) return colors;
+  
+  const clusters: ExtractedColor[] = [];
+  const threshold = 25; // Color similarity threshold
+  
+  for (const color of colors) {
+    let merged = false;
+    
+    // Try to merge with existing cluster
+    for (const cluster of clusters) {
+      const distance = calculateColorDistance(color.rgb, cluster.rgb);
+      if (distance < threshold) {
+        // Merge colors - weighted average based on frequency
+        const totalFreq = cluster.frequency + color.frequency;
+        const w1 = cluster.frequency / totalFreq;
+        const w2 = color.frequency / totalFreq;
+        
+        cluster.rgb.r = Math.round(cluster.rgb.r * w1 + color.rgb.r * w2);
+        cluster.rgb.g = Math.round(cluster.rgb.g * w1 + color.rgb.g * w2);
+        cluster.rgb.b = Math.round(cluster.rgb.b * w1 + color.rgb.b * w2);
+        cluster.hex = rgbToHex(cluster.rgb.r, cluster.rgb.g, cluster.rgb.b);
+        cluster.cmyk = rgbToCmyk(cluster.rgb.r, cluster.rgb.g, cluster.rgb.b);
+        cluster.frequency += color.frequency;
+        cluster.percentage += color.percentage;
+        merged = true;
+        break;
+      }
+    }
+    
+    // If not merged and we have space, add as new cluster
+    if (!merged && clusters.length < maxColors) {
+      clusters.push({ ...color });
+    }
+  }
+  
+  // Sort by frequency and return top colors
+  return clusters.sort((a, b) => b.frequency - a.frequency).slice(0, maxColors);
+}
+
+// Calculate Euclidean distance between two colors in RGB space
+function calculateColorDistance(color1: { r: number; g: number; b: number }, color2: { r: number; g: number; b: number }): number {
+  const dr = color1.r - color2.r;
+  const dg = color1.g - color2.g;
+  const db = color1.b - color2.b;
+  return Math.sqrt(dr * dr + dg * dg + db * db);
+}
+
 export default function MixColorsCalculator() {
   const { t } = useTranslation();
   const [results, setResults] = useState<ColorMix[] | null>(null);
-  const [extractedColors, setExtractedColors] = useState<string[]>([]);
-  const [selectedExtractedColor, setSelectedExtractedColor] = useState<string | null>(null);
+  const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([]);
+  const [selectedExtractedColor, setSelectedExtractedColor] = useState<ExtractedColor | null>(null);
   const [targetColorPreview, setTargetColorPreview] = useState("#5A7D9A");
   const [mixedColorPreview, setMixedColorPreview] = useState("#5A7D9A");
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -426,8 +524,8 @@ export default function MixColorsCalculator() {
     }
     
     try {
-      const dominantColors = await analyzeImage(file);
-      setExtractedColors(dominantColors);
+      const extractedColorData = await analyzeImage(file);
+      setExtractedColors(extractedColorData);
     } catch (error) {
       console.error('Error analyzing image:', error);
       setUploadError('Error analyzing image. Please try a different file.');
@@ -435,10 +533,24 @@ export default function MixColorsCalculator() {
   };
 
   // Handle extracted color selection
-  const handleExtractedColorSelect = (color: string) => {
+  const handleExtractedColorSelect = (color: ExtractedColor) => {
     setSelectedExtractedColor(color);
-    form.setValue('targetColor', color);
-    setTargetColorPreview(color);
+    form.setValue('targetColor', color.hex);
+    setTargetColorPreview(color.hex);
+    
+    // Auto-fill CMYK values from extracted color
+    form.setValue('cyan', Math.round(color.cmyk.c));
+    form.setValue('magenta', Math.round(color.cmyk.m));
+    form.setValue('yellow', Math.round(color.cmyk.y));
+    form.setValue('black', Math.round(color.cmyk.k));
+    
+    // Auto-fill RGB values from extracted color
+    form.setValue('red', color.rgb.r);
+    form.setValue('green', color.rgb.g);
+    form.setValue('blue', color.rgb.b);
+    
+    // Update color model to CMYK for better printing accuracy
+    form.setValue('colorModel', 'cmyk');
   };
   
   // Handle Pantone color selection
@@ -975,34 +1087,79 @@ export default function MixColorsCalculator() {
 
               {extractedColors.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Extracted Colors</h3>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium">Extracted Colors</h3>
+                    <span className="text-sm text-gray-500">{extractedColors.length} colors found</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {extractedColors.map((color, index) => (
                       <div 
                         key={index} 
                         className={`
-                          h-20 rounded-md cursor-pointer flex items-end justify-center p-2
-                          hover:ring-2 hover:ring-primary transition-all
-                          ${selectedExtractedColor === color ? 'ring-2 ring-primary' : ''}
+                          rounded-lg cursor-pointer transition-all duration-200 hover:scale-105
+                          ${selectedExtractedColor?.hex === color.hex ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:ring-1 hover:ring-gray-300'}
                         `}
-                        style={{ backgroundColor: color }}
                         onClick={() => handleExtractedColorSelect(color)}
                       >
-                        <span className="text-xs font-mono bg-white bg-opacity-70 px-2 py-1 rounded">
-                          {color}
-                        </span>
+                        <div 
+                          className="h-16 rounded-t-lg border-b"
+                          style={{ backgroundColor: color.hex }}
+                        />
+                        <div className="p-2 bg-white rounded-b-lg border border-t-0">
+                          <div className="text-xs font-mono font-medium text-gray-700">{color.hex}</div>
+                          <div className="text-xs text-blue-600 font-medium">{color.percentage}% coverage</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            CMYK: {Math.round(color.cmyk.c)}, {Math.round(color.cmyk.m)}, {Math.round(color.cmyk.y)}, {Math.round(color.cmyk.k)}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
                   
                   {selectedExtractedColor && (
-                    <div className="mt-6">
-                      <Button 
-                        onClick={() => form.handleSubmit(calculateColorMix)()}
-                        className="w-full"
-                      >
-                        Calculate Formula for Selected Color
-                      </Button>
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start space-x-4">
+                        <div 
+                          className="w-16 h-16 rounded-lg border-2 border-white shadow-sm flex-shrink-0"
+                          style={{ backgroundColor: selectedExtractedColor.hex }}
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-blue-900 mb-2">Selected Color Analysis</h4>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-600">Hex Code:</p>
+                              <p className="font-mono font-medium">{selectedExtractedColor.hex}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600">Coverage:</p>
+                              <p className="font-medium">{selectedExtractedColor.percentage}%</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600">RGB Values:</p>
+                              <p className="font-mono">{selectedExtractedColor.rgb.r}, {selectedExtractedColor.rgb.g}, {selectedExtractedColor.rgb.b}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600">CMYK Values:</p>
+                              <p className="font-mono">{Math.round(selectedExtractedColor.cmyk.c)}%, {Math.round(selectedExtractedColor.cmyk.m)}%, {Math.round(selectedExtractedColor.cmyk.y)}%, {Math.round(selectedExtractedColor.cmyk.k)}%</p>
+                            </div>
+                          </div>
+                          <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-700">
+                            <strong>Note:</strong> Color values have been automatically filled in the calculator. Click "Calculate Mix" below to generate the precise ink formula.
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4">
+                        <Button 
+                          onClick={() => form.handleSubmit(calculateColorMix)()}
+                          className="w-full"
+                          size="lg"
+                        >
+                          <Droplets className="mr-2 h-4 w-4" />
+                          Generate Ink Formula for This Color
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
