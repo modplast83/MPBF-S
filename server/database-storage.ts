@@ -1,4 +1,4 @@
-import { eq, and, gte, lte, desc } from "drizzle-orm";
+import { eq, and, gte, lte } from "drizzle-orm";
 import {
   users,
   type User,
@@ -684,7 +684,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orders);
   }
 
-  async getOrder(id: string): Promise<Order | undefined> {
+  async getOrder(id: number): Promise<Order | undefined> {
     const [order] = await db
       .select()
       .from(orders)
@@ -693,17 +693,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrder(order: InsertOrder): Promise<Order> {
-    // Generate the next order ID in format O001, O002, etc.
-    const existingOrders = await db.select({ orderNumber: orders.orderNumber }).from(orders).orderBy(desc(orders.orderNumber)).limit(1);
-    const nextOrderNumber = existingOrders.length > 0 ? existingOrders[0].orderNumber + 1 : 1;
-    const orderId = `O${nextOrderNumber.toString().padStart(3, '0')}`;
-    
     const [created] = await db
       .insert(orders)
-      .values({
-        ...order,
-        id: orderId
-      })
+      .values(order)
       .returning();
     return created;
   }

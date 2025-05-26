@@ -22,7 +22,6 @@ import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item, MasterBatc
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
 import { AnimatedButton, FadeInContent, SuccessCheck } from "@/components/ui/animated-elements";
-import { formatOrderId, formatJobOrderId, getJobOrderSequence } from "@/lib/serial-format";
 
 export function CollapsibleJobOrdersForExtrusion() {
   const { t } = useTranslation();
@@ -396,7 +395,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                         <span className="material-icons text-xs text-white">receipt_long</span>
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm text-primary-700 text-left">{formatOrderId(orderId)}</h4>
+                        <h4 className="font-medium text-sm text-primary-700 text-left">O #{orderId}</h4>
                         <p className="text-xs text-secondary-600 truncate max-w-[200px] sm:max-w-[300px]">
                           {customerName} {customerNameAr && <span className="font-bold mr-1 text-primary-700">({customerNameAr})</span>}
                         </p>
@@ -439,7 +438,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                                   <span className="material-icons text-xs text-secondary-700">production_quantity_limits</span>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium text-sm text-left">{formatJobOrderId(orderId, getJobOrderSequence(jobOrders, orderId, jobOrderId))}</h4>
+                                  <h4 className="font-medium text-sm text-left">JO #{jobOrderId}</h4>
                                   <p className="text-xs text-secondary-500">{getItemName(jobOrder)}</p>
                                 </div>
                               </div>

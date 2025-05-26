@@ -12,7 +12,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { formatOrderId, formatJobOrderId, getJobOrderSequence } from "@/lib/serial-format";
 
 interface GroupedRollsProps {
   rolls: Roll[];
@@ -227,7 +226,7 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
                   </div>
                   <div className="text-left">
                     <h4 className="font-medium text-sm sm:text-base">
-                      <span className="text-primary-600">{formatOrderId(orderId)}</span>
+                      <span className="text-primary-600">Order #{orderId}</span>
                       <Badge variant="outline" className="ml-2 text-xs">
                         {jobOrders.length} JO{jobOrders.length > 1 ? 's' : ''}
                       </Badge>
@@ -275,7 +274,7 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
                             </div>
                             <div className="text-left">
                               <h5 className="font-medium text-xs sm:text-sm">
-                                <span className="text-error-600">{formatJobOrderId(orderId, getJobOrderSequence(jobOrders.map(jo => ({ id: jo.jobOrderId, orderId })), orderId, jobOrderId))}</span>
+                                <span className="text-error-600">JO #{jobOrderId}</span>
                               </h5>
                               <p className="text-xs text-secondary-500 truncate max-w-[180px] sm:max-w-none">
                                 {getProductDetails(jobOrderId)}
