@@ -144,8 +144,7 @@ export type CustomerProduct = typeof customerProducts.$inferSelect;
 
 // Orders table
 export const orders = pgTable("orders", {
-  id: text("id").primaryKey(), // ID (O001, O002, etc.)
-  orderNumber: serial("order_number").unique(), // Auto-incrementing number for generating ID
+  id: serial("id").primaryKey(), // ID
   date: timestamp("date").defaultNow().notNull(), // Order Date
   customerId: text("customer_id").notNull().references(() => customers.id), // Customer ID
   note: text("note"), // Order Note
@@ -153,7 +152,7 @@ export const orders = pgTable("orders", {
   userId: text("user_id").references(() => users.id), // Created by
 });
 
-export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, orderNumber: true, date: true, status: true });
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, date: true, status: true });
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
@@ -371,8 +370,8 @@ export const smsMessages = pgTable("sms_messages", {
   recipientName: text("recipient_name"),
   message: text("message").notNull(),
   status: text("status").notNull().default("pending"), // pending, sent, failed, delivered
-  orderId: integer("order_id").references(() => orders.id),
-  jobOrderId: integer("job_order_id").references(() => jobOrders.id),
+  orderId: text("order_id").references(() => orders.id),
+  jobOrderId: text("job_order_id").references(() => jobOrders.id),
   customerId: text("customer_id").references(() => customers.id),
   sentBy: text("sent_by").references(() => users.id),
   sentAt: timestamp("sent_at").defaultNow(),
