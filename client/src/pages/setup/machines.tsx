@@ -19,9 +19,12 @@ export default function Machines() {
   const [deletingMachine, setDeletingMachine] = useState<Machine | null>(null);
 
   // Fetch machines and sections
-  const { data: machines, isLoading } = useQuery<Machine[]>({
+  const { data: machinesData, isLoading } = useQuery<Machine[]>({
     queryKey: [API_ENDPOINTS.MACHINES],
   });
+
+  // Sort machines by ID
+  const machines = machinesData ? [...machinesData].sort((a, b) => a.id.localeCompare(b.id)) : [];
 
   const { data: sections } = useQuery<Section[]>({
     queryKey: [API_ENDPOINTS.SECTIONS],
