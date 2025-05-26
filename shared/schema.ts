@@ -144,7 +144,8 @@ export type CustomerProduct = typeof customerProducts.$inferSelect;
 
 // Orders table
 export const orders = pgTable("orders", {
-  id: serial("id").primaryKey(), // ID
+  id: text("id").primaryKey(), // ID (O001, O002, etc.)
+  orderNumber: serial("order_number").unique(), // Auto-incrementing number for generating ID
   date: timestamp("date").defaultNow().notNull(), // Order Date
   customerId: text("customer_id").notNull().references(() => customers.id), // Customer ID
   note: text("note"), // Order Note
@@ -152,14 +153,15 @@ export const orders = pgTable("orders", {
   userId: text("user_id").references(() => users.id), // Created by
 });
 
-export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, date: true, status: true });
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, orderNumber: true, date: true, status: true });
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
 // Job Orders table
 export const jobOrders = pgTable("job_orders", {
-  id: serial("id").primaryKey(), // ID
-  orderId: integer("order_id").notNull().references(() => orders.id), // Order ID
+  id: text("id").primaryKey(), // ID (O001-JO01, O001-JO02, etc.)
+  jobOrderNumber: serial("job_order_number").unique(), // Auto-incrementing number for generating ID
+  orderId: text("order_id").notNull().references(() => orders.id), // Order ID
   customerProductId: integer("customer_product_id").notNull().references(() => customerProducts.id), // Customer Product No
   quantity: doublePrecision("quantity").notNull(), // Qty Kg
   finishedQty: doublePrecision("finished_qty").default(0).notNull(), // Finished quantity (kg)
@@ -172,14 +174,14 @@ export const jobOrders = pgTable("job_orders", {
   };
 });
 
-export const insertJobOrderSchema = createInsertSchema(jobOrders).omit({ id: true });
+export const insertJobOrderSchema = createInsertSchema(jobOrders).omit({ id: true, jobOrderNumber: true });
 export type InsertJobOrder = z.infer<typeof insertJobOrderSchema>;
 export type JobOrder = typeof jobOrders.$inferSelect;
 
 // Rolls table
 export const rolls = pgTable("rolls", {
   id: text("id").primaryKey(), // ID
-  jobOrderId: integer("job_order_id").notNull().references(() => jobOrders.id), // Job Order ID
+  jobOrderId: text("job_order_id").notNull().references(() => jobOrders.id), // Job Order ID
   serialNumber: text("roll_serial").notNull(), // Roll Serial
   extrudingQty: doublePrecision("extruding_qty").default(0), // Extruding Qty
   printingQty: doublePrecision("printing_qty").default(0), // Printing Qty
@@ -256,7 +258,7 @@ export type RawMaterial = typeof rawMaterials.$inferSelect;
 // Final Products table
 export const finalProducts = pgTable("final_products", {
   id: serial("id").primaryKey(),
-  jobOrderId: integer("job_order_id").notNull().references(() => jobOrders.id),
+  jobOrderId: text("job_order_id").notNull().references(() => jobOrders.id),
   quantity: doublePrecision("quantity").notNull(),
   completedDate: timestamp("completed_date").defaultNow(),
   status: text("status").notNull().default("in-stock"),
@@ -286,7 +288,7 @@ export const qualityChecks = pgTable("quality_checks", {
   id: serial("id").primaryKey(), 
   checkTypeId: text("check_type_id").notNull().references(() => qualityCheckTypes.id),
   rollId: text("roll_id").references(() => rolls.id),
-  jobOrderId: integer("job_order_id").references(() => jobOrders.id),
+  jobOrderId: text("job_order_id").references(() => jobOrders.id),
   performedBy: text("performed_by").references(() => users.id),
   timestamp: timestamp("timestamp").defaultNow().notNull(),
   status: text("status").notNull().default("pending"), // pending, passed, failed
