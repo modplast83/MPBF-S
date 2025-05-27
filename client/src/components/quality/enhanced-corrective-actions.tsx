@@ -492,7 +492,7 @@ export function QualityCorrectiveActions() {
         </div>
       ) : filteredActions.length === 0 ? (
         <div className="border rounded-md p-8 text-center">
-          <p className="text-muted-foreground">{t("quality.no_actions_found")}</p>
+          <p className="text-muted-foreground">No Quality Action Found</p>
         </div>
       ) : (
         <ScrollArea className="h-[calc(100vh-230px)] border rounded-md">
