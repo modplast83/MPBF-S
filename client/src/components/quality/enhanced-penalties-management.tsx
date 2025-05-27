@@ -767,8 +767,14 @@ export function QualityPenaltiesManagement() {
       </div>
       
       {isLoading ? (
-        <div className="flex justify-center py-10">
-          <p>{t("common.loading")}</p>
+        <div className="flex flex-col items-center justify-center py-20 space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="text-lg font-medium animate-pulse">{t("common.loading")}</p>
+          <div className="flex space-x-1">
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+          </div>
         </div>
       ) : filteredPenalties.length === 0 ? (
         <div className="border rounded-md p-8 text-center">
@@ -803,7 +809,7 @@ export function QualityPenaltiesManagement() {
                       <div className="flex flex-col gap-1">
                         {getPenaltyTypeBadge(penalty.penaltyType)}
                         {penalty.penaltyType === "Financial" && penalty.penaltyAmount && (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-1 rounded-full transition-all duration-300 hover:bg-amber-200 hover:scale-105 animate-pulse">
                             ${parseFloat(penalty.penaltyAmount).toFixed(2)}
                           </span>
                         )}
@@ -834,22 +840,25 @@ export function QualityPenaltiesManagement() {
                           size="icon" 
                           onClick={() => handlePrintClick(penalty)}
                           title={t("quality.print_penalty")}
+                          className="transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600"
                         >
-                          <Printer className="h-4 w-4" />
+                          <Printer className="h-4 w-4 transition-transform duration-300 hover:rotate-12" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="icon" 
                           onClick={() => handleEditClick(penalty)}
+                          className="transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-green-50 hover:border-green-300 hover:text-green-600"
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-4 w-4 transition-transform duration-300 hover:rotate-12" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="icon"
                           onClick={() => handleDeleteClick(penalty)}
+                          className="transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-red-50 hover:border-red-300 hover:text-red-600"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 transition-transform duration-300 hover:rotate-12" />
                         </Button>
                       </div>
                     </TableCell>
