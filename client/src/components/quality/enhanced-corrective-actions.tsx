@@ -294,7 +294,7 @@ export function QualityCorrectiveActions() {
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={t("common.search")}
+            placeholder="Search corrective actions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8 text-sm"
@@ -309,12 +309,12 @@ export function QualityCorrectiveActions() {
               onValueChange={setFilterVerified}
             >
               <SelectTrigger className="w-[120px] sm:w-[140px] text-xs sm:text-sm h-9">
-                <SelectValue placeholder={t("quality.verification")} />
+                <SelectValue placeholder="Verification" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t("common.all")}</SelectItem>
-                <SelectItem value="verified">{t("quality.verified")}</SelectItem>
-                <SelectItem value="pending">{t("quality.pending_verification")}</SelectItem>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -326,29 +326,29 @@ export function QualityCorrectiveActions() {
                 setShowAddDialog(true);
               }}>
                 <Plus className="mr-1 sm:mr-2 h-4 w-4" /> 
-                <span className="text-xs sm:text-sm">{t("quality.add_action")}</span>
+                <span className="text-xs sm:text-sm">Add Action</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-[95vw] sm:max-w-[500px] p-4 sm:p-6">
               <DialogHeader className="mb-2">
-                <DialogTitle className="text-lg">{t("quality.add_corrective_action")}</DialogTitle>
-                <DialogDescription>{t("quality.add_corrective_action_description")}</DialogDescription>
+                <DialogTitle className="text-lg">Add Corrective Action</DialogTitle>
+                <DialogDescription>Create a new corrective action for a quality check</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateSubmit}>
                 <div className="space-y-4 py-4">
                   <div>
-                    <Label htmlFor="qualityCheckId">{t("quality.related_check")} *</Label>
+                    <Label htmlFor="qualityCheckId">Related Quality Check *</Label>
                     <Select 
                       value={formData.qualityCheckId} 
                       onValueChange={(value) => setFormData({...formData, qualityCheckId: value})}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={t("quality.select_check")} />
+                        <SelectValue placeholder="Select a quality check" />
                       </SelectTrigger>
                       <SelectContent>
                         {checks.map((check: any) => (
                           <SelectItem key={check.id} value={String(check.id)}>
-                            {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
+                            Check #{check.id} - {new Date(check.checkedAt || check.checkDate).toLocaleDateString()}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -356,37 +356,42 @@ export function QualityCorrectiveActions() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="action">{t("quality.action_description")} *</Label>
+                    <Label htmlFor="action">Action Description *</Label>
                     <Textarea 
                       id="action" 
                       value={formData.action}
                       onChange={(e) => setFormData({...formData, action: e.target.value})}
+                      placeholder="Describe the corrective action to be taken..."
                       rows={3}
                       required
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="implementedBy">{t("quality.implemented_by")} *</Label>
+                    <Label htmlFor="implementedBy">Implemented By *</Label>
                     <Select 
                       value={formData.implementedBy} 
                       onValueChange={(value) => setFormData({...formData, implementedBy: value})}
                     >
                       <SelectTrigger className="text-xs sm:text-sm h-9">
-                        <SelectValue placeholder={t("quality.select_user")} />
+                        <SelectValue placeholder="Select responsible person" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Array.isArray(users) ? users.map((user: any) => (
+                        {Array.isArray(users) && users.length > 0 ? users.map((user: any) => (
                           <SelectItem key={user.id} value={user.id}>
-                            {user.firstName} {user.lastName}
+                            {user.firstName && user.lastName 
+                              ? `${user.firstName} ${user.lastName}` 
+                              : user.username || `User ${user.id}`}
                           </SelectItem>
-                        )) : null}
+                        )) : (
+                          <SelectItem value="no-users" disabled>No users available</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div>
-                    <Label htmlFor="implementationDate">{t("quality.implementation_date")} *</Label>
+                    <Label htmlFor="implementationDate">Implementation Date *</Label>
                     <Input 
                       id="implementationDate" 
                       type="date" 
