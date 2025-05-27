@@ -121,7 +121,11 @@ export default function ProductionIndex() {
                 data={orders || []}
                 columns={orderColumns}
                 isLoading={ordersLoading}
-                onRowClick={(row) => window.location.href = `/orders/${row.id}`}
+                onRowClick={(row) => {
+                  // Use wouter's navigation instead of window.location to prevent page refresh
+                  window.history.pushState({}, '', `/orders/${row.id}`);
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                }}
               />
             </CardContent>
           </Card>

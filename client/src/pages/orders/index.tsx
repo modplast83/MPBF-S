@@ -81,6 +81,7 @@ export default function OrdersIndex() {
       }
     },
     onSuccess: (_, variables) => {
+      // Only invalidate the orders query to refresh the data
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
       
       // Show success message
@@ -93,11 +94,8 @@ export default function OrdersIndex() {
         description: `Order #${variables.id} status changed to ${statusLabel}`,
       });
       
-      // If we're on a status tab and the status changed to something else,
-      // let's switch to the new status tab or stay on "all"
-      if (activeTab !== "all" && activeTab !== variables.status) {
-        setActiveTab(variables.status);
-      }
+      // Keep the user on the current tab - no automatic tab switching
+      // This prevents unwanted page refreshes and navigation
     },
     onError: (error: any) => {
       console.error("Status update error:", error);
