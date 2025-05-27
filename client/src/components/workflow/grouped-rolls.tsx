@@ -231,7 +231,7 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
                         {jobOrders.length} JO{jobOrders.length > 1 ? 's' : ''}
                       </Badge>
                     </h4>
-                    <p className="text-xs sm:text-sm text-secondary-500 truncate max-w-[200px] sm:max-w-none">
+                    <p className="text-xs sm:text-sm text-secondary-500 truncate max-w-[200px] sm:max-w-none font-extrabold">
                       {customer?.name}
                       {customer?.nameAr && 
                         <span className="mr-1 pr-1 font-semibold"> - {customer?.nameAr}</span>

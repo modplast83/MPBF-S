@@ -355,7 +355,6 @@ export function CollapsibleJobOrdersForExtrusion() {
           />
         )}
       </AuthProvider>
-      
       {filteredJobOrders.length === 0 ? (
         <Card className="bg-white border border-dashed border-secondary-200">
           <CardContent className="py-6 text-center">
@@ -395,8 +394,8 @@ export function CollapsibleJobOrdersForExtrusion() {
                         <span className="material-icons text-xs text-white">receipt_long</span>
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm text-primary-700 text-left">O #{orderId}</h4>
-                        <p className="text-xs text-secondary-600 truncate max-w-[200px] sm:max-w-[300px]">
+                        <h4 className="text-primary-700 text-left font-extrabold text-[19px]">O #{orderId}</h4>
+                        <p className="text-secondary-600 truncate max-w-[200px] sm:max-w-[300px] text-[18px] font-extrabold">
                           {customerName} {customerNameAr && <span className="font-bold mr-1 text-primary-700">({customerNameAr})</span>}
                         </p>
                       </div>
@@ -409,7 +408,6 @@ export function CollapsibleJobOrdersForExtrusion() {
                     </div>
                   </div>
                 </div>
-                
                 {expandedOrderIds.includes(orderId) && (
                   <Accordion
                     type="multiple"

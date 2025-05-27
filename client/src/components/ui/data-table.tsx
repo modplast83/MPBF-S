@@ -137,7 +137,6 @@ export function DataTable<T>({
           {actions && <div>{actions}</div>}
         </div>
       )}
-
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -145,7 +144,7 @@ export function DataTable<T>({
               {columns.filter(column => !column.hidden).map((column, index) => (
                 <TableHead 
                   key={index} 
-                  className={`font-semibold ${column.meta?.className || ''} ${isRightToLeft ? 'text-right' : ''}`}
+                  className="h-12 px-4 align-middle text-muted-foreground [&:has([role=checkbox])]:pr-0 font-extrabold text-center"
                 >
                   {column.header}
                 </TableHead>
@@ -155,7 +154,7 @@ export function DataTable<T>({
           <TableBody>
             {isLoading ? (
               // Loading skeleton
-              Array.from({ length: 5 }).map((_, rowIndex) => (
+              (Array.from({ length: 5 }).map((_, rowIndex) => (
                 <TableRow key={`skeleton-${rowIndex}`}>
                   {columns.filter(column => !column.hidden).map((_, colIndex) => (
                     <TableCell key={`skeleton-cell-${colIndex}`}>
@@ -163,7 +162,7 @@ export function DataTable<T>({
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
+              )))
             ) : paginatedData.length > 0 ? (
               paginatedData.map((row, rowIndex) => (
                 <TableRow
@@ -182,7 +181,7 @@ export function DataTable<T>({
                   {columns.filter(column => !column.hidden).map((column, colIndex) => (
                     <TableCell 
                       key={colIndex}
-                      className={column.meta?.className || ''}
+                      className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center font-semibold"
                     >
                       {column.cell
                         ? column.cell(row, getAbsoluteRowIndex(rowIndex))
@@ -208,7 +207,6 @@ export function DataTable<T>({
           </TableBody>
         </Table>
       </div>
-
       {pagination && totalPages > 0 && (
         <div className={`flex items-center justify-between ${isRightToLeft ? 'flex-row-reverse' : ''}`}>
           <div className={`text-sm text-gray-500 ${isRightToLeft ? 'text-right' : ''}`}>

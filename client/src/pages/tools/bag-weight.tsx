@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { Separator } from "@/components/ui/separator";
+import { useLanguage } from "@/hooks/use-language";
 
 // Form schema with validation
 const bagWeightSchema = z.object({
@@ -35,6 +37,8 @@ const bagWeightSchema = z.object({
 type BagWeightFormData = z.infer<typeof bagWeightSchema>;
 
 export default function BagWeightCalculator() {
+  const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
   const [results, setResults] = useState<{
     singleBagWeight: number;
     totalWeight: number;
@@ -110,28 +114,30 @@ export default function BagWeightCalculator() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center space-x-4">
+    <div className={`container mx-auto py-6 space-y-6 ${isRTL ? 'rtl' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
         <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
           <span className="material-icons text-xl">calculate</span>
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Bag Weight Calculator</h1>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+            {t("tools.bag_weight_calculator")}
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Calculate the theoretical weight of plastic bags based on dimensions and material
+            {t("tools.bag_weight_description")}
           </p>
         </div>
       </div>
-
-      <Link href="/tools" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary">
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Tools
+      <Link href="/tools" className={`inline-flex items-center text-sm text-muted-foreground hover:text-primary ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <ArrowLeft className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+        {t("common.back_to_tools")}
       </Link>
-      
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle>Bag Specifications</CardTitle>
+            <CardTitle className={isRTL ? 'text-right' : 'text-left'}>
+              {t("tools.bag_specifications")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -141,19 +147,21 @@ export default function BagWeightCalculator() {
                   name="bagType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bag Type</FormLabel>
+                      <FormLabel className={isRTL ? 'text-right' : 'text-left'}>
+                        {t("tools.bag_type")}
+                      </FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select bag type" />
+                          <SelectTrigger className={isRTL ? 'text-right' : 'text-left'}>
+                            <SelectValue placeholder={t("tools.select_bag_type")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="flat">Flat Bag</SelectItem>
-                          <SelectItem value="gusset">Gusset Bag</SelectItem>
+                          <SelectItem value="flat">{t("tools.flat_bag")}</SelectItem>
+                          <SelectItem value="gusset">{t("tools.gusset_bag")}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -166,19 +174,21 @@ export default function BagWeightCalculator() {
                   name="units"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Measurement Units</FormLabel>
+                      <FormLabel className={isRTL ? 'text-right' : 'text-left'}>
+                        {t("tools.measurement_units")}
+                      </FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select units" />
+                          <SelectTrigger className={isRTL ? 'text-right' : 'text-left'}>
+                            <SelectValue placeholder={t("tools.select_units")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="cm">Centimeters (cm)</SelectItem>
-                          <SelectItem value="inch">Inches (in)</SelectItem>
+                          <SelectItem value="cm">{t("tools.centimeters")}</SelectItem>
+                          <SelectItem value="inch">{t("tools.inches")}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -192,12 +202,14 @@ export default function BagWeightCalculator() {
                     name="width"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Width</FormLabel>
+                        <FormLabel className={isRTL ? 'text-right' : 'text-left'}>
+                          {t("common.width")}
+                        </FormLabel>
                         <FormControl>
-                          <Input {...field} type="number" min="0" step="0.1" />
+                          <Input {...field} type="number" min="0" step="0.1" className={isRTL ? 'text-right' : 'text-left'} />
                         </FormControl>
-                        <FormDescription>
-                          {form.watch("units") === "cm" ? "cm" : "inches"}
+                        <FormDescription className={isRTL ? 'text-right' : 'text-left'}>
+                          {form.watch("units") === "cm" ? t("tools.cm") : t("tools.inches")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -209,12 +221,14 @@ export default function BagWeightCalculator() {
                     name="length"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Length</FormLabel>
+                        <FormLabel className={isRTL ? 'text-right' : 'text-left'}>
+                          {t("common.length")}
+                        </FormLabel>
                         <FormControl>
-                          <Input {...field} type="number" min="0" step="0.1" />
+                          <Input {...field} type="number" min="0" step="0.1" className={isRTL ? 'text-right' : 'text-left'} />
                         </FormControl>
-                        <FormDescription>
-                          {form.watch("units") === "cm" ? "cm" : "inches"}
+                        <FormDescription className={isRTL ? 'text-right' : 'text-left'}>
+                          {form.watch("units") === "cm" ? t("tools.cm") : t("tools.inches")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -228,12 +242,14 @@ export default function BagWeightCalculator() {
                     name="gusset"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gusset Depth</FormLabel>
+                        <FormLabel className={isRTL ? 'text-right' : 'text-left'}>
+                          {t("tools.gusset_depth")}
+                        </FormLabel>
                         <FormControl>
-                          <Input {...field} type="number" min="0" step="0.1" />
+                          <Input {...field} type="number" min="0" step="0.1" className={isRTL ? 'text-right' : 'text-left'} />
                         </FormControl>
-                        <FormDescription>
-                          {form.watch("units") === "cm" ? "cm" : "inches"}
+                        <FormDescription className={isRTL ? 'text-right' : 'text-left'}>
+                          {form.watch("units") === "cm" ? t("tools.cm") : t("tools.inches")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -246,12 +262,14 @@ export default function BagWeightCalculator() {
                   name="thickness"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Thickness</FormLabel>
+                      <FormLabel className={isRTL ? 'text-right' : 'text-left'}>
+                        {t("common.thickness")}
+                      </FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" min="0" step="0.1" />
+                        <Input {...field} type="number" min="0" step="0.1" className={isRTL ? 'text-right' : 'text-left'} />
                       </FormControl>
-                      <FormDescription>
-                        Microns (μm)
+                      <FormDescription className={isRTL ? 'text-right' : 'text-left'}>
+                        {t("tools.microns")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -263,12 +281,14 @@ export default function BagWeightCalculator() {
                   name="density"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Material Density</FormLabel>
+                      <FormLabel className={isRTL ? 'text-right' : 'text-left'}>
+                        {t("tools.material_density")}
+                      </FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" min="0.1" step="0.01" />
+                        <Input {...field} type="number" min="0.1" step="0.01" className={isRTL ? 'text-right' : 'text-left'} />
                       </FormControl>
-                      <FormDescription>
-                        g/cm³ (LDPE: 0.92, HDPE: 0.95, PP: 0.90)
+                      <FormDescription className={isRTL ? 'text-right' : 'text-left'}>
+                        {t("tools.density_units")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -280,19 +300,23 @@ export default function BagWeightCalculator() {
                   name="quantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantity</FormLabel>
+                      <FormLabel className={isRTL ? 'text-right' : 'text-left'}>
+                        {t("common.quantity")}
+                      </FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" min="1" />
+                        <Input {...field} type="number" min="1" className={isRTL ? 'text-right' : 'text-left'} />
                       </FormControl>
-                      <FormDescription>
-                        Number of bags
+                      <FormDescription className={isRTL ? 'text-right' : 'text-left'}>
+                        {t("tools.number_of_bags")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" className="w-full">Calculate Weight</Button>
+                <Button type="submit" className="w-full">
+                  {t("tools.calculate_weight")}
+                </Button>
               </form>
             </Form>
           </CardContent>
@@ -300,26 +324,34 @@ export default function BagWeightCalculator() {
 
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle>Calculation Results</CardTitle>
+            <CardTitle className={isRTL ? 'text-right' : 'text-left'}>
+              {t("tools.calculation_results")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {results ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground">Single Bag Weight</h3>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                    <h3 className="text-sm font-semibold text-muted-foreground">
+                      {t("tools.single_bag_weight")}
+                    </h3>
                     <p className="text-2xl font-bold">
-                      {results.singleBagWeight.toFixed(3)} g
+                      {results.singleBagWeight.toFixed(3)} {t("tools.grams")}
                     </p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground">Total Weight</h3>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                    <h3 className="text-sm font-semibold text-muted-foreground">
+                      {t("tools.total_weight")}
+                    </h3>
                     <p className="text-2xl font-bold">
-                      {results.totalWeight.toFixed(2)} kg
+                      {results.totalWeight.toFixed(2)} {t("tools.kg")}
                     </p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground">Bags/KG</h3>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                    <h3 className="text-sm font-semibold text-muted-foreground">
+                      {t("tools.bags_per_kg")}
+                    </h3>
                     <p className="text-2xl font-bold">
                       {results.bagsPerKg.toFixed(0)}
                     </p>
@@ -329,43 +361,45 @@ export default function BagWeightCalculator() {
                 <Separator />
 
                 <div className="space-y-2">
-                  <h3 className="text-sm font-semibold">Calculation Details</h3>
+                  <h3 className={`text-sm font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t("tools.calculation_details")}
+                  </h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Material:</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("tools.material")}:</span>
                       <span>
                         {
                           form.getValues("density") === 0.92 ? "LDPE" :
                           form.getValues("density") === 0.95 ? "HDPE" :
                           form.getValues("density") === 0.90 ? "PP" :
-                          "Custom Material"
+                          t("tools.custom_material")
                         }
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Density:</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("tools.density")}:</span>
                       <span>{form.getValues("density")} g/cm³</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Surface Area:</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("tools.surface_area")}:</span>
                       <span>{results.area.toFixed(2)} cm²</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Film Volume:</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("tools.film_volume")}:</span>
                       <span>{results.volume.toFixed(4)} cm³</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Quantity:</span>
-                      <span>{form.getValues("quantity")} bags</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("common.quantity")}:</span>
+                      <span>{form.getValues("quantity")} {t("tools.bags")}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Bags per KG:</span>
-                      <span>{results.bagsPerKg.toFixed(0)} bags</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("tools.bags_per_kg")}:</span>
+                      <span>{results.bagsPerKg.toFixed(0)} {t("tools.bags")}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Bag Type:</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("tools.bag_type")}:</span>
                       <span>
-                        {form.getValues("bagType") === "flat" ? "Flat Bag" : "Gusset Bag"}
+                        {form.getValues("bagType") === "flat" ? t("tools.flat_bag") : t("tools.gusset_bag")}
                       </span>
                     </div>
                   </div>
@@ -374,48 +408,49 @@ export default function BagWeightCalculator() {
                 <Separator />
 
                 <div className="space-y-2">
-                  <h3 className="text-sm font-semibold">Dimensions</h3>
+                  <h3 className={`text-sm font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t("tools.dimensions")}
+                  </h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Width:</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("common.width")}:</span>
                       <span>
-                        {form.getValues("width")} {form.getValues("units")}
+                        {form.getValues("width")} {form.getValues("units") === "cm" ? t("tools.cm") : t("tools.inches")}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Length:</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("common.length")}:</span>
                       <span>
-                        {form.getValues("length")} {form.getValues("units")}
+                        {form.getValues("length")} {form.getValues("units") === "cm" ? t("tools.cm") : t("tools.inches")}
                       </span>
                     </div>
                     {form.getValues("bagType") === "gusset" && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Gusset:</span>
+                      <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                        <span className="text-muted-foreground">{t("tools.gusset")}:</span>
                         <span>
-                          {form.getValues("gusset")} {form.getValues("units")}
+                          {form.getValues("gusset")} {form.getValues("units") === "cm" ? t("tools.cm") : t("tools.inches")}
                         </span>
                       </div>
                     )}
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Thickness:</span>
+                    <div className={`flex ${isRTL ? 'justify-between flex-row-reverse' : 'justify-between'}`}>
+                      <span className="text-muted-foreground">{t("common.thickness")}:</span>
                       <span>{form.getValues("thickness")} μm</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-4 text-sm text-muted-foreground">
+                <div className={`mt-4 text-sm text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`}>
                   <p>
-                    <strong>Note:</strong> This is a theoretical calculation. Actual weights may vary due to
-                    manufacturing processes, additives, and other factors.
+                    <strong>{t("tools.note")}:</strong> {t("tools.calculation_disclaimer")}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="flex items-center justify-center h-64 text-center">
-                <div>
+                <div className={isRTL ? 'text-right' : 'text-left'}>
                   <span className="material-icons text-5xl text-muted-foreground mb-2 block">calculate</span>
                   <p className="text-muted-foreground">
-                    Enter bag specifications and click "Calculate Weight" to see results.
+                    {t("tools.enter_specifications_message")}
                   </p>
                 </div>
               </div>
