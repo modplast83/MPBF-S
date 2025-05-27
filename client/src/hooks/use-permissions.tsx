@@ -92,11 +92,14 @@ export function PermissionsProvider({
     if (!user) return false;
     
     // Get the user's role and section
-    const userRole = user.role;
-    const userSection = user.sectionId;
+    const userRole = user?.role;
+    const userSection = user?.sectionId;
     
     console.log(`Checking permission for module: ${module}, action: ${action}, userRole: ${userRole}`);
     console.log(`Available permissions:`, permissions.map(p => `${p.role}:${p.module}:${p.can_view}`));
+    
+    // Check if userRole exists before calling toLowerCase
+    if (!userRole) return false;
     
     // Administrator role has all permissions - case insensitive check
     if (userRole.toLowerCase() === "administrator") return true;
