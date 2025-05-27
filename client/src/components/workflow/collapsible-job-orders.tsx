@@ -482,7 +482,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                                   <p className="text-sm font-medium">{getThickness(jobOrder)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs text-secondary-500">{t("common.master_batch")}</p>
+                                  <p className="text-xs text-secondary-500">Master Batch </p>
                                   <p className="text-sm font-medium">{getMasterBatchName(jobOrder)}</p>
                                 </div>
                                 <div>
