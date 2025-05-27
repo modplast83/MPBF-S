@@ -492,30 +492,70 @@ export function QualityPenaltiesManagement() {
   const getPenaltyTypeBadge = (type: string) => {
     switch (type) {
       case "Financial":
-        return <Badge className="bg-yellow-500">{type}</Badge>;
+        return (
+          <Badge className="bg-amber-500 hover:bg-amber-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg animate-pulse hover:animate-none cursor-pointer">
+            {type}
+          </Badge>
+        );
       case "Warning":
-        return <Badge variant="warning">{type}</Badge>;
+        return (
+          <Badge className="bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg animate-bounce hover:animate-none cursor-pointer">
+            {type}
+          </Badge>
+        );
       case "Training":
-        return <Badge variant="outline" className="text-blue-500 border-blue-500">{type}</Badge>;
+        return (
+          <Badge className="bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:animate-pulse cursor-pointer">
+            {type}
+          </Badge>
+        );
       case "Suspension":
-        return <Badge variant="destructive">{type}</Badge>;
+        return (
+          <Badge className="bg-red-600 hover:bg-red-700 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg animate-pulse hover:animate-bounce cursor-pointer">
+            {type}
+          </Badge>
+        );
       default:
-        return <Badge>{type}</Badge>;
+        return (
+          <Badge className="bg-gray-500 hover:bg-gray-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-md cursor-pointer">
+            {type}
+          </Badge>
+        );
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Pending":
-        return <Badge variant="warning">{status}</Badge>;
+        return (
+          <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white transition-all duration-500 hover:scale-105 hover:shadow-lg animate-pulse hover:animate-spin cursor-pointer">
+            {status}
+          </Badge>
+        );
       case "Active":
-        return <Badge variant="destructive">{status}</Badge>;
+        return (
+          <Badge className="bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg animate-bounce hover:animate-pulse cursor-pointer">
+            {status}
+          </Badge>
+        );
       case "Completed":
-        return <Badge variant="success" className="bg-green-500">{status}</Badge>;
+        return (
+          <Badge className="bg-green-500 hover:bg-green-600 text-white transition-all duration-400 hover:scale-105 hover:shadow-lg hover:animate-bounce cursor-pointer">
+            {status}
+          </Badge>
+        );
       case "Dismissed":
-        return <Badge variant="outline">{status}</Badge>;
+        return (
+          <Badge className="bg-gray-400 hover:bg-gray-500 text-white transition-all duration-300 hover:scale-105 hover:shadow-md hover:animate-pulse cursor-pointer opacity-75 hover:opacity-100">
+            {status}
+          </Badge>
+        );
       default:
-        return <Badge>{status}</Badge>;
+        return (
+          <Badge className="bg-slate-500 hover:bg-slate-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-md cursor-pointer">
+            {status}
+          </Badge>
+        );
     }
   };
 
@@ -749,10 +789,16 @@ export function QualityPenaltiesManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPenalties.map((penalty: any) => {
+              {filteredPenalties.map((penalty: any, index: number) => {
                 return (
-                  <TableRow key={penalty.id}>
-                    <TableCell>#{penalty.id}</TableCell>
+                  <TableRow 
+                    key={penalty.id}
+                    className="hover:bg-gradient-to-r hover:from-background hover:to-accent/10 transition-all duration-300 hover:shadow-md animate-in fade-in slide-in-from-left-2"
+                    style={{
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  >
+                    <TableCell className="font-medium">#{penalty.id}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         {getPenaltyTypeBadge(penalty.penaltyType)}

@@ -527,6 +527,7 @@
       "completed": "Completed",
       "penalties": "Penalties",
       "penalties_desc": "Apply penalties for quality violations",
+      "penalties_description": "Manage and track quality-related penalties and disciplinary actions for manufacturing violations",
       "penalties_details": "Assign and track penalties for severe quality violations, including warnings, training, and financial consequences.",
       "manage_penalties": "Manage Penalties",
       "add_penalty": "Add Penalty",
