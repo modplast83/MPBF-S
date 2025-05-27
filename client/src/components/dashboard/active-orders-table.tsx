@@ -207,7 +207,7 @@ export function ActiveOrdersTable() {
   
   const actions = (
     <Link href="/orders/new">
-      <Button className="bg-primary-600 text-white hover:bg-primary-700 rounded-full shadow-sm text-sm sm:text-base">
+      <Button className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-full shadow-sm text-sm sm:text-base text-[#000000]">
         <span className={`material-icons text-sm ${isRTL ? 'ml-1' : 'mr-1'}`}>add</span>
         {isMobile ? "" : t("orders.new_order")}
       </Button>
