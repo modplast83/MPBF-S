@@ -478,7 +478,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                                   <p className="text-sm font-medium">{getRawMaterial(jobOrder)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs text-secondary-500">{t("common.thickness")}</p>
+                                  <p className="text-xs text-secondary-500">Thickness</p>
                                   <p className="text-sm font-medium">{getThickness(jobOrder)}</p>
                                 </div>
                                 <div>
@@ -486,7 +486,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                                   <p className="text-sm font-medium">{getMasterBatchName(jobOrder)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs text-secondary-500">{t("common.product_details")}</p>
+                                  <p className="text-xs text-secondary-500">Size</p>
                                   <p className="text-sm font-medium">{getProductDetails(jobOrder)}</p>
                                 </div>
                                 <div>
