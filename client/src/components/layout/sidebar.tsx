@@ -159,17 +159,33 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
                   >
                     <CollapsibleTrigger
                       className={cn(
-                        `flex items-center px-3 py-3 w-full rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                        `flex items-center px-3 py-3 w-full rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'text-right' : ''}`,
                         isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
                       )}
                     >
-                      <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
-                      {expanded && (
+                      {isRTL ? (
                         <>
-                          <span className="flex-1 font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
-                          <span className={`material-icons text-sm opacity-70 ${isRTL ? 'flip-in-rtl' : ''}`}>
-                            {openMenus[item.title] ? "expand_less" : "expand_more"}
-                          </span>
+                          {expanded && (
+                            <>
+                              <span className={`material-icons text-sm opacity-70 ${isRTL ? 'flip-in-rtl' : ''}`}>
+                                {openMenus[item.title] ? "expand_less" : "expand_more"}
+                              </span>
+                              <span className="flex-1 font-medium text-sm mr-3">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
+                            </>
+                          )}
+                          <span className="material-icons text-white">{item.icon}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-icons text-white mr-3">{item.icon}</span>
+                          {expanded && (
+                            <>
+                              <span className="flex-1 font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
+                              <span className="material-icons text-sm opacity-70">
+                                {openMenus[item.title] ? "expand_less" : "expand_more"}
+                              </span>
+                            </>
+                          )}
                         </>
                       )}
                     </CollapsibleTrigger>
@@ -206,12 +222,21 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
                       if (onNavItemClick) onNavItemClick();
                     }}
                     className={cn(
-                      `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                      `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'text-right' : ''}`,
                       isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
                     )}
                   >
-                    <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
-                    {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
+                    {isRTL ? (
+                      <>
+                        {expanded && <span className="font-medium text-sm mr-3">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
+                        <span className="material-icons text-white">{item.icon}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-icons text-white mr-3">{item.icon}</span>
+                        {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
+                      </>
+                    )}
                   </Link>
                 )}
               </div>
