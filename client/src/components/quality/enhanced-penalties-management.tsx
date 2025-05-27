@@ -648,7 +648,7 @@ export function QualityPenaltiesManagement() {
                   
                   {formData.penaltyType === "Financial" && (
                     <div>
-                      <Label htmlFor="penaltyAmount">{t("quality.penalty_amount")} *</Label>
+                      <Label htmlFor="penaltyAmount">Penalty Amount *</Label>
                       <div className="relative">
                         <span className="absolute left-3 top-2">$</span>
                         <Input 
@@ -657,6 +657,7 @@ export function QualityPenaltiesManagement() {
                           value={formData.penaltyAmount}
                           onChange={(e) => setFormData({...formData, penaltyAmount: e.target.value})}
                           className="pl-8"
+                          placeholder="0.00"
                           min="0"
                           step="0.01"
                           required={formData.penaltyType === "Financial"}
@@ -666,26 +667,30 @@ export function QualityPenaltiesManagement() {
                   )}
                   
                   <div>
-                    <Label htmlFor="assignedTo">{t("quality.assigned_to")} *</Label>
+                    <Label htmlFor="assignedTo">Assign To Employee *</Label>
                     <Select 
                       value={formData.assignedTo} 
                       onValueChange={(value) => setFormData({...formData, assignedTo: value})}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={t("quality.select_user")} />
+                        <SelectValue placeholder="Select an employee" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Array.isArray(users) ? users.map((user: any) => (
+                        {Array.isArray(users) && users.length > 0 ? users.map((user: any) => (
                           <SelectItem key={user.id} value={user.id}>
-                            {user.firstName} {user.lastName}
+                            {user.firstName && user.lastName 
+                              ? `${user.firstName} ${user.lastName}` 
+                              : user.username || `User ${user.id}`}
                           </SelectItem>
-                        )) : null}
+                        )) : (
+                          <SelectItem value="" disabled>No employees available</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div>
-                    <Label htmlFor="assignedDate">{t("quality.assigned_date")} *</Label>
+                    <Label htmlFor="assignedDate">Assignment Date *</Label>
                     <Input 
                       id="assignedDate" 
                       type="date" 
@@ -696,11 +701,12 @@ export function QualityPenaltiesManagement() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="description">{t("common.description")} *</Label>
+                    <Label htmlFor="description">Description *</Label>
                     <Textarea 
                       id="description" 
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      placeholder="Describe the penalty details and requirements..."
                       rows={3}
                       required
                     />
@@ -708,10 +714,10 @@ export function QualityPenaltiesManagement() {
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
-                    {t("common.cancel")}
+                    Cancel
                   </Button>
                   <Button type="submit" disabled={createMutation.isPending || !formData.violationId || !formData.assignedTo || (formData.penaltyType === "Financial" && !formData.penaltyAmount) || !formData.description}>
-                    {createMutation.isPending ? t("common.saving") : t("common.save")}
+                    {createMutation.isPending ? "Creating..." : "Create Penalty"}
                   </Button>
                 </DialogFooter>
               </form>
