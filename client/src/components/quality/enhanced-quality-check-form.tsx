@@ -561,13 +561,13 @@ export function QualityChecksManagement() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">{t("common.id")}</TableHead>
-              <TableHead>{t("quality.check_type")}</TableHead>
-              <TableHead>{t("quality.related_job")}</TableHead>
-              <TableHead>{t("quality.status")}</TableHead>
-              <TableHead>{t("quality.performed_by")}</TableHead>
-              <TableHead>{t("quality.check_date")}</TableHead>
-              <TableHead className="text-right">{t("common.actions")}</TableHead>
+              <TableHead className="w-[50px]">ID</TableHead>
+              <TableHead>Check Type</TableHead>
+              <TableHead>Job Order</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Performed By</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -602,7 +602,13 @@ export function QualityChecksManagement() {
                   </TableCell>
                   <TableCell>{getUserById(check.performedBy)}</TableCell>
                   <TableCell>
-                    {check.checkDate ? format(new Date(check.checkDate), 'MMM dd, yyyy') : ''}
+                    {check.checkedAt ? 
+                      format(new Date(check.checkedAt), 'MMM dd, yyyy') : 
+                      (check.checkDate ? 
+                        format(new Date(check.checkDate), 'MMM dd, yyyy') : 
+                        t("common.not_available")
+                      )
+                    }
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
