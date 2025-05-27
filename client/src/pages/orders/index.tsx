@@ -58,27 +58,21 @@ export default function OrdersIndex() {
   // Status update mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number, status: string }) => {
-      try {
-        // Make direct API request with just the status change
-        const response = await fetch(`${API_ENDPOINTS.ORDERS}/${id}/status`, {
-          method: 'PATCH',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status })
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to update status");
-        }
-        
-        return await response.json();
-      } catch (error) {
-        console.error("Error updating status:", error);
-        throw error;
+      const response = await fetch(`/api/orders/${id}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update status");
       }
+      
+      return response.json();
     },
     onSuccess: (_, variables) => {
       // Only invalidate the orders query to refresh the data
@@ -109,6 +103,7 @@ export default function OrdersIndex() {
   });
   
   const handleStatusChange = (order: Order, newStatus: string) => {
+    console.log("Status change initiated:", { orderId: order.id, newStatus });
     updateStatusMutation.mutate({ id: order.id, status: newStatus });
   };
 
