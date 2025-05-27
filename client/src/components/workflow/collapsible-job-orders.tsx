@@ -504,7 +504,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                               <Separator className="my-3" />
                               
                               <div className="mb-3">
-                                <h5 className="font-medium mb-2">{t("production.roll_management.extruded_rolls")}</h5>
+                                <h5 className="font-medium mb-2">Extruded Rolls</h5>
                                 {jobOrderRolls.length === 0 ? (
                                   <p className="text-xs text-secondary-500">{t("production.roll_management.no_rolls_created")}</p>
                                 ) : (
