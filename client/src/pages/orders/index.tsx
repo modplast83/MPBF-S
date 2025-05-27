@@ -74,11 +74,8 @@ export default function OrdersIndex() {
       
       return response.json();
     },
-    onSuccess: (_, variables) => {
-      // Only invalidate the orders query to refresh the data
-      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
-      
-      // Show success message
+    onSuccess: (data, variables) => {
+      // Show success message first
       let statusLabel = variables.status;
       if (variables.status === "processing") statusLabel = "For Production";
       if (variables.status === "hold") statusLabel = "On Hold";
@@ -88,8 +85,15 @@ export default function OrdersIndex() {
         description: `Order #${variables.id} status changed to ${statusLabel}`,
       });
       
-      // Keep the user on the current tab - no automatic tab switching
-      // This prevents unwanted page refreshes and navigation
+      // Update the orders data in the cache directly instead of invalidating
+      queryClient.setQueryData([API_ENDPOINTS.ORDERS], (oldData: any) => {
+        if (!oldData) return oldData;
+        return oldData.map((order: any) => 
+          order.id === variables.id 
+            ? { ...order, status: variables.status }
+            : order
+        );
+      });
     },
     onError: (error: any) => {
       console.error("Status update error:", error);
