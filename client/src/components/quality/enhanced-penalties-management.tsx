@@ -683,7 +683,7 @@ export function QualityPenaltiesManagement() {
                               : user.username || `User ${user.id}`}
                           </SelectItem>
                         )) : (
-                          <SelectItem value="" disabled>No employees available</SelectItem>
+                          <SelectItem value="no-users" disabled>No employees available</SelectItem>
                         )}
                       </SelectContent>
                     </Select>
