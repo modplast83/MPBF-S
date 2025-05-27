@@ -203,7 +203,7 @@ export default function BagWeightCalculator() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className={isRTL ? 'text-right' : 'text-left'}>
-                          {t("common.width")}
+                          Width
                         </FormLabel>
                         <FormControl>
                           <Input {...field} type="number" min="0" step="0.1" className={isRTL ? 'text-right' : 'text-left'} />
