@@ -1029,8 +1029,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Status is required" });
       }
       
-      // Validate status value
-      if (!["pending", "processing", "hold", "completed", "cancelled"].includes(status)) {
+      // Validate status value - include all possible statuses
+      if (!["pending", "processing", "hold", "completed", "cancelled", "For Production"].includes(status)) {
         return res.status(400).json({ message: "Invalid status value" });
       }
       
