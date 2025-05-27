@@ -390,7 +390,7 @@ export default function UnifiedQualityDashboard() {
                   </CardHeader>
                   <CardContent>
                     {recentViolations.length === 0 && recentChecks.length === 0 ? (
-                      <p className="text-muted-foreground">{t("quality.no_recent_activity")}</p>
+                      <p className="text-muted-foreground">No Recent Activity</p>
                     ) : (
                       <div className="space-y-4">
                         {recentViolations.slice(0, 2).map((violation: any, index: number) => (

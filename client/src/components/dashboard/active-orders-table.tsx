@@ -316,7 +316,7 @@ export function ActiveOrdersTable() {
         <div className="flex items-center gap-1 sm:gap-2">
           <span className="material-icons text-primary-600 text-sm sm:text-base">receipt_long</span>
           <h3 className={`font-semibold text-sm sm:text-lg text-gray-800 ${isRTL ? 'text-right' : ''}`}>
-            {t("orders.active_orders")}
+            Active Orders
           </h3>
         </div>
         {actions}
