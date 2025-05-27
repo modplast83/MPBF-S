@@ -467,7 +467,7 @@ export default function UnifiedQualityDashboard() {
         <TabsContent value="actions">
           <div className="rounded-lg border p-3 sm:p-6 bg-card">
             <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">{t("quality.corrective_actions")}</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{t("quality.corrective_actions_description")}</p>
+            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">Corrective Actions Description</p>
             <QualityCorrectiveActions />
           </div>
         </TabsContent>
