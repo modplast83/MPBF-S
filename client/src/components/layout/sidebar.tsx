@@ -141,94 +141,88 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           </button>
         </div>
       </div>
-      
       <nav className="mt-5 flex-grow overflow-y-auto scrollbar-hide">
         {filteredSidebarItems.map((section, sectionIndex) => (
           // Only show sections that have items
-          section.items.length > 0 ? (
-            <div key={sectionIndex}>
-              {expanded && (
-                <div className="px-4 py-2 text-gray-300 text-xs font-semibold uppercase tracking-wider">
-                  {t(`sidebar.${section.title.toLowerCase()}`)}
-                </div>
-              )}
-              
-              {section.items.map((item, itemIndex) => (
-                <div key={itemIndex}>
-                  {item.subItems ? (
-                    <Collapsible
-                      open={openMenus[item.title]}
-                      onOpenChange={() => toggleMenu(item.title)}
-                    >
-                      <CollapsibleTrigger
-                        className={cn(
-                          `flex items-center px-3 py-3 w-full rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
-                          isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
-                        )}
-                      >
-                        <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
-                        {expanded && (
-                          <>
-                            <span className="flex-1 font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
-                            <span className={`material-icons text-sm opacity-70 ${isRTL ? 'flip-in-rtl' : ''}`}>
-                              {openMenus[item.title] ? "expand_less" : "expand_more"}
-                            </span>
-                          </>
-                        )}
-                      </CollapsibleTrigger>
-                      
-                      {expanded && (
-                        <CollapsibleContent>
-                          {item.subItems.map((subItem, subIndex) => (
-                            <Link 
-                              key={subIndex} 
-                              href={subItem.path}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Close mobile menu if callback provided
-                                if (onNavItemClick) onNavItemClick();
-                              }}
-                              className={cn(
-                                `flex items-center py-2 px-3 mx-3 my-1 rounded text-white hover:bg-gray-600/50 hover:text-white transition-colors text-sm ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
-                                isActive(subItem.path) && "bg-gray-600/50 text-white font-medium"
-                              )}
-                            >
-                              <span className="h-1.5 w-1.5 rounded-full bg-white/40 mr-2"></span>
-                              {t(`sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`)}
-                            </Link>
-                          ))}
-                        </CollapsibleContent>
-                      )}
-                    </Collapsible>
-                  ) : (
-                    <Link 
-                      href={item.path}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Close mobile menu if callback provided
-                        if (onNavItemClick) onNavItemClick();
-                      }}
+          (section.items.length > 0 ? (<div key={sectionIndex}>
+            {expanded && (
+              <div className="px-4 py-2 text-gray-300 uppercase tracking-wider text-[18px] font-bold">
+                {t(`sidebar.${section.title.toLowerCase()}`)}
+              </div>
+            )}
+            {section.items.map((item, itemIndex) => (
+              <div key={itemIndex}>
+                {item.subItems ? (
+                  <Collapsible
+                    open={openMenus[item.title]}
+                    onOpenChange={() => toggleMenu(item.title)}
+                  >
+                    <CollapsibleTrigger
                       className={cn(
-                        `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                        `flex items-center px-3 py-3 w-full rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
                         isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
                       )}
                     >
                       <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
-                      {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
-                    </Link>
-                  )}
-                </div>
-              ))}
-              
-              {sectionIndex < filteredSidebarItems.length - 1 && 
-                filteredSidebarItems[sectionIndex + 1].items.length > 0 && (
-                  <Separator className="my-2 bg-gray-600 opacity-50" />
-              )}
-            </div>
-          ) : null
+                      {expanded && (
+                        <>
+                          <span className="flex-1 font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
+                          <span className={`material-icons text-sm opacity-70 ${isRTL ? 'flip-in-rtl' : ''}`}>
+                            {openMenus[item.title] ? "expand_less" : "expand_more"}
+                          </span>
+                        </>
+                      )}
+                    </CollapsibleTrigger>
+                    
+                    {expanded && (
+                      <CollapsibleContent>
+                        {item.subItems.map((subItem, subIndex) => (
+                          <Link 
+                            key={subIndex} 
+                            href={subItem.path}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Close mobile menu if callback provided
+                              if (onNavItemClick) onNavItemClick();
+                            }}
+                            className={cn(
+                              `flex items-center py-2 px-3 mx-3 my-1 rounded text-white hover:bg-gray-600/50 hover:text-white transition-colors text-sm ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
+                              isActive(subItem.path) && "bg-gray-600/50 text-white font-medium"
+                            )}
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full bg-white/40 ${isRTL ? 'ml-2' : 'mr-2'}`}></span>
+                            {t(`sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`)}
+                          </Link>
+                        ))}
+                      </CollapsibleContent>
+                    )}
+                  </Collapsible>
+                ) : (
+                  <Link 
+                    href={item.path}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Close mobile menu if callback provided
+                      if (onNavItemClick) onNavItemClick();
+                    }}
+                    className={cn(
+                      `flex items-center px-3 py-3 rounded-md mx-2 my-1 hover:bg-gray-700 hover:shadow-md text-white hover:text-white transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`,
+                      isActive(item.path) && "bg-gray-700 shadow-md text-white border-l-4 border-white"
+                    )}
+                  >
+                    <span className={`material-icons text-white ${isRTL ? 'ml-3' : 'mr-3'}`}>{item.icon}</span>
+                    {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
+                  </Link>
+                )}
+              </div>
+            ))}
+            {sectionIndex < filteredSidebarItems.length - 1 && 
+              filteredSidebarItems[sectionIndex + 1].items.length > 0 && (
+                <Separator className="my-2 bg-gray-600 opacity-50" />
+            )}
+          </div>) : null)
         ))}
       </nav>
-      
       <div className="mt-auto w-full border-t border-gray-700/50 p-4">
         <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="h-10 w-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-full flex items-center justify-center text-white font-bold shadow-md">
