@@ -474,13 +474,14 @@ export function QualityPenaltiesManagement() {
 
   const getUserById = (id: string) => {
     if (!Array.isArray(users)) {
-      return id || t("common.unknown");
+      return "Unknown User";
     }
     const user = users.find((user: any) => user.id === id);
     if (user) {
-      return `${user.firstName || ''} ${user.lastName || ''}`;
+      const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      return fullName || user.username || "Unknown User";
     }
-    return id || t("common.unknown");
+    return "Unknown User";
   };
 
   const getViolationById = (id: number) => {
@@ -732,13 +733,13 @@ export function QualityPenaltiesManagement() {
           <Table>
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
-                <TableHead>{t("common.id")}</TableHead>
-                <TableHead>{t("quality.penalty_type")}</TableHead>
-                <TableHead>{t("quality.violation")}</TableHead>
-                <TableHead>{t("quality.assigned_to")}</TableHead>
-                <TableHead>{t("common.status")}</TableHead>
-                <TableHead>{t("quality.details")}</TableHead>
-                <TableHead className="text-right">{t("common.actions")}</TableHead>
+                <TableHead>ID</TableHead>
+                <TableHead>Penalty Type</TableHead>
+                <TableHead>Violation</TableHead>
+                <TableHead>Assigned To</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
