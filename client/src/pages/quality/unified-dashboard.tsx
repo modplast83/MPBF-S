@@ -424,7 +424,7 @@ export default function UnifiedQualityDashboard() {
                           <div key={`check-${index}`} className="flex items-start gap-3 border-b pb-3">
                             <ClipboardCheck className={`h-5 w-5 ${check.passed ? 'text-green-500' : 'text-red-500'} mt-0.5`} />
                             <div>
-                              <div className="font-semibold">{t("quality.check")} #{check.id}</div>
+                              <div className="font-semibold">Quality Check #{check.id}</div>
                               <div className="text-sm text-muted-foreground">
                                 {check.notes?.substring(0, 60) || t("common.not_available")}...
                               </div>
