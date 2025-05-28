@@ -473,7 +473,11 @@ export default function OrdersIndex() {
                   data={filteredOrders || []}
                   columns={columns as any}
                   actions={tableActions}
-                  onRowClick={(row) => window.location.href = `/orders/${row.id}`}
+                  onRowClick={(row) => {
+                    // Use wouter's navigation to stay within the app
+                    window.history.pushState({}, '', `/orders/${row.id}`);
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
                 />
               )}
             </TabsContent>
