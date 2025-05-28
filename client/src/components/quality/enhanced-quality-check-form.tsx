@@ -120,20 +120,17 @@ export function QualityChecksManagement() {
     }
   });
 
-  // Fetch users - first get just the current user, then wrap in array
-  const { data: userData, isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/user"],
+  // Fetch users for dropdown selection
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/users"],
     queryFn: async () => {
-      const response = await fetch("/api/user");
+      const response = await fetch("/api/users");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
       return response.json();
     }
   });
-  
-  // Create a users array from the userData to prevent the map error
-  const users = userData ? (Array.isArray(userData) ? userData : [userData]) : [];
 
   // Create mutation
   const createMutation = useMutation({
