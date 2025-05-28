@@ -93,15 +93,13 @@ export function QualityViolations() {
 
   // Fetch users for reporter selection
   const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/user"],
+    queryKey: ["/api/users"],
     queryFn: async () => {
-      const response = await fetch("/api/user");
+      const response = await fetch("/api/users");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
-      // If response is a single user object, wrap it in an array
-      const data = await response.json();
-      return Array.isArray(data) ? data : [data];
+      return response.json();
     }
   });
 
@@ -437,9 +435,9 @@ export function QualityViolations() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="High">{t("quality.severity_high")}</SelectItem>
-                            <SelectItem value="Medium">{t("quality.severity_medium")}</SelectItem>
-                            <SelectItem value="Low">{t("quality.severity_low")}</SelectItem>
+                            <SelectItem value="Low">Low</SelectItem>
+                            <SelectItem value="Medium">Medium</SelectItem>
+                            <SelectItem value="High">High</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -454,35 +452,35 @@ export function QualityViolations() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Open">{t("quality.status_open")}</SelectItem>
-                            <SelectItem value="In Progress">{t("quality.status_in_progress")}</SelectItem>
-                            <SelectItem value="Resolved">{t("quality.status_resolved")}</SelectItem>
+                            <SelectItem value="Open">Open</SelectItem>
+                            <SelectItem value="In Progress">In Progress</SelectItem>
+                            <SelectItem value="Solved">Solved</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
                     
-                    {formData.status === "Resolved" && (
+                    {formData.status === "Solved" && (
                       <>
                         <div>
-                          <Label htmlFor="resolvedDate">{t("quality.resolved_date")} *</Label>
+                          <Label htmlFor="resolvedDate">Solved Date *</Label>
                           <Input 
                             id="resolvedDate" 
                             type="date" 
                             value={formData.resolvedDate}
                             onChange={(e) => setFormData({...formData, resolvedDate: e.target.value})}
-                            required={formData.status === "Resolved"}
+                            required={formData.status === "Solved"}
                           />
                         </div>
                         
                         <div>
-                          <Label htmlFor="resolutionNotes">{t("quality.resolution_notes")} *</Label>
+                          <Label htmlFor="resolutionNotes">Solution Notes *</Label>
                           <Textarea 
                             id="resolutionNotes" 
                             value={formData.resolutionNotes}
                             onChange={(e) => setFormData({...formData, resolutionNotes: e.target.value})}
                             rows={2}
-                            required={formData.status === "Resolved"}
+                            required={formData.status === "Solved"}
                           />
                         </div>
                       </>
@@ -656,9 +654,9 @@ export function QualityViolations() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="High">{t("quality.severity_high")}</SelectItem>
-                        <SelectItem value="Medium">{t("quality.severity_medium")}</SelectItem>
-                        <SelectItem value="Low">{t("quality.severity_low")}</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -673,35 +671,35 @@ export function QualityViolations() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Open">{t("quality.status_open")}</SelectItem>
-                        <SelectItem value="In Progress">{t("quality.status_in_progress")}</SelectItem>
-                        <SelectItem value="Resolved">{t("quality.status_resolved")}</SelectItem>
+                        <SelectItem value="Open">Open</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Solved">Solved</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 
-                {formData.status === "Resolved" && (
+                {formData.status === "Solved" && (
                   <>
                     <div>
-                      <Label htmlFor="resolvedDate">{t("quality.resolved_date")} *</Label>
+                      <Label htmlFor="resolvedDate">Solved Date *</Label>
                       <Input 
                         id="resolvedDate" 
                         type="date" 
                         value={formData.resolvedDate}
                         onChange={(e) => setFormData({...formData, resolvedDate: e.target.value})}
-                        required={formData.status === "Resolved"}
+                        required={formData.status === "Solved"}
                       />
                     </div>
                     
                     <div>
-                      <Label htmlFor="resolutionNotes">{t("quality.resolution_notes")} *</Label>
+                      <Label htmlFor="resolutionNotes">Solution Notes *</Label>
                       <Textarea 
                         id="resolutionNotes" 
                         value={formData.resolutionNotes}
                         onChange={(e) => setFormData({...formData, resolutionNotes: e.target.value})}
                         rows={2}
-                        required={formData.status === "Resolved"}
+                        required={formData.status === "Solved"}
                       />
                     </div>
                   </>
