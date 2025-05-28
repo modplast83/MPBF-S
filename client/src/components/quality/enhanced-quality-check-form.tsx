@@ -685,7 +685,7 @@ export function QualityChecksManagement() {
               </div>
               
               <div>
-                <h4 className="text-sm font-medium">{t("quality.notes")}</h4>
+                <h4 className="text-sm font-medium">Notes</h4>
                 <p className="text-sm mt-1">{currentCheck.notes || t("common.none")}</p>
               </div>
             </div>
