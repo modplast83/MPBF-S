@@ -652,7 +652,7 @@ export function QualityChecksManagement() {
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium">{t("quality.check_type")}</h4>
+                  <h4 className="text-sm font-medium">Check Type</h4>
                   <p>{getCheckTypeName(currentCheck.checkTypeId)}</p>
                 </div>
                 
