@@ -602,12 +602,11 @@ export function QualityChecksManagement() {
                   </TableCell>
                   <TableCell>{getUserById(check.performedBy)}</TableCell>
                   <TableCell>
-                    {check.checkedAt ? 
-                      format(new Date(check.checkedAt), 'MMM dd, yyyy') : 
-                      (check.checkDate ? 
-                        format(new Date(check.checkDate), 'MMM dd, yyyy') : 
-                        t("common.not_available")
-                      )
+                    {
+                      check.checkDate ? format(new Date(check.checkDate), 'MMM dd, yyyy') :
+                      check.timestamp ? format(new Date(check.timestamp), 'MMM dd, yyyy') :
+                      check.checkedAt ? format(new Date(check.checkedAt), 'MMM dd, yyyy') :
+                      t("common.not_available")
                     }
                   </TableCell>
                   <TableCell className="text-right">
