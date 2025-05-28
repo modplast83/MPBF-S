@@ -597,7 +597,7 @@ export function QualityChecksManagement() {
                   </TableCell>
                   <TableCell>
                     <Badge className={check.status === 'passed' ? badgeVariants.success : badgeVariants.destructive}>
-                      {check.status === 'passed' ? t("quality.passed") : t("quality.failed")}
+                      {check.status === 'passed' ? "Passed" : t("quality.failed")}
                     </Badge>
                   </TableCell>
                   <TableCell>{getUserById(check.performedBy)}</TableCell>
