@@ -406,7 +406,12 @@ export function QualityViolations() {
                           <SelectItem value="none">{t("common.none")}</SelectItem>
                           {checks.map((check: any) => (
                             <SelectItem key={check.id} value={String(check.id)}>
-                              {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
+                              Check #{check.id} - {
+                                check.checkDate ? new Date(check.checkDate).toLocaleDateString() :
+                                check.timestamp ? new Date(check.timestamp).toLocaleDateString() :
+                                check.checkedAt ? new Date(check.checkedAt).toLocaleDateString() :
+                                'No date'
+                              }
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -625,7 +630,12 @@ export function QualityViolations() {
                       <SelectItem value="none">{t("common.none")}</SelectItem>
                       {checks.map((check: any) => (
                         <SelectItem key={check.id} value={String(check.id)}>
-                          {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
+                          Check #{check.id} - {
+                            check.checkDate ? new Date(check.checkDate).toLocaleDateString() :
+                            check.timestamp ? new Date(check.timestamp).toLocaleDateString() :
+                            check.checkedAt ? new Date(check.checkedAt).toLocaleDateString() :
+                            'No date'
+                          }
                         </SelectItem>
                       ))}
                     </SelectContent>
