@@ -396,7 +396,7 @@ export function QualityViolations() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
+                      <Label htmlFor="qualityCheckId">Related Check</Label>
                       <Select 
                         value={formData.qualityCheckId ? String(formData.qualityCheckId) : "none"} 
                         onValueChange={(value) => setFormData({...formData, qualityCheckId: value === "none" ? null : parseInt(value, 10)})}
@@ -416,7 +416,7 @@ export function QualityViolations() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="description">{t("common.description")} *</Label>
+                      <Label htmlFor="description">Description *</Label>
                       <Textarea 
                         id="description" 
                         value={formData.description}
@@ -615,7 +615,7 @@ export function QualityViolations() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="qualityCheckId">{t("quality.related_check")}</Label>
+                  <Label htmlFor="qualityCheckId">Related Check</Label>
                   <Select 
                     value={formData.qualityCheckId ? String(formData.qualityCheckId) : "none"} 
                     onValueChange={(value) => setFormData({...formData, qualityCheckId: value === "none" ? null : parseInt(value, 10)})}
@@ -635,7 +635,7 @@ export function QualityViolations() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="description">{t("common.description")} *</Label>
+                  <Label htmlFor="description">Description *</Label>
                   <Textarea 
                     id="description" 
                     value={formData.description}
