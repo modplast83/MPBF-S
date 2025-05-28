@@ -657,9 +657,9 @@ export function QualityChecksManagement() {
                 </div>
                 
                 <div>
-                  <h4 className="text-sm font-medium">{t("quality.status")}</h4>
+                  <h4 className="text-sm font-medium">Status</h4>
                   <Badge className={currentCheck.status === 'passed' ? badgeVariants.success : badgeVariants.destructive}>
-                    {currentCheck.status === 'passed' ? t("quality.passed") : t("quality.failed")}
+                    {currentCheck.status === 'passed' ? "Passed" : t("quality.failed")}
                   </Badge>
                 </div>
                 
