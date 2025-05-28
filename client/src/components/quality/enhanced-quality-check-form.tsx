@@ -680,7 +680,12 @@ export function QualityChecksManagement() {
                 
                 <div>
                   <h4 className="text-sm font-medium">{t("quality.check_date")}</h4>
-                  <p>{currentCheck.checkDate ? format(new Date(currentCheck.checkDate), 'MMM dd, yyyy') : t("common.unknown")}</p>
+                  <p>{
+                    currentCheck.checkDate ? format(new Date(currentCheck.checkDate), 'MMM dd, yyyy') :
+                    currentCheck.timestamp ? format(new Date(currentCheck.timestamp), 'MMM dd, yyyy') :
+                    currentCheck.checkedAt ? format(new Date(currentCheck.checkedAt), 'MMM dd, yyyy') :
+                    t("common.unknown")
+                  }</p>
                 </div>
               </div>
               
