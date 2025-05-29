@@ -141,7 +141,7 @@ export function DataTable<T>({
         <Table>
           <TableHeader>
             <TableRow>
-              {columns.filter(column => !column.hidden).map((column, index) => (
+              {(isRightToLeft ? [...columns].reverse() : columns).filter(column => !column.hidden).map((column, index) => (
                 <TableHead 
                   key={index} 
                   className="h-12 px-4 align-middle text-muted-foreground [&:has([role=checkbox])]:pr-0 font-extrabold text-center"
@@ -156,7 +156,7 @@ export function DataTable<T>({
               // Loading skeleton
               (Array.from({ length: 5 }).map((_, rowIndex) => (
                 <TableRow key={`skeleton-${rowIndex}`}>
-                  {columns.filter(column => !column.hidden).map((_, colIndex) => (
+                  {(isRightToLeft ? [...columns].reverse() : columns).filter(column => !column.hidden).map((_, colIndex) => (
                     <TableCell key={`skeleton-cell-${colIndex}`}>
                       <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                     </TableCell>
@@ -178,7 +178,7 @@ export function DataTable<T>({
                   }}
                   className={onRowClick ? "cursor-pointer hover:bg-secondary-50" : ""}
                 >
-                  {columns.filter(column => !column.hidden).map((column, colIndex) => (
+                  {(isRightToLeft ? [...columns].reverse() : columns).filter(column => !column.hidden).map((column, colIndex) => (
                     <TableCell 
                       key={colIndex}
                       className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center font-semibold"
