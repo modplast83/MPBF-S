@@ -4992,7 +4992,18 @@ COMMIT;
 
   app.post("/api/time-attendance", async (req: Request, res: Response) => {
     try {
-      const data = insertTimeAttendanceSchema.parse(req.body);
+      // Transform data to match schema expectations
+      const transformedData = {
+        ...req.body,
+        userId: req.body.userId?.toString() || req.user?.id?.toString(),
+        date: new Date(req.body.date),
+        checkInTime: req.body.checkInTime ? new Date(req.body.checkInTime) : new Date(),
+        checkOutTime: req.body.checkOutTime ? new Date(req.body.checkOutTime) : null,
+        breakStartTime: req.body.breakStartTime ? new Date(req.body.breakStartTime) : null,
+        breakEndTime: req.body.breakEndTime ? new Date(req.body.breakEndTime) : null,
+      };
+      
+      const data = insertTimeAttendanceSchema.parse(transformedData);
       const timeAttendance = await storage.createTimeAttendance(data);
       res.json(timeAttendance);
     } catch (error) {
