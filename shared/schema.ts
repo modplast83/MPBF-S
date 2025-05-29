@@ -630,3 +630,86 @@ export const hrComplaints = pgTable("hr_complaints", {
 export const insertHrComplaintSchema = createInsertSchema(hrComplaints).omit({ id: true, submittedDate: true });
 export type InsertHrComplaint = z.infer<typeof insertHrComplaintSchema>;
 export type HrComplaint = typeof hrComplaints.$inferSelect;
+
+// Production Bottleneck Detection System
+export const productionMetrics = pgTable("production_metrics", {
+  id: serial("id").primaryKey(),
+  sectionId: text("section_id").notNull().references(() => sections.id),
+  machineId: text("machine_id").references(() => machines.id),
+  jobOrderId: integer("job_order_id").references(() => jobOrders.id),
+  stage: text("stage").notNull(), // "extruding", "printing", "cutting", "mixing"
+  targetRate: doublePrecision("target_rate").notNull(), // Expected production rate per hour
+  actualRate: doublePrecision("actual_rate").notNull(), // Actual production rate
+  efficiency: doublePrecision("efficiency").notNull(), // Percentage efficiency
+  downtime: integer("downtime_minutes").default(0), // Downtime in minutes
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  shift: text("shift").notNull().default("day"), // "day", "night", "morning"
+  operator: text("operator").references(() => users.id),
+  notes: text("notes"),
+});
+
+export const insertProductionMetricsSchema = createInsertSchema(productionMetrics).omit({ id: true, timestamp: true });
+export type InsertProductionMetrics = z.infer<typeof insertProductionMetricsSchema>;
+export type ProductionMetrics = typeof productionMetrics.$inferSelect;
+
+// Bottleneck Alerts
+export const bottleneckAlerts = pgTable("bottleneck_alerts", {
+  id: serial("id").primaryKey(),
+  alertType: text("alert_type").notNull(), // "efficiency_drop", "downtime_exceeded", "rate_below_target", "queue_buildup"
+  severity: text("severity").notNull().default("medium"), // "low", "medium", "high", "critical"
+  sectionId: text("section_id").notNull().references(() => sections.id),
+  machineId: text("machine_id").references(() => machines.id),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  affectedJobOrders: integer("affected_job_orders").array(), // Array of job order IDs
+  estimatedDelay: integer("estimated_delay_hours"), // Estimated delay in hours
+  suggestedActions: text("suggested_actions").array(), // Array of suggested actions
+  status: text("status").notNull().default("active"), // "active", "acknowledged", "resolved", "ignored"
+  detectedAt: timestamp("detected_at").defaultNow().notNull(),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  acknowledgedBy: text("acknowledged_by").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: text("resolved_by").references(() => users.id),
+  resolutionNotes: text("resolution_notes"),
+});
+
+export const insertBottleneckAlertSchema = createInsertSchema(bottleneckAlerts).omit({ id: true, detectedAt: true });
+export type InsertBottleneckAlert = z.infer<typeof insertBottleneckAlertSchema>;
+export type BottleneckAlert = typeof bottleneckAlerts.$inferSelect;
+
+// Notification Settings
+export const notificationSettings = pgTable("notification_settings", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  alertType: text("alert_type").notNull(), // "efficiency_drop", "downtime_exceeded", etc.
+  enabled: boolean("enabled").default(true),
+  minSeverity: text("min_severity").notNull().default("medium"), // Minimum severity to notify
+  notificationMethods: text("notification_methods").array().notNull(), // ["email", "sms", "push", "in_app"]
+  workingHoursOnly: boolean("working_hours_only").default(false),
+  departments: text("departments").array(), // If empty, all departments
+  machines: text("machines").array(), // If empty, all machines
+});
+
+export const insertNotificationSettingsSchema = createInsertSchema(notificationSettings).omit({ id: true });
+export type InsertNotificationSettings = z.infer<typeof insertNotificationSettingsSchema>;
+export type NotificationSettings = typeof notificationSettings.$inferSelect;
+
+// Production Targets
+export const productionTargets = pgTable("production_targets", {
+  id: serial("id").primaryKey(),
+  sectionId: text("section_id").notNull().references(() => sections.id),
+  machineId: text("machine_id").references(() => machines.id),
+  stage: text("stage").notNull(),
+  targetRate: doublePrecision("target_rate").notNull(), // Units per hour
+  minEfficiency: doublePrecision("min_efficiency").notNull().default(75), // Minimum acceptable efficiency %
+  maxDowntime: integer("max_downtime_minutes").notNull().default(30), // Maximum acceptable downtime per shift
+  shift: text("shift").notNull().default("day"),
+  effectiveFrom: timestamp("effective_from").defaultNow().notNull(),
+  effectiveTo: timestamp("effective_to"),
+  isActive: boolean("is_active").default(true),
+  createdBy: text("created_by").notNull().references(() => users.id),
+});
+
+export const insertProductionTargetsSchema = createInsertSchema(productionTargets).omit({ id: true, effectiveFrom: true });
+export type InsertProductionTargets = z.infer<typeof insertProductionTargetsSchema>;
+export type ProductionTargets = typeof productionTargets.$inferSelect;

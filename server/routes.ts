@@ -29,6 +29,7 @@ import { promisify } from 'util';
 import fileUpload from 'express-fileupload';
 import { setupAuth } from "./auth";
 import { ensureAdminUser } from "./user-seed";
+import { setupHRRoutes } from "./hr-routes";
 
 // Extend the Request type to include express-fileupload properties
 declare global {
@@ -56,6 +57,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup authentication
   setupAuth(app);
+  
+  // Setup HR module routes
+  setupHRRoutes(app);
   
   // User is now handled directly by auth.ts
   
