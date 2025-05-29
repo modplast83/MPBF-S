@@ -535,3 +535,98 @@ export const abaMaterialConfigs = pgTable("aba_material_configs", {
 export const insertAbaMaterialConfigSchema = createInsertSchema(abaMaterialConfigs).omit({ id: true, createdAt: true });
 export type InsertAbaMaterialConfig = z.infer<typeof insertAbaMaterialConfigSchema>;
 export type AbaMaterialConfig = typeof abaMaterialConfigs.$inferSelect;
+
+// HR Module Tables
+
+// Time Attendance
+export const timeAttendance = pgTable("time_attendance", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  date: timestamp("date").notNull(),
+  checkInTime: timestamp("check_in_time"),
+  checkOutTime: timestamp("check_out_time"),
+  breakStartTime: timestamp("break_start_time"),
+  breakEndTime: timestamp("break_end_time"),
+  workingHours: doublePrecision("working_hours").default(0), // in hours
+  overtimeHours: doublePrecision("overtime_hours").default(0), // in hours
+  location: text("location"), // GPS coordinates or location name
+  status: text("status").notNull().default("present"), // present, absent, late, early_leave
+  isAutoCheckedOut: boolean("is_auto_checked_out").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTimeAttendanceSchema = createInsertSchema(timeAttendance).omit({ id: true, createdAt: true });
+export type InsertTimeAttendance = z.infer<typeof insertTimeAttendanceSchema>;
+export type TimeAttendance = typeof timeAttendance.$inferSelect;
+
+// Employee of the Month
+export const employeeOfMonth = pgTable("employee_of_month", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  month: integer("month").notNull(), // 1-12
+  year: integer("year").notNull(),
+  obligationPoints: integer("obligation_points").notNull().default(0),
+  qualityScore: doublePrecision("quality_score").default(0),
+  attendanceScore: doublePrecision("attendance_score").default(0),
+  productivityScore: doublePrecision("productivity_score").default(0),
+  totalScore: doublePrecision("total_score").default(0),
+  rank: integer("rank"),
+  reward: text("reward"),
+  rewardAmount: doublePrecision("reward_amount"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueUserMonth: unique().on(table.userId, table.month, table.year),
+}));
+
+export const insertEmployeeOfMonthSchema = createInsertSchema(employeeOfMonth).omit({ id: true, createdAt: true });
+export type InsertEmployeeOfMonth = z.infer<typeof insertEmployeeOfMonthSchema>;
+export type EmployeeOfMonth = typeof employeeOfMonth.$inferSelect;
+
+// HR Violations and Complaints
+export const hrViolations = pgTable("hr_violations", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id), // Employee involved
+  reportedBy: text("reported_by").notNull().references(() => users.id), // Who reported it
+  violationType: text("violation_type").notNull(), // "attendance", "conduct", "safety", "performance", "policy"
+  severity: text("severity").notNull(), // "minor", "major", "critical"
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  actionTaken: text("action_taken"),
+  status: text("status").notNull().default("open"), // "open", "investigating", "resolved", "dismissed"
+  reportDate: timestamp("report_date").defaultNow().notNull(),
+  resolutionDate: timestamp("resolution_date"),
+  witnessIds: text("witness_ids").array(), // Array of user IDs who witnessed
+  evidenceUrls: text("evidence_urls").array(), // Photos, documents etc.
+  penaltyType: text("penalty_type"), // "warning", "financial", "training", "suspension", "termination"
+  penaltyAmount: doublePrecision("penalty_amount"),
+  notes: text("notes"),
+});
+
+export const insertHrViolationSchema = createInsertSchema(hrViolations).omit({ id: true, reportDate: true });
+export type InsertHrViolation = z.infer<typeof insertHrViolationSchema>;
+export type HrViolation = typeof hrViolations.$inferSelect;
+
+// HR Complaints
+export const hrComplaints = pgTable("hr_complaints", {
+  id: serial("id").primaryKey(),
+  complainantId: text("complainant_id").notNull().references(() => users.id), // Who filed the complaint
+  againstUserId: text("against_user_id").references(() => users.id), // Who the complaint is against (can be null for general complaints)
+  complaintType: text("complaint_type").notNull(), // "harassment", "discrimination", "work_environment", "management", "safety", "other"
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  priority: text("priority").notNull().default("medium"), // "low", "medium", "high", "urgent"
+  status: text("status").notNull().default("submitted"), // "submitted", "under_review", "investigating", "resolved", "closed"
+  isAnonymous: boolean("is_anonymous").default(false),
+  assignedTo: text("assigned_to").references(() => users.id), // HR person assigned
+  submittedDate: timestamp("submitted_date").defaultNow().notNull(),
+  resolutionDate: timestamp("resolution_date"),
+  actionTaken: text("action_taken"),
+  evidenceUrls: text("evidence_urls").array(),
+  notes: text("notes"),
+});
+
+export const insertHrComplaintSchema = createInsertSchema(hrComplaints).omit({ id: true, submittedDate: true });
+export type InsertHrComplaint = z.infer<typeof insertHrComplaintSchema>;
+export type HrComplaint = typeof hrComplaints.$inferSelect;

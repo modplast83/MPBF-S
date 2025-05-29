@@ -17,7 +17,9 @@ import {
   insertPlatePricingParameterSchema, insertPlateCalculationSchema,
   plateCalculationRequestSchema, PlateCalculationRequest,
   User, upsertUserSchema, UpsertUser,
-  AbaMaterialConfig, insertAbaMaterialConfigSchema
+  AbaMaterialConfig, insertAbaMaterialConfigSchema,
+  insertTimeAttendanceSchema, insertEmployeeOfMonthSchema,
+  insertHrViolationSchema, insertHrComplaintSchema
 } from "@shared/schema";
 import { z } from "zod";
 import path from 'path';
@@ -4942,6 +4944,210 @@ COMMIT;
     } catch (error) {
       console.error('Error saving user dashboard preferences:', error);
       res.status(500).json({ error: 'Failed to save user preferences' });
+    }
+  });
+
+  // HR Module API Routes
+
+  // Time Attendance Routes
+  app.get("/api/time-attendance", async (req: Request, res: Response) => {
+    try {
+      const timeAttendance = await storage.getTimeAttendance();
+      res.json(timeAttendance);
+    } catch (error) {
+      console.error('Error fetching time attendance:', error);
+      res.status(500).json({ error: 'Failed to fetch time attendance' });
+    }
+  });
+
+  app.get("/api/time-attendance/user/:userId", async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const timeAttendance = await storage.getTimeAttendanceByUser(userId);
+      res.json(timeAttendance);
+    } catch (error) {
+      console.error('Error fetching user time attendance:', error);
+      res.status(500).json({ error: 'Failed to fetch user time attendance' });
+    }
+  });
+
+  app.get("/api/time-attendance/date/:date", async (req: Request, res: Response) => {
+    try {
+      const { date } = req.params;
+      const timeAttendance = await storage.getTimeAttendanceByDate(new Date(date));
+      res.json(timeAttendance);
+    } catch (error) {
+      console.error('Error fetching date time attendance:', error);
+      res.status(500).json({ error: 'Failed to fetch date time attendance' });
+    }
+  });
+
+  app.post("/api/time-attendance", async (req: Request, res: Response) => {
+    try {
+      const data = insertTimeAttendanceSchema.parse(req.body);
+      const timeAttendance = await storage.createTimeAttendance(data);
+      res.json(timeAttendance);
+    } catch (error) {
+      console.error('Error creating time attendance:', error);
+      res.status(500).json({ error: 'Failed to create time attendance' });
+    }
+  });
+
+  app.put("/api/time-attendance/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = req.body;
+      const timeAttendance = await storage.updateTimeAttendance(id, data);
+      res.json(timeAttendance);
+    } catch (error) {
+      console.error('Error updating time attendance:', error);
+      res.status(500).json({ error: 'Failed to update time attendance' });
+    }
+  });
+
+  app.delete("/api/time-attendance/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteTimeAttendance(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting time attendance:', error);
+      res.status(500).json({ error: 'Failed to delete time attendance' });
+    }
+  });
+
+  // Employee of the Month Routes
+  app.get("/api/employee-of-month", async (req: Request, res: Response) => {
+    try {
+      const employees = await storage.getEmployeeOfMonth();
+      res.json(employees);
+    } catch (error) {
+      console.error('Error fetching employee of month:', error);
+      res.status(500).json({ error: 'Failed to fetch employee of month' });
+    }
+  });
+
+  app.get("/api/employee-of-month/year/:year", async (req: Request, res: Response) => {
+    try {
+      const year = parseInt(req.params.year);
+      const employees = await storage.getEmployeeOfMonthByYear(year);
+      res.json(employees);
+    } catch (error) {
+      console.error('Error fetching employee of month by year:', error);
+      res.status(500).json({ error: 'Failed to fetch employee of month by year' });
+    }
+  });
+
+  app.post("/api/employee-of-month", async (req: Request, res: Response) => {
+    try {
+      const data = insertEmployeeOfMonthSchema.parse(req.body);
+      const employee = await storage.createEmployeeOfMonth(data);
+      res.json(employee);
+    } catch (error) {
+      console.error('Error creating employee of month:', error);
+      res.status(500).json({ error: 'Failed to create employee of month' });
+    }
+  });
+
+  app.put("/api/employee-of-month/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = req.body;
+      const employee = await storage.updateEmployeeOfMonth(id, data);
+      res.json(employee);
+    } catch (error) {
+      console.error('Error updating employee of month:', error);
+      res.status(500).json({ error: 'Failed to update employee of month' });
+    }
+  });
+
+  // HR Violations Routes
+  app.get("/api/hr-violations", async (req: Request, res: Response) => {
+    try {
+      const violations = await storage.getHrViolations();
+      res.json(violations);
+    } catch (error) {
+      console.error('Error fetching HR violations:', error);
+      res.status(500).json({ error: 'Failed to fetch HR violations' });
+    }
+  });
+
+  app.get("/api/hr-violations/user/:userId", async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const violations = await storage.getHrViolationsByUser(userId);
+      res.json(violations);
+    } catch (error) {
+      console.error('Error fetching user HR violations:', error);
+      res.status(500).json({ error: 'Failed to fetch user HR violations' });
+    }
+  });
+
+  app.post("/api/hr-violations", async (req: Request, res: Response) => {
+    try {
+      const data = insertHrViolationSchema.parse(req.body);
+      const violation = await storage.createHrViolation(data);
+      res.json(violation);
+    } catch (error) {
+      console.error('Error creating HR violation:', error);
+      res.status(500).json({ error: 'Failed to create HR violation' });
+    }
+  });
+
+  app.put("/api/hr-violations/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = req.body;
+      const violation = await storage.updateHrViolation(id, data);
+      res.json(violation);
+    } catch (error) {
+      console.error('Error updating HR violation:', error);
+      res.status(500).json({ error: 'Failed to update HR violation' });
+    }
+  });
+
+  // HR Complaints Routes
+  app.get("/api/hr-complaints", async (req: Request, res: Response) => {
+    try {
+      const complaints = await storage.getHrComplaints();
+      res.json(complaints);
+    } catch (error) {
+      console.error('Error fetching HR complaints:', error);
+      res.status(500).json({ error: 'Failed to fetch HR complaints' });
+    }
+  });
+
+  app.get("/api/hr-complaints/complainant/:complainantId", async (req: Request, res: Response) => {
+    try {
+      const { complainantId } = req.params;
+      const complaints = await storage.getHrComplaintsByComplainant(complainantId);
+      res.json(complaints);
+    } catch (error) {
+      console.error('Error fetching complainant HR complaints:', error);
+      res.status(500).json({ error: 'Failed to fetch complainant HR complaints' });
+    }
+  });
+
+  app.post("/api/hr-complaints", async (req: Request, res: Response) => {
+    try {
+      const data = insertHrComplaintSchema.parse(req.body);
+      const complaint = await storage.createHrComplaint(data);
+      res.json(complaint);
+    } catch (error) {
+      console.error('Error creating HR complaint:', error);
+      res.status(500).json({ error: 'Failed to create HR complaint' });
+    }
+  });
+
+  app.put("/api/hr-complaints/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = req.body;
+      const complaint = await storage.updateHrComplaint(id, data);
+      res.json(complaint);
+    } catch (error) {
+      console.error('Error updating HR complaint:', error);
+      res.status(500).json({ error: 'Failed to update HR complaint' });
     }
   });
 

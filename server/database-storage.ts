@@ -48,6 +48,18 @@ import {
   qualityChecks,
   type QualityCheck,
   type InsertQualityCheck,
+  timeAttendance,
+  type TimeAttendance,
+  type InsertTimeAttendance,
+  employeeOfMonth,
+  type EmployeeOfMonth,
+  type InsertEmployeeOfMonth,
+  hrViolations,
+  type HrViolation,
+  type InsertHrViolation,
+  hrComplaints,
+  type HrComplaint,
+  type InsertHrComplaint,
   qualityViolations,
   type QualityViolation,
   type InsertQualityViolation,
@@ -1877,5 +1889,207 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return !!updated;
+  }
+
+  // HR Module Methods
+
+  // Time Attendance
+  async getTimeAttendance(): Promise<TimeAttendance[]> {
+    return await db.select().from(timeAttendance);
+  }
+
+  async getTimeAttendanceByUser(userId: string): Promise<TimeAttendance[]> {
+    return await db.select().from(timeAttendance).where(eq(timeAttendance.userId, userId));
+  }
+
+  async getTimeAttendanceByDate(date: Date): Promise<TimeAttendance[]> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    return await db.select().from(timeAttendance)
+      .where(and(
+        gte(timeAttendance.date, startOfDay),
+        lte(timeAttendance.date, endOfDay)
+      ));
+  }
+
+  async getTimeAttendanceByUserAndDate(userId: string, date: Date): Promise<TimeAttendance | undefined> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    const [attendance] = await db.select().from(timeAttendance)
+      .where(and(
+        eq(timeAttendance.userId, userId),
+        gte(timeAttendance.date, startOfDay),
+        lte(timeAttendance.date, endOfDay)
+      ));
+    return attendance || undefined;
+  }
+
+  async getTimeAttendance(id: number): Promise<TimeAttendance | undefined> {
+    const [attendance] = await db.select().from(timeAttendance).where(eq(timeAttendance.id, id));
+    return attendance || undefined;
+  }
+
+  async createTimeAttendance(attendanceData: InsertTimeAttendance): Promise<TimeAttendance> {
+    const [attendance] = await db
+      .insert(timeAttendance)
+      .values(attendanceData)
+      .returning();
+    return attendance;
+  }
+
+  async updateTimeAttendance(id: number, attendanceData: Partial<TimeAttendance>): Promise<TimeAttendance | undefined> {
+    const [updated] = await db
+      .update(timeAttendance)
+      .set(attendanceData)
+      .where(eq(timeAttendance.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteTimeAttendance(id: number): Promise<boolean> {
+    await db.delete(timeAttendance).where(eq(timeAttendance.id, id));
+    return true;
+  }
+
+  // Employee of the Month
+  async getEmployeeOfMonth(): Promise<EmployeeOfMonth[]> {
+    return await db.select().from(employeeOfMonth);
+  }
+
+  async getEmployeeOfMonthByYear(year: number): Promise<EmployeeOfMonth[]> {
+    return await db.select().from(employeeOfMonth).where(eq(employeeOfMonth.year, year));
+  }
+
+  async getEmployeeOfMonthByUser(userId: string): Promise<EmployeeOfMonth[]> {
+    return await db.select().from(employeeOfMonth).where(eq(employeeOfMonth.userId, userId));
+  }
+
+  async getEmployeeOfMonthRecord(id: number): Promise<EmployeeOfMonth | undefined> {
+    const [record] = await db.select().from(employeeOfMonth).where(eq(employeeOfMonth.id, id));
+    return record || undefined;
+  }
+
+  async createEmployeeOfMonth(employeeData: InsertEmployeeOfMonth): Promise<EmployeeOfMonth> {
+    const [employee] = await db
+      .insert(employeeOfMonth)
+      .values(employeeData)
+      .returning();
+    return employee;
+  }
+
+  async updateEmployeeOfMonth(id: number, employeeData: Partial<EmployeeOfMonth>): Promise<EmployeeOfMonth | undefined> {
+    const [updated] = await db
+      .update(employeeOfMonth)
+      .set(employeeData)
+      .where(eq(employeeOfMonth.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteEmployeeOfMonth(id: number): Promise<boolean> {
+    await db.delete(employeeOfMonth).where(eq(employeeOfMonth.id, id));
+    return true;
+  }
+
+  // HR Violations
+  async getHrViolations(): Promise<HrViolation[]> {
+    return await db.select().from(hrViolations);
+  }
+
+  async getHrViolationsByUser(userId: string): Promise<HrViolation[]> {
+    return await db.select().from(hrViolations).where(eq(hrViolations.userId, userId));
+  }
+
+  async getHrViolationsByReporter(reportedBy: string): Promise<HrViolation[]> {
+    return await db.select().from(hrViolations).where(eq(hrViolations.reportedBy, reportedBy));
+  }
+
+  async getHrViolationsByStatus(status: string): Promise<HrViolation[]> {
+    return await db.select().from(hrViolations).where(eq(hrViolations.status, status));
+  }
+
+  async getHrViolationsBySeverity(severity: string): Promise<HrViolation[]> {
+    return await db.select().from(hrViolations).where(eq(hrViolations.severity, severity));
+  }
+
+  async getHrViolation(id: number): Promise<HrViolation | undefined> {
+    const [violation] = await db.select().from(hrViolations).where(eq(hrViolations.id, id));
+    return violation || undefined;
+  }
+
+  async createHrViolation(violationData: InsertHrViolation): Promise<HrViolation> {
+    const [violation] = await db
+      .insert(hrViolations)
+      .values(violationData)
+      .returning();
+    return violation;
+  }
+
+  async updateHrViolation(id: number, violationData: Partial<HrViolation>): Promise<HrViolation | undefined> {
+    const [updated] = await db
+      .update(hrViolations)
+      .set(violationData)
+      .where(eq(hrViolations.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteHrViolation(id: number): Promise<boolean> {
+    await db.delete(hrViolations).where(eq(hrViolations.id, id));
+    return true;
+  }
+
+  // HR Complaints
+  async getHrComplaints(): Promise<HrComplaint[]> {
+    return await db.select().from(hrComplaints);
+  }
+
+  async getHrComplaintsByComplainant(complainantId: string): Promise<HrComplaint[]> {
+    return await db.select().from(hrComplaints).where(eq(hrComplaints.complainantId, complainantId));
+  }
+
+  async getHrComplaintsByAgainstUser(againstUserId: string): Promise<HrComplaint[]> {
+    return await db.select().from(hrComplaints).where(eq(hrComplaints.againstUserId, againstUserId));
+  }
+
+  async getHrComplaintsByStatus(status: string): Promise<HrComplaint[]> {
+    return await db.select().from(hrComplaints).where(eq(hrComplaints.status, status));
+  }
+
+  async getHrComplaintsByAssignee(assignedTo: string): Promise<HrComplaint[]> {
+    return await db.select().from(hrComplaints).where(eq(hrComplaints.assignedTo, assignedTo));
+  }
+
+  async getHrComplaint(id: number): Promise<HrComplaint | undefined> {
+    const [complaint] = await db.select().from(hrComplaints).where(eq(hrComplaints.id, id));
+    return complaint || undefined;
+  }
+
+  async createHrComplaint(complaintData: InsertHrComplaint): Promise<HrComplaint> {
+    const [complaint] = await db
+      .insert(hrComplaints)
+      .values(complaintData)
+      .returning();
+    return complaint;
+  }
+
+  async updateHrComplaint(id: number, complaintData: Partial<HrComplaint>): Promise<HrComplaint | undefined> {
+    const [updated] = await db
+      .update(hrComplaints)
+      .set(complaintData)
+      .where(eq(hrComplaints.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteHrComplaint(id: number): Promise<boolean> {
+    await db.delete(hrComplaints).where(eq(hrComplaints.id, id));
+    return true;
   }
 }
