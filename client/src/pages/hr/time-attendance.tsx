@@ -24,22 +24,19 @@ export default function TimeAttendancePage() {
   // Get attendance records
   const { data: attendanceRecords, isLoading } = useQuery({
     queryKey: [API_ENDPOINTS.TIME_ATTENDANCE, selectedDate],
-    queryFn: () => apiRequest(`${API_ENDPOINTS.TIME_ATTENDANCE}/date/${selectedDate}`)
+    queryFn: () => apiRequest('GET', `${API_ENDPOINTS.TIME_ATTENDANCE}/date/${selectedDate}`)
   });
 
   // Get user's today attendance
   const { data: todayAttendance } = useQuery({
     queryKey: [API_ENDPOINTS.TIME_ATTENDANCE, 'user', user?.id, selectedDate],
-    queryFn: () => apiRequest(`${API_ENDPOINTS.TIME_ATTENDANCE}/user/${user?.id}`),
+    queryFn: () => apiRequest('GET', `${API_ENDPOINTS.TIME_ATTENDANCE}/user/${user?.id}`),
     enabled: !!user?.id
   });
 
   // Check-in mutation
   const checkInMutation = useMutation({
-    mutationFn: (data: any) => apiRequest(API_ENDPOINTS.TIME_ATTENDANCE, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    }),
+    mutationFn: (data: any) => apiRequest('POST', API_ENDPOINTS.TIME_ATTENDANCE, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.TIME_ATTENDANCE] });
       toast({
@@ -51,10 +48,7 @@ export default function TimeAttendancePage() {
 
   // Check-out mutation
   const checkOutMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number, data: any }) => apiRequest(`${API_ENDPOINTS.TIME_ATTENDANCE}/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data)
-    }),
+    mutationFn: ({ id, data }: { id: number, data: any }) => apiRequest('PUT', `${API_ENDPOINTS.TIME_ATTENDANCE}/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.TIME_ATTENDANCE] });
       toast({

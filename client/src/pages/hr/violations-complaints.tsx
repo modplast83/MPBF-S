@@ -77,29 +77,26 @@ export default function ViolationsComplaintsPage() {
   // Get violations
   const { data: violations, isLoading: violationsLoading } = useQuery({
     queryKey: [API_ENDPOINTS.HR_VIOLATIONS],
-    queryFn: () => apiRequest(API_ENDPOINTS.HR_VIOLATIONS)
+    queryFn: () => apiRequest('GET', API_ENDPOINTS.HR_VIOLATIONS)
   });
 
   // Get complaints
   const { data: complaints, isLoading: complaintsLoading } = useQuery({
     queryKey: [API_ENDPOINTS.HR_COMPLAINTS],
-    queryFn: () => apiRequest(API_ENDPOINTS.HR_COMPLAINTS)
+    queryFn: () => apiRequest('GET', API_ENDPOINTS.HR_COMPLAINTS)
   });
 
   // Get users for selection
   const { data: users } = useQuery({
     queryKey: [API_ENDPOINTS.USERS],
-    queryFn: () => apiRequest(API_ENDPOINTS.USERS)
+    queryFn: () => apiRequest('GET', API_ENDPOINTS.USERS)
   });
 
   // Create violation mutation
   const createViolationMutation = useMutation({
-    mutationFn: (data: ViolationForm) => apiRequest(API_ENDPOINTS.HR_VIOLATIONS, {
-      method: 'POST',
-      body: JSON.stringify({
-        ...data,
-        reportedBy: user?.id
-      })
+    mutationFn: (data: ViolationForm) => apiRequest('POST', API_ENDPOINTS.HR_VIOLATIONS, {
+      ...data,
+      reportedBy: user?.id
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.HR_VIOLATIONS] });
@@ -114,12 +111,9 @@ export default function ViolationsComplaintsPage() {
 
   // Create complaint mutation
   const createComplaintMutation = useMutation({
-    mutationFn: (data: ComplaintForm) => apiRequest(API_ENDPOINTS.HR_COMPLAINTS, {
-      method: 'POST',
-      body: JSON.stringify({
-        ...data,
-        complainantId: user?.id
-      })
+    mutationFn: (data: ComplaintForm) => apiRequest('POST', API_ENDPOINTS.HR_COMPLAINTS, {
+      ...data,
+      complainantId: user?.id
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.HR_COMPLAINTS] });

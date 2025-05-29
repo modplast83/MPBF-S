@@ -57,25 +57,22 @@ export default function EmployeeOfMonthPage() {
   // Get employee of month records
   const { data: employeeRecords, isLoading } = useQuery({
     queryKey: [API_ENDPOINTS.EMPLOYEE_OF_MONTH, selectedYear],
-    queryFn: () => apiRequest(`${API_ENDPOINTS.EMPLOYEE_OF_MONTH}/year/${selectedYear}`)
+    queryFn: () => apiRequest('GET', `${API_ENDPOINTS.EMPLOYEE_OF_MONTH}/year/${selectedYear}`)
   });
 
   // Get users for selection
   const { data: users } = useQuery({
     queryKey: [API_ENDPOINTS.USERS],
-    queryFn: () => apiRequest(API_ENDPOINTS.USERS)
+    queryFn: () => apiRequest('GET', API_ENDPOINTS.USERS)
   });
 
   // Create employee of month mutation
   const createEmployeeMutation = useMutation({
     mutationFn: (data: EmployeeOfMonthForm) => {
       const totalScore = (data.qualityScore + data.attendanceScore + data.productivityScore) / 3;
-      return apiRequest(API_ENDPOINTS.EMPLOYEE_OF_MONTH, {
-        method: 'POST',
-        body: JSON.stringify({
-          ...data,
-          totalScore
-        })
+      return apiRequest('POST', API_ENDPOINTS.EMPLOYEE_OF_MONTH, {
+        ...data,
+        totalScore
       });
     },
     onSuccess: () => {
