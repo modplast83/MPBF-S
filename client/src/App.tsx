@@ -50,6 +50,11 @@ import UtilityTools from "@/pages/tools/utilities";
 import CostCalculatorPage from "@/pages/tools/cost-calculator";
 import MixColorsCalculator from "@/pages/tools/mix-colors";
 import ClichePage from "@/pages/cliches/index";
+// HR Module imports
+import HRIndex from "@/pages/hr/index";
+import TimeAttendancePage from "@/pages/hr/time-attendance";
+import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
+import ViolationsComplaintsPage from "@/pages/hr/violations-complaints";
 import { User } from "@shared/schema";
 
 function App() {
@@ -110,6 +115,11 @@ function App() {
                   <ProtectedRoute path="/tools/cost-calculator" component={CostCalculatorPage} module="Cost Calculator" />
                   <ProtectedRoute path="/tools/mix-colors" component={MixColorsCalculator} module="Mix Colors" />
                   <ProtectedRoute path="/cliches" component={ClichePage} module="Cliches" />
+                  {/* HR Module Routes */}
+                  <ProtectedRoute path="/hr" component={HRIndex} module="HR" />
+                  <ProtectedRoute path="/hr/time-attendance" component={TimeAttendancePage} module="Time Attendance" />
+                  <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
+                  <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />
                   <Route component={NotFound} />
                 </Switch>
               </MainLayout>
