@@ -10,7 +10,7 @@ import { Clock, MapPin, Coffee, LogOut, Calendar, Users } from "lucide-react";
 import { format } from "date-fns";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-v2";
 import { useToast } from "@/hooks/use-toast";
 import type { TimeAttendance } from "@shared/schema";
 
