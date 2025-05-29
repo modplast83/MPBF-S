@@ -105,9 +105,9 @@ export function DataTable<T>({
     }
   };
 
-  // Use the dir prop or fallback to isRTL from context
-  const direction = dir || (isRTL ? 'rtl' : 'ltr');
-  const isRightToLeft = direction === 'rtl';
+  // Always use RTL context, ignore dir prop if it conflicts
+  const direction = isRTL ? 'rtl' : 'ltr';
+  const isRightToLeft = isRTL;
   
   // Calculate the actual row index for pagination
   const getAbsoluteRowIndex = (relativeIndex: number): number => {
