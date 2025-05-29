@@ -91,13 +91,12 @@ export function QualityCorrectiveActions() {
 
   // Fetch users for user selection
   const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/user"],
+    queryKey: ["/api/users"],
     queryFn: async () => {
-      const response = await fetch("/api/user");
+      const response = await fetch("/api/users");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
-      // If response is a single user object, wrap it in an array
       const data = await response.json();
       return Array.isArray(data) ? data : [data];
     }
@@ -348,7 +347,7 @@ export function QualityCorrectiveActions() {
                       <SelectContent>
                         {checks.map((check: any) => (
                           <SelectItem key={check.id} value={String(check.id)}>
-                            Check #{check.id} - {new Date(check.checkedAt || check.checkDate).toLocaleDateString()}
+                            Check #{check.id} - {new Date(check.timestamp).toLocaleDateString()}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -594,7 +593,7 @@ export function QualityCorrectiveActions() {
                   <SelectContent>
                     {checks.map((check: any) => (
                       <SelectItem key={check.id} value={String(check.id)}>
-                        {t("quality.check")} #{check.id} - {new Date(check.checkDate).toLocaleDateString()}
+                        {t("quality.check")} #{check.id} - {new Date(check.timestamp).toLocaleDateString()}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -717,7 +716,7 @@ export function QualityCorrectiveActions() {
               <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
                 {t("common.cancel")}
               </Button>
-              <Button type="submit" disabled={updateMutation.isPending || !formData.qualityCheckId || !formData.action || !formData.implementedBy || !formData.implementationDate || (formData.verifiedDate && !formData.verifiedBy)}>
+              <Button type="submit" disabled={updateMutation.isPending || !formData.qualityCheckId || !formData.action || !formData.implementedBy || !formData.implementationDate || (formData.verifiedDate !== "" && !formData.verifiedBy)}>
                 {updateMutation.isPending ? t("common.updating") : t("common.update")}
               </Button>
             </DialogFooter>
