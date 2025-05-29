@@ -238,7 +238,7 @@ export default function OrdersIndex() {
                 className={row.status === "pending" ? "bg-secondary-100" : ""}
               >
                 <span className="w-3 h-3 rounded-full bg-secondary-300 mr-2"></span>
-                Pending
+                {t("status.pending")}
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleStatusChange(row, "processing")}
@@ -246,7 +246,7 @@ export default function OrdersIndex() {
                 className={row.status === "processing" ? "bg-secondary-100" : ""}
               >
                 <span className="w-3 h-3 rounded-full bg-primary-300 mr-2"></span>
-                For Production
+                {t("status.processing")}
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleStatusChange(row, "hold")}
@@ -254,7 +254,7 @@ export default function OrdersIndex() {
                 className={row.status === "hold" ? "bg-secondary-100" : ""}
               >
                 <span className="w-3 h-3 rounded-full bg-warning-300 mr-2"></span>
-                Hold
+                {t("orders.hold")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

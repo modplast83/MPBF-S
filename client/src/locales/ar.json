@@ -712,7 +712,7 @@
       "items_count": "عدد العناصر",
       "total_quantity": "إجمالي الكمية",
       "note": "ملاحظة",
-      "pending": "معلق",
+      "pending": "بالإنتظار",
       "processing": "قيد المعالجة",
       "completed": "مكتمل",
       "cancelled": "ملغى",
@@ -787,7 +787,7 @@
       "no_results": "لا توجد نتائج."
     },
     "status": {
-      "pending": "معلق",
+      "pending": "بالإنتظار",
       "in_progress": "قيد التنفيذ",
       "extrusion_completed": "تم انتاج الفيلم",
       "completed": "مكتمل",

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface StatusBadgeProps {
   status: string;
@@ -6,6 +7,7 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
+  const { t } = useTranslation();
   const getStatusInfo = () => {
     switch (status.toLowerCase()) {
       case "pending":
@@ -63,7 +65,15 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   };
 
   const { classes, icon } = getStatusInfo();
-  const displayText = status.charAt(0).toUpperCase() + status.slice(1);
+  
+  // Get translated status text, fallback to capitalized status if no translation
+  const getTranslatedStatus = () => {
+    try {
+      return t(`status.${status.toLowerCase()}`);
+    } catch {
+      return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
 
   return (
     <span
@@ -74,7 +84,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       )}
     >
       <span className="material-icons text-[13px]">{icon}</span>
-      {displayText}
+      {getTranslatedStatus()}
     </span>
   );
 }
