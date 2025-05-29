@@ -378,9 +378,7 @@ export function QualityCorrectiveActions() {
                       <SelectContent>
                         {Array.isArray(users) && users.length > 0 ? users.map((user: any) => (
                           <SelectItem key={user.id} value={user.id}>
-                            {user.firstName && user.lastName 
-                              ? `${user.firstName} ${user.lastName}` 
-                              : user.username || `User ${user.id}`}
+                            {user.firstName || user.username || `User ${user.id}`}
                           </SelectItem>
                         )) : (
                           <SelectItem value="no-users" disabled>No users available</SelectItem>
@@ -440,7 +438,7 @@ export function QualityCorrectiveActions() {
                             <SelectContent>
                               {Array.isArray(users) ? users.map((user: any) => (
                                 <SelectItem key={user.id} value={user.id}>
-                                  {user.firstName} {user.lastName}
+                                  {user.firstName || user.username || `User ${user.id}`}
                                 </SelectItem>
                               )) : null}
                             </SelectContent>
@@ -623,7 +621,7 @@ export function QualityCorrectiveActions() {
                   <SelectContent>
                     {Array.isArray(users) ? users.map((user: any) => (
                       <SelectItem key={user.id} value={user.id}>
-                        {user.firstName} {user.lastName}
+                        {user.firstName || user.username || `User ${user.id}`}
                       </SelectItem>
                     )) : null}
                   </SelectContent>
@@ -681,7 +679,7 @@ export function QualityCorrectiveActions() {
                         <SelectContent>
                           {Array.isArray(users) ? users.map((user: any) => (
                             <SelectItem key={user.id} value={user.id}>
-                              {user.firstName} {user.lastName}
+                              {user.firstName || user.username || `User ${user.id}`}
                             </SelectItem>
                           )) : null}
                         </SelectContent>
