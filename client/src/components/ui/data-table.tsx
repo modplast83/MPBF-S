@@ -223,12 +223,11 @@ export function DataTable<T>({
                     onMouseEnter={() => setHoveredRow(rowIndex)}
                     onMouseLeave={() => setHoveredRow(null)}
                     className={`
-                      border-b border-gray-100 transition-all duration-300 ease-in-out
+                      border-b border-gray-100 transition-colors duration-200 ease-in-out
                       ${onRowClick ? "cursor-pointer" : ""}
-                      ${isHovered ? "bg-gradient-to-r from-blue-50/70 to-indigo-50/70 scale-[1.01] shadow-sm" : ""}
-                      ${isNewRow ? "bg-gradient-to-r from-green-50 to-emerald-50 shadow-md animate-bounce" : ""}
+                      ${isHovered ? "bg-gradient-to-r from-blue-50/70 to-indigo-50/70" : ""}
+                      ${isNewRow ? "bg-gradient-to-r from-green-50 to-emerald-50" : ""}
                       ${!isHovered && !isNewRow ? "hover:bg-gray-50/60" : ""}
-                      transform
                     `}
                     style={{
                       animationDelay: animateChanges ? `${rowIndex * 50}ms` : '0ms'
