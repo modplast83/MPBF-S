@@ -42,7 +42,8 @@ import {
   Plus, 
   Filter,
   Search,
-  CheckCheck
+  CheckCheck,
+  Printer
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 
@@ -269,13 +270,13 @@ export function QualityCorrectiveActions() {
 
   const getUserById = (id: string) => {
     if (!Array.isArray(users)) {
-      return id || t("common.unknown");
+      return id || "Unknown";
     }
     const user = users.find((user: any) => user.id === id);
     if (user) {
-      return `${user.firstName || ''} ${user.lastName || ''}`;
+      return user.firstName || user.username || `User ${user.id}`;
     }
-    return id || t("common.unknown");
+    return id || "Unknown";
   };
 
   const getCheckById = (id: number) => {
@@ -286,6 +287,88 @@ export function QualityCorrectiveActions() {
   };
 
   const isLoading = actionsLoading || checksLoading || usersLoading;
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Corrective Actions Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .company-info { margin-bottom: 20px; }
+            .report-info { margin-bottom: 30px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            .status-verified { color: #16a34a; font-weight: bold; }
+            .status-pending { color: #ea580c; font-weight: bold; }
+            .print-date { text-align: right; margin-top: 20px; font-size: 12px; }
+            @media print { 
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Corrective Actions Report</h1>
+            <div class="company-info">
+              <h3>Quality Management System</h3>
+            </div>
+          </div>
+          
+          <div class="report-info">
+            <p><strong>Report Generated:</strong> ${new Date().toLocaleString()}</p>
+            <p><strong>Total Actions:</strong> ${filteredActions.length}</p>
+            <p><strong>Verified Actions:</strong> ${filteredActions.filter((a: any) => a.verifiedDate).length}</p>
+            <p><strong>Pending Actions:</strong> ${filteredActions.filter((a: any) => !a.verifiedDate).length}</p>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Quality Check</th>
+                <th>Action Description</th>
+                <th>Implemented By</th>
+                <th>Implementation Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredActions.map((action: any) => `
+                <tr>
+                  <td>#${action.id}</td>
+                  <td>${action.qualityCheckId ? `#${action.qualityCheckId}` : 'N/A'}</td>
+                  <td>${action.action || 'N/A'}</td>
+                  <td>${getUserById(action.implementedBy)}</td>
+                  <td>${action.implementationDate ? format(new Date(action.implementationDate), 'MMM d, yyyy') : 'N/A'}</td>
+                  <td class="${action.verifiedDate ? 'status-verified' : 'status-pending'}">
+                    ${action.verifiedDate ? 'Verified' : 'Pending Verification'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <div class="print-date">
+            Report printed on ${new Date().toLocaleString()}
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
 
   return (
     <div className="space-y-4">
@@ -317,6 +400,16 @@ export function QualityCorrectiveActions() {
               </SelectContent>
             </Select>
           </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9"
+            onClick={handlePrint}
+          >
+            <Printer className="mr-1 sm:mr-2 h-4 w-4" />
+            <span className="text-xs sm:text-sm">Print Report</span>
+          </Button>
           
           <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
@@ -489,19 +582,20 @@ export function QualityCorrectiveActions() {
         </div>
       ) : filteredActions.length === 0 ? (
         <div className="border rounded-md p-8 text-center">
-          <p className="text-muted-foreground">No Quality Action Found</p>
+          <p className="text-muted-foreground">No Corrective Actions Found</p>
+          <p className="text-sm text-muted-foreground mt-2">Add a new corrective action to get started</p>
         </div>
       ) : (
         <ScrollArea className="h-[calc(100vh-230px)] border rounded-md">
           <Table>
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
-                <TableHead>{t("common.id")}</TableHead>
-                <TableHead>{t("quality.related_check")}</TableHead>
-                <TableHead>{t("quality.action_description")}</TableHead>
-                <TableHead>{t("quality.implementation_details")}</TableHead>
-                <TableHead>{t("quality.verification_status")}</TableHead>
-                <TableHead className="text-right">{t("common.actions")}</TableHead>
+                <TableHead>ID</TableHead>
+                <TableHead>Quality Check</TableHead>
+                <TableHead>Action Description</TableHead>
+                <TableHead>Implementation Details</TableHead>
+                <TableHead>Verification Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -514,7 +608,7 @@ export function QualityCorrectiveActions() {
                       {action.qualityCheckId ? (
                         <span>#{action.qualityCheckId}</span>
                       ) : (
-                        <span className="text-muted-foreground">{t("common.not_available")}</span>
+                        <span className="text-muted-foreground">N/A</span>
                       )}
                     </TableCell>
                     <TableCell className="max-w-[200px]">
