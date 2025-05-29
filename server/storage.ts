@@ -251,6 +251,32 @@ export interface IStorage {
   updateAbaMaterialConfig(id: number, update: Partial<AbaMaterialConfig>): Promise<AbaMaterialConfig | undefined>;
   deleteAbaMaterialConfig(id: number): Promise<boolean>;
   setDefaultAbaMaterialConfig(id: number): Promise<boolean>;
+  
+  // HR Module methods
+  getTimeAttendance(): Promise<any[]>;
+  getTimeAttendanceByUser(userId: number): Promise<any[]>;
+  getTimeAttendanceByDate(date: string): Promise<any[]>;
+  createTimeAttendance(attendance: any): Promise<any>;
+  updateTimeAttendance(id: number, attendance: any): Promise<any | undefined>;
+  deleteTimeAttendance(id: number): Promise<boolean>;
+  
+  getEmployeeOfMonth(): Promise<any[]>;
+  getEmployeeOfMonthByUser(userId: number): Promise<any[]>;
+  createEmployeeOfMonth(employee: any): Promise<any>;
+  updateEmployeeOfMonth(id: number, employee: any): Promise<any | undefined>;
+  deleteEmployeeOfMonth(id: number): Promise<boolean>;
+  
+  getHrViolations(): Promise<any[]>;
+  getHrViolationsByUser(userId: number): Promise<any[]>;
+  createHrViolation(violation: any): Promise<any>;
+  updateHrViolation(id: number, violation: any): Promise<any | undefined>;
+  deleteHrViolation(id: number): Promise<boolean>;
+  
+  getHrComplaints(): Promise<any[]>;
+  getHrComplaintsByUser(userId: number): Promise<any[]>;
+  createHrComplaint(complaint: any): Promise<any>;
+  updateHrComplaint(id: number, complaint: any): Promise<any | undefined>;
+  deleteHrComplaint(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
