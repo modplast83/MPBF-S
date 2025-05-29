@@ -186,7 +186,7 @@ export function DataTable<T>({
           <TableBody>
             {isLoading ? (
               // Enhanced loading skeleton with staggered animation
-              (Array.from({ length: 5 }).map((_, rowIndex) => (
+              Array.from({ length: 5 }).map((_, rowIndex) => (
                 <TableRow 
                   key={`skeleton-${rowIndex}`}
                   className="animate-pulse"
@@ -201,7 +201,7 @@ export function DataTable<T>({
                     </TableCell>
                   ))}
                 </TableRow>
-              )))
+              ))
             ) : paginatedData.length > 0 ? (
               paginatedData.map((row, rowIndex) => {
                 const absoluteRowIndex = getAbsoluteRowIndex(rowIndex);
@@ -242,18 +242,19 @@ export function DataTable<T>({
                           transition-all duration-200 ease-in-out
                           ${isHovered ? "transform scale-105" : ""}
                         `}
-                    >
-                      {column.cell
-                        ? column.cell(row, getAbsoluteRowIndex(rowIndex))
-                        : typeof column.accessorKey === "function"
-                        ? column.accessorKey(row)
-                        : column.accessorKey 
-                          ? (row[column.accessorKey as keyof T] as React.ReactNode)
-                          : null}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+                      >
+                        {column.cell
+                          ? column.cell(row, getAbsoluteRowIndex(rowIndex))
+                          : typeof column.accessorKey === "function"
+                          ? column.accessorKey(row)
+                          : column.accessorKey 
+                            ? (row[column.accessorKey as keyof T] as React.ReactNode)
+                            : null}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell

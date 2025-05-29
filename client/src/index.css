@@ -2,6 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  /* Custom shimmer animation for loading states */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
+  }
+  
+  /* Enhanced bounce animation for new rows */
+  @keyframes gentle-bounce {
+    0%, 20%, 53%, 80%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+      transform: translate3d(0, -5px, 0);
+    }
+    70% {
+      transform: translate3d(0, -3px, 0);
+    }
+    90% {
+      transform: translate3d(0, -1px, 0);
+    }
+  }
+  
+  .animate-gentle-bounce {
+    animation: gentle-bounce 1s ease-in-out;
+  }
+  
+  /* Smooth scale animation for interactive elements */
+  @keyframes pulse-scale {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+  }
+  
+  .animate-pulse-scale {
+    animation: pulse-scale 2s ease-in-out infinite;
+  }
+  
+  /* Gradient background animation */
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
