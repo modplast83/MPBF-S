@@ -456,11 +456,11 @@ export default function OrdersIndex() {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-4">
-              <TabsTrigger value="all">All Orders</TabsTrigger>
-              <TabsTrigger value="processing">For Production</TabsTrigger>
-              <TabsTrigger value="hold">On Hold</TabsTrigger>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="all">{t("orders.all_orders")}</TabsTrigger>
+              <TabsTrigger value="processing">{t("orders.for_production")}</TabsTrigger>
+              <TabsTrigger value="hold">{t("orders.on_hold")}</TabsTrigger>
+              <TabsTrigger value="pending">{t("orders.pending")}</TabsTrigger>
+              <TabsTrigger value="completed">{t("orders.completed")}</TabsTrigger>
             </TabsList>
             
             <TabsContent value={activeTab} className="mt-0">

@@ -931,7 +931,11 @@
       "required_quantity": "Required Quantity",
       "stage": "Stage",
       "active_production_orders": "Active Production Orders",
-      "product": "Product"
+      "product": "Product",
+      "all_orders": "All Orders",
+      "for_production": "For Production",
+      "on_hold": "On Hold",
+      "hold": "Hold"
     },
     "job_orders": {
       "title": "Job Orders",

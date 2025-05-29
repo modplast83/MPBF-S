@@ -723,7 +723,11 @@
       "required_quantity": "الكمية المطلوبة",
       "stage": "المرحلة",
       "active_production_orders": "طلبات الإنتاج النشطة",
-      "product": "المنتج"
+      "product": "المنتج",
+      "all_orders": "جميع الطلبات",
+      "for_production": "للإنتاج",
+      "on_hold": "معلقة",
+      "hold": "معلق"
     },
     "job_orders": {
       "title": "أمر إنتاج",
