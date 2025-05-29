@@ -29,6 +29,7 @@ import {
 } from "recharts";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { formatDateString, formatNumber } from "@/lib/utils";
+import { PDFExportButton } from "@/components/ui/pdf-export-button";
 
 // Types for warehouse report data
 interface WarehouseReportData {
@@ -307,6 +308,23 @@ export default function WarehouseReportsPage() {
         <h1 className="text-2xl font-bold text-primary-700">
           {t("reports.warehouse_reports")}
         </h1>
+        <PDFExportButton
+          data={reportData?.currentInventory || []}
+          reportType="custom"
+          title="Warehouse Inventory Report"
+          subtitle="Current Inventory and Material Analysis"
+          filename={`warehouse-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`}
+          columns={[
+            { header: "Material ID", dataKey: "id" },
+            { header: "Material Name", dataKey: "name" },
+            { header: "Type", dataKey: "type" },
+            { header: "Quantity", dataKey: "quantity" },
+            { header: "Unit", dataKey: "unit" },
+            { header: "Last Updated", dataKey: "lastUpdated" }
+          ]}
+          variant="default"
+          size="sm"
+        />
       </div>
       
       {/* Filters Card */}
