@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Trophy, AlertTriangle } from "lucide-react";
+import { Clock, Trophy, AlertTriangle, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 
 export default function HRIndex() {
@@ -27,6 +27,13 @@ export default function HRIndex() {
       icon: AlertTriangle,
       path: "/hr/violations-complaints",
       color: "bg-red-500"
+    },
+    {
+      title: "Violation Trends",
+      description: "Smart data visualization and analytics for violation patterns",
+      icon: TrendingUp,
+      path: "/hr/violation-trends",
+      color: "bg-purple-500"
     }
   ];
 

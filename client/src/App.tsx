@@ -55,6 +55,7 @@ import HRIndex from "@/pages/hr/index";
 import TimeAttendancePage from "@/pages/hr/time-attendance";
 import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
 import ViolationsComplaintsPage from "@/pages/hr/violations-complaints";
+import ViolationTrendsPage from "@/pages/hr/violation-trends";
 import BottleneckDashboard from "@/pages/production/bottleneck-dashboard";
 import MetricsInputPage from "@/pages/production/metrics-input";
 import { User } from "@shared/schema";
@@ -122,6 +123,7 @@ function App() {
                   <ProtectedRoute path="/hr/time-attendance" component={TimeAttendancePage} module="Time Attendance" />
                   <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
                   <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />
+                  <ProtectedRoute path="/hr/violation-trends" component={ViolationTrendsPage} module="Violation Trends" />
                   {/* Bottleneck Notification System Routes */}
                   <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
                   <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />

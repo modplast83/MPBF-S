@@ -96,7 +96,7 @@ export default function ViolationsComplaintsPage() {
   const createViolationMutation = useMutation({
     mutationFn: (data: ViolationForm) => apiRequest('POST', API_ENDPOINTS.HR_VIOLATIONS, {
       ...data,
-      reportedBy: user?.id
+      reportedBy: user?.id?.toString()
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.HR_VIOLATIONS] });
@@ -113,7 +113,7 @@ export default function ViolationsComplaintsPage() {
   const createComplaintMutation = useMutation({
     mutationFn: (data: ComplaintForm) => apiRequest('POST', API_ENDPOINTS.HR_COMPLAINTS, {
       ...data,
-      complainantId: user?.id
+      complainantId: user?.id?.toString()
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.HR_COMPLAINTS] });
