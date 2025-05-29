@@ -104,6 +104,9 @@ export function PermissionsProvider({
     // Administrator role has all permissions - case insensitive check
     if (userRole.toLowerCase() === "administrator") return true;
     
+    // If permissions are still loading, allow access for administrators to prevent blocking
+    if (isLoading && userRole.toLowerCase() === "administrator") return true;
+    
     // Supervisor has broad permissions - case insensitive check
     if (userRole.toLowerCase() === "supervisor") {
       // Check if there are specific supervisor permissions defined - both exact and lowercase match

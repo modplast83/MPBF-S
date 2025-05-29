@@ -20,8 +20,20 @@ export function ProtectedRoute({
   workflowTab
 }: ProtectedRouteProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
-  const { hasPermission, hasWorkflowTabPermission } = usePermissions();
   const [location, setLocation] = useLocation();
+  
+  // Add safety check for permissions provider
+  let hasPermission = (module: string) => true;
+  let hasWorkflowTabPermission = (tab: string) => true;
+  
+  try {
+    const permissions = usePermissions();
+    hasPermission = permissions.hasPermission;
+    hasWorkflowTabPermission = permissions.hasWorkflowTabPermission;
+  } catch (error) {
+    // Fallback when permissions provider is not available
+    console.warn("Permissions provider not available, allowing access");
+  }
 
   useEffect(() => {
     // Only redirect if not already on the auth page

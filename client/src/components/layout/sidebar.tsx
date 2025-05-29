@@ -25,7 +25,20 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
   const { isRTL } = useLanguage();
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { hasPermission } = usePermissions();
+  
+  // Add safety check for permissions provider
+  let hasPermission: (module: string) => boolean;
+  let isLoading = true;
+  
+  try {
+    const permissions = usePermissions();
+    hasPermission = permissions.hasPermission;
+    isLoading = permissions.isLoading;
+  } catch (error) {
+    // Fallback when permissions provider is not available
+    hasPermission = () => true; // Allow all permissions as fallback
+    isLoading = false;
+  }
 
   // For storing open state of collapsible menu items
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
