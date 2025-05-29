@@ -60,9 +60,11 @@ export function QualityViolations() {
   const [formData, setFormData] = useState({
     reportedBy: "",
     qualityCheckId: null as null | number,
+    violationType: "material",
     description: "",
     severity: "Medium",
-    status: "Open",
+    status: "open",
+    affectedArea: "extrusion",
     resolvedDate: "",
     resolutionNotes: ""
   });
@@ -210,9 +212,11 @@ export function QualityViolations() {
     setFormData({
       reportedBy: "",
       qualityCheckId: null,
+      violationType: "material",
       description: "",
       severity: "Medium",
-      status: "Open",
+      status: "open",
+      affectedArea: "extrusion",
       resolvedDate: "",
       resolutionNotes: ""
     });
@@ -242,9 +246,11 @@ export function QualityViolations() {
     setFormData({
       reportedBy: violation.reportedBy || "",
       qualityCheckId: violation.qualityCheckId || null,
+      violationType: violation.violationType || "material",
       description: violation.description || "",
       severity: violation.severity || "Medium",
-      status: violation.status || "Open",
+      status: violation.status || "open",
+      affectedArea: violation.affectedArea || "extrusion",
       resolvedDate: violation.resolvedDate ? new Date(violation.resolvedDate).toISOString().split('T')[0] : "",
       resolutionNotes: violation.resolutionNotes || ""
     });

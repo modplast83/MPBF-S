@@ -1937,9 +1937,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.body.reportedBy = req.user.id;
       }
       
+      // Validate required fields
+      if (!req.body.qualityCheckId) {
+        return res.status(400).json({ message: "Quality check ID is required" });
+      }
+      if (!req.body.violationType) {
+        return res.status(400).json({ message: "Violation type is required" });
+      }
+      if (!req.body.severity) {
+        return res.status(400).json({ message: "Severity is required" });
+      }
+      if (!req.body.description) {
+        return res.status(400).json({ message: "Description is required" });
+      }
+      if (!req.body.affectedArea) {
+        return res.status(400).json({ message: "Affected area is required" });
+      }
+      
+      // Ensure status has a default value
+      if (!req.body.status) {
+        req.body.status = "open";
+      }
+      
+      console.log("Creating quality violation with data:", JSON.stringify(req.body, null, 2));
+      
       const violation = await storage.createQualityViolation(req.body);
       res.status(201).json(violation);
     } catch (error) {
+      console.error("Quality violation creation error:", error);
       res.status(500).json({ message: `Failed to create quality violation: ${error}` });
     }
   });

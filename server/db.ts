@@ -19,7 +19,18 @@ export function createDbConnection() {
 
   console.log("Connecting to database...");
   
-  const newPool = new Pool({ connectionString: databaseUrl });
+  const newPool = new Pool({ 
+    connectionString: databaseUrl,
+    max: 10, // Maximum number of connections in pool
+    idleTimeoutMillis: 30000, // Close connections after 30 seconds of inactivity
+    connectionTimeoutMillis: 10000, // Wait 10 seconds for a connection
+  });
+  
+  // Handle pool errors
+  newPool.on('error', (err) => {
+    console.error('Database pool error:', err);
+  });
+
   const newDb = drizzle(newPool, { schema });
   
   return { pool: newPool, db: newDb };
