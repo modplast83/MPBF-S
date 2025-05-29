@@ -43,7 +43,8 @@ import {
   AlertTriangle, 
   FileText, 
   Search,
-  Filter
+  Filter,
+  Printer
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 
@@ -262,6 +263,100 @@ export function QualityViolations() {
     setShowDeleteDialog(true);
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const filteredViolations = violations.filter((violation: any) => {
+      const matchesSearch = violation.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           violation.id?.toString().includes(searchQuery);
+      const matchesStatus = filterStatus === "all" || violation.status === filterStatus;
+      const matchesSeverity = filterSeverity === "all" || violation.severity === filterSeverity;
+      return matchesSearch && matchesStatus && matchesSeverity;
+    });
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Quality Violations Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .header h1 { color: #333; margin-bottom: 5px; }
+            .header p { color: #666; margin: 0; }
+            .summary { margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 5px; }
+            .summary h3 { margin-top: 0; color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f5f5f5; font-weight: bold; }
+            .severity-high { background-color: #fee; }
+            .severity-medium { background-color: #fff3cd; }
+            .severity-low { background-color: #d1ecf1; }
+            .status-open { color: #dc3545; }
+            .status-solved { color: #28a745; }
+            .status-progress { color: #ffc107; }
+            .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Quality Violations Report</h1>
+            <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+          </div>
+          
+          <div class="summary">
+            <h3>Summary</h3>
+            <p><strong>Total Violations:</strong> ${filteredViolations.length}</p>
+            <p><strong>Open:</strong> ${filteredViolations.filter((v: any) => v.status === 'open').length}</p>
+            <p><strong>In Progress:</strong> ${filteredViolations.filter((v: any) => v.status === 'investigating').length}</p>
+            <p><strong>Resolved:</strong> ${filteredViolations.filter((v: any) => v.status === 'resolved').length}</p>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Affected Area</th>
+                <th>Report Date</th>
+                <th>Reported By</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredViolations.map((violation: any) => `
+                <tr class="severity-${violation.severity?.toLowerCase()}">
+                  <td>${violation.id}</td>
+                  <td>${violation.description || 'N/A'}</td>
+                  <td>${violation.severity || 'N/A'}</td>
+                  <td class="status-${violation.status?.toLowerCase()}">${violation.status || 'N/A'}</td>
+                  <td>${violation.affectedArea || 'N/A'}</td>
+                  <td>${violation.reportDate ? new Date(violation.reportDate).toLocaleDateString() : 'N/A'}</td>
+                  <td>${violation.reportedBy || 'N/A'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>This report was generated automatically by the Production Management System</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
   // Filter and search functionality
   const filteredViolations = violations.filter((violation: any) => {
     const matchesSearch = searchQuery === "" || 
@@ -352,22 +447,27 @@ export function QualityViolations() {
             </Select>
           </div>
           
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button variant="default" size="sm" className="h-9" onClick={() => {
-                resetForm();
-                setShowAddDialog(true);
-              }}>
-                <Plus className="mr-1 sm:mr-2 h-4 w-4" /> 
-                <span className="text-xs sm:text-sm">{t("quality.add_violation")}</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-[500px] p-4 sm:p-6">
-              <DialogHeader className="mb-2">
-                <DialogTitle className="text-lg">{t("quality.add_violation")}</DialogTitle>
-                <DialogDescription className="text-sm">{t("quality.add_violation_description")}</DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreateSubmit}>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="h-9" onClick={handlePrint}>
+              <Printer className="mr-1 sm:mr-2 h-4 w-4" /> 
+              <span className="text-xs sm:text-sm">{t("common.print")}</span>
+            </Button>
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+              <DialogTrigger asChild>
+                <Button variant="default" size="sm" className="h-9" onClick={() => {
+                  resetForm();
+                  setShowAddDialog(true);
+                }}>
+                  <Plus className="mr-1 sm:mr-2 h-4 w-4" /> 
+                  <span className="text-xs sm:text-sm">{t("quality.add_violation")}</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[95vw] sm:max-w-[500px] p-4 sm:p-6">
+                <DialogHeader className="mb-2">
+                  <DialogTitle className="text-lg">{t("quality.add_violation")}</DialogTitle>
+                  <DialogDescription className="text-sm">{t("quality.add_violation_description")}</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleCreateSubmit}>
                 <div className="space-y-4 py-4">
                   <div className="grid grid-cols-1 gap-4">
                     <div>
@@ -558,8 +658,8 @@ export function QualityViolations() {
                     <TableCell>{getSeverityBadge(violation.severity)}</TableCell>
                     <TableCell>{getStatusBadge(violation.status)}</TableCell>
                     <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
-                      {violation.reportedDate 
-                        ? format(new Date(violation.reportedDate), 'MMM d, yyyy') 
+                      {violation.reportDate 
+                        ? format(new Date(violation.reportDate), 'MMM d, yyyy') 
                         : t("common.not_available")}
                     </TableCell>
                     <TableCell className="text-right">
