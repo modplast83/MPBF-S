@@ -103,6 +103,8 @@ export const SIDEBAR_ITEMS = [
           { title: "Orders", path: "/orders" },
           { title: "Workflow", path: "/workflow" },
           { title: "Mix Materials", path: "/production/mix-materials" },
+          { title: "Bottleneck Monitor", path: "/production/bottleneck-dashboard" },
+          { title: "Production Metrics", path: "/production/metrics-input" },
         ],
       },
       {

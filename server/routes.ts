@@ -30,6 +30,7 @@ import fileUpload from 'express-fileupload';
 import { setupAuth } from "./auth";
 import { ensureAdminUser } from "./user-seed";
 import { setupHRRoutes } from "./hr-routes";
+import { setupBottleneckRoutes } from "./bottleneck-routes";
 
 // Extend the Request type to include express-fileupload properties
 declare global {
@@ -60,6 +61,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup HR module routes
   setupHRRoutes(app);
+  
+  // Setup bottleneck notification system routes
+  setupBottleneckRoutes(app);
   
   // User is now handled directly by auth.ts
   
