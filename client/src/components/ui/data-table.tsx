@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -42,6 +42,8 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
   dir?: 'ltr' | 'rtl';
   isLoading?: boolean;
+  highlightNewRows?: boolean;
+  animateChanges?: boolean;
 }
 
 export function DataTable<T>({
@@ -57,16 +59,43 @@ export function DataTable<T>({
   onRowClick,
   dir = 'ltr',
   isLoading = false,
+  highlightNewRows = true,
+  animateChanges = true,
 }: DataTableProps<T>) {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [internalCurrentPage, setInternalCurrentPage] = useState(1);
   const [internalPageSize, setInternalPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [newRowsSet, setNewRowsSet] = useState<Set<number>>(new Set());
+  const [previousDataLength, setPreviousDataLength] = useState(data.length);
   
   // Use external state if provided, otherwise use internal state
   const currentPage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
   const pageSize = externalPageSize !== undefined ? externalPageSize : internalPageSize;
+
+  // Detect new rows and highlight them
+  useEffect(() => {
+    if (highlightNewRows && data.length > previousDataLength) {
+      const newRows = new Set<number>();
+      // Highlight the new rows (assuming they are added at the end)
+      for (let i = previousDataLength; i < data.length; i++) {
+        newRows.add(i);
+      }
+      setNewRowsSet(newRows);
+      
+      // Remove highlight after 3 seconds
+      const timer = setTimeout(() => {
+        setNewRowsSet(new Set());
+      }, 3000);
+      
+      setPreviousDataLength(data.length);
+      return () => clearTimeout(timer);
+    } else {
+      setPreviousDataLength(data.length);
+    }
+  }, [data.length, previousDataLength, highlightNewRows]);
 
   // Filter data based on search query
   const filteredData = searchable && searchQuery
@@ -140,48 +169,79 @@ export function DataTable<T>({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="border-b border-gray-200 hover:bg-gray-50/50 transition-colors duration-200">
               {(isRightToLeft ? [...columns].reverse() : columns).filter(column => !column.hidden).map((column, index) => (
                 <TableHead 
                   key={index} 
-                  className="h-12 px-4 align-middle text-muted-foreground [&:has([role=checkbox])]:pr-0 font-extrabold text-center"
+                  className="h-12 px-4 align-middle text-muted-foreground [&:has([role=checkbox])]:pr-0 font-extrabold text-center relative group"
                 >
-                  {column.header}
+                  <div className="flex items-center justify-center">
+                    {column.header}
+                    <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></div>
+                  </div>
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              // Loading skeleton
+              // Enhanced loading skeleton with staggered animation
               (Array.from({ length: 5 }).map((_, rowIndex) => (
-                <TableRow key={`skeleton-${rowIndex}`}>
+                <TableRow 
+                  key={`skeleton-${rowIndex}`}
+                  className="animate-pulse"
+                  style={{ animationDelay: `${rowIndex * 100}ms` }}
+                >
                   {(isRightToLeft ? [...columns].reverse() : columns).filter(column => !column.hidden).map((_, colIndex) => (
-                    <TableCell key={`skeleton-cell-${colIndex}`}>
-                      <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+                    <TableCell key={`skeleton-cell-${colIndex}`} className="p-4">
+                      <div 
+                        className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"
+                        style={{ animationDelay: `${colIndex * 50}ms` }}
+                      ></div>
                     </TableCell>
                   ))}
                 </TableRow>
               )))
             ) : paginatedData.length > 0 ? (
-              paginatedData.map((row, rowIndex) => (
-                <TableRow
-                  key={rowIndex}
-                  onClick={(e) => {
-                    // Only trigger row click if not clicking on an action button
-                    if (onRowClick && 
-                        e.target && 
-                        !((e.target as HTMLElement).closest('button') || 
-                          (e.target as HTMLElement).closest('a'))) {
-                      onRowClick(row);
-                    }
-                  }}
-                  className={onRowClick ? "cursor-pointer hover:bg-secondary-50" : ""}
-                >
-                  {(isRightToLeft ? [...columns].reverse() : columns).filter(column => !column.hidden).map((column, colIndex) => (
-                    <TableCell 
-                      key={colIndex}
-                      className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center font-semibold"
+              paginatedData.map((row, rowIndex) => {
+                const absoluteRowIndex = getAbsoluteRowIndex(rowIndex);
+                const isNewRow = newRowsSet.has(absoluteRowIndex);
+                const isHovered = hoveredRow === rowIndex;
+                
+                return (
+                  <TableRow
+                    key={rowIndex}
+                    onClick={(e) => {
+                      // Only trigger row click if not clicking on an action button
+                      if (onRowClick && 
+                          e.target && 
+                          !((e.target as HTMLElement).closest('button') || 
+                            (e.target as HTMLElement).closest('a'))) {
+                        onRowClick(row);
+                      }
+                    }}
+                    onMouseEnter={() => setHoveredRow(rowIndex)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                    className={`
+                      border-b border-gray-100 transition-all duration-300 ease-in-out
+                      ${onRowClick ? "cursor-pointer" : ""}
+                      ${isHovered ? "bg-gradient-to-r from-blue-50/70 to-indigo-50/70 scale-[1.01] shadow-sm" : ""}
+                      ${isNewRow ? "bg-gradient-to-r from-green-50 to-emerald-50 shadow-md animate-bounce" : ""}
+                      ${!isHovered && !isNewRow ? "hover:bg-gray-50/60" : ""}
+                      transform
+                    `}
+                    style={{
+                      animationDelay: animateChanges ? `${rowIndex * 50}ms` : '0ms'
+                    }}
+                  >
+                    {(isRightToLeft ? [...columns].reverse() : columns).filter(column => !column.hidden).map((column, colIndex) => (
+                      <TableCell 
+                        key={colIndex}
+                        className={`
+                          p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center font-semibold
+                          transition-all duration-200 ease-in-out
+                          ${isHovered ? "transform scale-105" : ""}
+                        `}
                     >
                       {column.cell
                         ? column.cell(row, getAbsoluteRowIndex(rowIndex))
