@@ -239,8 +239,8 @@ export function DataTable<T>({
                         key={colIndex}
                         className={`
                           p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center font-semibold
-                          transition-all duration-200 ease-in-out
-                          ${isHovered ? "transform scale-105" : ""}
+                          transition-colors duration-200 ease-in-out
+                          ${isHovered ? "bg-gray-50" : ""}
                         `}
                       >
                         {column.cell
