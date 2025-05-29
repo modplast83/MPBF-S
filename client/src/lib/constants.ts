@@ -48,6 +48,12 @@ export const API_ENDPOINTS = {
   
   // Demo
   INIT_DEMO_DATA: "/api/init-demo-data",
+  
+  // HR Module
+  TIME_ATTENDANCE: "/api/time-attendance",
+  EMPLOYEE_OF_MONTH: "/api/employee-of-month",
+  HR_VIOLATIONS: "/api/hr-violations",
+  HR_COMPLAINTS: "/api/hr-complaints",
 };
 
 // Stage and status options
@@ -114,6 +120,16 @@ export const SIDEBAR_ITEMS = [
         icon: "verified",
         subItems: [
           { title: "Unified Dashboard", path: "/quality/unified-dashboard" },
+        ],
+      },
+      {
+        title: "HR",
+        path: "/hr",
+        icon: "people",
+        subItems: [
+          { title: "Time Attendance", path: "/hr/time-attendance" },
+          { title: "Employee of the Month", path: "/hr/employee-of-month" },
+          { title: "Violation and Complaint", path: "/hr/violations-complaints" },
         ],
       },
     ],
