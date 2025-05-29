@@ -423,7 +423,7 @@ export function QualityCorrectiveActions() {
                           }
                         }} 
                       />
-                      <Label htmlFor="isVerified">{t("quality.is_verified")}</Label>
+                      <Label htmlFor="isVerified">Quality Verified</Label>
                     </div>
                     
                     {formData.verifiedDate && (
@@ -664,7 +664,7 @@ export function QualityCorrectiveActions() {
                       }
                     }} 
                   />
-                  <Label htmlFor="isVerified">{t("quality.is_verified")}</Label>
+                  <Label htmlFor="isVerified">Quality Verified</Label>
                 </div>
                 
                 {formData.verifiedDate && (
