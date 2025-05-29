@@ -868,6 +868,7 @@ export function QualityViolations() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
