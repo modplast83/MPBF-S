@@ -28,6 +28,7 @@ import {
 import { API_ENDPOINTS } from "@/lib/constants";
 import { formatDateString, formatNumber } from "@/lib/utils";
 import { User, Section } from "@shared/schema";
+import { PDFExportButton } from "@/components/ui/pdf-export-button";
 
 // Interface for workflow report data
 interface WorkflowReportData {
@@ -354,6 +355,22 @@ export default function WorkflowReportsPage() {
         <h1 className="text-2xl font-bold text-primary-700">
           {t("reports.workflow_report")}
         </h1>
+        <PDFExportButton
+          data={reportData?.sections || []}
+          reportType="production"
+          title="Workflow Production Report"
+          subtitle="Manufacturing Process Analysis"
+          filename={`workflow-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`}
+          columns={[
+            { header: "Section", dataKey: "name" },
+            { header: "Roll Count", dataKey: "rollCount" },
+            { header: "Total Quantity", dataKey: "totalQuantity" },
+            { header: "Waste %", dataKey: "wastePercentage" },
+            { header: "Efficiency %", dataKey: "efficiency" }
+          ]}
+          variant="default"
+          size="sm"
+        />
       </div>
       
       {/* Filters Card */}
