@@ -630,11 +630,11 @@ export function QualityCorrectiveActions() {
                       {action.verifiedDate ? (
                         <Badge variant="success" className="flex items-center gap-1">
                           <CheckCheck className="h-3 w-3" />
-                          {t("quality.verified")}
+                          Verified
                         </Badge>
                       ) : (
                         <Badge variant="outline" className="text-orange-500 border-orange-500">
-                          {t("quality.pending_verification")}
+                          Pending Verification
                         </Badge>
                       )}
                     </TableCell>
