@@ -255,9 +255,9 @@ export default function BottleneckDashboard() {
         <TabsContent value="active-alerts" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Active Production Alerts</CardTitle>
+              <CardTitle>{t("production.active_production_alerts")}</CardTitle>
               <CardDescription>
-                Current bottlenecks and issues requiring attention
+                {t("production.current_bottlenecks_description")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -272,8 +272,8 @@ export default function BottleneckDashboard() {
               ) : !activeAlerts || activeAlerts.length === 0 ? (
                 <div className="text-center py-8">
                   <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Active Alerts</h3>
-                  <p className="text-muted-foreground">All production lines are operating normally</p>
+                  <h3 className="text-lg font-semibold mb-2">{t("production.no_active_alerts")}</h3>
+                  <p className="text-muted-foreground">{t("production.all_lines_operating_normally")}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -298,12 +298,12 @@ export default function BottleneckDashboard() {
                           </AlertDescription>
                           {alert.estimatedDelay && (
                             <p className="text-sm text-orange-600 mb-2">
-                              Estimated delay: {alert.estimatedDelay} hours
+                              {t("production.estimated_delay")}: {alert.estimatedDelay} {t("production.hours")}
                             </p>
                           )}
                           {alert.suggestedActions && alert.suggestedActions.length > 0 && (
                             <div className="mb-3">
-                              <p className="text-sm font-medium mb-1">Suggested Actions:</p>
+                              <p className="text-sm font-medium mb-1">{t("production.suggested_actions")}:</p>
                               <ul className="text-sm text-muted-foreground list-disc list-inside">
                                 {alert.suggestedActions.slice(0, 3).map((action, index) => (
                                   <li key={index}>{action}</li>
@@ -313,7 +313,7 @@ export default function BottleneckDashboard() {
                           )}
                           <div className="flex items-center justify-between">
                             <p className="text-xs text-muted-foreground">
-                              Detected {formatTimeAgo(alert.detectedAt)}
+                              {t("production.detected")} {formatTimeAgo(alert.detectedAt)}
                             </p>
                             <div className="flex gap-2">
                               {alert.status === 'active' && (
@@ -324,14 +324,14 @@ export default function BottleneckDashboard() {
                                     onClick={() => acknowledgeAlertMutation.mutate(alert.id)}
                                     disabled={acknowledgeAlertMutation.isPending}
                                   >
-                                    Acknowledge
+                                    {t("production.acknowledge")}
                                   </Button>
                                   <Button
                                     size="sm"
                                     onClick={() => resolveAlertMutation.mutate({ alertId: alert.id })}
                                     disabled={resolveAlertMutation.isPending}
                                   >
-                                    Resolve
+                                    {t("production.resolve")}
                                   </Button>
                                 </>
                               )}
