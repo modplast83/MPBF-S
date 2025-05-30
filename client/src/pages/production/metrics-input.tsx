@@ -69,14 +69,11 @@ export default function MetricsInputPage() {
 
   const createMetricMutation = useMutation({
     mutationFn: (data: ProductionMetricsForm) => 
-      apiRequest("/api/production/metrics", {
-        method: "POST",
-        body: JSON.stringify(data)
-      }),
+      apiRequest("POST", "/api/production/metrics", data),
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Production metrics recorded successfully"
+        title: t("common.success"),
+        description: t("production.metrics_recorded_successfully")
       });
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/production/metrics"] });
@@ -85,8 +82,8 @@ export default function MetricsInputPage() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to record metrics",
+        title: t("common.error"),
+        description: error.message || t("production.metrics_record_failed"),
         variant: "destructive"
       });
     }
@@ -103,24 +100,24 @@ export default function MetricsInputPage() {
   };
 
   const stages = [
-    { value: "extruding", label: "Extruding" },
-    { value: "printing", label: "Printing" },
-    { value: "cutting", label: "Cutting" },
-    { value: "mixing", label: "Mixing" }
+    { value: "extruding", label: t("production.extruding") },
+    { value: "printing", label: t("production.printing") },
+    { value: "cutting", label: t("production.cutting") },
+    { value: "mixing", label: t("production.mixing") }
   ];
 
   const shifts = [
-    { value: "day", label: "Day Shift" },
-    { value: "night", label: "Night Shift" },
-    { value: "morning", label: "Morning Shift" }
+    { value: "day", label: t("production.day_shift") },
+    { value: "night", label: t("production.night_shift") },
+    { value: "morning", label: t("production.morning_shift") }
   ];
 
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Production Metrics Input</h1>
+        <h1 className="text-3xl font-bold">{t("production.metrics_input")}</h1>
         <p className="text-muted-foreground">
-          Record production metrics to monitor performance and detect bottlenecks
+          {t("production.metrics_input_description")}
         </p>
       </div>
 
@@ -131,10 +128,10 @@ export default function MetricsInputPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gauge className="h-5 w-5" />
-                Record Production Metrics
+                {t("production.record_metrics")}
               </CardTitle>
               <CardDescription>
-                Enter current production data for real-time bottleneck analysis
+                {t("production.enter_production_data")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -146,11 +143,11 @@ export default function MetricsInputPage() {
                       name="sectionId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Section</FormLabel>
+                          <FormLabel>{t("production.section")}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select section" />
+                                <SelectValue placeholder={t("production.select_section")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -171,11 +168,11 @@ export default function MetricsInputPage() {
                       name="machineId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Machine (Optional)</FormLabel>
+                          <FormLabel>{t("production.machine_optional")}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select machine" />
+                                <SelectValue placeholder={t("production.select_machine")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -198,11 +195,11 @@ export default function MetricsInputPage() {
                       name="stage"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Production Stage</FormLabel>
+                          <FormLabel>{t("production.production_stage")}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select stage" />
+                                <SelectValue placeholder={t("production.select_stage")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -223,11 +220,11 @@ export default function MetricsInputPage() {
                       name="jobOrderId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Job Order (Optional)</FormLabel>
+                          <FormLabel>{t("production.job_order_optional")}</FormLabel>
                           <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} defaultValue={field.value?.toString()}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select job order" />
+                                <SelectValue placeholder={t("production.select_job_order")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -250,7 +247,7 @@ export default function MetricsInputPage() {
                       name="targetRate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Target Rate (units/hr)</FormLabel>
+                          <FormLabel>{t("production.target_rate")}</FormLabel>
                           <FormControl>
                             <Input type="number" step="0.1" {...field} />
                           </FormControl>
@@ -264,7 +261,7 @@ export default function MetricsInputPage() {
                       name="actualRate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Actual Rate (units/hr)</FormLabel>
+                          <FormLabel>{t("production.actual_rate")}</FormLabel>
                           <FormControl>
                             <Input type="number" step="0.1" {...field} />
                           </FormControl>
@@ -278,7 +275,7 @@ export default function MetricsInputPage() {
                       name="efficiency"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Efficiency (%)</FormLabel>
+                          <FormLabel>{t("production.efficiency_percent")}</FormLabel>
                           <FormControl>
                             <Input type="number" min="0" max="100" step="0.1" {...field} />
                           </FormControl>
