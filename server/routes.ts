@@ -4870,7 +4870,26 @@ COMMIT;
     try {
       const id = parseInt(req.params.id);
       const data = req.body;
-      const timeAttendance = await storage.updateTimeAttendance(id, data);
+      
+      // Convert timestamp strings to Date objects
+      const processedData = { ...data };
+      if (processedData.checkInTime && typeof processedData.checkInTime === 'string') {
+        processedData.checkInTime = new Date(processedData.checkInTime);
+      }
+      if (processedData.checkOutTime && typeof processedData.checkOutTime === 'string') {
+        processedData.checkOutTime = new Date(processedData.checkOutTime);
+      }
+      if (processedData.breakStartTime && typeof processedData.breakStartTime === 'string') {
+        processedData.breakStartTime = new Date(processedData.breakStartTime);
+      }
+      if (processedData.breakEndTime && typeof processedData.breakEndTime === 'string') {
+        processedData.breakEndTime = new Date(processedData.breakEndTime);
+      }
+      if (processedData.date && typeof processedData.date === 'string') {
+        processedData.date = new Date(processedData.date);
+      }
+      
+      const timeAttendance = await storage.updateTimeAttendance(id, processedData);
       res.json(timeAttendance);
     } catch (error) {
       console.error('Error updating time attendance:', error);

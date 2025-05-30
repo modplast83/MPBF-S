@@ -93,7 +93,7 @@ export default function TimeAttendancePage() {
           checkOutMutation.mutate({
             id: attendance.id,
             data: {
-              checkOutTime,
+              checkOutTime: checkOutTime.toISOString(),
               workingHours: Math.round(workingHours * 100) / 100,
               overtimeHours: workingHours > 8 ? Math.round((workingHours - 8) * 100) / 100 : 0,
               location: attendance.location + ` | Out: ${location}`
@@ -104,7 +104,7 @@ export default function TimeAttendancePage() {
         checkOutMutation.mutate({
           id: attendance.id,
           data: {
-            checkOutTime,
+            checkOutTime: checkOutTime.toISOString(),
             workingHours: Math.round(workingHours * 100) / 100,
             overtimeHours: workingHours > 8 ? Math.round((workingHours - 8) * 100) / 100 : 0
           }
