@@ -652,38 +652,42 @@ export function QualityViolations() {
                 }
                 
                 return (
-                  <TableRow key={violation.id}>
-                    <TableCell className="text-xs sm:text-sm font-medium">#{violation.id}</TableCell>
-                    <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{reporterName}</TableCell>
-                    <TableCell className="max-w-[150px] sm:max-w-[200px]">
-                      <div className="truncate text-xs sm:text-sm" title={violation.description}>
-                        {violation.description}
+                  <TableRow key={violation.id} className="hover:bg-muted/50">
+                    <TableCell className="text-center font-medium text-sm">#{violation.id}</TableCell>
+                    <TableCell className="hidden md:table-cell text-sm">{reporterName}</TableCell>
+                    <TableCell className="max-w-[300px]">
+                      <div className="text-sm leading-relaxed" title={violation.description}>
+                        <div className="line-clamp-2 md:line-clamp-3">
+                          {violation.description}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell>{getSeverityBadge(violation.severity)}</TableCell>
-                    <TableCell>{getStatusBadge(violation.status)}</TableCell>
-                    <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
+                    <TableCell className="text-center">{getSeverityBadge(violation.severity)}</TableCell>
+                    <TableCell className="text-center">{getStatusBadge(violation.status)}</TableCell>
+                    <TableCell className="hidden lg:table-cell text-sm">
                       {violation.reportDate 
                         ? format(new Date(violation.reportDate), 'MMM d, yyyy') 
                         : t("common.not_available")}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-1 sm:gap-2">
+                      <div className="flex justify-end gap-1">
                         <Button 
                           variant="outline" 
-                          size="icon"
-                          className="h-7 w-7 sm:h-8 sm:w-8"
+                          size="sm"
+                          className="h-8 w-8 p-0"
                           onClick={() => handleEditClick(violation)}
+                          title={t("common.edit")}
                         >
-                          <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="outline" 
-                          size="icon"
-                          className="h-7 w-7 sm:h-8 sm:w-8"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive-foreground hover:bg-destructive"
                           onClick={() => handleDeleteClick(violation)}
+                          title={t("common.delete")}
                         >
-                          <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -692,7 +696,8 @@ export function QualityViolations() {
               })}
             </TableBody>
           </Table>
-        </ScrollArea>
+          </ScrollArea>
+        </div>
       )}
       
       {/* Edit Dialog */}
@@ -873,7 +878,6 @@ export function QualityViolations() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </div>
     </div>
   );
 }
