@@ -209,15 +209,11 @@ export function CustomerForm({ customer, onSuccess }: CustomerFormProps) {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="null">None</SelectItem>
-                    {Array.isArray(users) ? users.map((user) => (
+                    {users?.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.firstName || user.username || user.id}
                       </SelectItem>
-                    )) : (users && typeof users === 'object' && 'id' in users ? (
-                      <SelectItem key={users.id} value={users.id}>
-                        {users.firstName || users.username || users.id}
-                      </SelectItem>
-                    ) : null)}
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />

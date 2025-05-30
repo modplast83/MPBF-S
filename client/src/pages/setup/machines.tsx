@@ -81,44 +81,44 @@ export default function Machines() {
   const columns = [
     {
       header: "ID",
-      accessorKey: "id",
+      accessorKey: "id" as const,
     },
     {
       header: "Name",
-      accessorKey: "name",
+      accessorKey: "name" as const,
     },
     {
       header: "S/N",
-      accessorKey: "serialNumber",
-      cell: (row: { serialNumber: string | null }) => row.serialNumber || "N/A",
+      accessorKey: "serialNumber" as const,
+      cell: (row: Machine) => row.serialNumber || "N/A",
     },
     {
       header: "Supplier",
-      accessorKey: "supplier",
-      cell: (row: { supplier: string | null }) => row.supplier || "N/A",
+      accessorKey: "supplier" as const,
+      cell: (row: Machine) => row.supplier || "N/A",
     },
     {
       header: "Date of Manufacturing",
-      accessorKey: "dateOfManufacturing",
-      cell: (row: { dateOfManufacturing: Date | null }) => 
+      accessorKey: "dateOfManufacturing" as const,
+      cell: (row: Machine) => 
         row.dateOfManufacturing 
           ? new Date(row.dateOfManufacturing).toLocaleDateString()
           : "N/A",
     },
     {
       header: "Model #",
-      accessorKey: "modelNumber",
-      cell: (row: { modelNumber: string | null }) => row.modelNumber || "N/A",
+      accessorKey: "modelNumber" as const,
+      cell: (row: Machine) => row.modelNumber || "N/A",
     },
     {
       header: "Section",
-      accessorKey: "sectionId",
-      cell: (row: { sectionId: string | null }) => getSectionName(row.sectionId),
+      accessorKey: "sectionId" as const,
+      cell: (row: Machine) => getSectionName(row.sectionId),
     },
     {
       header: "Status",
-      accessorKey: "isActive",
-      cell: (row: { isActive: boolean }) => (
+      accessorKey: "isActive" as const,
+      cell: (row: Machine) => (
         <Badge variant={row.isActive ? "default" : "secondary"}>
           {row.isActive ? "Active" : "Inactive"}
         </Badge>

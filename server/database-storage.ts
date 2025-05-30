@@ -2125,7 +2125,7 @@ export class DatabaseStorage implements IStorage {
 
   async getMaintenanceRequestsByUser(userId: string): Promise<MaintenanceRequest[]> {
     return await db.select().from(maintenanceRequests)
-      .where(eq(maintenanceRequests.reportedBy, userId))
+      .where(eq(maintenanceRequests.requestedBy, userId))
       .orderBy(desc(maintenanceRequests.createdAt));
   }
 
@@ -2140,7 +2140,7 @@ export class DatabaseStorage implements IStorage {
   async updateMaintenanceRequest(id: number, requestData: Partial<MaintenanceRequest>): Promise<MaintenanceRequest | undefined> {
     const [updated] = await db
       .update(maintenanceRequests)
-      .set({ ...requestData, updatedAt: new Date() })
+      .set(requestData)
       .where(eq(maintenanceRequests.id, id))
       .returning();
     return updated || undefined;
@@ -2184,7 +2184,7 @@ export class DatabaseStorage implements IStorage {
   async updateMaintenanceAction(id: number, actionData: Partial<MaintenanceAction>): Promise<MaintenanceAction | undefined> {
     const [updated] = await db
       .update(maintenanceActions)
-      .set({ ...actionData, updatedAt: new Date() })
+      .set(actionData)
       .where(eq(maintenanceActions.id, id))
       .returning();
     return updated || undefined;
