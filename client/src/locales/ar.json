@@ -1130,6 +1130,139 @@
         "warning": "تحذير",
         "info": "معلومات"
       }
+    },
+    "maintenance": {
+      "title": "إدارة الصيانة",
+      "description": "نظام إدارة الصيانة الشامل لمعدات الإنتاج",
+      "requests": {
+        "title": "طلبات الصيانة",
+        "description": "إنشاء وإدارة طلبات الصيانة لمعدات الإنتاج",
+        "new": "طلب جديد",
+        "create": "إنشاء طلب صيانة",
+        "machine": "الآلة",
+        "damageType": "نوع العطل",
+        "severity": "درجة الخطورة",
+        "description": "الوصف",
+        "notes": "الملاحظات",
+        "estimatedRepairTime": "الوقت المقدر للإصلاح (ساعات)",
+        "reportedBy": "أبلغ بواسطة",
+        "status": "الحالة",
+        "date": "التاريخ",
+        "actions": "الإجراءات",
+        "priority": "الأولوية",
+        "assignedTo": "مُعيَّن إلى",
+        "completedAt": "اكتمل في",
+        "actualRepairTime": "الوقت الفعلي للإصلاح",
+        "noRequests": "لا توجد طلبات صيانة",
+        "searchPlaceholder": "البحث في الطلبات...",
+        "filterByStatus": "تصفية حسب الحالة",
+        "filterBySeverity": "تصفية حسب الخطورة",
+        "allStatus": "جميع الحالات",
+        "allSeverity": "جميع درجات الخطورة",
+        "validationError": "يرجى ملء جميع الحقول المطلوبة",
+        "createSuccess": "تم إنشاء طلب الصيانة بنجاح",
+        "updateSuccess": "تم تحديث طلب الصيانة بنجاح",
+        "start": "ابدأ",
+        "complete": "اكتمل"
+      },
+      "actions": {
+        "title": "إجراءات الصيانة",
+        "description": "تسجيل وتتبع إجراءات الصيانة المتخذة لطلبات المعدات",
+        "record": "تسجيل إجراء",
+        "create": "تسجيل إجراء صيانة",
+        "request": "طلب الصيانة",
+        "actionsTaken": "الإجراءات المتخذة",
+        "partsCost": "تكلفة القطع ($)",
+        "laborHours": "ساعات العمل",
+        "actionBy": "الإجراء بواسطة",
+        "noActions": "لا توجد إجراءات صيانة",
+        "searchPlaceholder": "البحث في الإجراءات...",
+        "validationError": "يرجى ملء جميع الحقول المطلوبة",
+        "createSuccess": "تم تسجيل إجراء الصيانة بنجاح"
+      },
+      "schedule": {
+        "title": "جدولة الصيانة",
+        "description": "جدولة الصيانة الوقائية للآلات",
+        "preventive": "الصيانة الوقائية",
+        "overdue": "الصيانة المتأخرة",
+        "upcoming": "الصيانة القادمة",
+        "scheduleMaintenance": "جدولة الصيانة",
+        "nextDue": "الاستحقاق التالي",
+        "frequency": "التكرار",
+        "lastPerformed": "آخر تنفيذ",
+        "maintenanceType": "نوع الصيانة",
+        "daily": "يومية",
+        "weekly": "أسبوعية",
+        "monthly": "شهرية",
+        "quarterly": "ربع سنوية",
+        "yearly": "سنوية"
+      },
+      "dashboard": {
+        "title": "لوحة تحكم الصيانة",
+        "description": "نظرة عامة على أنشطة ومقاييس الصيانة",
+        "pendingRequests": "الطلبات المعلقة",
+        "inProgress": "قيد التقدم",
+        "completedToday": "اكتمل اليوم",
+        "overdueMaintenance": "الصيانة المتأخرة",
+        "totalCost": "التكلفة الإجمالية",
+        "averageRepairTime": "متوسط وقت الإصلاح",
+        "efficiency": "كفاءة الصيانة",
+        "uptime": "وقت تشغيل المعدات"
+      },
+      "features": {
+        "requestManagement": "إدارة الطلبات",
+        "requestManagementDesc": "إنشاء وتتبع طلبات الصيانة مع أنواع العطل التفصيلية ومستويات الخطورة",
+        "actionTracking": "تتبع الإجراءات",
+        "actionTrackingDesc": "تسجيل إجراءات الصيانة المتخذة بما في ذلك الإصلاحات وتغيير القطع وأنشطة الورشة",
+        "preventiveScheduling": "الجدولة الوقائية",
+        "preventiveSchedulingDesc": "جدولة الصيانة المنتظمة لمنع الأعطال وتحسين أداء الآلات",
+        "analytics": "التحليلات والتقارير",
+        "analyticsDesc": "تتبع مقاييس الصيانة والتكاليف ومؤشرات الأداء",
+        "priorityManagement": "إدارة الأولويات",
+        "priorityManagementDesc": "تصنيف الطلبات حسب الخطورة والأولوية لتحسين تخصيص الموارد",
+        "integration": "التكامل",
+        "integrationDesc": "متكامل بسلاسة مع وحدات الإنتاج والجودة والموارد البشرية"
+      },
+      "damageTypes": {
+        "motor": "محرك",
+        "bearing": "محمل",
+        "roller": "أسطوانة",
+        "printingRoller": "أسطوانة الطباعة",
+        "gear": "ترس",
+        "fan": "مروحة",
+        "fuse": "فيوز",
+        "sealing": "إحكام",
+        "knife": "سكين",
+        "heater": "سخان",
+        "inverter": "عاكس",
+        "powerSupply": "مزود الطاقة",
+        "shaft": "عمود",
+        "takeUp": "التقاط",
+        "short": "دائرة قصيرة",
+        "other": "أخرى"
+      },
+      "severity": {
+        "high": "عالية",
+        "normal": "عادية",
+        "low": "منخفضة"
+      },
+      "status": {
+        "pending": "معلق",
+        "inProgress": "قيد التقدم",
+        "completed": "مكتمل",
+        "cancelled": "ملغي"
+      },
+      "actionTypes": {
+        "repair": "إصلاح",
+        "changeParts": "تغيير القطع",
+        "workshop": "ورشة"
+      },
+      "maintenanceTypes": {
+        "corrective": "تصحيحية",
+        "preventive": "وقائية",
+        "predictive": "تنبؤية",
+        "emergency": "طوارئ"
+      }
     }
   }
 }

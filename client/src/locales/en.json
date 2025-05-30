@@ -172,7 +172,12 @@
       "hr": "HR",
       "time_attendance": "Time Attendance",
       "employee_of_the_month": "Employee of the Month",
-      "violation_and_complaint": "Violation and Complaint"
+      "violation_and_complaint": "Violation and Complaint",
+      "maintenance": "Maintenance",
+      "maintenance_requests": "Maintenance Requests",
+      "maintenance_actions": "Maintenance Actions",
+      "maintenance_schedule": "Maintenance Schedule",
+      "maintenance_dashboard": "Maintenance Dashboard"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -1230,6 +1235,139 @@
         "error": "Error",
         "warning": "Warning",
         "info": "Information"
+      }
+    },
+    "maintenance": {
+      "title": "Maintenance Management",
+      "description": "Comprehensive maintenance management system for production equipment",
+      "requests": {
+        "title": "Maintenance Requests",
+        "description": "Create and manage maintenance requests for production equipment",
+        "new": "New Request",
+        "create": "Create Maintenance Request",
+        "machine": "Machine",
+        "damageType": "Damage Type",
+        "severity": "Severity",
+        "description": "Description",
+        "notes": "Notes",
+        "estimatedRepairTime": "Estimated Repair Time (hours)",
+        "reportedBy": "Reported By",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions",
+        "priority": "Priority",
+        "assignedTo": "Assigned To",
+        "completedAt": "Completed At",
+        "actualRepairTime": "Actual Repair Time",
+        "noRequests": "No maintenance requests found",
+        "searchPlaceholder": "Search requests...",
+        "filterByStatus": "Filter by status",
+        "filterBySeverity": "Filter by severity",
+        "allStatus": "All Status",
+        "allSeverity": "All Severity",
+        "validationError": "Please fill in all required fields",
+        "createSuccess": "Maintenance request created successfully",
+        "updateSuccess": "Maintenance request updated successfully",
+        "start": "Start",
+        "complete": "Complete"
+      },
+      "actions": {
+        "title": "Maintenance Actions",
+        "description": "Record and track maintenance actions taken for equipment requests",
+        "record": "Record Action",
+        "create": "Record Maintenance Action",
+        "request": "Maintenance Request",
+        "actionsTaken": "Actions Taken",
+        "partsCost": "Parts Cost ($)",
+        "laborHours": "Labor Hours",
+        "actionBy": "Action By",
+        "noActions": "No maintenance actions found",
+        "searchPlaceholder": "Search actions...",
+        "validationError": "Please fill in all required fields",
+        "createSuccess": "Maintenance action recorded successfully"
+      },
+      "schedule": {
+        "title": "Maintenance Schedule",
+        "description": "Schedule preventive maintenance for machines",
+        "preventive": "Preventive Maintenance",
+        "overdue": "Overdue Maintenance",
+        "upcoming": "Upcoming Maintenance",
+        "scheduleMaintenance": "Schedule Maintenance",
+        "nextDue": "Next Due",
+        "frequency": "Frequency",
+        "lastPerformed": "Last Performed",
+        "maintenanceType": "Maintenance Type",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "quarterly": "Quarterly",
+        "yearly": "Yearly"
+      },
+      "dashboard": {
+        "title": "Maintenance Dashboard",
+        "description": "Overview of maintenance activities and metrics",
+        "pendingRequests": "Pending Requests",
+        "inProgress": "In Progress",
+        "completedToday": "Completed Today",
+        "overdueMaintenance": "Overdue Maintenance",
+        "totalCost": "Total Cost",
+        "averageRepairTime": "Average Repair Time",
+        "efficiency": "Maintenance Efficiency",
+        "uptime": "Equipment Uptime"
+      },
+      "features": {
+        "requestManagement": "Request Management",
+        "requestManagementDesc": "Create and track maintenance requests with detailed damage types and severity levels",
+        "actionTracking": "Action Tracking",
+        "actionTrackingDesc": "Record maintenance actions taken including repairs, part changes, and workshop activities",
+        "preventiveScheduling": "Preventive Scheduling",
+        "preventiveSchedulingDesc": "Schedule regular maintenance to prevent breakdowns and optimize machine performance",
+        "analytics": "Analytics & Reports",
+        "analyticsDesc": "Track maintenance metrics, costs, and performance indicators",
+        "priorityManagement": "Priority Management",
+        "priorityManagementDesc": "Classify requests by severity and priority to optimize resource allocation",
+        "integration": "Integration",
+        "integrationDesc": "Seamlessly integrated with production, quality, and HR modules"
+      },
+      "damageTypes": {
+        "motor": "Motor",
+        "bearing": "Bearing",
+        "roller": "Roller",
+        "printingRoller": "Printing Roller",
+        "gear": "Gear",
+        "fan": "Fan",
+        "fuse": "Fuse",
+        "sealing": "Sealing",
+        "knife": "Knife",
+        "heater": "Heater",
+        "inverter": "Inverter",
+        "powerSupply": "Power Supply",
+        "shaft": "Shaft",
+        "takeUp": "Take up",
+        "short": "Short",
+        "other": "Other"
+      },
+      "severity": {
+        "high": "High",
+        "normal": "Normal",
+        "low": "Low"
+      },
+      "status": {
+        "pending": "Pending",
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "actionTypes": {
+        "repair": "Repair",
+        "changeParts": "Change Parts",
+        "workshop": "Workshop"
+      },
+      "maintenanceTypes": {
+        "corrective": "Corrective",
+        "preventive": "Preventive",
+        "predictive": "Predictive",
+        "emergency": "Emergency"
       }
     }
   }

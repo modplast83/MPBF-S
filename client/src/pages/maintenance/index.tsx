@@ -19,29 +19,29 @@ export default function MaintenancePage() {
 
   const maintenanceModules = [
     {
-      title: "Maintenance Requests",
-      description: "Create and manage maintenance requests for machines",
+      title: t("maintenance.requests.title"),
+      description: t("maintenance.requests.description"),
       path: "/maintenance/requests",
       icon: ClipboardList,
       color: "bg-blue-500 hover:bg-blue-600",
     },
     {
-      title: "Maintenance Actions",
-      description: "Record actions taken for maintenance requests",
+      title: t("maintenance.actions.title"),
+      description: t("maintenance.actions.description"),
       path: "/maintenance/actions",
       icon: Wrench,
       color: "bg-green-500 hover:bg-green-600",
     },
     {
-      title: "Maintenance Schedule",
-      description: "Schedule preventive maintenance for machines",
+      title: t("maintenance.schedule.title"),
+      description: t("maintenance.schedule.description"),
       path: "/maintenance/schedule",
       icon: Calendar,
       color: "bg-purple-500 hover:bg-purple-600",
     },
     {
-      title: "Dashboard",
-      description: "Overview of maintenance activities and metrics",
+      title: t("maintenance.dashboard.title"),
+      description: t("maintenance.dashboard.description"),
       path: "/maintenance/dashboard",
       icon: BarChart3,
       color: "bg-orange-500 hover:bg-orange-600",
@@ -51,8 +51,8 @@ export default function MaintenancePage() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
-        title="Maintenance Management"
-        description="Comprehensive maintenance management system for production equipment"
+        title={t("maintenance.title")}
+        description={t("maintenance.description")}
       />
 
       {/* Module Cards */}
@@ -86,9 +86,9 @@ export default function MaintenancePage() {
       {/* Key Features */}
       <Card>
         <CardHeader>
-          <CardTitle>Maintenance Module Features</CardTitle>
+          <CardTitle>{t("maintenance.features.title", "Maintenance Module Features")}</CardTitle>
           <CardDescription>
-            Comprehensive maintenance management capabilities
+            {t("maintenance.features.description", "Comprehensive maintenance management capabilities")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -96,54 +96,54 @@ export default function MaintenancePage() {
             <div className="flex items-start space-x-3">
               <ClipboardList className="h-5 w-5 text-blue-500 mt-1" />
               <div>
-                <h4 className="font-medium">Request Management</h4>
+                <h4 className="font-medium">{t("maintenance.features.requestManagement")}</h4>
                 <p className="text-sm text-gray-600">
-                  Create and track maintenance requests with detailed damage types and severity levels
+                  {t("maintenance.features.requestManagementDesc")}
                 </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <Wrench className="h-5 w-5 text-green-500 mt-1" />
               <div>
-                <h4 className="font-medium">Action Tracking</h4>
+                <h4 className="font-medium">{t("maintenance.features.actionTracking")}</h4>
                 <p className="text-sm text-gray-600">
-                  Record maintenance actions taken including repairs, part changes, and workshop activities
+                  {t("maintenance.features.actionTrackingDesc")}
                 </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <Calendar className="h-5 w-5 text-purple-500 mt-1" />
               <div>
-                <h4 className="font-medium">Preventive Scheduling</h4>
+                <h4 className="font-medium">{t("maintenance.features.preventiveScheduling")}</h4>
                 <p className="text-sm text-gray-600">
-                  Schedule regular maintenance to prevent breakdowns and optimize machine performance
+                  {t("maintenance.features.preventiveSchedulingDesc")}
                 </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <BarChart3 className="h-5 w-5 text-orange-500 mt-1" />
               <div>
-                <h4 className="font-medium">Analytics & Reports</h4>
+                <h4 className="font-medium">{t("maintenance.features.analytics")}</h4>
                 <p className="text-sm text-gray-600">
-                  Track maintenance metrics, costs, and performance indicators
+                  {t("maintenance.features.analyticsDesc")}
                 </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <AlertTriangle className="h-5 w-5 text-red-500 mt-1" />
               <div>
-                <h4 className="font-medium">Priority Management</h4>
+                <h4 className="font-medium">{t("maintenance.features.priorityManagement")}</h4>
                 <p className="text-sm text-gray-600">
-                  Classify requests by severity and priority to optimize resource allocation
+                  {t("maintenance.features.priorityManagementDesc")}
                 </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <Settings className="h-5 w-5 text-gray-500 mt-1" />
               <div>
-                <h4 className="font-medium">Integration</h4>
+                <h4 className="font-medium">{t("maintenance.features.integration")}</h4>
                 <p className="text-sm text-gray-600">
-                  Seamlessly integrated with production, quality, and HR modules
+                  {t("maintenance.features.integrationDesc")}
                 </p>
               </div>
             </div>
