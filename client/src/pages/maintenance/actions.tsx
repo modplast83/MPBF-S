@@ -38,11 +38,13 @@ interface MaintenanceAction {
 
 interface MaintenanceRequest {
   id: number;
+  requestNumber: string;
   machineId: string;
   damageType: string;
   severity: string;
   description: string;
   status: string;
+  createdAt?: string;
 }
 
 interface Machine {
@@ -206,7 +208,7 @@ export default function MaintenanceActionsPage() {
 
   const getRequestInfo = (requestId: number) => {
     const request = requests.find((r: MaintenanceRequest) => r.id === requestId);
-    return request ? `#${request.id} - ${request.damageType}` : `#${requestId}`;
+    return request ? `${request.requestNumber || '#' + request.id} - ${request.damageType}` : `#${requestId}`;
   };
 
   const getStatusBadge = (status: string) => {
@@ -222,10 +224,10 @@ export default function MaintenanceActionsPage() {
     }
   };
 
-  // Get pending maintenance requests for dropdown
-  const pendingRequests = requests.filter((r: MaintenanceRequest) => 
-    r.status === 'pending' || r.status === 'in_progress'
-  );
+  // Get all maintenance requests for dropdown (sorted by most recent first)
+  const availableRequests = requests.filter((r: MaintenanceRequest) => 
+    r.status !== 'completed' && r.status !== 'cancelled'
+  ).sort((a: any, b: any) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -284,9 +286,9 @@ export default function MaintenanceActionsPage() {
                     <SelectValue placeholder="Select maintenance request" />
                   </SelectTrigger>
                   <SelectContent>
-                    {pendingRequests.map((request: MaintenanceRequest) => (
+                    {availableRequests.map((request: MaintenanceRequest) => (
                       <SelectItem key={request.id} value={request.id.toString()}>
-                        #{request.id} - {getMachineName(request.machineId)} ({request.damageType})
+                        {request.requestNumber || '#' + request.id} - {getMachineName(request.machineId)} ({request.damageType})
                       </SelectItem>
                     ))}
                   </SelectContent>
