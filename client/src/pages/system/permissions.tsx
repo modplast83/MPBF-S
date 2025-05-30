@@ -53,6 +53,9 @@ const ALL_MODULES = [
   "Reports", 
   "System",
   "Tools",
+  "HR",
+  "Maintenance",
+  "Cliches",
   // Setup submodules
   "Categories", 
   "Products", 
@@ -66,14 +69,27 @@ const ALL_MODULES = [
   "Final Products",
   // Production submodules
   "Mix Materials",
+  "Bottleneck Monitor",
+  "Production Metrics",
   // Quality submodules
   "Check Types", 
   "Quality Checks", 
   "Corrective Actions",
+  "Unified Dashboard",
+  "Violation and Complaint",
+  // HR submodules
+  "Time Attendance",
+  "Employee of the Month",
+  // Maintenance submodules
+  "Maintenance Requests",
+  "Maintenance Actions",
+  "Maintenance Schedule",
   // Tools submodules
   "Bag Weight Calculator", 
   "Ink Consumption", 
+  "Mix Colors",
   "Utility Tools",
+  "Cost",
   // System submodules
   "Database", 
   "Permissions", 

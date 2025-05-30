@@ -206,6 +206,11 @@ export default function TimeAttendancePage() {
     return statusColors[status as keyof typeof statusColors] || "bg-gray-100 text-gray-800";
   };
 
+  const getUserFirstName = (userId: string) => {
+    const user = users?.find((u: any) => u.id === userId);
+    return user?.firstName || userId;
+  };
+
   const currentAttendance = todayAttendance?.find((att: TimeAttendance) => 
     format(new Date(att.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
   );
@@ -368,7 +373,7 @@ export default function TimeAttendancePage() {
               <TableBody>
                 {attendanceRecords?.map((record: TimeAttendance) => (
                   <TableRow key={record.id}>
-                    <TableCell className="font-medium">{record.userId}</TableCell>
+                    <TableCell className="font-medium">{getUserFirstName(record.userId)}</TableCell>
                     <TableCell>
                       {record.checkInTime ? format(new Date(record.checkInTime), 'HH:mm') : '-'}
                     </TableCell>
