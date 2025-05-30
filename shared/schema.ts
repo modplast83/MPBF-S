@@ -721,10 +721,15 @@ export const maintenanceRequests = pgTable("maintenance_requests", {
   id: serial("id").primaryKey(),
   requestNumber: text("request_number"),
   machineId: text("machine_id").notNull().references(() => machines.id),
+  damageType: text("damage_type").notNull(),
+  severity: text("severity").notNull().default("Normal"), // High, Normal, Low
   description: text("description").notNull(),
   status: text("status").notNull().default("pending"), // pending, in_progress, completed, cancelled
-  priority: text("priority").default("Normal"), // High, Normal, Low
+  priority: integer("priority").default(2), // 1=High, 2=Normal, 3=Low
+  estimatedRepairTime: integer("estimated_repair_time"), // in hours
+  actualRepairTime: integer("actual_repair_time"), // in hours
   requestedBy: text("requested_by").notNull().references(() => users.id),
+  reportedBy: text("reported_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   assignedTo: text("assigned_to").references(() => users.id),
   completedAt: timestamp("completed_at"),
