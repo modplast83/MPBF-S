@@ -5200,11 +5200,22 @@ COMMIT;
 
   app.post("/api/maintenance-actions", async (req: Request, res: Response) => {
     try {
+      console.log('Received maintenance action data:', req.body);
+      
       const actionData = {
-        ...req.body,
-        actionBy: req.body.actionBy || req.user?.id?.toString(),
-        date: new Date(),
+        requestId: parseInt(req.body.requestId),
+        machineId: req.body.machineId,
+        actionType: Array.isArray(req.body.actionsTaken) && req.body.actionsTaken.length > 0 ? req.body.actionsTaken.join(', ') : 'General Maintenance',
+        description: req.body.description,
+        performedBy: req.body.actionBy || req.user?.id?.toString(),
+        hours: parseFloat(req.body.laborHours) || 0,
+        cost: parseFloat(req.body.partsCost) || 0,
+        status: 'completed',
+        partReplaced: req.body.partReplaced || null,
+        partId: req.body.partId || null,
       };
+      
+      console.log('Processed action data:', actionData);
       
       const action = await storage.createMaintenanceAction(actionData);
       

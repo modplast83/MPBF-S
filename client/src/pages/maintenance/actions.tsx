@@ -22,18 +22,17 @@ const ACTION_TYPES = ["Repair", "Change Parts", "Workshop"];
 
 interface MaintenanceAction {
   id: number;
-  date: string;
+  actionDate: string;
   requestId: number;
   machineId: string;
-  actionBy: string;
-  actionsTaken: string[];
+  performedBy: string;
+  actionType: string;
   description: string;
-  partsCost: number;
-  laborHours: number;
+  cost: number;
+  hours: number;
   status: string;
-  notes?: string;
-  attachments?: string[];
-  createdAt: string;
+  partReplaced?: string;
+  partId?: number;
 }
 
 interface MaintenanceRequest {
@@ -188,7 +187,7 @@ export default function MaintenanceActionsPage() {
   const filteredActions = actions.filter((action: MaintenanceAction) => {
     const matchesSearch = searchQuery === "" || 
       action.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      action.actionsTaken.some(actionType => actionType.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      action.actionType.toLowerCase().includes(searchQuery.toLowerCase()) ||
       action.machineId.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || action.status === statusFilter;
@@ -429,29 +428,25 @@ export default function MaintenanceActionsPage() {
                   {filteredActions.map((action: MaintenanceAction) => (
                     <TableRow key={action.id}>
                       <TableCell className="font-medium">#{action.id}</TableCell>
-                      <TableCell>{format(new Date(action.date), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{format(new Date(action.actionDate), 'MMM dd, yyyy')}</TableCell>
                       <TableCell>{getRequestInfo(action.requestId)}</TableCell>
                       <TableCell>{getMachineName(action.machineId)}</TableCell>
                       <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {action.actionsTaken.map((actionType, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {actionType}
-                            </Badge>
-                          ))}
-                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {action.actionType}
+                        </Badge>
                       </TableCell>
-                      <TableCell>{getUserName(action.actionBy)}</TableCell>
+                      <TableCell>{getUserName(action.performedBy)}</TableCell>
                       <TableCell>
                         <div className="flex items-center">
                           <FileText className="w-4 h-4 mr-1 text-gray-400" />
-                          {action.laborHours}h
+                          {action.hours}h
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
                           <DollarSign className="w-4 h-4 mr-1 text-gray-400" />
-                          {action.partsCost.toFixed(2)}
+                          ${action.cost.toFixed(2)}
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(action.status)}</TableCell>
