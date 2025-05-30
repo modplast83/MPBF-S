@@ -145,7 +145,7 @@ export function MachineForm({ machine, onSuccess }: MachineFormProps) {
               <FormItem>
                 <FormLabel>Supplier</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter supplier name" {...field} />
+                  <Input placeholder="Enter supplier name" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -180,7 +180,7 @@ export function MachineForm({ machine, onSuccess }: MachineFormProps) {
               <FormItem>
                 <FormLabel>Model #</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter model number" {...field} />
+                  <Input placeholder="Enter model number" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
