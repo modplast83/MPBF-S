@@ -2153,7 +2153,7 @@ export class DatabaseStorage implements IStorage {
 
   // Maintenance Actions methods
   async getMaintenanceActions(): Promise<MaintenanceAction[]> {
-    return await db.select().from(maintenanceActions).orderBy(desc(maintenanceActions.createdAt));
+    return await db.select().from(maintenanceActions).orderBy(desc(maintenanceActions.actionDate));
   }
 
   async getMaintenanceAction(id: number): Promise<MaintenanceAction | undefined> {
@@ -2164,13 +2164,13 @@ export class DatabaseStorage implements IStorage {
   async getMaintenanceActionsByRequest(requestId: number): Promise<MaintenanceAction[]> {
     return await db.select().from(maintenanceActions)
       .where(eq(maintenanceActions.requestId, requestId))
-      .orderBy(desc(maintenanceActions.createdAt));
+      .orderBy(desc(maintenanceActions.actionDate));
   }
 
   async getMaintenanceActionsByMachine(machineId: string): Promise<MaintenanceAction[]> {
     return await db.select().from(maintenanceActions)
       .where(eq(maintenanceActions.machineId, machineId))
-      .orderBy(desc(maintenanceActions.createdAt));
+      .orderBy(desc(maintenanceActions.actionDate));
   }
 
   async createMaintenanceAction(actionData: InsertMaintenanceAction): Promise<MaintenanceAction> {
