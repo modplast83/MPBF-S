@@ -58,6 +58,8 @@ import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
 import MaintenancePage from "@/pages/maintenance/index";
 import MaintenanceRequestsPage from "@/pages/maintenance/requests";
 import MaintenanceActionsPage from "@/pages/maintenance/actions";
+import MaintenanceSchedulePage from "@/pages/maintenance/schedule";
+import MaintenanceDashboard from "@/pages/maintenance/dashboard";
 import ViolationsComplaintsPage from "@/pages/hr/violations-complaints";
 import ViolationTrendsPage from "@/pages/hr/violation-trends";
 import BottleneckDashboard from "@/pages/production/bottleneck-dashboard";
@@ -132,6 +134,8 @@ function App() {
                   <ProtectedRoute path="/maintenance" component={MaintenancePage} module="Maintenance" />
                   <ProtectedRoute path="/maintenance/requests" component={MaintenanceRequestsPage} module="Maintenance Requests" />
                   <ProtectedRoute path="/maintenance/actions" component={MaintenanceActionsPage} module="Maintenance Actions" />
+                  <ProtectedRoute path="/maintenance/schedule" component={MaintenanceSchedulePage} module="Maintenance Schedule" />
+                  <ProtectedRoute path="/maintenance/dashboard" component={MaintenanceDashboard} module="Dashboard" />
                   {/* Bottleneck Notification System Routes */}
                   <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
                   <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />
