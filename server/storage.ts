@@ -253,11 +253,12 @@ export interface IStorage {
   setDefaultAbaMaterialConfig(id: number): Promise<boolean>;
   
   // HR Module methods
-  getTimeAttendance(): Promise<any[]>;
-  getTimeAttendanceByUser(userId: number): Promise<any[]>;
-  getTimeAttendanceByDate(date: string): Promise<any[]>;
-  createTimeAttendance(attendance: any): Promise<any>;
-  updateTimeAttendance(id: number, attendance: any): Promise<any | undefined>;
+  getTimeAttendance(): Promise<TimeAttendance[]>;
+  getTimeAttendanceByUser(userId: string): Promise<TimeAttendance[]>;
+  getTimeAttendanceByDate(date: Date): Promise<TimeAttendance[]>;
+  getTimeAttendanceByUserAndDate(userId: string, date: Date): Promise<TimeAttendance | undefined>;
+  createTimeAttendance(attendance: InsertTimeAttendance): Promise<TimeAttendance>;
+  updateTimeAttendance(id: number, attendance: Partial<TimeAttendance>): Promise<TimeAttendance | undefined>;
   deleteTimeAttendance(id: number): Promise<boolean>;
   
   getEmployeeOfMonth(): Promise<any[]>;

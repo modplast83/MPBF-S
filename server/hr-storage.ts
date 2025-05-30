@@ -11,12 +11,24 @@ export class HRStorage {
     return this.timeAttendance;
   }
 
-  async getTimeAttendanceByUser(userId: number): Promise<any[]> {
-    return this.timeAttendance.filter(att => att.user_id === userId);
+  async getTimeAttendanceByUser(userId: string): Promise<any[]> {
+    return this.timeAttendance.filter(att => att.userId === userId);
   }
 
-  async getTimeAttendanceByDate(date: string): Promise<any[]> {
-    return this.timeAttendance.filter(att => att.date === date);
+  async getTimeAttendanceByDate(date: Date): Promise<any[]> {
+    const dateStr = date.toISOString().split('T')[0];
+    return this.timeAttendance.filter(att => {
+      const attDate = new Date(att.date).toISOString().split('T')[0];
+      return attDate === dateStr;
+    });
+  }
+
+  async getTimeAttendanceByUserAndDate(userId: string, date: Date): Promise<any | undefined> {
+    const dateStr = date.toISOString().split('T')[0];
+    return this.timeAttendance.find(att => {
+      const attDate = new Date(att.date).toISOString().split('T')[0];
+      return att.userId === userId && attDate === dateStr;
+    });
   }
 
   async createTimeAttendance(attendance: any): Promise<any> {
