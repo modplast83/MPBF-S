@@ -4830,15 +4830,30 @@ COMMIT;
 
   app.post("/api/time-attendance", async (req: Request, res: Response) => {
     try {
+      // Get current user from session or request
+      const currentUser = (req as any).user || req.session?.user;
+      if (!currentUser) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const now = new Date();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       // Transform data to match schema expectations
       const transformedData = {
-        ...req.body,
-        userId: req.body.userId?.toString() || req.user?.id?.toString(),
-        date: new Date(req.body.date),
-        checkInTime: req.body.checkInTime ? new Date(req.body.checkInTime) : new Date(),
+        userId: currentUser.id?.toString(),
+        date: req.body.date ? new Date(req.body.date) : today,
+        checkInTime: req.body.checkInTime ? new Date(req.body.checkInTime) : now,
         checkOutTime: req.body.checkOutTime ? new Date(req.body.checkOutTime) : null,
         breakStartTime: req.body.breakStartTime ? new Date(req.body.breakStartTime) : null,
         breakEndTime: req.body.breakEndTime ? new Date(req.body.breakEndTime) : null,
+        status: req.body.status || 'present',
+        location: req.body.location || null,
+        notes: req.body.notes || null,
+        workingHours: req.body.workingHours || 0,
+        overtimeHours: req.body.overtimeHours || 0,
+        isAutoCheckedOut: req.body.isAutoCheckedOut || false
       };
       
       const data = insertTimeAttendanceSchema.parse(transformedData);
@@ -4846,7 +4861,8 @@ COMMIT;
       res.json(timeAttendance);
     } catch (error) {
       console.error('Error creating time attendance:', error);
-      res.status(500).json({ error: 'Failed to create time attendance' });
+      console.error('Error details:', error);
+      res.status(500).json({ error: 'Failed to create time attendance', details: error.message });
     }
   });
 
