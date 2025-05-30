@@ -136,6 +136,35 @@ export default function WorkflowReportsPage() {
     queryKey: [`/api/reports/workflow?${buildQueryParams()}`],
     enabled: true,
   });
+
+  // Filter sections to only show Extruding, Printing, and Cutting
+  const allowedSections = ['Extruding', 'Printing', 'Cutting'];
+  const filteredSections = sections?.filter(section => 
+    allowedSections.some(allowed => 
+      section.name.toLowerCase().includes(allowed.toLowerCase())
+    )
+  ) || [];
+
+  // Filter operators to only show those from allowed sections
+  const filteredUsers = users?.filter(user => {
+    // Check if user belongs to any of the allowed sections
+    return user.section && filteredSections.some(section => section.id === user.section);
+  }) || [];
+
+  // Filter report data to only show allowed sections and operators
+  const filteredReportData = reportData ? {
+    ...reportData,
+    sections: reportData.sections?.filter(section => 
+      allowedSections.some(allowed => 
+        section.name.toLowerCase().includes(allowed.toLowerCase())
+      )
+    ) || [],
+    operators: reportData.operators?.filter(operator => {
+      // Find the user and check if they belong to allowed sections
+      const user = users?.find(u => u.id === operator.id);
+      return user && user.section && filteredSections.some(section => section.id === user.section);
+    }) || []
+  } : null;
   
   // Effect to refetch when filters change
   useEffect(() => {
