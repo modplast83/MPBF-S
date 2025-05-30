@@ -395,32 +395,32 @@ export default function MaintenanceRequestsPage() {
       {/* Requests Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Maintenance Requests ({filteredRequests.length})</CardTitle>
+          <CardTitle>{t("maintenance.requests.table_title", { count: filteredRequests.length })}</CardTitle>
           <CardDescription>
-            Track and manage all maintenance requests for production equipment
+            {t("maintenance.requests.table_description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {requestsLoading ? (
-            <div className="text-center py-4">Loading requests...</div>
+            <div className="text-center py-4">{t("common.loading")}</div>
           ) : filteredRequests.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
-              No maintenance requests found
+              {t("maintenance.requests.no_requests")}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Machine</TableHead>
-                    <TableHead>Damage Type</TableHead>
-                    <TableHead>Severity</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Reported By</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t("maintenance.requests.id")}</TableHead>
+                    <TableHead>{t("maintenance.requests.date")}</TableHead>
+                    <TableHead>{t("maintenance.requests.machine")}</TableHead>
+                    <TableHead>{t("maintenance.requests.damage_type")}</TableHead>
+                    <TableHead>{t("maintenance.requests.severity")}</TableHead>
+                    <TableHead>{t("maintenance.requests.status")}</TableHead>
+                    <TableHead>{t("maintenance.requests.reported_by")}</TableHead>
+                    <TableHead>{t("maintenance.requests.description")}</TableHead>
+                    <TableHead>{t("common.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -444,7 +444,7 @@ export default function MaintenanceRequestsPage() {
                               variant="outline"
                               onClick={() => handleStatusUpdate(request.id, 'in_progress')}
                             >
-                              Start
+                              {t("common.start")}
                             </Button>
                           )}
                           {request.status === 'in_progress' && (
@@ -453,7 +453,7 @@ export default function MaintenanceRequestsPage() {
                               variant="outline"
                               onClick={() => handleStatusUpdate(request.id, 'completed')}
                             >
-                              Complete
+                              {t("common.complete")}
                             </Button>
                           )}
                         </div>

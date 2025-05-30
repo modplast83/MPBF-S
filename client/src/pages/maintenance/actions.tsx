@@ -394,9 +394,9 @@ export default function MaintenanceActionsPage() {
       {/* Actions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Maintenance Actions ({filteredActions.length})</CardTitle>
+          <CardTitle>{t("maintenance.actions.table_title", { count: filteredActions.length })}</CardTitle>
           <CardDescription>
-            Track all maintenance actions performed on production equipment
+            {t("maintenance.actions.table_description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
