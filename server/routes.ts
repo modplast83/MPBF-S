@@ -5105,8 +5105,27 @@ COMMIT;
 
   app.post("/api/maintenance-requests", async (req: Request, res: Response) => {
     try {
+      // Get the next request number by finding the highest existing number
+      const existingRequests = await storage.getMaintenanceRequests();
+      let nextNumber = 1;
+      
+      if (existingRequests.length > 0) {
+        const requestNumbers = existingRequests
+          .map(req => req.requestNumber)
+          .filter(num => num && num.startsWith('Re'))
+          .map(num => parseInt(num.substring(2)))
+          .filter(num => !isNaN(num));
+        
+        if (requestNumbers.length > 0) {
+          nextNumber = Math.max(...requestNumbers) + 1;
+        }
+      }
+      
+      const requestNumber = `Re${nextNumber.toString().padStart(3, '0')}`;
+      
       const requestData = {
         ...req.body,
+        requestNumber,
         requestedBy: req.body.requestedBy || req.user?.id?.toString(),
         reportedBy: req.body.reportedBy || req.user?.id?.toString(),
         createdAt: new Date(),
