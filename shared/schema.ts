@@ -764,20 +764,20 @@ export type MaintenanceAction = typeof maintenanceActions.$inferSelect;
 export const maintenanceSchedule = pgTable("maintenance_schedule", {
   id: serial("id").primaryKey(),
   machineId: text("machine_id").notNull().references(() => machines.id),
-  maintenanceType: text("maintenance_type").notNull(), // preventive, predictive, breakdown
+  taskName: text("task_name").notNull(),
+  taskDescription: text("task_description"),
   frequency: text("frequency").notNull(), // daily, weekly, monthly, quarterly, yearly
-  lastMaintenanceDate: timestamp("last_maintenance_date"),
-  nextMaintenanceDate: timestamp("next_maintenance_date").notNull(),
+  lastCompleted: timestamp("last_completed"),
+  nextDue: timestamp("next_due").notNull(),
   assignedTo: text("assigned_to").references(() => users.id),
-  description: text("description").notNull(),
-  estimatedDuration: integer("estimated_duration_hours").default(1),
-  isActive: boolean("is_active").default(true),
+  priority: text("priority").default("medium"), // low, medium, high, critical
+  estimatedHours: doublePrecision("estimated_hours").default(1),
+  instructions: text("instructions"),
+  status: text("status").default("active"), // active, inactive, completed
   createdBy: text("created_by").notNull().references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertMaintenanceScheduleSchema = createInsertSchema(maintenanceSchedule).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertMaintenanceScheduleSchema = createInsertSchema(maintenanceSchedule).omit({ id: true });
 export type InsertMaintenanceSchedule = z.infer<typeof insertMaintenanceScheduleSchema>;
 export type MaintenanceSchedule = typeof maintenanceSchedule.$inferSelect;
 
