@@ -144,7 +144,15 @@
       "hr": "الموارد البشرية",
       "time_attendance": "الحضور والانصراف",
       "employee_of_the_month": "موظف الشهر",
-      "violation_and_complaint": "المخالفات والشكاوى"
+      "violation_and_complaint": "المخالفات والشكاوى",
+      "maintenance": "الصيانة",
+      "maintenance_requests": "طلبات الصيانة",
+      "maintenance_actions": "إجراءات الصيانة",
+      "maintenance_schedule": "جدولة الصيانة",
+      "cost": "التكلفة",
+      "cost_calculator": "حاسبة التكلفة",
+      "user": "المستخدم",
+      "role": "الدور"
     },
     "dashboard": {
       "title": "لوحة التحكم",
