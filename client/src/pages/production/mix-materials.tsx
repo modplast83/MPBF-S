@@ -514,76 +514,92 @@ export default function MixMaterialsPage() {
     
     if (!filteredMixMaterials || filteredMixMaterials.length === 0) {
       return (
-        <div className="text-center py-8 px-4 bg-gray-50 rounded-md">
-          <span className="material-icons text-gray-300 text-3xl mb-2">science</span>
-          <p className="text-gray-500">{t('production.mix_materials.no_mixes')}</p>
+        <div className="text-center py-12 px-4 bg-gray-50 rounded-lg">
+          <span className="material-icons text-gray-300 text-4xl mb-3 block">science</span>
+          <p className="text-gray-500 text-sm">{t('production.mix_materials.no_mixes')}</p>
         </div>
       );
     }
     
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         {filteredMixMaterials.map((mix) => (
           <Card 
             key={mix.id} 
-            className="overflow-hidden hover:shadow-md transition-all"
+            className="overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary-500"
             onClick={() => {
               setSelectedMixId(mix.id);
               setIsViewDialogOpen(true);
             }}
           >
-            <CardHeader className="p-3 pb-2 flex flex-row justify-between items-start bg-gray-50">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="material-icons text-xs text-primary-500">science</span>
-                  <CardTitle className="text-sm font-semibold">
-                    {t('production.mix_materials.mix_id')}: {mix.id}
-                  </CardTitle>
+            <CardHeader className="p-4 pb-3 bg-gradient-to-r from-gray-50 to-primary-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-8 h-8 bg-primary-100 rounded-full">
+                    <span className="material-icons text-sm text-primary-600">science</span>
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-semibold text-gray-900">
+                      Mix #{mix.id}
+                    </CardTitle>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      {formatDateString(mix.mixDate.toString())}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {formatDateString(mix.mixDate.toString())}
-                </p>
+                <span className="material-icons text-gray-400 text-lg">chevron_right</span>
               </div>
             </CardHeader>
-            <CardContent className="p-3 pt-2">
-              <div className="grid grid-cols-3 gap-2 mb-2">
-                <div>
-                  <p className="text-xs text-gray-500">{t('production.mix_materials.operator')}</p>
-                  <p className="text-sm font-medium">{getOperatorName(mix.mixPerson)}</p>
+            <CardContent className="p-4 pt-3">
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">{t('production.mix_materials.operator')}</p>
+                  <p className="text-sm font-medium text-gray-900 truncate">{getOperatorName(mix.mixPerson)}</p>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">{t('production.mix_materials.total_weight')}</p>
-                  <p className="text-sm font-medium">{mix.totalQuantity?.toFixed(2) || "0.00"} kg</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">{t('production.mix_materials.screw')}</p>
-                  <p className="text-sm font-medium">{mix.mixScrew || "-"}</p>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">{t('production.mix_materials.total_weight')}</p>
+                  <p className="text-sm font-medium text-gray-900">{mix.totalQuantity?.toFixed(2) || "0.00"} kg</p>
                 </div>
               </div>
               
-              <div className="mt-3 pt-2 flex justify-end items-center space-x-2 border-t border-gray-100">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    printMixLabel(mix.id);
-                  }}
-                  className="h-8 w-8 rounded-full text-primary-500 hover:text-primary-700 hover:bg-primary-50"
-                >
-                  <span className="material-icons text-sm">print</span>
-                </Button>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteMix(mix.id);
-                  }}
-                  className="h-8 w-8 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
-                >
-                  <span className="material-icons text-sm">delete</span>
-                </Button>
+              {mix.mixScrew && (
+                <div className="bg-blue-50 p-3 rounded-lg mb-3">
+                  <p className="text-xs text-blue-600 mb-1">{t('production.mix_materials.screw')}</p>
+                  <p className="text-sm font-medium text-blue-900">{mix.mixScrew}</p>
+                </div>
+              )}
+              
+              <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                <div className="flex items-center text-xs text-gray-500">
+                  <span className="material-icons text-xs mr-1">touch_app</span>
+                  Tap to view details
+                </div>
+                <div className="flex space-x-1">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      printMixLabel(mix.id);
+                    }}
+                    className="h-9 w-9 rounded-full text-primary-600 hover:text-primary-700 hover:bg-primary-100"
+                  >
+                    <span className="material-icons text-sm">print</span>
+                  </Button>
+                  {canDelete && (
+                    <Button 
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteMix(mix.id);
+                      }}
+                      className="h-9 w-9 rounded-full text-red-500 hover:text-red-700 hover:bg-red-100"
+                    >
+                      <span className="material-icons text-sm">delete</span>
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -595,9 +611,18 @@ export default function MixMaterialsPage() {
   // Mobile loading state
   const renderMobileLoadingState = () => {
     return (
-      <div className="space-y-4 animate-pulse">
+      <div className="space-y-3 animate-pulse">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-32 bg-gray-100 rounded-lg"></div>
+          <div key={i} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="h-16 bg-gradient-to-r from-gray-100 to-gray-200"></div>
+            <div className="p-4 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="h-12 bg-gray-100 rounded-lg"></div>
+                <div className="h-12 bg-gray-100 rounded-lg"></div>
+              </div>
+              <div className="h-4 bg-gray-100 rounded w-3/4"></div>
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -812,48 +837,49 @@ export default function MixMaterialsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-primary-700">{t('production.mix_materials.title')}</h1>
-        <div className="flex space-x-2">
-          {canCreate && (
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-1">
-                  <span className="material-icons text-sm">add</span>
-                  {isMobile ? "" : t('production.mix_materials.new_mix')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className={isMobile ? "max-w-[95vw] p-4 sm:p-6" : "sm:max-w-[550px]"}>
-                <DialogHeader>
-                  <DialogTitle>{t('production.mix_materials.new_mix')}</DialogTitle>
-                </DialogHeader>
-                <MixMaterialForm 
-                  rawMaterials={rawMaterials || []}
-                  onSuccess={() => {
-                    setIsCreateDialogOpen(false);
-                    refetchMixes();
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Mobile-optimized header */}
+      <div className={`${isMobile ? 'flex flex-col space-y-3' : 'flex justify-between items-center'} mb-4 sm:mb-6`}>
+        <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-primary-700`}>
+          {t('production.mix_materials.title')}
+        </h1>
+        {canCreate && (
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className={`${isMobile ? 'w-full justify-center' : 'flex items-center gap-1'}`}>
+                <span className="material-icons text-sm">add</span>
+                <span className="ml-1">{t('production.mix_materials.new_mix')}</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className={isMobile ? "max-w-[95vw] max-h-[95vh] p-3 sm:p-6 overflow-y-auto" : "sm:max-w-[550px]"}>
+              <DialogHeader>
+                <DialogTitle className={isMobile ? 'text-lg' : ''}>{t('production.mix_materials.new_mix')}</DialogTitle>
+              </DialogHeader>
+              <MixMaterialForm 
+                rawMaterials={rawMaterials || []}
+                onSuccess={() => {
+                  setIsCreateDialogOpen(false);
+                  refetchMixes();
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <Tabs defaultValue="mix_materials" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4">
-          <TabsTrigger value="mix_materials">
-            <span className="material-icons text-sm mr-1">science</span>
-            {t('production.mix_materials.title')}
+        <TabsList className={`grid w-full mb-4 ${isMobile ? 'grid-cols-1 gap-1 h-auto p-1' : 'grid-cols-3'}`}>
+          <TabsTrigger value="mix_materials" className={isMobile ? 'w-full justify-start py-3 px-4' : ''}>
+            <span className="material-icons text-sm mr-2">science</span>
+            <span className={isMobile ? 'text-sm' : ''}>{t('production.mix_materials.title')}</span>
           </TabsTrigger>
-          <TabsTrigger value="aba_calculator">
-            <span className="material-icons text-sm mr-1">calculate</span>
-            {t('production.aba_calculator.title')}
+          <TabsTrigger value="aba_calculator" className={isMobile ? 'w-full justify-start py-3 px-4' : ''}>
+            <span className="material-icons text-sm mr-2">calculate</span>
+            <span className={isMobile ? 'text-sm' : ''}>{t('production.aba_calculator.title')}</span>
           </TabsTrigger>
-          <TabsTrigger value="aba_config">
-            <span className="material-icons text-sm mr-1">settings</span>
-            {t('production.aba_calculator.config_tab')}
+          <TabsTrigger value="aba_config" className={isMobile ? 'w-full justify-start py-3 px-4' : ''}>
+            <span className="material-icons text-sm mr-2">settings</span>
+            <span className={isMobile ? 'text-sm' : ''}>{t('production.aba_calculator.config_tab')}</span>
           </TabsTrigger>
         </TabsList>
         
@@ -1108,23 +1134,24 @@ export default function MixMaterialsPage() {
         
         <TabsContent value="aba_config">
           <Card>
-            <CardHeader className="pb-0">
-              <CardTitle>{t('production.aba_calculator.config_tab')}</CardTitle>
-              <div className="flex items-center justify-between mt-1">
-                <CardDescription>
+            <CardHeader className={`${isMobile ? 'p-4 pb-2' : 'pb-0'}`}>
+              <CardTitle className={isMobile ? 'text-lg' : ''}>{t('production.aba_calculator.config_tab')}</CardTitle>
+              <div className={`${isMobile ? 'flex flex-col space-y-3' : 'flex items-center justify-between'} mt-1`}>
+                <CardDescription className={isMobile ? 'text-sm' : ''}>
                   {t('production.aba_calculator.drag_help')}
                 </CardDescription>
-                <div className="flex space-x-2">
+                <div className={`${isMobile ? 'flex flex-col space-y-2' : 'flex space-x-2'}`}>
                   {selectedConfigId && (
                     <Button 
                       variant="outline" 
-                      size="sm"
+                      size={isMobile ? "default" : "sm"}
                       onClick={() => {
                         setSelectedConfigId(null);
                         setConfigName("");
                         setConfigDescription("");
                         setMaterialDistributions([]);
                       }}
+                      className={isMobile ? 'w-full justify-center' : ''}
                     >
                       <span className="material-icons text-xs mr-1">add</span>
                       {t('production.aba_calculator.new_config')}
