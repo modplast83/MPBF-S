@@ -625,19 +625,20 @@ export function QualityViolations() {
           <p className="text-muted-foreground">{t("quality.no_violations_found")}</p>
         </div>
       ) : (
-        <ScrollArea className="h-[calc(100vh-230px)] border rounded-md">
-          <Table>
-            <TableHeader className="sticky top-0 bg-background z-10">
-              <TableRow>
-                <TableHead className="w-12 whitespace-nowrap">{t("common.id")}</TableHead>
-                <TableHead className="hidden sm:table-cell whitespace-nowrap">{t("quality.reported_by")}</TableHead>
-                <TableHead className="max-w-[150px] sm:max-w-[200px]">{t("common.description")}</TableHead>
-                <TableHead className="whitespace-nowrap">{t("quality.severity")}</TableHead>
-                <TableHead className="whitespace-nowrap">{t("common.status")}</TableHead>
-                <TableHead className="hidden sm:table-cell whitespace-nowrap">{t("quality.reported_date")}</TableHead>
-                <TableHead className="w-16 sm:w-auto text-right">{t("common.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
+        <div className="border rounded-md overflow-hidden">
+          <ScrollArea className="h-[400px] md:h-[500px] lg:h-[600px]">
+            <Table>
+              <TableHeader className="sticky top-0 bg-background z-10">
+                <TableRow>
+                  <TableHead className="w-16 text-center">{t("common.id")}</TableHead>
+                  <TableHead className="hidden md:table-cell min-w-[120px]">{t("quality.reported_by")}</TableHead>
+                  <TableHead className="min-w-[200px] max-w-[300px]">{t("common.description")}</TableHead>
+                  <TableHead className="w-24 text-center">{t("quality.severity")}</TableHead>
+                  <TableHead className="w-28 text-center">{t("common.status")}</TableHead>
+                  <TableHead className="hidden lg:table-cell w-32">{t("quality.reported_date")}</TableHead>
+                  <TableHead className="w-20 text-right">{t("common.actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
             <TableBody>
               {filteredViolations.map((violation: any) => {
                 // Handle reporter information whether users is array or single object
