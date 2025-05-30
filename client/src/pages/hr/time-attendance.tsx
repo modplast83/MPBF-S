@@ -87,14 +87,29 @@ export default function TimeAttendancePage() {
       const checkInTime = new Date(attendance.checkInTime);
       const workingHours = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
       
-      checkOutMutation.mutate({
-        id: attendance.id,
-        data: {
-          checkOutTime,
-          workingHours: workingHours,
-          overtimeHours: workingHours > 8 ? workingHours - 8 : 0
-        }
-      });
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const location = `${position.coords.latitude},${position.coords.longitude}`;
+          checkOutMutation.mutate({
+            id: attendance.id,
+            data: {
+              checkOutTime,
+              workingHours: Math.round(workingHours * 100) / 100,
+              overtimeHours: workingHours > 8 ? Math.round((workingHours - 8) * 100) / 100 : 0,
+              location: attendance.location + ` | Out: ${location}`
+            }
+          });
+        });
+      } else {
+        checkOutMutation.mutate({
+          id: attendance.id,
+          data: {
+            checkOutTime,
+            workingHours: Math.round(workingHours * 100) / 100,
+            overtimeHours: workingHours > 8 ? Math.round((workingHours - 8) * 100) / 100 : 0
+          }
+        });
+      }
     }
   };
 
