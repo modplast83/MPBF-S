@@ -427,7 +427,7 @@ export default function MaintenanceRequestsPage() {
                   {filteredRequests.map((request: MaintenanceRequest) => (
                     <TableRow key={request.id}>
                       <TableCell className="font-medium">#{request.id}</TableCell>
-                      <TableCell>{format(new Date(request.date), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{format(new Date(request.createdAt), 'MMM dd, yyyy')}</TableCell>
                       <TableCell>{getMachineName(request.machineId)}</TableCell>
                       <TableCell>{request.damageType}</TableCell>
                       <TableCell>{getSeverityBadge(request.severity)}</TableCell>
