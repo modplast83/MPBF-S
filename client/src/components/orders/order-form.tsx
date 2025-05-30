@@ -352,8 +352,8 @@ export function OrderForm() {
                           {filteredCustomers.length === 0 ? (
                             <div className="py-6 text-center">
                               <span className="material-icons mb-2 text-muted-foreground">search_off</span>
-                              <p>No matching customer found.</p>
-                              <p className="text-xs text-muted-foreground mt-1">Try a different search term</p>
+                              <p>{t("orders.no_matching_customer")}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{t("orders.try_different_search")}</p>
                             </div>
                           ) : (
                             <div className="p-1">
@@ -409,10 +409,10 @@ export function OrderForm() {
               name="note"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Order Note</FormLabel>
+                  <FormLabel>{t("orders.order_note")}</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Enter additional notes for this order"
+                      placeholder={t("orders.order_note_placeholder")}
                       onChange={field.onChange}
                       value={field.value || ""}
                       name={field.name}
@@ -428,7 +428,7 @@ export function OrderForm() {
             {/* Job Orders */}
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Order Products</h3>
+                <h3 className="text-lg font-medium">{t("orders.add_products")}</h3>
                 <Button
                   type="button"
                   variant="outline"
@@ -437,7 +437,7 @@ export function OrderForm() {
                   disabled={!selectedCustomerId}
                 >
                   <span className="material-icons text-sm mr-1">add</span>
-                  Add Product
+                  {t("orders.add_product")}
                 </Button>
               </div>
               
@@ -451,7 +451,7 @@ export function OrderForm() {
                           name={`jobOrders.${index}.customerProductId`}
                           render={({ field }) => (
                             <FormItem className="flex-1">
-                              <FormLabel>Product</FormLabel>
+                              <FormLabel>{t("orders.product")}</FormLabel>
                               <Select
                                 onValueChange={(value) => field.onChange(parseInt(value))}
                                 value={field.value.toString()}
@@ -459,7 +459,7 @@ export function OrderForm() {
                               >
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Select a product" />
+                                    <SelectValue placeholder={t("orders.select_product")} />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -486,11 +486,11 @@ export function OrderForm() {
                           name={`jobOrders.${index}.quantity`}
                           render={({ field }) => (
                             <FormItem className="flex-1">
-                              <FormLabel>Quantity (kg)</FormLabel>
+                              <FormLabel>{t("orders.quantity")} (كجم)</FormLabel>
                               <FormControl>
                                 <Input 
                                   type="number"
-                                  placeholder="Enter quantity"
+                                  placeholder={t("orders.enter_quantity")}
                                   {...field}
                                   onChange={(e) => field.onChange(parseFloat(e.target.value))}
                                 />
@@ -515,13 +515,13 @@ export function OrderForm() {
                 ) : (
                   <div className="text-center py-8 text-secondary-400 border border-dashed rounded-md">
                     <span className="material-icons text-3xl mb-2">inventory</span>
-                    <p>Add products to this order</p>
+                    <p>{t("orders.add_products_to_order")}</p>
                   </div>
                 )
               ) : (
                 <div className="text-center py-8 text-secondary-400 border border-dashed rounded-md">
                   <span className="material-icons text-3xl mb-2">person</span>
-                  <p>Select a customer first</p>
+                  <p>{t("orders.select_customer_first")}</p>
                 </div>
               )}
             </div>
@@ -533,13 +533,13 @@ export function OrderForm() {
               variant="outline"
               onClick={() => navigate("/orders")}
             >
-              Cancel
+              {t("orders.cancel")}
             </Button>
             <Button 
               type="submit" 
               disabled={createOrderMutation.isPending}
             >
-              {createOrderMutation.isPending ? "Creating..." : "Create Order"}
+              {createOrderMutation.isPending ? t("orders.creating") : t("orders.create_order")}
             </Button>
           </CardFooter>
         </form>
