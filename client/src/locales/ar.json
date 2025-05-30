@@ -673,7 +673,37 @@
       "id": "الرقم",
       "action": "الإجراء",
       "implemented_by": "نفذ بواسطة",
-      "implementation_date": "تاريخ التنفيذ"
+      "implementation_date": "تاريخ التنفيذ",
+      
+      "workflow_analytics": "تحليلات سير العمل",
+      "by_section": "حسب القسم",
+      "by_operator": "حسب المشغل",
+      "by_item": "حسب الصنف",
+      "section_performance": "أداء الأقسام",
+      "operator_performance": "أداء المشغلين",
+      "section_details": "تفاصيل الأقسام",
+      "operator_details": "تفاصيل المشغلين",
+      
+      "section_id": "رقم القسم",
+      "section_name": "اسم القسم",
+      "section": "القسم",
+      "rolls_count": "عدد الرولات",
+      "waste_quantity": "كمية الهدر",
+      "production_time": "وقت الإنتاج",
+      
+      "operator_id": "رقم المشغل",
+      "operator_name": "اسم المشغل",
+      "operator": "المشغل",
+      "all_operators": "جميع المشغلين",
+      "jobs_count": "عدد المهام",
+      "rolls_processed": "الرولات المعالجة",
+      
+      "item_id": "رقم الصنف",
+      "item_name": "اسم الصنف",
+      "category": "الفئة",
+      "finished_quantity": "الكمية المنتهية",
+      
+      "all_sections": "جميع الأقسام"
     },
     "tools": {
       "title": "الأدوات",
