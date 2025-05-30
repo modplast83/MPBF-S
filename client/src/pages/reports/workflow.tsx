@@ -148,7 +148,7 @@ export default function WorkflowReportsPage() {
   // Filter operators to only show those from allowed sections
   const filteredUsers = users?.filter(user => {
     // Check if user belongs to any of the allowed sections
-    return user.section && filteredSections.some(section => section.id === user.section);
+    return user.sectionId && filteredSections.some(section => section.id === user.sectionId);
   }) || [];
 
   // Filter report data to only show allowed sections and operators
@@ -162,7 +162,7 @@ export default function WorkflowReportsPage() {
     operators: reportData.operators?.filter(operator => {
       // Find the user and check if they belong to allowed sections
       const user = users?.find(u => u.id === operator.id);
-      return user && user.section && filteredSections.some(section => section.id === user.section);
+      return user && user.sectionId && filteredSections.some(section => section.id === user.sectionId);
     }) || []
   } : null;
   
@@ -302,10 +302,10 @@ export default function WorkflowReportsPage() {
     }
   ];
   
-  // Prepare chart data for sections
+  // Prepare chart data for sections (using filtered data)
   const prepareSectionsChartData = () => {
-    if (!reportData || !reportData.sections || reportData.sections.length === 0) return [];
-    return reportData.sections.map(section => ({
+    if (!filteredReportData || !filteredReportData.sections || filteredReportData.sections.length === 0) return [];
+    return filteredReportData.sections.map(section => ({
       name: section.name,
       totalQuantity: section.totalQuantity,
       wasteQuantity: section.wasteQuantity,
@@ -313,10 +313,10 @@ export default function WorkflowReportsPage() {
     }));
   };
   
-  // Prepare chart data for operators
+  // Prepare chart data for operators (using filtered data)
   const prepareOperatorsChartData = () => {
-    if (!reportData || !reportData.operators || reportData.operators.length === 0) return [];
-    return reportData.operators.map(operator => ({
+    if (!filteredReportData || !filteredReportData.operators || filteredReportData.operators.length === 0) return [];
+    return filteredReportData.operators.map(operator => ({
       name: operator.name,
       rollsProcessed: operator.rollsProcessed,
       totalQuantity: operator.totalQuantity,
@@ -381,14 +381,19 @@ export default function WorkflowReportsPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-primary-700">
-          {t("reports.workflow_report")}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-primary-700">
+            {t("reports.workflow_report")}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Showing data for production sections: Extruding, Printing, and Cutting only
+          </p>
+        </div>
         <PDFExportButton
-          data={reportData?.sections || []}
+          data={filteredReportData?.sections || []}
           reportType="production"
           title="Workflow Production Report"
-          subtitle="Manufacturing Process Analysis"
+          subtitle="Manufacturing Process Analysis (Extruding, Printing, Cutting)"
           filename={`workflow-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`}
           columns={[
             { header: "Section", dataKey: "name" },
@@ -438,7 +443,7 @@ export default function WorkflowReportsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all_sections">{t("reports.all_sections")}</SelectItem>
-                  {sections?.map((section) => (
+                  {filteredSections?.map((section) => (
                     <SelectItem key={section.id} value={section.id}>
                       {section.name}
                     </SelectItem>
@@ -458,11 +463,9 @@ export default function WorkflowReportsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all_operators">{t("reports.all_operators")}</SelectItem>
-                  {users?.map((user) => (
+                  {filteredUsers?.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.firstName && user.lastName 
-                        ? `${user.firstName} ${user.lastName}` 
-                        : user.username}
+                      {user.firstName || user.username}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -507,7 +510,7 @@ export default function WorkflowReportsPage() {
             
             {/* Sections Tab */}
             <TabsContent value="sections" className="py-2">
-              {reportData && reportData.sections && reportData.sections.length > 0 ? (
+              {filteredReportData && filteredReportData.sections && filteredReportData.sections.length > 0 ? (
                 <>
                   <div className="mb-6">
                     <h3 className="text-lg font-medium mb-3">{t("reports.section_performance")}</h3>
@@ -529,7 +532,7 @@ export default function WorkflowReportsPage() {
                   <div>
                     <h3 className="text-lg font-medium mb-3">{t("reports.section_details")}</h3>
                     <DataTable
-                      data={reportData.sections}
+                      data={filteredReportData.sections}
                       columns={sectionsColumns as any}
                     />
                   </div>
@@ -544,7 +547,7 @@ export default function WorkflowReportsPage() {
             
             {/* Operators Tab */}
             <TabsContent value="operators" className="py-2">
-              {reportData && reportData.operators && reportData.operators.length > 0 ? (
+              {filteredReportData && filteredReportData.operators && filteredReportData.operators.length > 0 ? (
                 <>
                   <div className="mb-6">
                     <h3 className="text-lg font-medium mb-3">{t("reports.operator_performance")}</h3>
@@ -566,7 +569,7 @@ export default function WorkflowReportsPage() {
                   <div>
                     <h3 className="text-lg font-medium mb-3">{t("reports.operator_details")}</h3>
                     <DataTable
-                      data={reportData.operators}
+                      data={filteredReportData.operators}
                       columns={operatorsColumns as any}
                     />
                   </div>
