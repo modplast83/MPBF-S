@@ -119,8 +119,8 @@ export default function Machines() {
       header: "Status",
       accessorKey: "isActive" as const,
       cell: (row: Machine) => (
-        <Badge variant={row.isActive ? "default" : "secondary"}>
-          {row.isActive ? "Active" : "Inactive"}
+        <Badge variant={row.isActive === true ? "default" : "secondary"}>
+          {row.isActive === true ? "Active" : "Inactive"}
         </Badge>
       ),
     },
