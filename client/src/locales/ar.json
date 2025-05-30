@@ -114,6 +114,8 @@
       "orders": "الطلبات",
       "workflow": "سير العمل",
       "mix_materials": "خلط مواد",
+      "bottleneck_monitor": "مراقب الاختناقات",
+      "production_metrics": "مقاييس الإنتاج",
       "mix_colors": "خلط الألوان",
       "warehouse": "المستودع",
       "raw_materials": "المواد الخام",

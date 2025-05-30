@@ -139,6 +139,8 @@
       "orders": "Orders",
       "workflow": "Workflow",
       "mix_materials": "Mix Materials",
+      "bottleneck_monitor": "Bottleneck Monitor",
+      "production_metrics": "Production Metrics",
       "warehouse": "Warehouse",
       "raw_materials": "Raw Materials",
       "final_products": "Final Products",
