@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Gauge, TrendingUp, Clock, AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const productionMetricsSchema = z.object({
   sectionId: z.string().min(1, "Section is required"),
@@ -32,6 +33,7 @@ type ProductionMetricsForm = z.infer<typeof productionMetricsSchema>;
 export default function MetricsInputPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   // Fetch sections for dropdown
   const { data: sections } = useQuery({

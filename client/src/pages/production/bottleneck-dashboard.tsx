@@ -73,14 +73,14 @@ export default function BottleneckDashboard() {
   // Fetch active alerts
   const { data: activeAlerts, isLoading: alertsLoading } = useQuery<BottleneckAlert[]>({
     queryKey: ["/api/bottleneck/alerts", "active"],
-    queryFn: () => apiRequest("/api/bottleneck/alerts?status=active"),
+    queryFn: () => apiRequest("GET", "/api/bottleneck/alerts?status=active"),
     refetchInterval: 15000 // Refresh every 15 seconds
   });
 
   // Acknowledge alert mutation
   const acknowledgeAlertMutation = useMutation({
     mutationFn: (alertId: number) => 
-      apiRequest(`/api/bottleneck/alerts/${alertId}/acknowledge`, { method: "PUT" }),
+      apiRequest("PUT", `/api/bottleneck/alerts/${alertId}/acknowledge`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bottleneck/alerts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/bottleneck/dashboard"] });
@@ -90,10 +90,7 @@ export default function BottleneckDashboard() {
   // Resolve alert mutation
   const resolveAlertMutation = useMutation({
     mutationFn: ({ alertId, notes }: { alertId: number; notes?: string }) =>
-      apiRequest(`/api/bottleneck/alerts/${alertId}/resolve`, { 
-        method: "PUT",
-        body: JSON.stringify({ notes })
-      }),
+      apiRequest("PUT", `/api/bottleneck/alerts/${alertId}/resolve`, { notes }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bottleneck/alerts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/bottleneck/dashboard"] });
