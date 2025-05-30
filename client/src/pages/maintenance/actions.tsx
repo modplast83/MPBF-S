@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { PageHeader } from "@/components/ui/page-header";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { Plus, Search, Wrench, FileText, DollarSign } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -58,6 +59,7 @@ interface User {
 }
 
 export default function MaintenanceActionsPage() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -228,8 +230,8 @@ export default function MaintenanceActionsPage() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
-        title="Maintenance Actions"
-        description="Record and track maintenance actions taken for equipment requests"
+        title={t("maintenance.actions.title")}
+        description={t("maintenance.actions.description")}
       />
 
       {/* Action Bar */}

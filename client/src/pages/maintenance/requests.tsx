@@ -309,13 +309,13 @@ export default function MaintenanceRequestsPage() {
               </div>
 
               <div>
-                <Label htmlFor="damageType">Damage Type *</Label>
+                <Label htmlFor="damageType">{t("maintenance.requests.damageType")} *</Label>
                 <Select 
                   value={formData.damageType} 
                   onValueChange={(value) => setFormData({...formData, damageType: value})}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select damage type" />
+                    <SelectValue placeholder={t("maintenance.requests.damageType")} />
                   </SelectTrigger>
                   <SelectContent>
                     {DAMAGE_TYPES.map((type) => (
@@ -328,13 +328,13 @@ export default function MaintenanceRequestsPage() {
               </div>
 
               <div>
-                <Label htmlFor="severity">Severity *</Label>
+                <Label htmlFor="severity">{t("maintenance.requests.severity")} *</Label>
                 <Select 
                   value={formData.severity} 
                   onValueChange={(value) => setFormData({...formData, severity: value})}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select severity" />
+                    <SelectValue placeholder={t("maintenance.requests.severity")} />
                   </SelectTrigger>
                   <SelectContent>
                     {SEVERITY_LEVELS.map((level) => (
@@ -347,10 +347,10 @@ export default function MaintenanceRequestsPage() {
               </div>
 
               <div>
-                <Label htmlFor="description">Description *</Label>
+                <Label htmlFor="description">{t("maintenance.requests.description")} *</Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe the issue or maintenance needed..."
+                  placeholder={t("maintenance.requests.description")}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   rows={3}
@@ -358,7 +358,7 @@ export default function MaintenanceRequestsPage() {
               </div>
 
               <div>
-                <Label htmlFor="estimatedRepairTime">Estimated Repair Time (hours)</Label>
+                <Label htmlFor="estimatedRepairTime">{t("maintenance.requests.estimatedRepairTime")}</Label>
                 <Input
                   id="estimatedRepairTime"
                   type="number"
@@ -369,10 +369,10 @@ export default function MaintenanceRequestsPage() {
               </div>
 
               <div>
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">{t("maintenance.requests.notes")}</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Additional notes or observations..."
+                  placeholder={t("maintenance.requests.notes")}
                   value={formData.notes}
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   rows={2}
@@ -381,10 +381,10 @@ export default function MaintenanceRequestsPage() {
 
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button type="submit" disabled={createRequestMutation.isPending}>
-                  {createRequestMutation.isPending ? "Creating..." : "Create Request"}
+                  {createRequestMutation.isPending ? t("common.creating") : t("maintenance.requests.create")}
                 </Button>
               </div>
             </form>
