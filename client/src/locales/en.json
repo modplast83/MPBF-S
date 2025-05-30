@@ -993,6 +993,50 @@
       "quantity_exceeds": "The quantity exceeds the remaining job order quantity by {{amount}} kg",
       "quantity_error": "Quantity must be greater than 0"
     },
+    "maintenance": {
+      "title": "Maintenance",
+      "requests": {
+        "title": "Maintenance Requests",
+        "description": "Record and manage maintenance requests for equipment",
+        "table_title": "Maintenance Requests ({{count}})",
+        "table_description": "Track and manage all maintenance requests for production equipment",
+        "no_requests": "No maintenance requests found",
+        "id": "ID",
+        "date": "Date",
+        "machine": "Machine",
+        "damage_type": "Damage Type",
+        "severity": "Severity",
+        "status": "Status",
+        "reported_by": "Reported By",
+        "description": "Description",
+        "search_placeholder": "Search requests...",
+        "filter_by_status": "Filter by Status",
+        "filter_by_severity": "Filter by Severity",
+        "all_statuses": "All Statuses",
+        "all_severities": "All Severities",
+        "new_request": "New Request",
+        "submit_request": "Submit Request",
+        "request_details": "Request Details"
+      },
+      "actions": {
+        "title": "Maintenance Actions",
+        "description": "Record and track maintenance actions taken for equipment requests",
+        "table_title": "Maintenance Actions ({{count}})",
+        "table_description": "Track all maintenance actions performed on production equipment",
+        "no_actions": "No maintenance actions found",
+        "new_action": "New Action",
+        "record_action": "Record Action"
+      },
+      "schedule": {
+        "title": "Maintenance Schedule",
+        "description": "Manage preventive and scheduled maintenance routines",
+        "table_title": "Maintenance Schedules ({{count}})",
+        "table_description": "Manage and track preventive maintenance schedules",
+        "no_schedules": "No maintenance schedules found",
+        "new_schedule": "New Schedule",
+        "create_schedule": "Create Schedule"
+      }
+    },
     "language": {
       "en": "English",
       "ar": "العربية"
