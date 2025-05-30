@@ -401,26 +401,26 @@ export default function MaintenanceActionsPage() {
         </CardHeader>
         <CardContent>
           {actionsLoading ? (
-            <div className="text-center py-4">Loading actions...</div>
+            <div className="text-center py-4">{t("common.loading")}</div>
           ) : filteredActions.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
-              No maintenance actions found
+              {t("maintenance.actions.no_actions")}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Request</TableHead>
-                    <TableHead>Machine</TableHead>
-                    <TableHead>Actions Taken</TableHead>
-                    <TableHead>Action By</TableHead>
-                    <TableHead>Labor Hours</TableHead>
-                    <TableHead>Parts Cost</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Description</TableHead>
+                    <TableHead>{t("maintenance.actions.id")}</TableHead>
+                    <TableHead>{t("maintenance.actions.date")}</TableHead>
+                    <TableHead>{t("maintenance.actions.request")}</TableHead>
+                    <TableHead>{t("maintenance.actions.machine")}</TableHead>
+                    <TableHead>{t("maintenance.actions.actionsTaken")}</TableHead>
+                    <TableHead>{t("maintenance.actions.actionBy")}</TableHead>
+                    <TableHead>{t("maintenance.actions.laborHours")}</TableHead>
+                    <TableHead>{t("maintenance.actions.partsCost")}</TableHead>
+                    <TableHead>{t("maintenance.actions.status")}</TableHead>
+                    <TableHead>{t("maintenance.actions.description")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
