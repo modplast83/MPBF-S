@@ -43,6 +43,7 @@ import { insertOrderSchema, Customer, CustomerProduct, Item, Category } from "@s
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 // Extended schema for the form
 const orderFormSchema = insertOrderSchema.extend({
@@ -57,6 +58,7 @@ const orderFormSchema = insertOrderSchema.extend({
 type OrderFormValues = z.infer<typeof orderFormSchema>;
 
 export function OrderForm() {
+  const { t } = useTranslation();
   const [_, navigate] = useLocation();
   const queryClient = useQueryClient();
   
@@ -274,15 +276,15 @@ export function OrderForm() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
       toast({
-        title: "Order Created",
-        description: `Order #${data.id} has been created successfully.`,
+        title: t("orders.order_created"),
+        description: t("orders.order_created_success", { id: data.id }),
       });
       navigate("/orders");
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to create order: ${error}`,
+        title: t("orders.error"),
+        description: t("orders.order_creation_failed", { error }),
         variant: "destructive",
       });
     },
@@ -305,7 +307,7 @@ export function OrderForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create New Order</CardTitle>
+        <CardTitle>{t("orders.create_new_order")}</CardTitle>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -316,7 +318,7 @@ export function OrderForm() {
               name="customerId"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Customer</FormLabel>
+                  <FormLabel>{t("orders.customer")}</FormLabel>
                   <div className="relative">
                     <Button
                       type="button"
@@ -328,8 +330,8 @@ export function OrderForm() {
                       onClick={() => setOpen(!open)}
                     >
                       {field.value
-                        ? customers?.find((customer) => customer.id === field.value)?.name || "Select customer"
-                        : "Select customer"}
+                        ? customers?.find((customer) => customer.id === field.value)?.name || t("orders.select_customer")
+                        : t("orders.select_customer")}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                     
@@ -339,7 +341,7 @@ export function OrderForm() {
                           <input
                             type="text"
                             className="w-full p-2 border rounded-md"
-                            placeholder="Search by name, Arabic name, or code..."
+                            placeholder={t("orders.search_customer_placeholder")}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             autoFocus
