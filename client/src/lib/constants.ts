@@ -54,6 +54,11 @@ export const API_ENDPOINTS = {
   EMPLOYEE_OF_MONTH: "/api/employee-of-month",
   HR_VIOLATIONS: "/api/hr-violations",
   HR_COMPLAINTS: "/api/hr-complaints",
+  
+  // Maintenance Module
+  MAINTENANCE_REQUESTS: "/api/maintenance-requests",
+  MAINTENANCE_ACTIONS: "/api/maintenance-actions",
+  MAINTENANCE_SCHEDULE: "/api/maintenance-schedule",
 };
 
 // Stage and status options
@@ -132,6 +137,17 @@ export const SIDEBAR_ITEMS = [
           { title: "Time Attendance", path: "/hr/time-attendance" },
           { title: "Employee of the Month", path: "/hr/employee-of-month" },
           { title: "Violation and Complaint", path: "/hr/violations-complaints" },
+        ],
+      },
+      {
+        title: "Maintenance",
+        path: "/maintenance",
+        icon: "build",
+        subItems: [
+          { title: "Maintenance Requests", path: "/maintenance/requests" },
+          { title: "Maintenance Actions", path: "/maintenance/actions" },
+          { title: "Maintenance Schedule", path: "/maintenance/schedule" },
+          { title: "Dashboard", path: "/maintenance/dashboard" },
         ],
       },
     ],

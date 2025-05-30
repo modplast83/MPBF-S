@@ -5015,6 +5015,195 @@ COMMIT;
     }
   });
 
+  // Maintenance Module Routes
+
+  // Maintenance Requests
+  app.get("/api/maintenance-requests", async (req: Request, res: Response) => {
+    try {
+      const requests = await storage.getMaintenanceRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error('Error fetching maintenance requests:', error);
+      res.status(500).json({ error: 'Failed to fetch maintenance requests' });
+    }
+  });
+
+  app.get("/api/maintenance-requests/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid request ID" });
+      }
+      
+      const request = await storage.getMaintenanceRequest(id);
+      if (!request) {
+        return res.status(404).json({ error: "Maintenance request not found" });
+      }
+      res.json(request);
+    } catch (error) {
+      console.error('Error fetching maintenance request:', error);
+      res.status(500).json({ error: 'Failed to fetch maintenance request' });
+    }
+  });
+
+  app.get("/api/maintenance-requests/machine/:machineId", async (req: Request, res: Response) => {
+    try {
+      const { machineId } = req.params;
+      const requests = await storage.getMaintenanceRequestsByMachine(machineId);
+      res.json(requests);
+    } catch (error) {
+      console.error('Error fetching maintenance requests by machine:', error);
+      res.status(500).json({ error: 'Failed to fetch maintenance requests' });
+    }
+  });
+
+  app.get("/api/maintenance-requests/status/:status", async (req: Request, res: Response) => {
+    try {
+      const { status } = req.params;
+      const requests = await storage.getMaintenanceRequestsByStatus(status);
+      res.json(requests);
+    } catch (error) {
+      console.error('Error fetching maintenance requests by status:', error);
+      res.status(500).json({ error: 'Failed to fetch maintenance requests' });
+    }
+  });
+
+  app.post("/api/maintenance-requests", async (req: Request, res: Response) => {
+    try {
+      const requestData = {
+        ...req.body,
+        reportedBy: req.body.reportedBy || req.user?.id?.toString(),
+        date: new Date(),
+      };
+      
+      const request = await storage.createMaintenanceRequest(requestData);
+      res.status(201).json(request);
+    } catch (error) {
+      console.error('Error creating maintenance request:', error);
+      res.status(500).json({ error: 'Failed to create maintenance request' });
+    }
+  });
+
+  app.put("/api/maintenance-requests/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid request ID" });
+      }
+      
+      const request = await storage.updateMaintenanceRequest(id, req.body);
+      if (!request) {
+        return res.status(404).json({ error: "Maintenance request not found" });
+      }
+      res.json(request);
+    } catch (error) {
+      console.error('Error updating maintenance request:', error);
+      res.status(500).json({ error: 'Failed to update maintenance request' });
+    }
+  });
+
+  app.delete("/api/maintenance-requests/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid request ID" });
+      }
+      
+      await storage.deleteMaintenanceRequest(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting maintenance request:', error);
+      res.status(500).json({ error: 'Failed to delete maintenance request' });
+    }
+  });
+
+  // Maintenance Actions
+  app.get("/api/maintenance-actions", async (req: Request, res: Response) => {
+    try {
+      const actions = await storage.getMaintenanceActions();
+      res.json(actions);
+    } catch (error) {
+      console.error('Error fetching maintenance actions:', error);
+      res.status(500).json({ error: 'Failed to fetch maintenance actions' });
+    }
+  });
+
+  app.get("/api/maintenance-actions/request/:requestId", async (req: Request, res: Response) => {
+    try {
+      const requestId = parseInt(req.params.requestId);
+      if (isNaN(requestId)) {
+        return res.status(400).json({ error: "Invalid request ID" });
+      }
+      
+      const actions = await storage.getMaintenanceActionsByRequest(requestId);
+      res.json(actions);
+    } catch (error) {
+      console.error('Error fetching maintenance actions by request:', error);
+      res.status(500).json({ error: 'Failed to fetch maintenance actions' });
+    }
+  });
+
+  app.post("/api/maintenance-actions", async (req: Request, res: Response) => {
+    try {
+      const actionData = {
+        ...req.body,
+        actionBy: req.body.actionBy || req.user?.id?.toString(),
+        date: new Date(),
+      };
+      
+      const action = await storage.createMaintenanceAction(actionData);
+      
+      // Update the related request status to 'in_progress' or 'completed'
+      if (req.body.requestId) {
+        await storage.updateMaintenanceRequest(req.body.requestId, {
+          status: 'in_progress',
+          assignedTo: actionData.actionBy,
+        });
+      }
+      
+      res.status(201).json(action);
+    } catch (error) {
+      console.error('Error creating maintenance action:', error);
+      res.status(500).json({ error: 'Failed to create maintenance action' });
+    }
+  });
+
+  // Maintenance Schedule
+  app.get("/api/maintenance-schedule", async (req: Request, res: Response) => {
+    try {
+      const schedules = await storage.getMaintenanceSchedules();
+      res.json(schedules);
+    } catch (error) {
+      console.error('Error fetching maintenance schedules:', error);
+      res.status(500).json({ error: 'Failed to fetch maintenance schedules' });
+    }
+  });
+
+  app.get("/api/maintenance-schedule/overdue", async (req: Request, res: Response) => {
+    try {
+      const overdueSchedules = await storage.getOverdueMaintenanceSchedules();
+      res.json(overdueSchedules);
+    } catch (error) {
+      console.error('Error fetching overdue maintenance schedules:', error);
+      res.status(500).json({ error: 'Failed to fetch overdue schedules' });
+    }
+  });
+
+  app.post("/api/maintenance-schedule", async (req: Request, res: Response) => {
+    try {
+      const scheduleData = {
+        ...req.body,
+        createdBy: req.body.createdBy || req.user?.id?.toString(),
+      };
+      
+      const schedule = await storage.createMaintenanceSchedule(scheduleData);
+      res.status(201).json(schedule);
+    } catch (error) {
+      console.error('Error creating maintenance schedule:', error);
+      res.status(500).json({ error: 'Failed to create maintenance schedule' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

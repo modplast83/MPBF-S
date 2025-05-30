@@ -1,0 +1,469 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageHeader } from "@/components/ui/page-header";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { Plus, Search, Filter, AlertTriangle, Clock, CheckCircle, X } from "lucide-react";
+import { API_ENDPOINTS } from "@/lib/constants";
+import { apiRequest } from "@/lib/queryClient";
+
+const DAMAGE_TYPES = [
+  "Motor", "Bearing", "Roller", "Printing Roller", "Gear", "Fan", 
+  "Fuse", "Sealing", "Knife", "Heater", "Inverter", "Power Supply", 
+  "Shaft", "Take up", "Short", "Other"
+];
+
+const SEVERITY_LEVELS = ["High", "Normal", "Low"];
+const STATUS_OPTIONS = ["pending", "in_progress", "completed", "cancelled"];
+
+interface MaintenanceRequest {
+  id: number;
+  date: string;
+  reportedBy: string;
+  machineId: string;
+  damageType: string;
+  severity: string;
+  description: string;
+  notes?: string;
+  status: string;
+  priority: number;
+  estimatedRepairTime?: number;
+  actualRepairTime?: number;
+  assignedTo?: string;
+  completedAt?: string;
+  createdAt: string;
+}
+
+interface Machine {
+  id: string;
+  name: string;
+  sectionId: string;
+}
+
+interface User {
+  id: string;
+  username: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export default function MaintenanceRequestsPage() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [severityFilter, setSeverityFilter] = useState("all");
+
+  const [formData, setFormData] = useState({
+    machineId: "",
+    damageType: "",
+    severity: "Normal",
+    description: "",
+    notes: "",
+    estimatedRepairTime: "",
+  });
+
+  // Fetch maintenance requests
+  const { data: requests = [], isLoading: requestsLoading, refetch: refetchRequests } = useQuery({
+    queryKey: [API_ENDPOINTS.MAINTENANCE_REQUESTS],
+    queryFn: () => apiRequest('GET', API_ENDPOINTS.MAINTENANCE_REQUESTS)
+  });
+
+  // Fetch machines
+  const { data: machines = [] } = useQuery({
+    queryKey: ['/api/machines'],
+    queryFn: () => apiRequest('GET', '/api/machines')
+  });
+
+  // Fetch users
+  const { data: users = [] } = useQuery({
+    queryKey: ['/api/users'],
+    queryFn: () => apiRequest('GET', '/api/users')
+  });
+
+  // Create request mutation
+  const createRequestMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', API_ENDPOINTS.MAINTENANCE_REQUESTS, data),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Maintenance request created successfully",
+      });
+      setIsDialogOpen(false);
+      resetForm();
+      refetchRequests();
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MAINTENANCE_REQUESTS] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create maintenance request",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update request mutation
+  const updateRequestMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => 
+      apiRequest('PUT', `${API_ENDPOINTS.MAINTENANCE_REQUESTS}/${id}`, data),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Maintenance request updated successfully",
+      });
+      refetchRequests();
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MAINTENANCE_REQUESTS] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update maintenance request",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      machineId: "",
+      damageType: "",
+      severity: "Normal",
+      description: "",
+      notes: "",
+      estimatedRepairTime: "",
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.machineId || !formData.damageType || !formData.description) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const requestData = {
+      ...formData,
+      estimatedRepairTime: formData.estimatedRepairTime ? parseInt(formData.estimatedRepairTime) : null,
+      priority: formData.severity === "High" ? 1 : formData.severity === "Normal" ? 2 : 3,
+    };
+
+    createRequestMutation.mutate(requestData);
+  };
+
+  const handleStatusUpdate = (requestId: number, newStatus: string) => {
+    const updateData = { 
+      status: newStatus,
+      ...(newStatus === 'completed' && { completedAt: new Date().toISOString() })
+    };
+    updateRequestMutation.mutate({ id: requestId, data: updateData });
+  };
+
+  // Filter requests
+  const filteredRequests = requests.filter((request: MaintenanceRequest) => {
+    const matchesSearch = searchQuery === "" || 
+      request.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.machineId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.damageType.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || request.status === statusFilter;
+    const matchesSeverity = severityFilter === "all" || request.severity === severityFilter;
+    
+    return matchesSearch && matchesStatus && matchesSeverity;
+  });
+
+  const getSeverityBadge = (severity: string) => {
+    switch (severity) {
+      case "High":
+        return <Badge variant="destructive">{severity}</Badge>;
+      case "Normal":
+        return <Badge variant="secondary">{severity}</Badge>;
+      case "Low":
+        return <Badge variant="outline">{severity}</Badge>;
+      default:
+        return <Badge>{severity}</Badge>;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending":
+        return <Badge variant="destructive"><AlertTriangle className="w-3 h-3 mr-1" />{status}</Badge>;
+      case "in_progress":
+        return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />{status}</Badge>;
+      case "completed":
+        return <Badge variant="default"><CheckCircle className="w-3 h-3 mr-1" />{status}</Badge>;
+      case "cancelled":
+        return <Badge variant="outline"><X className="w-3 h-3 mr-1" />{status}</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getMachineName = (machineId: string) => {
+    const machine = machines.find((m: Machine) => m.id === machineId);
+    return machine ? machine.name : machineId;
+  };
+
+  const getUserName = (userId: string) => {
+    const user = users.find((u: User) => u.id === userId);
+    return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : userId;
+  };
+
+  return (
+    <div className="container mx-auto p-4 space-y-6">
+      <PageHeader
+        title="Maintenance Requests"
+        description="Create and manage maintenance requests for production equipment"
+      />
+
+      {/* Action Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-2 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search requests..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              {STATUS_OPTIONS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={severityFilter} onValueChange={setSeverityFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Filter by severity" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Severity</SelectItem>
+              {SEVERITY_LEVELS.map((severity) => (
+                <SelectItem key={severity} value={severity}>
+                  {severity}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              New Request
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Maintenance Request</DialogTitle>
+              <DialogDescription>
+                Submit a new maintenance request for equipment repair or service
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="machineId">Machine *</Label>
+                <Select 
+                  value={formData.machineId} 
+                  onValueChange={(value) => setFormData({...formData, machineId: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select machine" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {machines.map((machine: Machine) => (
+                      <SelectItem key={machine.id} value={machine.id}>
+                        {machine.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="damageType">Damage Type *</Label>
+                <Select 
+                  value={formData.damageType} 
+                  onValueChange={(value) => setFormData({...formData, damageType: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select damage type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DAMAGE_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="severity">Severity *</Label>
+                <Select 
+                  value={formData.severity} 
+                  onValueChange={(value) => setFormData({...formData, severity: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SEVERITY_LEVELS.map((level) => (
+                      <SelectItem key={level} value={level}>
+                        {level}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description *</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe the issue or maintenance needed..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="estimatedRepairTime">Estimated Repair Time (hours)</Label>
+                <Input
+                  id="estimatedRepairTime"
+                  type="number"
+                  placeholder="Enter estimated hours"
+                  value={formData.estimatedRepairTime}
+                  onChange={(e) => setFormData({...formData, estimatedRepairTime: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Additional notes or observations..."
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  rows={2}
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createRequestMutation.isPending}>
+                  {createRequestMutation.isPending ? "Creating..." : "Create Request"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Requests Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Maintenance Requests ({filteredRequests.length})</CardTitle>
+          <CardDescription>
+            Track and manage all maintenance requests for production equipment
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {requestsLoading ? (
+            <div className="text-center py-4">Loading requests...</div>
+          ) : filteredRequests.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">
+              No maintenance requests found
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Machine</TableHead>
+                    <TableHead>Damage Type</TableHead>
+                    <TableHead>Severity</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Reported By</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredRequests.map((request: MaintenanceRequest) => (
+                    <TableRow key={request.id}>
+                      <TableCell className="font-medium">#{request.id}</TableCell>
+                      <TableCell>{format(new Date(request.date), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{getMachineName(request.machineId)}</TableCell>
+                      <TableCell>{request.damageType}</TableCell>
+                      <TableCell>{getSeverityBadge(request.severity)}</TableCell>
+                      <TableCell>{getStatusBadge(request.status)}</TableCell>
+                      <TableCell>{getUserName(request.reportedBy)}</TableCell>
+                      <TableCell className="max-w-xs truncate" title={request.description}>
+                        {request.description}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1">
+                          {request.status === 'pending' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleStatusUpdate(request.id, 'in_progress')}
+                            >
+                              Start
+                            </Button>
+                          )}
+                          {request.status === 'in_progress' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleStatusUpdate(request.id, 'completed')}
+                            >
+                              Complete
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
