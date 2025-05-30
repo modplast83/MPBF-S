@@ -18,6 +18,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { useTranslation } from "react-i18next";
 
 interface BottleneckAlert {
   id: number;
@@ -63,6 +64,7 @@ const severityTextColors = {
 
 export default function BottleneckDashboard() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   // Fetch dashboard overview data
   const { data: dashboardData, isLoading: dashboardLoading } = useQuery<DashboardData>({
@@ -148,19 +150,19 @@ export default function BottleneckDashboard() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Production Bottleneck Monitor</h1>
+          <h1 className="text-3xl font-bold">{t("production.bottleneck_monitor")}</h1>
           <p className="text-muted-foreground">
-            Real-time monitoring and smart notifications for production bottlenecks
+            {t("production.bottleneck_monitor_description")}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             <Settings className="h-4 w-4 mr-2" />
-            Settings
+            {t("common.settings")}
           </Button>
           <Button variant="outline" size="sm">
             <BarChart3 className="h-4 w-4 mr-2" />
-            Analytics
+            {t("production.analytics")}
           </Button>
         </div>
       </div>
@@ -171,7 +173,7 @@ export default function BottleneckDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Alerts</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("production.active_alerts")}</p>
                 <p className="text-2xl font-bold">{dashboardData?.activeAlerts || 0}</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-orange-500" />
@@ -183,7 +185,7 @@ export default function BottleneckDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Critical Issues</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("production.critical_issues")}</p>
                 <p className="text-2xl font-bold text-red-600">{dashboardData?.criticalAlerts || 0}</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-red-500" />
@@ -195,7 +197,7 @@ export default function BottleneckDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Overall Efficiency</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("production.overall_efficiency")}</p>
                 <p className="text-2xl font-bold">{dashboardData?.overallEfficiency?.toFixed(1) || 0}%</p>
               </div>
               {(dashboardData?.overallEfficiency || 0) >= 80 ? (
@@ -214,7 +216,7 @@ export default function BottleneckDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Metrics Today</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("production.metrics_today")}</p>
                 <p className="text-2xl font-bold">{dashboardData?.metricsCount || 0}</p>
               </div>
               <Factory className="h-8 w-8 text-blue-500" />
@@ -227,7 +229,7 @@ export default function BottleneckDashboard() {
       {dashboardData?.alertsBySeverity && Object.keys(dashboardData.alertsBySeverity).length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Alerts by Severity</CardTitle>
+            <CardTitle>{t("production.alerts_by_severity")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex gap-4">
@@ -245,9 +247,9 @@ export default function BottleneckDashboard() {
 
       <Tabs defaultValue="active-alerts" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="active-alerts">Active Alerts</TabsTrigger>
-          <TabsTrigger value="top-bottlenecks">Top Bottlenecks</TabsTrigger>
-          <TabsTrigger value="recent-activity">Recent Activity</TabsTrigger>
+          <TabsTrigger value="active-alerts">{t("production.active_alerts")}</TabsTrigger>
+          <TabsTrigger value="top-bottlenecks">{t("production.top_bottlenecks")}</TabsTrigger>
+          <TabsTrigger value="recent-activity">{t("production.recent_activity")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active-alerts" className="space-y-4">
