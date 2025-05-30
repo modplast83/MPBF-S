@@ -133,6 +133,31 @@ export default function Permissions() {
   // Convert API data to UI format
   const permissions: Permission[] = apiPermissions.map(apiToUiFormat);
   
+  // Check for missing modules and create them automatically
+  useEffect(() => {
+    if (apiPermissions.length > 0) {
+      const existingModules = new Set(apiPermissions.map(p => p.module));
+      const missingModules = ALL_MODULES.filter(module => !existingModules.has(module));
+      
+      if (missingModules.length > 0) {
+        console.log('Creating permissions for missing modules:', missingModules);
+        
+        // Create permissions for missing modules for administrator role
+        missingModules.forEach(module => {
+          createPermissionMutation.mutate({
+            role: 'administrator',
+            module: module,
+            can_view: true,
+            can_create: true,
+            can_edit: true,
+            can_delete: true,
+            is_active: true
+          });
+        });
+      }
+    }
+  }, [apiPermissions]);
+  
   // Group permissions by role for better organization
   const permissionsByRole: Record<string, Permission[]> = {};
   permissions.forEach(permission => {
