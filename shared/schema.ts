@@ -714,6 +714,75 @@ export const productionTargets = pgTable("production_targets", {
   createdBy: text("created_by").notNull().references(() => users.id),
 });
 
+// Maintenance Module Tables
+
+// Maintenance Requests
+export const maintenanceRequests = pgTable("maintenance_requests", {
+  id: serial("id").primaryKey(),
+  date: timestamp("date").defaultNow().notNull(),
+  reportedBy: text("reported_by").notNull().references(() => users.id),
+  machineId: text("machine_id").notNull().references(() => machines.id),
+  damageType: text("damage_type").notNull(), // Motor, Bearing, Roller, etc.
+  severity: text("severity").notNull().default("Normal"), // High, Normal, Low
+  description: text("description").notNull(),
+  notes: text("notes"),
+  status: text("status").notNull().default("pending"), // pending, in_progress, completed, cancelled
+  priority: integer("priority").default(2), // 1 = High, 2 = Normal, 3 = Low
+  estimatedRepairTime: integer("estimated_repair_time_hours"),
+  actualRepairTime: integer("actual_repair_time_hours"),
+  assignedTo: text("assigned_to").references(() => users.id),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMaintenanceRequestSchema = createInsertSchema(maintenanceRequests).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertMaintenanceRequest = z.infer<typeof insertMaintenanceRequestSchema>;
+export type MaintenanceRequest = typeof maintenanceRequests.$inferSelect;
+
+// Maintenance Actions
+export const maintenanceActions = pgTable("maintenance_actions", {
+  id: serial("id").primaryKey(),
+  date: timestamp("date").defaultNow().notNull(),
+  requestId: integer("request_id").notNull().references(() => maintenanceRequests.id, { onDelete: "cascade" }),
+  machineId: text("machine_id").notNull().references(() => machines.id),
+  actionBy: text("action_by").notNull().references(() => users.id),
+  actionsTaken: text("actions_taken").array().notNull(), // ["Repair", "Change Parts", "Workshop"]
+  description: text("description").notNull(),
+  partsCost: doublePrecision("parts_cost").default(0),
+  laborHours: doublePrecision("labor_hours").default(0),
+  status: text("status").notNull().default("completed"), // pending, in_progress, completed
+  notes: text("notes"),
+  attachments: text("attachments").array(), // URLs for photos/documents
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMaintenanceActionSchema = createInsertSchema(maintenanceActions).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertMaintenanceAction = z.infer<typeof insertMaintenanceActionSchema>;
+export type MaintenanceAction = typeof maintenanceActions.$inferSelect;
+
+// Maintenance Schedule (for preventive maintenance)
+export const maintenanceSchedule = pgTable("maintenance_schedule", {
+  id: serial("id").primaryKey(),
+  machineId: text("machine_id").notNull().references(() => machines.id),
+  maintenanceType: text("maintenance_type").notNull(), // preventive, predictive, breakdown
+  frequency: text("frequency").notNull(), // daily, weekly, monthly, quarterly, yearly
+  lastMaintenanceDate: timestamp("last_maintenance_date"),
+  nextMaintenanceDate: timestamp("next_maintenance_date").notNull(),
+  assignedTo: text("assigned_to").references(() => users.id),
+  description: text("description").notNull(),
+  estimatedDuration: integer("estimated_duration_hours").default(1),
+  isActive: boolean("is_active").default(true),
+  createdBy: text("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMaintenanceScheduleSchema = createInsertSchema(maintenanceSchedule).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertMaintenanceSchedule = z.infer<typeof insertMaintenanceScheduleSchema>;
+export type MaintenanceSchedule = typeof maintenanceSchedule.$inferSelect;
+
 export const insertProductionTargetsSchema = createInsertSchema(productionTargets).omit({ id: true, effectiveFrom: true });
 export type InsertProductionTargets = z.infer<typeof insertProductionTargetsSchema>;
 export type ProductionTargets = typeof productionTargets.$inferSelect;

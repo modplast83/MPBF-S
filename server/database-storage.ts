@@ -1,4 +1,4 @@
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, or, sql, ne, isNull } from "drizzle-orm";
 import {
   users,
   type User,
@@ -95,10 +95,18 @@ import {
   type InsertPlateCalculation,
   abaMaterialConfigs,
   type AbaMaterialConfig,
-  type InsertAbaMaterialConfig
+  type InsertAbaMaterialConfig,
+  maintenanceRequests,
+  type MaintenanceRequest,
+  type InsertMaintenanceRequest,
+  maintenanceActions,
+  type MaintenanceAction,
+  type InsertMaintenanceAction,
+  maintenanceSchedule,
+  type MaintenanceSchedule,
+  type InsertMaintenanceSchedule
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, and, or, sql, ne, desc, asc, isNull } from "drizzle-orm";
 import { IStorage } from "./storage";
 import connectPg from "connect-pg-simple";
 import session from "express-session";
@@ -2090,6 +2098,148 @@ export class DatabaseStorage implements IStorage {
 
   async deleteHrComplaint(id: number): Promise<boolean> {
     await db.delete(hrComplaints).where(eq(hrComplaints.id, id));
+    return true;
+  }
+
+  // Maintenance Requests methods
+  async getMaintenanceRequests(): Promise<MaintenanceRequest[]> {
+    return await db.select().from(maintenanceRequests).orderBy(desc(maintenanceRequests.createdAt));
+  }
+
+  async getMaintenanceRequest(id: number): Promise<MaintenanceRequest | undefined> {
+    const [request] = await db.select().from(maintenanceRequests).where(eq(maintenanceRequests.id, id));
+    return request || undefined;
+  }
+
+  async getMaintenanceRequestsByMachine(machineId: string): Promise<MaintenanceRequest[]> {
+    return await db.select().from(maintenanceRequests)
+      .where(eq(maintenanceRequests.machineId, machineId))
+      .orderBy(desc(maintenanceRequests.createdAt));
+  }
+
+  async getMaintenanceRequestsByStatus(status: string): Promise<MaintenanceRequest[]> {
+    return await db.select().from(maintenanceRequests)
+      .where(eq(maintenanceRequests.status, status))
+      .orderBy(desc(maintenanceRequests.createdAt));
+  }
+
+  async getMaintenanceRequestsByUser(userId: string): Promise<MaintenanceRequest[]> {
+    return await db.select().from(maintenanceRequests)
+      .where(eq(maintenanceRequests.reportedBy, userId))
+      .orderBy(desc(maintenanceRequests.createdAt));
+  }
+
+  async createMaintenanceRequest(requestData: InsertMaintenanceRequest): Promise<MaintenanceRequest> {
+    const [request] = await db
+      .insert(maintenanceRequests)
+      .values(requestData)
+      .returning();
+    return request;
+  }
+
+  async updateMaintenanceRequest(id: number, requestData: Partial<MaintenanceRequest>): Promise<MaintenanceRequest | undefined> {
+    const [updated] = await db
+      .update(maintenanceRequests)
+      .set({ ...requestData, updatedAt: new Date() })
+      .where(eq(maintenanceRequests.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteMaintenanceRequest(id: number): Promise<boolean> {
+    await db.delete(maintenanceRequests).where(eq(maintenanceRequests.id, id));
+    return true;
+  }
+
+  // Maintenance Actions methods
+  async getMaintenanceActions(): Promise<MaintenanceAction[]> {
+    return await db.select().from(maintenanceActions).orderBy(desc(maintenanceActions.createdAt));
+  }
+
+  async getMaintenanceAction(id: number): Promise<MaintenanceAction | undefined> {
+    const [action] = await db.select().from(maintenanceActions).where(eq(maintenanceActions.id, id));
+    return action || undefined;
+  }
+
+  async getMaintenanceActionsByRequest(requestId: number): Promise<MaintenanceAction[]> {
+    return await db.select().from(maintenanceActions)
+      .where(eq(maintenanceActions.requestId, requestId))
+      .orderBy(desc(maintenanceActions.createdAt));
+  }
+
+  async getMaintenanceActionsByMachine(machineId: string): Promise<MaintenanceAction[]> {
+    return await db.select().from(maintenanceActions)
+      .where(eq(maintenanceActions.machineId, machineId))
+      .orderBy(desc(maintenanceActions.createdAt));
+  }
+
+  async createMaintenanceAction(actionData: InsertMaintenanceAction): Promise<MaintenanceAction> {
+    const [action] = await db
+      .insert(maintenanceActions)
+      .values(actionData)
+      .returning();
+    return action;
+  }
+
+  async updateMaintenanceAction(id: number, actionData: Partial<MaintenanceAction>): Promise<MaintenanceAction | undefined> {
+    const [updated] = await db
+      .update(maintenanceActions)
+      .set({ ...actionData, updatedAt: new Date() })
+      .where(eq(maintenanceActions.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteMaintenanceAction(id: number): Promise<boolean> {
+    await db.delete(maintenanceActions).where(eq(maintenanceActions.id, id));
+    return true;
+  }
+
+  // Maintenance Schedule methods
+  async getMaintenanceSchedules(): Promise<MaintenanceSchedule[]> {
+    return await db.select().from(maintenanceSchedule).orderBy(asc(maintenanceSchedule.nextMaintenanceDate));
+  }
+
+  async getMaintenanceSchedule(id: number): Promise<MaintenanceSchedule | undefined> {
+    const [schedule] = await db.select().from(maintenanceSchedule).where(eq(maintenanceSchedule.id, id));
+    return schedule || undefined;
+  }
+
+  async getMaintenanceSchedulesByMachine(machineId: string): Promise<MaintenanceSchedule[]> {
+    return await db.select().from(maintenanceSchedule)
+      .where(eq(maintenanceSchedule.machineId, machineId))
+      .orderBy(asc(maintenanceSchedule.nextMaintenanceDate));
+  }
+
+  async getOverdueMaintenanceSchedules(): Promise<MaintenanceSchedule[]> {
+    const today = new Date();
+    return await db.select().from(maintenanceSchedule)
+      .where(and(
+        eq(maintenanceSchedule.isActive, true),
+        lte(maintenanceSchedule.nextMaintenanceDate, today)
+      ))
+      .orderBy(asc(maintenanceSchedule.nextMaintenanceDate));
+  }
+
+  async createMaintenanceSchedule(scheduleData: InsertMaintenanceSchedule): Promise<MaintenanceSchedule> {
+    const [schedule] = await db
+      .insert(maintenanceSchedule)
+      .values(scheduleData)
+      .returning();
+    return schedule;
+  }
+
+  async updateMaintenanceSchedule(id: number, scheduleData: Partial<MaintenanceSchedule>): Promise<MaintenanceSchedule | undefined> {
+    const [updated] = await db
+      .update(maintenanceSchedule)
+      .set({ ...scheduleData, updatedAt: new Date() })
+      .where(eq(maintenanceSchedule.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteMaintenanceSchedule(id: number): Promise<boolean> {
+    await db.delete(maintenanceSchedule).where(eq(maintenanceSchedule.id, id));
     return true;
   }
 }
