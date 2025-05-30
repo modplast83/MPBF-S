@@ -5200,8 +5200,6 @@ COMMIT;
 
   app.post("/api/maintenance-actions", async (req: Request, res: Response) => {
     try {
-      console.log('Received maintenance action data:', req.body);
-      
       const actionData = {
         requestId: parseInt(req.body.requestId),
         machineId: req.body.machineId,
@@ -5214,8 +5212,6 @@ COMMIT;
         partReplaced: req.body.partReplaced || null,
         partId: req.body.partId || null,
       };
-      
-      console.log('Processed action data:', actionData);
       
       const action = await storage.createMaintenanceAction(actionData);
       
