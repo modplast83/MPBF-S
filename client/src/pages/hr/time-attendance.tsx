@@ -34,6 +34,12 @@ export default function TimeAttendancePage() {
     enabled: !!user?.id
   });
 
+  // Get all users for name lookup
+  const { data: users } = useQuery({
+    queryKey: ['/api/users'],
+    queryFn: () => apiRequest('GET', '/api/users')
+  });
+
   // Check-in mutation
   const checkInMutation = useMutation({
     mutationFn: (data: any) => apiRequest('POST', API_ENDPOINTS.TIME_ATTENDANCE, data),
@@ -54,6 +60,29 @@ export default function TimeAttendancePage() {
       toast({
         title: t("hr.common.success"),
         description: "Check-out recorded successfully"
+      });
+    }
+  });
+
+  // Break mutations
+  const breakStartMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: any }) => apiRequest('PUT', `${API_ENDPOINTS.TIME_ATTENDANCE}/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.TIME_ATTENDANCE] });
+      toast({
+        title: t("hr.common.success"),
+        description: "Break started successfully"
+      });
+    }
+  });
+
+  const breakEndMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: any }) => apiRequest('PUT', `${API_ENDPOINTS.TIME_ATTENDANCE}/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.TIME_ATTENDANCE] });
+      toast({
+        title: t("hr.common.success"),
+        description: "Break ended successfully"
       });
     }
   });
@@ -113,6 +142,60 @@ export default function TimeAttendancePage() {
     }
   };
 
+  const handleBreakStart = () => {
+    if (todayAttendance?.[0]) {
+      const attendance = todayAttendance[0];
+      const breakStartTime = new Date();
+      
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const location = `${position.coords.latitude},${position.coords.longitude}`;
+          breakStartMutation.mutate({
+            id: attendance.id,
+            data: {
+              breakStartTime: breakStartTime.toISOString(),
+              location: attendance.location + ` | Break Start: ${location}`
+            }
+          });
+        });
+      } else {
+        breakStartMutation.mutate({
+          id: attendance.id,
+          data: {
+            breakStartTime: breakStartTime.toISOString()
+          }
+        });
+      }
+    }
+  };
+
+  const handleBreakEnd = () => {
+    if (todayAttendance?.[0]) {
+      const attendance = todayAttendance[0];
+      const breakEndTime = new Date();
+      
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const location = `${position.coords.latitude},${position.coords.longitude}`;
+          breakEndMutation.mutate({
+            id: attendance.id,
+            data: {
+              breakEndTime: breakEndTime.toISOString(),
+              location: attendance.location + ` | Break End: ${location}`
+            }
+          });
+        });
+      } else {
+        breakEndMutation.mutate({
+          id: attendance.id,
+          data: {
+            breakEndTime: breakEndTime.toISOString()
+          }
+        });
+      }
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusColors = {
       present: "bg-green-100 text-green-800",
@@ -139,7 +222,7 @@ export default function TimeAttendancePage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -200,14 +283,44 @@ export default function TimeAttendancePage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {t("hr.time_attendance.overtime_hours")}
+              Break Out
             </CardTitle>
             <Coffee className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {currentAttendance?.overtimeHours?.toFixed(1) || '0.0'}h
-            </div>
+            <Button 
+              onClick={handleBreakStart}
+              disabled={!currentAttendance?.checkInTime || !!currentAttendance?.checkOutTime || !!currentAttendance?.breakStartTime || breakStartMutation.isPending}
+              variant="secondary"
+              className="w-full"
+            >
+              {currentAttendance?.breakStartTime ? 
+                format(new Date(currentAttendance.breakStartTime), 'HH:mm') : 
+                "Break Out"
+              }
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Break In
+            </CardTitle>
+            <Coffee className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={handleBreakEnd}
+              disabled={!currentAttendance?.breakStartTime || !!currentAttendance?.breakEndTime || !!currentAttendance?.checkOutTime || breakEndMutation.isPending}
+              variant="secondary"
+              className="w-full"
+            >
+              {currentAttendance?.breakEndTime ? 
+                format(new Date(currentAttendance.breakEndTime), 'HH:mm') : 
+                "Break In"
+              }
+            </Button>
           </CardContent>
         </Card>
       </div>
