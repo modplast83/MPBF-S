@@ -57,15 +57,15 @@ export default function RawMaterials() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.RAW_MATERIALS] });
       toast({
-        title: `Material ${editMaterial ? "Updated" : "Created"}`,
-        description: `The material has been ${editMaterial ? "updated" : "created"} successfully.`,
+        title: editMaterial ? t("warehouse.material_updated") : t("warehouse.material_created"),
+        description: editMaterial ? t("warehouse.material_updated_success") : t("warehouse.material_created_success"),
       });
       handleCloseForm();
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to ${editMaterial ? "update" : "create"} material: ${error}`,
+        title: t("common.error"),
+        description: editMaterial ? t("warehouse.update_material_failed", { error }) : t("warehouse.create_material_failed", { error }),
         variant: "destructive",
       });
     },
@@ -79,15 +79,15 @@ export default function RawMaterials() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.RAW_MATERIALS] });
       toast({
-        title: "Material Deleted",
-        description: "The material has been deleted successfully.",
+        title: t("warehouse.material_deleted"),
+        description: t("warehouse.material_deleted_success"),
       });
       setDeletingMaterial(null);
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to delete material: ${error}`,
+        title: t("common.error"),
+        description: t("warehouse.delete_material_failed", { error }),
         variant: "destructive",
       });
     },
@@ -104,15 +104,15 @@ export default function RawMaterials() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.RAW_MATERIALS] });
       toast({
-        title: "Materials Updated",
-        description: "Material quantities have been updated successfully.",
+        title: t("warehouse.materials_updated"),
+        description: t("warehouse.materials_updated_success"),
       });
       handleCloseInputForm();
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update material quantities: ${error}`,
+        title: t("common.error"),
+        description: t("warehouse.update_materials_failed", { error }),
         variant: "destructive",
       });
     },
@@ -122,8 +122,8 @@ export default function RawMaterials() {
   const handleAddInputItem = () => {
     if (!selectedRawMaterialId || inputQuantity <= 0) {
       toast({
-        title: "Validation Error",
-        description: "Please select a material and enter a valid quantity.",
+        title: t("warehouse.validation_error"),
+        description: t("warehouse.select_material_and_quantity"),
         variant: "destructive",
       });
       return;
@@ -154,8 +154,8 @@ export default function RawMaterials() {
   const handleSaveInput = () => {
     if (inputItems.length === 0) {
       toast({
-        title: "Validation Error",
-        description: "Please add at least one material to the input list.",
+        title: t("warehouse.validation_error"),
+        description: t("warehouse.add_at_least_one_material"),
         variant: "destructive",
       });
       return;
@@ -193,8 +193,8 @@ export default function RawMaterials() {
   const handleSave = () => {
     if (!name || !type || quantity < 0 || !unit) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields with valid values.",
+        title: t("warehouse.validation_error"),
+        description: t("warehouse.fill_required_fields"),
         variant: "destructive",
       });
       return;
@@ -220,28 +220,28 @@ export default function RawMaterials() {
 
   const columns = [
     {
-      header: "ID",
+      header: t("warehouse.id"),
       accessorKey: "id",
     },
     {
-      header: "Name",
+      header: t("warehouse.name"),
       accessorKey: "name",
     },
     {
-      header: "Type",
+      header: t("warehouse.type"),
       accessorKey: "type",
     },
     {
-      header: "Quantity",
+      header: t("warehouse.quantity"),
       accessorKey: (row: RawMaterial) => `${row.quantity} ${row.unit}`,
     },
     {
-      header: "Last Updated",
+      header: t("warehouse.last_updated"),
       accessorKey: "lastUpdated",
       cell: (row: { lastUpdated: string }) => formatDateString(row.lastUpdated),
     },
     {
-      header: "Actions",
+      header: t("warehouse.actions"),
       cell: (row: RawMaterial) => (
         <div className="flex space-x-2">
           <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
@@ -261,17 +261,17 @@ export default function RawMaterials() {
         <DropdownMenuTrigger asChild>
           <Button>
             <span className="material-icons text-sm mr-1">add</span>
-            Actions
+            {t("warehouse.actions")}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem onClick={() => setFormOpen(true)}>
             <span className="material-icons text-sm mr-2">add</span>
-            Add Material
+            {t("warehouse.add_material")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setInputFormOpen(true)}>
             <span className="material-icons text-sm mr-2">add_shopping_cart</span>
-            Input Material
+            {t("warehouse.input_material")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -284,7 +284,7 @@ export default function RawMaterials() {
       return (
         <div className="text-center py-8 px-4 bg-gray-50 rounded-md">
           <span className="material-icons text-gray-300 text-3xl mb-2">inventory</span>
-          <p className="text-gray-500">No raw materials found</p>
+          <p className="text-gray-500">{t("warehouse.no_raw_materials_found")}</p>
         </div>
       );
     }
@@ -305,11 +305,11 @@ export default function RawMaterials() {
             <CardContent className="p-3 pt-2">
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div>
-                  <p className="text-xs text-gray-500">Type</p>
+                  <p className="text-xs text-gray-500">{t("warehouse.type")}</p>
                   <p className="text-sm font-medium">{material.type}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Quantity</p>
+                  <p className="text-xs text-gray-500">{t("warehouse.quantity")}</p>
                   <p className="text-sm font-medium">{material.quantity} {material.unit}</p>
                 </div>
               </div>
@@ -317,7 +317,7 @@ export default function RawMaterials() {
               {material.lastUpdated && (
                 <div className="mt-2 pt-2 border-t border-gray-100">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500">Last Updated</p>
+                    <p className="text-xs text-gray-500">{t("warehouse.last_updated")}</p>
                     <p className="text-xs text-gray-500">{formatDateString(material.lastUpdated)}</p>
                   </div>
                 </div>
