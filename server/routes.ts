@@ -5107,8 +5107,9 @@ COMMIT;
     try {
       const requestData = {
         ...req.body,
+        requestedBy: req.body.requestedBy || req.user?.id?.toString(),
         reportedBy: req.body.reportedBy || req.user?.id?.toString(),
-        date: new Date(),
+        createdAt: new Date(),
       };
       
       const request = await storage.createMaintenanceRequest(requestData);
