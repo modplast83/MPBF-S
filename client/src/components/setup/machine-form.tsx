@@ -46,6 +46,10 @@ export function MachineForm({ machine, onSuccess }: MachineFormProps) {
       id: machine?.id || "",
       name: machine?.name || "",
       sectionId: machine?.sectionId || null,
+      serialNumber: machine?.serialNumber || "",
+      supplier: machine?.supplier || "",
+      dateOfManufacturing: machine?.dateOfManufacturing || null,
+      modelNumber: machine?.modelNumber || "",
       isActive: machine?.isActive ?? true,
     },
   });
@@ -112,6 +116,71 @@ export function MachineForm({ machine, onSuccess }: MachineFormProps) {
                 <FormLabel>Machine Name</FormLabel>
                 <FormControl>
                   <Input placeholder="Enter machine name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="serialNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>S/N (Serial Number)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter serial number" {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="supplier"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Supplier</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter supplier name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="dateOfManufacturing"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Date of Manufacturing</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="date" 
+                    {...field}
+                    value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="modelNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Model #</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter model number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

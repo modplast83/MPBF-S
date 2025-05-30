@@ -232,6 +232,10 @@ export const machines = pgTable("machines", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   sectionId: text("section_id").references(() => sections.id),
+  serialNumber: text("serial_number"),
+  supplier: text("supplier"),
+  dateOfManufacturing: timestamp("date_of_manufacturing"),
+  modelNumber: text("model_number"),
   isActive: boolean("is_active").default(true),
 });
 

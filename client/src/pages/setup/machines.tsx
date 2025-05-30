@@ -88,6 +88,29 @@ export default function Machines() {
       accessorKey: "name",
     },
     {
+      header: "S/N",
+      accessorKey: "serialNumber",
+      cell: (row: { serialNumber: string | null }) => row.serialNumber || "N/A",
+    },
+    {
+      header: "Supplier",
+      accessorKey: "supplier",
+      cell: (row: { supplier: string | null }) => row.supplier || "N/A",
+    },
+    {
+      header: "Date of Manufacturing",
+      accessorKey: "dateOfManufacturing",
+      cell: (row: { dateOfManufacturing: Date | null }) => 
+        row.dateOfManufacturing 
+          ? new Date(row.dateOfManufacturing).toLocaleDateString()
+          : "N/A",
+    },
+    {
+      header: "Model #",
+      accessorKey: "modelNumber",
+      cell: (row: { modelNumber: string | null }) => row.modelNumber || "N/A",
+    },
+    {
       header: "Section",
       accessorKey: "sectionId",
       cell: (row: { sectionId: string | null }) => getSectionName(row.sectionId),
