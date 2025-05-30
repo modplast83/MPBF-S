@@ -5071,8 +5071,15 @@ COMMIT;
   app.put("/api/employee-of-month/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid employee of month ID" });
+      }
+      
       const data = req.body;
       const employee = await storage.updateEmployeeOfMonth(id, data);
+      if (!employee) {
+        return res.status(404).json({ error: "Employee of month record not found" });
+      }
       res.json(employee);
     } catch (error) {
       console.error('Error updating employee of month:', error);

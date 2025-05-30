@@ -26,6 +26,10 @@ export function setupHRRoutes(app: Express) {
   app.put("/api/hr/time-attendance/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid attendance ID" });
+      }
+      
       const attendance = await hrStorage.updateTimeAttendance(id, req.body);
       if (!attendance) {
         return res.status(404).json({ error: "Attendance record not found" });

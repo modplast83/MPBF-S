@@ -268,8 +268,10 @@ export function QualityViolations() {
     if (!printWindow) return;
 
     const filteredViolations = violations.filter((violation: any) => {
-      const matchesSearch = violation.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           violation.id?.toString().includes(searchQuery);
+      const matchesSearch = searchQuery === "" || 
+        violation.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        violation.id?.toString().includes(searchQuery) ||
+        violation.violationType?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = filterStatus === "all" || violation.status === filterStatus;
       const matchesSeverity = filterSeverity === "all" || violation.severity === filterSeverity;
       return matchesSearch && matchesStatus && matchesSeverity;
@@ -360,8 +362,10 @@ export function QualityViolations() {
   // Filter and search functionality
   const filteredViolations = violations.filter((violation: any) => {
     const matchesSearch = searchQuery === "" || 
-      (violation.description && violation.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (violation.reportedBy && violation.reportedBy.toLowerCase().includes(searchQuery.toLowerCase()));
+      violation.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      violation.reportedBy?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      violation.violationType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      violation.id?.toString().includes(searchQuery);
     
     const matchesStatus = filterStatus === "all" || violation.status === filterStatus;
     const matchesSeverity = filterSeverity === "all" || violation.severity === filterSeverity;
