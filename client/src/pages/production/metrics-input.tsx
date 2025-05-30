@@ -36,17 +36,17 @@ export default function MetricsInputPage() {
   const { t } = useTranslation();
 
   // Fetch sections for dropdown
-  const { data: sections = [] } = useQuery({
+  const { data: sections = [] } = useQuery<any[]>({
     queryKey: ["/api/sections"]
   });
 
   // Fetch machines for dropdown
-  const { data: machines = [] } = useQuery({
+  const { data: machines = [] } = useQuery<any[]>({
     queryKey: ["/api/machines"]
   });
 
   // Fetch job orders for dropdown
-  const { data: jobOrders = [] } = useQuery({
+  const { data: jobOrders = [] } = useQuery<any[]>({
     queryKey: ["/api/job-orders"]
   });
 
@@ -228,7 +228,7 @@ export default function MetricsInputPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {jobOrders?.map((jobOrder: any) => (
+                              {jobOrders.map((jobOrder: any) => (
                                 <SelectItem key={jobOrder.id} value={jobOrder.id.toString()}>
                                   JO-{jobOrder.id}
                                 </SelectItem>
