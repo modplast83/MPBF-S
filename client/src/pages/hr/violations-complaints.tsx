@@ -331,7 +331,7 @@ export default function ViolationsComplaintsPage() {
                         type="submit" 
                         disabled={createViolationMutation.isPending}
                       >
-                        {createViolationMutation.isPending ? t("hr.common.loading") : t("hr.common.submit")}
+                        {createViolationMutation.isPending ? t("common.loading") : t("common.submit")}
                       </Button>
                     </DialogFooter>
                   </form>
