@@ -36,17 +36,17 @@ export default function MetricsInputPage() {
   const { t } = useTranslation();
 
   // Fetch sections for dropdown
-  const { data: sections } = useQuery({
+  const { data: sections = [] } = useQuery({
     queryKey: ["/api/sections"]
   });
 
   // Fetch machines for dropdown
-  const { data: machines } = useQuery({
+  const { data: machines = [] } = useQuery({
     queryKey: ["/api/machines"]
   });
 
   // Fetch job orders for dropdown
-  const { data: jobOrders } = useQuery({
+  const { data: jobOrders = [] } = useQuery({
     queryKey: ["/api/job-orders"]
   });
 
@@ -151,7 +151,7 @@ export default function MetricsInputPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {sections?.map((section: any) => (
+                              {sections.map((section: any) => (
                                 <SelectItem key={section.id} value={section.id}>
                                   {section.name}
                                 </SelectItem>
@@ -176,7 +176,7 @@ export default function MetricsInputPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {machines?.map((machine: any) => (
+                              {machines.map((machine: any) => (
                                 <SelectItem key={machine.id} value={machine.id}>
                                   {machine.name}
                                 </SelectItem>
@@ -291,7 +291,7 @@ export default function MetricsInputPage() {
                       name="downtime"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Downtime (minutes)</FormLabel>
+                          <FormLabel>{t("production.downtime_minutes")}</FormLabel>
                           <FormControl>
                             <Input type="number" min="0" {...field} />
                           </FormControl>
@@ -305,11 +305,11 @@ export default function MetricsInputPage() {
                       name="shift"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Shift</FormLabel>
+                          <FormLabel>{t("production.shift")}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select shift" />
+                                <SelectValue placeholder={t("production.select_shift")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -330,9 +330,9 @@ export default function MetricsInputPage() {
                       name="operator"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Operator (Optional)</FormLabel>
+                          <FormLabel>{t("production.operator_optional")}</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="Operator name" />
+                            <Input {...field} placeholder={t("production.operator_name")} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -345,11 +345,11 @@ export default function MetricsInputPage() {
                     name="notes"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Notes</FormLabel>
+                        <FormLabel>{t("production.notes")}</FormLabel>
                         <FormControl>
                           <Textarea 
                             {...field} 
-                            placeholder="Additional notes about production conditions..."
+                            placeholder={t("production.notes_placeholder")}
                             rows={3}
                           />
                         </FormControl>
@@ -363,7 +363,7 @@ export default function MetricsInputPage() {
                     className="w-full"
                     disabled={createMetricMutation.isPending}
                   >
-                    {createMetricMutation.isPending ? "Recording..." : "Record Metrics"}
+                    {createMetricMutation.isPending ? t("production.recording") : t("production.record_metrics_button")}
                   </Button>
                 </form>
               </Form>
@@ -377,18 +377,18 @@ export default function MetricsInputPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm">
                 <TrendingUp className="h-4 w-4 text-green-500" />
-                Smart Analysis
+                {t("production.smart_analysis")}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm">
               <p className="text-muted-foreground">
-                The system automatically analyzes your metrics and detects potential bottlenecks based on:
+                {t("production.smart_analysis_description")}
               </p>
               <ul className="mt-2 space-y-1 text-xs">
-                <li>• Efficiency below targets</li>
-                <li>• Production rate drops</li>
-                <li>• Excessive downtime</li>
-                <li>• Queue buildups</li>
+                <li>• {t("production.efficiency_below_targets")}</li>
+                <li>• {t("production.production_rate_drops")}</li>
+                <li>• {t("production.excessive_downtime")}</li>
+                <li>• {t("production.queue_buildups")}</li>
               </ul>
             </CardContent>
           </Card>
@@ -397,18 +397,18 @@ export default function MetricsInputPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm">
                 <AlertTriangle className="h-4 w-4 text-orange-500" />
-                Auto Notifications
+                {t("production.auto_notifications")}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm">
               <p className="text-muted-foreground">
-                Alerts are automatically generated when issues are detected and sent to relevant personnel via:
+                {t("production.auto_notifications_description")}
               </p>
               <ul className="mt-2 space-y-1 text-xs">
-                <li>• Real-time dashboard updates</li>
-                <li>• Email notifications</li>
-                <li>• SMS alerts for critical issues</li>
-                <li>• In-app notifications</li>
+                <li>• {t("production.dashboard_updates")}</li>
+                <li>• {t("production.email_notifications")}</li>
+                <li>• {t("production.sms_alerts")}</li>
+                <li>• {t("production.app_notifications")}</li>
               </ul>
             </CardContent>
           </Card>
