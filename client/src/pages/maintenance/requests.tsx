@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/ui/page-header";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { Plus, Search, Filter, AlertTriangle, Clock, CheckCircle, X } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -57,6 +58,7 @@ interface User {
 }
 
 export default function MaintenanceRequestsPage() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -228,8 +230,8 @@ export default function MaintenanceRequestsPage() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <PageHeader
-        title="Maintenance Requests"
-        description="Create and manage maintenance requests for production equipment"
+        title={t("maintenance.requests.title")}
+        description={t("maintenance.requests.description")}
       />
 
       {/* Action Bar */}
@@ -238,7 +240,7 @@ export default function MaintenanceRequestsPage() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search requests..."
+              placeholder={t("maintenance.requests.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -246,10 +248,10 @@ export default function MaintenanceRequestsPage() {
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t("maintenance.requests.filterByStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="all">{t("maintenance.requests.allStatus")}</SelectItem>
               {STATUS_OPTIONS.map((status) => (
                 <SelectItem key={status} value={status}>
                   {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
@@ -259,10 +261,10 @@ export default function MaintenanceRequestsPage() {
           </Select>
           <Select value={severityFilter} onValueChange={setSeverityFilter}>
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter by severity" />
+              <SelectValue placeholder={t("maintenance.requests.filterBySeverity")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Severity</SelectItem>
+              <SelectItem value="all">{t("maintenance.requests.allSeverity")}</SelectItem>
               {SEVERITY_LEVELS.map((severity) => (
                 <SelectItem key={severity} value={severity}>
                   {severity}
@@ -276,25 +278,25 @@ export default function MaintenanceRequestsPage() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              New Request
+              {t("maintenance.requests.new")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Create Maintenance Request</DialogTitle>
+              <DialogTitle>{t("maintenance.requests.create")}</DialogTitle>
               <DialogDescription>
-                Submit a new maintenance request for equipment repair or service
+                {t("maintenance.requests.description")}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="machineId">Machine *</Label>
+                <Label htmlFor="machineId">{t("maintenance.requests.machine")} *</Label>
                 <Select 
                   value={formData.machineId} 
                   onValueChange={(value) => setFormData({...formData, machineId: value})}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select machine" />
+                    <SelectValue placeholder={t("maintenance.requests.machine")} />
                   </SelectTrigger>
                   <SelectContent>
                     {machines.map((machine: Machine) => (
