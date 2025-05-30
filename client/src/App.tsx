@@ -54,6 +54,10 @@ import ClichePage from "@/pages/cliches/index";
 import HRIndex from "@/pages/hr/index";
 import TimeAttendancePage from "@/pages/hr/time-attendance";
 import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
+// Maintenance Module imports
+import MaintenancePage from "@/pages/maintenance/index";
+import MaintenanceRequestsPage from "@/pages/maintenance/requests";
+import MaintenanceActionsPage from "@/pages/maintenance/actions";
 import ViolationsComplaintsPage from "@/pages/hr/violations-complaints";
 import ViolationTrendsPage from "@/pages/hr/violation-trends";
 import BottleneckDashboard from "@/pages/production/bottleneck-dashboard";
@@ -124,6 +128,10 @@ function App() {
                   <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
                   <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />
                   <ProtectedRoute path="/hr/violation-trends" component={ViolationTrendsPage} module="Violation Trends" />
+                  {/* Maintenance Module Routes */}
+                  <ProtectedRoute path="/maintenance" component={MaintenancePage} module="Maintenance" />
+                  <ProtectedRoute path="/maintenance/requests" component={MaintenanceRequestsPage} module="Maintenance Requests" />
+                  <ProtectedRoute path="/maintenance/actions" component={MaintenanceActionsPage} module="Maintenance Actions" />
                   {/* Bottleneck Notification System Routes */}
                   <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
                   <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />
