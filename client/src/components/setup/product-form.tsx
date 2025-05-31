@@ -119,6 +119,38 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       form.setValue("thicknessOne", calculatedThicknessOne);
     }
   }, [watchedThickness, form]);
+
+  // Auto-calculate Length (cm) when Printing Cylinder changes
+  const watchedPrintingCylinder = form.watch("printingCylinder");
+  
+  useEffect(() => {
+    if (watchedPrintingCylinder !== undefined && watchedPrintingCylinder > 0) {
+      const calculatedLength = Math.round(watchedPrintingCylinder * 2.54);
+      form.setValue("lengthCm", calculatedLength);
+    }
+  }, [watchedPrintingCylinder, form]);
+
+  // Auto-calculate Volume when dependent fields change
+  const watchedRightF = form.watch("rightF");
+  const watchedWidth = form.watch("width");
+  const watchedLeftF = form.watch("leftF");
+  const watchedLengthCm = form.watch("lengthCm");
+  const watchedThicknessOne = form.watch("thicknessOne");
+  
+  useEffect(() => {
+    if (
+      watchedRightF !== undefined && 
+      watchedWidth !== undefined && 
+      watchedLeftF !== undefined &&
+      watchedLengthCm !== undefined && 
+      watchedThicknessOne !== undefined &&
+      watchedRightF > 0 && watchedWidth > 0 && watchedLeftF > 0 && 
+      watchedLengthCm > 0 && watchedThicknessOne > 0
+    ) {
+      const calculatedVolume = ((watchedRightF + watchedWidth + watchedLeftF) * watchedLengthCm * 2 * watchedThicknessOne) / 1000;
+      form.setValue("volum", calculatedVolume.toFixed(2));
+    }
+  }, [watchedRightF, watchedWidth, watchedLeftF, watchedLengthCm, watchedThicknessOne, form]);
   
   // Create mutation for adding/updating product
   const mutation = useMutation({
@@ -456,13 +488,15 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
             name="lengthCm"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Length (cm)</FormLabel>
+                <FormLabel>Length (cm) (Auto-calculated)</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="Length" 
+                    placeholder="Auto-calculated from printing cylinder"
                     {...field}
-                    onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                    value={field.value || ""}
+                    readOnly
+                    className="bg-gray-50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -580,9 +614,23 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Cutting Unit</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Kg" {...field} />
-                </FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select cutting unit" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Kg.">Kg.</SelectItem>
+                    <SelectItem value="ROLL">ROLL</SelectItem>
+                    <SelectItem value="PKT">PKT</SelectItem>
+                    <SelectItem value="BOX">BOX</SelectItem>
+                    <SelectItem value="Peace">Peace</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -669,13 +717,14 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
             name="volum"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Volume</FormLabel>
+                <FormLabel>Volume (cm³) (Auto-calculated)</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="Volume" 
+                    placeholder="Auto-calculated from dimensions"
                     {...field}
                     value={field.value || ""}
-                    onChange={(e) => field.onChange(e.target.value || null)}
+                    readOnly
+                    className="bg-gray-50"
                   />
                 </FormControl>
                 <FormMessage />
