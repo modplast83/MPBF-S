@@ -470,7 +470,7 @@ export function OrderForm() {
                                     const category = categories?.find(cat => cat.id === product.categoryId);
                                     return (
                                       <SelectItem key={product.id} value={product.id.toString()}>
-                                        {category?.name} - {item?.name} {product.sizeCaption ? `(${product.sizeCaption})` : ''}
+                                        {category?.name} - {item?.name} {product.sizeCaption ? `(${product.sizeCaption})` : ''} {product.lengthCm ? `- ${product.lengthCm}cm` : ''}
                                       </SelectItem>
                                     );
                                   })}
