@@ -1425,7 +1425,9 @@
         "pending": "Pending",
         "inProgress": "In Progress",
         "completed": "Completed",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "hold": "Hold",
+        "processing": "Processing"
       },
       "actionTypes": {
         "repair": "Repair",

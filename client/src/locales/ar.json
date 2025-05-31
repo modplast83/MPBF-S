@@ -1365,7 +1365,9 @@
         "pending": "معلق",
         "inProgress": "قيد التقدم",
         "completed": "مكتمل",
-        "cancelled": "ملغي"
+        "cancelled": "ملغي",
+        "hold": "إنتظار",
+        "processing": "قيد الإنتاج"
       },
       "actionTypes": {
         "repair": "إصلاح",

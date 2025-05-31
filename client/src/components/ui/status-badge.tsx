@@ -68,11 +68,15 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   
   // Get translated status text, fallback to capitalized status if no translation
   const getTranslatedStatus = () => {
-    try {
-      return t(`status.${status.toLowerCase()}`);
-    } catch {
+    const translationKey = `status.${status.toLowerCase()}`;
+    const translated = t(translationKey);
+    
+    // If translation returns the same as the key, it means no translation exists
+    if (translated === translationKey) {
       return status.charAt(0).toUpperCase() + status.slice(1);
     }
+    
+    return translated;
   };
 
   return (
