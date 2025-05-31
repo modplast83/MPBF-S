@@ -392,9 +392,9 @@ export default function OrdersIndex() {
     }
     
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         {filteredOrders.map((order) => (
-          <Card key={order.id} className="overflow-hidden hover:shadow-md transition-all">
+          <Card key={order.id} className="overflow-hidden hover:shadow-md transition-all border-l-4 border-l-primary-500">
             <div className="relative">
               <div 
                 className="absolute top-3 left-3 z-10"
@@ -404,77 +404,78 @@ export default function OrdersIndex() {
                   type="checkbox"
                   checked={selectedOrders.includes(order.id)}
                   onChange={() => handleSelectOrder(order.id)}
-                  className="rounded border-gray-300"
+                  className="rounded border-gray-300 w-4 h-4"
                 />
               </div>
               <Link href={`/orders/${order.id}`}>
-                <CardHeader className="p-3 pb-2 flex flex-row justify-between items-start bg-gray-50 pl-10">
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="material-icons text-xs text-primary-500">receipt_long</span>
-                      <CardTitle className="text-sm font-semibold">#{order.id}</CardTitle>
+                <CardHeader className="p-4 pb-3 flex flex-row justify-between items-start bg-gradient-to-r from-gray-50 to-white pl-12">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="material-icons text-sm text-primary-500">receipt_long</span>
+                      <CardTitle className="text-base font-bold text-gray-900">#{order.id}</CardTitle>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">{formatDateString(order.date)}</p>
+                    <p className="text-xs text-gray-500 mt-1 font-medium">{formatDateString(order.date)}</p>
                   </div>
-                  <StatusBadge status={order.status} />
+                  <div className="flex flex-col items-end gap-1">
+                    <StatusBadge status={order.status} />
+                  </div>
                 </CardHeader>
-              <CardContent className="p-3 pt-2">
-                <div className="grid grid-cols-1 gap-2 mb-2">
+              <CardContent className="p-4 pt-2">
+                <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-gray-500">{t("orders.customer")}</p>
-                    <p className="text-sm font-medium truncate">
-                      {/* Limit customer name to 35 characters on mobile */}
-                      {getCustomerName(order.customerId).length > 35 
-                        ? getCustomerName(order.customerId).substring(0, 35) + '...' 
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">{t("orders.customer")}</p>
+                    <p className="text-sm font-semibold text-gray-900 mt-1">
+                      {getCustomerName(order.customerId).length > 32 
+                        ? getCustomerName(order.customerId).substring(0, 32) + '...' 
                         : getCustomerName(order.customerId)}
                     </p>
                   </div>
+                  
                   {getCustomerNameAr(order.customerId) !== "-" && (
                     <div>
-                      <p className="text-xs text-gray-500">{t("orders.customer_ar")}</p>
-                      <p className="text-sm font-medium truncate">{getCustomerNameAr(order.customerId)}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">{t("orders.customer_ar")}</p>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">{getCustomerNameAr(order.customerId)}</p>
                     </div>
                   )}
-                </div>
-                
-                <div className="mt-2 pt-2 border-t border-gray-100">
+                  
                   {getCustomerPlateDrawerCode(order.customerId) !== "-" && (
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs text-gray-500">{t("orders.plate_drawer_code")}</p>
-                      <p className="text-sm font-medium">{getCustomerPlateDrawerCode(order.customerId)}</p>
+                    <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-600 font-medium">{t("orders.plate_drawer_code")}</p>
+                      <p className="text-sm font-bold text-primary-600">{getCustomerPlateDrawerCode(order.customerId)}</p>
                     </div>
                   )}
                   
                   {order.note && (
-                    <div className="mt-2 pt-2 border-t border-gray-100">
-                      <p className="text-xs text-gray-500">{t("orders.note")}</p>
-                      <p className="text-sm mt-1 text-gray-700 line-clamp-2">{order.note}</p>
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <p className="text-xs text-blue-600 uppercase tracking-wide font-medium">{t("orders.note")}</p>
+                      <p className="text-sm mt-1 text-blue-800 line-clamp-2">{order.note}</p>
                     </div>
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="p-2 pt-0 flex justify-between items-center">
-                <span className="text-primary-500 text-xs flex items-center">
-                  {t("common.view")}
-                  <span className="material-icons text-xs ml-1">arrow_forward</span>
+              <CardFooter className="px-4 py-3 bg-gray-50 flex justify-between items-center">
+                <span className="text-primary-600 text-sm flex items-center font-medium">
+                  {t("common.view")} Details
+                  <span className="material-icons text-sm ml-1">arrow_forward</span>
                 </span>
-                <div className="flex space-x-0.5">
-                  {/* Status Change Dropdown for Mobile - Optimized for small screens */}
+                <div className="flex space-x-2">
+                  {/* Status Change Dropdown for Mobile */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button 
-                        variant="ghost" 
+                        variant="outline" 
                         size="sm" 
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                         }}
-                        className="h-7 w-7 p-0 rounded-full text-secondary-500 hover:text-secondary-700 hover:bg-secondary-50"
+                        className="h-8 px-3 text-xs font-medium border-gray-300 hover:bg-gray-100"
                       >
-                        <span className="material-icons text-xs">swap_horiz</span>
+                        <span className="material-icons text-sm mr-1">swap_horiz</span>
+                        Status
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
+                    <DropdownMenuContent align="end" className="w-40">
                       <DropdownMenuItem 
                         onClick={(e) => {
                           e.preventDefault();
@@ -515,16 +516,17 @@ export default function OrdersIndex() {
                   </DropdownMenu>
                   
                   <Button 
-                    variant="ghost" 
+                    variant="outline" 
                     size="sm" 
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       handleDelete(order);
                     }} 
-                    className="h-7 w-7 p-0 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
+                    className="h-8 px-3 text-xs font-medium border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
                   >
-                    <span className="material-icons text-xs">delete</span>
+                    <span className="material-icons text-sm mr-1">delete</span>
+                    Delete
                   </Button>
                 </div>
               </CardFooter>
@@ -562,29 +564,31 @@ export default function OrdersIndex() {
 
       {/* Bulk Actions Toolbar */}
       {selectedOrders.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <div className={`flex items-center ${isMobile ? "flex-col gap-2" : "justify-between"}`}>
             <div className="flex items-center gap-3">
-              <span className="text-blue-700 font-medium">
+              <span className="text-blue-700 font-medium text-sm">
                 {selectedOrders.length} order{selectedOrders.length > 1 ? 's' : ''} selected
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 ${isMobile ? "w-full" : ""}`}>
               <Button
                 variant="outline"
-                size="sm"
+                size={isMobile ? "sm" : "sm"}
                 onClick={() => setSelectedOrders([])}
+                className={isMobile ? "flex-1" : ""}
               >
-                Clear Selection
+                {isMobile ? "Clear" : "Clear Selection"}
               </Button>
               <Button
                 variant="destructive"
-                size="sm"
+                size={isMobile ? "sm" : "sm"}
                 onClick={() => setShowBulkDeleteDialog(true)}
                 disabled={bulkDeleteMutation.isPending}
+                className={isMobile ? "flex-1" : ""}
               >
                 <span className="material-icons text-sm mr-1">delete</span>
-                Delete Selected
+                {isMobile ? "Delete" : "Delete Selected"}
               </Button>
             </div>
           </div>
@@ -592,20 +596,69 @@ export default function OrdersIndex() {
       )}
 
       <Card>
-        <CardHeader>
+        <CardHeader className={isMobile ? "pb-3" : ""}>
           <CardTitle className="flex justify-between items-center">
-            <span>{t("orders.active_production_orders")}</span>
+            <span className={isMobile ? "text-lg" : ""}>{t("orders.active_production_orders")}</span>
+            {!isMobile && (
+              <Link href="/orders/new">
+                <Button>
+                  <span className="material-icons text-sm mr-1">add</span>
+                  {t("orders.new_order")}
+                </Button>
+              </Link>
+            )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className={isMobile ? "px-3" : ""}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">{t("orders.all_orders")}</TabsTrigger>
-              <TabsTrigger value="processing">{t("orders.for_production")}</TabsTrigger>
-              <TabsTrigger value="hold">{t("orders.on_hold")}</TabsTrigger>
-              <TabsTrigger value="pending">{t("orders.pending")}</TabsTrigger>
-              <TabsTrigger value="completed">{t("orders.completed")}</TabsTrigger>
+            <TabsList className={`mb-4 ${isMobile ? "grid grid-cols-3 w-full h-auto" : ""}`}>
+              <TabsTrigger 
+                value="all" 
+                className={isMobile ? "text-xs py-2 px-1" : ""}
+              >
+                {isMobile ? "All" : t("orders.all_orders")}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="processing" 
+                className={isMobile ? "text-xs py-2 px-1" : ""}
+              >
+                {isMobile ? "Production" : t("orders.for_production")}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="hold" 
+                className={isMobile ? "text-xs py-2 px-1" : ""}
+              >
+                {isMobile ? "Hold" : t("orders.on_hold")}
+              </TabsTrigger>
+              {!isMobile && (
+                <>
+                  <TabsTrigger value="pending">{t("orders.pending")}</TabsTrigger>
+                  <TabsTrigger value="completed">{t("orders.completed")}</TabsTrigger>
+                </>
+              )}
             </TabsList>
+            
+            {/* Mobile secondary tabs for remaining statuses */}
+            {isMobile && (
+              <div className="flex gap-2 mb-4 overflow-x-auto">
+                <Button
+                  variant={activeTab === "pending" ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs whitespace-nowrap"
+                  onClick={() => setActiveTab("pending")}
+                >
+                  {t("orders.pending")}
+                </Button>
+                <Button
+                  variant={activeTab === "completed" ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs whitespace-nowrap"
+                  onClick={() => setActiveTab("completed")}
+                >
+                  {t("orders.completed")}
+                </Button>
+              </div>
+            )}
             
             <TabsContent value={activeTab} className="mt-0">
               {isLoading ? (
