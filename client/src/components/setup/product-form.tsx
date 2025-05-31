@@ -68,7 +68,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
     cuttingLength: z.number().optional(),
     rawMaterial: z.string().optional(),
     masterBatchId: z.string().optional(),
-    printed: z.string().optional(),
+    printed: z.boolean().optional(),
     cuttingUnit: z.string().optional(),
     unitWeight: z.number().optional(),
     packing: z.string().optional(),

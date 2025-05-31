@@ -932,7 +932,7 @@
       "total_quantity": "Total Quantity",
       "note": "Note",
       "pending": "Pending",
-      "processing": "Processing",
+      "processing": "On Production",
       "completed": "Completed",
       "cancelled": "Cancelled",
       "no_recent_orders": "No recent orders found",
