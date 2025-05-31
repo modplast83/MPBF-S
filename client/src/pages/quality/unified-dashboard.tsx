@@ -190,26 +190,46 @@ export default function UnifiedQualityDashboard() {
         value={activeTab}
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 mb-8 overflow-x-auto gap-1">
-          <TabsTrigger value="overview" className="flex items-center">
-            <PieChart className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="text-xs sm:text-sm">{t("quality.overview")}</span>
+        <TabsList className="flex w-full h-auto flex-wrap md:grid md:grid-cols-5 mb-8 p-1 bg-muted rounded-md">
+          <TabsTrigger 
+            value="overview" 
+            className="flex items-center justify-center min-w-0 flex-1 md:flex-initial px-2 py-2 text-xs sm:text-sm whitespace-nowrap"
+          >
+            <PieChart className="h-4 w-4 mr-1 flex-shrink-0" />
+            <span className="hidden sm:inline">{t("quality.overview")}</span>
+            <span className="sm:hidden">Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="checks" className="flex items-center">
-            <ClipboardCheck className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="text-xs sm:text-sm">{t("quality.quality_checks")}</span>
+          <TabsTrigger 
+            value="checks" 
+            className="flex items-center justify-center min-w-0 flex-1 md:flex-initial px-2 py-2 text-xs sm:text-sm whitespace-nowrap"
+          >
+            <ClipboardCheck className="h-4 w-4 mr-1 flex-shrink-0" />
+            <span className="hidden sm:inline">{t("quality.quality_checks")}</span>
+            <span className="sm:hidden">Checks</span>
           </TabsTrigger>
-          <TabsTrigger value="violations" className="flex items-center">
-            <AlertTriangle className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="text-xs sm:text-sm">{t("quality.quality_violations")}</span>
+          <TabsTrigger 
+            value="violations" 
+            className="flex items-center justify-center min-w-0 flex-1 md:flex-initial px-2 py-2 text-xs sm:text-sm whitespace-nowrap"
+          >
+            <AlertTriangle className="h-4 w-4 mr-1 flex-shrink-0" />
+            <span className="hidden sm:inline">{t("quality.quality_violations")}</span>
+            <span className="sm:hidden">Violations</span>
           </TabsTrigger>
-          <TabsTrigger value="actions" className="flex items-center">
-            <ShieldAlert className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="text-xs sm:text-sm">{t("quality.corrective_actions")}</span>
+          <TabsTrigger 
+            value="actions" 
+            className="flex items-center justify-center min-w-0 flex-1 md:flex-initial px-2 py-2 text-xs sm:text-sm whitespace-nowrap"
+          >
+            <ShieldAlert className="h-4 w-4 mr-1 flex-shrink-0" />
+            <span className="hidden sm:inline">{t("quality.corrective_actions")}</span>
+            <span className="sm:hidden">Actions</span>
           </TabsTrigger>
-          <TabsTrigger value="penalties" className="flex items-center">
-            <FileWarning className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="text-xs sm:text-sm">{t("quality.penalties")}</span>
+          <TabsTrigger 
+            value="penalties" 
+            className="flex items-center justify-center min-w-0 flex-1 md:flex-initial px-2 py-2 text-xs sm:text-sm whitespace-nowrap"
+          >
+            <FileWarning className="h-4 w-4 mr-1 flex-shrink-0" />
+            <span className="hidden sm:inline">{t("quality.penalties")}</span>
+            <span className="sm:hidden">Penalties</span>
           </TabsTrigger>
         </TabsList>
 
