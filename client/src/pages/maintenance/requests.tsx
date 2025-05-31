@@ -395,7 +395,7 @@ export default function MaintenanceRequestsPage() {
       {/* Requests Table */}
       <Card>
         <CardHeader>
-          <CardTitle>{t("maintenance.requests.table_title", { count: filteredRequests.length })}</CardTitle>
+          <CardTitle>Maintenance Requests</CardTitle>
           <CardDescription>
             {t("maintenance.requests.table_description")}
           </CardDescription>
