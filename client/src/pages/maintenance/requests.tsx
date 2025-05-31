@@ -405,7 +405,7 @@ export default function MaintenanceRequestsPage() {
             <div className="text-center py-4">{t("common.loading")}</div>
           ) : filteredRequests.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
-              {t("maintenance.requests.no_requests")}
+              No maintenance Request found
             </div>
           ) : (
             <div className="overflow-x-auto">
