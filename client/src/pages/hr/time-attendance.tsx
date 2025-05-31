@@ -12,6 +12,7 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth-v2";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { TimeAttendance } from "@shared/schema";
 
 export default function TimeAttendancePage() {
@@ -19,6 +20,7 @@ export default function TimeAttendancePage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Get attendance records
@@ -216,12 +218,12 @@ export default function TimeAttendancePage() {
   );
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+    <div className={`container mx-auto ${isMobile ? "p-3" : "p-6"}`}>
+      <div className={isMobile ? "mb-4" : "mb-8"}>
+        <h1 className={`font-bold text-gray-900 dark:text-gray-100 ${isMobile ? "text-xl" : "text-3xl"}`}>
           {t("hr.time_attendance.title")}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className={`text-gray-600 dark:text-gray-400 ${isMobile ? "mt-1 text-sm" : "mt-2"}`}>
           {t("hr.time_attendance.attendance_summary")}
         </p>
       </div>
