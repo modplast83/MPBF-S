@@ -119,22 +119,23 @@ export default function EmployeeOfMonthPage() {
   const topPerformers = employeeRecords?.slice(0, 3) || [];
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <div className="flex justify-between items-center">
+    <div className="container mx-auto p-3 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
               {t("hr.employee_of_month.title")}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
               {t("hr.employee_of_month.performance_evaluation")}
             </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
-                {t("hr.employee_of_month.award_employee")}
+                <span className="hidden sm:inline">{t("hr.employee_of_month.award_employee")}</span>
+                <span className="sm:hidden">Award Employee</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -356,41 +357,41 @@ export default function EmployeeOfMonthPage() {
 
       {/* Top Performers */}
       {topPerformers.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {topPerformers.map((employee: EmployeeOfMonth, index) => (
             <Card key={employee.id} className={index === 0 ? "border-yellow-300 bg-yellow-50 dark:bg-yellow-950" : ""}>
-              <CardHeader className="text-center">
+              <CardHeader className="text-center pb-4">
                 <div className="flex justify-center mb-2">
                   {index === 0 ? (
-                    <Trophy className="h-12 w-12 text-yellow-500" />
+                    <Trophy className="h-8 w-8 sm:h-12 sm:w-12 text-yellow-500" />
                   ) : index === 1 ? (
-                    <Award className="h-12 w-12 text-gray-400" />
+                    <Award className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400" />
                   ) : (
-                    <Star className="h-12 w-12 text-orange-500" />
+                    <Star className="h-8 w-8 sm:h-12 sm:w-12 text-orange-500" />
                   )}
                 </div>
-                <CardTitle className="flex items-center justify-center space-x-2">
-                  <span>{employee.userId}</span>
+                <CardTitle className="flex items-center justify-center space-x-2 text-sm sm:text-base">
+                  <span className="truncate">{employee.userId}</span>
                   {getRankBadge(index + 1)}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   {getMonthName(employee.month)} {employee.year}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>{t("hr.employee_of_month.total_score")}</span>
-                    <span className="font-bold">{employee.totalScore?.toFixed(1) || '0.0'}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs sm:text-sm">{t("hr.employee_of_month.total_score")}</span>
+                    <span className="font-bold text-sm sm:text-base">{employee.totalScore?.toFixed(1) || '0.0'}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>{t("hr.employee_of_month.obligation_points")}</span>
-                    <span>{employee.obligationPoints}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs sm:text-sm">{t("hr.employee_of_month.obligation_points")}</span>
+                    <span className="text-sm sm:text-base">{employee.obligationPoints}</span>
                   </div>
                   {employee.reward && (
-                    <div className="flex justify-between">
-                      <span>{t("hr.employee_of_month.reward")}</span>
-                      <span>{employee.reward}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm">{t("hr.employee_of_month.reward")}</span>
+                      <span className="text-sm sm:text-base truncate max-w-[100px]">{employee.reward}</span>
                     </div>
                   )}
                 </div>
@@ -401,11 +402,11 @@ export default function EmployeeOfMonthPage() {
       )}
 
       {/* Year Filter */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-4">
-          <Calendar className="h-5 w-5" />
+      <div className="mb-4 sm:mb-6">
+        <div className="flex items-center space-x-3 sm:space-x-4">
+          <Calendar className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
           <Select onValueChange={(value) => setSelectedYear(parseInt(value))} defaultValue={selectedYear.toString()}>
-            <SelectTrigger className="w-auto">
+            <SelectTrigger className="w-32 sm:w-auto">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

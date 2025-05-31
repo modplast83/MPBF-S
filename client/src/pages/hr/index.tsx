@@ -38,35 +38,35 @@ export default function HRIndex() {
   ];
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+    <div className="container mx-auto p-3 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
           {t("hr.title")}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
           Manage employee attendance, performance, and workplace issues
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {hrModules.map((module) => {
           const IconComponent = module.icon;
           return (
             <Link key={module.path} href={module.path}>
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
-                <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-                  <div className={`p-2 rounded-lg ${module.color} text-white mr-4`}>
-                    <IconComponent className="h-6 w-6" />
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200 h-full">
+                <CardHeader className="flex flex-row items-center space-y-0 pb-3 sm:pb-2">
+                  <div className={`p-2 sm:p-3 rounded-lg ${module.color} text-white mr-3 sm:mr-4 flex-shrink-0`}>
+                    <IconComponent className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
-                  <div>
-                    <CardTitle className="text-lg">{module.title}</CardTitle>
-                    <CardDescription className="text-sm">
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="text-sm sm:text-lg font-semibold truncate">{module.title}</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm line-clamp-2 mt-1">
                       {module.description}
                     </CardDescription>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                <CardContent className="pt-0 sm:pt-2">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     Click to access {module.title.toLowerCase()} management
                   </p>
                 </CardContent>
