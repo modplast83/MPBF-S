@@ -397,7 +397,7 @@ export default function MaintenanceRequestsPage() {
         <CardHeader>
           <CardTitle>Maintenance Requests</CardTitle>
           <CardDescription>
-            {t("maintenance.requests.table_description")}
+            Follow All Maintenance Requests
           </CardDescription>
         </CardHeader>
         <CardContent>
