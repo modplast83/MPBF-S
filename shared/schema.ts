@@ -166,6 +166,8 @@ export const jobOrders = pgTable("job_orders", {
   receivedQty: doublePrecision("received_qty").default(0).notNull(), // Received quantity (kg)
   status: text("status").default("pending").notNull(), // Status (pending, in_progress, extrusion_completed, completed, cancelled, received, partially_received)
   customerId: text("customer_id").references(() => customers.id), // Customer ID
+  receiveDate: timestamp("receive_date"), // Date when received in warehouse
+  receivedBy: text("received_by").references(() => users.id), // User who received the job order
 }, (table) => {
   return {
     jobOrderUnique: unique().on(table.orderId, table.customerProductId),

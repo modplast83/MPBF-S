@@ -16,6 +16,7 @@ import { JobOrder, CustomerProduct, Order, Customer, Roll, Item, Category } from
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -36,6 +37,7 @@ export default function FinalProducts() {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   
   // Fetch job orders data
   const { data: jobOrders = [], isLoading: isJobOrdersLoading } = useQuery<JobOrder[]>({
@@ -223,8 +225,10 @@ export default function FinalProducts() {
       id: selectedJobOrder.id,
       status: newStatus,
       finishedQty: totalFinishedQty,
-      receivedQty: totalReceived
-    },
+      receivedQty: totalReceived,
+      receiveDate: new Date().toISOString(),
+      receivedBy: user?.id || undefined
+    } as any,
     {
       onSuccess: () => {
         // Check if all job orders for this order are now received
@@ -1095,6 +1099,32 @@ export default function FinalProducts() {
                     </p>
                   )}
                 </div>
+              </div>
+              
+              <div className={`grid ${isMobile ? "" : "grid-cols-4"} items-center gap-4`}>
+                <Label className={isMobile ? "" : "text-right"}>
+                  Receive Date
+                </Label>
+                <Input
+                  type="text"
+                  value={new Date().toLocaleDateString()}
+                  readOnly
+                  disabled
+                  className={isMobile ? "w-full" : "col-span-3 bg-secondary-50"}
+                />
+              </div>
+              
+              <div className={`grid ${isMobile ? "" : "grid-cols-4"} items-center gap-4`}>
+                <Label className={isMobile ? "" : "text-right"}>
+                  Received by
+                </Label>
+                <Input
+                  type="text"
+                  value={user?.username || 'Current User'}
+                  readOnly
+                  disabled
+                  className={isMobile ? "w-full" : "col-span-3 bg-secondary-50"}
+                />
               </div>
               
               <div className={`grid ${isMobile ? "" : "grid-cols-4"} items-start gap-4`}>

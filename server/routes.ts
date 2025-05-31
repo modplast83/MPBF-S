@@ -1168,11 +1168,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: z.enum(["pending", "in_progress", "extrusion_completed", "completed", "cancelled", "received", "partially_received"]).optional(),
           finishedQty: z.number().nonnegative().optional(),
           receivedQty: z.number().nonnegative().optional(),
+          receiveDate: z.string().optional(),
+          receivedBy: z.string().optional(),
         });
         
         try {
           const updateData = updateSchema.parse(req.body);
-          const updatedJobOrder = await storage.updateJobOrder(parseInt(req.params.id), updateData);
+          // Convert receiveDate string to Date object if provided
+          const processedData = {
+            ...updateData,
+            receiveDate: updateData.receiveDate ? new Date(updateData.receiveDate) : undefined
+          };
+          const updatedJobOrder = await storage.updateJobOrder(parseInt(req.params.id), processedData);
           return res.json(updatedJobOrder);
         } catch (updateError) {
           // Not a valid status or finishedQty update, continue with full validation
