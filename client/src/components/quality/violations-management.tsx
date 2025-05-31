@@ -285,7 +285,13 @@ export function QualityViolationsManagement() {
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === "qualityCheckId") {
+      // Convert string to number for qualityCheckId, or set to undefined if empty
+      const numericValue = value && value !== "" ? parseInt(value) : undefined;
+      setFormData(prev => ({ ...prev, [name]: numericValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCreateOrUpdate = () => {
@@ -303,13 +309,25 @@ export function QualityViolationsManagement() {
       updateMutation.mutate(formData);
     } else {
       // For new violations, we need to provide a qualityCheckId
-      // If no specific quality check is selected, use the first available one or create a default
-      const qualityCheckId = formData.qualityCheckId || 
-        (qualityChecks && qualityChecks.length > 0 ? qualityChecks[0].id : 1);
+      // If no specific quality check is selected, use the first available one
+      let qualityCheckId = formData.qualityCheckId;
+      
+      if (!qualityCheckId && qualityChecks && qualityChecks.length > 0) {
+        qualityCheckId = qualityChecks[0].id;
+      }
+      
+      if (!qualityCheckId) {
+        toast({
+          title: t("common.validation_error"),
+          description: "Please select a quality check or ensure quality checks exist in the system",
+          variant: "destructive",
+        });
+        return;
+      }
 
       createMutation.mutate({
         ...formData,
-        qualityCheckId: parseInt(qualityCheckId.toString()),
+        qualityCheckId: typeof qualityCheckId === 'number' ? qualityCheckId : parseInt(qualityCheckId.toString()),
         reportDate: new Date(),
         reportedBy: users[0]?.id || "Unknown",
       });
