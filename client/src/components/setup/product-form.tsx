@@ -151,6 +151,23 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       form.setValue("volum", calculatedVolume.toFixed(2));
     }
   }, [watchedRightF, watchedWidth, watchedLeftF, watchedLengthCm, watchedThicknessOne, form]);
+
+  // Auto-calculate Size Caption when dimensions change
+  useEffect(() => {
+    if (
+      watchedWidth !== undefined && 
+      watchedLeftF !== undefined && 
+      watchedRightF !== undefined &&
+      watchedWidth > 0 && watchedLeftF > 0 && watchedRightF > 0
+    ) {
+      const calculatedSizeCaption = `${watchedWidth}+${watchedLeftF}+${watchedRightF}`;
+      form.setValue("sizeCaption", calculatedSizeCaption);
+    }
+  }, [watchedWidth, watchedLeftF, watchedRightF, form]);
+
+  // Filter items based on selected category
+  const watchedCategoryId = form.watch("categoryId");
+  const filteredItems = items?.filter(item => item.categoryId === watchedCategoryId) || [];
   
   // Create mutation for adding/updating product
   const mutation = useMutation({
@@ -318,15 +335,15 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={isLoading}
+                  disabled={isLoading || !watchedCategoryId}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select item" />
+                      <SelectValue placeholder={watchedCategoryId ? "Select item" : "Select category first"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {items?.map((item) => (
+                    {filteredItems?.map((item) => (
                       <SelectItem key={item.id} value={item.id}>
                         {item.name}
                       </SelectItem>
@@ -343,9 +360,15 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
             name="sizeCaption"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Size Caption</FormLabel>
+                <FormLabel>Size Caption (Auto-calculated)</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. 9×9+28" {...field} />
+                  <Input 
+                    placeholder="Auto-calculated from dimensions"
+                    {...field}
+                    value={field.value || ""}
+                    readOnly
+                    className="bg-gray-50"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
