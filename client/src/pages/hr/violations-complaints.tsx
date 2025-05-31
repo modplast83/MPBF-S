@@ -181,23 +181,24 @@ export default function ViolationsComplaintsPage() {
   });
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <div className="flex justify-between items-center">
+    <div className="container mx-auto p-3 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
               {t("hr.violations_complaints.title")}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
               {t("hr.violations_complaints.investigation_notes")}
             </p>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
             <Dialog open={isViolationDialogOpen} onOpenChange={setIsViolationDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <AlertTriangle className="h-4 w-4 mr-2" />
-                  {t("hr.violations_complaints.report_violation")}
+                  <span className="hidden sm:inline">{t("hr.violations_complaints.report_violation")}</span>
+                  <span className="sm:hidden">Report Violation</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
@@ -341,9 +342,10 @@ export default function ViolationsComplaintsPage() {
 
             <Dialog open={isComplaintDialogOpen} onOpenChange={setIsComplaintDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button className="w-full sm:w-auto">
                   <MessageSquare className="h-4 w-4 mr-2" />
-                  {t("hr.violations_complaints.file_complaint")}
+                  <span className="hidden sm:inline">{t("hr.violations_complaints.file_complaint")}</span>
+                  <span className="sm:hidden">File Complaint</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">

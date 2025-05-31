@@ -274,16 +274,16 @@ export default function ViolationTrendsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t("hr.violations.trends.title")}</h1>
-          <p className="text-gray-600 mt-2">{t("hr.violations.trends.description")}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t("hr.violations.trends.title")}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">{t("hr.violations.trends.description")}</p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -296,14 +296,14 @@ export default function ViolationTrendsPage() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Violations</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Violations</CardTitle>
+            <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalViolations}</div>
+            <div className="text-lg sm:text-2xl font-bold">{totalViolations}</div>
             <div className="flex items-center text-xs text-gray-600 mt-1">
               {trend >= 0 ? (
                 <TrendingUp className="h-3 w-3 text-red-500 mr-1" />
@@ -313,7 +313,7 @@ export default function ViolationTrendsPage() {
               <span className={trend >= 0 ? "text-red-500" : "text-green-500"}>
                 {Math.abs(Number(trendPercentage))}%
               </span>
-              <span className="ml-1">vs previous period</span>
+              <span className="ml-1 hidden sm:inline">vs previous period</span>
             </div>
           </CardContent>
         </Card>
