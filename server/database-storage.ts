@@ -2197,7 +2197,7 @@ export class DatabaseStorage implements IStorage {
 
   // Maintenance Schedule methods
   async getMaintenanceSchedules(): Promise<MaintenanceSchedule[]> {
-    return await db.select().from(maintenanceSchedule).orderBy(asc(maintenanceSchedule.nextMaintenanceDate));
+    return await db.select().from(maintenanceSchedule).orderBy(asc(maintenanceSchedule.nextDue));
   }
 
   async getMaintenanceSchedule(id: number): Promise<MaintenanceSchedule | undefined> {
@@ -2208,17 +2208,17 @@ export class DatabaseStorage implements IStorage {
   async getMaintenanceSchedulesByMachine(machineId: string): Promise<MaintenanceSchedule[]> {
     return await db.select().from(maintenanceSchedule)
       .where(eq(maintenanceSchedule.machineId, machineId))
-      .orderBy(asc(maintenanceSchedule.nextMaintenanceDate));
+      .orderBy(asc(maintenanceSchedule.nextDue));
   }
 
   async getOverdueMaintenanceSchedules(): Promise<MaintenanceSchedule[]> {
     const today = new Date();
     return await db.select().from(maintenanceSchedule)
       .where(and(
-        eq(maintenanceSchedule.isActive, true),
-        lte(maintenanceSchedule.nextMaintenanceDate, today)
+        eq(maintenanceSchedule.status, "active"),
+        lte(maintenanceSchedule.nextDue, today)
       ))
-      .orderBy(asc(maintenanceSchedule.nextMaintenanceDate));
+      .orderBy(asc(maintenanceSchedule.nextDue));
   }
 
   async createMaintenanceSchedule(scheduleData: InsertMaintenanceSchedule): Promise<MaintenanceSchedule> {
@@ -2232,7 +2232,7 @@ export class DatabaseStorage implements IStorage {
   async updateMaintenanceSchedule(id: number, scheduleData: Partial<MaintenanceSchedule>): Promise<MaintenanceSchedule | undefined> {
     const [updated] = await db
       .update(maintenanceSchedule)
-      .set({ ...scheduleData, updatedAt: new Date() })
+      .set(scheduleData)
       .where(eq(maintenanceSchedule.id, id))
       .returning();
     return updated || undefined;
