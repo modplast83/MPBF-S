@@ -409,6 +409,68 @@ export default function MaintenanceRequestsPage() {
             <div className="text-center py-4 text-gray-500">
               No maintenance Request found
             </div>
+          ) : isMobile ? (
+            <div className="space-y-3">
+              {filteredRequests.map((request: MaintenanceRequest) => (
+                <Card key={request.id} className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium text-sm">#{request.id}</span>
+                      {getSeverityBadge(request.severity)}
+                    </div>
+                    {getStatusBadge(request.status)}
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Machine:</span>
+                      <span className="font-medium">{getMachineName(request.machineId)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Type:</span>
+                      <span>{request.damageType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Date:</span>
+                      <span>{format(new Date(request.createdAt), 'MMM dd, yyyy')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Reported by:</span>
+                      <span>{getUserName(request.reportedBy)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-sm text-gray-700 mb-3" title={request.description}>
+                      {request.description.length > 100 ? `${request.description.substring(0, 100)}...` : request.description}
+                    </p>
+                    
+                    <div className="flex space-x-2">
+                      {request.status === 'pending' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => handleStatusUpdate(request.id, 'in_progress')}
+                        >
+                          {t("common.start")}
+                        </Button>
+                      )}
+                      {request.status === 'in_progress' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => handleStatusUpdate(request.id, 'completed')}
+                        >
+                          {t("common.complete")}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
