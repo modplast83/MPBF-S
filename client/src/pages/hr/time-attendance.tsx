@@ -229,24 +229,24 @@ export default function TimeAttendancePage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium truncate">
-              {t("hr.time_attendance.check_in")}
+      <div className={`grid gap-3 ${isMobile ? "grid-cols-2 mb-4" : "grid-cols-2 sm:grid-cols-3 md:grid-cols-5 sm:gap-4 mb-8"}`}>
+        <Card className={isMobile ? "col-span-1" : ""}>
+          <CardHeader className={`flex flex-row items-center justify-between space-y-0 ${isMobile ? "pb-1 px-3 pt-3" : "pb-2"}`}>
+            <CardTitle className={`font-medium truncate ${isMobile ? "text-xs" : "text-xs sm:text-sm"}`}>
+              {isMobile ? "Check In" : t("hr.time_attendance.check_in")}
             </CardTitle>
-            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
+            <Clock className={`text-muted-foreground flex-shrink-0 ${isMobile ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4"}`} />
           </CardHeader>
-          <CardContent className="pt-2">
+          <CardContent className={isMobile ? "pt-1 px-3 pb-3" : "pt-2"}>
             <Button 
               onClick={handleCheckIn}
               disabled={!!currentAttendance?.checkInTime || checkInMutation.isPending}
-              className="w-full text-xs sm:text-sm h-8 sm:h-9"
+              className={`w-full ${isMobile ? "text-xs h-8" : "text-xs sm:text-sm h-8 sm:h-9"}`}
               size="sm"
             >
               {currentAttendance?.checkInTime ? 
                 format(new Date(currentAttendance.checkInTime), 'HH:mm') : 
-                <span className="truncate">Check In</span>
+                <span className="truncate">{isMobile ? "In" : "Check In"}</span>
               }
             </Button>
           </CardContent>
