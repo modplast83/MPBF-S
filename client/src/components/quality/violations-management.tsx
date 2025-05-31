@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -118,8 +118,7 @@ export function QualityViolationsManagement() {
     status: "Open",
     violationType: "Process",
     affectedArea: "Machine",
-    notes: "",
-    qualityCheckId: undefined
+    notes: ""
   });
   const [filters, setFilters] = useState<ViolationFilterState>({
     severity: "all",
@@ -274,10 +273,12 @@ export function QualityViolationsManagement() {
       violationType: "Process",
       affectedArea: "Machine",
       notes: "",
-      qualityCheckId: undefined
+      qualityCheckId: qualityChecks && qualityChecks.length > 0 ? qualityChecks[0].id : undefined
     });
     setCurrentViolation(null);
   };
+
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
