@@ -118,7 +118,8 @@ export function QualityViolationsManagement() {
     status: "Open",
     violationType: "Process",
     affectedArea: "Machine",
-    notes: ""
+    notes: "",
+    qualityCheckId: undefined
   });
   const [filters, setFilters] = useState<ViolationFilterState>({
     severity: "all",
@@ -272,7 +273,8 @@ export function QualityViolationsManagement() {
       status: "Open",
       violationType: "Process",
       affectedArea: "Machine",
-      notes: ""
+      notes: "",
+      qualityCheckId: undefined
     });
     setCurrentViolation(null);
   };
@@ -288,7 +290,7 @@ export function QualityViolationsManagement() {
 
   const handleCreateOrUpdate = () => {
     // Validate required fields
-    if (!formData.description || !formData.severity || !formData.status) {
+    if (!formData.description || !formData.severity || !formData.status || !formData.violationType || !formData.affectedArea) {
       toast({
         title: t("common.validation_error"),
         description: t("common.required_fields"),
@@ -300,8 +302,14 @@ export function QualityViolationsManagement() {
     if (currentViolation) {
       updateMutation.mutate(formData);
     } else {
+      // For new violations, we need to provide a qualityCheckId
+      // If no specific quality check is selected, use the first available one or create a default
+      const qualityCheckId = formData.qualityCheckId || 
+        (qualityChecks && qualityChecks.length > 0 ? qualityChecks[0].id : 1);
+
       createMutation.mutate({
         ...formData,
+        qualityCheckId: parseInt(qualityCheckId.toString()),
         reportDate: new Date(),
         reportedBy: users[0]?.id || "Unknown",
       });
@@ -651,7 +659,7 @@ export function QualityViolationsManagement() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="qualityCheckId">
+                <Label htmlFor="qualityCheckId" className="required">
                   {t("quality.quality_check")}
                 </Label>
                 <Select
