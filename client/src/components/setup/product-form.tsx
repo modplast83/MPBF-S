@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
+import { useEffect } from "react";
 import {
   Form,
   FormControl,
@@ -97,7 +98,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       cuttingLength: product?.cuttingLength || undefined,
       rawMaterial: product?.rawMaterial || "",
       masterBatchId: product?.masterBatchId || "none",
-      printed: product?.printed || "",
+      printed: product?.printed === "Yes" || false,
       cuttingUnit: product?.cuttingUnit || "",
       unitWeight: product?.unitWeight || undefined,
       packing: product?.packing || "",
@@ -108,6 +109,16 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       notes: product?.notes || null,
     },
   });
+  
+  // Auto-calculate Thickness One when Thickness changes
+  const watchedThickness = form.watch("thickness");
+  
+  useEffect(() => {
+    if (watchedThickness !== undefined && watchedThickness > 0) {
+      const calculatedThicknessOne = (watchedThickness / 4) * 10;
+      form.setValue("thicknessOne", calculatedThicknessOne);
+    }
+  }, [watchedThickness, form]);
   
   // Create mutation for adding/updating product
   const mutation = useMutation({
@@ -132,7 +143,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
         // Ensure text fields are never null or undefined
         sizeCaption: values.sizeCaption || "",
         rawMaterial: values.rawMaterial || "",
-        printed: values.printed || "",
+        printed: values.printed ? "Yes" : "No",
         cuttingUnit: values.cuttingUnit || "",
         packing: values.packing || "",
         punching: values.punching || "",
@@ -394,13 +405,15 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
             name="thicknessOne"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Thickness One</FormLabel>
+                <FormLabel>Thickness One (Auto-calculated)</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="Thickness One" 
+                    placeholder="Auto-calculated from thickness"
                     {...field}
-                    onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                    value={field.value || ""}
+                    readOnly
+                    className="bg-gray-50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -414,14 +427,23 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Printing Cylinder (Inch)</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="Printing Cylinder" 
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                  />
-                </FormControl>
+                <Select
+                  onValueChange={(value) => field.onChange(parseFloat(value))}
+                  value={field.value ? field.value.toString() : ""}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select cylinder size" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {[8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 39].map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size}"
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -473,9 +495,21 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Raw Material</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. HDPE" {...field} />
-                </FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select raw material" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="HDPE">HDPE</SelectItem>
+                    <SelectItem value="LLDPE">LLDPE</SelectItem>
+                    <SelectItem value="Regrind">Regrind</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -519,9 +553,20 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Printed</FormLabel>
-                <FormControl>
-                  <Input placeholder="Printed" {...field} />
-                </FormControl>
+                <Select
+                  onValueChange={(value) => field.onChange(value === "true")}
+                  value={field.value ? "true" : "false"}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select printed status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -584,9 +629,22 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Punching</FormLabel>
-                <FormControl>
-                  <Input placeholder="Punching" {...field} />
-                </FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select punching type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="None">None</SelectItem>
+                    <SelectItem value="T-Shirt">T-Shirt</SelectItem>
+                    <SelectItem value="T-Shirt w/Hook">T-Shirt w/Hook</SelectItem>
+                    <SelectItem value="Banana">Banana</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
