@@ -482,7 +482,14 @@
       "added_materials": "Added Materials",
       "actions": "Actions",
       "add_quantities_desc": "Add quantities to existing raw materials",
-      "customer_arabic_name": "Customer (Arabic)"
+      "customer_arabic_name": "Customer (Arabic)",
+      "batch_print_label": "Print Daily Labels",
+      "batch_print_description": "Print labels for all job orders received on {{date}}",
+      "batch_print_summary": "Summary of job orders to print:",
+      "orders_found": "{{count}} job order(s) found",
+      "total_received_kg": "Total received quantity: {{kg}} kg",
+      "printing_batch_labels": "Printing Labels...",
+      "print_batch_labels": "Print All Labels"
     },
     "performance": {
       "title": "Performance Metrics",
