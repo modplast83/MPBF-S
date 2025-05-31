@@ -528,7 +528,8 @@ export default function OrdersIndex() {
                   </Button>
                 </div>
               </CardFooter>
-            </Link>
+              </Link>
+            </div>
           </Card>
         ))}
       </div>
