@@ -860,6 +860,7 @@
       "processing": "قيد الإنتاج",
       "completed": "مكتمل",
       "cancelled": "ملغى",
+      "hold": "إنتظار",
       "no_recent_orders": "لا توجد طلبات حديثة",
       "see_all_orders": "عرض جميع الطلبات",
       "size": "المقاس",
