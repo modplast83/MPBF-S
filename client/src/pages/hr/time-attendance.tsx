@@ -227,23 +227,24 @@ export default function TimeAttendancePage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">
               {t("hr.time_attendance.check_in")}
             </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-2">
             <Button 
               onClick={handleCheckIn}
               disabled={!!currentAttendance?.checkInTime || checkInMutation.isPending}
-              className="w-full"
+              className="w-full text-xs sm:text-sm h-8 sm:h-9"
+              size="sm"
             >
               {currentAttendance?.checkInTime ? 
                 format(new Date(currentAttendance.checkInTime), 'HH:mm') : 
-                t("hr.time_attendance.check_in")
+                <span className="truncate">Check In</span>
               }
             </Button>
           </CardContent>
@@ -251,21 +252,22 @@ export default function TimeAttendancePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">
               {t("hr.time_attendance.check_out")}
             </CardTitle>
-            <LogOut className="h-4 w-4 text-muted-foreground" />
+            <LogOut className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-2">
             <Button 
               onClick={handleCheckOut}
               disabled={!currentAttendance?.checkInTime || !!currentAttendance?.checkOutTime || checkOutMutation.isPending}
               variant="outline"
-              className="w-full"
+              className="w-full text-xs sm:text-sm h-8 sm:h-9"
+              size="sm"
             >
               {currentAttendance?.checkOutTime ? 
                 format(new Date(currentAttendance.checkOutTime), 'HH:mm') : 
-                t("hr.time_attendance.check_out")
+                <span className="truncate">Check Out</span>
               }
             </Button>
           </CardContent>
@@ -273,13 +275,13 @@ export default function TimeAttendancePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("hr.time_attendance.working_hours")}
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">
+              Hours
             </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="pt-2">
+            <div className="text-lg sm:text-2xl font-bold">
               {currentAttendance?.workingHours?.toFixed(1) || '0.0'}h
             </div>
           </CardContent>
@@ -287,21 +289,22 @@ export default function TimeAttendancePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">
               Break Out
             </CardTitle>
-            <Coffee className="h-4 w-4 text-muted-foreground" />
+            <Coffee className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-2">
             <Button 
               onClick={handleBreakStart}
               disabled={!currentAttendance?.checkInTime || !!currentAttendance?.checkOutTime || !!currentAttendance?.breakStartTime || breakStartMutation.isPending}
               variant="secondary"
-              className="w-full"
+              className="w-full text-xs sm:text-sm h-8 sm:h-9"
+              size="sm"
             >
               {currentAttendance?.breakStartTime ? 
                 format(new Date(currentAttendance.breakStartTime), 'HH:mm') : 
-                "Break Out"
+                <span className="truncate">Break Out</span>
               }
             </Button>
           </CardContent>
@@ -309,21 +312,22 @@ export default function TimeAttendancePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">
               Break In
             </CardTitle>
-            <Coffee className="h-4 w-4 text-muted-foreground" />
+            <Coffee className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-2">
             <Button 
               onClick={handleBreakEnd}
               disabled={!currentAttendance?.breakStartTime || !!currentAttendance?.breakEndTime || !!currentAttendance?.checkOutTime || breakEndMutation.isPending}
               variant="secondary"
-              className="w-full"
+              className="w-full text-xs sm:text-sm h-8 sm:h-9"
+              size="sm"
             >
               {currentAttendance?.breakEndTime ? 
                 format(new Date(currentAttendance.breakEndTime), 'HH:mm') : 
-                "Break In"
+                <span className="truncate">Break In</span>
               }
             </Button>
           </CardContent>
@@ -332,13 +336,13 @@ export default function TimeAttendancePage() {
 
       {/* Date Filter */}
       <div className="mb-6">
-        <div className="flex items-center space-x-4">
-          <Calendar className="h-5 w-5" />
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
           <Input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-auto"
+            className="w-auto text-sm"
           />
         </div>
       </div>
@@ -358,52 +362,114 @@ export default function TimeAttendancePage() {
           {isLoading ? (
             <div className="text-center py-4">{t("hr.common.loading")}</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("hr.common.employee")}</TableHead>
-                  <TableHead>{t("hr.time_attendance.check_in_time")}</TableHead>
-                  <TableHead>{t("hr.time_attendance.check_out_time")}</TableHead>
-                  <TableHead>{t("hr.time_attendance.working_hours")}</TableHead>
-                  <TableHead>{t("hr.time_attendance.overtime_hours")}</TableHead>
-                  <TableHead>{t("hr.common.location")}</TableHead>
-                  <TableHead>{t("hr.common.status")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile Card Layout */}
+              <div className="block lg:hidden space-y-4">
                 {attendanceRecords?.map((record: TimeAttendance) => (
-                  <TableRow key={record.id}>
-                    <TableCell className="font-medium">{getUserFirstName(record.userId)}</TableCell>
-                    <TableCell>
-                      {record.checkInTime ? format(new Date(record.checkInTime), 'HH:mm') : '-'}
-                    </TableCell>
-                    <TableCell>
-                      {record.checkOutTime ? format(new Date(record.checkOutTime), 'HH:mm') : '-'}
-                    </TableCell>
-                    <TableCell>{record.workingHours?.toFixed(1) || '0.0'}h</TableCell>
-                    <TableCell>{record.overtimeHours?.toFixed(1) || '0.0'}h</TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="h-3 w-3" />
-                        <span className="text-sm">{record.location || 'N/A'}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
+                  <Card key={record.id} className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-sm">{getUserFirstName(record.userId)}</h3>
                       <Badge className={getStatusBadge(record.status)}>
                         {t(`hr.time_attendance.${record.status}`)}
                       </Badge>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Check In:</span>
+                          <span className="font-medium">
+                            {record.checkInTime ? format(new Date(record.checkInTime), 'HH:mm') : '-'}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <LogOut className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Check Out:</span>
+                          <span className="font-medium">
+                            {record.checkOutTime ? format(new Date(record.checkOutTime), 'HH:mm') : '-'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Hours:</span>
+                          <span className="font-medium">{record.workingHours?.toFixed(1) || '0.0'}h</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Overtime:</span>
+                          <span className="font-medium">{record.overtimeHours?.toFixed(1) || '0.0'}h</span>
+                        </div>
+                      </div>
+                    </div>
+                    {record.location && (
+                      <div className="mt-3 pt-3 border-t">
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground truncate">{record.location}</span>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
                 ))}
                 {(!attendanceRecords || attendanceRecords.length === 0) && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4">
-                      {t("hr.common.no_data")}
-                    </TableCell>
-                  </TableRow>
+                  <div className="text-center py-8 text-muted-foreground">
+                    {t("hr.common.no_data")}
+                  </div>
                 )}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Desktop Table Layout */}
+              <div className="hidden lg:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t("hr.common.employee")}</TableHead>
+                      <TableHead>{t("hr.time_attendance.check_in_time")}</TableHead>
+                      <TableHead>{t("hr.time_attendance.check_out_time")}</TableHead>
+                      <TableHead>{t("hr.time_attendance.working_hours")}</TableHead>
+                      <TableHead>{t("hr.time_attendance.overtime_hours")}</TableHead>
+                      <TableHead>{t("hr.common.location")}</TableHead>
+                      <TableHead>{t("hr.common.status")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {attendanceRecords?.map((record: TimeAttendance) => (
+                      <TableRow key={record.id}>
+                        <TableCell className="font-medium">{getUserFirstName(record.userId)}</TableCell>
+                        <TableCell>
+                          {record.checkInTime ? format(new Date(record.checkInTime), 'HH:mm') : '-'}
+                        </TableCell>
+                        <TableCell>
+                          {record.checkOutTime ? format(new Date(record.checkOutTime), 'HH:mm') : '-'}
+                        </TableCell>
+                        <TableCell>{record.workingHours?.toFixed(1) || '0.0'}h</TableCell>
+                        <TableCell>{record.overtimeHours?.toFixed(1) || '0.0'}h</TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="h-3 w-3" />
+                            <span className="text-sm">{record.location || 'N/A'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusBadge(record.status)}>
+                            {t(`hr.time_attendance.${record.status}`)}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {(!attendanceRecords || attendanceRecords.length === 0) && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-4">
+                          {t("hr.common.no_data")}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
