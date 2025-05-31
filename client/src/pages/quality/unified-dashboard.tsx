@@ -47,30 +47,11 @@ export default function UnifiedQualityDashboard() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ["/api/quality/stats"],
     queryFn: async () => {
-      try {
-        const response = await fetch("/api/quality/stats");
-        if (!response.ok) {
-          throw new Error("API error: " + response.status);
-        }
-        return response.json();
-      } catch (error) {
-        console.error("Error fetching quality stats:", error);
-        // Return fallback data if the API fails
-        return {
-          totalChecks: 120,
-          passedChecks: 98,
-          failedChecks: 22,
-          totalViolations: 35,
-          openViolations: 8,
-          resolvedViolations: 27,
-          totalCorrectiveActions: 42,
-          pendingActions: 5,
-          completedActions: 37,
-          totalPenalties: 18,
-          activePenalties: 4,
-          closedPenalties: 14
-        };
+      const response = await fetch("/api/quality/stats");
+      if (!response.ok) {
+        throw new Error("Failed to fetch quality statistics");
       }
+      return response.json();
     }
   });
 
