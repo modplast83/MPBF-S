@@ -12,7 +12,7 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDateString, formatNumber, cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { JobOrder, CustomerProduct, Order, Customer, Roll, Item } from "@shared/schema";
+import { JobOrder, CustomerProduct, Order, Customer, Roll, Item, Category } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -48,6 +48,10 @@ export default function FinalProducts() {
 
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: [API_ENDPOINTS.ORDERS],
+  });
+
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: [API_ENDPOINTS.CATEGORIES],
   });
 
   const { data: customers = [] } = useQuery<Customer[]>({
@@ -296,185 +300,139 @@ export default function FinalProducts() {
       return;
     }
     
+    // Group job orders by order number
+    const groupedByOrder = jobOrdersToPrint.reduce((groups, jobOrder) => {
+      const jobOrderDetails = getJobOrderDetails(jobOrder.id);
+      const orderNumber = jobOrderDetails.orderNumber || 'N/A';
+      
+      if (!groups[orderNumber]) {
+        groups[orderNumber] = [];
+      }
+      groups[orderNumber].push(jobOrder);
+      return groups;
+    }, {} as Record<string, JobOrder[]>);
+    
     // Start building the HTML content for all labels
     let htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Batch Job Order Labels</title>
+        <title>Daily Labels - Grouped by Order</title>
         <style>
           @page {
-            size: 4in 6in;
-            margin: 0;
+            size: A4;
+            margin: 0.5in;
           }
           body {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
+            font-size: 12pt;
           }
           .page-break {
             page-break-after: always;
           }
-          .label-container {
-            width: 4in;
-            height: 6in;
-            padding: 0.25in;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #ccc;
+          .order-group {
+            margin-bottom: 1in;
+            border: 2px solid #000;
+            padding: 0.3in;
           }
-          .header {
-            display: flex;
-            justify-content: space-between;
+          .order-header {
+            background-color: #f0f0f0;
+            padding: 0.2in;
             margin-bottom: 0.2in;
-            font-size: 10pt;
-            font-weight: bold;
-          }
-          .job-order-id {
+            border: 1px solid #333;
             font-size: 14pt;
             font-weight: bold;
+            text-align: center;
           }
-          .info-row {
-            display: flex;
-            margin-bottom: 0.1in;
-            font-size: 9pt;
+          .job-orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0.2in;
           }
-          .info-label {
-            width: 1.3in;
+          .job-orders-table th,
+          .job-orders-table td {
+            border: 1px solid #333;
+            padding: 0.1in;
+            text-align: left;
+            font-size: 10pt;
+          }
+          .job-orders-table th {
+            background-color: #e0e0e0;
             font-weight: bold;
           }
-          .info-value {
-            flex: 1;
-          }
-          .qr-placeholder {
-            margin: 0.2in auto;
-            text-align: center;
-            padding: 0.5in;
-            border: 1px dashed #999;
-            font-size: 8pt;
-          }
-          .footer {
-            margin-top: auto;
-            font-size: 8pt;
-            text-align: center;
-            border-top: 1px solid #000;
-            padding-top: 0.1in;
-          }
-          .receipt-status {
-            font-weight: bold;
+          .group-footer {
             margin-top: 0.1in;
-            text-align: center;
-            padding: 0.05in;
-            border: 1px solid #000;
-            border-radius: 0.1in;
-          }
-          .full-receipt {
-            background-color: #d4edda;
-            color: #155724;
-          }
-          .partial-receipt {
-            background-color: #cce5ff;
-            color: #004085;
-          }
-          .completed-status {
-            background-color: #fff3cd;
-            color: #856404;
+            font-size: 8pt;
+            text-align: right;
+            color: #666;
           }
         </style>
       </head>
       <body>
     `;
     
-    // Add each job order label
-    jobOrdersToPrint.forEach((jobOrder, index) => {
-      const jobOrderDetails = getJobOrderDetails(jobOrder.id);
-      const productionQty = getTotalExtrusionQty(jobOrder.id);
-      const finishedQty = jobOrder.finishedQty || 0;
-      const wasteQty = Math.max(0, productionQty - finishedQty);
-      
-      // Format date to display on label
-      const formattedDate = new Date().toLocaleDateString();
-      
-      // Add page break between labels except for the first one
-      if (index > 0) {
+    const formattedDate = new Date().toLocaleDateString();
+    let isFirstGroup = true;
+    
+    // Add each order group
+    Object.entries(groupedByOrder).forEach(([orderNumber, jobOrders]) => {
+      // Add page break between order groups except for the first one
+      if (!isFirstGroup) {
         htmlContent += '<div class="page-break"></div>';
       }
+      isFirstGroup = false;
+      
+      // Get customer name from first job order in the group (should be same for all)
+      const firstJobOrderDetails = getJobOrderDetails(jobOrders[0].id);
+      const customerName = firstJobOrderDetails.customer || 'N/A';
       
       htmlContent += `
-        <div class="label-container">
-          <div class="header">
-            <div class="job-order-id">JO #${jobOrder.id}</div>
-            <div>${formattedDate}</div>
+        <div class="order-group">
+          <div class="order-header">
+            Order #${orderNumber} - ${customerName}
           </div>
           
-          <div class="info-row">
-            <div class="info-label">Customer:</div>
-            <div class="info-value">${jobOrderDetails.customer || 'N/A'}</div>
-          </div>
+          <table class="job-orders-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>JO #</th>
+                <th>Customer Name</th>
+                <th>Category Code</th>
+                <th>Item Name</th>
+                <th>Received Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      // Add each job order in this group
+      jobOrders.forEach(jobOrder => {
+        const jobOrderDetails = getJobOrderDetails(jobOrder.id);
+        const categoryCode = jobOrderDetails.categoryCode || 'N/A';
+        const itemName = jobOrderDetails.productName || 'N/A';
+        const receivedQty = formatNumber(jobOrder.receivedQty || 0);
+        
+        htmlContent += `
+          <tr>
+            <td>${orderNumber}</td>
+            <td>${jobOrder.id}</td>
+            <td>${customerName}</td>
+            <td>${categoryCode}</td>
+            <td>${itemName}</td>
+            <td>${receivedQty} kg</td>
+          </tr>
+        `;
+      });
+      
+      htmlContent += `
+            </tbody>
+          </table>
           
-          <div class="info-row">
-            <div class="info-label">Product:</div>
-            <div class="info-value">${jobOrderDetails.productName || 'N/A'}</div>
-          </div>
-          
-          <div class="info-row">
-            <div class="info-label">Order #:</div>
-            <div class="info-value">${jobOrderDetails.orderNumber || 'N/A'}</div>
-          </div>
-          
-          <div class="info-row">
-            <div class="info-label">Ordered Qty:</div>
-            <div class="info-value">${formatNumber(jobOrder.quantity || 0)} kg</div>
-          </div>
-          
-          <div class="info-row">
-            <div class="info-label">Finished Qty:</div>
-            <div class="info-value">${formatNumber(finishedQty)} kg</div>
-          </div>
-          
-          <div class="info-row">
-            <div class="info-label">Received Qty:</div>
-            <div class="info-value">${formatNumber(jobOrder.receivedQty || 0)} kg</div>
-          </div>
-          
-          <div class="info-row">
-            <div class="info-label">Waste Qty:</div>
-            <div class="info-value">${formatNumber(wasteQty)} kg</div>
-          </div>
-          
-          <div class="info-row">
-            <div class="info-label">Waste %:</div>
-            <div class="info-value">${calculateWastePercentage(jobOrder.id)}%</div>
-          </div>
-          
-          <div class="receipt-status ${
-            jobOrder.status === 'partially_received' 
-              ? 'partial-receipt' 
-              : jobOrder.status === 'completed' 
-                ? 'completed-status' 
-                : 'full-receipt'
-          }">
-            ${
-              jobOrder.status === 'partially_received' 
-                ? 'PARTIALLY RECEIVED' 
-                : jobOrder.status === 'completed' 
-                  ? 'COMPLETED - PENDING WAREHOUSE' 
-                  : 'FULLY RECEIVED'
-            }
-          </div>
-          
-          <div class="qr-placeholder">
-            Scan QR code to view detailed information<br>
-            JO #${jobOrder.id}
-          </div>
-          
-          <div class="footer">
-            ${
-              jobOrder.status === 'completed'
-                ? 'Production Complete - Not Yet Received'
-                : 'Received in Warehouse'
-            } - ${formattedDate}
+          <div class="group-footer">
+            Total Job Orders in Order #${orderNumber}: ${jobOrders.length} | Printed on: ${formattedDate}
           </div>
         </div>
       `;
@@ -762,6 +720,7 @@ export default function FinalProducts() {
       productName: "Unknown", 
       customer: "Unknown",
       customerAr: "غير معروف",
+      categoryCode: "Unknown",
       totalCutQty: 0,
       finishedQty: 0,
       totalRequiredQty: 0,
@@ -778,6 +737,15 @@ export default function FinalProducts() {
       const item = items.find(i => i.id === product.itemId);
       if (item) {
         itemName = item.name;
+      }
+    }
+    
+    // Get the category code from the categories collection
+    let categoryCode = "Unknown";
+    if (product && product.categoryId) {
+      const category = categories.find(c => c.id === product.categoryId);
+      if (category) {
+        categoryCode = category.code;
       }
     }
     
@@ -798,6 +766,7 @@ export default function FinalProducts() {
       productName: itemName,
       customer: customer?.name || "Unknown",
       customerAr: customer?.nameAr || "غير معروف",
+      categoryCode: categoryCode,
       totalCutQty: totalCutQty,
       finishedQty: finishedQty,
       totalRequiredQty: totalRequiredQty,
