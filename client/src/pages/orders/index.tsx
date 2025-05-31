@@ -25,6 +25,8 @@ import { Order, Customer } from "@shared/schema";
 export default function OrdersIndex() {
   const queryClient = useQueryClient();
   const [deletingOrder, setDeletingOrder] = useState<Order | null>(null);
+  const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
@@ -156,6 +158,81 @@ export default function OrdersIndex() {
     },
   });
 
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (orderIds: number[]) => {
+      const results = await Promise.allSettled(
+        orderIds.map(async (id) => {
+          const response = await fetch(`${API_ENDPOINTS.ORDERS}/${id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(`Order #${id}: ${data.message || 'Failed to delete'}`);
+          }
+          
+          return { id, success: true };
+        })
+      );
+      
+      const successful = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected');
+      
+      return { successful, failed, total: orderIds.length };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
+      
+      const { successful, failed, total } = data;
+      
+      if (failed.length === 0) {
+        toast({
+          title: "Orders Deleted",
+          description: `Successfully deleted ${successful} order${successful > 1 ? 's' : ''}`,
+        });
+      } else {
+        toast({
+          title: "Partial Success",
+          description: `Deleted ${successful}/${total} orders. ${failed.length} failed.`,
+          variant: "destructive",
+        });
+      }
+      
+      setSelectedOrders([]);
+      setShowBulkDeleteDialog(false);
+    },
+    onError: (error: any) => {
+      console.error("Bulk delete error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete selected orders",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Selection helper functions
+  const handleSelectOrder = (orderId: number) => {
+    setSelectedOrders(prev => 
+      prev.includes(orderId) 
+        ? prev.filter(id => id !== orderId)
+        : [...prev, orderId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedOrders.length === filteredOrders?.length) {
+      setSelectedOrders([]);
+    } else {
+      setSelectedOrders(filteredOrders?.map(order => order.id) || []);
+    }
+  };
+
+  const isAllSelected = selectedOrders.length > 0 && selectedOrders.length === filteredOrders?.length;
+
   const handleDelete = (order: Order) => {
     setDeletingOrder(order);
   };
@@ -180,6 +257,29 @@ export default function OrdersIndex() {
   };
 
   const columns = [
+    {
+      header: (
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            checked={isAllSelected}
+            onChange={handleSelectAll}
+            className="rounded border-gray-300"
+          />
+        </div>
+      ),
+      accessorKey: "select",
+      cell: (row: Order) => (
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            checked={selectedOrders.includes(row.id)}
+            onChange={() => handleSelectOrder(row.id)}
+            className="rounded border-gray-300"
+          />
+        </div>
+      ),
+    },
     {
       header: t("orders.order_id"),
       accessorKey: "id",
@@ -295,17 +395,29 @@ export default function OrdersIndex() {
       <div className="space-y-4">
         {filteredOrders.map((order) => (
           <Card key={order.id} className="overflow-hidden hover:shadow-md transition-all">
-            <Link href={`/orders/${order.id}`}>
-              <CardHeader className="p-3 pb-2 flex flex-row justify-between items-start bg-gray-50">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="material-icons text-xs text-primary-500">receipt_long</span>
-                    <CardTitle className="text-sm font-semibold">#{order.id}</CardTitle>
+            <div className="relative">
+              <div 
+                className="absolute top-3 left-3 z-10"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedOrders.includes(order.id)}
+                  onChange={() => handleSelectOrder(order.id)}
+                  className="rounded border-gray-300"
+                />
+              </div>
+              <Link href={`/orders/${order.id}`}>
+                <CardHeader className="p-3 pb-2 flex flex-row justify-between items-start bg-gray-50 pl-10">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-icons text-xs text-primary-500">receipt_long</span>
+                      <CardTitle className="text-sm font-semibold">#{order.id}</CardTitle>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{formatDateString(order.date)}</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">{formatDateString(order.date)}</p>
-                </div>
-                <StatusBadge status={order.status} />
-              </CardHeader>
+                  <StatusBadge status={order.status} />
+                </CardHeader>
               <CardContent className="p-3 pt-2">
                 <div className="grid grid-cols-1 gap-2 mb-2">
                   <div>
@@ -447,6 +559,37 @@ export default function OrdersIndex() {
         )}
       </div>
 
+      {/* Bulk Actions Toolbar */}
+      {selectedOrders.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-blue-700 font-medium">
+                {selectedOrders.length} order{selectedOrders.length > 1 ? 's' : ''} selected
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedOrders([])}
+              >
+                Clear Selection
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowBulkDeleteDialog(true)}
+                disabled={bulkDeleteMutation.isPending}
+              >
+                <span className="material-icons text-sm mr-1">delete</span>
+                Delete Selected
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
@@ -508,6 +651,35 @@ export default function OrdersIndex() {
               className="bg-error-500 hover:bg-error-600"
             >
               {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Multiple Orders</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedOrders.length} selected order{selectedOrders.length > 1 ? 's' : ''}? This will permanently delete:
+              <br />- Job orders
+              <br />- Rolls
+              <br />- Final products
+              <br />- Quality checks
+              <br />- SMS messages
+              <br /><br />
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => bulkDeleteMutation.mutate(selectedOrders)}
+              className="bg-error-500 hover:bg-error-600"
+              disabled={bulkDeleteMutation.isPending}
+            >
+              {bulkDeleteMutation.isPending ? "Deleting..." : "Delete Selected"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
