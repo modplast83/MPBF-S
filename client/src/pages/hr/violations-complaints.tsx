@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth-v2";
@@ -52,6 +53,7 @@ export default function ViolationsComplaintsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [isViolationDialogOpen, setIsViolationDialogOpen] = useState(false);
   const [isComplaintDialogOpen, setIsComplaintDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");

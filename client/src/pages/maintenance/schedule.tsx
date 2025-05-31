@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/ui/page-header";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { format, addDays, addWeeks, addMonths, addYears, isPast } from "date-fns";
 import { Plus, Calendar, AlertTriangle, CheckCircle, Clock, Search } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -51,6 +52,7 @@ export default function MaintenanceSchedulePage() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("upcoming");
@@ -216,14 +218,14 @@ export default function MaintenanceSchedulePage() {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className={`container mx-auto space-y-6 ${isMobile ? "p-3" : "p-4"}`}>
       <PageHeader
         title={t("maintenance.schedule.title")}
         description={t("maintenance.schedule.description")}
       />
 
       {/* Action Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className={`flex gap-4 items-start justify-between ${isMobile ? "flex-col" : "flex-col sm:flex-row sm:items-center"}`}>
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
