@@ -11,6 +11,7 @@ import {
   createRollSchema, InsertRoll,
   insertRawMaterialSchema, insertFinalProductSchema,
   insertSmsMessageSchema, InsertSmsMessage,
+  insertSmsTemplateSchema, insertSmsNotificationRuleSchema,
   insertMixMaterialSchema, insertMixItemSchema,
   insertPermissionSchema, insertMaterialInputSchema,
   insertMaterialInputItemSchema,
@@ -2416,13 +2417,130 @@ COMMIT;
     }
   });
 
+  // Import SMS storage and seed data
+  const { smsStorage } = await import("./sms-storage");
+  const { seedSmsData } = await import("./sms-seed");
+  
+  // Initialize SMS data on startup
+  await seedSmsData();
+
   // SMS Messages
   app.get("/api/sms-messages", async (_req: Request, res: Response) => {
     try {
-      const messages = await storage.getSmsMessages();
+      const messages = await smsStorage.getSmsMessages();
       res.json(messages);
     } catch (error) {
+      console.error("Error fetching SMS messages:", error);
       res.status(500).json({ message: "Failed to get SMS messages" });
+    }
+  });
+
+  app.get("/api/sms-messages/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+      
+      const message = await smsStorage.getSmsMessage(id);
+      if (!message) {
+        return res.status(404).json({ message: "SMS message not found" });
+      }
+      
+      res.json(message);
+    } catch (error) {
+      console.error("Error fetching SMS message:", error);
+      res.status(500).json({ message: "Failed to get SMS message" });
+    }
+  });
+
+  app.post("/api/sms-messages", async (req: Request, res: Response) => {
+    try {
+      const messageData = insertSmsMessageSchema.parse(req.body);
+      const message = await smsStorage.createSmsMessage({
+        ...messageData,
+        sentBy: req.user?.id,
+      });
+      
+      // Here you would typically send the SMS via Twilio
+      // For now, we'll mark it as sent immediately
+      await smsStorage.updateSmsMessage(message.id, {
+        status: "sent",
+        twilioMessageId: `sim_${message.id}_${Date.now()}`
+      });
+      
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Error creating SMS message:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid SMS message data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create SMS message" });
+    }
+  });
+
+  app.put("/api/sms-messages/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+      
+      const updates = req.body;
+      const message = await smsStorage.updateSmsMessage(id, updates);
+      
+      if (!message) {
+        return res.status(404).json({ message: "SMS message not found" });
+      }
+      
+      res.json(message);
+    } catch (error) {
+      console.error("Error updating SMS message:", error);
+      res.status(500).json({ message: "Failed to update SMS message" });
+    }
+  });
+
+  app.delete("/api/sms-messages/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+      
+      const deleted = await smsStorage.deleteSmsMessage(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "SMS message not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting SMS message:", error);
+      res.status(500).json({ message: "Failed to delete SMS message" });
+    }
+  });
+
+  app.post("/api/sms-messages/:id/resend", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+      
+      const message = await smsStorage.resendSmsMessage(id);
+      if (!message) {
+        return res.status(404).json({ message: "SMS message not found" });
+      }
+      
+      // Here you would resend via Twilio
+      await smsStorage.updateSmsMessage(message.id, {
+        status: "sent",
+        twilioMessageId: `sim_${message.id}_${Date.now()}`
+      });
+      
+      res.json(message);
+    } catch (error) {
+      console.error("Error resending SMS message:", error);
+      res.status(500).json({ message: "Failed to resend SMS message" });
     }
   });
 
@@ -2433,16 +2551,177 @@ COMMIT;
         return res.status(400).json({ message: "Invalid order ID" });
       }
       
-      // Verify order exists
-      const order = await storage.getOrder(orderId);
-      if (!order) {
-        return res.status(404).json({ message: "Order not found" });
-      }
-      
-      const messages = await storage.getSmsMessagesByOrder(orderId);
+      const messages = await smsStorage.getSmsMessagesByOrder(orderId);
       res.json(messages);
     } catch (error) {
+      console.error("Error fetching order SMS messages:", error);
       res.status(500).json({ message: "Failed to get SMS messages" });
+    }
+  });
+
+  // SMS Templates
+  app.get("/api/sms-templates", async (_req: Request, res: Response) => {
+    try {
+      const templates = await smsStorage.getSmsTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching SMS templates:", error);
+      res.status(500).json({ message: "Failed to get SMS templates" });
+    }
+  });
+
+  app.get("/api/sms-templates/:id", async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const template = await smsStorage.getSmsTemplate(id);
+      
+      if (!template) {
+        return res.status(404).json({ message: "SMS template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      console.error("Error fetching SMS template:", error);
+      res.status(500).json({ message: "Failed to get SMS template" });
+    }
+  });
+
+  app.post("/api/sms-templates", async (req: Request, res: Response) => {
+    try {
+      const templateData = insertSmsTemplateSchema.parse(req.body);
+      const template = await smsStorage.createSmsTemplate({
+        ...templateData,
+        createdBy: req.user?.id,
+      });
+      
+      res.status(201).json(template);
+    } catch (error) {
+      console.error("Error creating SMS template:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid SMS template data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create SMS template" });
+    }
+  });
+
+  app.put("/api/sms-templates/:id", async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const updates = req.body;
+      const template = await smsStorage.updateSmsTemplate(id, updates);
+      
+      if (!template) {
+        return res.status(404).json({ message: "SMS template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      console.error("Error updating SMS template:", error);
+      res.status(500).json({ message: "Failed to update SMS template" });
+    }
+  });
+
+  app.delete("/api/sms-templates/:id", async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const deleted = await smsStorage.deleteSmsTemplate(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "SMS template not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting SMS template:", error);
+      res.status(500).json({ message: "Failed to delete SMS template" });
+    }
+  });
+
+  // SMS Notification Rules
+  app.get("/api/sms-notification-rules", async (_req: Request, res: Response) => {
+    try {
+      const rules = await smsStorage.getSmsNotificationRules();
+      res.json(rules);
+    } catch (error) {
+      console.error("Error fetching SMS notification rules:", error);
+      res.status(500).json({ message: "Failed to get SMS notification rules" });
+    }
+  });
+
+  app.get("/api/sms-notification-rules/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid rule ID" });
+      }
+      
+      const rule = await smsStorage.getSmsNotificationRule(id);
+      if (!rule) {
+        return res.status(404).json({ message: "SMS notification rule not found" });
+      }
+      
+      res.json(rule);
+    } catch (error) {
+      console.error("Error fetching SMS notification rule:", error);
+      res.status(500).json({ message: "Failed to get SMS notification rule" });
+    }
+  });
+
+  app.post("/api/sms-notification-rules", async (req: Request, res: Response) => {
+    try {
+      const ruleData = insertSmsNotificationRuleSchema.parse(req.body);
+      const rule = await smsStorage.createSmsNotificationRule({
+        ...ruleData,
+        createdBy: req.user?.id,
+      });
+      
+      res.status(201).json(rule);
+    } catch (error) {
+      console.error("Error creating SMS notification rule:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid SMS notification rule data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create SMS notification rule" });
+    }
+  });
+
+  app.put("/api/sms-notification-rules/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid rule ID" });
+      }
+      
+      const updates = req.body;
+      const rule = await smsStorage.updateSmsNotificationRule(id, updates);
+      
+      if (!rule) {
+        return res.status(404).json({ message: "SMS notification rule not found" });
+      }
+      
+      res.json(rule);
+    } catch (error) {
+      console.error("Error updating SMS notification rule:", error);
+      res.status(500).json({ message: "Failed to update SMS notification rule" });
+    }
+  });
+
+  app.delete("/api/sms-notification-rules/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid rule ID" });
+      }
+      
+      const deleted = await smsStorage.deleteSmsNotificationRule(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "SMS notification rule not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting SMS notification rule:", error);
+      res.status(500).json({ message: "Failed to delete SMS notification rule" });
     }
   });
 

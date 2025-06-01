@@ -5,39 +5,11 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-// Function to create a new database connection pool
-export function createDbConnection() {
-  // Use the specified database URL (plain-wildflower-82755165) if available,
-  // otherwise fall back to the standard database URL
-  const databaseUrl = process.env.DATABASE_URL_WILDFLOWER || process.env.DATABASE_URL;
-
-  if (!databaseUrl) {
-    throw new Error(
-      "DATABASE_URL must be set. Did you forget to provision a database?",
-    );
-  }
-
-  console.log("Connecting to database...");
-  
-  const newPool = new Pool({ 
-    connectionString: databaseUrl,
-    max: 10, // Maximum number of connections in pool
-    idleTimeoutMillis: 30000, // Close connections after 30 seconds of inactivity
-    connectionTimeoutMillis: 10000, // Wait 10 seconds for a connection
-  });
-  
-  // Handle pool errors
-  newPool.on('error', (err) => {
-    console.error('Database pool error:', err);
-  });
-
-  const newDb = drizzle(newPool, { schema });
-  
-  return { pool: newPool, db: newDb };
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL must be set. Did you forget to provision a database?",
+  );
 }
 
-// Initialize the database connection
-const { pool, db } = createDbConnection();
-
-// Export the pool and db instances
-export { pool, db };
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const db = drizzle({ client: pool, schema });

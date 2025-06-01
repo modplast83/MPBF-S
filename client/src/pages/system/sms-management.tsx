@@ -99,29 +99,319 @@ interface Customer {
   code: string;
 }
 
-// Placeholder components until full implementation
-const SendSmsDialog = ({ children, onSuccess }: { children: React.ReactNode; onSuccess?: () => void; customers?: Customer[]; orders?: Order[]; templates?: SmsTemplate[] }) => (
-  <div onClick={() => onSuccess?.()}>{children}</div>
-);
+// Simple Send SMS Dialog Component
+const SendSmsDialog = ({ children, onSuccess, customers = [], orders = [], templates = [] }: { 
+  children: React.ReactNode; 
+  onSuccess?: () => void; 
+  customers?: Customer[]; 
+  orders?: Order[]; 
+  templates?: SmsTemplate[] 
+}) => {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    recipientPhone: "",
+    recipientName: "",
+    message: "",
+    priority: "normal",
+    category: "general",
+    messageType: "custom"
+  });
 
-const SmsTemplateDialog = ({ children, onSuccess }: { children: React.ReactNode; onSuccess?: () => void; template?: SmsTemplate }) => (
-  <div onClick={() => onSuccess?.()}>{children}</div>
-);
+  const sendMessage = async () => {
+    try {
+      await apiRequest("POST", "/api/sms-messages", formData);
+      toast({ title: "SMS Sent", description: "Message sent successfully" });
+      setOpen(false);
+      setFormData({
+        recipientPhone: "",
+        recipientName: "",
+        message: "",
+        priority: "normal",
+        category: "general",
+        messageType: "custom"
+      });
+      onSuccess?.();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to send SMS", variant: "destructive" });
+    }
+  };
 
-const NotificationRuleDialog = ({ children, onSuccess }: { children: React.ReactNode; onSuccess?: () => void; rule?: SmsNotificationRule; templates?: SmsTemplate[] }) => (
-  <div onClick={() => onSuccess?.()}>{children}</div>
-);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Send SMS Message</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>Phone Number</Label>
+            <Input 
+              value={formData.recipientPhone}
+              onChange={(e) => setFormData({...formData, recipientPhone: e.target.value})}
+              placeholder="+1234567890"
+            />
+          </div>
+          <div>
+            <Label>Recipient Name</Label>
+            <Input 
+              value={formData.recipientName}
+              onChange={(e) => setFormData({...formData, recipientName: e.target.value})}
+              placeholder="Optional"
+            />
+          </div>
+          <div>
+            <Label>Message</Label>
+            <Textarea 
+              value={formData.message}
+              onChange={(e) => setFormData({...formData, message: e.target.value})}
+              placeholder="Enter your message..."
+              className="min-h-[100px]"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label>Priority</Label>
+              <Select value={formData.priority} onValueChange={(value) => setFormData({...formData, priority: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="production">Production</SelectItem>
+                  <SelectItem value="quality">Quality</SelectItem>
+                  <SelectItem value="maintenance">Maintenance</SelectItem>
+                  <SelectItem value="hr">HR</SelectItem>
+                  <SelectItem value="management">Management</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={sendMessage} disabled={!formData.recipientPhone || !formData.message}>
+              <Send className="h-4 w-4 mr-2" />
+              Send SMS
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
-const SmsMessageDetails = ({ open, onOpenChange }: { message?: SmsMessage; open: boolean; onOpenChange: (open: boolean) => void; customer?: Customer; order?: Order }) => (
-  open ? <div onClick={() => onOpenChange(false)}>Message Details</div> : null
-);
+// Simple Template Dialog Component
+const SmsTemplateDialog = ({ children, onSuccess, template }: { 
+  children: React.ReactNode; 
+  onSuccess?: () => void; 
+  template?: SmsTemplate 
+}) => {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{template ? "Edit" : "Create"} SMS Template</DialogTitle>
+        </DialogHeader>
+        <div className="p-4 text-center text-gray-500">
+          Template management functionality would be implemented here with form fields for template creation and editing.
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={() => { setOpen(false); onSuccess?.(); }}>Save Template</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
-const SmsAnalytics = ({ messages }: { messages: SmsMessage[] }) => (
-  <div className="p-8 text-center">
-    <h3 className="text-lg font-medium mb-2">SMS Analytics</h3>
-    <p className="text-gray-500">Analytics for {messages.length} messages will be displayed here.</p>
-  </div>
-);
+// Simple Notification Rule Dialog Component
+const NotificationRuleDialog = ({ children, onSuccess, rule, templates = [] }: { 
+  children: React.ReactNode; 
+  onSuccess?: () => void; 
+  rule?: SmsNotificationRule; 
+  templates?: SmsTemplate[] 
+}) => {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{rule ? "Edit" : "Create"} Notification Rule</DialogTitle>
+        </DialogHeader>
+        <div className="p-4 text-center text-gray-500">
+          Notification rule management functionality would be implemented here with form fields for rule configuration.
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={() => { setOpen(false); onSuccess?.(); }}>Save Rule</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Simple Message Details Dialog
+const SmsMessageDetails = ({ message, open, onOpenChange, customer, order }: { 
+  message?: SmsMessage; 
+  open: boolean; 
+  onOpenChange: (open: boolean) => void; 
+  customer?: Customer; 
+  order?: Order 
+}) => {
+  if (!open || !message) return null;
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>SMS Message Details</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium text-gray-500">Recipient</Label>
+              <p>{message.recipientName || "Unknown"}</p>
+              <p className="text-sm text-gray-500">{message.recipientPhone}</p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-500">Status</Label>
+              <Badge variant={getStatusBadge(message.status)}>{message.status}</Badge>
+            </div>
+          </div>
+          <div>
+            <Label className="text-sm font-medium text-gray-500">Message</Label>
+            <div className="p-3 bg-gray-50 rounded border">
+              <p className="text-sm">{message.message}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <Label className="text-sm font-medium text-gray-500">Priority</Label>
+              <Badge variant={getPriorityBadge(message.priority)}>{message.priority}</Badge>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-500">Category</Label>
+              <Badge variant="outline">{message.category}</Badge>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-500">Type</Label>
+              <Badge variant="outline">{message.messageType}</Badge>
+            </div>
+          </div>
+          {message.sentAt && (
+            <div>
+              <Label className="text-sm font-medium text-gray-500">Sent At</Label>
+              <p className="text-sm">{format(new Date(message.sentAt), "MMM dd, yyyy 'at' HH:mm")}</p>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Simple Analytics Component
+const SmsAnalytics = ({ messages }: { messages: SmsMessage[] }) => {
+  const totalMessages = messages.length;
+  const deliveredCount = messages.filter(m => m.status === "delivered").length;
+  const failedCount = messages.filter(m => m.status === "failed").length;
+  const pendingCount = messages.filter(m => m.status === "pending").length;
+  const deliveryRate = totalMessages > 0 ? (deliveredCount / totalMessages * 100).toFixed(1) : "0";
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">SMS Analytics</h3>
+        <p className="text-sm text-gray-500">Overview of SMS messaging performance</p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-blue-600" />
+              Total Messages
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalMessages}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              Delivery Rate
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{deliveryRate}%</div>
+            <div className="text-xs text-gray-500">{deliveredCount} delivered</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <XCircle className="h-4 w-4 text-red-600" />
+              Failed Messages
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{failedCount}</div>
+            <div className="text-xs text-gray-500">{pendingCount} pending</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Users className="h-4 w-4 text-purple-600" />
+              Unique Recipients
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {new Set(messages.map(m => m.recipientPhone)).size}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {messages.length === 0 && (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <MessageSquare className="h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No SMS Data Available</h3>
+            <p className="text-gray-500 text-center">
+              Start sending SMS messages to see analytics and insights here.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
 
 export default function SmsManagementPage() {
   const { toast } = useToast();

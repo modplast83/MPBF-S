@@ -14,7 +14,9 @@ import {
   PlateCalculation, InsertPlateCalculation,
   AbaMaterialConfig, InsertAbaMaterialConfig,
   QualityViolation, InsertQualityViolation,
-  QualityPenalty, InsertQualityPenalty
+  QualityPenalty, InsertQualityPenalty,
+  SmsTemplate, InsertSmsTemplate,
+  SmsNotificationRule, InsertSmsNotificationRule
 } from "@shared/schema";
 import session from "express-session";
 
@@ -48,6 +50,20 @@ export interface IStorage {
   createSmsMessage(message: InsertSmsMessage): Promise<SmsMessage>;
   updateSmsMessage(id: number, message: Partial<SmsMessage>): Promise<SmsMessage | undefined>;
   deleteSmsMessage(id: number): Promise<boolean>;
+  
+  // SMS Templates
+  getSmsTemplates(): Promise<SmsTemplate[]>;
+  getSmsTemplate(id: string): Promise<SmsTemplate | undefined>;
+  createSmsTemplate(template: InsertSmsTemplate): Promise<SmsTemplate>;
+  updateSmsTemplate(id: string, template: Partial<SmsTemplate>): Promise<SmsTemplate | undefined>;
+  deleteSmsTemplate(id: string): Promise<boolean>;
+  
+  // SMS Notification Rules
+  getSmsNotificationRules(): Promise<SmsNotificationRule[]>;
+  getSmsNotificationRule(id: number): Promise<SmsNotificationRule | undefined>;
+  createSmsNotificationRule(rule: InsertSmsNotificationRule): Promise<SmsNotificationRule>;
+  updateSmsNotificationRule(id: number, rule: Partial<SmsNotificationRule>): Promise<SmsNotificationRule | undefined>;
+  deleteSmsNotificationRule(id: number): Promise<boolean>;
   
   // Mix Materials
   getMixMaterials(): Promise<MixMaterial[]>;
