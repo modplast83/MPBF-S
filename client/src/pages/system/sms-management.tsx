@@ -34,14 +34,94 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import type { SmsMessage, SmsTemplate, SmsNotificationRule, Order, Customer } from "shared/schema";
+// Temporary type definitions until server routes are implemented
+interface SmsMessage {
+  id: number;
+  recipientPhone: string;
+  recipientName?: string;
+  message: string;
+  status: string;
+  sentAt?: Date;
+  deliveredAt?: Date;
+  priority: string;
+  category: string;
+  messageType: string;
+  orderId?: number;
+  customerId?: string;
+  retryCount?: number;
+  templateId?: string;
+  metadata?: any;
+  errorMessage?: string;
+  isScheduled?: boolean;
+  scheduledFor?: Date;
+  lastRetryAt?: Date;
+  twilioMessageId?: string;
+  sentBy?: string;
+}
 
-// Components
-import { SendSmsDialog } from "@/components/sms/send-sms-dialog";
-import { SmsTemplateDialog } from "@/components/sms/sms-template-dialog";
-import { NotificationRuleDialog } from "@/components/sms/notification-rule-dialog";
-import { SmsMessageDetails } from "@/components/sms/sms-message-details";
-import { SmsAnalytics } from "@/components/sms/sms-analytics";
+interface SmsTemplate {
+  id: string;
+  name: string;
+  category: string;
+  messageType: string;
+  template: string;
+  variables?: string[];
+  isActive: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface SmsNotificationRule {
+  id: number;
+  name: string;
+  triggerEvent: string;
+  templateId?: string;
+  recipientRoles?: string[];
+  recipientUsers?: string[];
+  isActive: boolean;
+  priority: string;
+  cooldownMinutes?: number;
+  workingHoursOnly: boolean;
+  conditions?: any;
+}
+
+interface Order {
+  id: number;
+  customerId: string;
+  status: string;
+  date?: Date;
+  note?: string;
+}
+
+interface Customer {
+  id: string;
+  name: string;
+  code: string;
+}
+
+// Placeholder components until full implementation
+const SendSmsDialog = ({ children, onSuccess }: { children: React.ReactNode; onSuccess?: () => void; customers?: Customer[]; orders?: Order[]; templates?: SmsTemplate[] }) => (
+  <div onClick={() => onSuccess?.()}>{children}</div>
+);
+
+const SmsTemplateDialog = ({ children, onSuccess }: { children: React.ReactNode; onSuccess?: () => void; template?: SmsTemplate }) => (
+  <div onClick={() => onSuccess?.()}>{children}</div>
+);
+
+const NotificationRuleDialog = ({ children, onSuccess }: { children: React.ReactNode; onSuccess?: () => void; rule?: SmsNotificationRule; templates?: SmsTemplate[] }) => (
+  <div onClick={() => onSuccess?.()}>{children}</div>
+);
+
+const SmsMessageDetails = ({ open, onOpenChange }: { message?: SmsMessage; open: boolean; onOpenChange: (open: boolean) => void; customer?: Customer; order?: Order }) => (
+  open ? <div onClick={() => onOpenChange(false)}>Message Details</div> : null
+);
+
+const SmsAnalytics = ({ messages }: { messages: SmsMessage[] }) => (
+  <div className="p-8 text-center">
+    <h3 className="text-lg font-medium mb-2">SMS Analytics</h3>
+    <p className="text-gray-500">Analytics for {messages.length} messages will be displayed here.</p>
+  </div>
+);
 
 export default function SmsManagementPage() {
   const { toast } = useToast();
@@ -201,12 +281,13 @@ export default function SmsManagementPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <PageHeader
-        heading="SMS Management"
-        text="Professional notifications and order tracking system"
-      >
-        <MessageSquare className="h-6 w-6 mb-2" />
-      </PageHeader>
+      <div className="flex items-center gap-3 mb-6">
+        <MessageSquare className="h-6 w-6 text-blue-600" />
+        <div>
+          <h1 className="text-2xl font-bold">SMS Management</h1>
+          <p className="text-gray-600">Professional notifications and order tracking system</p>
+        </div>
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
