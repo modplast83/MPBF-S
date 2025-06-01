@@ -230,8 +230,50 @@ export default function MaintenanceRequestsPage() {
     return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : userId;
   };
 
+  const quickActions = [
+    {
+      id: "new-request",
+      label: "New Request",
+      icon: Plus,
+      onClick: () => setIsDialogOpen(true),
+      variant: "default"
+    },
+    {
+      id: "refresh",
+      label: "Refresh",
+      icon: RefreshCw,
+      onClick: () => {
+        queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MAINTENANCE_REQUESTS] });
+      },
+      variant: "outline"
+    },
+    {
+      id: "pending-filter",
+      label: "Pending",
+      icon: Filter,
+      onClick: () => setStatusFilter("pending"),
+      variant: statusFilter === "pending" ? "default" : "outline"
+    },
+    {
+      id: "search",
+      label: "Search",
+      icon: Search,
+      onClick: () => {
+        const input = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+        if (input) input.focus();
+      },
+      variant: "outline"
+    }
+  ];
+
   return (
     <div className={`container mx-auto space-y-6 ${isMobile ? "p-3" : "p-4"}`}>
+      <QuickActions
+        title="Quick Actions"
+        actions={quickActions}
+        columns={2}
+      />
+
       <PageHeader
         title={t("maintenance.requests.title")}
         description={t("maintenance.requests.description")}

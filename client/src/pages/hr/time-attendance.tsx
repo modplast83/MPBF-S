@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Clock, MapPin, Coffee, LogOut, Calendar, Users } from "lucide-react";
+import { Clock, MapPin, Coffee, LogOut, Calendar, Users, UserCheck, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth-v2";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { QuickActions } from "@/components/ui/quick-actions";
 import type { TimeAttendance } from "@shared/schema";
 
 export default function TimeAttendancePage() {
@@ -217,8 +218,47 @@ export default function TimeAttendancePage() {
     format(new Date(att.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
   );
 
+  const quickActions = [
+    {
+      id: "check-in",
+      label: "Check In",
+      icon: UserCheck,
+      onClick: handleCheckIn,
+      variant: currentAttendance?.checkInTime ? "outline" : "default"
+    },
+    {
+      id: "check-out",
+      label: "Check Out",
+      icon: LogOut,
+      onClick: handleCheckOut,
+      variant: currentAttendance?.checkOutTime ? "outline" : "default"
+    },
+    {
+      id: "break",
+      label: currentAttendance?.breakEndTime ? "End Break" : "Start Break",
+      icon: Coffee,
+      onClick: currentAttendance?.breakEndTime ? handleBreakEnd : handleBreakStart,
+      variant: "outline"
+    },
+    {
+      id: "refresh",
+      label: "Refresh",
+      icon: RefreshCw,
+      onClick: () => {
+        queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.TIME_ATTENDANCE] });
+      },
+      variant: "outline"
+    }
+  ];
+
   return (
     <div className={`container mx-auto ${isMobile ? "p-3" : "p-6"}`}>
+      <QuickActions
+        title="Time Tracking"
+        actions={quickActions}
+        columns={2}
+      />
+
       <div className={isMobile ? "mb-4" : "mb-8"}>
         <h1 className={`font-bold text-gray-900 dark:text-gray-100 ${isMobile ? "text-xl" : "text-3xl"}`}>
           {t("hr.time_attendance.title")}
