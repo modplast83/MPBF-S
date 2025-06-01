@@ -409,6 +409,55 @@ export default function MaintenanceActionsPage() {
             <div className="text-center py-4 text-gray-500">
               {t("maintenance.actions.no_actions")}
             </div>
+          ) : isMobile ? (
+            <div className="space-y-3">
+              {filteredActions.map((action: MaintenanceAction) => (
+                <Card key={action.id} className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium text-sm">#{action.id}</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {action.actionType}
+                      </Badge>
+                    </div>
+                    {getStatusBadge(action.status)}
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Date:</span>
+                      <span>{format(new Date(action.actionDate), 'MMM dd, yyyy')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Machine:</span>
+                      <span className="font-medium">{getMachineName(action.machineId)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Request:</span>
+                      <span>{getRequestInfo(action.requestId)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Performed by:</span>
+                      <span>{getUserName(action.performedBy)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Hours:</span>
+                      <span>{action.hours}h</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Cost:</span>
+                      <span>${action.cost}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-sm text-gray-700" title={action.description}>
+                      {action.description.length > 80 ? `${action.description.substring(0, 80)}...` : action.description}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>

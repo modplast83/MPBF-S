@@ -183,14 +183,14 @@ export default function ViolationsComplaintsPage() {
   });
 
   return (
-    <div className="container mx-auto p-3 sm:p-6">
-      <div className="mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <div className={`container mx-auto ${isMobile ? "p-3" : "p-3 sm:p-6"}`}>
+      <div className={isMobile ? "mb-4" : "mb-6 sm:mb-8"}>
+        <div className={`flex gap-4 ${isMobile ? "flex-col" : "flex-col sm:flex-row sm:justify-between sm:items-center"}`}>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <h1 className={`font-bold text-gray-900 dark:text-gray-100 ${isMobile ? "text-xl" : "text-2xl sm:text-3xl"}`}>
               {t("hr.violations_complaints.title")}
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
+            <p className={`text-gray-600 dark:text-gray-400 mt-2 ${isMobile ? "text-sm" : "text-sm sm:text-base"}`}>
               {t("hr.violations_complaints.investigation_notes")}
             </p>
           </div>

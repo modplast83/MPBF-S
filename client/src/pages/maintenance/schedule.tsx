@@ -398,6 +398,50 @@ export default function MaintenanceSchedulePage() {
                 <div className="text-center py-4 text-gray-500">
                   No upcoming maintenance scheduled
                 </div>
+              ) : isMobile ? (
+                <div className="space-y-3">
+                  {upcomingSchedules.map((schedule: MaintenanceSchedule) => (
+                    <Card key={schedule.id} className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-sm">{getMachineName(schedule.machineId)}</span>
+                          {getMaintenanceTypeBadge(schedule.maintenanceType)}
+                        </div>
+                        {getStatusBadge(schedule.nextDue)}
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Due Date:</span>
+                          <span className="font-medium">{format(new Date(schedule.nextDue), 'MMM dd, yyyy')}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Frequency:</span>
+                          <span>{t(`maintenance.schedule.${schedule.frequency}`)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Assigned To:</span>
+                          <span>{schedule.assignedTo ? getUserName(schedule.assignedTo) : 'Unassigned'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Last Performed:</span>
+                          <span>
+                            {schedule.lastPerformed 
+                              ? format(new Date(schedule.lastPerformed), 'MMM dd, yyyy')
+                              : 'Never'
+                            }
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="text-sm text-gray-700" title={schedule.description}>
+                          {schedule.description.length > 80 ? `${schedule.description.substring(0, 80)}...` : schedule.description}
+                        </p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
