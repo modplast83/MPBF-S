@@ -21,6 +21,8 @@ import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Order, Customer } from "@shared/schema";
+import { QuickActions } from "@/components/ui/quick-actions";
+import { Filter, Search, Plus, Download, RefreshCw, Eye } from "lucide-react";
 
 export default function OrdersIndex() {
   const queryClient = useQueryClient();
@@ -367,6 +369,40 @@ export default function OrdersIndex() {
     },
   ];
 
+  const quickActions = [
+    {
+      id: "new-order",
+      label: t("orders.new_order"),
+      icon: Plus,
+      onClick: () => window.location.href = "/orders/new",
+      variant: "default" as const
+    },
+    {
+      id: "refresh",
+      label: "Refresh",
+      icon: RefreshCw,
+      onClick: () => {
+        queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ORDERS] });
+        queryClient.invalidateQueries({ queryKey: ["/api/customers"] });
+      },
+      variant: "outline" as const
+    },
+    {
+      id: "all-tab",
+      label: "All Orders",
+      icon: Eye,
+      onClick: () => setActiveTab("all"),
+      variant: activeTab === "all" ? "default" : "outline"
+    },
+    {
+      id: "pending-tab",
+      label: "Pending",
+      icon: Filter,
+      onClick: () => setActiveTab("pending"),
+      variant: activeTab === "pending" ? "default" : "outline"
+    }
+  ];
+
   const tableActions = (
     <Link href="/orders/new">
       <Button>
@@ -550,8 +586,15 @@ export default function OrdersIndex() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className={`container mx-auto ${isMobile ? "p-3" : "p-6"}`}>
+      <QuickActions
+        title="Quick Actions"
+        actions={quickActions}
+        columns={2}
+      />
+
+      <div className="space-y-6">
+        <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-secondary-900">{t("orders.title")}</h1>
         {isMobile && (
           <Link href="/orders/new">
@@ -738,6 +781,7 @@ export default function OrdersIndex() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   );
 }

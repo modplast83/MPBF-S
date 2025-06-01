@@ -14,7 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
-import { Plus, Search, Filter, AlertTriangle, Clock, CheckCircle, X } from "lucide-react";
+import { QuickActions } from "@/components/ui/quick-actions";
+import { Plus, RefreshCw, Filter, Search, AlertTriangle, Clock, CheckCircle, X } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 
