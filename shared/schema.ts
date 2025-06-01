@@ -368,7 +368,7 @@ export const insertQualityPenaltySchema = createInsertSchema(qualityPenalties).o
 export type InsertQualityPenalty = z.infer<typeof insertQualityPenaltySchema>;
 export type QualityPenalty = typeof qualityPenalties.$inferSelect;
 
-// SMS Messages
+// SMS Messages with Professional Notifications
 export const smsMessages = pgTable("sms_messages", {
   id: serial("id").primaryKey(),
   recipientPhone: text("recipient_phone").notNull(),
@@ -382,18 +382,66 @@ export const smsMessages = pgTable("sms_messages", {
   sentAt: timestamp("sent_at").defaultNow(),
   deliveredAt: timestamp("delivered_at"),
   errorMessage: text("error_message"),
-  messageType: text("message_type").notNull(), // order_notification, status_update, custom, etc.
+  messageType: text("message_type").notNull(), // order_notification, status_update, custom, bottleneck_alert, quality_alert, maintenance_alert, hr_notification
   twilioMessageId: text("twilio_message_id"),
+  priority: text("priority").notNull().default("normal"), // low, normal, high, urgent
+  category: text("category").notNull().default("general"), // general, production, quality, maintenance, hr, management
+  templateId: text("template_id"), // Reference to message template
+  scheduledFor: timestamp("scheduled_for"), // For scheduled messages
+  isScheduled: boolean("is_scheduled").default(false),
+  retryCount: integer("retry_count").default(0),
+  lastRetryAt: timestamp("last_retry_at"),
+  metadata: jsonb("metadata"), // Additional data like order details, alert info, etc.
 });
 
 export const insertSmsMessageSchema = createInsertSchema(smsMessages).omit({ 
   id: true, 
   sentAt: true, 
   deliveredAt: true, 
-  twilioMessageId: true 
+  twilioMessageId: true,
+  lastRetryAt: true
 });
 export type InsertSmsMessage = z.infer<typeof insertSmsMessageSchema>;
 export type SmsMessage = typeof smsMessages.$inferSelect;
+
+// SMS Templates for Professional Notifications
+export const smsTemplates = pgTable("sms_templates", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // production, quality, maintenance, hr, management, custom
+  messageType: text("message_type").notNull(),
+  template: text("template").notNull(), // Message template with placeholders
+  variables: text("variables").array(), // Available variables for template
+  isActive: boolean("is_active").default(true),
+  createdBy: text("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSmsTemplateSchema = createInsertSchema(smsTemplates);
+export type InsertSmsTemplate = z.infer<typeof insertSmsTemplateSchema>;
+export type SmsTemplate = typeof smsTemplates.$inferSelect;
+
+// SMS Notification Rules
+export const smsNotificationRules = pgTable("sms_notification_rules", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  triggerEvent: text("trigger_event").notNull(), // order_created, order_completed, bottleneck_detected, etc.
+  conditions: jsonb("conditions"), // JSON conditions for when to trigger
+  templateId: text("template_id").references(() => smsTemplates.id),
+  recipientRoles: text("recipient_roles").array(), // Which roles should receive notifications
+  recipientUsers: text("recipient_users").array(), // Specific users to notify
+  isActive: boolean("is_active").default(true),
+  priority: text("priority").default("normal"),
+  cooldownMinutes: integer("cooldown_minutes").default(0), // Prevent spam
+  workingHoursOnly: boolean("working_hours_only").default(false),
+  createdBy: text("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSmsNotificationRuleSchema = createInsertSchema(smsNotificationRules).omit({ id: true });
+export type InsertSmsNotificationRule = z.infer<typeof insertSmsNotificationRuleSchema>;
+export type SmsNotificationRule = typeof smsNotificationRules.$inferSelect;
 
 // Mix Materials table
 export const mixMaterials = pgTable("mix_materials", {
