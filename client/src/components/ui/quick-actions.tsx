@@ -9,7 +9,7 @@ interface QuickAction {
   label: string;
   icon: LucideIcon;
   onClick: () => void;
-  variant?: "default" | "secondary" | "outline" | "destructive";
+  variant?: "default" | "secondary" | "outline" | "destructive" | string;
   className?: string;
 }
 
@@ -38,7 +38,7 @@ export function QuickActions({ title, actions, columns = 2 }: QuickActionsProps)
           return (
             <Button
               key={action.id}
-              variant={action.variant || "outline"}
+              variant={action.variant === "default" ? "default" : action.variant === "destructive" ? "destructive" : action.variant === "secondary" ? "secondary" : "outline"}
               size="sm"
               onClick={action.onClick}
               className={`h-16 flex-col space-y-1 text-xs ${action.className || ""}`}
