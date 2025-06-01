@@ -13,9 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Send, Loader2, User, Template, Clock } from "lucide-react";
+import { Send, Loader2, User, FileText, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Customer, Order, SmsTemplate } from "@/shared/schema";
+import type { Customer, Order, SmsTemplate } from "shared/schema";
 
 const sendSmsSchema = z.object({
   recipientPhone: z.string().min(7, "Phone number is required"),

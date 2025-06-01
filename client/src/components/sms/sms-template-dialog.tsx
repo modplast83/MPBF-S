@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Save, Loader2, Template, Variable } from "lucide-react";
+import { Plus, Save, Loader2, FileText, Variable } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { SmsTemplate } from "shared/schema";
 
