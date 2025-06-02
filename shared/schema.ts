@@ -736,16 +736,11 @@ export const hrViolations = pgTable("hr_violations", {
   description: text("description").notNull(),
   actionTaken: text("action_taken"),
   status: text("status").notNull().default("open"), // "open", "investigating", "resolved", "dismissed"
-  reportDate: timestamp("report_date").defaultNow().notNull(),
-  resolutionDate: timestamp("resolution_date"),
-  witnessIds: text("witness_ids").array(), // Array of user IDs who witnessed
-  evidenceUrls: text("evidence_urls").array(), // Photos, documents etc.
-  penaltyType: text("penalty_type"), // "warning", "financial", "training", "suspension", "termination"
-  penaltyAmount: doublePrecision("penalty_amount"),
-  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertHrViolationSchema = createInsertSchema(hrViolations).omit({ id: true, reportDate: true });
+export const insertHrViolationSchema = createInsertSchema(hrViolations).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertHrViolation = z.infer<typeof insertHrViolationSchema>;
 export type HrViolation = typeof hrViolations.$inferSelect;
 
@@ -755,20 +750,17 @@ export const hrComplaints = pgTable("hr_complaints", {
   complainantId: text("complainant_id").notNull().references(() => users.id), // Who filed the complaint
   againstUserId: text("against_user_id").references(() => users.id), // Who the complaint is against (can be null for general complaints)
   complaintType: text("complaint_type").notNull(), // "harassment", "discrimination", "work_environment", "management", "safety", "other"
+  priority: text("priority").notNull().default("medium"), // "low", "medium", "high", "urgent"
   title: text("title").notNull(),
   description: text("description").notNull(),
-  priority: text("priority").notNull().default("medium"), // "low", "medium", "high", "urgent"
-  status: text("status").notNull().default("submitted"), // "submitted", "under_review", "investigating", "resolved", "closed"
+  desiredOutcome: text("desired_outcome"),
   isAnonymous: boolean("is_anonymous").default(false),
-  assignedTo: text("assigned_to").references(() => users.id), // HR person assigned
-  submittedDate: timestamp("submitted_date").defaultNow().notNull(),
-  resolutionDate: timestamp("resolution_date"),
-  actionTaken: text("action_taken"),
-  evidenceUrls: text("evidence_urls").array(),
-  notes: text("notes"),
+  status: text("status").notNull().default("submitted"), // "submitted", "under_review", "investigating", "resolved", "closed"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertHrComplaintSchema = createInsertSchema(hrComplaints).omit({ id: true, submittedDate: true });
+export const insertHrComplaintSchema = createInsertSchema(hrComplaints).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertHrComplaint = z.infer<typeof insertHrComplaintSchema>;
 export type HrComplaint = typeof hrComplaints.$inferSelect;
 
@@ -902,7 +894,8 @@ export const maintenanceSchedule = pgTable("maintenance_schedule", {
   id: serial("id").primaryKey(),
   machineId: text("machine_id").notNull().references(() => machines.id),
   taskName: text("task_name").notNull(),
-  taskDescription: text("task_description"),
+  maintenanceType: text("maintenance_type"),
+  description: text("description"),
   frequency: text("frequency").notNull(), // daily, weekly, monthly, quarterly, yearly
   lastCompleted: timestamp("last_completed"),
   nextDue: timestamp("next_due").notNull(),
