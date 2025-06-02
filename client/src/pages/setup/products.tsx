@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Search, Printer } from "lucide-react";
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export default function Products() {
   const queryClient = useQueryClient();
@@ -162,7 +162,7 @@ export default function Products() {
     ]);
 
     // Add table
-    (doc as any).autoTable({
+    autoTable(doc, {
       head: [['S/N', 'ID', 'Category', 'Item', 'Size Caption', 'Thickness', 'Length (cm)', 'Width', 'Unit Weight']],
       body: tableData,
       startY: 70,
