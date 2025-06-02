@@ -1,34 +1,62 @@
-import twilio from 'twilio';
-const Twilio = twilio;
 import { storage } from '../storage';
 import { SmsMessage, InsertSmsMessage } from '@shared/schema';
 
-// Initialize Twilio client with environment variables
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+// Initialize Taqnyat credentials with environment variables
+const taqnyatApiKey = process.env.TAQNYAT_API_KEY;
+const taqnyatSenderId = process.env.TAQNYAT_SENDER_ID;
+const taqnyatApiUrl = process.env.TAQNYAT_API_URL || 'https://api.taqnyat.sa/v1/messages';
 
-// Create a SMS service class to handle Twilio integration
+// Create a SMS service class to handle Taqnyat integration
 export class SmsService {
-  private static twilioClient: Twilio | null = null;
-
-  // Initialize the Twilio client if credentials are available
-  private static getTwilioClient(): Twilio | null {
-    if (this.twilioClient) {
-      return this.twilioClient;
+  
+  // Check if Taqnyat credentials are available
+  private static hasTaqnyatCredentials(): boolean {
+    if (!taqnyatApiKey || !taqnyatSenderId) {
+      console.error('Taqnyat credentials not found in environment variables.');
+      return false;
     }
+    return true;
+  }
 
-    if (!accountSid || !authToken || !twilioPhoneNumber) {
-      console.error('Twilio credentials not found in environment variables.');
-      return null;
+  // Send SMS using Taqnyat API
+  private static async sendTaqnyatMessage(to: string, message: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    if (!this.hasTaqnyatCredentials()) {
+      return { success: false, error: 'Taqnyat credentials not configured' };
     }
 
     try {
-      this.twilioClient = new Twilio(accountSid, authToken);
-      return this.twilioClient;
-    } catch (error) {
-      console.error('Failed to initialize Twilio client:', error);
-      return null;
+      const response = await fetch(taqnyatApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${taqnyatApiKey}`
+        },
+        body: JSON.stringify({
+          body: message,
+          recipients: [to],
+          sender: taqnyatSenderId
+        })
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.statusCode === 201) {
+        return { 
+          success: true, 
+          messageId: result.messageId || result.id || 'taq_' + Date.now()
+        };
+      } else {
+        return { 
+          success: false, 
+          error: result.message || `HTTP ${response.status}: ${response.statusText}`
+        };
+      }
+    } catch (error: any) {
+      console.error('Failed to send SMS via Taqnyat:', error);
+      return { 
+        success: false, 
+        error: error.message || 'Network error connecting to Taqnyat'
+      };
     }
   }
 
@@ -43,29 +71,23 @@ export class SmsService {
       twilioMessageId: null
     });
 
-    // Try to send the message via Twilio
+    // Try to send the message via Taqnyat
     try {
-      const client = this.getTwilioClient();
-      if (!client) {
-        // If Twilio client is not available, update the message status
+      const result = await this.sendTaqnyatMessage(messageData.recipientPhone, messageData.message);
+      
+      if (result.success) {
+        // Update the message with Taqnyat message ID and sent status
+        return await storage.updateSmsMessage(message.id, {
+          status: 'sent',
+          twilioMessageId: result.messageId || null
+        });
+      } else {
+        // If sending failed, update the message status
         return await storage.updateSmsMessage(message.id, {
           status: 'failed',
-          errorMessage: 'Twilio client not initialized. Check environment credentials.'
+          errorMessage: result.error || 'Failed to send SMS via Taqnyat'
         });
       }
-
-      // Send the message via Twilio
-      const twilioMessage = await client.messages.create({
-        body: messageData.message,
-        from: twilioPhoneNumber,
-        to: messageData.recipientPhone
-      });
-
-      // Update the message with Twilio message ID and sent status
-      return await storage.updateSmsMessage(message.id, {
-        status: 'sent',
-        twilioMessageId: twilioMessage.sid
-      });
     } catch (error: any) {
       // Handle sending errors and update the message status
       console.error('Failed to send SMS:', error);
