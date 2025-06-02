@@ -397,9 +397,10 @@ export const smsMessages = pgTable("sms_messages", {
 export const insertSmsMessageSchema = createInsertSchema(smsMessages).omit({ 
   id: true, 
   sentAt: true, 
-  deliveredAt: true, 
-  twilioMessageId: true,
   lastRetryAt: true
+}).extend({
+  twilioMessageId: z.string().nullable().optional(),
+  deliveredAt: z.date().nullable().optional()
 });
 export type InsertSmsMessage = z.infer<typeof insertSmsMessageSchema>;
 export type SmsMessage = typeof smsMessages.$inferSelect;

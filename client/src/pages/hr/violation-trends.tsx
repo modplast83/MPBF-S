@@ -339,7 +339,7 @@ export default function ViolationTrendsPage() {
           <CardContent>
             <div className="text-2xl font-bold capitalize">{mostCommonType[0]}</div>
             <p className="text-xs text-gray-600 mt-1">
-              {mostCommonType[1]} incidents ({totalViolations > 0 ? ((mostCommonType[1] / totalViolations) * 100).toFixed(0) : '0'}%)
+              {mostCommonType[1]} incidents ({totalViolations > 0 && !isNaN(mostCommonType[1]) && !isNaN(totalViolations) ? ((mostCommonType[1] / totalViolations) * 100).toFixed(0) : '0'}%)
             </p>
           </CardContent>
         </Card>
@@ -480,7 +480,7 @@ export default function ViolationTrendsPage() {
                   Pattern Detected
                 </div>
                 <p className="text-sm text-yellow-600">
-                  {mostCommonType[0]} violations account for {totalViolations > 0 ? ((mostCommonType[1] / totalViolations) * 100).toFixed(0) : '0'}% of all cases. 
+                  {mostCommonType[0]} violations account for {totalViolations > 0 && !isNaN(mostCommonType[1]) && !isNaN(totalViolations) ? ((mostCommonType[1] / totalViolations) * 100).toFixed(0) : '0'}% of all cases. 
                   Consider targeted training for this area.
                 </p>
               </div>

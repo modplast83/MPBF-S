@@ -127,10 +127,19 @@ export async function seedSmsData() {
     console.log("Seeding SMS templates...");
     for (const template of templates) {
       try {
-        await smsStorage.createSmsTemplate(template);
-        console.log(`Created template: ${template.name}`);
+        const existingTemplate = await smsStorage.getSmsTemplate(template.id);
+        if (!existingTemplate) {
+          await smsStorage.createSmsTemplate(template);
+          console.log(`Created template: ${template.name}`);
+        }
       } catch (error) {
-        console.log(`Template ${template.name} already exists or error:`, error);
+        // Template likely doesn't exist, try to create it
+        try {
+          await smsStorage.createSmsTemplate(template);
+          console.log(`Created template: ${template.name}`);
+        } catch (createError) {
+          console.log(`Template ${template.name} already exists`);
+        }
       }
     }
 

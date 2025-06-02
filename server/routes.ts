@@ -4816,7 +4816,8 @@ COMMIT;
       res.json(performanceMetrics);
     } catch (error) {
       console.error("Error generating performance metrics:", error);
-      res.status(500).json({ message: "Failed to generate performance metrics", error: error instanceof Error ? error.message : 'Unknown error' });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ message: "Failed to generate performance metrics", error: errorMessage });
     }
   });
 
