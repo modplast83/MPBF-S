@@ -108,12 +108,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    // Skip role checking for testing - TEMPORARY
-    // Comment the line below in production
-    return next();
-    
     // Check if user has admin role
-    if (req.user && req.user.role !== "admin" && req.user.role !== "administrator") {
+    if (req.user && (req.user as any).role !== "admin" && (req.user as any).role !== "administrator") {
       return res.status(403).json({ message: "Permission denied" });
     }
     next();
@@ -1711,13 +1707,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const jobOrderId = parseInt(req.params.jobOrderId);
       
-      if (isNaN(jobOrderId)) {
+      if (isNaN(jobOrderId) || jobOrderId <= 0) {
         return res.status(400).json({ message: "Invalid job order ID" });
       }
       
       const qualityChecks = await storage.getQualityChecksByJobOrder(jobOrderId);
       res.json(qualityChecks);
     } catch (error) {
+      console.error("Error fetching quality checks by job order:", error);
       res.status(500).json({ message: "Failed to fetch quality checks by job order" });
     }
   });
@@ -1951,8 +1948,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/quality-violations", async (req: Request, res: Response) => {
     try {
       // Set the reportedBy field from the authenticated user if not provided
-      if (!req.body.reportedBy && req.user && req.user.id) {
-        req.body.reportedBy = req.user.id;
+      if (!req.body.reportedBy && req.user && (req.user as any).id) {
+        req.body.reportedBy = (req.user as any).id;
       }
       
       // Validate required fields
@@ -4620,13 +4617,15 @@ COMMIT;
       // Calculate summary metrics
       const totalChecks = qualityReport.length;
       const failedChecks = qualityReport.filter(report => report.result === "Fail").length;
-      const passRate = totalChecks > 0 ? ((totalChecks - failedChecks) / totalChecks) * 100 : 0;
+      const passRate = totalChecks > 0 && !isNaN(totalChecks) && !isNaN(failedChecks) 
+        ? ((totalChecks - failedChecks) / totalChecks) * 100 
+        : 0;
       
       const qualitySummary = {
         totalChecks,
         passedChecks: totalChecks - failedChecks,
         failedChecks,
-        passRate: parseFloat(passRate.toFixed(2)),
+        passRate: isNaN(passRate) ? 0 : parseFloat(passRate.toFixed(2)),
         checks: qualityReport
       };
       
@@ -4817,7 +4816,7 @@ COMMIT;
       res.json(performanceMetrics);
     } catch (error) {
       console.error("Error generating performance metrics:", error);
-      res.status(500).json({ message: "Failed to generate performance metrics" });
+      res.status(500).json({ message: "Failed to generate performance metrics", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
