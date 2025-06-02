@@ -6,22 +6,32 @@ const taqnyatApiKey = process.env.TAQNYAT_API_KEY;
 const taqnyatSenderId = process.env.TAQNYAT_SENDER_ID;
 const taqnyatApiUrl = process.env.TAQNYAT_API_URL || 'https://api.taqnyat.sa/v1/messages';
 
-// Create a SMS service class to handle Taqnyat integration
+// Initialize Twilio fallback credentials
+const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
+const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+// SMS Provider types
+type SmsProvider = 'taqnyat' | 'twilio';
+type SmsResult = { success: boolean; messageId?: string; error?: string; provider?: SmsProvider };
+
+// Create a SMS service class to handle multiple providers with fallback
 export class SmsService {
   
   // Check if Taqnyat credentials are available
   private static hasTaqnyatCredentials(): boolean {
-    if (!taqnyatApiKey || !taqnyatSenderId) {
-      console.error('Taqnyat credentials not found in environment variables.');
-      return false;
-    }
-    return true;
+    return !!(taqnyatApiKey && taqnyatSenderId);
   }
 
-  // Send SMS using Taqnyat API
-  private static async sendTaqnyatMessage(to: string, message: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  // Check if Twilio credentials are available
+  private static hasTwilioCredentials(): boolean {
+    return !!(twilioAccountSid && twilioAuthToken && twilioPhoneNumber);
+  }
+
+  // Send SMS using Taqnyat API (primary provider)
+  private static async sendTaqnyatMessage(to: string, message: string): Promise<SmsResult> {
     if (!this.hasTaqnyatCredentials()) {
-      return { success: false, error: 'Taqnyat credentials not configured' };
+      return { success: false, error: 'Taqnyat credentials not configured', provider: 'taqnyat' };
     }
 
     try {
@@ -43,21 +53,85 @@ export class SmsService {
       if (response.ok && result.statusCode === 201) {
         return { 
           success: true, 
-          messageId: result.messageId || result.id || 'taq_' + Date.now()
+          messageId: result.messageId || result.id || 'taq_' + Date.now(),
+          provider: 'taqnyat'
         };
       } else {
         return { 
           success: false, 
-          error: result.message || `HTTP ${response.status}: ${response.statusText}`
+          error: result.message || `HTTP ${response.status}: ${response.statusText}`,
+          provider: 'taqnyat'
         };
       }
     } catch (error: any) {
       console.error('Failed to send SMS via Taqnyat:', error);
       return { 
         success: false, 
-        error: error.message || 'Network error connecting to Taqnyat'
+        error: error.message || 'Network error connecting to Taqnyat',
+        provider: 'taqnyat'
       };
     }
+  }
+
+  // Send SMS using Twilio API (fallback provider)
+  private static async sendTwilioMessage(to: string, message: string): Promise<SmsResult> {
+    if (!this.hasTwilioCredentials()) {
+      return { success: false, error: 'Twilio credentials not configured', provider: 'twilio' };
+    }
+
+    try {
+      // Dynamic import to avoid loading Twilio if not needed
+      const twilio = (await import('twilio')).default;
+      const client = twilio(twilioAccountSid, twilioAuthToken);
+
+      const twilioMessage = await client.messages.create({
+        body: message,
+        from: twilioPhoneNumber,
+        to: to
+      });
+
+      return {
+        success: true,
+        messageId: twilioMessage.sid,
+        provider: 'twilio'
+      };
+    } catch (error: any) {
+      console.error('Failed to send SMS via Twilio:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to send SMS via Twilio',
+        provider: 'twilio'
+      };
+    }
+  }
+
+  // Send SMS with automatic failover
+  private static async sendWithFailover(to: string, message: string): Promise<SmsResult> {
+    // Try primary provider (Taqnyat) first
+    console.log('Attempting to send SMS via Taqnyat (primary provider)...');
+    const taqnyatResult = await this.sendTaqnyatMessage(to, message);
+    
+    if (taqnyatResult.success) {
+      console.log('SMS sent successfully via Taqnyat');
+      return taqnyatResult;
+    }
+
+    // If Taqnyat fails, try Twilio as fallback
+    console.log('Taqnyat failed, attempting fallback to Twilio...');
+    const twilioResult = await this.sendTwilioMessage(to, message);
+    
+    if (twilioResult.success) {
+      console.log('SMS sent successfully via Twilio (fallback)');
+      return twilioResult;
+    }
+
+    // Both providers failed
+    console.error('Both SMS providers failed');
+    return {
+      success: false,
+      error: `Primary: ${taqnyatResult.error} | Fallback: ${twilioResult.error}`,
+      provider: 'both_failed'
+    };
   }
 
   // Send a message and record it in the database
@@ -71,29 +145,30 @@ export class SmsService {
       twilioMessageId: null
     });
 
-    // Try to send the message via Taqnyat
+    // Try to send the message with automatic failover
     try {
-      const result = await this.sendTaqnyatMessage(messageData.recipientPhone, messageData.message);
+      const result = await this.sendWithFailover(messageData.recipientPhone, messageData.message);
       
       if (result.success) {
-        // Update the message with Taqnyat message ID and sent status
+        // Update the message with provider message ID and sent status
         return await storage.updateSmsMessage(message.id, {
           status: 'sent',
-          twilioMessageId: result.messageId || null
+          twilioMessageId: result.messageId || null,
+          errorMessage: result.provider ? `Sent via ${result.provider}` : null
         });
       } else {
-        // If sending failed, update the message status
+        // If sending failed on all providers, update the message status
         return await storage.updateSmsMessage(message.id, {
           status: 'failed',
-          errorMessage: result.error || 'Failed to send SMS via Taqnyat'
+          errorMessage: result.error || 'Failed to send SMS via all providers'
         });
       }
     } catch (error: any) {
-      // Handle sending errors and update the message status
-      console.error('Failed to send SMS:', error);
+      // Handle unexpected errors and update the message status
+      console.error('Unexpected error sending SMS:', error);
       return await storage.updateSmsMessage(message.id, {
         status: 'failed',
-        errorMessage: error.message || 'Failed to send SMS'
+        errorMessage: error.message || 'Unexpected error sending SMS'
       });
     }
   }

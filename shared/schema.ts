@@ -834,3 +834,36 @@ export type MaintenanceSchedule = typeof maintenanceSchedule.$inferSelect;
 export const insertProductionTargetsSchema = createInsertSchema(productionTargets).omit({ id: true, effectiveFrom: true });
 export type InsertProductionTargets = z.infer<typeof insertProductionTargetsSchema>;
 export type ProductionTargets = typeof productionTargets.$inferSelect;
+
+// SMS Provider Settings for fallback configuration
+export const smsProviderSettings = pgTable('sms_provider_settings', {
+  id: serial('id').primaryKey(),
+  primaryProvider: text('primary_provider').notNull().default('taqnyat'),
+  fallbackProvider: text('fallback_provider').notNull().default('twilio'),
+  retryAttempts: integer('retry_attempts').notNull().default(3),
+  retryDelay: integer('retry_delay').notNull().default(5000), // milliseconds
+  isActive: boolean('is_active').notNull().default(true),
+  lastUpdated: timestamp('last_updated').notNull().defaultNow(),
+  updatedBy: text('updated_by')
+});
+
+// SMS Provider Health Status for monitoring
+export const smsProviderHealth = pgTable('sms_provider_health', {
+  id: serial('id').primaryKey(),
+  provider: text('provider').notNull(), // 'taqnyat' or 'twilio'
+  status: text('status').notNull().default('healthy'), // 'healthy', 'degraded', 'down'
+  lastSuccessfulSend: timestamp('last_successful_send'),
+  lastFailedSend: timestamp('last_failed_send'),
+  successCount: integer('success_count').notNull().default(0),
+  failureCount: integer('failure_count').notNull().default(0),
+  lastError: text('last_error'),
+  checkedAt: timestamp('checked_at').notNull().defaultNow()
+});
+
+export const insertSmsProviderSettingsSchema = createInsertSchema(smsProviderSettings).omit({ id: true, lastUpdated: true });
+export type InsertSmsProviderSettings = z.infer<typeof insertSmsProviderSettingsSchema>;
+export type SmsProviderSettings = typeof smsProviderSettings.$inferSelect;
+
+export const insertSmsProviderHealthSchema = createInsertSchema(smsProviderHealth).omit({ id: true, checkedAt: true });
+export type InsertSmsProviderHealth = z.infer<typeof insertSmsProviderHealthSchema>;
+export type SmsProviderHealth = typeof smsProviderHealth.$inferSelect;
