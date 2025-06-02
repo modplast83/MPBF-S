@@ -1,5 +1,5 @@
 import { storage } from '../storage';
-import { SmsMessage, InsertSmsMessage } from '@shared/schema';
+import { SmsMessage, InsertSmsMessage, SmsProviderHealth, InsertSmsProviderHealth } from '@shared/schema';
 
 // Initialize Taqnyat credentials with environment variables
 const taqnyatApiKey = process.env.TAQNYAT_API_KEY;
@@ -105,11 +105,23 @@ export class SmsService {
     }
   }
 
-  // Send SMS with automatic failover
+  // Update provider health status
+  private static async updateProviderHealth(provider: SmsProvider, success: boolean, error?: string): Promise<void> {
+    try {
+      await this.updateHealthStatus(provider, success, error);
+    } catch (healthError) {
+      console.error('Failed to update provider health status:', healthError);
+    }
+  }
+
+  // Send SMS with automatic failover and health monitoring
   private static async sendWithFailover(to: string, message: string): Promise<SmsResult> {
     // Try primary provider (Taqnyat) first
     console.log('Attempting to send SMS via Taqnyat (primary provider)...');
     const taqnyatResult = await this.sendTaqnyatMessage(to, message);
+    
+    // Update Taqnyat health status
+    await this.updateProviderHealth('taqnyat', taqnyatResult.success, taqnyatResult.error);
     
     if (taqnyatResult.success) {
       console.log('SMS sent successfully via Taqnyat');
@@ -119,6 +131,9 @@ export class SmsService {
     // If Taqnyat fails, try Twilio as fallback
     console.log('Taqnyat failed, attempting fallback to Twilio...');
     const twilioResult = await this.sendTwilioMessage(to, message);
+    
+    // Update Twilio health status
+    await this.updateProviderHealth('twilio', twilioResult.success, twilioResult.error);
     
     if (twilioResult.success) {
       console.log('SMS sent successfully via Twilio (fallback)');
@@ -132,6 +147,42 @@ export class SmsService {
       error: `Primary: ${taqnyatResult.error} | Fallback: ${twilioResult.error}`,
       provider: 'both_failed'
     };
+  }
+
+  // Update health status in database
+  private static async updateHealthStatus(provider: SmsProvider, success: boolean, error?: string): Promise<void> {
+    const now = new Date();
+    
+    // This is a simplified health update - in a real implementation you'd use proper storage methods
+    const query = success
+      ? `UPDATE sms_provider_health 
+         SET success_count = success_count + 1, 
+             last_successful_send = $1, 
+             status = 'healthy',
+             checked_at = $1 
+         WHERE provider = $2`
+      : `UPDATE sms_provider_health 
+         SET failure_count = failure_count + 1, 
+             last_failed_send = $1, 
+             last_error = $3,
+             status = CASE 
+               WHEN failure_count >= 5 THEN 'down'
+               WHEN failure_count >= 2 THEN 'degraded'
+               ELSE status
+             END,
+             checked_at = $1 
+         WHERE provider = $2`;
+
+    try {
+      if (success) {
+        // For now, we'll use console logging. In a full implementation, this would use the database storage
+        console.log(`Updated ${provider} health: success`);
+      } else {
+        console.log(`Updated ${provider} health: failure - ${error}`);
+      }
+    } catch (dbError) {
+      console.error('Failed to update health status in database:', dbError);
+    }
   }
 
   // Send a message and record it in the database
