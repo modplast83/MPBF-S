@@ -5538,6 +5538,9 @@ COMMIT;
     }
   });
 
+  // Setup notification routes
+  setupNotificationRoutes(app);
+
   const httpServer = createServer(app);
   return httpServer;
 }

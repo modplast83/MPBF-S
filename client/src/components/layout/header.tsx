@@ -13,9 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth-v2";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
-import { Loader2, Globe, Menu } from "lucide-react";
+import { Loader2, Globe, Menu, HelpCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthenticationButton } from "@/components/authentication-button";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 interface HeaderProps {
   mobileMenuOpen?: boolean;
@@ -118,16 +119,14 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
             </DropdownMenuContent>
           </DropdownMenu>
           
-          {/* Only show these buttons on larger screens */}
+          {/* Notification Bell - available on all screen sizes for authenticated users */}
+          {user && <NotificationBell />}
+          
+          {/* Only show help button on larger screens */}
           {!isMobile && (
-            <>
-              <Button variant="outline" size="icon" className="text-primary-600 border-primary-200 shadow-sm hover:bg-primary-50">
-                <span className="material-icons">notifications</span>
-              </Button>
-              <Button variant="outline" size="icon" className="text-primary-600 border-primary-200 shadow-sm hover:bg-primary-50">
-                <span className="material-icons">help_outline</span>
-              </Button>
-            </>
+            <Button variant="outline" size="icon" className="text-primary-600 border-primary-200 shadow-sm hover:bg-primary-50">
+              <HelpCircle className="h-5 w-5" />
+            </Button>
           )}
           
           {/* Use new AuthenticationButton component for Replit Auth */}

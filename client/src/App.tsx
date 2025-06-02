@@ -64,6 +64,7 @@ import ViolationsComplaintsPage from "@/pages/hr/violations-complaints";
 import ViolationTrendsPage from "@/pages/hr/violation-trends";
 import BottleneckDashboard from "@/pages/production/bottleneck-dashboard";
 import MetricsInputPage from "@/pages/production/metrics-input";
+import NotificationsPage from "@/pages/notifications";
 import { User } from "@shared/schema";
 
 function App() {
@@ -139,6 +140,8 @@ function App() {
                   {/* Bottleneck Notification System Routes */}
                   <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
                   <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />
+                  {/* Notifications Route */}
+                  <ProtectedRoute path="/notifications" component={NotificationsPage} module="Notifications" />
                   <Route component={NotFound} />
                 </Switch>
               </MainLayout>
