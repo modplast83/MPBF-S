@@ -52,3 +52,11 @@ export async function comparePasswords(supplied: string, stored: string) {
     return false;
   }
 }
+
+// Authentication middleware
+export function requireAuth(req: any, res: any, next: any) {
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: 'Authentication required' });
+}

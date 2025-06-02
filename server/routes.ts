@@ -20,7 +20,9 @@ import {
   User, upsertUserSchema, UpsertUser,
   AbaMaterialConfig, insertAbaMaterialConfigSchema,
   insertTimeAttendanceSchema, insertEmployeeOfMonthSchema,
-  insertHrViolationSchema, insertHrComplaintSchema
+  insertHrViolationSchema, insertHrComplaintSchema,
+  insertNotificationSchema, insertNotificationTemplateSchema,
+  InsertNotification, InsertNotificationTemplate
 } from "@shared/schema";
 import { z } from "zod";
 import path from 'path';
@@ -32,6 +34,8 @@ import { setupAuth } from "./auth";
 import { ensureAdminUser } from "./user-seed";
 import { setupHRRoutes } from "./hr-routes";
 import { setupBottleneckRoutes } from "./bottleneck-routes";
+import { notificationService } from "./notification-service";
+import { setupNotificationRoutes } from "./notification-routes";
 
 // Extend the Request type to include express-fileupload properties
 declare global {
