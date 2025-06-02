@@ -2456,26 +2456,49 @@ COMMIT;
 
   app.post("/api/sms-messages", async (req: Request, res: Response) => {
     try {
-      const messageData = insertSmsMessageSchema.parse(req.body);
-      const message = await smsStorage.createSmsMessage({
-        ...messageData,
-        sentBy: req.user?.id,
-      });
+      const validatedData = insertSmsMessageSchema.parse(req.body);
       
-      // Here you would typically send the SMS via Twilio
-      // For now, we'll mark it as sent immediately
-      await smsStorage.updateSmsMessage(message.id, {
-        status: "sent",
-        twilioMessageId: `sim_${message.id}_${Date.now()}`
-      });
+      // Import and use the SMS service
+      const { SmsService } = await import('./services/sms-service');
       
-      res.status(201).json(message);
+      // Send the SMS using the service
+      let result;
+      if (validatedData.messageType === 'order_notification' && validatedData.orderId) {
+        result = await SmsService.sendOrderNotification(
+          validatedData.orderId,
+          validatedData.recipientPhone,
+          validatedData.message,
+          validatedData.sentBy || req.user?.id || null,
+          validatedData.recipientName || null,
+          validatedData.customerId || null
+        );
+      } else if (validatedData.messageType === 'status_update' && validatedData.jobOrderId) {
+        result = await SmsService.sendJobOrderUpdate(
+          validatedData.jobOrderId,
+          validatedData.recipientPhone,
+          validatedData.message,
+          validatedData.sentBy || req.user?.id || null,
+          validatedData.recipientName || null,
+          validatedData.customerId || null
+        );
+      } else {
+        result = await SmsService.sendCustomMessage(
+          validatedData.recipientPhone,
+          validatedData.message,
+          validatedData.sentBy || req.user?.id || null,
+          validatedData.recipientName || null,
+          validatedData.category || 'general',
+          validatedData.priority || 'normal'
+        );
+      }
+      
+      res.status(201).json(result);
     } catch (error) {
-      console.error("Error creating SMS message:", error);
+      console.error("Error sending SMS message:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid SMS message data", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to create SMS message" });
+      res.status(500).json({ message: "Failed to send SMS message" });
     }
   });
 
@@ -2531,11 +2554,16 @@ COMMIT;
         return res.status(404).json({ message: "SMS message not found" });
       }
       
-      // Here you would resend via Twilio
-      await smsStorage.updateSmsMessage(message.id, {
-        status: "sent",
-        twilioMessageId: `sim_${message.id}_${Date.now()}`
-      });
+      // Use the SMS service to actually resend via Twilio
+      const { SmsService } = await import('./services/sms-service');
+      const updatedMessage = await SmsService.sendCustomMessage(
+        message.recipientPhone,
+        message.message,
+        message.sentBy,
+        message.recipientName,
+        message.category || 'general',
+        message.priority || 'normal'
+      );
       
       res.json(message);
     } catch (error) {
@@ -2780,53 +2808,7 @@ COMMIT;
     }
   });
 
-  app.post("/api/sms-messages", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertSmsMessageSchema.parse(req.body);
-      
-      // Import and use the SMS service
-      const { SmsService } = await import('./services/sms-service');
-      
-      // Send the SMS using the service
-      let result;
-      if (validatedData.messageType === 'order_notification' && validatedData.orderId) {
-        result = await SmsService.sendOrderNotification(
-          validatedData.orderId,
-          validatedData.recipientPhone,
-          validatedData.message,
-          validatedData.sentBy || null,
-          validatedData.recipientName || null,
-          validatedData.customerId || null
-        );
-      } else if (validatedData.messageType === 'status_update' && validatedData.jobOrderId) {
-        result = await SmsService.sendJobOrderUpdate(
-          validatedData.jobOrderId,
-          validatedData.recipientPhone,
-          validatedData.message,
-          validatedData.sentBy || null,
-          validatedData.recipientName || null,
-          validatedData.customerId || null
-        );
-      } else {
-        result = await SmsService.sendCustomMessage(
-          validatedData.recipientPhone,
-          validatedData.message,
-          validatedData.sentBy || null,
-          validatedData.recipientName || null,
-          validatedData.customerId || null,
-          validatedData.orderId || null,
-          validatedData.jobOrderId || null
-        );
-      }
-      
-      res.status(201).json(result);
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid SMS message data", errors: error.errors });
-      }
-      res.status(500).json({ message: `Failed to send SMS message: ${error.message}` });
-    }
-  });
+
 
   app.delete("/api/sms-messages/:id", async (req: Request, res: Response) => {
     try {
