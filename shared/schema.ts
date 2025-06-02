@@ -444,6 +444,92 @@ export const insertSmsNotificationRuleSchema = createInsertSchema(smsNotificatio
 export type InsertSmsNotificationRule = z.infer<typeof insertSmsNotificationRuleSchema>;
 export type SmsNotificationRule = typeof smsNotificationRules.$inferSelect;
 
+// Notification Center with Priority Management
+export const notificationCenter = pgTable("notification_center", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(), // system, alert, warning, info, success, quality, production, maintenance, hr
+  priority: text("priority").notNull().default("medium"), // low, medium, high, critical, urgent
+  category: text("category").notNull(), // production, quality, maintenance, hr, system, order, inventory
+  source: text("source").notNull(), // module that generated the notification
+  userId: text("user_id").references(() => users.id), // specific user (null for broadcast)
+  userRole: text("user_role"), // role-based notifications
+  isRead: boolean("is_read").default(false),
+  isArchived: boolean("is_archived").default(false),
+  isDismissed: boolean("is_dismissed").default(false),
+  actionRequired: boolean("action_required").default(false),
+  actionUrl: text("action_url"), // URL to navigate for action
+  actionData: jsonb("action_data"), // Additional data for action
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  readAt: timestamp("read_at"),
+  dismissedAt: timestamp("dismissed_at"),
+  metadata: jsonb("metadata"), // Additional context data
+});
+
+export const insertNotificationSchema = createInsertSchema(notificationCenter).omit({ 
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  readAt: true,
+  dismissedAt: true
+});
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notificationCenter.$inferSelect;
+
+// Notification Preferences for Users
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  category: text("category").notNull(), // production, quality, maintenance, hr, system
+  enabled: boolean("enabled").default(true),
+  priority: text("priority").notNull().default("medium"), // minimum priority to receive
+  emailEnabled: boolean("email_enabled").default(false),
+  smsEnabled: boolean("sms_enabled").default(false),
+  pushEnabled: boolean("push_enabled").default(true),
+  soundEnabled: boolean("sound_enabled").default(true),
+  quietHours: jsonb("quiet_hours"), // {start: "22:00", end: "06:00"}
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertNotificationPreferenceSchema = createInsertSchema(notificationPreferences).omit({ 
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+export type InsertNotificationPreference = z.infer<typeof insertNotificationPreferenceSchema>;
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+
+// Notification Templates for Auto-Generation
+export const notificationTemplates = pgTable("notification_templates", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  type: text("type").notNull(),
+  priority: text("priority").notNull().default("medium"),
+  title: text("title").notNull(), // Template with placeholders
+  message: text("message").notNull(), // Template with placeholders
+  actionRequired: boolean("action_required").default(false),
+  actionUrl: text("action_url"), // URL template
+  isActive: boolean("is_active").default(true),
+  triggerEvent: text("trigger_event"), // Event that triggers this notification
+  conditions: jsonb("conditions"), // Conditions for triggering
+  createdBy: text("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertNotificationTemplateSchema = createInsertSchema(notificationTemplates).omit({ 
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+export type InsertNotificationTemplate = z.infer<typeof insertNotificationTemplateSchema>;
+export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
+
 // Mix Materials table
 export const mixMaterials = pgTable("mix_materials", {
   id: serial("id").primaryKey(),
