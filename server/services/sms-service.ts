@@ -124,6 +124,8 @@ export class SmsService {
     message: string,
     sentBy?: string,
     recipientName?: string,
+    category: string = 'general',
+    priority: string = 'normal',
     customerId?: string,
     orderId?: number,
     jobOrderId?: number
@@ -132,6 +134,8 @@ export class SmsService {
       recipientPhone,
       message,
       messageType: 'custom',
+      category,
+      priority,
       customerId,
       recipientName,
       sentBy,
