@@ -994,7 +994,24 @@
     },
     "language": {
       "en": "English",
-      "ar": "العربية"
+      "ar": "العربية",
+      "es": "Español",
+      "fr": "Français", 
+      "de": "Deutsch",
+      "zh": "中文",
+      "change_interface": "تغيير لغة الواجهة",
+      "viewing_in_en": "العرض باللغة الإنجليزية",
+      "viewing_in_ar": "العرض باللغة العربية",
+      "viewing_in_es": "العرض باللغة الإسبانية",
+      "viewing_in_fr": "العرض باللغة الفرنسية",
+      "viewing_in_de": "العرض باللغة الألمانية",
+      "viewing_in_zh": "العرض باللغة الصينية",
+      "interface_in_en": "الواجهة باللغة الإنجليزية",
+      "interface_in_ar": "الواجهة باللغة العربية",
+      "interface_in_es": "الواجهة باللغة الإسبانية",
+      "interface_in_fr": "الواجهة باللغة الفرنسية",
+      "interface_in_de": "الواجهة باللغة الألمانية",
+      "interface_in_zh": "الواجهة باللغة الصينية"
     },
     "pagination": {
       "showing_entries": "عرض {{from}} إلى {{to}} من {{total}} سجل",
