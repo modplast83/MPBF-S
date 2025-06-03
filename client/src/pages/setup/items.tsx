@@ -98,7 +98,7 @@ export default function Items() {
           <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
             <span className="material-icons text-sm">edit</span>
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-red-500 hover:text-red-700">
             <span className="material-icons text-sm">delete</span>
           </Button>
         </div>
@@ -165,7 +165,7 @@ export default function Items() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
-              className="bg-error-500 hover:bg-error-600"
+              className="bg-red-500 hover:bg-red-600"
             >
               Delete
             </AlertDialogAction>
