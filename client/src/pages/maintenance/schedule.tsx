@@ -107,6 +107,26 @@ export default function MaintenanceSchedulePage() {
     },
   });
 
+  // Generate automatic schedules mutation
+  const generateSchedulesMutation = useMutation({
+    mutationFn: () => apiRequest('POST', `${API_ENDPOINTS.MAINTENANCE_SCHEDULE}/generate`, {}),
+    onSuccess: (response: any) => {
+      toast({
+        title: "Success",
+        description: response.message || "Maintenance schedules generated successfully",
+      });
+      refetchSchedules();
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MAINTENANCE_SCHEDULE] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate maintenance schedules",
+        variant: "destructive",
+      });
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       machineId: "",
@@ -236,14 +256,25 @@ export default function MaintenanceSchedulePage() {
           />
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("maintenance.schedule.scheduleMaintenance")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
+        <div className="flex space-x-2">
+          <Button
+            onClick={() => generateSchedulesMutation.mutate()}
+            disabled={generateSchedulesMutation.isPending}
+            variant="outline"
+            className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            {generateSchedulesMutation.isPending ? "Generating..." : "Generate Auto Schedules"}
+          </Button>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("maintenance.schedule.scheduleMaintenance")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>{t("maintenance.schedule.scheduleMaintenance")}</DialogTitle>
               <DialogDescription>

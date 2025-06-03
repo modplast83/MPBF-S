@@ -5538,20 +5538,119 @@ COMMIT;
     }
   });
 
+  // One-click maintenance schedule generator
+  app.post("/api/maintenance-schedule/generate", async (req: Request, res: Response) => {
+    try {
+      const machines = await storage.getMachines();
+      const createdSchedules = [];
+      
+      // Define maintenance templates for different machine types
+      const maintenanceTemplates = {
+        'extruder': [
+          { task: 'Daily cleaning and lubrication', frequency: 'daily', hours: 0.5, priority: 'high' },
+          { task: 'Weekly screw inspection', frequency: 'weekly', hours: 2, priority: 'medium' },
+          { task: 'Monthly temperature sensor calibration', frequency: 'monthly', hours: 1, priority: 'medium' },
+          { task: 'Quarterly barrel cleaning', frequency: 'quarterly', hours: 4, priority: 'high' }
+        ],
+        'printer': [
+          { task: 'Daily print head cleaning', frequency: 'daily', hours: 0.5, priority: 'high' },
+          { task: 'Weekly ink system check', frequency: 'weekly', hours: 1, priority: 'medium' },
+          { task: 'Monthly roller alignment', frequency: 'monthly', hours: 2, priority: 'medium' },
+          { task: 'Quarterly comprehensive service', frequency: 'quarterly', hours: 6, priority: 'high' }
+        ],
+        'cutter': [
+          { task: 'Daily blade inspection', frequency: 'daily', hours: 0.25, priority: 'high' },
+          { task: 'Weekly cutting accuracy check', frequency: 'weekly', hours: 1, priority: 'medium' },
+          { task: 'Monthly blade replacement', frequency: 'monthly', hours: 1.5, priority: 'high' },
+          { task: 'Quarterly motor maintenance', frequency: 'quarterly', hours: 3, priority: 'medium' }
+        ],
+        'sealer': [
+          { task: 'Daily seal quality check', frequency: 'daily', hours: 0.25, priority: 'high' },
+          { task: 'Weekly temperature adjustment', frequency: 'weekly', hours: 0.5, priority: 'medium' },
+          { task: 'Monthly heating element inspection', frequency: 'monthly', hours: 1, priority: 'medium' },
+          { task: 'Quarterly full system check', frequency: 'quarterly', hours: 2, priority: 'high' }
+        ]
+      };
+      
+      for (const machine of machines) {
+        const machineType = machine.name.toLowerCase().includes('extruder') ? 'extruder' :
+                           machine.name.toLowerCase().includes('print') ? 'printer' :
+                           machine.name.toLowerCase().includes('cut') ? 'cutter' :
+                           machine.name.toLowerCase().includes('seal') ? 'sealer' : 'extruder';
+        
+        const templates = maintenanceTemplates[machineType] || maintenanceTemplates['extruder'];
+        
+        for (const template of templates) {
+          const nextDue = calculateNextDue(template.frequency);
+          
+          const scheduleData = {
+            machineId: machine.id,
+            taskName: template.task,
+            maintenanceType: 'preventive',
+            description: `${template.task} for ${machine.name}`,
+            frequency: template.frequency,
+            nextDue: nextDue,
+            priority: template.priority,
+            estimatedHours: template.hours,
+            status: 'active',
+            createdBy: req.user?.id?.toString() || '00U1'
+          };
+          
+          const schedule = await storage.createMaintenanceSchedule(scheduleData);
+          createdSchedules.push(schedule);
+        }
+      }
+      
+      res.json({ 
+        message: `Generated ${createdSchedules.length} maintenance schedules for ${machines.length} machines`,
+        schedules: createdSchedules 
+      });
+    } catch (error) {
+      console.error('Error generating maintenance schedules:', error);
+      res.status(500).json({ error: 'Failed to generate maintenance schedules' });
+    }
+  });
+
+  function calculateNextDue(frequency: string): Date {
+    const now = new Date();
+    switch (frequency) {
+      case 'daily': return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      case 'weekly': return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      case 'monthly': return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      case 'quarterly': return new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+      case 'yearly': return new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+      default: return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    }
+  }
+
   app.post("/api/maintenance-schedule", async (req: Request, res: Response) => {
     try {
-      const scheduleData = {
-        ...req.body,
+      const scheduleData: any = {
+        machineId: req.body.machineId,
+        taskName: req.body.description || req.body.taskName || 'Maintenance Task',
+        maintenanceType: req.body.maintenanceType || 'preventive',
+        description: req.body.description,
+        frequency: req.body.frequency,
+        assignedTo: req.body.assignedTo,
+        priority: req.body.priority || 'medium',
+        estimatedHours: req.body.estimatedDuration ? parseFloat(req.body.estimatedDuration) : 1,
+        instructions: req.body.instructions,
+        status: req.body.status || 'active',
         createdBy: req.body.createdBy || req.user?.id?.toString(),
       };
       
-      // Convert date strings to Date objects
-      if (scheduleData.nextDue && typeof scheduleData.nextDue === 'string') {
-        scheduleData.nextDue = new Date(scheduleData.nextDue);
+      // Convert date strings to Date objects and add required nextDue
+      if (req.body.nextDue && typeof req.body.nextDue === 'string') {
+        scheduleData.nextDue = new Date(req.body.nextDue);
+      } else if (req.body.nextDue) {
+        scheduleData.nextDue = req.body.nextDue;
+      } else {
+        // Default to one month from now if not provided
+        scheduleData.nextDue = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       }
       
-      if (scheduleData.lastCompleted && typeof scheduleData.lastCompleted === 'string') {
-        scheduleData.lastCompleted = new Date(scheduleData.lastCompleted);
+      if (req.body.lastCompleted && typeof req.body.lastCompleted === 'string') {
+        scheduleData.lastCompleted = new Date(req.body.lastCompleted);
       }
       
       const schedule = await storage.createMaintenanceSchedule(scheduleData);
