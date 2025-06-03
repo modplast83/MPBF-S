@@ -125,6 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const categories = await storage.getCategories();
       res.json(categories);
     } catch (error) {
+      console.error("Error fetching categories:", error);
       res.status(500).json({ message: "Failed to get categories" });
     }
   });
@@ -137,6 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(category);
     } catch (error) {
+      console.error("Error fetching category:", error);
       res.status(500).json({ message: "Failed to get category" });
     }
   });
@@ -1300,7 +1302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Prepare the complete roll data with auto-generated fields
       // Get the current user ID from the authenticated session
-      const currentUserId = req.user?.id || req.body.createdById;
+      const currentUserId = req.user?.username || req.body.createdById;
       
       // Format the ID with padding to ensure uniqueness
       const paddedJobOrderId = String(validatedData.jobOrderId).padStart(4, '0');
@@ -3284,9 +3286,9 @@ COMMIT;
         .filter(roll => roll.createdAt && (roll.printedAt || roll.cutAt))
         .map(roll => {
           // Calculate processing time for different stages
-          const extrusionToNextStage = roll.printedAt ? 
+          const extrusionToNextStage = roll.printedAt && roll.createdAt ? 
             (new Date(roll.printedAt).getTime() - new Date(roll.createdAt).getTime()) : 
-            (roll.cutAt ? (new Date(roll.cutAt).getTime() - new Date(roll.createdAt).getTime()) : 0);
+            (roll.cutAt && roll.createdAt ? (new Date(roll.cutAt).getTime() - new Date(roll.createdAt).getTime()) : 0);
           
           // Calculate printing to cutting if available
           const printingToCutting = (roll.printedAt && roll.cutAt) ? 
