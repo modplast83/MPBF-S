@@ -64,6 +64,10 @@ import ViolationsComplaintsPage from "@/pages/hr/violations-complaints";
 import ViolationTrendsPage from "@/pages/hr/violation-trends";
 import BottleneckDashboard from "@/pages/production/bottleneck-dashboard";
 import MetricsInputPage from "@/pages/production/metrics-input";
+import IoTMonitor from "@/pages/production/iot-monitor";
+import MobileTasks from "@/pages/mobile/tasks";
+import MobileUpdates from "@/pages/mobile/updates";
+import MobileDevices from "@/pages/mobile/devices";
 import NotificationsPage from "@/pages/notifications";
 import { User } from "@shared/schema";
 
@@ -140,6 +144,12 @@ function App() {
                   {/* Bottleneck Notification System Routes */}
                   <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
                   <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />
+                  {/* IoT Integration Module Routes */}
+                  <ProtectedRoute path="/production/iot-monitor" component={IoTMonitor} module="IoT Monitor" />
+                  {/* Mobile Operations Routes */}
+                  <ProtectedRoute path="/mobile/tasks" component={MobileTasks} module="Operator Tasks" />
+                  <ProtectedRoute path="/mobile/updates" component={MobileUpdates} module="Quick Updates" />
+                  <ProtectedRoute path="/mobile/devices" component={MobileDevices} module="Device Management" />
                   {/* Notifications Route */}
                   <ProtectedRoute path="/notifications" component={NotificationsPage} module="Notifications" />
                   <Route component={NotFound} />
