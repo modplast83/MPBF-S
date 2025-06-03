@@ -7,13 +7,10 @@ interface DatabaseQualityCheckType {
   id: string;
   name: string;
   description: string | null;
-  stage: string;
-  target_stage?: string;
-  type: string;
-  category: string;
-  is_active: boolean;
-  checklist_items?: string[];
-  parameters?: string[];
+  checklistItems: string[] | null;
+  parameters: string[] | null;
+  targetStage: string;
+  isActive: boolean | null;
 }
 
 interface FrontendQualityCheckType {
@@ -21,9 +18,9 @@ interface FrontendQualityCheckType {
   name: string;
   description: string | null;
   targetStage: string;
-  checklistItems: string[];
-  parameters: string[];
-  isActive: boolean;
+  checklistItems: string[] | null;
+  parameters: string[] | null;
+  isActive: boolean | null;
 }
 
 /**
@@ -34,10 +31,10 @@ export function adaptToFrontend(dbCheckType: DatabaseQualityCheckType): Frontend
     id: dbCheckType.id,
     name: dbCheckType.name,
     description: dbCheckType.description,
-    targetStage: dbCheckType.target_stage || dbCheckType.stage || 'extrusion',
-    checklistItems: dbCheckType.checklist_items || [],
-    parameters: dbCheckType.parameters || [],
-    isActive: dbCheckType.is_active
+    targetStage: dbCheckType.targetStage,
+    checklistItems: dbCheckType.checklistItems,
+    parameters: dbCheckType.parameters,
+    isActive: dbCheckType.isActive
   };
 }
 
@@ -49,12 +46,9 @@ export function adaptToDatabase(frontendCheckType: FrontendQualityCheckType): Da
     id: frontendCheckType.id,
     name: frontendCheckType.name,
     description: frontendCheckType.description,
-    stage: 'production', // Default stage
-    target_stage: frontendCheckType.targetStage,
-    type: 'standard', // Default type
-    category: 'physical', // Default category
-    is_active: frontendCheckType.isActive,
-    checklist_items: frontendCheckType.checklistItems,
-    parameters: frontendCheckType.parameters
+    targetStage: frontendCheckType.targetStage,
+    checklistItems: frontendCheckType.checklistItems,
+    parameters: frontendCheckType.parameters,
+    isActive: frontendCheckType.isActive
   };
 }

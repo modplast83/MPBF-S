@@ -4565,13 +4565,13 @@ COMMIT;
       if (stageFilter) {
         qualityChecks = qualityChecks.filter(check => {
           const checkType = qualityCheckTypes.find(type => type.id === check.checkTypeId);
-          return checkType && checkType.stage === stageFilter;
+          return checkType && checkType.targetStage === stageFilter;
         });
       }
       
       if (startDate || endDate) {
         qualityChecks = qualityChecks.filter(check => {
-          const checkDate = new Date(check.checkDate);
+          const checkDate = new Date(check.timestamp);
           if (startDate && checkDate < startDate) return false;
           if (endDate && checkDate > endDate) return false;
           return true;
@@ -4594,11 +4594,11 @@ COMMIT;
         
         return {
           id: check.id,
-          date: check.checkDate,
+          date: check.timestamp,
           type: {
             id: checkType?.id || "",
             name: checkType?.name || "Unknown",
-            stage: checkType?.stage || "Unknown"
+            stage: checkType?.targetStage || "Unknown"
           },
           roll: roll ? {
             id: roll.id,
