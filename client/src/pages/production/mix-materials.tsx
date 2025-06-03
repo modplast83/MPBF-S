@@ -695,7 +695,7 @@ export default function MixMaterialsPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 rounded-full text-error-500 hover:text-error-700"
+                  className="h-7 w-7 rounded-full text-red-500 hover:text-red-700"
                   title={t('common.delete')}
                   onClick={() => {
                     if (confirm(t('common.delete_confirmation'))) {

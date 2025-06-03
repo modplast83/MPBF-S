@@ -672,7 +672,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-8 w-8 p-0 rounded-full text-error-500"
+                              className="h-8 w-8 p-0 rounded-full text-red-500"
                               onClick={() => handleDeleteJobOrder(jobOrder)}
                             >
                               <span className="material-icons text-sm">delete</span>
@@ -772,7 +772,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-error-500 hover:text-error-700"
+                              className="text-red-500 hover:text-red-700"
                               onClick={() => handleDeleteJobOrder(jobOrder)}
                             >
                               <span className="material-icons text-sm">delete</span>
@@ -978,7 +978,7 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
-              className="bg-error-500 hover:bg-error-600"
+              className="bg-red-500 hover:bg-red-600"
             >
               Delete
             </AlertDialogAction>

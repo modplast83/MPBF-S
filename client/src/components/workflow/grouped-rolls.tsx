@@ -274,7 +274,7 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
                             </div>
                             <div className="text-left">
                               <h5 className="font-medium text-xs sm:text-sm">
-                                <span className="text-error-600">JO #{jobOrderId}</span>
+                                <span className="text-red-600">JO #{jobOrderId}</span>
                               </h5>
                               <p className="text-xs text-secondary-500 truncate max-w-[180px] sm:max-w-none">
                                 {getProductDetails(jobOrderId)}

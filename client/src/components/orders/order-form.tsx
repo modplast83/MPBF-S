@@ -505,7 +505,7 @@ export function OrderForm() {
                           variant="ghost"
                           size="icon"
                           onClick={() => remove(index)}
-                          className="mb-2 text-error-500 hover:text-error-700"
+                          className="mb-2 text-red-500 hover:text-red-700"
                         >
                           <span className="material-icons">delete</span>
                         </Button>

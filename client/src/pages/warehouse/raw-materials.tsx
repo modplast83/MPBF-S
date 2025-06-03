@@ -247,7 +247,7 @@ export default function RawMaterials() {
           <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
             <span className="material-icons text-sm">edit</span>
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-red-500 hover:text-red-700">
             <span className="material-icons text-sm">delete</span>
           </Button>
         </div>
@@ -336,7 +336,7 @@ export default function RawMaterials() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleDelete(material)} 
-                className="h-8 w-8 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
+                className="h-8 w-8 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50"
               >
                 <span className="material-icons text-sm">delete</span>
               </Button>
@@ -557,7 +557,7 @@ export default function RawMaterials() {
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
-              className={`bg-error-500 hover:bg-error-600 ${isMobile ? "w-full" : ""}`}
+              className={`bg-red-500 hover:bg-red-600 ${isMobile ? "w-full" : ""}`}
             >
               {t('common.delete')}
             </AlertDialogAction>
@@ -639,7 +639,7 @@ export default function RawMaterials() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveInputItem(item.id)}
-                          className="h-8 w-8 rounded-full text-error-500 hover:text-error-700 hover:bg-error-50"
+                          className="h-8 w-8 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50"
                         >
                           <span className="material-icons text-sm">delete</span>
                         </Button>
