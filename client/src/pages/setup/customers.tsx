@@ -180,7 +180,7 @@ export default function Customers() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
-              className="bg-error-500 hover:bg-error-600"
+              className="bg-red-500 hover:bg-red-600"
             >
               Delete
             </AlertDialogAction>

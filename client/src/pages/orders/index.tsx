@@ -361,7 +361,7 @@ export default function OrdersIndex() {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700">
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-red-500 hover:text-red-700">
             <span className="material-icons text-sm">delete</span>
           </Button>
         </div>
@@ -745,7 +745,7 @@ export default function OrdersIndex() {
             <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
-              className="bg-error-500 hover:bg-error-600"
+              className="bg-red-500 hover:bg-red-600"
             >
               {t("common.delete")}
             </AlertDialogAction>
@@ -773,7 +773,7 @@ export default function OrdersIndex() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => bulkDeleteMutation.mutate(selectedOrders)}
-              className="bg-error-500 hover:bg-error-600"
+              className="bg-red-500 hover:bg-red-600"
               disabled={bulkDeleteMutation.isPending}
             >
               {bulkDeleteMutation.isPending ? "Deleting..." : "Delete Selected"}

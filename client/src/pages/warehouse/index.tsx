@@ -15,7 +15,7 @@ function WarehouseCard({ title, description, icon, path, count, status }: Wareho
   const getStatusColor = () => {
     switch (status) {
       case "critical":
-        return "bg-error-100 text-error-700";
+        return "bg-red-100 text-red-700";
       case "warning":
         return "bg-warning-100 text-warning-700";
       default:
@@ -28,7 +28,7 @@ function WarehouseCard({ title, description, icon, path, count, status }: Wareho
       <CardHeader className="pb-2">
         <CardTitle className="flex justify-between items-center">
           <span className="flex items-center">
-            <span className={`material-icons mr-2 ${status === "critical" ? "text-error-500" : status === "warning" ? "text-warning-500" : "text-success"}`}>
+            <span className={`material-icons mr-2 ${status === "critical" ? "text-red-500" : status === "warning" ? "text-yellow-500" : "text-green-500"}`}>
               {icon}
             </span>
             {title}
@@ -43,7 +43,7 @@ function WarehouseCard({ title, description, icon, path, count, status }: Wareho
         <div className="mt-2">
           <div className="w-full bg-secondary-100 rounded-full h-2">
             <div
-              className={`h-2 rounded-full ${status === "critical" ? "bg-error-500" : status === "warning" ? "bg-warning-500" : "bg-success"}`}
+              className={`h-2 rounded-full ${status === "critical" ? "bg-red-500" : status === "warning" ? "bg-yellow-500" : "bg-green-500"}`}
               style={{
                 width: status === "critical" ? "15%" : status === "warning" ? "45%" : "85%",
               }}
@@ -127,7 +127,7 @@ export default function WarehouseIndex() {
             
             <div className="flex justify-between items-center p-3 bg-secondary-50 rounded-lg">
               <div className="flex items-center gap-3">
-                <span className="material-icons text-error-500">remove_circle</span>
+                <span className="material-icons text-red-500">remove_circle</span>
                 <div>
                   <p className="font-medium">Raw Material Used</p>
                   <p className="text-sm text-secondary-500">200 kg of HDPE used for Order #3</p>

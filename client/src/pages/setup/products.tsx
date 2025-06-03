@@ -257,7 +257,7 @@ export default function Products() {
           <Button variant="ghost" size="icon" onClick={() => handleDuplicate(row)} className="text-secondary-500 hover:text-secondary-700" title="Duplicate">
             <span className="material-icons text-sm">content_copy</span>
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-error-500 hover:text-error-700" title="Delete">
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-red-500 hover:text-red-700" title="Delete">
             <span className="material-icons text-sm">delete</span>
           </Button>
         </div>
@@ -395,7 +395,7 @@ export default function Products() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
-              className="bg-error-500 hover:bg-error-600"
+              className="bg-red-500 hover:bg-red-600"
             >
               Delete
             </AlertDialogAction>
