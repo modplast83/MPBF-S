@@ -5545,6 +5545,15 @@ COMMIT;
         createdBy: req.body.createdBy || req.user?.id?.toString(),
       };
       
+      // Convert date strings to Date objects
+      if (scheduleData.nextDue && typeof scheduleData.nextDue === 'string') {
+        scheduleData.nextDue = new Date(scheduleData.nextDue);
+      }
+      
+      if (scheduleData.lastCompleted && typeof scheduleData.lastCompleted === 'string') {
+        scheduleData.lastCompleted = new Date(scheduleData.lastCompleted);
+      }
+      
       const schedule = await storage.createMaintenanceSchedule(scheduleData);
       res.status(201).json(schedule);
     } catch (error) {
