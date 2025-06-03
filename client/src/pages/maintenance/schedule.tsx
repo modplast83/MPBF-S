@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format, addDays, addWeeks, addMonths, addYears, isPast } from "date-fns";
-import { Plus, Calendar, AlertTriangle, CheckCircle, Clock, Search } from "lucide-react";
+import { Plus, Calendar, AlertTriangle, CheckCircle, Clock, Search, Trophy } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { CelebrationScreen, useCelebration } from "@/components/maintenance/celebration-screen";
@@ -252,11 +252,89 @@ export default function MaintenanceSchedulePage() {
     }
   };
 
+  // Calculate progress statistics for schedule tracking
+  const scheduleProgressStats = {
+    completedToday: filteredSchedules.filter((s: MaintenanceSchedule) => s.status === 'completed' && 
+      new Date(s.lastCompleted || '').toDateString() === new Date().toDateString()).length,
+    totalScheduled: filteredSchedules.length,
+    streak: 7, // This would be calculated from historical completion data
+    efficiency: filteredSchedules.length > 0 ? 
+      Math.round((filteredSchedules.filter((s: MaintenanceSchedule) => s.status === 'completed').length / filteredSchedules.length) * 100) : 0,
+    upcomingDue: upcomingSchedules.length,
+    overdue: overdueSchedules.length
+  };
+
+  const handleMilestoneReached = (milestone: string, data: any) => {
+    showCelebration(milestone as any, data);
+  };
+
+  // Demo celebration function for testing
+  const showDemoCelebration = () => {
+    const celebrations = [
+      {
+        type: 'task_completed' as const,
+        data: {
+          title: 'Task Completed!',
+          subtitle: 'Excellent Work',
+          description: 'Another maintenance task successfully resolved!',
+          stats: [
+            { label: 'Tasks Completed', value: 15 },
+            { label: 'Efficiency', value: '98%' }
+          ],
+          achievementLevel: 'gold' as const
+        }
+      },
+      {
+        type: 'milestone_reached' as const,
+        data: {
+          title: '10 Day Streak!',
+          subtitle: 'Consistency Champion',
+          description: 'You are building excellent maintenance habits!',
+          stats: [
+            { label: 'Current Streak', value: 10 },
+            { label: 'Total Completed', value: 45 }
+          ],
+          achievementLevel: 'silver' as const
+        }
+      },
+      {
+        type: 'perfect_score' as const,
+        data: {
+          title: 'Perfect Score!',
+          subtitle: '100% Efficiency',
+          description: 'Outstanding performance in maintenance management!',
+          stats: [
+            { label: 'Efficiency', value: '100%' },
+            { label: 'Perfect Days', value: 3 }
+          ],
+          achievementLevel: 'platinum' as const
+        }
+      }
+    ];
+    
+    const randomCelebration = celebrations[Math.floor(Math.random() * celebrations.length)];
+    showCelebration(randomCelebration.type, randomCelebration.data);
+  };
+
   return (
     <div className={`container mx-auto space-y-6 ${isMobile ? "p-3" : "p-4"}`}>
       <PageHeader
         title={t("maintenance.schedule.title")}
         description={t("maintenance.schedule.description")}
+      />
+
+      {/* Progress Tracker */}
+      <ProgressTracker 
+        stats={scheduleProgressStats} 
+        onMilestoneReached={handleMilestoneReached}
+      />
+
+      {/* Celebration Screen */}
+      <CelebrationScreen
+        isVisible={celebration.isVisible}
+        onClose={hideCelebration}
+        type={celebration.type}
+        data={celebration.data}
       />
 
       {/* Action Bar */}
@@ -272,6 +350,15 @@ export default function MaintenanceSchedulePage() {
         </div>
 
         <div className="flex space-x-2">
+          <Button
+            onClick={showDemoCelebration}
+            variant="outline"
+            className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+          >
+            <Trophy className="mr-2 h-4 w-4" />
+            Demo Celebration
+          </Button>
+          
           <Button
             onClick={() => generateSchedulesMutation.mutate()}
             disabled={generateSchedulesMutation.isPending}
