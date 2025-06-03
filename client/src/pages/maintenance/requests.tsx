@@ -18,6 +18,8 @@ import { QuickActions } from "@/components/ui/quick-actions";
 import { Plus, RefreshCw, Filter, Search, AlertTriangle, Clock, CheckCircle, X } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
+import { CelebrationScreen, useCelebration } from "@/components/maintenance/celebration-screen";
+import { ProgressTracker } from "@/components/maintenance/progress-tracker";
 
 const DAMAGE_TYPES = [
   "Motor", "Bearing", "Roller", "Printing Roller", "Gear", "Fan", 
@@ -68,6 +70,7 @@ export default function MaintenanceRequestsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
+  const { celebration, showCelebration, hideCelebration } = useCelebration();
 
   const [formData, setFormData] = useState({
     machineId: "",
