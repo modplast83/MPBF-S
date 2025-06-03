@@ -110,6 +110,7 @@ export const SIDEBAR_ITEMS = [
           { title: "Mix Materials", path: "/production/mix-materials" },
           { title: "Bottleneck Monitor", path: "/production/bottleneck-dashboard" },
           { title: "Production Metrics", path: "/production/metrics-input" },
+          { title: "IoT Monitor", path: "/production/iot-monitor" },
         ],
       },
       {
@@ -148,6 +149,16 @@ export const SIDEBAR_ITEMS = [
           { title: "Maintenance Actions", path: "/maintenance/actions" },
           { title: "Maintenance Schedule", path: "/maintenance/schedule" },
           { title: "Dashboard", path: "/maintenance/dashboard" },
+        ],
+      },
+      {
+        title: "Mobile Operations",
+        path: "/mobile",
+        icon: "smartphone",
+        subItems: [
+          { title: "Operator Tasks", path: "/mobile/tasks" },
+          { title: "Quick Updates", path: "/mobile/updates" },
+          { title: "Device Management", path: "/mobile/devices" },
         ],
       },
     ],

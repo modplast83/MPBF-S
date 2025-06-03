@@ -36,6 +36,8 @@ import { setupHRRoutes } from "./hr-routes";
 import { setupBottleneckRoutes } from "./bottleneck-routes";
 import { notificationService } from "./notification-service";
 import { setupNotificationRoutes } from "./notification-routes";
+import { setupIotRoutes } from "./iot-routes";
+import { setupMobileRoutes } from "./mobile-routes";
 
 // Extend the Request type to include express-fileupload properties
 declare global {
@@ -69,6 +71,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup bottleneck notification system routes
   setupBottleneckRoutes(app);
+  
+  // Setup IoT Integration routes
+  setupIotRoutes(app);
+  
+  // Setup Mobile App routes
+  setupMobileRoutes(app);
   
   // User is now handled directly by auth.ts
   
