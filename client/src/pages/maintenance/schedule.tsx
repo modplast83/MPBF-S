@@ -275,13 +275,13 @@ export default function MaintenanceSchedulePage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>{t("maintenance.schedule.scheduleMaintenance")}</DialogTitle>
-              <DialogDescription>
-                Schedule preventive maintenance for equipment
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+              <DialogHeader>
+                <DialogTitle>{t("maintenance.schedule.scheduleMaintenance")}</DialogTitle>
+                <DialogDescription>
+                  Schedule preventive maintenance for equipment
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="machineId">{t("maintenance.requests.machine")} *</Label>
                 <Select 
@@ -397,9 +397,10 @@ export default function MaintenanceSchedulePage() {
                   {createScheduleMutation.isPending ? "Scheduling..." : "Schedule"}
                 </Button>
               </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Schedule Tabs */}
