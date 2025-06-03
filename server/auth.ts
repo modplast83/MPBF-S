@@ -9,7 +9,14 @@ import crypto from "crypto";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User {
+      id: string;
+      username: string;
+      role: string;
+      email?: string | null;
+      firstName?: string | null;
+      lastName?: string | null;
+    }
   }
 }
 
@@ -48,7 +55,14 @@ export function setupAuth(app: Express) {
           return done(null, false, { message: "Incorrect password" });
         }
         
-        return done(null, user);
+        return done(null, {
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          email: user.email || undefined,
+          firstName: user.firstName || undefined,
+          lastName: user.lastName || undefined
+        });
       } catch (error) {
         return done(error);
       }
@@ -65,7 +79,14 @@ export function setupAuth(app: Express) {
       if (!user) {
         return done(null, false);
       }
-      done(null, user);
+      done(null, {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        email: user.email || undefined,
+        firstName: user.firstName || undefined,
+        lastName: user.lastName || undefined
+      });
     } catch (error) {
       done(error);
     }

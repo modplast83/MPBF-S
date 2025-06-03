@@ -5387,7 +5387,7 @@ COMMIT;
         const requestNumbers = existingRequests
           .map(req => req.requestNumber)
           .filter(num => num && num.startsWith('Re'))
-          .map(num => parseInt(num.substring(2)))
+          .map(num => parseInt(num?.substring(2) || '0'))
           .filter(num => !isNaN(num));
         
         if (requestNumbers.length > 0) {
