@@ -662,6 +662,131 @@ export const plateCalculationRequestSchema = z.object({
 
 export type PlateCalculationRequest = z.infer<typeof plateCalculationRequestSchema>;
 
+// IoT Integration Module - Machine Sensors
+export const machineSensors = pgTable("machine_sensors", {
+  id: text("id").primaryKey(),
+  machineId: text("machine_id").notNull().references(() => machines.id),
+  sensorType: text("sensor_type").notNull(), // temperature, pressure, speed, vibration, energy, status
+  name: text("name").notNull(),
+  unit: text("unit"), // °C, bar, rpm, Hz, kW, boolean
+  minValue: doublePrecision("min_value"),
+  maxValue: doublePrecision("max_value"),
+  warningThreshold: doublePrecision("warning_threshold"),
+  criticalThreshold: doublePrecision("critical_threshold"),
+  isActive: boolean("is_active").default(true),
+  calibrationDate: timestamp("calibration_date"),
+  nextCalibrationDate: timestamp("next_calibration_date"),
+});
+
+export const insertMachineSensorSchema = createInsertSchema(machineSensors);
+export type InsertMachineSensor = z.infer<typeof insertMachineSensorSchema>;
+export type MachineSensor = typeof machineSensors.$inferSelect;
+
+// IoT Sensor Data
+export const sensorData = pgTable("sensor_data", {
+  id: serial("id").primaryKey(),
+  sensorId: text("sensor_id").notNull().references(() => machineSensors.id),
+  value: doublePrecision("value").notNull(),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  status: text("status").notNull().default("normal"), // normal, warning, critical
+  metadata: jsonb("metadata"), // Additional sensor-specific data
+});
+
+export const insertSensorDataSchema = createInsertSchema(sensorData).omit({ id: true, timestamp: true });
+export type InsertSensorData = z.infer<typeof insertSensorDataSchema>;
+export type SensorData = typeof sensorData.$inferSelect;
+
+// IoT Alerts
+export const iotAlerts = pgTable("iot_alerts", {
+  id: serial("id").primaryKey(),
+  sensorId: text("sensor_id").notNull().references(() => machineSensors.id),
+  alertType: text("alert_type").notNull(), // threshold_exceeded, sensor_offline, anomaly_detected
+  severity: text("severity").notNull(), // warning, critical, emergency
+  message: text("message").notNull(),
+  currentValue: doublePrecision("current_value"),
+  thresholdValue: doublePrecision("threshold_value"),
+  isActive: boolean("is_active").default(true),
+  acknowledgedBy: text("acknowledged_by").references(() => users.id),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  resolvedBy: text("resolved_by").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertIotAlertSchema = createInsertSchema(iotAlerts).omit({ id: true, createdAt: true });
+export type InsertIotAlert = z.infer<typeof insertIotAlertSchema>;
+export type IotAlert = typeof iotAlerts.$inferSelect;
+
+// Mobile App - Operator Tasks
+export const operatorTasks = pgTable("operator_tasks", {
+  id: serial("id").primaryKey(),
+  assignedTo: text("assigned_to").notNull().references(() => users.id),
+  taskType: text("task_type").notNull(), // quality_check, maintenance, production_update, material_input
+  title: text("title").notNull(),
+  description: text("description"),
+  priority: text("priority").notNull().default("normal"), // low, normal, high, urgent
+  status: text("status").notNull().default("pending"), // pending, in_progress, completed, cancelled
+  dueDate: timestamp("due_date"),
+  relatedJobOrderId: integer("related_job_order_id").references(() => jobOrders.id),
+  relatedMachineId: text("related_machine_id").references(() => machines.id),
+  relatedRollId: text("related_roll_id").references(() => rolls.id),
+  assignedBy: text("assigned_by").references(() => users.id),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  estimatedDuration: integer("estimated_duration"), // in minutes
+  actualDuration: integer("actual_duration"), // in minutes
+  notes: text("notes"),
+  attachments: text("attachments").array(), // photo URLs
+  gpsLocation: text("gps_location"), // latitude,longitude
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOperatorTaskSchema = createInsertSchema(operatorTasks).omit({ id: true, createdAt: true });
+export type InsertOperatorTask = z.infer<typeof insertOperatorTaskSchema>;
+export type OperatorTask = typeof operatorTasks.$inferSelect;
+
+// Mobile App - Quick Updates from operators
+export const operatorUpdates = pgTable("operator_updates", {
+  id: serial("id").primaryKey(),
+  operatorId: text("operator_id").notNull().references(() => users.id),
+  updateType: text("update_type").notNull(), // status_update, issue_report, progress_update, completion_report
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  relatedJobOrderId: integer("related_job_order_id").references(() => jobOrders.id),
+  relatedMachineId: text("related_machine_id").references(() => machines.id),
+  relatedRollId: text("related_roll_id").references(() => rolls.id),
+  priority: text("priority").default("normal"),
+  status: text("status").default("new"), // new, acknowledged, resolved
+  photos: text("photos").array(), // photo URLs
+  gpsLocation: text("gps_location"),
+  acknowledgedBy: text("acknowledged_by").references(() => users.id),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOperatorUpdateSchema = createInsertSchema(operatorUpdates).omit({ id: true, createdAt: true });
+export type InsertOperatorUpdate = z.infer<typeof insertOperatorUpdateSchema>;
+export type OperatorUpdate = typeof operatorUpdates.$inferSelect;
+
+// Mobile App - Device Registration
+export const mobileDevices = pgTable("mobile_devices", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  deviceName: text("device_name").notNull(),
+  deviceType: text("device_type").notNull(), // android, ios
+  deviceModel: text("device_model"),
+  appVersion: text("app_version"),
+  osVersion: text("os_version"),
+  pushToken: text("push_token"), // for push notifications
+  isActive: boolean("is_active").default(true),
+  lastActive: timestamp("last_active").defaultNow(),
+  registeredAt: timestamp("registered_at").defaultNow(),
+});
+
+export const insertMobileDeviceSchema = createInsertSchema(mobileDevices).omit({ registeredAt: true });
+export type InsertMobileDevice = z.infer<typeof insertMobileDeviceSchema>;
+export type MobileDevice = typeof mobileDevices.$inferSelect;
+
 // ABA Material Configurations table for storing ABA calculator formulas
 export const abaMaterialConfigs = pgTable("aba_material_configs", {
   id: serial("id").primaryKey(),
