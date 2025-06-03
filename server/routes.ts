@@ -4609,13 +4609,13 @@ COMMIT;
             id: jobOrder.id,
             status: jobOrder.status
           } : null,
-          result: check.passed ? "Pass" : "Fail",
+          result: check.status === "passed" ? "Pass" : "Fail",
           notes: check.notes,
           correctiveActions: actions.map(action => ({
             id: action.id,
             action: action.action,
-            implementedBy: action.implementedBy,
-            implementationDate: action.implementationDate
+            implementedBy: action.completedBy,
+            implementationDate: action.completedAt
           }))
         };
       }));
@@ -4652,10 +4652,10 @@ COMMIT;
       
       // Calculate processing times for rolls
       const rollProcessingTimes = rolls
-        .filter(roll => roll.status === "completed" && roll.extrudedAt && roll.printedAt && roll.cutAt)
+        .filter(roll => roll.status === "completed" && roll.createdAt && roll.printedAt && roll.cutAt)
         .map(roll => {
           // Calculate time differences in hours
-          const extrudedDate = new Date(roll.extrudedAt!);
+          const extrudedDate = new Date(roll.createdAt!);
           const printedDate = new Date(roll.printedAt!);
           const cutDate = new Date(roll.cutAt!);
           
@@ -4676,7 +4676,7 @@ COMMIT;
             totalProcessingTime,
             wasteQty,
             wastePercentage,
-            extrudedAt: roll.extrudedAt,
+            extrudedAt: roll.createdAt,
             printedAt: roll.printedAt,
             cutAt: roll.cutAt
           };
@@ -4730,7 +4730,7 @@ COMMIT;
       
       // Quality metrics
       const totalQualityChecks = qualityChecks.length;
-      const failedQualityChecks = qualityChecks.filter(check => !check.passed).length;
+      const failedQualityChecks = qualityChecks.filter(check => check.status === "failed").length;
       const qualityFailureRate = totalQualityChecks > 0 ? (failedQualityChecks / totalQualityChecks) * 100 : 0;
       
       // Daily throughput for the last 30 days
@@ -4840,7 +4840,7 @@ COMMIT;
       // Prepare section data with actual counts
       const sectionData = sections.map(section => {
         // Count rolls by stage
-        const sectionRolls = rolls.filter(roll => roll.stage === section.id);
+        const sectionRolls = rolls.filter(roll => roll.currentStage === section.id);
         const rollCount = sectionRolls.length;
         
         // Calculate basic metrics
@@ -4991,7 +4991,7 @@ COMMIT;
     try {
       const violations = await storage.getQualityViolations();
       const sortedViolations = violations
-        .sort((a, b) => new Date(b.createdAt || new Date()).getTime() - new Date(a.createdAt || new Date()).getTime())
+        .sort((a, b) => new Date(b.reportDate || new Date()).getTime() - new Date(a.reportDate || new Date()).getTime())
         .slice(0, 10); // Get the 10 most recent
       
       // Calculate totals by status
