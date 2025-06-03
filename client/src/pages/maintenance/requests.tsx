@@ -519,13 +519,13 @@ export default function MaintenanceRequestsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t("maintenance.requests.id")}</TableHead>
+                    <TableHead>Request ID</TableHead>
                     <TableHead>{t("maintenance.requests.date")}</TableHead>
                     <TableHead>{t("maintenance.requests.machine")}</TableHead>
-                    <TableHead>{t("maintenance.requests.damage_type")}</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>{t("maintenance.requests.severity")}</TableHead>
                     <TableHead>{t("maintenance.requests.status")}</TableHead>
-                    <TableHead>{t("maintenance.requests.reported_by")}</TableHead>
+                    <TableHead>Reported By</TableHead>
                     <TableHead>{t("maintenance.requests.description")}</TableHead>
                     <TableHead>{t("common.actions")}</TableHead>
                   </TableRow>
