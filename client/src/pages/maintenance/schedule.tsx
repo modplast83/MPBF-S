@@ -17,6 +17,8 @@ import { format, addDays, addWeeks, addMonths, addYears, isPast } from "date-fns
 import { Plus, Calendar, AlertTriangle, CheckCircle, Clock, Search } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
+import { CelebrationScreen, useCelebration } from "@/components/maintenance/celebration-screen";
+import { ProgressTracker } from "@/components/maintenance/progress-tracker";
 
 const FREQUENCY_OPTIONS = ["daily", "weekly", "monthly", "quarterly", "yearly"];
 const MAINTENANCE_TYPES = ["preventive", "corrective", "predictive", "emergency"];
@@ -56,6 +58,7 @@ export default function MaintenanceSchedulePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("upcoming");
+  const { celebration, showCelebration, hideCelebration } = useCelebration();
 
   const [formData, setFormData] = useState({
     machineId: "",
@@ -111,6 +114,18 @@ export default function MaintenanceSchedulePage() {
   const generateSchedulesMutation = useMutation({
     mutationFn: () => apiRequest('POST', `${API_ENDPOINTS.MAINTENANCE_SCHEDULE}/generate`, {}),
     onSuccess: (response: any) => {
+      // Show celebration for successful schedule generation
+      showCelebration('milestone_reached', {
+        title: 'Schedules Generated!',
+        subtitle: 'Smart Automation Success',
+        description: response.message || 'Maintenance schedules created automatically for all machines',
+        stats: [
+          { label: 'Schedules Created', value: response.schedules?.length || 0 },
+          { label: 'Machines Covered', value: machines?.length || 0 }
+        ],
+        achievementLevel: 'gold'
+      });
+      
       toast({
         title: "Success",
         description: response.message || "Maintenance schedules generated successfully",

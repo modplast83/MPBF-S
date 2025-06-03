@@ -125,10 +125,28 @@ export default function MaintenanceRequestsPage() {
   const updateRequestMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
       apiRequest('PUT', `${API_ENDPOINTS.MAINTENANCE_REQUESTS}/${id}`, data),
-    onSuccess: () => {
+    onSuccess: (result, variables) => {
+      const wasCompleted = variables.data.status === 'completed';
+      
+      if (wasCompleted) {
+        // Trigger celebration when task is completed
+        const completedCount = requests?.filter((r: MaintenanceRequest) => r.status === 'completed').length || 0;
+        
+        showCelebration('task_completed', {
+          title: 'Task Completed!',
+          subtitle: 'Excellent Work',
+          description: 'Another maintenance task successfully resolved!',
+          stats: [
+            { label: 'Tasks Completed', value: completedCount + 1 },
+            { label: 'Status', value: 'Resolved' }
+          ],
+          achievementLevel: completedCount >= 10 ? 'gold' : completedCount >= 5 ? 'silver' : 'bronze'
+        });
+      }
+      
       toast({
         title: "Success",
-        description: "Maintenance request updated successfully",
+        description: wasCompleted ? "Maintenance task completed!" : "Maintenance request updated successfully",
       });
       refetchRequests();
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MAINTENANCE_REQUESTS] });
@@ -233,6 +251,21 @@ export default function MaintenanceRequestsPage() {
     return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : userId;
   };
 
+  // Calculate progress statistics
+  const progressStats = {
+    completedToday: requests?.filter((r: MaintenanceRequest) => r.status === 'completed' && 
+      new Date(r.completedAt || '').toDateString() === new Date().toDateString()).length || 0,
+    totalScheduled: requests?.length || 0,
+    streak: 5, // This would be calculated from historical data
+    efficiency: requests?.length > 0 ? Math.round((requests.filter((r: MaintenanceRequest) => r.status === 'completed').length / requests.length) * 100) : 0,
+    upcomingDue: requests?.filter((r: MaintenanceRequest) => r.status === 'pending').length || 0,
+    overdue: requests?.filter((r: MaintenanceRequest) => r.status === 'pending' && r.priority >= 3).length || 0
+  };
+
+  const handleMilestoneReached = (milestone: string, data: any) => {
+    showCelebration(milestone as any, data);
+  };
+
   const quickActions = [
     {
       id: "new-request",
@@ -280,6 +313,20 @@ export default function MaintenanceRequestsPage() {
       <PageHeader
         title={t("maintenance.requests.title")}
         description={t("maintenance.requests.description")}
+      />
+
+      {/* Progress Tracker */}
+      <ProgressTracker 
+        stats={progressStats} 
+        onMilestoneReached={handleMilestoneReached}
+      />
+
+      {/* Celebration Screen */}
+      <CelebrationScreen
+        isVisible={celebration.isVisible}
+        onClose={hideCelebration}
+        type={celebration.type}
+        data={celebration.data}
       />
 
       {/* Action Bar */}
