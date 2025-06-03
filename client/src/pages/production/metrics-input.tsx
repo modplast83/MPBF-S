@@ -115,7 +115,7 @@ export default function MetricsInputPage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">{t("production.metrics_input")}</h1>
+        <h1 className="text-3xl font-bold">Metrics Input</h1>
         <p className="text-muted-foreground">
           {t("production.metrics_input_description")}
         </p>
