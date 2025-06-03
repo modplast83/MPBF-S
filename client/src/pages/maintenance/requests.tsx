@@ -26,7 +26,7 @@ const DAMAGE_TYPES = [
 ];
 
 const SEVERITY_LEVELS = ["High", "Normal", "Low"];
-const STATUS_OPTIONS = ["pending", "in_progress", "completed", "cancelled"];
+const STATUS_OPTIONS = ["pending", "progress", "completed", "cancelled"];
 
 interface MaintenanceRequest {
   id: number;
@@ -209,7 +209,7 @@ export default function MaintenanceRequestsPage() {
     switch (status) {
       case "pending":
         return <Badge variant="destructive"><AlertTriangle className="w-3 h-3 mr-1" />{status}</Badge>;
-      case "in_progress":
+      case "progress":
         return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />{status}</Badge>;
       case "completed":
         return <Badge variant="default"><CheckCircle className="w-3 h-3 mr-1" />{status}</Badge>;

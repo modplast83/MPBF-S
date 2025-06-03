@@ -5420,7 +5420,20 @@ COMMIT;
         return res.status(400).json({ error: "Invalid request ID" });
       }
       
-      const request = await storage.updateMaintenanceRequest(id, req.body);
+      // Process the update data to handle date fields properly
+      const updateData = { ...req.body };
+      
+      // If status is being updated to 'completed', set completedAt
+      if (updateData.status === 'completed' && !updateData.completedAt) {
+        updateData.completedAt = new Date();
+      }
+      
+      // Ensure any date strings are converted to Date objects
+      if (updateData.completedAt && typeof updateData.completedAt === 'string') {
+        updateData.completedAt = new Date(updateData.completedAt);
+      }
+      
+      const request = await storage.updateMaintenanceRequest(id, updateData);
       if (!request) {
         return res.status(404).json({ error: "Maintenance request not found" });
       }
