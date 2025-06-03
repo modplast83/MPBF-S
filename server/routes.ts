@@ -1302,7 +1302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Prepare the complete roll data with auto-generated fields
       // Get the current user ID from the authenticated session
-      const currentUserId = req.user?.username || req.body.createdById;
+      const currentUserId = req.user?.id || req.body.createdById;
       
       // Format the ID with padding to ensure uniqueness
       const paddedJobOrderId = String(validatedData.jobOrderId).padStart(4, '0');
@@ -2262,7 +2262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Error creating database backup:", error);
-      res.status(500).json({ message: `Failed to create database backup: ${error.message}` });
+      res.status(500).json({ message: `Failed to create database backup: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   });
 
@@ -3372,9 +3372,9 @@ COMMIT;
       const recentProcessingTimes = recentRolls
         .filter(roll => roll.createdAt && (roll.printedAt || roll.cutAt))
         .map(roll => {
-          const extrusionToNextStage = roll.printedAt ? 
+          const extrusionToNextStage = roll.printedAt && roll.createdAt ? 
             (new Date(roll.printedAt).getTime() - new Date(roll.createdAt).getTime()) : 
-            (roll.cutAt ? (new Date(roll.cutAt).getTime() - new Date(roll.createdAt).getTime()) : 0);
+            (roll.cutAt && roll.createdAt ? (new Date(roll.cutAt).getTime() - new Date(roll.createdAt).getTime()) : 0);
           
           return {
             rollId: roll.id,
