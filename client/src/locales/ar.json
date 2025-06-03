@@ -151,6 +151,11 @@
       "maintenance_schedule": "جدولة الصيانة",
       "cost": "التكلفة",
       "cost_calculator": "حاسبة التكلفة",
+      "iot_monitor": "مراقب إنترنت الأشياء",
+      "mobile_operations": "العمليات المحمولة",
+      "operator_tasks": "مهام المشغلين",
+      "quick_updates": "التحديثات السريعة",
+      "device_management": "إدارة الأجهزة",
       "user": "المستخدم",
       "role": "الدور"
     },

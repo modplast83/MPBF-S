@@ -177,7 +177,12 @@
       "maintenance_requests": "Maintenance Requests",
       "maintenance_actions": "Maintenance Actions",
       "maintenance_schedule": "Maintenance Schedule",
-      "maintenance_dashboard": "Maintenance Dashboard"
+      "maintenance_dashboard": "Maintenance Dashboard",
+      "iot_monitor": "IoT Monitor",
+      "mobile_operations": "Mobile Operations",
+      "operator_tasks": "Operator Tasks",
+      "quick_updates": "Quick Updates",
+      "device_management": "Device Management"
     },
     "dashboard": {
       "title": "Dashboard",
