@@ -17,9 +17,9 @@ function WarehouseCard({ title, description, icon, path, count, status }: Wareho
       case "critical":
         return "bg-red-100 text-red-700";
       case "warning":
-        return "bg-warning-100 text-warning-700";
+        return "bg-yellow-100 text-yellow-700";
       default:
-        return "bg-success-100 text-success-700";
+        return "bg-green-100 text-green-700";
     }
   };
 
@@ -105,7 +105,7 @@ export default function WarehouseIndex() {
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 bg-secondary-50 rounded-lg">
               <div className="flex items-center gap-3">
-                <span className="material-icons text-warning-500">add_circle</span>
+                <span className="material-icons text-yellow-500">add_circle</span>
                 <div>
                   <p className="font-medium">HDPE Raw Material Added</p>
                   <p className="text-sm text-secondary-500">500 kg added to inventory</p>
