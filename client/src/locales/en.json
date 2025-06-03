@@ -1112,7 +1112,24 @@
     },
     "language": {
       "en": "English",
-      "ar": "العربية"
+      "ar": "العربية",
+      "es": "Español",
+      "fr": "Français", 
+      "de": "Deutsch",
+      "zh": "中文",
+      "change_interface": "Change interface language",
+      "viewing_in_en": "Viewing in English",
+      "viewing_in_ar": "Viewing in العربية",
+      "viewing_in_es": "Viewing in Español",
+      "viewing_in_fr": "Viewing in Français",
+      "viewing_in_de": "Viewing in Deutsch",
+      "viewing_in_zh": "Viewing in 中文",
+      "interface_in_en": "Interface in English",
+      "interface_in_ar": "Interface in العربية",
+      "interface_in_es": "Interface in Español",
+      "interface_in_fr": "Interface in Français",
+      "interface_in_de": "Interface in Deutsch",
+      "interface_in_zh": "Interface in 中文"
     },
     "pagination": {
       "showing_entries": "Showing {{from}} to {{to}} of {{total}} entries",

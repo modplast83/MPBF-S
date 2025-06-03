@@ -13,10 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth-v2";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
-import { Loader2, Globe, Menu, HelpCircle } from "lucide-react";
+import { Loader2, Menu, HelpCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthenticationButton } from "@/components/authentication-button";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import AnimatedLanguageToggle from "@/components/ui/animated-language-toggle";
 
 interface HeaderProps {
   mobileMenuOpen?: boolean;
@@ -102,22 +103,8 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
           </h2>
         </div>
         <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 sm:space-x-4`}>
-          {/* Language Switcher */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="flex items-center justify-center text-primary-600 border-primary-200 shadow-sm hover:bg-primary-50">
-                <Globe className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onSelect={() => setLanguage("en")} className={language === "en" ? "bg-primary-50" : ""}>
-                <span className={`${language === "en" ? "font-bold text-primary-700" : ""}`}>{t("language.en")}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setLanguage("ar")} className={language === "ar" ? "bg-primary-50" : ""}>
-                <span className={`${language === "ar" ? "font-bold text-primary-700" : ""}`}>{t("language.ar")}</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Animated Language Toggle */}
+          <AnimatedLanguageToggle variant="dropdown" showNames={!isMobile} />
           
           {/* Notification Bell - available on all screen sizes for authenticated users */}
           {user && <NotificationBell />}
