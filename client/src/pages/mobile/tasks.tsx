@@ -257,26 +257,26 @@ export default function MobileTasks() {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Operator Tasks</h1>
-          <p className="text-gray-600 mt-1">Manage your daily tasks and updates</p>
+          <h1 className="text-3xl font-bold">{t('mobile.tasks.title', 'Operator Tasks')}</h1>
+          <p className="text-gray-600 mt-1">{t('mobile.tasks.description', 'Manage your daily tasks and updates')}</p>
         </div>
         <Dialog open={isQuickUpdateOpen} onOpenChange={setIsQuickUpdateOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Quick Update
+              {t('mobile.tasks.quick_update', 'Quick Update')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Send Quick Update</DialogTitle>
+              <DialogTitle>{t('mobile.tasks.send_quick_update', 'Send Quick Update')}</DialogTitle>
               <DialogDescription>
-                Send a quick status update to supervisors
+                {t('mobile.tasks.quick_update_desc', 'Send a quick status update to supervisors')}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="type">Update Type</Label>
+                <Label htmlFor="type">{t('mobile.tasks.update_type', 'Update Type')}</Label>
                 <Select
                   value={quickUpdateData.type}
                   onValueChange={(value) => setQuickUpdateData(prev => ({ ...prev, type: value }))}
@@ -285,15 +285,15 @@ export default function MobileTasks() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="status_update">Status Update</SelectItem>
-                    <SelectItem value="issue_report">Issue Report</SelectItem>
-                    <SelectItem value="progress_update">Progress Update</SelectItem>
-                    <SelectItem value="completion_report">Completion Report</SelectItem>
+                    <SelectItem value="status_update">{t('mobile.updates.update_types.status_update', 'Status Update')}</SelectItem>
+                    <SelectItem value="issue_report">{t('mobile.updates.update_types.issue_report', 'Issue Report')}</SelectItem>
+                    <SelectItem value="progress_update">{t('mobile.updates.update_types.progress_update', 'Progress Update')}</SelectItem>
+                    <SelectItem value="completion_report">{t('mobile.updates.update_types.completion_report', 'Completion Report')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="message">Message</Label>
+                <Label htmlFor="message">{t('mobile.tasks.update_message', 'Message')}</Label>
                 <Textarea
                   id="message"
                   value={quickUpdateData.message}

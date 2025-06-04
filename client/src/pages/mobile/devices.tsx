@@ -189,74 +189,74 @@ export default function MobileDevices() {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Device Management</h1>
-          <p className="text-gray-600 mt-1">Manage your mobile devices and app access</p>
+          <h1 className="text-3xl font-bold">{t('mobile.devices.title', 'Device Management')}</h1>
+          <p className="text-gray-600 mt-1">{t('mobile.devices.description', 'Manage your mobile devices and app access')}</p>
         </div>
         <Dialog open={isRegisterDeviceOpen} onOpenChange={setIsRegisterDeviceOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Register Device
+              {t('mobile.devices.register_device', 'Register Device')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Register New Device</DialogTitle>
+              <DialogTitle>{t('mobile.devices.register_device', 'Register New Device')}</DialogTitle>
               <DialogDescription>
-                Register a new mobile device for operator app access
+                {t('mobile.devices.register_desc', 'Register a new mobile device for operator app access')}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="deviceName">Device Name *</Label>
+                <Label htmlFor="deviceName">{t('mobile.devices.device_name', 'Device Name')} *</Label>
                 <Input
                   id="deviceName"
                   value={deviceData.deviceName}
                   onChange={(e) => setDeviceData(prev => ({ ...prev, deviceName: e.target.value }))}
-                  placeholder="e.g., John's Phone"
+                  placeholder={t('mobile.devices.enter_device_name', "e.g., John's Phone")}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="deviceType">Device Type *</Label>
+                <Label htmlFor="deviceType">{t('mobile.devices.device_type', 'Device Type')} *</Label>
                 <Select
                   value={deviceData.deviceType}
                   onValueChange={(value) => setDeviceData(prev => ({ ...prev, deviceType: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder={t('mobile.devices.select_device_type', 'Select device type')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="android">Android</SelectItem>
-                    <SelectItem value="ios">iOS</SelectItem>
-                    <SelectItem value="tablet">Tablet</SelectItem>
+                    <SelectItem value="android">{t('mobile.devices.device_types.android', 'Android')}</SelectItem>
+                    <SelectItem value="ios">{t('mobile.devices.device_types.ios', 'iOS')}</SelectItem>
+                    <SelectItem value="tablet">{t('mobile.devices.device_types.tablet', 'Tablet')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="deviceModel">Device Model</Label>
+                <Label htmlFor="deviceModel">{t('mobile.devices.device_model', 'Device Model')}</Label>
                 <Input
                   id="deviceModel"
                   value={deviceData.deviceModel}
                   onChange={(e) => setDeviceData(prev => ({ ...prev, deviceModel: e.target.value }))}
-                  placeholder="e.g., Samsung Galaxy S21"
+                  placeholder={t('mobile.devices.enter_device_model', 'e.g., Samsung Galaxy S21')}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="appVersion">App Version</Label>
+                <Label htmlFor="appVersion">{t('mobile.devices.app_version', 'App Version')}</Label>
                 <Input
                   id="appVersion"
                   value={deviceData.appVersion}
                   onChange={(e) => setDeviceData(prev => ({ ...prev, appVersion: e.target.value }))}
-                  placeholder="e.g., 1.0.0"
+                  placeholder="1.0.0"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="osVersion">OS Version</Label>
+                <Label htmlFor="osVersion">{t('mobile.devices.os_version', 'OS Version')}</Label>
                 <Input
                   id="osVersion"
                   value={deviceData.osVersion}
                   onChange={(e) => setDeviceData(prev => ({ ...prev, osVersion: e.target.value }))}
-                  placeholder="e.g., Android 12"
+                  placeholder={t('mobile.devices.enter_os_version', 'e.g., Android 12')}
                 />
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function MobileDevices() {
                 onClick={handleRegisterDevice}
                 disabled={registerDeviceMutation.isPending}
               >
-                {registerDeviceMutation.isPending ? 'Registering...' : 'Register Device'}
+                {registerDeviceMutation.isPending ? t('mobile.devices.registering', 'Registering...') : t('mobile.devices.register_device', 'Register Device')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -296,7 +296,7 @@ export default function MobileDevices() {
                     <WifiOff className="h-4 w-4 text-gray-400" />
                   )}
                   <Badge variant={device.isActive ? 'default' : 'secondary'}>
-                    {device.isActive ? 'Active' : 'Inactive'}
+                    {device.isActive ? t('mobile.devices.active', 'Active') : t('mobile.devices.inactive', 'Inactive')}
                   </Badge>
                 </div>
               </div>
@@ -304,20 +304,20 @@ export default function MobileDevices() {
             <CardContent>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Type:</span>
+                  <span className="text-gray-500">{t('mobile.devices.type', 'Type')}:</span>
                   <span className={`px-2 py-1 rounded text-xs ${getDeviceTypeColor(device.deviceType)}`}>
                     {device.deviceType.toUpperCase()}
                   </span>
                 </div>
                 {device.appVersion && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">App Version:</span>
+                    <span className="text-gray-500">{t('mobile.devices.app_version', 'App Version')}:</span>
                     <span>{device.appVersion}</span>
                   </div>
                 )}
                 {device.osVersion && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">OS Version:</span>
+                    <span className="text-gray-500">{t('mobile.devices.os_version', 'OS Version')}:</span>
                     <span>{device.osVersion}</span>
                   </div>
                 )}
