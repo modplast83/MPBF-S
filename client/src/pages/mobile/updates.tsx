@@ -200,52 +200,52 @@ export default function MobileUpdates() {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Quick Updates</h1>
-          <p className="text-gray-600 mt-1">Send status updates and report issues</p>
+          <h1 className="text-3xl font-bold">{t('mobile.updates.title', 'Quick Updates')}</h1>
+          <p className="text-gray-600 mt-1">{t('mobile.updates.description', 'Send status updates and report issues')}</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={isIssueReportOpen} onOpenChange={setIsIssueReportOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <AlertTriangle className="h-4 w-4 mr-2" />
-                Report Issue
+                {t('mobile.updates.report_issue', 'Report Issue')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Report Issue</DialogTitle>
+                <DialogTitle>{t('mobile.updates.report_issue', 'Report Issue')}</DialogTitle>
                 <DialogDescription>
-                  Report a production issue or problem that needs attention
+                  {t('mobile.updates.report_issue_desc', 'Report a production issue or problem that needs attention')}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="issueTitle">Issue Title</Label>
+                  <Label htmlFor="issueTitle">{t('mobile.updates.issue_title', 'Issue Title')}</Label>
                   <Input
                     id="issueTitle"
                     value={issueReportData.title}
                     onChange={(e) => setIssueReportData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Brief description of the issue"
+                    placeholder={t('mobile.updates.enter_title', 'Brief description of the issue')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="issueDescription">Description</Label>
+                  <Label htmlFor="issueDescription">{t('mobile.updates.issue_description', 'Description')}</Label>
                   <Textarea
                     id="issueDescription"
                     value={issueReportData.description}
                     onChange={(e) => setIssueReportData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Detailed description of the issue..."
+                    placeholder={t('mobile.updates.enter_message', 'Detailed description of the issue...')}
                     rows={4}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="machine">Related Machine (Optional)</Label>
+                  <Label htmlFor="machine">{t('mobile.updates.machine', 'Related Machine')} ({t('mobile.updates.optional', 'Optional')})</Label>
                   <Select
                     value={issueReportData.machineId}
                     onValueChange={(value) => setIssueReportData(prev => ({ ...prev, machineId: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select machine" />
+                      <SelectValue placeholder={t('mobile.updates.select_machine', 'Select machine')} />
                     </SelectTrigger>
                     <SelectContent>
                       {(machines as any[]).map((machine: any) => (
@@ -257,7 +257,7 @@ export default function MobileUpdates() {
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="severity">Severity</Label>
+                  <Label htmlFor="severity">{t('mobile.updates.severity', 'Severity')}</Label>
                   <Select
                     value={issueReportData.severity}
                     onValueChange={(value) => setIssueReportData(prev => ({ ...prev, severity: value }))}
@@ -266,10 +266,10 @@ export default function MobileUpdates() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="urgent">Urgent</SelectItem>
+                      <SelectItem value="low">{t('mobile.updates.severity_levels.low', 'Low')}</SelectItem>
+                      <SelectItem value="normal">{t('mobile.updates.severity_levels.normal', 'Normal')}</SelectItem>
+                      <SelectItem value="high">{t('mobile.updates.severity_levels.high', 'High')}</SelectItem>
+                      <SelectItem value="critical">{t('mobile.updates.severity_levels.critical', 'Critical')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -279,7 +279,7 @@ export default function MobileUpdates() {
                   onClick={handleReportIssue}
                   disabled={reportIssueMutation.isPending || !issueReportData.title || !issueReportData.description}
                 >
-                  {reportIssueMutation.isPending ? 'Reporting...' : 'Report Issue'}
+                  {reportIssueMutation.isPending ? t('mobile.updates.sending', 'Reporting...') : t('mobile.updates.report_issue', 'Report Issue')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -289,66 +289,66 @@ export default function MobileUpdates() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                New Update
+                {t('mobile.updates.new_update', 'New Update')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Send Update</DialogTitle>
+                <DialogTitle>{t('mobile.updates.send_update', 'Send Update')}</DialogTitle>
                 <DialogDescription>
-                  Send a status update to supervisors and management
+                  {t('mobile.updates.send_update_desc', 'Send a status update to supervisors and management')}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="updateType">Update Type</Label>
+                  <Label htmlFor="updateType">{t('mobile.updates.update_type', 'Update Type')}</Label>
                   <Select
                     value={newUpdateData.type}
                     onValueChange={(value) => setNewUpdateData(prev => ({ ...prev, type: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder={t('mobile.updates.select_update_type', 'Select update type')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="status_update">Status Update</SelectItem>
-                      <SelectItem value="progress_update">Progress Update</SelectItem>
-                      <SelectItem value="completion_report">Completion Report</SelectItem>
+                      <SelectItem value="status_update">{t('mobile.updates.update_types.status_update', 'Status Update')}</SelectItem>
+                      <SelectItem value="progress_update">{t('mobile.updates.update_types.progress_update', 'Progress Update')}</SelectItem>
+                      <SelectItem value="completion_report">{t('mobile.updates.update_types.completion_report', 'Completion Report')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="updateTitle">Title</Label>
+                  <Label htmlFor="updateTitle">{t('mobile.updates.update_title', 'Title')}</Label>
                   <Input
                     id="updateTitle"
                     value={newUpdateData.title}
                     onChange={(e) => setNewUpdateData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Update title"
+                    placeholder={t('mobile.updates.enter_title', 'Update title')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="updateMessage">Message</Label>
+                  <Label htmlFor="updateMessage">{t('mobile.updates.update_message', 'Message')}</Label>
                   <Textarea
                     id="updateMessage"
                     value={newUpdateData.message}
                     onChange={(e) => setNewUpdateData(prev => ({ ...prev, message: e.target.value }))}
-                    placeholder="Describe the update..."
+                    placeholder={t('mobile.updates.enter_message', 'Describe the update...')}
                     rows={4}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="updatePriority">Priority</Label>
+                  <Label htmlFor="updatePriority">{t('mobile.updates.priority', 'Priority')}</Label>
                   <Select
                     value={newUpdateData.priority}
                     onValueChange={(value) => setNewUpdateData(prev => ({ ...prev, priority: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder={t('mobile.updates.select_priority', 'Select priority')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="urgent">Urgent</SelectItem>
+                      <SelectItem value="low">{t('mobile.updates.priority_levels.low', 'Low')}</SelectItem>
+                      <SelectItem value="normal">{t('mobile.updates.priority_levels.normal', 'Normal')}</SelectItem>
+                      <SelectItem value="high">{t('mobile.updates.priority_levels.high', 'High')}</SelectItem>
+                      <SelectItem value="urgent">{t('mobile.updates.priority_levels.urgent', 'Urgent')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -1491,6 +1491,184 @@
       "machine_health": "صحة الآلة",
       "performance_metrics": "مقاييس الأداء",
       "alert_management": "إدارة التنبيهات"
+    },
+    "mobile": {
+      "updates": {
+        "title": "التحديثات",
+        "description": "إرسال وعرض تحديثات الحالة والتقارير",
+        "new_update": "تحديث جديد",
+        "report_issue": "الإبلاغ عن مشكلة",
+        "send_update": "إرسال تحديث",
+        "quick_update": "تحديث سريع",
+        "update_type": "نوع التحديث",
+        "update_title": "عنوان التحديث",
+        "update_message": "رسالة التحديث",
+        "priority": "الأولوية",
+        "select_update_type": "اختر نوع التحديث",
+        "enter_title": "أدخل العنوان",
+        "enter_message": "أدخل الرسالة",
+        "select_priority": "اختر الأولوية",
+        "issue_title": "عنوان المشكلة",
+        "issue_description": "وصف المشكلة",
+        "severity": "الخطورة",
+        "machine": "الآلة",
+        "select_machine": "اختر الآلة",
+        "optional": "اختياري",
+        "sending": "جاري الإرسال...",
+        "send": "إرسال",
+        "no_updates": "لا توجد تحديثات متاحة",
+        "update_types": {
+          "status_update": "تحديث حالة",
+          "issue_report": "تقرير مشكلة",
+          "completion_report": "تقرير إنجاز",
+          "progress_update": "تحديث التقدم"
+        },
+        "priority_levels": {
+          "urgent": "عاجل",
+          "high": "عالي",
+          "normal": "عادي",
+          "low": "منخفض"
+        },
+        "severity_levels": {
+          "critical": "حرج",
+          "high": "عالي",
+          "normal": "عادي",
+          "low": "منخفض"
+        },
+        "status": {
+          "new": "جديد",
+          "acknowledged": "تم الإقرار",
+          "resolved": "تم الحل"
+        },
+        "success": {
+          "update_sent": "تم إرسال التحديث بنجاح",
+          "issue_reported": "تم الإبلاغ عن المشكلة بنجاح"
+        },
+        "error": {
+          "update_failed": "فشل في إرسال التحديث",
+          "issue_report_failed": "فشل في الإبلاغ عن المشكلة"
+        }
+      },
+      "tasks": {
+        "title": "مهام المشغل",
+        "description": "إدارة مهامك اليومية والتحديثات",
+        "my_tasks": "مهامي",
+        "pending_tasks": "المهام المعلقة",
+        "completed_tasks": "المهام المكتملة",
+        "task_details": "تفاصيل المهمة",
+        "start_task": "بدء المهمة",
+        "complete_task": "إكمال المهمة",
+        "update_progress": "تحديث التقدم",
+        "task_status": "حالة المهمة",
+        "assigned_by": "مُكلف من",
+        "due_date": "تاريخ الاستحقاق",
+        "priority": "الأولوية",
+        "instructions": "التعليمات",
+        "progress": "التقدم",
+        "notes": "ملاحظات",
+        "attachments": "المرفقات",
+        "quick_update": "تحديث سريع",
+        "send_quick_update": "إرسال تحديث سريع",
+        "update_message": "رسالة التحديث",
+        "task_filter": "فلتر المهام",
+        "all_tasks": "جميع المهام",
+        "my_assigned": "المُكلف لي",
+        "overdue": "متأخر",
+        "today": "اليوم",
+        "this_week": "هذا الأسبوع",
+        "no_tasks": "لا توجد مهام متاحة",
+        "task_statistics": "إحصائيات المهام",
+        "total_tasks": "إجمالي المهام",
+        "completed_today": "مكتمل اليوم",
+        "pending_urgent": "عاجل ومعلق",
+        "success_rate": "معدل النجاح",
+        "status": {
+          "pending": "معلق",
+          "in_progress": "قيد التنفيذ",
+          "completed": "مكتمل",
+          "overdue": "متأخر",
+          "cancelled": "ملغي"
+        },
+        "success": {
+          "task_started": "تم بدء المهمة بنجاح",
+          "task_completed": "تم إكمال المهمة بنجاح",
+          "progress_updated": "تم تحديث التقدم بنجاح",
+          "update_sent": "تم إرسال التحديث بنجاح"
+        },
+        "error": {
+          "task_start_failed": "فشل في بدء المهمة",
+          "task_complete_failed": "فشل في إكمال المهمة",
+          "progress_update_failed": "فشل في تحديث التقدم",
+          "update_send_failed": "فشل في إرسال التحديث"
+        }
+      },
+      "devices": {
+        "title": "إدارة الأجهزة",
+        "description": "إدارة الأجهزة المحمولة والوصول",
+        "my_devices": "أجهزتي",
+        "register_device": "تسجيل جهاز",
+        "device_name": "اسم الجهاز",
+        "device_type": "نوع الجهاز",
+        "device_model": "موديل الجهاز",
+        "app_version": "إصدار التطبيق",
+        "os_version": "إصدار نظام التشغيل",
+        "status": "الحالة",
+        "last_active": "آخر نشاط",
+        "registered_at": "تاريخ التسجيل",
+        "activate": "تفعيل",
+        "deactivate": "إلغاء التفعيل",
+        "device_info": "معلومات الجهاز",
+        "enter_device_name": "أدخل اسم الجهاز",
+        "enter_device_model": "أدخل موديل الجهاز",
+        "enter_os_version": "أدخل إصدار نظام التشغيل",
+        "select_device_type": "اختر نوع الجهاز",
+        "registering": "جاري التسجيل...",
+        "register": "تسجيل",
+        "no_devices": "لا توجد أجهزة مسجلة",
+        "device_management_info": "معلومات إدارة الأجهزة",
+        "active_devices": "الأجهزة النشطة",
+        "device_registration": "تسجيل الجهاز",
+        "security": "الأمان",
+        "active_devices_desc": "الأجهزة النشطة يمكنها تلقي الإشعارات والوصول لتطبيق المشغل المحمول. جهاز واحد فقط لكل مستخدم يمكن أن يكون نشطاً لأسباب أمنية.",
+        "device_registration_desc": "سجل أجهزة جديدة للوصول للميزات المحمولة. كل جهاز يتطلب موافقة وسيلغي تلقائياً الأجهزة الأخرى لنفس المستخدم.",
+        "security_desc": "ألغِ تفعيل الأجهزة المفقودة أو المسروقة فوراً. نشاط الجهاز يتم تتبعه لأغراض الأمان والمراجعة.",
+        "device_types": {
+          "android": "أندرويد",
+          "ios": "آيفون",
+          "tablet": "جهاز لوحي",
+          "scanner": "ماسح ضوئي"
+        },
+        "status_types": {
+          "active": "نشط",
+          "inactive": "غير نشط",
+          "pending": "في الانتظار"
+        },
+        "success": {
+          "device_registered": "تم تسجيل الجهاز بنجاح",
+          "device_activated": "تم تفعيل الجهاز",
+          "device_deactivated": "تم إلغاء تفعيل الجهاز"
+        },
+        "error": {
+          "registration_failed": "فشل في تسجيل الجهاز",
+          "activation_failed": "فشل في تفعيل الجهاز",
+          "deactivation_failed": "فشل في إلغاء تفعيل الجهاز"
+        }
+      },
+      "common": {
+        "loading": "جاري التحميل...",
+        "refresh": "تحديث",
+        "filter": "فلتر",
+        "search": "بحث",
+        "location": "الموقع",
+        "photos": "الصور",
+        "time_ago": "منذ",
+        "view_details": "عرض التفاصيل",
+        "close": "إغلاق",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "delete": "حذف",
+        "edit": "تعديل"
+      }
     }
   }
 }
