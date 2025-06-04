@@ -322,11 +322,11 @@ export default function MobileDevices() {
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Last Active:</span>
+                  <span className="text-gray-500">{t('mobile.devices.last_active', 'Last Active')}:</span>
                   <span>{formatDistanceToNow(new Date(device.lastActive), { addSuffix: true })}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Registered:</span>
+                  <span className="text-gray-500">{t('mobile.devices.registered', 'Registered')}:</span>
                   <span>{formatDistanceToNow(new Date(device.registeredAt), { addSuffix: true })}</span>
                 </div>
                 
@@ -339,7 +339,7 @@ export default function MobileDevices() {
                       disabled={updateActivityMutation.isPending}
                     >
                       <Activity className="h-4 w-4 mr-1" />
-                      Update Activity
+                      {t('mobile.devices.update_activity', 'Update Activity')}
                     </Button>
                   )}
                   <Button
@@ -351,12 +351,12 @@ export default function MobileDevices() {
                     {device.isActive ? (
                       <>
                         <WifiOff className="h-4 w-4 mr-1" />
-                        Deactivate
+                        {t('mobile.devices.deactivate', 'Deactivate')}
                       </>
                     ) : (
                       <>
                         <Wifi className="h-4 w-4 mr-1" />
-                        Reactivate
+                        {t('mobile.devices.reactivate', 'Reactivate')}
                       </>
                     )}
                   </Button>
@@ -372,13 +372,13 @@ export default function MobileDevices() {
           <CardContent className="p-8">
             <div className="text-center">
               <Smartphone className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-semibold mb-2">No Devices Registered</h3>
+              <h3 className="text-lg font-semibold mb-2">{t('mobile.devices.no_devices', 'No Devices Registered')}</h3>
               <p className="text-gray-600 mb-4">
-                Register your mobile device to access the operator app and receive notifications.
+                {t('mobile.devices.no_devices_desc', 'Register your mobile device to access the operator app and receive notifications.')}
               </p>
               <Button onClick={() => setIsRegisterDeviceOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Register Your First Device
+                {t('mobile.devices.register_first_device', 'Register Your First Device')}
               </Button>
             </div>
           </CardContent>
