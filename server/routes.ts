@@ -4931,6 +4931,87 @@ COMMIT;
     }
   });
 
+  // Server Management API endpoints
+  app.get("/api/system/server-status", async (req: Request, res: Response) => {
+    try {
+      const uptimeSeconds = Math.floor(process.uptime());
+      const memoryUsage = process.memoryUsage();
+      
+      const serverStatus = {
+        status: 'running',
+        uptime: uptimeSeconds,
+        lastRestart: new Date(Date.now() - uptimeSeconds * 1000).toISOString(),
+        processId: process.pid,
+        memoryUsage: {
+          used: Math.round(memoryUsage.heapUsed / 1024 / 1024), // MB
+          total: Math.round(memoryUsage.heapTotal / 1024 / 1024), // MB
+          percentage: Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100)
+        },
+        activeConnections: 0, // Would need actual connection tracking
+        nodeVersion: process.version,
+        environment: process.env.NODE_ENV || 'development'
+      };
+
+      res.json(serverStatus);
+    } catch (error) {
+      console.error('Error fetching server status:', error);
+      res.status(500).json({ error: 'Failed to fetch server status' });
+    }
+  });
+
+  app.post("/api/system/restart-server", async (req: Request, res: Response) => {
+    try {
+      // Log the restart request
+      console.log('Server restart requested by user:', req.session?.user?.username || 'unknown');
+      
+      // Send immediate response
+      res.json({ 
+        message: 'Server restart initiated',
+        timestamp: new Date().toISOString(),
+        estimatedDowntime: '10-15 seconds'
+      });
+
+      // Graceful shutdown and restart after response is sent
+      setTimeout(() => {
+        console.log('Initiating graceful server restart...');
+        process.exit(0); // This will cause the process manager to restart the application
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error initiating server restart:', error);
+      res.status(500).json({ error: 'Failed to initiate server restart' });
+    }
+  });
+
+  app.get("/api/system/restart-history", async (req: Request, res: Response) => {
+    try {
+      // In a real implementation, this would come from a log file or database
+      const restartHistory = [
+        {
+          id: 1,
+          timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+          reason: 'Manual restart',
+          initiatedBy: 'admin',
+          status: 'success',
+          duration: 15000, // milliseconds
+        },
+        {
+          id: 2,
+          timestamp: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+          reason: 'Configuration update',
+          initiatedBy: 'system',
+          status: 'success',
+          duration: 12000,
+        }
+      ];
+
+      res.json(restartHistory);
+    } catch (error) {
+      console.error('Error fetching restart history:', error);
+      res.status(500).json({ error: 'Failed to fetch restart history' });
+    }
+  });
+
   // User Dashboard API endpoint
   app.get("/api/user-dashboard/:userId", async (req: Request, res: Response) => {
     try {
