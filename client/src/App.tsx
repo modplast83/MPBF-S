@@ -70,6 +70,7 @@ import MobileUpdates from "@/pages/mobile/updates";
 import MobileDevices from "@/pages/mobile/devices";
 import NotificationsPage from "@/pages/notifications";
 import UserDashboard from "@/pages/user-dashboard";
+import EmployeeDashboard from "@/pages/employee-dashboard";
 import ServerRestart from "@/pages/system/server-restart";
 import { User } from "@shared/schema";
 
@@ -157,6 +158,8 @@ function App() {
                   <ProtectedRoute path="/notifications" component={NotificationsPage} module="Notifications" />
                   {/* User Dashboard Route */}
                   <ProtectedRoute path="/user-dashboard" component={UserDashboard} module="User Dashboard" />
+                  {/* Employee Dashboard Route */}
+                  <ProtectedRoute path="/employee-dashboard" component={EmployeeDashboard} module="Employee Dashboard" />
                   <Route component={NotFound} />
                 </Switch>
               </MainLayout>
