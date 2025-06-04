@@ -156,6 +156,10 @@
       "operator_tasks": "مهام المشغلين",
       "quick_updates": "التحديثات السريعة",
       "device_management": "إدارة الأجهزة",
+      "employee": "الموظف",
+      "my_dashboard": "لوحة التحكم الخاصة بي",
+      "user_dashboard": "لوحة تحكم المستخدم",
+      "server_management": "إدارة الخادم",
       "user": "المستخدم",
       "role": "الدور"
     },
