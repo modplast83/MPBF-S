@@ -27,7 +27,7 @@ import {
   Settings
 } from "lucide-react";
 import { formatDistanceToNow, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-v2";
 
 interface UserDashboardData {
   user: {
