@@ -259,31 +259,31 @@ export default function IoTMonitor() {
             }}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+            {t('iot.refresh', 'Refresh')}
           </Button>
           <Dialog open={isAddSensorOpen} onOpenChange={setIsAddSensorOpen}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Sensor
+                {t('iot.add_sensor', 'Add Sensor')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add New Sensor</DialogTitle>
+                <DialogTitle>{t('iot.add_new_sensor', 'Add New Sensor')}</DialogTitle>
                 <DialogDescription>
-                  Configure a new IoT sensor for machine monitoring
+                  {t('iot.configure_sensor', 'Configure a new IoT sensor for machine monitoring')}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="machine">Machine</Label>
+                  <Label htmlFor="machine">{t('iot.machine', 'Machine')}</Label>
                   <Select
                     value={newSensorData.machineId}
                     onValueChange={(value) => setNewSensorData(prev => ({ ...prev, machineId: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select machine" />
+                      <SelectValue placeholder={t('iot.select_machine', 'Select machine')} />
                     </SelectTrigger>
                     <SelectContent>
                       {machines.map((machine: any) => (
@@ -295,40 +295,40 @@ export default function IoTMonitor() {
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="sensorType">Sensor Type</Label>
+                  <Label htmlFor="sensorType">{t('iot.sensor_type', 'Sensor Type')}</Label>
                   <Select
                     value={newSensorData.sensorType}
                     onValueChange={(value) => setNewSensorData(prev => ({ ...prev, sensorType: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select sensor type" />
+                      <SelectValue placeholder={t('iot.select_sensor_type', 'Select sensor type')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="temperature">Temperature</SelectItem>
-                      <SelectItem value="pressure">Pressure</SelectItem>
-                      <SelectItem value="speed">Speed</SelectItem>
-                      <SelectItem value="vibration">Vibration</SelectItem>
-                      <SelectItem value="energy">Energy</SelectItem>
-                      <SelectItem value="status">Status</SelectItem>
+                      <SelectItem value="temperature">{t('iot.sensor_types.temperature', 'Temperature')}</SelectItem>
+                      <SelectItem value="pressure">{t('iot.sensor_types.pressure', 'Pressure')}</SelectItem>
+                      <SelectItem value="speed">{t('iot.sensor_types.speed', 'Speed')}</SelectItem>
+                      <SelectItem value="vibration">{t('iot.sensor_types.vibration', 'Vibration')}</SelectItem>
+                      <SelectItem value="energy">{t('iot.sensor_types.energy', 'Energy')}</SelectItem>
+                      <SelectItem value="status">{t('iot.sensor_types.status', 'Status')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="name">Sensor Name</Label>
+                  <Label htmlFor="name">{t('iot.sensor_name', 'Sensor Name')}</Label>
                   <Input
                     id="name"
                     value={newSensorData.name}
                     onChange={(e) => setNewSensorData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="e.g., Main Motor Temperature"
+                    placeholder={t('iot.sensor_name_placeholder', 'e.g., Main Motor Temperature')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="unit">Unit</Label>
+                  <Label htmlFor="unit">{t('iot.unit', 'Unit')}</Label>
                   <Input
                     id="unit"
                     value={newSensorData.unit}
                     onChange={(e) => setNewSensorData(prev => ({ ...prev, unit: e.target.value }))}
-                    placeholder="e.g., °C, bar, rpm"
+                    placeholder={t('iot.unit_placeholder', 'e.g., °C, bar, rpm')}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
