@@ -164,6 +164,21 @@ export const SIDEBAR_ITEMS = [
     ],
   },
   {
+    title: "Employee",
+    items: [
+      {
+        title: "My Dashboard",
+        path: "/employee-dashboard",
+        icon: "person",
+      },
+      {
+        title: "User Dashboard",
+        path: "/user-dashboard",
+        icon: "dashboard",
+      },
+    ],
+  },
+  {
     title: "Administration",
     items: [
       {

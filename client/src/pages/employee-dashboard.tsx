@@ -20,7 +20,7 @@ export default function EmployeeDashboard() {
   const { t } = useTranslation();
 
   // Fetch user data
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<any>({
     queryKey: ['/api/user'],
   });
 
