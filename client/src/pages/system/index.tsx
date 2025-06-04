@@ -80,6 +80,13 @@ export default function SystemIndex() {
           icon="import_export"
           path="/system/import-export"
         />
+
+        <SettingCard
+          title="Server Management"
+          description="Monitor server status and perform system restarts"
+          icon="power_settings_new"
+          path="/system/server-restart"
+        />
       </div>
 
       <Card>

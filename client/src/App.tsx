@@ -70,6 +70,7 @@ import MobileUpdates from "@/pages/mobile/updates";
 import MobileDevices from "@/pages/mobile/devices";
 import NotificationsPage from "@/pages/notifications";
 import UserDashboard from "@/pages/user-dashboard";
+import ServerRestart from "@/pages/system/server-restart";
 import { User } from "@shared/schema";
 
 function App() {
@@ -123,6 +124,7 @@ function App() {
                   <ProtectedRoute path="/system/permissions" component={Permissions} module="Permissions" />
                   <ProtectedRoute path="/system/import-export" component={ImportExport} module="Import & Export" />
                   <ProtectedRoute path="/system/sms" component={SmsIndex} module="SMS Management" />
+                  <ProtectedRoute path="/system/server-restart" component={ServerRestart} module="Server Management" />
                   <ProtectedRoute path="/tools" component={ToolsPage} module="Tools" />
                   <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} module="Bag Weight Calculator" />
                   <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} module="Ink Consumption" />

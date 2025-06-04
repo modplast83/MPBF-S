@@ -193,6 +193,7 @@ export const SIDEBAR_ITEMS = [
           { title: "Permissions", path: "/system/permissions" },
           { title: "Import & Export", path: "/system/import-export" },
           { title: "SMS Management", path: "/system/sms" },
+          { title: "Server Management", path: "/system/server-restart" },
         ],
       },
     ],
