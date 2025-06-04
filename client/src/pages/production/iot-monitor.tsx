@@ -333,23 +333,23 @@ export default function IoTMonitor() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="warning">Warning Threshold</Label>
+                    <Label htmlFor="warning">{t('iot.warning_threshold', 'Warning Threshold')}</Label>
                     <Input
                       id="warning"
                       type="number"
                       value={newSensorData.warningThreshold}
                       onChange={(e) => setNewSensorData(prev => ({ ...prev, warningThreshold: e.target.value }))}
-                      placeholder="Warning level"
+                      placeholder={t('iot.warning_level', 'Warning level')}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="critical">Critical Threshold</Label>
+                    <Label htmlFor="critical">{t('iot.critical_threshold', 'Critical Threshold')}</Label>
                     <Input
                       id="critical"
                       type="number"
                       value={newSensorData.criticalThreshold}
                       onChange={(e) => setNewSensorData(prev => ({ ...prev, criticalThreshold: e.target.value }))}
-                      placeholder="Critical level"
+                      placeholder={t('iot.critical_level', 'Critical level')}
                     />
                   </div>
                 </div>
@@ -359,7 +359,7 @@ export default function IoTMonitor() {
                   onClick={handleCreateSensor}
                   disabled={createSensorMutation.isPending}
                 >
-                  {createSensorMutation.isPending ? 'Creating...' : 'Create Sensor'}
+                  {createSensorMutation.isPending ? t('iot.creating', 'Creating...') : t('iot.create_sensor', 'Create Sensor')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -373,7 +373,7 @@ export default function IoTMonitor() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-700">
               <AlertTriangle className="h-5 w-5" />
-              Active Alerts ({activeAlerts.length})
+              {t('iot.active_alerts', 'Active Alerts')} ({activeAlerts.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -388,7 +388,7 @@ export default function IoTMonitor() {
                       <span className="font-medium">{alert.message}</span>
                     </div>
                     <p className="text-sm text-gray-600 mt-1">
-                      Current: {alert.currentValue} | Threshold: {alert.thresholdValue}
+                      {t('iot.current', 'Current')}: {alert.currentValue} | {t('iot.threshold', 'Threshold')}: {alert.thresholdValue}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -399,7 +399,7 @@ export default function IoTMonitor() {
                         onClick={() => acknowledgeAlertMutation.mutate(alert.id)}
                         disabled={acknowledgeAlertMutation.isPending}
                       >
-                        Acknowledge
+                        {t('iot.acknowledge', 'Acknowledge')}
                       </Button>
                     )}
                     <Button
@@ -407,7 +407,7 @@ export default function IoTMonitor() {
                       onClick={() => resolveAlertMutation.mutate(alert.id)}
                       disabled={resolveAlertMutation.isPending}
                     >
-                      Resolve
+                      {t('iot.resolve', 'Resolve')}
                     </Button>
                   </div>
                 </div>
@@ -419,9 +419,9 @@ export default function IoTMonitor() {
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sensors">Sensors</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="overview">{t('iot.overview', 'Overview')}</TabsTrigger>
+          <TabsTrigger value="sensors">{t('iot.sensors', 'Sensors')}</TabsTrigger>
+          <TabsTrigger value="analytics">{t('iot.analytics', 'Analytics')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -440,29 +440,29 @@ export default function IoTMonitor() {
                       <CardTitle className="text-sm">{sensor.name}</CardTitle>
                     </div>
                     <Badge variant={sensor.isActive ? 'default' : 'secondary'}>
-                      {sensor.isActive ? 'Active' : 'Inactive'}
+                      {sensor.isActive ? t('iot.active', 'Active') : t('iot.inactive', 'Inactive')}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Type:</span>
-                      <span className="capitalize">{sensor.sensorType}</span>
+                      <span>{t('iot.type', 'Type')}:</span>
+                      <span className="capitalize">{t(`iot.sensor_types.${sensor.sensorType}`, sensor.sensorType)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Unit:</span>
+                      <span>{t('iot.unit', 'Unit')}:</span>
                       <span>{sensor.unit}</span>
                     </div>
                     {sensor.warningThreshold && (
                       <div className="flex justify-between text-sm">
-                        <span>Warning:</span>
+                        <span>{t('iot.warning', 'Warning')}:</span>
                         <span className="text-yellow-600">{sensor.warningThreshold}</span>
                       </div>
                     )}
                     {sensor.criticalThreshold && (
                       <div className="flex justify-between text-sm">
-                        <span>Critical:</span>
+                        <span>{t('iot.critical', 'Critical')}:</span>
                         <span className="text-red-600">{sensor.criticalThreshold}</span>
                       </div>
                     )}
@@ -477,7 +477,7 @@ export default function IoTMonitor() {
           {/* Machine Filter */}
           <Card>
             <CardHeader>
-              <CardTitle>Filter by Machine</CardTitle>
+              <CardTitle>{t('iot.filter_by_machine', 'Filter by Machine')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Select value={selectedMachine} onValueChange={setSelectedMachine}>
@@ -485,7 +485,7 @@ export default function IoTMonitor() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Machines</SelectItem>
+                  <SelectItem value="all">{t('iot.all_machines', 'All Machines')}</SelectItem>
                   {machines.map((machine: any) => (
                     <SelectItem key={machine.id} value={machine.id}>
                       {machine.name}
