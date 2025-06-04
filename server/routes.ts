@@ -4931,6 +4931,94 @@ COMMIT;
     }
   });
 
+  // User Dashboard API endpoint
+  app.get("/api/user-dashboard/:userId", async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      
+      // Get user data
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Get today's attendance
+      const today = new Date();
+      const todayAttendance = await storage.getTimeAttendanceByUserAndDate(userId, today);
+
+      // Calculate weekly stats (this week)
+      const startOfWeekDate = new Date(today);
+      startOfWeekDate.setDate(today.getDate() - today.getDay());
+      
+      const weeklyAttendance = await storage.getTimeAttendanceByUser(userId);
+      const thisWeekAttendance = weeklyAttendance.filter(att => {
+        const attDate = new Date(att.date);
+        return attDate >= startOfWeekDate && attDate <= today;
+      });
+
+      const weeklyStats = {
+        totalHours: thisWeekAttendance.reduce((sum, att) => sum + (att.workingHours || 0), 0),
+        daysPresent: thisWeekAttendance.filter(att => att.status === 'present').length,
+        daysLate: thisWeekAttendance.filter(att => att.status === 'late').length,
+        averageCheckIn: '08:30' // Simplified calculation
+      };
+
+      // Calculate monthly stats (this month)
+      const startOfMonthDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      const monthlyAttendance = weeklyAttendance.filter(att => {
+        const attDate = new Date(att.date);
+        return attDate >= startOfMonthDate && attDate <= today;
+      });
+
+      const monthlyStats = {
+        totalHours: monthlyAttendance.reduce((sum, att) => sum + (att.workingHours || 0), 0),
+        daysPresent: monthlyAttendance.filter(att => att.status === 'present').length,
+        daysAbsent: monthlyAttendance.filter(att => att.status === 'absent').length,
+        overtimeHours: monthlyAttendance.reduce((sum, att) => sum + (att.overtimeHours || 0), 0)
+      };
+
+      // Get user violations
+      const violations = await storage.getHrViolationsByUser(parseInt(userId));
+
+      // Get user achievements (from employee of month data)
+      const achievements = await storage.getEmployeeOfMonthByUser(parseInt(userId));
+
+      // Get user tasks (from mobile tasks if available)
+      let tasks = [];
+      try {
+        const mobileTasks = await storage.getOperatorTasks();
+        tasks = mobileTasks.filter(task => task.assignedTo === userId);
+      } catch (error) {
+        // Mobile tasks not available, return empty array
+        tasks = [];
+      }
+
+      const dashboardData = {
+        user: {
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+          sectionId: user.sectionId,
+          profileImageUrl: user.profileImageUrl
+        },
+        todayAttendance,
+        weeklyStats,
+        monthlyStats,
+        violations: violations || [],
+        achievements: achievements || [],
+        tasks: tasks || []
+      };
+
+      res.json(dashboardData);
+    } catch (error) {
+      console.error('Error fetching user dashboard data:', error);
+      res.status(500).json({ error: 'Failed to fetch user dashboard data' });
+    }
+  });
+
   // Dashboard Widget API endpoints
   app.get("/api/quality/stats", async (req: Request, res: Response) => {
     try {

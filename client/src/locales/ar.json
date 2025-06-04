@@ -1669,6 +1669,49 @@
         "delete": "حذف",
         "edit": "تعديل"
       }
+    },
+    "user_dashboard": {
+      "welcome": "مرحباً",
+      "today_date": "اليوم هو",
+      "settings": "الإعدادات",
+      "today_status": "حالة اليوم",
+      "not_checked_in": "لم يتم تسجيل الحضور",
+      "hours_today": "ساعات اليوم",
+      "this_week": "هذا الأسبوع",
+      "violations": "المخالفات",
+      "overview": "نظرة عامة",
+      "attendance": "الحضور",
+      "tasks": "المهام",
+      "todays_schedule": "جدول اليوم",
+      "check_in": "تسجيل الحضور",
+      "check_out": "تسجيل الانصراف",
+      "still_working": "لا يزال يعمل",
+      "location": "الموقع",
+      "no_attendance_today": "لا يوجد سجل حضور لليوم",
+      "weekly_performance": "الأداء الأسبوعي",
+      "attendance_rate": "معدل الحضور",
+      "days_present": "أيام الحضور",
+      "days_late": "أيام التأخير",
+      "recent_activities": "الأنشطة الأخيرة",
+      "no_recent_activities": "لا توجد أنشطة حديثة",
+      "monthly_summary": "ملخص الشهر",
+      "days_absent": "أيام الغياب",
+      "total_hours": "إجمالي الساعات",
+      "overtime_hours": "ساعات العمل الإضافي",
+      "violations_penalties": "المخالفات والعقوبات",
+      "violations_desc": "راجع مخالفاتك وحالتها الحالية",
+      "reported_on": "تم الإبلاغ في",
+      "no_violations": "لا توجد مخالفات مسجلة",
+      "my_tasks": "مهامي",
+      "tasks_desc": "تابع المهام المكلف بها والمواعيد النهائية",
+      "due_date": "تاريخ الاستحقاق:",
+      "no_tasks": "لا توجد مهام مكلف بها",
+      "status": {
+        "present": "حاضر",
+        "late": "متأخر",
+        "absent": "غائب",
+        "early_leave": "مغادرة مبكرة"
+      }
     }
   }
 }
