@@ -47,7 +47,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
     for (const section of SIDEBAR_ITEMS) {
       for (const item of section.items) {
         if (item.path === location) {
-          return t(`sidebar.${item.title.toLowerCase()}`);
+          return t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`);
         }
         
         // Check subItems if they exist
@@ -65,7 +65,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
     for (const section of SIDEBAR_ITEMS) {
       for (const item of section.items) {
         if (location.startsWith(item.path) && item.path !== "/") {
-          return t(`sidebar.${item.title.toLowerCase()}`);
+          return t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`);
         }
         
         // Check subItems if they exist

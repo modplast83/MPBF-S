@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { useAuth } from "@/hooks/use-auth-v2";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface UserDashboardData {
   user: {
@@ -93,6 +94,7 @@ export default function UserDashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const isMobile = useIsMobile();
 
   // Fetch user dashboard data
   const { data: dashboardData, isLoading } = useQuery({
@@ -148,51 +150,51 @@ export default function UserDashboard() {
   const data = dashboardData as UserDashboardData;
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-3 sm:py-6 px-4 sm:px-6">
       {/* Header Section */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <Avatar className="h-12 w-12">
+      <div className={`flex ${isMobile ? 'flex-col space-y-4' : 'items-center justify-between'} mb-6`}>
+        <div className="flex items-center space-x-3 sm:space-x-4">
+          <Avatar className={`${isMobile ? 'h-10 w-10' : 'h-12 w-12'}`}>
             <AvatarImage src={data?.user?.profileImageUrl} />
             <AvatarFallback>
               {data?.user?.firstName?.[0]}{data?.user?.lastName?.[0] || data?.user?.username?.[0]}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold">
+            <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>
               {t('user_dashboard.welcome', 'Welcome')}, {data?.user?.firstName || data?.user?.username}!
             </h1>
-            <p className="text-gray-600">
-              {t('user_dashboard.today_date', 'Today is')} {format(new Date(), 'EEEE, MMMM d, yyyy')}
+            <p className={`text-gray-600 ${isMobile ? 'text-sm' : ''}`}>
+              {t('user_dashboard.today_date', 'Today is')} {format(new Date(), isMobile ? 'MMM d, yyyy' : 'EEEE, MMMM d, yyyy')}
             </p>
           </div>
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size={isMobile ? "sm" : "sm"} className={isMobile ? "self-start" : ""}>
           <Settings className="h-4 w-4 mr-2" />
           {t('user_dashboard.settings', 'Settings')}
         </Button>
       </div>
 
       {/* Quick Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-4 gap-6'} mb-6`}>
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-center justify-between'}`}>
+              <div className={isMobile ? 'text-center' : ''}>
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.today_status', 'Today Status')}
                 </p>
-                <p className="text-2xl font-bold">
+                <div className={`${isMobile ? 'text-sm mt-1' : 'text-2xl'} font-bold`}>
                   {data?.todayAttendance ? (
-                    <Badge className={getStatusColor(data.todayAttendance.status)}>
+                    <Badge className={`${getStatusColor(data.todayAttendance.status)} ${isMobile ? 'text-xs px-2 py-1' : ''}`}>
                       {t(`user_dashboard.status.${data.todayAttendance.status}`, data.todayAttendance.status)}
                     </Badge>
                   ) : (
-                    <Badge variant="outline">{t('user_dashboard.not_checked_in', 'Not Checked In')}</Badge>
+                    <Badge variant="outline" className={isMobile ? 'text-xs px-2 py-1' : ''}>{t('user_dashboard.not_checked_in', 'Not Checked In')}</Badge>
                   )}
-                </p>
+                </div>
               </div>
-              <Clock className="h-8 w-8 text-blue-500" />
+              <Clock className={`${isMobile ? 'h-5 w-5 mx-auto' : 'h-8 w-8'} text-blue-500`} />
             </div>
           </CardContent>
         </Card>
