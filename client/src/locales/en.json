@@ -183,9 +183,9 @@
       "operator_tasks": "Operator Tasks",
       "quick_updates": "Quick Updates",
       "device_management": "Device Management",
-      "employee": "Employee",
       "my_dashboard": "My Dashboard",
       "user_dashboard": "User Dashboard",
+      "employee": "Employee",
       "server_management": "Server Management"
     },
     "dashboard": {
