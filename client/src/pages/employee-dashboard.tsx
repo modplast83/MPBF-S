@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,14 @@ import {
   Calendar,
   TrendingUp,
   MapPin,
-  Target
+  Target,
+  Settings
 } from "lucide-react";
 import { format } from "date-fns";
 
 export default function EmployeeDashboard() {
   const { t } = useTranslation();
+  const [, setLocation] = useLocation();
 
   // Fetch user data
   const { data: user } = useQuery<any>({
@@ -39,7 +42,8 @@ export default function EmployeeDashboard() {
             {t('user_dashboard.today_date', 'Today is')} {formattedDate}
           </p>
         </div>
-        <Button variant="outline" onClick={() => window.location.href = '/setup/users'}>
+        <Button variant="outline" onClick={() => setLocation('/setup/users')}>
+          <Settings className="h-4 w-4 mr-2" />
           {t('user_dashboard.settings', 'Settings')}
         </Button>
       </div>
