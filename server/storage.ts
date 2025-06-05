@@ -385,10 +385,17 @@ export class MemStorage implements IStorage {
     this.createUser({
       username: "admin",
       password: "admin123",
-      name: "Admin User",
       role: "administrator",
       isActive: true,
       sectionId: null,
+      email: null,
+      firstName: null,
+      lastName: null,
+      bio: null,
+      profileImageUrl: null,
+      phone: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
     
     // Add sections

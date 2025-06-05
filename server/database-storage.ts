@@ -104,7 +104,13 @@ import {
   type InsertMaintenanceAction,
   maintenanceSchedule,
   type MaintenanceSchedule,
-  type InsertMaintenanceSchedule
+  type InsertMaintenanceSchedule,
+  smsTemplates,
+  type SmsTemplate,
+  type InsertSmsTemplate,
+  smsNotificationRules,
+  type SmsNotificationRule,
+  type InsertSmsNotificationRule
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { IStorage } from "./storage";
@@ -2148,6 +2154,15 @@ export class DatabaseStorage implements IStorage {
 
   async getHrComplaintsByAgainstUser(againstUserId: string): Promise<HrComplaint[]> {
     return await db.select().from(hrComplaints).where(eq(hrComplaints.againstUserId, againstUserId));
+  }
+
+  async getHrComplaintsByUser(userId: string): Promise<HrComplaint[]> {
+    return await db.select().from(hrComplaints).where(
+      or(
+        eq(hrComplaints.complainantId, userId),
+        eq(hrComplaints.againstUserId, userId)
+      )
+    );
   }
 
   async getHrComplaintsByStatus(status: string): Promise<HrComplaint[]> {
