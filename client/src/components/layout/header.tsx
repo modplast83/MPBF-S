@@ -85,7 +85,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
 
   return (
     <header className="bg-white/95 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-40 shadow-sm">
-      <div className={`flex justify-between items-center px-4 sm:px-6 py-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <div className="flex justify-between items-center px-4 sm:px-6 py-3 pl-[0px] pr-[0px]">
         <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
           {isMobile && (
             <Button 
