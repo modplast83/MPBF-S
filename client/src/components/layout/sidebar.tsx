@@ -147,9 +147,7 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
                 />
               </div>
               <div className="text-center">
-                <h1 className="text-lg font-bold text-white leading-tight">
-                  Modern Plastic
-                </h1>
+                <h1 className="text-lg text-white leading-tight font-semibold">MPBF</h1>
                 <p className="text-xs text-slate-300 mt-1">
                   Manufacturing System
                 </p>
@@ -188,7 +186,6 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           </Button>
         )}
       </div>
-
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto scrollbar-hide">
         {filteredSidebarItems.map((section, sectionIndex) => (
@@ -279,7 +276,6 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           )
         ))}
       </nav>
-      
       {/* Footer */}
       <div className="p-4 border-t border-slate-700/50">
         {expanded ? (
