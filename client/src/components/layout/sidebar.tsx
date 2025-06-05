@@ -79,7 +79,7 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
     return items.map(section => ({
       ...section,
       items: section.items
-        .filter(item => {
+        .filter((item: any) => {
           // If it's a standalone item, check permission for it
           if (!item.subItems) {
             // Dashboard is always visible
@@ -88,7 +88,7 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           }
 
           // For items with subitems, check if any subitems have permission
-          const filteredSubItems = (item.subItems || []).filter(subItem => {
+          const filteredSubItems = (item.subItems || []).filter((subItem: any) => {
             // For Mix Materials, only show if user has a section assigned
             if (subItem.title === 'Mix Materials') {
               return hasPermission(subItem.title) && user?.sectionId && user.sectionId !== "";
@@ -101,12 +101,12 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           // Only keep parent item if there are visible subitems
           return filteredSubItems.length > 0;
         })
-        .map(item => {
+        .map((item: any) => {
           // If item has subitems, filter those too
           if (item.subItems) {
             return {
               ...item,
-              subItems: item.subItems.filter(subItem => {
+              subItems: item.subItems.filter((subItem: any) => {
                 // For Mix Materials, only show if user has a section assigned
                 if (subItem.title === 'Mix Materials') {
                   return hasPermission(subItem.title) && user?.sectionId && user.sectionId !== "";
@@ -188,6 +188,7 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           </Button>
         )}
       </div>
+
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto scrollbar-hide">
         {filteredSidebarItems.map((section, sectionIndex) => (
