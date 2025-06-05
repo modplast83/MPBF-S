@@ -303,24 +303,21 @@ export default function MaintenanceRequestsPage() {
   ];
 
   return (
-    <div className={`container mx-auto space-y-6 ${isMobile ? "p-3" : "p-4"}`}>
+    <div className="container mx-auto space-y-6 p-3 pl-[0.5px] pr-[0.5px]">
       <QuickActions
         title="Quick Actions"
         actions={quickActions}
         columns={2}
       />
-
       <PageHeader
         title={t("maintenance.requests.title")}
         description={t("maintenance.requests.description")}
       />
-
       {/* Progress Tracker */}
       <ProgressTracker 
         stats={progressStats} 
         onMilestoneReached={handleMilestoneReached}
       />
-
       {/* Celebration Screen */}
       <CelebrationScreen
         isVisible={celebration.isVisible}
@@ -328,7 +325,6 @@ export default function MaintenanceRequestsPage() {
         type={celebration.type}
         data={celebration.data}
       />
-
       {/* Action Bar */}
       <div className={`flex gap-4 items-start justify-between ${isMobile ? "flex-col" : "flex-col sm:flex-row sm:items-center"}`}>
         <div className="flex flex-col sm:flex-row gap-2 flex-1">
@@ -486,7 +482,6 @@ export default function MaintenanceRequestsPage() {
           </DialogContent>
         </Dialog>
       </div>
-
       {/* Requests Table */}
       <Card>
         <CardHeader>
