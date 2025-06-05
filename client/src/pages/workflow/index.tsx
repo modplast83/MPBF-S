@@ -87,7 +87,6 @@ export default function WorkflowIndex() {
           </Button>
         </div>
       </div>
-      
       <Card className="overflow-hidden">
         <CardHeader className="pb-2 md:pb-6 px-3 sm:px-6">
           <CardTitle className="text-base md:text-lg">{t("production.roll_management.title")}</CardTitle>
@@ -124,7 +123,7 @@ export default function WorkflowIndex() {
                 <TabsTrigger value="cutting" className="flex-1 flex flex-col md:flex-row items-center justify-center md:gap-1.5 py-1.5 md:py-2 px-0.5 md:px-2">
                   <span className="material-icons text-success text-sm md:text-lg">content_cut</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.cutting")}</span>
-                  <span className="text-[9px] md:hidden">Cut</span>
+                  <span className="md:hidden font-bold text-[17px]">Cut</span>
                   <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-success-100 text-[9px] md:text-xs flex items-center justify-center">
                     {cuttingLoading ? "-" : cuttingRolls?.filter(roll => roll.status !== "completed").length || 0}
                   </span>
@@ -160,7 +159,7 @@ export default function WorkflowIndex() {
                         </>
                       ) : extrusionRolls && extrusionRolls.length > 0 ? (
                         // Sort rolls by job order ID first, then by roll ID
-                        [...extrusionRolls]
+                        ([...extrusionRolls]
                           .sort((a, b) => {
                             // First sort by job order ID
                             if (a.jobOrderId !== b.jobOrderId) {
@@ -171,7 +170,7 @@ export default function WorkflowIndex() {
                           })
                           .map((roll) => (
                             <RollCard key={roll.id} roll={roll} />
-                          ))
+                          )))
                       ) : (
                         <div className="py-6 text-center text-secondary-400 bg-white rounded-lg border border-dashed border-secondary-200">
                           <span className="material-icons text-3xl mb-2">hourglass_empty</span>
