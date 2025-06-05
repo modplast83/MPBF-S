@@ -95,7 +95,7 @@ export default function WorkflowIndex() {
           <Tabs defaultValue={activeTab || undefined} onValueChange={setActiveTab}>
             {/* Dynamic TabsList based on visible tabs */}
             <TabsList 
-              className="w-full flex mb-4 md:mb-6 p-0.5 gap-0.5 md:gap-1 bg-muted overflow-hidden"
+              className="h-10 items-center justify-center rounded-md text-muted-foreground w-full flex md:mb-6 p-0.5 gap-0.5 md:gap-1 bg-muted overflow-hidden mt-[3px] mb-[3px] pt-[30.25px] pb-[30.25px]"
             >
               {showExtrusionTab && (
                 <TabsTrigger value="extrusion" className="flex-1 flex flex-col md:flex-row items-center justify-center md:gap-1.5 py-1.5 md:py-2 px-0.5 md:px-2">
