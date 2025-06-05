@@ -175,10 +175,7 @@ export function RoleBasedDashboard() {
           {/* Responsive Overview Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6">
             {/* Performance Health - Responsive sizing */}
-            <div className={`
-              col-span-1 
-              ${selectedPreset === 'balanced' ? 'lg:col-span-6' : 'lg:col-span-12'}
-            `}>
+            <div className={`col-span-1 ${selectedPreset === 'balanced' ? 'lg:col-span-6' : 'lg:col-span-12'}`}>
               <PerformanceHealth />
             </div>
             
