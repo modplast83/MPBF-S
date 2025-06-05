@@ -484,7 +484,7 @@ export default function MaintenanceRequestsPage() {
       </div>
       {/* Requests Table */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col space-y-1.5 p-6 pl-[20px] pr-[20px]">
           <CardTitle>Maintenance Requests</CardTitle>
           <CardDescription>
             Follow All Maintenance Requests
