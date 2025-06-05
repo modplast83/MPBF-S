@@ -5,6 +5,7 @@ import { useSidebar } from "@/hooks/use-sidebar";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { 
   Collapsible,
   CollapsibleTrigger,
@@ -13,11 +14,27 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth-v2";
 import { usePermissions } from "@/hooks/use-permissions";
+import { ChevronDown, ChevronRight, Home, Settings, Factory, Users, BarChart3, Package, Wrench, FileText, Shield, HelpCircle } from "lucide-react";
+import factoryLogo from "@assets/FactoryLogoHPNGW Green.png";
 
 interface SidebarProps {
   onNavItemClick?: () => void;
   isMobile?: boolean;
 }
+
+// Icon mapping for modern design
+const iconMap: Record<string, any> = {
+  "dashboard": Home,
+  "settings": Settings,
+  "precision_manufacturing": Factory,
+  "people": Users,
+  "assessment": BarChart3,
+  "inventory": Package,
+  "build": Wrench,
+  "description": FileText,
+  "security": Shield,
+  "help": HelpCircle
+};
 
 export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarProps) {
   const [location] = useLocation();
@@ -111,168 +128,169 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
   return (
     <aside 
       className={cn(
-        "bg-white border-r border-gray-200 text-gray-800 h-full min-h-screen flex flex-col transition-all duration-300 shadow-xl overflow-hidden",
-        expanded ? "w-[280px]" : "w-[72px]",
+        "bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white h-full min-h-screen flex flex-col transition-all duration-300 shadow-2xl overflow-hidden backdrop-blur-sm",
+        expanded ? "w-[280px]" : "w-[80px]",
         isMobile ? "static w-full" : "fixed top-0 z-50",
         !isMobile && (isRTL ? "right-0" : "left-0")
       )}
     >
-      <div className={`p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 ${isRTL ? 'text-right' : 'text-left'}`}>
-        <div className="flex justify-between items-center">
+      {/* Header with Logo */}
+      <div className={`p-4 border-b border-slate-700/50 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className="flex items-center justify-between">
           {expanded ? (
-            <div className="flex flex-col items-center w-full">
-              <div className="bg-white p-3 rounded-xl shadow-lg ring-1 ring-gray-100 mx-auto">
+            <div className="flex flex-col items-center w-full space-y-3">
+              <div className="bg-white/95 p-3 rounded-2xl shadow-lg ring-1 ring-white/20 backdrop-blur-sm">
                 <img 
-                  src="/assets/company-logo.png" 
+                  src={factoryLogo} 
                   alt="Modern Plastic Bag Factory" 
-                  className="h-12 w-12 object-contain"
+                  className="h-16 w-16 object-contain"
                 />
               </div>
-              <h1 className="text-sm font-bold mt-3 whitespace-normal leading-tight text-gray-700 text-center">
-                {t("app.title")}
-              </h1>
+              <div className="text-center">
+                <h1 className="text-lg font-bold text-white leading-tight">
+                  Modern Plastic
+                </h1>
+                <p className="text-xs text-slate-300 mt-1">
+                  Manufacturing System
+                </p>
+              </div>
             </div>
           ) : (
-            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className="bg-white p-2 rounded-xl shadow-lg ring-1 ring-gray-100">
+            <div className="flex items-center justify-center w-full">
+              <div className="bg-white/95 p-2 rounded-xl shadow-lg ring-1 ring-white/20">
                 <img 
-                  src="/assets/company-logo.png" 
-                  alt="Modern Plastic Bag Factory" 
-                  className="h-8 w-8 object-contain"
+                  src={factoryLogo} 
+                  alt="Factory Logo" 
+                  className="h-10 w-10 object-contain"
                 />
               </div>
             </div>
           )}
-          
-          <button 
-            onClick={toggle} 
-            className={`text-gray-600 hover:text-blue-600 focus:outline-none transition-colors p-2 rounded-lg hover:bg-white/70 ${expanded ? 'absolute right-4' : ''}`}
-          >
-            <span className={`material-icons text-xl ${isRTL ? 'flip-in-rtl' : ''}`}>
-              {expanded ? "menu_open" : "menu"}
-            </span>
-          </button>
         </div>
-      </div>
-      <nav className="mt-6 flex-grow overflow-y-auto scrollbar-hide px-3">
-        {filteredSidebarItems.map((section, sectionIndex) => (
-          // Only show sections that have items
-          (section.items.length > 0 ? (<div key={sectionIndex} className="mb-6">
-            {expanded && (
-              <div className="px-3 py-2 text-gray-500 uppercase tracking-wider text-xs font-semibold border-b border-gray-100 mb-3">
-                {t(`sidebar.${section.title.toLowerCase()}`)}
-              </div>
+        
+        {/* Toggle Button */}
+        {!isMobile && (
+          <Button
+            onClick={toggle}
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "absolute top-4 text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-200",
+              isRTL ? "left-4" : "right-4",
+              expanded ? "translate-y-0" : "translate-y-2"
             )}
-            {section.items.map((item, itemIndex) => (
-              <div key={itemIndex}>
-                {item.subItems ? (
-                  <Collapsible
-                    open={openMenus[item.title]}
-                    onOpenChange={() => toggleMenu(item.title)}
-                  >
-                    <CollapsibleTrigger
-                      className={cn(
-                        `flex items-center px-4 py-3 w-full rounded-xl my-1 hover:bg-blue-50 hover:shadow-sm text-gray-700 hover:text-blue-700 transition-all duration-200 group ${isRTL ? 'text-right' : ''}`,
-                        isActive(item.path) && "bg-blue-100 shadow-sm text-blue-700 border border-blue-200 font-medium"
-                      )}
-                    >
-                      {isRTL ? (
-                        <>
-                          {expanded && (
-                            <>
-                              <span className={`material-icons text-sm text-gray-500 group-hover:text-blue-600 ${isRTL ? 'flip-in-rtl' : ''}`}>
-                                {openMenus[item.title] ? "expand_less" : "expand_more"}
-                              </span>
-                              <span className="flex-1 font-medium text-sm mr-3">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
-                            </>
-                          )}
-                          <span className="material-icons text-gray-600 group-hover:text-blue-600">{item.icon}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="material-icons text-gray-600 group-hover:text-blue-600 mr-3">{item.icon}</span>
-                          {expanded && (
-                            <>
-                              <span className="flex-1 font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
-                              <span className="material-icons text-sm text-gray-500 group-hover:text-blue-600">
-                                {openMenus[item.title] ? "expand_less" : "expand_more"}
-                              </span>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </CollapsibleTrigger>
-                    
-                    {expanded && (
-                      <CollapsibleContent>
-                        {item.subItems.map((subItem, subIndex) => (
-                          <Link 
-                            key={subIndex} 
-                            href={subItem.path}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Close mobile menu if callback provided
-                              if (onNavItemClick) onNavItemClick();
-                            }}
+          >
+            {expanded ? (
+              isRTL ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+            ) : (
+              isRTL ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+        )}
+      </div>
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto scrollbar-hide">
+        {filteredSidebarItems.map((section, sectionIndex) => (
+          section.items.length > 0 && (
+            <div key={sectionIndex} className="space-y-1">
+              {expanded && (
+                <div className="px-3 py-2 text-slate-400 uppercase tracking-wider text-xs font-semibold">
+                  {t(`sidebar.${section.title.toLowerCase()}`)}
+                </div>
+              )}
+              
+              {section.items.map((item: any, itemIndex: number) => {
+                const IconComponent = iconMap[item.icon] || Home;
+                
+                return (
+                  <div key={itemIndex}>
+                    {item.subItems ? (
+                      <Collapsible
+                        open={openMenus[item.title]}
+                        onOpenChange={() => toggleMenu(item.title)}
+                      >
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
                             className={cn(
-                              `flex items-center py-2.5 px-4 mx-2 my-0.5 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 text-sm ${isRTL ? 'pr-8 flex-row-reverse justify-end' : 'pl-8'}`,
-                              isActive(subItem.path) && "bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-500"
+                              "w-full justify-start text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-200 group",
+                              isRTL && "flex-row-reverse",
+                              isActive(item.path) && "bg-blue-600/20 text-blue-300 border-l-2 border-blue-400"
                             )}
                           >
-                            <span className={`h-1.5 w-1.5 rounded-full bg-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`}></span>
-                            {t(`sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`)}
-                          </Link>
-                        ))}
-                      </CollapsibleContent>
-                    )}
-                  </Collapsible>
-                ) : (
-                  <Link 
-                    href={item.path}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Close mobile menu if callback provided
-                      if (onNavItemClick) onNavItemClick();
-                    }}
-                    className={cn(
-                      `flex items-center px-4 py-3 rounded-xl my-1 hover:bg-blue-50 hover:shadow-sm text-gray-700 hover:text-blue-700 transition-all duration-200 group ${isRTL ? 'text-right' : ''}`,
-                      isActive(item.path) && "bg-blue-100 shadow-sm text-blue-700 border border-blue-200 font-medium"
-                    )}
-                  >
-                    {isRTL ? (
-                      <>
-                        {expanded && <span className="font-medium text-sm mr-3">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
-                        <span className="material-icons text-gray-600 group-hover:text-blue-600">{item.icon}</span>
-                      </>
+                            <IconComponent className={cn("h-5 w-5", expanded && !isRTL && "mr-3", expanded && isRTL && "ml-3")} />
+                            {expanded && (
+                              <>
+                                <span className="flex-1 text-left">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
+                                {openMenus[item.title] ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className={cn("h-4 w-4", isRTL && "rotate-180")} />
+                                )}
+                              </>
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                        
+                        <CollapsibleContent className="space-y-1">
+                          {item.subItems.map((subItem: any, subIndex: number) => (
+                            <Link key={subIndex} href={subItem.path}>
+                              <Button
+                                variant="ghost"
+                                onClick={onNavItemClick}
+                                className={cn(
+                                  "w-full justify-start text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-200 ml-6",
+                                  isRTL && "flex-row-reverse mr-6 ml-0",
+                                  isActive(subItem.path) && "bg-blue-600/30 text-blue-200 border-l-2 border-blue-400"
+                                )}
+                              >
+                                <div className={cn("w-2 h-2 rounded-full bg-slate-500", expanded && !isRTL && "mr-3", expanded && isRTL && "ml-3")} />
+                                {expanded && (
+                                  <span className="text-sm">{t(`sidebar.${subItem.title.toLowerCase().replace(/ /g, '_')}`)}</span>
+                                )}
+                              </Button>
+                            </Link>
+                          ))}
+                        </CollapsibleContent>
+                      </Collapsible>
                     ) : (
-                      <>
-                        <span className="material-icons text-gray-600 group-hover:text-blue-600 mr-3">{item.icon}</span>
-                        {expanded && <span className="font-medium text-sm">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>}
-                      </>
+                      <Link href={item.path}>
+                        <Button
+                          variant="ghost"
+                          onClick={onNavItemClick}
+                          className={cn(
+                            "w-full justify-start text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-200 group",
+                            isRTL && "flex-row-reverse",
+                            isActive(item.path) && "bg-blue-600/20 text-blue-300 border-l-2 border-blue-400"
+                          )}
+                        >
+                          <IconComponent className={cn("h-5 w-5", expanded && !isRTL && "mr-3", expanded && isRTL && "ml-3")} />
+                          {expanded && (
+                            <span className="text-sm font-medium">{t(`sidebar.${item.title.toLowerCase().replace(/ /g, '_')}`)}</span>
+                          )}
+                        </Button>
+                      </Link>
                     )}
-                  </Link>
-                )}
-              </div>
-            ))}
-            {sectionIndex < filteredSidebarItems.length - 1 && 
-              filteredSidebarItems[sectionIndex + 1].items.length > 0 && (
-                <Separator className="my-4 bg-gray-200" />
-            )}
-          </div>) : null)
+                  </div>
+                );
+              })}
+            </div>
+          )
         ))}
       </nav>
-      <div className="mt-auto w-full border-t border-gray-200 p-4 bg-gray-50">
-        <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-blue-100">
-            {user?.username ? user.username.charAt(0).toUpperCase() : '?'}
+      
+      {/* Footer */}
+      <div className="p-4 border-t border-slate-700/50">
+        {expanded ? (
+          <div className="text-center">
+            <p className="text-xs text-slate-400">Version 2.0</p>
+            <p className="text-xs text-slate-500 mt-1">© 2025 Modern Plastic</p>
           </div>
-          {expanded && (
-            <div className={isRTL ? 'mr-3' : 'ml-3'}>
-              <p className="text-sm font-semibold text-gray-800">{user?.username || t("sidebar.user")}</p>
-              <p className="text-xs text-gray-500 uppercase tracking-wide">{user?.role || t("sidebar.role")}</p>
-            </div>
-          )}
-        </div>
+        ) : (
+          <div className="flex justify-center">
+            <div className="w-8 h-1 bg-slate-600 rounded-full"></div>
+          </div>
+        )}
       </div>
     </aside>
   );

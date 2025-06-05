@@ -43,7 +43,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className={`flex h-screen overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Desktop sidebar - fixed position */}
       {isAuthenticated && !isMobile && <Sidebar isMobile={false} />}
       
@@ -52,7 +52,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <Sheet open={isOpen} onOpenChange={handleMobileMenuToggle}>
           <SheetContent 
             side={isRTL ? "right" : "left"} 
-            className="p-0 m-0 border-0 shadow-xl w-[85%] max-w-[300px] h-full min-h-[100dvh] bg-transparent overflow-hidden"
+            className="p-0 m-0 border-0 shadow-2xl w-[85%] max-w-[320px] h-full min-h-[100dvh] bg-transparent overflow-hidden"
           >
             <VisuallyHidden>
               <div id="mobile-sidebar-title">Navigation Menu</div>
@@ -63,17 +63,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
       )}
       
       <div 
-        className={`flex flex-col flex-1 transition-all duration-300 ${
+        className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${
           !isMobile && isAuthenticated && expanded 
-            ? isRTL ? "mr-[250px]" : "ml-[250px]" 
+            ? isRTL ? "mr-[280px]" : "ml-[280px]" 
             : !isMobile && isAuthenticated 
-              ? isRTL ? "mr-[64px]" : "ml-[64px]" 
+              ? isRTL ? "mr-[80px]" : "ml-[80px]" 
               : "mx-0"
         }`}
       >
         {isAuthenticated && <Header mobileMenuOpen={isOpen} setMobileMenuOpen={handleMobileMenuToggle} />}
-        <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 to-gray-100 p-3 sm:p-4 md:p-6">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-2 sm:p-4 lg:p-6">
+          <div className="max-w-full mx-auto h-full">
             {children}
           </div>
         </main>
