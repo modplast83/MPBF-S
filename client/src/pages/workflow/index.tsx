@@ -112,7 +112,7 @@ export default function WorkflowIndex() {
                 <TabsTrigger value="printing" className="flex-1 flex flex-col md:flex-row items-center justify-center md:gap-1.5 py-1.5 md:py-2 px-0.5 md:px-2">
                   <span className="material-icons text-warning-500 text-sm md:text-lg">format_color_fill</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.printing")}</span>
-                  <span className="text-[9px] md:hidden">Print</span>
+                  <span className="md:hidden font-bold text-[17px]">Print</span>
                   <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-warning-100 text-[9px] md:text-xs flex items-center justify-center">
                     {printingLoading ? "-" : printingRolls?.length || 0}
                   </span>
