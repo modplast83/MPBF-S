@@ -116,8 +116,12 @@ export class DatabaseStorage implements IStorage {
 
   constructor() {
     const pgStore = connectPg(session);
-    // Use the holy-bonus database URL if available, otherwise fall back to the standard database URL
-    const databaseUrl = process.env.DATABASE_URL_WILDFLOWER || process.env.DATABASE_URL;
+    // Use consistent database URL
+    const databaseUrl = process.env.DATABASE_URL;
+    
+    if (!databaseUrl) {
+      throw new Error("DATABASE_URL environment variable is required");
+    }
     
     this.sessionStore = new pgStore({
       conString: databaseUrl,
@@ -177,37 +181,40 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log("Upserting user:", userData.username);
       
+      // Create a clean copy to avoid mutating the input
+      const cleanUserData = { ...userData };
+      
       // Handle the special case for password updating
-      const isUpdate = !!userData.id;
-      const isPasswordUnchanged = userData.password === "UNCHANGED_PASSWORD";
+      const isUpdate = !!cleanUserData.id;
+      const isPasswordUnchanged = cleanUserData.password === "UNCHANGED_PASSWORD";
       
       if (isUpdate && isPasswordUnchanged) {
         // Get the existing user to keep their current password
-        const existingUser = await this.getUser(userData.id);
+        const existingUser = await this.getUser(cleanUserData.id);
         if (!existingUser) {
-          throw new Error(`User with id ${userData.id} not found`);
+          throw new Error(`User with id ${cleanUserData.id} not found`);
         }
         
         // Use the existing password instead of "UNCHANGED_PASSWORD"
-        userData.password = existingUser.password;
+        cleanUserData.password = existingUser.password;
       }
       
       const [user] = await db
         .insert(users)
         .values({
-          ...userData,
+          ...cleanUserData,
           updatedAt: new Date(),
         })
         .onConflictDoUpdate({
           target: users.id,
           set: {
-            ...userData,
+            ...cleanUserData,
             updatedAt: new Date(),
           },
         })
         .returning();
         
-      console.log("Upsert user success for:", userData.username);
+      console.log("Upsert user success for:", cleanUserData.username);
       return user;
     } catch (error) {
       console.error("Error upserting user:", error);
@@ -275,8 +282,8 @@ export class DatabaseStorage implements IStorage {
       const row = result.rows[0];
       return {
         id: Number(row.id),
-        role: row.role,
-        module: row.module,
+        role: String(row.role),
+        module: String(row.module),
         can_view: Boolean(row.can_view),
         can_create: Boolean(row.can_create),
         can_edit: Boolean(row.can_edit),
