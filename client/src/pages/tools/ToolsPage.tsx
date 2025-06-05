@@ -1,117 +1,107 @@
-import { Link } from "wouter";
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Droplet, Wrench, DollarSign, Palette } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
+import { ModuleCard } from "@/components/ui/module-card";
+import { 
+  Calculator, 
+  Palette, 
+  Wrench, 
+  DollarSign,
+  Beaker,
+  Settings,
+  Zap
+} from "lucide-react";
+
+const tools = [
+  {
+    title: "Bag Weight Calculator",
+    description: "Calculate optimal bag weights and material requirements",
+    icon: Calculator,
+    path: "/tools/bag-weight",
+    color: "bg-gradient-to-br from-blue-500 to-blue-600"
+  },
+  {
+    title: "Ink Consumption Calculator", 
+    description: "Estimate ink usage for printing operations",
+    icon: Palette,
+    path: "/tools/ink-consumption",
+    color: "bg-gradient-to-br from-purple-500 to-purple-600"
+  },
+  {
+    title: "Mix Colors Calculator",
+    description: "Calculate color mixing ratios and formulations",
+    icon: Beaker,
+    path: "/tools/mix-colors",
+    color: "bg-gradient-to-br from-green-500 to-green-600"
+  },
+  {
+    title: "Utility Tools",
+    description: "Additional utility tools for production support",
+    icon: Wrench,
+    path: "/tools/utilities",
+    color: "bg-gradient-to-br from-orange-500 to-orange-600"
+  },
+  {
+    title: "Cost Calculator",
+    description: "Calculate production costs and pricing",
+    icon: DollarSign,
+    path: "/tools/cost-calculator",
+    color: "bg-gradient-to-br from-red-500 to-red-600"
+  }
+];
 
 export default function ToolsPage() {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <PageHeader 
-        title="Factory Tools" 
-        description="Specialized tools to help with factory calculations and operations"
-        icon="build"
-      />
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Link href="/tools/bag-weight">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center">
-                <Calculator className="mr-2 h-5 w-5" />
-                Bag Weight Calculator
-              </CardTitle>
-              <CardDescription>
-                Calculate the theoretical weight of plastic bags based on dimensions and material
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                Precisely calculate the weight of plastic bags by specifying dimensions, 
-                thickness, material density, and other parameters.
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/tools/ink-consumption">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center">
-                <Droplet className="mr-2 h-5 w-5" />
-                Ink Consumption Calculator
-              </CardTitle>
-              <CardDescription>
-                Estimate ink usage for flexographic printing jobs
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                Calculate the amount of ink needed for print jobs based on coverage area,
-                print density, anilox specification, and other printing parameters.
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/tools/cost-calculator">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center">
-                <DollarSign className="mr-2 h-5 w-5" />
-                Cost Calculator
-              </CardTitle>
-              <CardDescription>
-                Calculate material costs for production
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                Calculate production costs based on material prices, percentages,
-                waste factors, and fixed costs to determine accurate per-kilogram pricing.
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/tools/mix-colors">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center">
-                <Palette className="mr-2 h-5 w-5" />
-                Mix Colors Calculator
-              </CardTitle>
-              <CardDescription>
-                Calculate color formulas for printing special colors
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                Calculate CMYK or RGB percentages needed to create specific colors
-                and analyze design files to extract color formulas for printing.
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/tools/utilities">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center">
-                <Wrench className="mr-2 h-5 w-5" />
-                Utility Tools
-              </CardTitle>
-              <CardDescription>
-                Additional utilities for daily operations
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                Access various utility tools including unit converters, 
-                process time estimators, and other helpful calculators.
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+    <div className={`min-h-full ${isRTL ? 'rtl' : 'ltr'}`}>
+      {/* Header Section */}
+      <div className={`mb-12 text-center ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className="flex items-center justify-center mb-6">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-4 rounded-2xl shadow-lg">
+            <Wrench className="h-12 w-12 text-white" />
+          </div>
+        </div>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+          Manufacturing Tools
+        </h1>
+        <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          Essential calculators and utilities for efficient production management
+        </p>
+      </div>
+      
+      {/* Tools Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+        {tools.map((tool) => (
+          <ModuleCard
+            key={tool.path}
+            title={tool.title}
+            description={tool.description}
+            icon={tool.icon}
+            path={tool.path}
+            color={tool.color}
+            action="Open Tool"
+          />
+        ))}
+      </div>
+      
+      {/* Tools Categories */}
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-slate-200/50 text-center">
+          <Calculator className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-slate-800 mb-2">Calculators</h3>
+          <p className="text-slate-600 text-sm">Precise calculations for manufacturing</p>
+        </div>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-slate-200/50 text-center">
+          <Settings className="h-8 w-8 text-green-500 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-slate-800 mb-2">Utilities</h3>
+          <p className="text-slate-600 text-sm">Production support tools</p>
+        </div>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-slate-200/50 text-center">
+          <Zap className="h-8 w-8 text-purple-500 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-slate-800 mb-2">Efficiency</h3>
+          <p className="text-slate-600 text-sm">Optimize production workflows</p>
+        </div>
       </div>
     </div>
   );
