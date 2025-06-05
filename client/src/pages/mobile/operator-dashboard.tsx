@@ -200,7 +200,7 @@ export default function OperatorDashboard() {
                     </div>
                   ))}
                 </div>
-              ) : activeJobs?.length > 0 ? (
+              ) : activeJobs.length > 0 ? (
                 <div className="space-y-3">
                   {activeJobs.slice(0, 5).map((job: any) => (
                     <div key={job.id} className="p-3 border rounded-lg">
@@ -240,7 +240,7 @@ export default function OperatorDashboard() {
                     </div>
                   ))}
                 </div>
-              ) : qualityChecks?.length > 0 ? (
+              ) : qualityChecks.length > 0 ? (
                 <div className="space-y-3">
                   {qualityChecks.slice(0, 5).map((check: any) => (
                     <div key={check.id} className="p-3 border rounded-lg">

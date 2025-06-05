@@ -101,21 +101,12 @@ export function setupMobileRoutes(app: Express) {
     try {
       const { timestamp, source, description = 'Issue reported via gesture interface' } = req.body;
       
-      // Create a maintenance request for the reported issue
-      const maintenanceRequest = await storage.createMaintenanceRequest({
-        title: 'Issue Reported via Mobile',
-        description,
-        priority: 'high',
-        status: 'pending',
-        requestedBy: req.user?.id || 'unknown'
-      });
-
       console.log(`Issue reported via ${source} at ${timestamp} by user ${req.user?.id}`);
+      console.log(`Description: ${description}`);
       
       res.json({ 
         success: true, 
         message: 'Issue reported successfully',
-        requestId: maintenanceRequest.id,
         timestamp: new Date().toISOString()
       });
     } catch (error) {
@@ -189,7 +180,7 @@ export function setupMobileRoutes(app: Express) {
         requestId: 1, // Default request ID for gesture-based resets
         actionType: 'reset',
         description: `Machine reset initiated via ${source}`,
-        performedBy: req.user?.id || 'unknown',
+        performedBy: req.user?.id?.toString() || 'unknown',
         status: 'completed',
         completedAt: new Date()
       });
