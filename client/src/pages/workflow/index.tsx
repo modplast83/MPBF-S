@@ -91,7 +91,7 @@ export default function WorkflowIndex() {
         <CardHeader className="pb-2 md:pb-6 px-3 sm:px-6">
           <CardTitle className="text-base md:text-lg">{t("production.roll_management.title")}</CardTitle>
         </CardHeader>
-        <CardContent className="p-2 sm:p-6">
+        <CardContent className="p-2 sm:p-6 pt-[21px] pb-[21px]">
           <Tabs defaultValue={activeTab || undefined} onValueChange={setActiveTab}>
             {/* Dynamic TabsList based on visible tabs */}
             <TabsList 
