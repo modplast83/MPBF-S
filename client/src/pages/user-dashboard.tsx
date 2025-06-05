@@ -200,49 +200,49 @@ export default function UserDashboard() {
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-center justify-between'}`}>
+              <div className={isMobile ? 'text-center' : ''}>
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.hours_today', 'Hours Today')}
                 </p>
-                <p className="text-2xl font-bold">
+                <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                   {data?.todayAttendance?.workingHours?.toFixed(1) || '0.0'}h
                 </p>
               </div>
-              <Timer className="h-8 w-8 text-green-500" />
+              <Timer className={`${isMobile ? 'h-5 w-5 mx-auto' : 'h-8 w-8'} text-green-500`} />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-center justify-between'}`}>
+              <div className={isMobile ? 'text-center' : ''}>
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.this_week', 'This Week')}
                 </p>
-                <p className="text-2xl font-bold">
+                <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                   {data?.weeklyStats?.totalHours?.toFixed(1) || '0.0'}h
                 </p>
               </div>
-              <BarChart3 className="h-8 w-8 text-purple-500" />
+              <BarChart3 className={`${isMobile ? 'h-5 w-5 mx-auto' : 'h-8 w-8'} text-purple-500`} />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-center justify-between'}`}>
+              <div className={isMobile ? 'text-center' : ''}>
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.violations', 'Violations')}
                 </p>
-                <p className="text-2xl font-bold">
+                <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                   {data?.violations?.filter(v => v.status === 'open').length || 0}
                 </p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-500" />
+              <AlertTriangle className={`${isMobile ? 'h-5 w-5 mx-auto' : 'h-8 w-8'} text-red-500`} />
             </div>
           </CardContent>
         </Card>
@@ -250,11 +250,19 @@ export default function UserDashboard() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">{t('user_dashboard.overview', 'Overview')}</TabsTrigger>
-          <TabsTrigger value="attendance">{t('user_dashboard.attendance', 'Attendance')}</TabsTrigger>
-          <TabsTrigger value="violations">{t('user_dashboard.violations', 'Violations')}</TabsTrigger>
-          <TabsTrigger value="tasks">{t('user_dashboard.tasks', 'Tasks')}</TabsTrigger>
+        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2 h-auto' : 'grid-cols-4'}`}>
+          <TabsTrigger value="overview" className={isMobile ? 'text-xs py-2' : ''}>
+            {isMobile ? t('user_dashboard.overview_short', 'Overview') : t('user_dashboard.overview', 'Overview')}
+          </TabsTrigger>
+          <TabsTrigger value="attendance" className={isMobile ? 'text-xs py-2' : ''}>
+            {isMobile ? t('user_dashboard.attendance_short', 'Attend.') : t('user_dashboard.attendance', 'Attendance')}
+          </TabsTrigger>
+          <TabsTrigger value="violations" className={isMobile ? 'text-xs py-2' : ''}>
+            {isMobile ? t('user_dashboard.violations_short', 'Issues') : t('user_dashboard.violations', 'Violations')}
+          </TabsTrigger>
+          <TabsTrigger value="tasks" className={isMobile ? 'text-xs py-2' : ''}>
+            {isMobile ? t('user_dashboard.tasks_short', 'Tasks') : t('user_dashboard.tasks', 'Tasks')}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">

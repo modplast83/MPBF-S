@@ -17,10 +17,12 @@ import {
   Settings
 } from "lucide-react";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function EmployeeDashboard() {
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
+  const isMobile = useIsMobile();
 
   // Fetch user data
   const { data: user } = useQuery<any>({
@@ -28,82 +30,82 @@ export default function EmployeeDashboard() {
   });
 
   const currentDate = new Date();
-  const formattedDate = format(currentDate, 'EEEE, MMMM d, yyyy');
+  const formattedDate = format(currentDate, isMobile ? 'MMM d, yyyy' : 'EEEE, MMMM d, yyyy');
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-3 sm:py-6 px-4 sm:px-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className={`flex ${isMobile ? 'flex-col space-y-4' : 'items-center justify-between'} mb-6`}>
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>
             {t('user_dashboard.welcome', 'Welcome')}, {user?.firstName || user?.username}
           </h1>
-          <p className="text-gray-600">
+          <p className={`text-gray-600 ${isMobile ? 'text-sm' : ''}`}>
             {t('user_dashboard.today_date', 'Today is')} {formattedDate}
           </p>
         </div>
-        <Button variant="outline" onClick={() => setLocation('/setup/users')}>
+        <Button variant="outline" onClick={() => setLocation('/setup/users')} size={isMobile ? "sm" : "default"} className={isMobile ? "self-start" : ""}>
           <Settings className="h-4 w-4 mr-2" />
           {t('user_dashboard.settings', 'Settings')}
         </Button>
       </div>
 
       {/* Quick Status Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-4 gap-6'} mb-6`}>
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-center justify-between'}`}>
+              <div className={isMobile ? 'text-center' : ''}>
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.today_status', 'Today\'s Status')}
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className={`${isMobile ? 'text-sm' : 'text-2xl'} font-bold text-green-600`}>
                   {t('user_dashboard.not_checked_in', 'Not Checked In')}
                 </p>
               </div>
-              <Clock className="h-8 w-8 text-blue-500" />
+              <Clock className={`${isMobile ? 'h-5 w-5 mx-auto' : 'h-8 w-8'} text-blue-500`} />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-center justify-between'}`}>
+              <div className={isMobile ? 'text-center' : ''}>
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.hours_today', 'Hours Today')}
                 </p>
-                <p className="text-2xl font-bold">0.0</p>
+                <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>0.0</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-500" />
+              <TrendingUp className={`${isMobile ? 'h-5 w-5 mx-auto' : 'h-8 w-8'} text-green-500`} />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-center justify-between'}`}>
+              <div className={isMobile ? 'text-center' : ''}>
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.this_week', 'This Week')}
                 </p>
-                <p className="text-2xl font-bold">0.0h</p>
+                <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>0.0h</p>
               </div>
-              <Calendar className="h-8 w-8 text-purple-500" />
+              <Calendar className={`${isMobile ? 'h-5 w-5 mx-auto' : 'h-8 w-8'} text-purple-500`} />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-center justify-between'}`}>
+              <div className={isMobile ? 'text-center' : ''}>
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.violations', 'Violations')}
                 </p>
-                <p className="text-2xl font-bold text-red-600">0</p>
+                <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-red-600`}>0</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-500" />
+              <AlertTriangle className={`${isMobile ? 'h-5 w-5 mx-auto' : 'h-8 w-8'} text-red-500`} />
             </div>
           </CardContent>
         </Card>
@@ -111,44 +113,52 @@ export default function EmployeeDashboard() {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">{t('user_dashboard.overview', 'Overview')}</TabsTrigger>
-          <TabsTrigger value="attendance">{t('user_dashboard.attendance', 'Attendance')}</TabsTrigger>
-          <TabsTrigger value="tasks">{t('user_dashboard.tasks', 'Tasks')}</TabsTrigger>
-          <TabsTrigger value="schedule">{t('user_dashboard.todays_schedule', 'Today\'s Schedule')}</TabsTrigger>
+        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2 h-auto' : 'grid-cols-4'}`}>
+          <TabsTrigger value="overview" className={isMobile ? 'text-xs py-2' : ''}>
+            {isMobile ? t('user_dashboard.overview_short', 'Overview') : t('user_dashboard.overview', 'Overview')}
+          </TabsTrigger>
+          <TabsTrigger value="attendance" className={isMobile ? 'text-xs py-2' : ''}>
+            {isMobile ? t('user_dashboard.attendance_short', 'Attend.') : t('user_dashboard.attendance', 'Attendance')}
+          </TabsTrigger>
+          <TabsTrigger value="tasks" className={isMobile ? 'text-xs py-2' : ''}>
+            {isMobile ? t('user_dashboard.tasks_short', 'Tasks') : t('user_dashboard.tasks', 'Tasks')}
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className={isMobile ? 'text-xs py-2' : ''}>
+            {isMobile ? t('user_dashboard.schedule_short', 'Schedule') : t('user_dashboard.todays_schedule', 'Today\'s Schedule')}
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="overview" className={`space-y-${isMobile ? '4' : '6'}`}>
+          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'lg:grid-cols-2 gap-6'}`}>
             {/* Today's Attendance */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2" />
+              <CardHeader className={isMobile ? 'pb-3' : ''}>
+                <CardTitle className={`flex items-center ${isMobile ? 'text-base' : ''}`}>
+                  <Clock className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} mr-2`} />
                   {t('user_dashboard.attendance', 'Attendance')}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <CardContent className={isMobile ? 'pt-0' : ''}>
+                <div className={`space-y-${isMobile ? '3' : '4'}`}>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Check In</span>
-                    <Button variant="outline" size="sm">
+                    <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>Check In</span>
+                    <Button variant="outline" size={isMobile ? "xs" : "sm"}>
                       {t('user_dashboard.check_in', 'Check In')}
                     </Button>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Check Out</span>
-                    <Button variant="outline" size="sm" disabled>
+                    <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>Check Out</span>
+                    <Button variant="outline" size={isMobile ? "xs" : "sm"} disabled>
                       {t('user_dashboard.check_out', 'Check Out')}
                     </Button>
                   </div>
-                  <div className="pt-4 border-t">
-                    <p className="text-sm text-gray-600 mb-2">
+                  <div className={`pt-${isMobile ? '3' : '4'} border-t`}>
+                    <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 mb-2`}>
                       {t('user_dashboard.location', 'Location')}
                     </p>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <MapPin className="h-4 w-4 mr-1" />
+                    <div className={`flex items-center ${isMobile ? 'text-xs' : 'text-sm'} text-gray-500`}>
+                      <MapPin className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
                       Factory Floor - Section A
                     </div>
                   </div>
