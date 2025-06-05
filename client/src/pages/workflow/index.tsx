@@ -95,14 +95,14 @@ export default function WorkflowIndex() {
           <Tabs defaultValue={activeTab || undefined} onValueChange={setActiveTab}>
             {/* Dynamic TabsList based on visible tabs */}
             <TabsList 
-              className="h-10 items-center justify-center rounded-md text-muted-foreground w-full flex md:mb-6 p-0.5 gap-0.5 md:gap-1 bg-muted overflow-hidden mt-[3px] mb-[3px] pt-[30.25px] pb-[30.25px]"
+              className="h-10 items-center justify-center rounded-md text-muted-foreground w-full flex mb-4 md:mb-6 p-0.5 gap-0.5 md:gap-1 bg-muted overflow-hidden pt-[31.25px] pb-[31.25px]"
             >
               {showExtrusionTab && (
                 <TabsTrigger value="extrusion" className="flex-1 flex flex-col md:flex-row items-center justify-center md:gap-1.5 py-1.5 md:py-2 px-0.5 md:px-2">
                   <span className="material-icons text-primary-500 md:text-lg text-[17px] font-bold">merge_type</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.extrusion")}</span>
                   <span className="md:hidden font-bold text-[17px]">Extr</span>
-                  <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-primary-100 text-[9px] md:text-xs flex items-center justify-center">
+                  <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-primary-100 md:text-xs flex items-center justify-center text-[17px]">
                     {extrusionLoading ? "-" : extrusionRolls?.length || 0}
                   </span>
                 </TabsTrigger>
@@ -113,7 +113,7 @@ export default function WorkflowIndex() {
                   <span className="material-icons text-warning-500 text-sm md:text-lg">format_color_fill</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.printing")}</span>
                   <span className="md:hidden font-bold text-[17px]">Print</span>
-                  <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-warning-100 text-[9px] md:text-xs flex items-center justify-center">
+                  <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-warning-100 md:text-xs flex items-center justify-center text-[17px]">
                     {printingLoading ? "-" : printingRolls?.length || 0}
                   </span>
                 </TabsTrigger>
