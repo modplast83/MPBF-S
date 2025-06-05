@@ -100,32 +100,37 @@ export default function HRIndex() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {hrModules.map((module) => {
-          const IconComponent = module.icon;
-          return (
-            <Link key={module.path} href={module.path}>
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200 h-full">
-                <CardHeader className="flex flex-row items-center space-y-0 pb-3 sm:pb-2">
-                  <div className={`p-2 sm:p-3 rounded-lg ${module.color} text-white mr-3 sm:mr-4 flex-shrink-0`}>
-                    <IconComponent className="h-5 w-5 sm:h-6 sm:w-6" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-sm sm:text-lg font-semibold truncate">{module.title}</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm line-clamp-2 mt-1">
-                      {module.description}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0 sm:pt-2">
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    Click to access {module.title.toLowerCase()} management
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
+      {/* Modules Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6 lg:gap-8">
+        {hrModules.map((module) => (
+          <HRModuleCard
+            key={module.path}
+            title={module.title}
+            description={module.description}
+            icon={module.icon}
+            path={module.path}
+            color={module.color}
+          />
+        ))}
+      </div>
+      
+      {/* Stats Overview */}
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-slate-200/50 text-center">
+          <Calendar className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-slate-800 mb-2">Attendance</h3>
+          <p className="text-slate-600 text-sm">Track employee work hours and attendance patterns</p>
+        </div>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-slate-200/50 text-center">
+          <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-slate-800 mb-2">Performance</h3>
+          <p className="text-slate-600 text-sm">Evaluate and recognize outstanding employees</p>
+        </div>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-slate-200/50 text-center">
+          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-slate-800 mb-2">Issues</h3>
+          <p className="text-slate-600 text-sm">Manage violations and workplace complaints</p>
+        </div>
       </div>
     </div>
   );
