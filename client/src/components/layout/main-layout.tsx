@@ -46,7 +46,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
     <div className={`flex h-screen overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Desktop sidebar - fixed position */}
       {isAuthenticated && !isMobile && <Sidebar isMobile={false} />}
-      
       {/* Mobile sidebar as a sheet for better mobile experience */}
       {isAuthenticated && isMobile && (
         <Sheet open={isOpen} onOpenChange={handleMobileMenuToggle}>
@@ -61,7 +60,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </SheetContent>
         </Sheet>
       )}
-      
       <div 
         className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${
           !isMobile && isAuthenticated && expanded 
@@ -72,7 +70,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         }`}
       >
         {isAuthenticated && <Header mobileMenuOpen={isOpen} setMobileMenuOpen={handleMobileMenuToggle} />}
-        <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-2 sm:p-4 lg:p-6">
+        <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-2 sm:p-4 lg:p-6 pl-[3px] pr-[3px]">
           <div className="max-w-full mx-auto h-full">
             {children}
           </div>
