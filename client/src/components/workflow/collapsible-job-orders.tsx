@@ -379,7 +379,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                 delay={index * 0.1}
               >
                 <div
-                  className={`bg-primary-50 px-4 py-3 border-b cursor-pointer hover:bg-primary-100 transition-colors ${expandedOrderIds.includes(orderId) ? 'border-b-primary-200' : 'border-b-transparent'}`}
+                  className="bg-primary-50 px-4 py-3 border-b cursor-pointer hover:bg-primary-100 transition-colors border-b-transparent pl-[5px] pr-[5px] pt-[10.5px] pb-[10.5px]"
                   onClick={() => {
                     setExpandedOrderIds(prev => 
                       prev.includes(orderId) 
