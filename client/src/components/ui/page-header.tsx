@@ -29,7 +29,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           </div>
         )}
         <div>
-          <H1 className="scroll-m-20 lg:text-5xl font-bold tracking-tight md:text-3xl text-[40px]">{title}</H1>
+          <H1 className="scroll-m-20 lg:text-5xl font-bold tracking-tight md:text-3xl text-[30px]">{title}</H1>
           {description && (
             <p className="text-sm text-muted-foreground mt-1">{description}</p>
           )}

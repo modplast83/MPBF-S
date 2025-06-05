@@ -156,7 +156,7 @@ export function ProgressTracker({ stats, onMilestoneReached }: ProgressTrackerPr
 
       {/* Efficiency Rating */}
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="flex flex-col space-y-1.5 p-6 pb-2 pl-[15px] pr-[15px]">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-purple-500" />
             Efficiency
