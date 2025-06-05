@@ -40,13 +40,13 @@ export default function OperatorDashboard() {
   });
 
   // Fetch active job orders
-  const { data: activeJobs, isLoading: jobsLoading } = useQuery({
+  const { data: activeJobs = [], isLoading: jobsLoading } = useQuery<any[]>({
     queryKey: ['/api/job-orders', { status: 'in_progress' }],
     refetchInterval: 15000, // Refresh every 15 seconds
   });
 
   // Fetch recent quality checks
-  const { data: qualityChecks, isLoading: qualityLoading } = useQuery({
+  const { data: qualityChecks = [], isLoading: qualityLoading } = useQuery<any[]>({
     queryKey: ['/api/quality-checks', { limit: 5 }],
     refetchInterval: 60000, // Refresh every minute
   });

@@ -68,6 +68,7 @@ import IoTMonitor from "@/pages/production/iot-monitor";
 import MobileTasks from "@/pages/mobile/tasks";
 import MobileUpdates from "@/pages/mobile/updates";
 import MobileDevices from "@/pages/mobile/devices";
+import OperatorDashboard from "@/pages/mobile/operator-dashboard";
 import NotificationsPage from "@/pages/notifications";
 import UserDashboard from "@/pages/user-dashboard";
 import EmployeeDashboard from "@/pages/employee-dashboard";
@@ -160,6 +161,8 @@ function App() {
                   <ProtectedRoute path="/user-dashboard" component={UserDashboard} module="User Dashboard" />
                   {/* Employee Dashboard Route */}
                   <ProtectedRoute path="/employee-dashboard" component={EmployeeDashboard} module="Employee Dashboard" />
+                  {/* Mobile Operator Dashboard Route */}
+                  <ProtectedRoute path="/mobile/operator-dashboard" component={OperatorDashboard} module="Operator Dashboard" />
                   <Route component={NotFound} />
                 </Switch>
               </MainLayout>

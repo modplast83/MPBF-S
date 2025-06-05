@@ -5840,6 +5840,9 @@ COMMIT;
 
   // Setup notification routes
   setupNotificationRoutes(app);
+  
+  // Setup mobile routes
+  setupMobileRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
