@@ -124,7 +124,7 @@ export default function WorkflowIndex() {
                   <span className="material-icons text-success text-sm md:text-lg">content_cut</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.cutting")}</span>
                   <span className="md:hidden font-bold text-[17px]">Cut</span>
-                  <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-success-100 text-[9px] md:text-xs flex items-center justify-center">
+                  <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-success-100 md:text-xs flex items-center justify-center text-[17px]">
                     {cuttingLoading ? "-" : cuttingRolls?.filter(roll => roll.status !== "completed").length || 0}
                   </span>
                 </TabsTrigger>
