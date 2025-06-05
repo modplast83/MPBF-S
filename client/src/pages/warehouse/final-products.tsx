@@ -982,27 +982,32 @@ export default function FinalProducts() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">{t('warehouse.final_products')}</h1>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Mobile-optimized header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-secondary-900">{t('warehouse.final_products')}</h1>
         
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
+        {/* Mobile-friendly control buttons */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
+                  size={isMobile ? "sm" : "default"}
                   className={cn(
-                    "justify-start text-left font-normal",
+                    "justify-start text-left font-normal w-full sm:w-auto",
                     !selectedDate && "text-muted-foreground"
                   )}
                 >
                   <span className="material-icons mr-2 text-sm">calendar_today</span>
-                  {selectedDate ? (
-                    format(selectedDate, "PPP")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
+                  <span className="truncate">
+                    {selectedDate ? (
+                      format(selectedDate, isMobile ? "MMM dd" : "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -1017,36 +1022,142 @@ export default function FinalProducts() {
             
             <Button
               onClick={handleOpenBatchPrint}
-              className="whitespace-nowrap"
+              size={isMobile ? "sm" : "default"}
+              className="w-full sm:w-auto whitespace-nowrap"
             >
               <span className="material-icons mr-2 text-sm">print</span>
-              Print Daily Labels
+              {isMobile ? "Print Labels" : "Print Daily Labels"}
             </Button>
           </div>
         </div>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-lg sm:text-xl">
             {t('warehouse.manage_final_products')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             {t('warehouse.receive_completed_products')}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <DataTable 
-            data={completedJobOrders || []}
-            columns={columns}
-            isLoading={isJobOrdersLoading}
-          />
+        <CardContent className="p-3 sm:p-6">
+          {isMobile ? (
+            /* Mobile Card View */
+            <div className="space-y-3">
+              {isJobOrdersLoading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="animate-pulse bg-gray-100 rounded-lg p-4 h-32" />
+                ))
+              ) : completedJobOrders && completedJobOrders.length > 0 ? (
+                completedJobOrders.map((jobOrder) => {
+                  const details = getJobOrderDetails(jobOrder.id);
+                  const totalCutQty = getTotalCuttingQty(jobOrder.id);
+                  const wasteQty = Math.max(0, getTotalExtrusionQty(jobOrder.id) - (jobOrder.finishedQty || 0));
+                  
+                  return (
+                    <Card key={jobOrder.id} className="border border-gray-200 shadow-sm">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-semibold text-sm">JO #{jobOrder.id}</h3>
+                            <p className="text-xs text-gray-600 truncate max-w-[200px]">
+                              {details.customer}
+                            </p>
+                          </div>
+                          <Badge 
+                            variant={
+                              jobOrder.status === "completed" ? "secondary" :
+                              jobOrder.status === "received" ? "default" :
+                              jobOrder.status === "partially_received" ? "outline" : "secondary"
+                            }
+                            className="text-xs"
+                          >
+                            {jobOrder.status === "completed" && "Completed"}
+                            {jobOrder.status === "received" && "Received"}
+                            {jobOrder.status === "partially_received" && "Partial"}
+                            {jobOrder.status === "in_progress" && "In Progress"}
+                            {jobOrder.status === "extrusion_completed" && "Extr. Done"}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                          <div>
+                            <span className="text-gray-500">Product:</span>
+                            <p className="font-medium truncate" title={details.productName}>
+                              {details.productName}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Ordered:</span>
+                            <p className="font-medium">{formatNumber(jobOrder.quantity || 0)} kg</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Finished:</span>
+                            <p className="font-medium">{formatNumber(totalCutQty)} kg</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Received:</span>
+                            <p className="font-medium">{formatNumber(jobOrder.receivedQty || 0)} kg</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          {(jobOrder.status === "completed" || 
+                            jobOrder.status === "extrusion_completed" || 
+                            jobOrder.status === "partially_received") && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleReceiveJobOrder(jobOrder)}
+                              className="flex-1 text-xs py-2"
+                            >
+                              <span className="material-icons text-sm mr-1">download</span>
+                              Receive
+                            </Button>
+                          )}
+                          {(jobOrder.status === "received" || 
+                            jobOrder.status === "partially_received" ||
+                            jobOrder.status === "completed") && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handlePrintLabel(jobOrder)}
+                              className="flex-1 text-xs py-2"
+                            >
+                              <span className="material-icons text-sm mr-1">print</span>
+                              Label
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <span className="material-icons text-4xl mb-2 block">inventory_2</span>
+                  <p className="text-sm">No final products available</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Desktop Table View */
+            <DataTable 
+              data={completedJobOrders || []}
+              columns={columns}
+              isLoading={isJobOrdersLoading}
+            />
+          )}
         </CardContent>
       </Card>
 
       {/* Receive Job Order Dialog */}
       <Dialog open={receiveDialogOpen} onOpenChange={setReceiveDialogOpen}>
-        <DialogContent className={isRTL ? "rtl" : ""}>
+        <DialogContent className={cn(
+          isRTL ? "rtl" : "",
+          isMobile ? "max-w-[95vw] w-full max-h-[90vh] overflow-y-auto" : ""
+        )}>
           <DialogHeader>
             <DialogTitle>
               {t('warehouse.receive_job_order')}
@@ -1163,7 +1274,10 @@ export default function FinalProducts() {
       
       {/* Print Label Dialog */}
       <Dialog open={printLabelDialogOpen} onOpenChange={setPrintLabelDialogOpen}>
-        <DialogContent className={isRTL ? "rtl" : ""}>
+        <DialogContent className={cn(
+          isRTL ? "rtl" : "",
+          isMobile ? "max-w-[95vw] w-full max-h-[90vh] overflow-y-auto" : ""
+        )}>
           <DialogHeader>
             <DialogTitle>
               {t('warehouse.print_label')}
@@ -1236,7 +1350,10 @@ export default function FinalProducts() {
 
       {/* Batch Print Dialog */}
       <Dialog open={batchPrintDialogOpen} onOpenChange={setBatchPrintDialogOpen}>
-        <DialogContent className={isRTL ? "rtl" : ""}>
+        <DialogContent className={cn(
+          isRTL ? "rtl" : "",
+          isMobile ? "max-w-[95vw] w-full max-h-[90vh] overflow-y-auto" : ""
+        )}>
           <DialogHeader>
             <DialogTitle>
               {t('warehouse.batch_print_label') || "Print Multiple Labels"}
