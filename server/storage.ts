@@ -16,7 +16,8 @@ import {
   QualityViolation, InsertQualityViolation,
   QualityPenalty, InsertQualityPenalty,
   SmsTemplate, InsertSmsTemplate,
-  SmsNotificationRule, InsertSmsNotificationRule
+  SmsNotificationRule, InsertSmsNotificationRule,
+  TimeAttendance, InsertTimeAttendance
 } from "@shared/schema";
 import session from "express-session";
 
@@ -269,10 +270,11 @@ export interface IStorage {
   setDefaultAbaMaterialConfig(id: number): Promise<boolean>;
   
   // HR Module methods
-  getTimeAttendance(): Promise<TimeAttendance[]>;
+  getAllTimeAttendance(): Promise<TimeAttendance[]>;
   getTimeAttendanceByUser(userId: string): Promise<TimeAttendance[]>;
   getTimeAttendanceByDate(date: Date): Promise<TimeAttendance[]>;
   getTimeAttendanceByUserAndDate(userId: string, date: Date): Promise<TimeAttendance | undefined>;
+  getTimeAttendance(id: number): Promise<TimeAttendance | undefined>;
   createTimeAttendance(attendance: InsertTimeAttendance): Promise<TimeAttendance>;
   updateTimeAttendance(id: number, attendance: Partial<TimeAttendance>): Promise<TimeAttendance | undefined>;
   deleteTimeAttendance(id: number): Promise<boolean>;

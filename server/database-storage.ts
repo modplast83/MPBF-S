@@ -1677,6 +1677,76 @@ export class DatabaseStorage implements IStorage {
     return true;
   }
 
+  // SMS Template methods
+  async getSmsTemplates(): Promise<SmsTemplate[]> {
+    return await db.select().from(smsTemplates);
+  }
+
+  async getSmsTemplate(id: string): Promise<SmsTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(smsTemplates)
+      .where(eq(smsTemplates.id, id));
+    return template;
+  }
+
+  async createSmsTemplate(template: InsertSmsTemplate): Promise<SmsTemplate> {
+    const [created] = await db
+      .insert(smsTemplates)
+      .values(template)
+      .returning();
+    return created;
+  }
+
+  async updateSmsTemplate(id: string, template: Partial<SmsTemplate>): Promise<SmsTemplate | undefined> {
+    const [updated] = await db
+      .update(smsTemplates)
+      .set(template)
+      .where(eq(smsTemplates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSmsTemplate(id: string): Promise<boolean> {
+    await db.delete(smsTemplates).where(eq(smsTemplates.id, id));
+    return true;
+  }
+
+  // SMS Notification Rules methods
+  async getSmsNotificationRules(): Promise<SmsNotificationRule[]> {
+    return await db.select().from(smsNotificationRules);
+  }
+
+  async getSmsNotificationRule(id: number): Promise<SmsNotificationRule | undefined> {
+    const [rule] = await db
+      .select()
+      .from(smsNotificationRules)
+      .where(eq(smsNotificationRules.id, id));
+    return rule;
+  }
+
+  async createSmsNotificationRule(rule: InsertSmsNotificationRule): Promise<SmsNotificationRule> {
+    const [created] = await db
+      .insert(smsNotificationRules)
+      .values(rule)
+      .returning();
+    return created;
+  }
+
+  async updateSmsNotificationRule(id: number, rule: Partial<SmsNotificationRule>): Promise<SmsNotificationRule | undefined> {
+    const [updated] = await db
+      .update(smsNotificationRules)
+      .set(rule)
+      .where(eq(smsNotificationRules.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSmsNotificationRule(id: number): Promise<boolean> {
+    await db.delete(smsNotificationRules).where(eq(smsNotificationRules.id, id));
+    return true;
+  }
+
   // Material Inputs methods
   async getMaterialInputs(): Promise<MaterialInput[]> {
     return await db.select().from(materialInputs);
@@ -2085,7 +2155,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getHrComplaintsByAssignee(assignedTo: string): Promise<HrComplaint[]> {
-    return await db.select().from(hrComplaints).where(eq(hrComplaints.assignedTo, assignedTo));
+    // Note: HR complaints don't have assignedTo field in current schema
+    // This method returns empty array until schema is updated
+    return [];
   }
 
   async getHrComplaint(id: number): Promise<HrComplaint | undefined> {
