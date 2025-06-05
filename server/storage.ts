@@ -278,13 +278,13 @@ export interface IStorage {
   deleteTimeAttendance(id: number): Promise<boolean>;
   
   getEmployeeOfMonth(): Promise<any[]>;
-  getEmployeeOfMonthByUser(userId: number): Promise<any[]>;
+  getEmployeeOfMonthByUser(userId: string): Promise<any[]>;
   createEmployeeOfMonth(employee: any): Promise<any>;
   updateEmployeeOfMonth(id: number, employee: any): Promise<any | undefined>;
   deleteEmployeeOfMonth(id: number): Promise<boolean>;
   
   getHrViolations(): Promise<any[]>;
-  getHrViolationsByUser(userId: number): Promise<any[]>;
+  getHrViolationsByUser(userId: string): Promise<any[]>;
   createHrViolation(violation: any): Promise<any>;
   updateHrViolation(id: number, violation: any): Promise<any | undefined>;
   deleteHrViolation(id: number): Promise<boolean>;

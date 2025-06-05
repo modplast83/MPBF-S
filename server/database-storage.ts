@@ -282,8 +282,8 @@ export class DatabaseStorage implements IStorage {
       const row = result.rows[0];
       return {
         id: Number(row.id),
-        role: String(row.role),
-        module: String(row.module),
+        role: row.role as string,
+        module: row.module as string,
         can_view: Boolean(row.can_view),
         can_create: Boolean(row.can_create),
         can_edit: Boolean(row.can_edit),
@@ -1003,7 +1003,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(qualityCheckTypes)
-      .where(eq(qualityCheckTypes.stage, stage));
+      .where(eq(qualityCheckTypes.targetStage, stage));
   }
 
   async getQualityCheckType(id: string): Promise<QualityCheckType | undefined> {
@@ -1815,9 +1815,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPlateCalculation(calculation: InsertPlateCalculation): Promise<PlateCalculation> {
+    // Calculate the area before insertion
+    const area = calculation.width * calculation.height;
+    
     const [created] = await db
       .insert(plateCalculations)
-      .values(calculation)
+      .values({
+        ...calculation,
+        area,
+        calculatedPrice: 0 // Will be calculated by the calling function
+      })
       .returning();
     return created;
   }
@@ -1909,7 +1916,7 @@ export class DatabaseStorage implements IStorage {
   // HR Module Methods
 
   // Time Attendance
-  async getTimeAttendance(): Promise<TimeAttendance[]> {
+  async getAllTimeAttendance(): Promise<TimeAttendance[]> {
     return await db.select().from(timeAttendance);
   }
 
