@@ -101,7 +101,7 @@ export default function WorkflowIndex() {
                 <TabsTrigger value="extrusion" className="flex-1 flex flex-col md:flex-row items-center justify-center md:gap-1.5 py-1.5 md:py-2 px-0.5 md:px-2">
                   <span className="material-icons text-primary-500 text-sm md:text-lg">merge_type</span>
                   <span className="text-xs md:text-sm hidden md:inline">{t("rolls.extrusion")}</span>
-                  <span className="text-[9px] md:hidden">Extr</span>
+                  <span className="md:hidden font-bold text-[17px]">Extr</span>
                   <span className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0 rounded-full bg-primary-100 text-[9px] md:text-xs flex items-center justify-center">
                     {extrusionLoading ? "-" : extrusionRolls?.length || 0}
                   </span>
