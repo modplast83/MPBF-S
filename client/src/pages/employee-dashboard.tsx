@@ -39,7 +39,7 @@ export default function EmployeeDashboard() {
             {t('user_dashboard.today_date', 'Today is')} {formattedDate}
           </p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={() => window.location.href = '/setup/users'}>
           {t('user_dashboard.settings', 'Settings')}
         </Button>
       </div>
