@@ -53,7 +53,7 @@ export default function EmployeeDashboard() {
       <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-4 gap-6'} mb-6`}>
         <Card>
           <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
-            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-center justify-between'}`}>
+            <div className="flex items-center justify-between pt-[0px] pb-[0px] pl-[2px] pr-[2px] ml-[-19px] mr-[-19px]">
               <div className={isMobile ? 'text-center' : ''}>
                 <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.today_status', 'Today\'s Status')}
