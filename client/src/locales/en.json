@@ -443,6 +443,8 @@
       "pass_rate": "Pass Rate",
       "total_checks": "Total Checks",
       "pending_violations": "Pending Violations",
+      "quick_actions": "Quick Actions",
+      "quick_actions_description": "Shortcuts for common manufacturing tasks",
       "resolved_violations": "Resolved Violations",
       "recent_quality_inspections": "Recent Quality Inspections",
       "inventory_status": "Inventory Status",

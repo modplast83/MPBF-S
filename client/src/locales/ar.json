@@ -418,6 +418,8 @@
       "pass_rate": "معدل النجاح",
       "total_checks": "إجمالي الفحوصات",
       "pending_violations": "المخالفات المعلقة",
+      "quick_actions": "الإجراءات السريعة",
+      "quick_actions_description": "اختصارات للمهام التصنيعية الشائعة",
       "resolved_violations": "المخالفات المحلولة",
       "recent_quality_inspections": "فحوصات الجودة الأخيرة",
       "inventory_status": "حالة المخزون",
