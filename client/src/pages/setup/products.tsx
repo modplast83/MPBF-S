@@ -63,15 +63,15 @@ export default function Products() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.CUSTOMER_PRODUCTS] });
       toast({
-        title: "Product Deleted",
-        description: "The product has been deleted successfully.",
+        title: t("setup.products.product_deleted"),
+        description: t("setup.products.product_deleted_success"),
       });
       setDeletingProduct(null);
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to delete product: ${error}`,
+        title: t("common.error"),
+        description: t("setup.products.delete_failed", { error }),
         variant: "destructive",
       });
     },
@@ -130,8 +130,8 @@ export default function Products() {
   const handlePrintProducts = () => {
     if (!selectedCustomerId || !products || products.length === 0) {
       toast({
-        title: "No Data to Print",
-        description: "Please select a customer with products to print.",
+        title: t("common.no_data"),
+        description: t("setup.products.please_select_customer"),
         variant: "destructive",
       });
       return;
@@ -224,42 +224,42 @@ export default function Products() {
       accessorKey: "id" as const,
     },
     {
-      header: "Category",
+      header: t("setup.products.category"),
       id: "categoryName",
       cell: (row: CustomerProduct) => getCategoryName(row.categoryId)
     },
     {
-      header: "Item",
+      header: t("common.item"),
       id: "itemName",
       cell: (row: CustomerProduct) => getItemName(row.itemId)
     },
     {
-      header: "Size Caption",
+      header: t("setup.products.size"),
       id: "sizeCaption",
       cell: (row: CustomerProduct) => row.sizeCaption || "-"
     },
     {
-      header: "Thickness",
+      header: t("setup.products.thickness"),
       id: "thickness",
       cell: (row: CustomerProduct) => row.thickness ? `${row.thickness}` : "-"
     },
     {
-      header: "Length (cm)",
+      header: t("common.length") + " (cm)",
       id: "lengthCm",
       cell: (row: CustomerProduct) => row.lengthCm ? `${row.lengthCm}` : "-"
     },
     {
-      header: "Actions",
+      header: t("setup.products.actions"),
       id: "actions",
       cell: (row: CustomerProduct) => (
         <div className="flex space-x-2">
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700" title="Edit">
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700" title={t("common.edit")}>
             <span className="material-icons text-sm">edit</span>
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDuplicate(row)} className="text-secondary-500 hover:text-secondary-700" title="Duplicate">
+          <Button variant="ghost" size="icon" onClick={() => handleDuplicate(row)} className="text-secondary-500 hover:text-secondary-700" title={t("setup.products.duplicate_product")}>
             <span className="material-icons text-sm">content_copy</span>
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-red-500 hover:text-red-700" title="Delete">
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row)} className="text-red-500 hover:text-red-700" title={t("setup.products.delete_product")}>
             <span className="material-icons text-sm">delete</span>
           </Button>
         </div>
@@ -270,7 +270,7 @@ export default function Products() {
   const tableActions = (
     <Button onClick={handleAddProduct}>
       <span className="material-icons text-sm mr-1">add</span>
-      Add Product
+      {t("setup.products.add_new")}
     </Button>
   );
 
@@ -281,17 +281,17 @@ export default function Products() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">منتجات العملاء</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t("setup.products.title")}</h1>
       </div>
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>أختر العميل</CardTitle>
+          <CardTitle>{t("setup.products.select_customer")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-3 relative">
               <Input
-                placeholder="Search customer by name or code..."
+                placeholder={t("setup.products.search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -304,7 +304,7 @@ export default function Products() {
               disabled={customersLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a customer" />
+                <SelectValue placeholder={t("setup.products.select_a_customer")} />
               </SelectTrigger>
               <SelectContent>
                 {filteredCustomers?.map((customer) => (
@@ -322,8 +322,8 @@ export default function Products() {
           <CardTitle className="flex justify-between items-center">
             <span>
               {selectedCustomerId 
-                ? `Products for ${getCustomerName(selectedCustomerId)}`
-                : "أختر العميل لعرض المنتجات"}
+                ? t("setup.products.products_for", { customer: getCustomerName(selectedCustomerId) })
+                : t("setup.products.select_customer_to_view")}
             </span>
             {selectedCustomerId && products && products.length > 0 && (
               <Button 
@@ -333,7 +333,7 @@ export default function Products() {
                 className="flex items-center gap-2"
               >
                 <Printer className="h-4 w-4" />
-                Print A4
+                {t("setup.products.print_a4")}
               </Button>
             )}
           </CardTitle>
@@ -354,7 +354,7 @@ export default function Products() {
           ) : (
             <div className="text-center py-8 text-gray-500">
               <span className="material-icons text-4xl mb-2">people</span>
-              <p>Please select a customer to view their products</p>
+              <p>{t("setup.products.please_select_customer")}</p>
             </div>
           )}
         </CardContent>
@@ -365,10 +365,10 @@ export default function Products() {
           <DialogHeader>
             <DialogTitle>
               {isDuplicating 
-                ? "Duplicate Product" 
+                ? t("setup.products.duplicate_product")
                 : editProduct 
-                  ? "Edit Product" 
-                  : "Add New Product"
+                  ? t("setup.products.edit_product")
+                  : t("setup.products.add_new")
               }
             </DialogTitle>
           </DialogHeader>
@@ -384,18 +384,18 @@ export default function Products() {
       <AlertDialog open={!!deletingProduct} onOpenChange={(open) => !open && setDeletingProduct(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("setup.products.are_you_sure")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this product. This action cannot be undone.
+              {t("setup.products.delete_confirmation")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("setup.products.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
               className="bg-red-500 hover:bg-red-600"
             >
-              Delete
+              {t("setup.products.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { Machine, Section } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 export default function Machines() {
   const queryClient = useQueryClient();

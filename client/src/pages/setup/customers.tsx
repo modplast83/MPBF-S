@@ -10,6 +10,7 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { Customer, User } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export default function Customers() {
   const queryClient = useQueryClient();
