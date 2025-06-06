@@ -283,7 +283,7 @@ export default function Products() {
       </div>
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Select Customer</CardTitle>
+          <CardTitle>أختر العميل</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -321,7 +321,7 @@ export default function Products() {
             <span>
               {selectedCustomerId 
                 ? `Products for ${getCustomerName(selectedCustomerId)}`
-                : "Select a customer to view products"}
+                : "أختر العميل لعرض المنتجات"}
             </span>
             {selectedCustomerId && products && products.length > 0 && (
               <Button 
