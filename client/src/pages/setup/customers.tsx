@@ -136,7 +136,7 @@ export default function Customers() {
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Manage Customers</span>
+            <span>إدارة العملاء</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
