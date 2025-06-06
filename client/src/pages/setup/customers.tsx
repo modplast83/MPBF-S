@@ -131,9 +131,8 @@ export default function Customers() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Customers</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">العملاء</h1>
       </div>
-
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
@@ -149,7 +148,6 @@ export default function Customers() {
           />
         </CardContent>
       </Card>
-
       {/* Add/Edit Customer Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent>
@@ -164,7 +162,6 @@ export default function Customers() {
           />
         </DialogContent>
       </Dialog>
-
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deletingCustomer} onOpenChange={(open) => !open && setDeletingCustomer(null)}>
         <AlertDialogContent>
