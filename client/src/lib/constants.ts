@@ -171,11 +171,6 @@ export const SIDEBAR_ITEMS = [
         path: "/employee-dashboard",
         icon: "person",
       },
-      {
-        title: "User Dashboard",
-        path: "/user-dashboard",
-        icon: "dashboard",
-      },
     ],
   },
   {
