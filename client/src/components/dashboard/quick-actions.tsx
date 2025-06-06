@@ -163,8 +163,8 @@ export function QuickActions() {
   const quickActions: QuickAction[] = [
     {
       id: 'new-order',
-      title: 'New Order',
-      description: 'Create new',
+      title: t('quick_actions.new_order'),
+      description: t('quick_actions.new_order_desc'),
       icon: Plus,
       color: 'bg-blue-500 hover:bg-blue-600',
       category: 'orders',
@@ -174,8 +174,8 @@ export function QuickActions() {
     },
     {
       id: 'start-production',
-      title: 'Start Production',
-      description: 'Begin production',
+      title: t('quick_actions.start_production'),
+      description: t('quick_actions.start_production_desc'),
       icon: Play,
       color: 'bg-green-500 hover:bg-green-600',
       category: 'production',
@@ -185,8 +185,8 @@ export function QuickActions() {
     },
     {
       id: 'quality-check',
-      title: 'Quality Check',
-      description: 'Perform inspection',
+      title: t('quick_actions.quality_check'),
+      description: t('quick_actions.quality_check_desc'),
       icon: CheckCircle,
       color: 'bg-purple-500 hover:bg-purple-600',
       category: 'quality',
@@ -196,8 +196,8 @@ export function QuickActions() {
     },
     {
       id: 'maintenance-request',
-      title: 'Report Issue',
-      description: 'Submit request',
+      title: t('quick_actions.report_issue'),
+      description: t('quick_actions.report_issue_desc'),
       icon: AlertTriangle,
       color: 'bg-red-500 hover:bg-red-600',
       category: 'maintenance',
@@ -206,8 +206,8 @@ export function QuickActions() {
     },
     {
       id: 'production-metrics',
-      title: 'Update Metrics',
-      description: 'Input data',
+      title: t('quick_actions.update_metrics'),
+      description: t('quick_actions.update_metrics_desc'),
       icon: BarChart3,
       color: 'bg-indigo-500 hover:bg-indigo-600',
       category: 'production',
@@ -216,8 +216,8 @@ export function QuickActions() {
     },
     {
       id: 'warehouse-status',
-      title: 'Warehouse',
-      description: 'inventory status',
+      title: t('quick_actions.warehouse'),
+      description: t('quick_actions.warehouse_desc'),
       icon: Package,
       color: 'bg-orange-500 hover:bg-orange-600',
       category: 'orders',
@@ -226,8 +226,8 @@ export function QuickActions() {
     },
     {
       id: 'mix-materials',
-      title: 'Mix Materials',
-      description: 'Create mix',
+      title: t('quick_actions.mix_materials'),
+      description: t('quick_actions.mix_materials_desc'),
       icon: RefreshCw,
       color: 'bg-teal-500 hover:bg-teal-600',
       category: 'production',
@@ -236,8 +236,8 @@ export function QuickActions() {
     },
     {
       id: 'reports',
-      title: 'Quick Report',
-      description: 'Generate report',
+      title: t('quick_actions.quick_report'),
+      description: t('quick_actions.quick_report_desc'),
       icon: FileText,
       color: 'bg-gray-500 hover:bg-gray-600',
       category: 'reports',
