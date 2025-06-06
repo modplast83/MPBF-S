@@ -100,13 +100,13 @@ export default function Sections() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Sections</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t('setup.sections.title')}</h1>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Manage Sections</span>
+            <span>{t('setup.sections.description')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>

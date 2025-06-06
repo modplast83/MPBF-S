@@ -84,36 +84,36 @@ export default function Users() {
 
   const columns = [
     {
-      header: "Username",
-      accessorKey: "username",
+      header: t('setup.users.username'),
+      accessorKey: "username" as keyof User,
     },
     {
-      header: "Name",
-      accessorKey: "firstName",
-      cell: (row: { firstName?: string, lastName?: string }) => 
+      header: t('setup.users.first_name'),
+      accessorKey: "firstName" as keyof User,
+      cell: (row: { firstName?: string | null, lastName?: string | null }) => 
         `${row.firstName || ''} ${row.lastName || ''}`.trim() || '-',
     },
     {
-      header: "Role",
-      accessorKey: "role",
+      header: t('setup.users.role'),
+      accessorKey: "role" as keyof User,
       cell: (row: { role: string }) => formatRole(row.role),
     },
     {
-      header: "Section",
-      accessorKey: "sectionId",
+      header: t('setup.users.section'),
+      accessorKey: "sectionId" as keyof User,
       cell: (row: { sectionId: string | null }) => getSectionName(row.sectionId),
     },
     {
-      header: "Status",
-      accessorKey: "isActive",
+      header: t('setup.users.status'),
+      accessorKey: "isActive" as keyof User,
       cell: (row: { isActive: boolean }) => (
         <Badge variant={row.isActive ? "default" : "secondary"}>
-          {row.isActive ? "Active" : "Inactive"}
+          {row.isActive ? t('setup.users.active') : t('setup.users.inactive')}
         </Badge>
       ),
     },
     {
-      header: "Actions",
+      header: t('common.actions'),
       cell: (row: User) => (
         <div className="flex space-x-2">
           <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} className="text-primary-500 hover:text-primary-700">
