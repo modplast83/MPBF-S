@@ -65,7 +65,7 @@ export default function ViolationTrendsPage() {
 
   const { start, end } = getDateRange();
   const filteredViolations = violations.filter((v: HrViolation) => {
-    const reportDate = new Date(v.reportDate);
+    const reportDate = new Date(v.createdAt);
     return reportDate >= start && reportDate <= end;
   });
 
@@ -84,7 +84,7 @@ export default function ViolationTrendsPage() {
 
     return months.map(({ month, label }) => {
       const monthViolations = filteredViolations.filter((v: HrViolation) => 
-        format(new Date(v.reportDate), 'yyyy-MM') === month
+        format(new Date(v.createdAt), 'yyyy-MM') === month
       );
 
       return {
@@ -239,7 +239,7 @@ export default function ViolationTrendsPage() {
   // Calculate statistics
   const totalViolations = filteredViolations.length;
   const previousPeriod = violations.filter((v: HrViolation) => {
-    const reportDate = new Date(v.reportDate);
+    const reportDate = new Date(v.createdAt);
     const prevStart = new Date(start);
     prevStart.setMonth(prevStart.getMonth() - (timeRange === "3months" ? 3 : timeRange === "6months" ? 6 : 12));
     return reportDate >= prevStart && reportDate < start;
@@ -248,13 +248,17 @@ export default function ViolationTrendsPage() {
   const trend = totalViolations - previousPeriod.length;
   const trendPercentage = previousPeriod.length > 0 ? ((trend / previousPeriod.length) * 100).toFixed(1) : '0';
 
-  const mostCommonType = Object.entries({
+  const typeBreakdown = {
     attendance: filteredViolations.filter((v: HrViolation) => v.violationType === 'attendance').length,
     conduct: filteredViolations.filter((v: HrViolation) => v.violationType === 'conduct').length,
     safety: filteredViolations.filter((v: HrViolation) => v.violationType === 'safety').length,
     performance: filteredViolations.filter((v: HrViolation) => v.violationType === 'performance').length,
     policy: filteredViolations.filter((v: HrViolation) => v.violationType === 'policy').length,
-  }).reduce((a, b) => a[1] > b[1] ? a : b);
+  };
+  
+  const mostCommonType = Object.entries(typeBreakdown).length > 0 
+    ? Object.entries(typeBreakdown).reduce((a, b) => a[1] > b[1] ? a : b)
+    : ['none', 0];
 
   const criticalViolations = filteredViolations.filter((v: HrViolation) => v.severity === 'critical').length;
 

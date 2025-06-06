@@ -2488,16 +2488,16 @@ COMMIT;
           validatedData.jobOrderId,
           validatedData.recipientPhone,
           validatedData.message,
-          validatedData.sentBy || req.user?.id || null,
-          validatedData.recipientName || null,
-          validatedData.customerId || null
+          validatedData.sentBy || req.user?.id || undefined,
+          validatedData.recipientName || undefined,
+          validatedData.customerId || undefined
         );
       } else {
         result = await SmsService.sendCustomMessage(
           validatedData.recipientPhone,
           validatedData.message,
-          validatedData.sentBy || req.user?.id || null,
-          validatedData.recipientName || null,
+          validatedData.sentBy || req.user?.id || undefined,
+          validatedData.recipientName || undefined,
           validatedData.category || 'general',
           validatedData.priority || 'normal'
         );
@@ -3420,8 +3420,8 @@ COMMIT;
         // Convert to array format
         return Object.entries(rollsByDay).map(([date, dayRolls]) => ({
           date,
-          count: dayRolls.length,
-          totalWeight: dayRolls.reduce((sum, r) => sum + (r.cuttingQty || 0), 0)
+          count: (dayRolls as any[]).length,
+          totalWeight: (dayRolls as any[]).reduce((sum: number, r: any) => sum + (r.cuttingQty || 0), 0)
         }));
       };
       
@@ -4437,7 +4437,7 @@ COMMIT;
             id: jo.id,
             quantity: jo.quantity,
             status: jo.status,
-            completedDate: jo.completedDate
+            completedDate: jo.receiveDate || null
           }))
         };
       }));
@@ -4716,7 +4716,7 @@ COMMIT;
           
           // Find the latest completion date among job orders
           const completionDates = orderJobOrders
-            .map(jo => jo.completedDate)
+            .map(jo => jo.receiveDate)
             .filter(date => date !== null) as Date[];
             
           if (completionDates.length === 0) return null;
@@ -5059,16 +5059,19 @@ COMMIT;
       };
 
       // Get user violations
-      const violations = await storage.getHrViolationsByUser(parseInt(userId));
+      const violations = await storage.getHrViolationsByUser(userId);
 
       // Get user achievements (from employee of month data)
-      const achievements = await storage.getEmployeeOfMonthByUser(parseInt(userId));
+      const achievements = await storage.getEmployeeOfMonthByUser(userId);
 
       // Get user tasks (from mobile tasks if available)
       let tasks = [];
       try {
-        const mobileTasks = await storage.getOperatorTasks();
-        tasks = mobileTasks.filter(task => task.assignedTo === userId);
+        // Check if getOperatorTasks method exists before calling
+        if (typeof storage.getOperatorTasks === 'function') {
+          const mobileTasks = await storage.getOperatorTasks();
+          tasks = mobileTasks.filter((task: any) => task.assignedTo === userId);
+        }
       } catch (error) {
         // Mobile tasks not available, return empty array
         tasks = [];
