@@ -98,7 +98,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
             </Button>
           )}
           <div className="flex flex-col">
-            <h1 className={`text-xl sm:text-2xl font-bold text-slate-800 ${isMobile ? 'truncate max-w-[180px]' : ''}`}>
+            <h1 className="sm:text-2xl font-bold text-slate-800 text-[20px]">
               {getCurrentPageTitle()}
             </h1>
             <p className="text-sm text-slate-500 hidden sm:block">

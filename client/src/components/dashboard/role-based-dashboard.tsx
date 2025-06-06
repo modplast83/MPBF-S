@@ -5,6 +5,7 @@ import { ActiveOrdersTable } from './active-orders-table';
 import { PerformanceHealth } from './performance-health';
 import { ProductionChart } from './production-chart';
 import { RecentOrders } from './recent-orders';
+import { QuickActions } from './quick-actions';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth-v2';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -101,7 +102,7 @@ export function RoleBasedDashboard() {
         <div className="flex-1 min-w-0">
           <PageHeader
             title={t('dashboard.personalized_dashboard')}
-            description={t('dashboard.welcome_message', { name: user?.firstName || 'User' })}
+            description="مرحبًا AbuKhalid."
           />
         </div>
         
@@ -172,6 +173,11 @@ export function RoleBasedDashboard() {
         </div>
 
         <TabsContent value="overview" className="mt-0 space-y-4 lg:space-y-6">
+          {/* Quick Actions - Full width at top */}
+          <div className="w-full">
+            <QuickActions />
+          </div>
+          
           {/* Responsive Overview Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6">
             {/* Performance Health - Responsive sizing */}
