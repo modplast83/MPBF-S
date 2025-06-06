@@ -128,20 +128,20 @@ export default function Users() {
   const tableActions = (
     <Button onClick={() => setFormOpen(true)}>
       <span className="material-icons text-sm mr-1">add</span>
-      Add User
+      {t('setup.users.add_new')}
     </Button>
   );
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Users</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t('setup.users.title')}</h1>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Manage Users</span>
+            <span>{t('setup.users.description')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -159,7 +159,7 @@ export default function Users() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editUser ? "Edit User" : "Add New User"}
+              {editUser ? t('setup.users.edit_user') : t('setup.users.add_new')}
             </DialogTitle>
           </DialogHeader>
           <UserForm 
@@ -173,11 +173,11 @@ export default function Users() {
       <AlertDialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('setup.users.are_you_sure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the user{' '}
-              <span className="font-semibold">"{`${deletingUser?.firstName || ''} ${deletingUser?.lastName || ''}`.trim() || deletingUser?.username || ''}"</span>.
-              This action cannot be undone.
+              {t('setup.users.delete_confirmation', { 
+                name: `${deletingUser?.firstName || ''} ${deletingUser?.lastName || ''}`.trim() || deletingUser?.username || ''
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
