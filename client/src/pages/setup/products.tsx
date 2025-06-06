@@ -15,8 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Search, Printer } from "lucide-react";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useTranslation } from "react-i18next";
 
 export default function Products() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<CustomerProduct | null>(null);
