@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { Machine, Section } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { Plus } from "lucide-react";
 
 export default function Machines() {
   const { t } = useTranslation();
