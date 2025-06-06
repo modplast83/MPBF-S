@@ -13,6 +13,7 @@ import { Section } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 
 export default function Sections() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editSection, setEditSection] = useState<Section | null>(null);
@@ -31,15 +32,15 @@ export default function Sections() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.SECTIONS] });
       toast({
-        title: "Section Deleted",
-        description: "The section has been deleted successfully.",
+        title: t("setup.sections.section_deleted"),
+        description: t("setup.sections.section_deleted_success"),
       });
       setDeletingSection(null);
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to delete section: ${error}`,
+        title: t("common.error"),
+        description: t("setup.sections.delete_failed", { error }),
         variant: "destructive",
       });
     },

@@ -280,10 +280,10 @@ export function QuickActions() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Zap className="h-5 w-5 text-blue-600" />
-          Quick Actions
+          {t("dashboard.quick_actions")}
         </CardTitle>
         <CardDescription>
-          Shortcuts for common manufacturing tasks
+          {t("dashboard.quick_actions_description")}
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 
 export default function Machines() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editMachine, setEditMachine] = useState<Machine | null>(null);
@@ -39,15 +40,15 @@ export default function Machines() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MACHINES] });
       toast({
-        title: "Machine Deleted",
-        description: "The machine has been deleted successfully.",
+        title: t("setup.machines.machine_deleted"),
+        description: t("setup.machines.machine_deleted_success"),
       });
       setDeletingMachine(null);
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to delete machine: ${error}`,
+        title: t("common.error"),
+        description: t("setup.machines.delete_failed", { error }),
         variant: "destructive",
       });
     },

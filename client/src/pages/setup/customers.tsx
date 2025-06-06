@@ -13,6 +13,7 @@ import { Customer, User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 
 export default function Customers() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
@@ -35,15 +36,15 @@ export default function Customers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.CUSTOMERS] });
       toast({
-        title: "Customer Deleted",
-        description: "The customer has been deleted successfully.",
+        title: t("setup.customers.customer_deleted"),
+        description: t("setup.customers.customer_deleted_success"),
       });
       setDeletingCustomer(null);
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to delete customer: ${error}`,
+        title: t("common.error"),
+        description: t("setup.customers.delete_failed", { error }),
         variant: "destructive",
       });
     },
@@ -132,12 +133,12 @@ export default function Customers() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">العملاء</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t("setup.customers.title")}</h1>
       </div>
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>إدارة العملاء</span>
+            <span>{t("setup.customers.description")}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -154,7 +155,7 @@ export default function Customers() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editCustomer ? "Edit Customer" : "Add New Customer"}
+              {editCustomer ? t("setup.customers.edit_customer") : t("setup.customers.add_new")}
             </DialogTitle>
           </DialogHeader>
           <CustomerForm 
@@ -167,20 +168,18 @@ export default function Customers() {
       <AlertDialog open={!!deletingCustomer} onOpenChange={(open) => !open && setDeletingCustomer(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("setup.customers.are_you_sure")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the customer{' '}
-              <span className="font-semibold">"{deletingCustomer?.name}"</span>.
-              This action cannot be undone.
+              {t("setup.customers.delete_confirmation")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("setup.customers.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
               className="bg-red-500 hover:bg-red-600"
             >
-              Delete
+              {t("setup.customers.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -13,6 +13,7 @@ import { Item, Category } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 
 export default function Items() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<Item | null>(null);
@@ -35,15 +36,15 @@ export default function Items() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.ITEMS] });
       toast({
-        title: "Item Deleted",
-        description: "The item has been deleted successfully.",
+        title: t("setup.items.item_deleted"),
+        description: t("setup.items.item_deleted_success"),
       });
       setDeletingItem(null);
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to delete item: ${error}`,
+        title: t("common.error"),
+        description: t("setup.items.delete_failed", { error }),
         variant: "destructive",
       });
     },
