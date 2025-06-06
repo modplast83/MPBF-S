@@ -279,9 +279,8 @@ export default function Products() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Products</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">منتجات العملاء</h1>
       </div>
-
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Select Customer</CardTitle>
@@ -316,7 +315,6 @@ export default function Products() {
           </div>
         </CardContent>
       </Card>
-
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
@@ -359,7 +357,6 @@ export default function Products() {
           )}
         </CardContent>
       </Card>
-
       {/* Add/Edit Product Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -381,7 +378,6 @@ export default function Products() {
           />
         </DialogContent>
       </Dialog>
-
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deletingProduct} onOpenChange={(open) => !open && setDeletingProduct(null)}>
         <AlertDialogContent>
