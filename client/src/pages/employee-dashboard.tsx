@@ -49,7 +49,6 @@ export default function EmployeeDashboard() {
           {t('user_dashboard.settings', 'Settings')}
         </Button>
       </div>
-
       {/* Quick Status Cards */}
       <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-4 gap-6'} mb-6`}>
         <Card>
@@ -59,7 +58,7 @@ export default function EmployeeDashboard() {
                 <p className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
                   {t('user_dashboard.today_status', 'Today\'s Status')}
                 </p>
-                <p className={`${isMobile ? 'text-sm' : 'text-2xl'} font-bold text-green-600`}>
+                <p className="font-bold text-green-600 text-[15px]">
                   {t('user_dashboard.not_checked_in', 'Not Checked In')}
                 </p>
               </div>
@@ -110,7 +109,6 @@ export default function EmployeeDashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2 h-auto' : 'grid-cols-4'}`}>
