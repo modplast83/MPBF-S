@@ -2479,9 +2479,9 @@ COMMIT;
           validatedData.orderId,
           validatedData.recipientPhone,
           validatedData.message,
-          validatedData.sentBy || req.user?.id || null,
-          validatedData.recipientName || null,
-          validatedData.customerId || null
+          validatedData.sentBy || req.user?.id || undefined,
+          validatedData.recipientName || undefined,
+          validatedData.customerId || undefined
         );
       } else if (validatedData.messageType === 'status_update' && validatedData.jobOrderId) {
         result = await SmsService.sendJobOrderUpdate(
@@ -2570,8 +2570,8 @@ COMMIT;
       const updatedMessage = await SmsService.sendCustomMessage(
         message.recipientPhone,
         message.message,
-        message.sentBy,
-        message.recipientName,
+        message.sentBy || undefined,
+        message.recipientName || undefined,
         message.category || 'general',
         message.priority || 'normal'
       );
@@ -5252,7 +5252,7 @@ COMMIT;
   // Time Attendance Routes
   app.get("/api/time-attendance", async (req: Request, res: Response) => {
     try {
-      const timeAttendance = await storage.getTimeAttendance();
+      const timeAttendance = await storage.getTimeAttendance(req.query.userId as string);
       res.json(timeAttendance);
     } catch (error) {
       console.error('Error fetching time attendance:', error);
@@ -5686,7 +5686,7 @@ COMMIT;
       if (req.body.requestId) {
         await storage.updateMaintenanceRequest(req.body.requestId, {
           status: 'in_progress',
-          assignedTo: actionData.actionBy,
+          assignedTo: actionData.performedBy,
         });
       }
       
