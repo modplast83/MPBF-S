@@ -452,27 +452,27 @@ export function QuickActions() {
               </div>
 
               <div>
-                <Label htmlFor="severity">Severity</Label>
+                <Label htmlFor="severity">{t('quick_actions.severity')}</Label>
                 <Select 
                   value={maintenanceForm.severity} 
                   onValueChange={(value: 'low' | 'normal' | 'high') => setMaintenanceForm(prev => ({ ...prev, severity: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select severity" />
+                    <SelectValue placeholder={t('quick_actions.select_severity')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Low - Minor issue</SelectItem>
-                    <SelectItem value="normal">Normal - Standard repair</SelectItem>
-                    <SelectItem value="high">High - Urgent attention needed</SelectItem>
+                    <SelectItem value="low">{t('quick_actions.low_severity')}</SelectItem>
+                    <SelectItem value="normal">{t('quick_actions.normal_severity')}</SelectItem>
+                    <SelectItem value="high">{t('quick_actions.high_severity')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('quick_actions.description')}</Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe the issue in detail..."
+                  placeholder={t('quick_actions.describe_issue')}
                   value={maintenanceForm.description}
                   onChange={(e) => setMaintenanceForm(prev => ({ ...prev, description: e.target.value }))}
                 />
@@ -484,10 +484,10 @@ export function QuickActions() {
                   disabled={createMaintenanceMutation.isPending || !maintenanceForm.machineId || !maintenanceForm.description}
                   className="flex-1"
                 >
-                  {createMaintenanceMutation.isPending ? 'Submitting...' : 'Submit Request'}
+                  {createMaintenanceMutation.isPending ? t('quick_actions.submitting') : t('quick_actions.submit_request')}
                 </Button>
                 <Button variant="outline" onClick={() => setMaintenanceDialogOpen(false)}>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
