@@ -175,7 +175,7 @@ export default function Machines() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editMachine ? "Edit Machine" : "Add New Machine"}
+              {editMachine ? t('setup.machines.edit_machine') : t('setup.machines.add_new')}
             </DialogTitle>
           </DialogHeader>
           <MachineForm 
@@ -189,20 +189,18 @@ export default function Machines() {
       <AlertDialog open={!!deletingMachine} onOpenChange={(open) => !open && setDeletingMachine(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('setup.machines.are_you_sure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the machine{' '}
-              <span className="font-semibold">"{deletingMachine?.name}"</span>.
-              This action cannot be undone.
+              {t('setup.machines.delete_confirmation', { name: deletingMachine?.name || '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('setup.machines.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
               className="bg-red-500 hover:bg-red-600"
             >
-              Delete
+              {t('setup.machines.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

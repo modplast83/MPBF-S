@@ -295,7 +295,7 @@
         "update_failed": "Failed to update machine: {{error}}",
         "delete_failed": "Failed to delete machine: {{error}}",
         "are_you_sure": "Are you sure?",
-        "delete_confirmation": "This will permanently delete this machine. This action cannot be undone.",
+        "delete_confirmation": "This will permanently delete the machine \"{{name}}\". This action cannot be undone.",
         "cancel": "Cancel",
         "delete": "Delete"
       },
