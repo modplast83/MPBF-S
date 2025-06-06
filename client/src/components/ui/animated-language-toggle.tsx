@@ -97,34 +97,6 @@ const languages = {
     nativeName: 'العربية',
     flag: FlagSA,
     dir: 'rtl'
-  },
-  es: {
-    code: 'es',
-    name: 'Spanish',
-    nativeName: 'Español',
-    flag: FlagES,
-    dir: 'ltr'
-  },
-  fr: {
-    code: 'fr',
-    name: 'French',
-    nativeName: 'Français',
-    flag: FlagFR,
-    dir: 'ltr'
-  },
-  de: {
-    code: 'de',
-    name: 'German',
-    nativeName: 'Deutsch',
-    flag: FlagDE,
-    dir: 'ltr'
-  },
-  zh: {
-    code: 'zh',
-    name: 'Chinese',
-    nativeName: '中文',
-    flag: FlagCN,
-    dir: 'ltr'
   }
 } as const;
 
