@@ -383,6 +383,25 @@
       "user": "المستخدم",
       "role": "الدور"
     },
+    "quick_actions": {
+      "title": "الإجراءات السريعة",
+      "new_order": "طلبية جديدة",
+      "new_order_desc": "إنشاء طلبية",
+      "start_production": "بدء الإنتاج", 
+      "start_production_desc": "بدء العملية",
+      "quality_check": "فحص الجودة",
+      "quality_check_desc": "إجراء فحص",
+      "report_issue": "بلاغ عطل",
+      "report_issue_desc": "تقديم طلب",
+      "update_metrics": "تحديث المقاييس",
+      "update_metrics_desc": "إدخال البيانات",
+      "warehouse": "المستودع",
+      "warehouse_desc": "حالة المخزون",
+      "mix_materials": "خلط المواد",
+      "mix_materials_desc": "إنشاء خلطة",
+      "quick_report": "تقرير سريع",
+      "quick_report_desc": "إنشاء تقرير"
+    },
     "dashboard": {
       "title": "لوحة التحكم",
       "orders_count": "الطلبات",

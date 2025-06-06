@@ -323,20 +323,20 @@ export function QuickActions() {
         <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Create Quick Order</DialogTitle>
+              <DialogTitle>{t('quick_actions.create_quick_order')}</DialogTitle>
               <DialogDescription>
-                Create a new production order quickly
+                {t('quick_actions.create_quick_order_desc')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="customerId">Customer</Label>
+                <Label htmlFor="customerId">{t('quick_actions.customer')}</Label>
                 <Select 
                   value={orderForm.customerId} 
                   onValueChange={(value) => setOrderForm(prev => ({ ...prev, customerId: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select customer" />
+                    <SelectValue placeholder={t('quick_actions.select_customer')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="CID001">Customer A</SelectItem>
@@ -347,18 +347,18 @@ export function QuickActions() {
               </div>
 
               <div>
-                <Label>Order Items</Label>
+                <Label>{t('quick_actions.order_items')}</Label>
                 {orderForm.items.map((item, index) => (
                   <div key={index} className="flex gap-2 mt-2">
                     <Input
                       type="number"
-                      placeholder="Product ID"
+                      placeholder={t('quick_actions.product_id')}
                       value={item.customerProductId || ''}
                       onChange={(e) => updateOrderItem(index, 'customerProductId', parseInt(e.target.value) || 0)}
                     />
                     <Input
                       type="number"
-                      placeholder="Quantity"
+                      placeholder={t('quick_actions.quantity')}
                       value={item.quantity || ''}
                       onChange={(e) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 0)}
                     />
@@ -374,15 +374,15 @@ export function QuickActions() {
                   </div>
                 ))}
                 <Button variant="outline" size="sm" onClick={addOrderItem} className="mt-2">
-                  Add Item
+                  {t('quick_actions.add_item')}
                 </Button>
               </div>
 
               <div>
-                <Label htmlFor="notes">Notes (Optional)</Label>
+                <Label htmlFor="notes">{t('quick_actions.notes_optional')}</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Order notes..."
+                  placeholder={t('quick_actions.order_notes')}
                   value={orderForm.notes || ''}
                   onChange={(e) => setOrderForm(prev => ({ ...prev, notes: e.target.value }))}
                 />
@@ -394,10 +394,10 @@ export function QuickActions() {
                   disabled={createOrderMutation.isPending || !orderForm.customerId}
                   className="flex-1"
                 >
-                  {createOrderMutation.isPending ? 'Creating...' : 'Create Order'}
+                  {createOrderMutation.isPending ? t('quick_actions.creating') : t('quick_actions.create_order')}
                 </Button>
                 <Button variant="outline" onClick={() => setOrderDialogOpen(false)}>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -408,20 +408,20 @@ export function QuickActions() {
         <Dialog open={maintenanceDialogOpen} onOpenChange={setMaintenanceDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Report Maintenance Issue</DialogTitle>
+              <DialogTitle>{t('quick_actions.report_maintenance_issue')}</DialogTitle>
               <DialogDescription>
-                Submit a maintenance request quickly
+                {t('quick_actions.submit_maintenance_request')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="machineId">Machine</Label>
+                <Label htmlFor="machineId">{t('quick_actions.machine')}</Label>
                 <Select 
                   value={maintenanceForm.machineId} 
                   onValueChange={(value) => setMaintenanceForm(prev => ({ ...prev, machineId: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select machine" />
+                    <SelectValue placeholder={t('quick_actions.select_machine')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="EXT001">Extruder 1</SelectItem>
@@ -433,13 +433,13 @@ export function QuickActions() {
               </div>
 
               <div>
-                <Label htmlFor="damageType">Issue Type</Label>
+                <Label htmlFor="damageType">{t('quick_actions.issue_type')}</Label>
                 <Select 
                   value={maintenanceForm.damageType} 
                   onValueChange={(value) => setMaintenanceForm(prev => ({ ...prev, damageType: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select issue type" />
+                    <SelectValue placeholder={t('quick_actions.select_issue_type')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="mechanical">Mechanical Issue</SelectItem>

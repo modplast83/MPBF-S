@@ -408,6 +408,25 @@
       "employee": "Employee",
       "server_management": "Server Management"
     },
+    "quick_actions": {
+      "title": "Quick Actions",
+      "new_order": "New Order",
+      "new_order_desc": "Create new",
+      "start_production": "Start Production", 
+      "start_production_desc": "Begin production",
+      "quality_check": "Quality Check",
+      "quality_check_desc": "Perform inspection",
+      "report_issue": "Report Issue",
+      "report_issue_desc": "Submit request",
+      "update_metrics": "Update Metrics",
+      "update_metrics_desc": "Input data",
+      "warehouse": "Warehouse",
+      "warehouse_desc": "inventory status",
+      "mix_materials": "Mix Materials",
+      "mix_materials_desc": "Create mix",
+      "quick_report": "Quick Report",
+      "quick_report_desc": "Generate report"
+    },
     "dashboard": {
       "title": "Dashboard",
       "orders_count": "Orders",
