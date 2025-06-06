@@ -147,61 +147,18 @@ export async function seedSmsData() {
     console.log("Seeding SMS notification rules...");
     for (const rule of notificationRules) {
       try {
-        await smsStorage.createSmsNotificationRule(rule);
-        console.log(`Created rule: ${rule.name}`);
+        // Check if rule with this name already exists
+        const existingRules = await smsStorage.getSmsNotificationRules();
+        const ruleExists = existingRules.some(r => r.name === rule.name);
+        
+        if (!ruleExists) {
+          await smsStorage.createSmsNotificationRule(rule);
+          console.log(`Created rule: ${rule.name}`);
+        } else {
+          console.log(`Rule ${rule.name} already exists, skipping`);
+        }
       } catch (error) {
         console.log(`Rule ${rule.name} already exists or error:`, error);
-      }
-    }
-
-    // Create sample SMS messages for demonstration
-    const sampleMessages = [
-      {
-        recipientPhone: "+1234567890",
-        recipientName: "Sample Customer",
-        message: "Hello Sample Customer, your order #1001 has been created and is now in production. We'll keep you updated on the progress.",
-        status: "delivered" as const,
-        priority: "normal" as const,
-        category: "production" as const,
-        messageType: "order_notification" as const,
-        orderId: null,
-        customerId: null,
-        templateId: "order_created",
-      },
-      {
-        recipientPhone: "+1234567891",
-        recipientName: "Production Manager",
-        message: "ALERT: Production bottleneck detected in Extrusion Section at Machine A1. Estimated delay: 2 hours. Immediate attention required.",
-        status: "sent" as const,
-        priority: "urgent" as const,
-        category: "production" as const,
-        messageType: "bottleneck_alert" as const,
-        templateId: "bottleneck_alert",
-      },
-      {
-        recipientPhone: "+1234567892",
-        recipientName: "Quality Inspector",
-        message: "Quality Issue: Job Order #2001 has failed quality inspection. Priority: high. Action required immediately.",
-        status: "delivered" as const,
-        priority: "high" as const,
-        category: "quality" as const,
-        messageType: "quality_alert" as const,
-        templateId: "quality_issue",
-      }
-    ];
-
-    console.log("Seeding sample SMS messages...");
-    for (const message of sampleMessages) {
-      try {
-        await smsStorage.createSmsMessage({
-          ...message,
-          retryCount: 0,
-          isScheduled: false,
-          sentBy: "admin",
-        });
-        console.log(`Created sample message to: ${message.recipientName}`);
-      } catch (error) {
-        console.log(`Sample message creation error:`, error);
       }
     }
 

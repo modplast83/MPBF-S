@@ -2430,10 +2430,10 @@ COMMIT;
 
   // Import SMS storage and seed data
   const { smsStorage } = await import("./sms-storage");
-  const { seedSmsData } = await import("./sms-seed");
+  // const { seedSmsData } = await import("./sms-seed");
   
-  // Initialize SMS data on startup
-  await seedSmsData();
+  // Initialize SMS data on startup (disabled to prevent duplicate records)
+  // await seedSmsData();
 
   // SMS Messages
   app.get("/api/sms-messages", async (_req: Request, res: Response) => {
