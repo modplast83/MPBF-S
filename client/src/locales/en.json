@@ -136,7 +136,7 @@
         "select_customer": "Select Customer",
         "select_customer_to_view": "Select a customer to view products",
         "products_for": "Products for {{customer}}",
-        "search_placeholder": "Search customer by name or code...",
+        "search_placeholder": "Search products...",
         "select_a_customer": "Select a customer",
         "please_select_customer": "Please select a customer to view their products",
         "no_products_found": "No products found",

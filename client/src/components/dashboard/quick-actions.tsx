@@ -164,7 +164,7 @@ export function QuickActions() {
     {
       id: 'new-order',
       title: 'New Order',
-      description: 'Create new production order',
+      description: 'Create new',
       icon: Plus,
       color: 'bg-blue-500 hover:bg-blue-600',
       category: 'orders',
@@ -175,7 +175,7 @@ export function QuickActions() {
     {
       id: 'start-production',
       title: 'Start Production',
-      description: 'Begin production workflow',
+      description: 'Begin production',
       icon: Play,
       color: 'bg-green-500 hover:bg-green-600',
       category: 'production',
@@ -186,7 +186,7 @@ export function QuickActions() {
     {
       id: 'quality-check',
       title: 'Quality Check',
-      description: 'Perform quality inspection',
+      description: 'Perform inspection',
       icon: CheckCircle,
       color: 'bg-purple-500 hover:bg-purple-600',
       category: 'quality',
@@ -197,7 +197,7 @@ export function QuickActions() {
     {
       id: 'maintenance-request',
       title: 'Report Issue',
-      description: 'Submit maintenance request',
+      description: 'Submit request',
       icon: AlertTriangle,
       color: 'bg-red-500 hover:bg-red-600',
       category: 'maintenance',
@@ -207,7 +207,7 @@ export function QuickActions() {
     {
       id: 'production-metrics',
       title: 'Update Metrics',
-      description: 'Input production data',
+      description: 'Input data',
       icon: BarChart3,
       color: 'bg-indigo-500 hover:bg-indigo-600',
       category: 'production',
@@ -217,7 +217,7 @@ export function QuickActions() {
     {
       id: 'warehouse-status',
       title: 'Warehouse',
-      description: 'Check inventory status',
+      description: 'inventory status',
       icon: Package,
       color: 'bg-orange-500 hover:bg-orange-600',
       category: 'orders',
@@ -227,7 +227,7 @@ export function QuickActions() {
     {
       id: 'mix-materials',
       title: 'Mix Materials',
-      description: 'Create material mix',
+      description: 'Create mix',
       icon: RefreshCw,
       color: 'bg-teal-500 hover:bg-teal-600',
       category: 'production',
@@ -237,7 +237,7 @@ export function QuickActions() {
     {
       id: 'reports',
       title: 'Quick Report',
-      description: 'Generate production report',
+      description: 'Generate report',
       icon: FileText,
       color: 'bg-gray-500 hover:bg-gray-600',
       category: 'reports',

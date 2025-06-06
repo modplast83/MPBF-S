@@ -285,7 +285,7 @@ export default function Products() {
       </div>
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>{t("setup.products.select_customer")}</CardTitle>
+          <CardTitle>اضافة منتجات العملاء</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -323,7 +323,7 @@ export default function Products() {
             <span>
               {selectedCustomerId 
                 ? t("setup.products.products_for", { customer: getCustomerName(selectedCustomerId) })
-                : t("setup.products.select_customer_to_view")}
+                : "حدد عميل لعرض المنتجات الخاصة به"}
             </span>
             {selectedCustomerId && products && products.length > 0 && (
               <Button 
