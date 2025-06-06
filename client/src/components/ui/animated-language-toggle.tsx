@@ -46,42 +46,6 @@ const FlagSA = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const FlagES = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 16" className={className}>
-    <rect width="24" height="16" fill="#AA151B"/>
-    <rect width="24" height="6.4" y="4.8" fill="#F1BF00"/>
-  </svg>
-);
-
-const FlagFR = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 16" className={className}>
-    <rect width="8" height="16" fill="#002395"/>
-    <rect x="8" width="8" height="16" fill="white"/>
-    <rect x="16" width="8" height="16" fill="#ED2939"/>
-  </svg>
-);
-
-const FlagDE = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 16" className={className}>
-    <rect width="24" height="5.33" fill="#000000"/>
-    <rect width="24" height="5.33" y="5.33" fill="#DD0000"/>
-    <rect width="24" height="5.33" y="10.67" fill="#FFCE00"/>
-  </svg>
-);
-
-const FlagCN = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 16" className={className}>
-    <rect width="24" height="16" fill="#DE2910"/>
-    <g fill="#FFDE00">
-      <polygon points="4,3 5,5 3,4 5,4 3,5" transform="scale(0.8)"/>
-      <polygon points="8,2 8.5,3 7.5,2.5 8.5,2.5 7.5,3" transform="scale(0.6)"/>
-      <polygon points="9,4 9.5,5 8.5,4.5 9.5,4.5 8.5,5" transform="scale(0.6)"/>
-      <polygon points="9,6 9.5,7 8.5,6.5 9.5,6.5 8.5,7" transform="scale(0.6)"/>
-      <polygon points="8,8 8.5,9 7.5,8.5 8.5,8.5 7.5,9" transform="scale(0.6)"/>
-    </g>
-  </svg>
-);
-
 // Language data with enhanced information
 const languages = {
   en: {

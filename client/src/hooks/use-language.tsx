@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 // Define available languages
-export type Language = "en" | "ar" | "es" | "fr" | "de" | "zh";
+export type Language = "en" | "ar";
 
 // Language context type
 type LanguageContextType = {
