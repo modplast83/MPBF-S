@@ -124,7 +124,7 @@ export default function Sections() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editSection ? "Edit Section" : "Add New Section"}
+              {editSection ? t('setup.sections.edit_section') : t('setup.sections.add_new')}
             </DialogTitle>
           </DialogHeader>
           <SectionForm 
@@ -138,20 +138,18 @@ export default function Sections() {
       <AlertDialog open={!!deletingSection} onOpenChange={(open) => !open && setDeletingSection(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('setup.sections.are_you_sure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the section{' '}
-              <span className="font-semibold">"{deletingSection?.name}"</span>.
-              This action cannot be undone.
+              {t('setup.sections.delete_confirmation', { name: deletingSection?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('setup.sections.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
               className="bg-red-500 hover:bg-red-600"
             >
-              Delete
+              {t('setup.sections.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

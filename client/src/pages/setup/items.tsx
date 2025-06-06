@@ -124,7 +124,7 @@ export default function Items() {
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Manage Items</span>
+            <span>{t('setup.items.description')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -142,7 +142,7 @@ export default function Items() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editItem ? "Edit Item" : "Add New Item"}
+              {editItem ? t('setup.items.edit_item') : t('setup.items.add_new')}
             </DialogTitle>
           </DialogHeader>
           <ItemForm 
@@ -156,20 +156,18 @@ export default function Items() {
       <AlertDialog open={!!deletingItem} onOpenChange={(open) => !open && setDeletingItem(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('setup.items.are_you_sure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the item{' '}
-              <span className="font-semibold">"{deletingItem?.name}"</span>.
-              This action cannot be undone.
+              {t('setup.items.delete_confirmation', { name: deletingItem?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('setup.items.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete}
               className="bg-red-500 hover:bg-red-600"
             >
-              Delete
+              {t('setup.items.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

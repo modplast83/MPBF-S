@@ -144,20 +144,20 @@ export default function Machines() {
   const tableActions = (
     <Button onClick={() => setFormOpen(true)}>
       <span className="material-icons text-sm mr-1">add</span>
-      Add Machine
+      {t('setup.machines.add_new')}
     </Button>
   );
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Machines</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t('setup.machines.title')}</h1>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Manage Machines</span>
+            <span>{t('setup.machines.description')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
