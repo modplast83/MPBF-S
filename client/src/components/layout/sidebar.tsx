@@ -89,9 +89,9 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
 
           // For items with subitems, check if any subitems have permission
           const filteredSubItems = (item.subItems || []).filter((subItem: any) => {
-            // For Mix Materials, only show if user has a section assigned
+            // For Mix Materials, show if user has permission (administrators can always access)
             if (subItem.title === 'Mix Materials') {
-              return hasPermission(subItem.title) && user?.sectionId && user.sectionId !== "";
+              return hasPermission(subItem.title);
             }
             // Special case for operators
             return (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
@@ -107,9 +107,9 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
             return {
               ...item,
               subItems: item.subItems.filter((subItem: any) => {
-                // For Mix Materials, only show if user has a section assigned
+                // For Mix Materials, show if user has permission (administrators can always access)
                 if (subItem.title === 'Mix Materials') {
-                  return hasPermission(subItem.title) && user?.sectionId && user.sectionId !== "";
+                  return hasPermission(subItem.title);
                 }
                 // Special case for operators
                 return (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
