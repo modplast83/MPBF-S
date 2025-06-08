@@ -1658,6 +1658,7 @@
       },
       "status": {
         "pending": "معلق",
+        "in_progress": "قيد التقدم",
         "inProgress": "قيد التقدم",
         "completed": "مكتمل",
         "cancelled": "ملغي",

@@ -1773,6 +1773,7 @@
       },
       "status": {
         "pending": "Pending",
+        "in_progress": "In Progress",
         "inProgress": "In Progress",
         "completed": "Completed",
         "cancelled": "Cancelled",
