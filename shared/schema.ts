@@ -889,6 +889,7 @@ export const hrViolations = pgTable("hr_violations", {
   description: text("description").notNull(),
   actionTaken: text("action_taken"),
   status: text("status").notNull().default("open"), // "open", "investigating", "resolved", "dismissed"
+  reportDate: timestamp("report_date").defaultNow(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -909,6 +910,8 @@ export const hrComplaints = pgTable("hr_complaints", {
   desiredOutcome: text("desired_outcome"),
   isAnonymous: boolean("is_anonymous").default(false),
   status: text("status").notNull().default("submitted"), // "submitted", "under_review", "investigating", "resolved", "closed"
+  submittedDate: timestamp("submitted_date").defaultNow(),
+  assignedTo: text("assigned_to").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

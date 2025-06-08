@@ -22,7 +22,13 @@ import {
   insertTimeAttendanceSchema, insertEmployeeOfMonthSchema,
   insertHrViolationSchema, insertHrComplaintSchema,
   insertNotificationSchema, insertNotificationTemplateSchema,
-  InsertNotification, InsertNotificationTemplate
+  InsertNotification, InsertNotificationTemplate,
+  InsertCategory, InsertCustomer, InsertItem, InsertSection, InsertMachine,
+  InsertMasterBatch, InsertCustomerProduct, InsertOrder, InsertJobOrder,
+  InsertRawMaterial, InsertFinalProduct, InsertSmsTemplate, InsertSmsNotificationRule,
+  InsertMixMaterial, InsertMixItem, InsertPermission, InsertModule,
+  InsertMaterialInput, InsertMaterialInputItem, InsertAbaMaterialConfig,
+  InsertTimeAttendance, InsertEmployeeOfMonth, InsertHrViolation, InsertHrComplaint
 } from "@shared/schema";
 import { z } from "zod";
 import path from 'path';
@@ -197,8 +203,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/categories", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertCategorySchema.parse(req.body);
-      const existingCategory = await storage.getCategoryByCode(validatedData.code!);
+      const validatedData = insertCategorySchema.parse(req.body) as InsertCategory;
+      const existingCategory = await storage.getCategoryByCode(validatedData.code);
       if (existingCategory) {
         return res.status(409).json({ message: "Category code already exists" });
       }
