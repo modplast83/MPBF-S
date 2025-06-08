@@ -494,30 +494,30 @@ export default function MaintenanceActionsPage() {
                 <TableBody>
                   {filteredActions.map((action: MaintenanceAction) => (
                     <TableRow key={action.id}>
-                      <TableCell className="font-medium">#{action.id}</TableCell>
-                      <TableCell>{format(new Date(action.actionDate), 'MMM dd, yyyy')}</TableCell>
-                      <TableCell>{getRequestInfo(action.requestId)}</TableCell>
-                      <TableCell>{getMachineName(action.machineId)}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium text-center">#{action.id}</TableCell>
+                      <TableCell className="text-center">{format(new Date(action.actionDate), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell className="text-center">{getRequestInfo(action.requestId)}</TableCell>
+                      <TableCell className="text-center">{getMachineName(action.machineId)}</TableCell>
+                      <TableCell className="text-center">
                         <Badge variant="secondary" className="text-xs">
                           {action.actionType}
                         </Badge>
                       </TableCell>
-                      <TableCell>{getUserName(action.performedBy)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
+                      <TableCell className="text-center">{getUserName(action.performedBy)}</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center">
                           <FileText className="w-4 h-4 mr-1 text-gray-400" />
                           {action.hours}h
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center">
                           <DollarSign className="w-4 h-4 mr-1 text-gray-400" />
                           ${action.cost.toFixed(2)}
                         </div>
                       </TableCell>
-                      <TableCell>{getStatusBadge(action.status)}</TableCell>
-                      <TableCell className="max-w-xs truncate" title={action.description}>
+                      <TableCell className="text-center">{getStatusBadge(action.status)}</TableCell>
+                      <TableCell className="max-w-xs truncate text-center" title={action.description}>
                         {action.description}
                       </TableCell>
                     </TableRow>
