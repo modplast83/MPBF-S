@@ -170,15 +170,15 @@ export default function ViolationsComplaintsPage() {
 
   const filteredViolations = violations?.filter((violation: HrViolation) => {
     const matchesStatus = statusFilter === "all" || violation.status === statusFilter;
-    const matchesSearch = violation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         violation.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (violation.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (violation.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
   const filteredComplaints = complaints?.filter((complaint: HrComplaint) => {
     const matchesStatus = statusFilter === "all" || complaint.status === statusFilter;
-    const matchesSearch = complaint.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         complaint.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (complaint.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (complaint.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 

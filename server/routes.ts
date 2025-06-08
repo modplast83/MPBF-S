@@ -198,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/categories", async (req: Request, res: Response) => {
     try {
       const validatedData = insertCategorySchema.parse(req.body);
-      const existingCategory = await storage.getCategoryByCode(validatedData.code);
+      const existingCategory = await storage.getCategoryByCode(validatedData.code!);
       if (existingCategory) {
         return res.status(409).json({ message: "Category code already exists" });
       }

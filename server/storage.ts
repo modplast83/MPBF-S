@@ -393,6 +393,7 @@ export class MemStorage {
   private initializeData() {
     // Add an admin user
     this.createUser({
+      id: "admin-user-001",
       username: "admin",
       password: "admin123",
       isAdmin: true,
