@@ -131,8 +131,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = req.user as any;
       
-      // Administrator role bypasses permission checks
-      if (user.role === "administrator") {
+      // Administrator bypasses permission checks
+      if (user.isAdmin) {
         return next();
       }
 
@@ -3790,7 +3790,7 @@ COMMIT;
   app.get("/api/modules", requireAuth, async (req: Request, res: Response) => {
     try {
       // Check if user has permission to view modules
-      if (req.user && (req.user as any).role !== "administrator") {
+      if (req.user && !(req.user as any).isAdmin) {
         return res.status(403).json({ message: "Permission denied" });
       }
 
@@ -3805,7 +3805,7 @@ COMMIT;
   app.get("/api/modules/category/:category", requireAuth, async (req: Request, res: Response) => {
     try {
       // Check if user has permission to view modules
-      if (req.user && (req.user as any).role !== "administrator") {
+      if (req.user && !(req.user as any).isAdmin) {
         return res.status(403).json({ message: "Permission denied" });
       }
 
@@ -3821,7 +3821,7 @@ COMMIT;
   app.get("/api/modules/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       // Check if user has permission to view modules
-      if (req.user && (req.user as any).role !== "administrator") {
+      if (req.user && !(req.user as any).isAdmin) {
         return res.status(403).json({ message: "Permission denied" });
       }
 
