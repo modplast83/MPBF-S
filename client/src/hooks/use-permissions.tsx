@@ -109,9 +109,11 @@ export function PermissionsProvider({
     }
     
     // Find permission for this user's section and the requested module
+    const moduleMatch = modules.find((m: any) => m.name === module);
+    const moduleId = moduleMatch?.id;
+    
     const userPermission = permissions.find(p => 
-      p.sectionId === userSection && 
-      (p.moduleId === module || (typeof p.moduleId === 'number' && p.moduleId.toString() === module))
+      p.sectionId === userSection && p.moduleId === moduleId
     );
     
     if (!userPermission || !userPermission.isActive) {
