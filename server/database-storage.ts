@@ -231,17 +231,24 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Permission management operations
+  // Permission management operations (section-based)
   async getPermissions(): Promise<Permission[]> {
     const allPermissions = await db.select().from(permissions);
     return allPermissions;
   }
 
-  async getPermissionsByRole(role: string): Promise<Permission[]> {
-    const rolePermissions = await db.select()
+  async getPermissionsBySection(sectionId: string): Promise<Permission[]> {
+    const sectionPermissions = await db.select()
       .from(permissions)
-      .where(eq(permissions.role, role));
-    return rolePermissions;
+      .where(eq(permissions.sectionId, sectionId));
+    return sectionPermissions;
+  }
+
+  async getPermissionsByModule(moduleId: number): Promise<Permission[]> {
+    const modulePermissions = await db.select()
+      .from(permissions)
+      .where(eq(permissions.moduleId, moduleId));
+    return modulePermissions;
   }
 
   async getPermission(id: number): Promise<Permission | undefined> {
@@ -253,52 +260,11 @@ export class DatabaseStorage implements IStorage {
 
   async createPermission(permission: InsertPermission): Promise<Permission> {
     try {
-      // Extract field values with appropriate defaults
-      const role = permission.role;
-      const module = permission.module;
-      const can_view = permission.can_view === undefined ? true : permission.can_view;
-      const can_create = permission.can_create === undefined ? false : permission.can_create;
-      const can_edit = permission.can_edit === undefined ? false : permission.can_edit;
-      const can_delete = permission.can_delete === undefined ? false : permission.can_delete;
-      const is_active = permission.is_active === undefined ? true : permission.is_active;
-      
-      // Build a direct SQL query for insertion using string interpolation (not parameters)
-      // We're not specifying ID so the sequence is used
-      const query = `
-        INSERT INTO permissions 
-        (role, module, can_view, can_create, can_edit, can_delete, is_active) 
-        VALUES (
-          '${role}',
-          '${module}',
-          ${can_view ? 'TRUE' : 'FALSE'},
-          ${can_create ? 'TRUE' : 'FALSE'},
-          ${can_edit ? 'TRUE' : 'FALSE'},
-          ${can_delete ? 'TRUE' : 'FALSE'},
-          ${is_active ? 'TRUE' : 'FALSE'}
-        )
-        RETURNING *;
-      `;
-      
-      console.log("Executing direct SQL insert query:", query);
-      
-      // Execute the raw query using db.execute
-      const result = await db.execute(query);
-      
-      if (!result.rows.length) {
-        throw new Error("Failed to create permission - no row returned");
-      }
-      
-      const row = result.rows[0];
-      return {
-        id: Number(row.id),
-        role: row.role as string,
-        module: row.module as string,
-        can_view: Boolean(row.can_view),
-        can_create: Boolean(row.can_create),
-        can_edit: Boolean(row.can_edit),
-        can_delete: Boolean(row.can_delete),
-        is_active: Boolean(row.is_active)
-      };
+      const [created] = await db
+        .insert(permissions)
+        .values(permission)
+        .returning();
+      return created;
     } catch (error) {
       console.error('Error in createPermission:', error);
       throw error;
@@ -307,116 +273,85 @@ export class DatabaseStorage implements IStorage {
 
   async updatePermission(id: number, permissionData: Partial<Permission>): Promise<Permission | undefined> {
     try {
-      // Get existing permission first to check if it exists
-      const existingPermission = await this.getPermission(id);
-      if (!existingPermission) {
-        console.error(`Permission with ID ${id} not found`);
-        return undefined;
-      }
-      
-      console.log("Original Permission Data:", JSON.stringify(existingPermission));
-      console.log("Update Permission Data:", JSON.stringify(permissionData));
-      
-      // Build SQL SET clauses dynamically with parameter placeholders
-      const setClauses = [];
-      const params = [];
-      let paramIndex = 1;
-      
-      if (permissionData.can_view !== undefined) {
-        setClauses.push(`can_view = $${paramIndex}`);
-        params.push(permissionData.can_view);
-        paramIndex++;
-      }
-      
-      if (permissionData.can_create !== undefined) {
-        setClauses.push(`can_create = $${paramIndex}`);
-        params.push(permissionData.can_create);
-        paramIndex++;
-      }
-      
-      if (permissionData.can_edit !== undefined) {
-        setClauses.push(`can_edit = $${paramIndex}`);
-        params.push(permissionData.can_edit);
-        paramIndex++;
-      }
-      
-      if (permissionData.can_delete !== undefined) {
-        setClauses.push(`can_delete = $${paramIndex}`);
-        params.push(permissionData.can_delete);
-        paramIndex++;
-      }
-      
-      if (permissionData.is_active !== undefined) {
-        setClauses.push(`is_active = $${paramIndex}`);
-        params.push(permissionData.is_active);
-        paramIndex++;
-      }
-      
-      if (permissionData.role !== undefined) {
-        setClauses.push(`role = $${paramIndex}`);
-        params.push(permissionData.role);
-        paramIndex++;
-      }
-      
-      if (permissionData.module !== undefined) {
-        setClauses.push(`module = $${paramIndex}`);
-        params.push(permissionData.module);
-        paramIndex++;
-      }
-      
-      // Only proceed if we have fields to update
-      if (setClauses.length === 0) {
-        console.log("No fields to update for permission", id);
-        return existingPermission; // Return existing if no updates
-      }
-      
-      // Build full SQL query with returning and use parameterized queries
-      const query = {
-        text: `
-          UPDATE permissions 
-          SET ${setClauses.join(', ')}
-          WHERE id = $${paramIndex}
-          RETURNING *;
-        `,
-        values: [...params, id]
-      };
-      
-      console.log("Executing parameterized SQL query:", query.text);
-      console.log("With parameters:", query.values);
-      
-      // Execute the raw query using pool.query for better parameter handling
-      const result = await pool.query(query);
-      
-      if (!result.rows.length) {
-        console.log("No rows returned from update query");
-        return undefined;
-      }
-      
-      const row = result.rows[0];
-      console.log("Updated permission row:", row);
-      
-      return {
-        id: Number(row.id),
-        role: row.role,
-        module: row.module,
-        can_view: Boolean(row.can_view),
-        can_create: Boolean(row.can_create),
-        can_edit: Boolean(row.can_edit),
-        can_delete: Boolean(row.can_delete),
-        is_active: Boolean(row.is_active)
-      };
+      const [updated] = await db
+        .update(permissions)
+        .set(permissionData)
+        .where(eq(permissions.id, id))
+        .returning();
+      return updated;
     } catch (error) {
       console.error('Error in updatePermission:', error);
-      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
       throw error;
     }
   }
 
   async deletePermission(id: number): Promise<boolean> {
-    await db
-      .delete(permissions)
-      .where(eq(permissions.id, id));
-    return true;
+    try {
+      await db
+        .delete(permissions)
+        .where(eq(permissions.id, id));
+      return true;
+    } catch (error) {
+      console.error('Error in deletePermission:', error);
+      throw error;
+    }
+  }
+
+  // Modules management operations
+  async getModules(): Promise<Module[]> {
+    return await db.select().from(modules);
+  }
+
+  async getModulesByCategory(category: string): Promise<Module[]> {
+    return await db.select()
+      .from(modules)
+      .where(eq(modules.category, category));
+  }
+
+  async getModule(id: number): Promise<Module | undefined> {
+    const [module] = await db.select()
+      .from(modules)
+      .where(eq(modules.id, id));
+    return module;
+  }
+
+  async createModule(module: InsertModule): Promise<Module> {
+    try {
+      const [created] = await db
+        .insert(modules)
+        .values(module)
+        .returning();
+      return created;
+    } catch (error) {
+      console.error('Error in createModule:', error);
+      throw error;
+    }
+  }
+
+  async updateModule(id: number, module: Partial<Module>): Promise<Module | undefined> {
+    try {
+      const [updated] = await db
+        .update(modules)
+        .set(module)
+        .where(eq(modules.id, id))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Error in updateModule:', error);
+      throw error;
+    }
+  }
+
+  async deleteModule(id: number): Promise<boolean> {
+    try {
+      await db
+        .delete(modules)
+        .where(eq(modules.id, id));
+      return true;
+    } catch (error) {
+      console.error('Error in deleteModule:', error);
+      throw error;
+    }
   }
 
   // Categories methods
