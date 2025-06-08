@@ -5843,12 +5843,20 @@ COMMIT;
       
       const action = await storage.createMaintenanceAction(actionData);
       
-      // Update the related request status to 'in_progress' or 'completed'
+      // Update the related request status based on readyToWork flag
       if (req.body.requestId) {
-        await storage.updateMaintenanceRequest(req.body.requestId, {
-          status: 'in_progress',
+        const requestStatus = req.body.readyToWork ? 'completed' : 'in_progress';
+        const updateData: any = {
+          status: requestStatus,
           assignedTo: actionData.performedBy,
-        });
+        };
+        
+        // If marking as completed, set completion timestamp
+        if (req.body.readyToWork) {
+          updateData.completedAt = new Date();
+        }
+        
+        await storage.updateMaintenanceRequest(req.body.requestId, updateData);
       }
       
       res.status(201).json(action);

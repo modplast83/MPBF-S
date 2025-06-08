@@ -78,6 +78,7 @@ export default function MaintenanceActionsPage() {
     partsCost: "",
     laborHours: "",
     notes: "",
+    readyToWork: false,
   });
 
   // Fetch maintenance actions
@@ -136,6 +137,7 @@ export default function MaintenanceActionsPage() {
       partsCost: "",
       laborHours: "",
       notes: "",
+      readyToWork: false,
     });
   };
 
@@ -380,6 +382,17 @@ export default function MaintenanceActionsPage() {
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   rows={2}
                 />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="readyToWork"
+                  checked={formData.readyToWork}
+                  onCheckedChange={(checked) => setFormData({...formData, readyToWork: !!checked})}
+                />
+                <Label htmlFor="readyToWork" className="text-sm font-medium">
+                  Ready to Work (Complete maintenance request)
+                </Label>
               </div>
 
               <div className="flex justify-end space-x-2">
