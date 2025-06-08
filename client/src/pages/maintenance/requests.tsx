@@ -564,15 +564,15 @@ export default function MaintenanceRequestsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Request ID</TableHead>
-                    <TableHead>{t("maintenance.requests.date")}</TableHead>
-                    <TableHead>{t("maintenance.requests.machine")}</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>{t("maintenance.requests.severity")}</TableHead>
-                    <TableHead>{t("maintenance.requests.status")}</TableHead>
-                    <TableHead>Reported By</TableHead>
-                    <TableHead>{t("maintenance.requests.description")}</TableHead>
-                    <TableHead>{t("common.actions")}</TableHead>
+                    <TableHead className="text-center">Request ID</TableHead>
+                    <TableHead className="text-center">{t("maintenance.requests.date")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.requests.machine")}</TableHead>
+                    <TableHead className="text-center">Type</TableHead>
+                    <TableHead className="text-center">{t("maintenance.requests.severity")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.requests.status")}</TableHead>
+                    <TableHead className="text-center">Reported By</TableHead>
+                    <TableHead className="text-center">{t("maintenance.requests.description")}</TableHead>
+                    <TableHead className="text-center">{t("common.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
