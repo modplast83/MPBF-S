@@ -13,6 +13,7 @@ declare global {
       id: string;
       username: string;
       isAdmin: boolean;
+      sectionId?: string | null;
       email?: string | null;
       firstName?: string | null;
       lastName?: string | null;
