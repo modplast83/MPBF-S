@@ -95,75 +95,39 @@ export function PermissionsProvider({
     const userRole = user?.role;
     const userSection = user?.sectionId;
     
-    console.log(`Checking permission for module: ${module}, action: ${action}, userRole: ${userRole}`);
+    console.log(`Checking permission for module: ${module}, action: ${action}, userRole: ${userRole}, userSection: ${userSection}`);
     
-    // Check if userRole exists before calling toLowerCase
-    if (!userRole) return false;
-    
-    // Administrator role has all permissions - case insensitive check
-    if (userRole.toLowerCase() === "administrator") return true;
+    // Administrator role has all permissions
+    if (userRole === "administrator") return true;
     
     // If permissions are still loading, allow access for administrators to prevent blocking
-    if (isLoading && userRole.toLowerCase() === "administrator") return true;
+    if (isLoading && userRole === "administrator") return true;
     
-    // Supervisor has broad permissions - case insensitive check
-    if (userRole.toLowerCase() === "supervisor") {
-      // For administrators and supervisors, grant full access for now
-      // TODO: Implement proper section-based permission checking when needed
-      
-      // Default supervisor permissions if not explicitly defined
-      return true;
-    }
-
-    // For section-specific roles (Extruding, Printing, Cutting, Warehouse)
-    if (userSection) {
-      // First check if there's a section-specific permission
-      const sectionPermission = permissions.find(
-        p => p.role.toLowerCase() === userSection.toLowerCase() && p.module === module && p.is_active === true
-      );
-      
-      console.log(`Section permission found for section ${userSection}:`, sectionPermission);
-      
-      if (sectionPermission) {
-        // Check for the specific permission action and explicitly handle null/undefined
-        switch (action) {
-          case "view": return Boolean(sectionPermission.can_view);
-          case "create": return Boolean(sectionPermission.can_create);
-          case "edit": return Boolean(sectionPermission.can_edit);
-          case "delete": return Boolean(sectionPermission.can_delete);
-          default: return false;
-        }
-      }
+    // For non-administrators, check section-based permissions
+    if (!userSection) {
+      console.log(`User has no section assigned, denying access to ${module}`);
+      return false;
     }
     
-    // Special case for operators - they can view workflow and mix materials
-    if (userRole.toLowerCase() === "operator" && action === "view") {
-      if (module === "Workflow" || module === "Mix Materials") {
-        return true;
-      }
-    }
-    
-    // Find the permission for this role and module - case insensitive match
-    const permission = permissions.find(
-      p => p.role.toLowerCase() === userRole.toLowerCase() && p.module === module && p.is_active === true
+    // Find permission for this user's section and the requested module
+    const userPermission = permissions.find(p => 
+      p.sectionId === userSection && 
+      (p.moduleId === module || (typeof p.moduleId === 'number' && p.moduleId.toString() === module))
     );
     
-    // If no permission found, deny access
-    if (!permission) return false;
-    
-    // Check for the specific permission action and handle SQL boolean values
-    switch (action) {
-      case "view":
-        return Boolean(permission.can_view);
-      case "create":
-        return Boolean(permission.can_create);
-      case "edit":
-        return Boolean(permission.can_edit);
-      case "delete":
-        return Boolean(permission.can_delete);
-      default:
-        return false;
+    if (!userPermission || !userPermission.isActive) {
+      console.log(`No active permission found for section ${userSection} and module ${module}`);
+      return false;
     }
+    
+    // Check specific action permission
+    const hasActionPermission = action === 'view' ? userPermission.canView :
+                               action === 'create' ? userPermission.canCreate :
+                               action === 'edit' ? userPermission.canEdit :
+                               action === 'delete' ? userPermission.canDelete : false;
+    
+    console.log(`Permission check result: ${hasActionPermission} for ${action} on ${module}`);
+    return Boolean(hasActionPermission);
   };
 
   return (

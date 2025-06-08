@@ -3771,12 +3771,8 @@ COMMIT;
     }
   });
 
-  app.delete("/api/permissions/:id", requireAuth, async (req: Request, res: Response) => {
+  app.delete("/api/permissions/:id", requirePermission("Permissions", "delete"), async (req: Request, res: Response) => {
     try {
-      // Make sure only administrators can delete permissions
-      if (req.user && (req.user as any).role !== "administrator") {
-        return res.status(403).json({ message: "Only administrators can manage permissions" });
-      }
 
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
