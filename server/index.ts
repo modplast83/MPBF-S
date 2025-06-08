@@ -122,7 +122,7 @@ app.use((req, res, next) => {
   }
 
   // Use fixed port allocation with fallback
-  const port = parseInt((process.env.PORT || 5000).toString());
+  const port = parseInt((process.env.PORT || "5000").toString());
   
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
