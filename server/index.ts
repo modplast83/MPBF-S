@@ -121,27 +121,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use dynamic port allocation to avoid conflicts
-  const startPort = parseInt((process.env.PORT || 5000).toString());
+  // Use fixed port allocation
+  const port = parseInt((process.env.PORT || 5000).toString());
   
-  function tryStartServer(port: number): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const serverInstance = server.listen({
-        port: port,
-        host: "0.0.0.0",
-      }, () => {
-        log(`serving on port ${port}`);
-        resolve();
-      }).on('error', (err: any) => {
-        if (err.code === 'EADDRINUSE') {
-          console.log(`Port ${port} is busy, trying ${port + 1}`);
-          tryStartServer(port + 1).then(resolve).catch(reject);
-        } else {
-          reject(err);
-        }
-      });
-    });
-  }
-  
-  await tryStartServer(startPort);
+  server.listen(port, "0.0.0.0", () => {
+    log(`serving on port ${port}`);
+  });
 })();

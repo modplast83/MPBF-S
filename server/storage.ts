@@ -308,7 +308,7 @@ export interface IStorage {
   deleteHrComplaint(id: number): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
+export class MemStorage {
   private users: Map<string, User>;
   private categories: Map<string, Category>;
   private items: Map<string, Item>;

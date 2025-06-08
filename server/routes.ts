@@ -5226,7 +5226,7 @@ COMMIT;
       const achievements = await storage.getEmployeeOfMonthByUser(userId);
 
       // Get user tasks (from mobile tasks if available)
-      let tasks = [];
+      let tasks: any[] = [];
       try {
         // Mobile tasks functionality not implemented yet
         tasks = [];
@@ -5242,7 +5242,7 @@ COMMIT;
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          role: user.role,
+          role: user.isAdmin ? 'Admin' : 'User',
           sectionId: user.sectionId,
           profileImageUrl: user.profileImageUrl
         },
