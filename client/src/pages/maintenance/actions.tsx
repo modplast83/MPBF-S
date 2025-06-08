@@ -269,25 +269,25 @@ export default function MaintenanceActionsPage() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Record Action
+              {t("maintenance.actions.record")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Record Maintenance Action</DialogTitle>
+              <DialogTitle>{t("maintenance.actions.create")}</DialogTitle>
               <DialogDescription>
-                Record the actions taken for a maintenance request
+                {t("maintenance.actions.description")}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="requestId">Maintenance Request *</Label>
+                <Label htmlFor="requestId">{t("maintenance.actions.maintenanceRequest")} *</Label>
                 <Select 
                   value={formData.requestId} 
                   onValueChange={handleRequestChange}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select maintenance request" />
+                    <SelectValue placeholder={t("maintenance.actions.selectMaintenanceRequest")} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableRequests.map((request: MaintenanceRequest) => (
@@ -300,14 +300,14 @@ export default function MaintenanceActionsPage() {
               </div>
 
               <div>
-                <Label htmlFor="machineId">Machine *</Label>
+                <Label htmlFor="machineId">{t("maintenance.actions.machine")} *</Label>
                 <Select 
                   value={formData.machineId} 
                   onValueChange={(value) => setFormData({...formData, machineId: value})}
                   disabled={!!formData.requestId}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select machine" />
+                    <SelectValue placeholder={t("common.select_machine")} />
                   </SelectTrigger>
                   <SelectContent>
                     {machines.map((machine: Machine) => (
@@ -320,7 +320,7 @@ export default function MaintenanceActionsPage() {
               </div>
 
               <div>
-                <Label>Actions Taken *</Label>
+                <Label>{t("maintenance.actions.actionsTaken")} *</Label>
                 <div className="grid grid-cols-1 gap-2 mt-2">
                   {ACTION_TYPES.map((actionType) => (
                     <div key={actionType} className="flex items-center space-x-2">
@@ -330,7 +330,9 @@ export default function MaintenanceActionsPage() {
                         onCheckedChange={(checked) => handleActionTypeToggle(actionType, checked as boolean)}
                       />
                       <Label htmlFor={actionType} className="cursor-pointer">
-                        {actionType}
+                        {actionType === "Repair" ? t("maintenance.actions.repairAction") : 
+                         actionType === "Change Parts" ? t("maintenance.actions.changePartsAction") :
+                         actionType === "Workshop" ? t("maintenance.actions.workshopAction") : actionType}
                       </Label>
                     </div>
                   ))}
@@ -338,10 +340,10 @@ export default function MaintenanceActionsPage() {
               </div>
 
               <div>
-                <Label htmlFor="description">Description *</Label>
+                <Label htmlFor="description">{t("maintenance.actions.description")} *</Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe the actions taken..."
+                  placeholder={t("maintenance.actions.description")}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   rows={3}
@@ -350,7 +352,7 @@ export default function MaintenanceActionsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="partsCost">Parts Cost ($)</Label>
+                  <Label htmlFor="partsCost">{t("maintenance.actions.partsCost")} ($)</Label>
                   <Input
                     id="partsCost"
                     type="number"
@@ -361,7 +363,7 @@ export default function MaintenanceActionsPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="laborHours">Labor Hours</Label>
+                  <Label htmlFor="laborHours">{t("maintenance.actions.laborHours")}</Label>
                   <Input
                     id="laborHours"
                     type="number"
@@ -374,10 +376,10 @@ export default function MaintenanceActionsPage() {
               </div>
 
               <div>
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">{t("maintenance.actions.notes")}</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Additional notes or observations..."
+                  placeholder={t("maintenance.actions.additionalNotes")}
                   value={formData.notes}
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   rows={2}
@@ -391,16 +393,16 @@ export default function MaintenanceActionsPage() {
                   onCheckedChange={(checked) => setFormData({...formData, readyToWork: !!checked})}
                 />
                 <Label htmlFor="readyToWork" className="text-sm font-medium">
-                  Ready to Work (Complete maintenance request)
+                  {t("maintenance.actions.readyToWork")}
                 </Label>
               </div>
 
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button type="submit" disabled={createActionMutation.isPending}>
-                  {createActionMutation.isPending ? "Recording..." : "Record Action"}
+                  {createActionMutation.isPending ? t("maintenance.actions.recording") : t("maintenance.actions.recordAction")}
                 </Button>
               </div>
             </form>
