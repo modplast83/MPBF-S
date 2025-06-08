@@ -181,10 +181,17 @@ export default function Permissions() {
   // Create permission mutation
   const createPermissionMutation = useMutation({
     mutationFn: async (permission: Partial<Permission>) => {
-      return apiRequest("/api/permissions", {
+      const response = await fetch("/api/permissions", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(uiToApiFormat(permission)),
       });
+      if (!response.ok) {
+        throw new Error("Failed to create permission");
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
@@ -207,10 +214,17 @@ export default function Permissions() {
   // Update permission mutation
   const updatePermissionMutation = useMutation({
     mutationFn: async ({ id, permission }: { id: number; permission: Partial<Permission> }) => {
-      return apiRequest(`/api/permissions/${id}`, {
+      const response = await fetch(`/api/permissions/${id}`, {
         method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(uiToApiFormat(permission)),
       });
+      if (!response.ok) {
+        throw new Error("Failed to update permission");
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
@@ -233,9 +247,13 @@ export default function Permissions() {
   // Delete permission mutation
   const deletePermissionMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/permissions/${id}`, {
+      const response = await fetch(`/api/permissions/${id}`, {
         method: "DELETE",
       });
+      if (!response.ok) {
+        throw new Error("Failed to delete permission");
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
