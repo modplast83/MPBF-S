@@ -92,87 +92,87 @@ function App() {
               <Route path="*">
                 <MainLayout>
                   <Switch>
-                  <ProtectedRoute path="/" component={Dashboard} />
-                  <ProtectedRoute path="/setup" component={SetupIndex} module="Setup" />
-                  <ProtectedRoute path="/setup/categories" component={Categories} module="Categories" />
-                  <ProtectedRoute path="/setup/products" component={Products} module="Products" />
-                  <ProtectedRoute path="/setup/customers" component={Customers} module="Customers" />
-                  <ProtectedRoute path="/setup/items" component={Items} module="Items" />
-                  <ProtectedRoute path="/setup/sections" component={Sections} module="Sections" />
-                  <ProtectedRoute path="/setup/machines" component={Machines} module="Machines" />
-                  <ProtectedRoute path="/setup/users" component={Users} module="Users" />
-                  <ProtectedRoute path="/production" component={ProductionIndex} module="Production" />
-                  <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" sectionOnly={true} />
-                  <ProtectedRoute path="/orders" component={OrdersIndex} module="Orders" />
-                  <ProtectedRoute path="/orders/:id" component={OrderDetails} module="Orders" />
-                  <ProtectedRoute path="/workflow" component={WorkflowIndex} module="Workflow" workflowTab="extrusion" />
-                  <ProtectedRoute path="/warehouse" component={WarehouseIndex} module="Warehouse" />
-                  <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" />
-                  <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" />
-                  <ProtectedRoute path="/reports" component={ReportsIndex} module="Reports" />
-                  <ProtectedRoute path="/reports/performance" component={PerformancePage} module="Performance Metrics" />
-                  <ProtectedRoute path="/reports/production" component={ProductionReportsPage} module="Production Reports" />
-                  <ProtectedRoute path="/reports/warehouse" component={WarehouseReportsPage} module="Warehouse Reports" />
-                  <ProtectedRoute path="/reports/quality" component={QualityReportsPage} module="Quality Reports" />
-                  <ProtectedRoute path="/reports/workflow" component={WorkflowReportsPage} module="Workflow Reports" />
-                  <ProtectedRoute path="/quality" component={QualityIndex} module="Quality" />
-                  <ProtectedRoute path="/quality/unified-dashboard" component={UnifiedQualityDashboard} module="Unified Dashboard" />
-                  <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} module="Check Types" />
-                  <ProtectedRoute path="/quality/checks" component={QualityChecks} module="Checks" />
-                  <ProtectedRoute path="/quality/violations" component={QualityViolations} module="Violations" />
-                  <ProtectedRoute path="/quality/corrective-actions" component={QualityCorrectiveActions} module="Corrective Actions" />
-                  <ProtectedRoute path="/quality/penalties" component={QualityPenalties} module="Penalties" />
-                  <ProtectedRoute path="/quality/reports" component={QualityReports} module="Quality Reports" />
-                  <ProtectedRoute path="/system" component={SystemIndex} module="System Settings" />
-                  <ProtectedRoute path="/system/database" component={Database} module="Database" />
-                  <ProtectedRoute path="/system/permissions" component={Permissions} module="Permissions" />
-                  <ProtectedRoute path="/system/import-export" component={ImportExport} module="Import & Export" />
-                  <ProtectedRoute path="/system/sms" component={SmsIndex} module="SMS Management" />
-                  <ProtectedRoute path="/system/server-restart" component={ServerRestart} module="Server Management" />
-                  <ProtectedRoute path="/tools" component={ToolsPage} module="Tools" />
-                  <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} module="Bag Weight Calculator" />
-                  <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} module="Ink Consumption" />
-                  <ProtectedRoute path="/tools/utilities" component={UtilityTools} module="Utility Tools" />
-                  <ProtectedRoute path="/tools/cost-calculator" component={CostCalculatorPage} module="Cost Calculator" />
-                  <ProtectedRoute path="/tools/mix-colors" component={MixColorsCalculator} module="Mix Colors" />
-                  <ProtectedRoute path="/cliches" component={ClichePage} module="Cliches" />
-                  {/* HR Module Routes */}
-                  <ProtectedRoute path="/hr" component={HRIndex} module="HR" />
-                  <ProtectedRoute path="/hr/time-attendance" component={TimeAttendancePage} module="Time Attendance" />
-                  <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
-                  <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />
-                  <ProtectedRoute path="/hr/violation-trends" component={ViolationTrendsPage} module="Violation Trends" />
-                  {/* Maintenance Module Routes */}
-                  <ProtectedRoute path="/maintenance" component={MaintenancePage} module="Maintenance" />
-                  <ProtectedRoute path="/maintenance/requests" component={MaintenanceRequestsPage} module="Maintenance Requests" />
-                  <ProtectedRoute path="/maintenance/actions" component={MaintenanceActionsPage} module="Maintenance Actions" />
-                  <ProtectedRoute path="/maintenance/schedule" component={MaintenanceSchedulePage} module="Maintenance Schedule" />
-                  <ProtectedRoute path="/maintenance/dashboard" component={MaintenanceDashboard} module="Dashboard" />
-                  {/* Production Module Routes */}
-                  <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" />
-                  <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
-                  <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />
-                  {/* IoT Integration Module Routes */}
-                  <ProtectedRoute path="/production/iot-monitor" component={IoTMonitor} module="IoT Monitor" />
-                  {/* Mobile Operations Routes */}
-                  <ProtectedRoute path="/mobile/tasks" component={MobileTasks} module="Operator Tasks" />
-                  <ProtectedRoute path="/mobile/updates" component={MobileUpdates} module="Quick Updates" />
-                  <ProtectedRoute path="/mobile/devices" component={MobileDevices} module="Device Management" />
-                  {/* Notifications Route */}
-                  <ProtectedRoute path="/notifications" component={NotificationsPage} module="Notifications" />
+                    <ProtectedRoute path="/" component={Dashboard} />
+                    <ProtectedRoute path="/setup" component={SetupIndex} module="Setup" />
+                    <ProtectedRoute path="/setup/categories" component={Categories} module="Categories" />
+                    <ProtectedRoute path="/setup/products" component={Products} module="Products" />
+                    <ProtectedRoute path="/setup/customers" component={Customers} module="Customers" />
+                    <ProtectedRoute path="/setup/items" component={Items} module="Items" />
+                    <ProtectedRoute path="/setup/sections" component={Sections} module="Sections" />
+                    <ProtectedRoute path="/setup/machines" component={Machines} module="Machines" />
+                    <ProtectedRoute path="/setup/users" component={Users} module="Users" />
+                    <ProtectedRoute path="/orders" component={OrdersIndex} module="Orders" />
+                    <ProtectedRoute path="/orders/:id" component={OrderDetails} module="Orders" />
+                    <ProtectedRoute path="/workflow" component={WorkflowIndex} module="Workflow" />
+                    <ProtectedRoute path="/production" component={ProductionIndex} module="Production" />
+                    <ProtectedRoute path="/warehouse" component={WarehouseIndex} module="Warehouse" />
+                    <ProtectedRoute path="/warehouse/raw-materials" component={RawMaterials} module="Raw Materials" />
+                    <ProtectedRoute path="/warehouse/final-products" component={FinalProducts} module="Final Products" />
+                    <ProtectedRoute path="/reports" component={ReportsIndex} module="Reports" />
+                    <ProtectedRoute path="/reports/performance" component={PerformancePage} module="Performance Metrics" />
+                    <ProtectedRoute path="/reports/production" component={ProductionReportsPage} module="Production Reports" />
+                    <ProtectedRoute path="/reports/warehouse" component={WarehouseReportsPage} module="Warehouse Reports" />
+                    <ProtectedRoute path="/reports/quality" component={QualityReportsPage} module="Quality Reports" />
+                    <ProtectedRoute path="/reports/workflow" component={WorkflowReportsPage} module="Workflow Reports" />
+                    <ProtectedRoute path="/quality" component={QualityIndex} module="Quality" />
+                    <ProtectedRoute path="/quality/unified-dashboard" component={UnifiedQualityDashboard} module="Unified Dashboard" />
+                    <ProtectedRoute path="/quality/check-types" component={QualityCheckTypes} module="Check Types" />
+                    <ProtectedRoute path="/quality/checks" component={QualityChecks} module="Checks" />
+                    <ProtectedRoute path="/quality/violations" component={QualityViolations} module="Violations" />
+                    <ProtectedRoute path="/quality/corrective-actions" component={QualityCorrectiveActions} module="Corrective Actions" />
+                    <ProtectedRoute path="/quality/penalties" component={QualityPenalties} module="Penalties" />
+                    <ProtectedRoute path="/quality/reports" component={QualityReports} module="Quality Reports" />
+                    <ProtectedRoute path="/system" component={SystemIndex} module="System Settings" />
+                    <ProtectedRoute path="/system/database" component={Database} module="Database" />
+                    <ProtectedRoute path="/system/permissions" component={Permissions} module="Permissions" />
+                    <ProtectedRoute path="/system/import-export" component={ImportExport} module="Import & Export" />
+                    <ProtectedRoute path="/system/sms" component={SmsIndex} module="SMS Management" />
+                    <ProtectedRoute path="/system/server-restart" component={ServerRestart} module="Server Management" />
+                    <ProtectedRoute path="/tools" component={ToolsPage} module="Tools" />
+                    <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} module="Bag Weight Calculator" />
+                    <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} module="Ink Consumption" />
+                    <ProtectedRoute path="/tools/utilities" component={UtilityTools} module="Utility Tools" />
+                    <ProtectedRoute path="/tools/cost-calculator" component={CostCalculatorPage} module="Cost Calculator" />
+                    <ProtectedRoute path="/tools/mix-colors" component={MixColorsCalculator} module="Mix Colors" />
+                    <ProtectedRoute path="/cliches" component={ClichePage} module="Cliches" />
+                    {/* HR Module Routes */}
+                    <ProtectedRoute path="/hr" component={HRIndex} module="HR" />
+                    <ProtectedRoute path="/hr/time-attendance" component={TimeAttendancePage} module="Time Attendance" />
+                    <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
+                    <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />
+                    <ProtectedRoute path="/hr/violation-trends" component={ViolationTrendsPage} module="Violation Trends" />
+                    {/* Maintenance Module Routes */}
+                    <ProtectedRoute path="/maintenance" component={MaintenancePage} module="Maintenance" />
+                    <ProtectedRoute path="/maintenance/requests" component={MaintenanceRequestsPage} module="Maintenance Requests" />
+                    <ProtectedRoute path="/maintenance/actions" component={MaintenanceActionsPage} module="Maintenance Actions" />
+                    <ProtectedRoute path="/maintenance/schedule" component={MaintenanceSchedulePage} module="Maintenance Schedule" />
+                    <ProtectedRoute path="/maintenance/dashboard" component={MaintenanceDashboard} module="Dashboard" />
+                    {/* Production Module Routes */}
+                    <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" />
+                    <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
+                    <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />
+                    {/* IoT Integration Module Routes */}
+                    <ProtectedRoute path="/production/iot-monitor" component={IoTMonitor} module="IoT Monitor" />
+                    {/* Mobile Operations Routes */}
+                    <ProtectedRoute path="/mobile/tasks" component={MobileTasks} module="Operator Tasks" />
+                    <ProtectedRoute path="/mobile/updates" component={MobileUpdates} module="Quick Updates" />
+                    <ProtectedRoute path="/mobile/devices" component={MobileDevices} module="Device Management" />
+                    {/* Notifications Route */}
+                    <ProtectedRoute path="/notifications" component={NotificationsPage} module="Notifications" />
 
-                  {/* Employee Dashboard Route */}
-                  <ProtectedRoute path="/employee-dashboard" component={EmployeeDashboard} module="Employee Dashboard" />
-                  {/* Mobile Operator Dashboard Route */}
-                  <ProtectedRoute path="/mobile/operator-dashboard" component={OperatorDashboard} module="Operator Dashboard" />
-                  <Route component={NotFound} />
-                </Switch>
-              </MainLayout>
-            </Route>
-          </Switch>
-        </PermissionsProvider>
-      )}
-    </AuthProvider>
+                    {/* Employee Dashboard Route */}
+                    <ProtectedRoute path="/employee-dashboard" component={EmployeeDashboard} module="Employee Dashboard" />
+                    {/* Mobile Operator Dashboard Route */}
+                    <ProtectedRoute path="/mobile/operator-dashboard" component={OperatorDashboard} module="Operator Dashboard" />
+                    <Route component={NotFound} />
+                  </Switch>
+                </MainLayout>
+              </Route>
+            </Switch>
+          </PermissionsProvider>
+        )}
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
