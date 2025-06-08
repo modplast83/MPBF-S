@@ -3803,13 +3803,28 @@ COMMIT;
   // Modules management API endpoints
   app.get("/api/modules", requireAuth, async (req: Request, res: Response) => {
     try {
-      // Check if user has permission to view modules
-      if (req.user && !(req.user as any).isAdmin) {
-        return res.status(403).json({ message: "Permission denied" });
+      const user = req.user as any;
+      
+      // Admin users can see all modules
+      if (user.isAdmin) {
+        const modules = await storage.getModules();
+        return res.json(modules);
       }
-
-      const modules = await storage.getModules();
-      res.json(modules);
+      
+      // Regular users can only see modules they have permissions for
+      if (!user.sectionId) {
+        return res.json([]); // No section assigned, no modules
+      }
+      
+      // Get user's section permissions
+      const sectionPermissions = await storage.getPermissionsBySection(user.sectionId);
+      const allModules = await storage.getModules();
+      
+      // Filter modules to only those the user has permissions for
+      const userModuleIds = new Set(sectionPermissions.map(p => p.moduleId));
+      const userModules = allModules.filter(module => userModuleIds.has(module.id));
+      
+      res.json(userModules);
     } catch (error) {
       console.error("Error getting modules:", error);
       res.status(500).json({ message: "Failed to get modules" });
@@ -3818,14 +3833,29 @@ COMMIT;
 
   app.get("/api/modules/category/:category", requireAuth, async (req: Request, res: Response) => {
     try {
-      // Check if user has permission to view modules
-      if (req.user && !(req.user as any).isAdmin) {
-        return res.status(403).json({ message: "Permission denied" });
-      }
-
+      const user = req.user as any;
       const { category } = req.params;
-      const modules = await storage.getModulesByCategory(category);
-      res.json(modules);
+      
+      // Admin users can see all modules in category
+      if (user.isAdmin) {
+        const modules = await storage.getModulesByCategory(category);
+        return res.json(modules);
+      }
+      
+      // Regular users can only see modules they have permissions for in this category
+      if (!user.sectionId) {
+        return res.json([]); // No section assigned, no modules
+      }
+      
+      // Get user's section permissions and filter by category
+      const sectionPermissions = await storage.getPermissionsBySection(user.sectionId);
+      const allModules = await storage.getModulesByCategory(category);
+      
+      // Filter modules to only those the user has permissions for
+      const userModuleIds = new Set(sectionPermissions.map(p => p.moduleId));
+      const userModules = allModules.filter(module => userModuleIds.has(module.id));
+      
+      res.json(userModules);
     } catch (error) {
       console.error("Error getting modules by category:", error);
       res.status(500).json({ message: "Failed to get modules by category" });
@@ -3834,12 +3864,9 @@ COMMIT;
 
   app.get("/api/modules/:id", requireAuth, async (req: Request, res: Response) => {
     try {
-      // Check if user has permission to view modules
-      if (req.user && !(req.user as any).isAdmin) {
-        return res.status(403).json({ message: "Permission denied" });
-      }
-
+      const user = req.user as any;
       const id = parseInt(req.params.id);
+      
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid module ID" });
       }
@@ -3847,6 +3874,24 @@ COMMIT;
       const module = await storage.getModule(id);
       if (!module) {
         return res.status(404).json({ message: "Module not found" });
+      }
+
+      // Admin users can see any module
+      if (user.isAdmin) {
+        return res.json(module);
+      }
+
+      // Regular users can only see modules they have permissions for
+      if (!user.sectionId) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      // Check if user has permission for this module
+      const sectionPermissions = await storage.getPermissionsBySection(user.sectionId);
+      const hasPermission = sectionPermissions.some(p => p.moduleId === id);
+
+      if (!hasPermission) {
+        return res.status(403).json({ message: "Permission denied" });
       }
 
       res.json(module);
