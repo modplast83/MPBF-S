@@ -3574,11 +3574,25 @@ COMMIT;
   });
 
   // Permissions
-  app.get("/api/permissions", requirePermission("Permissions", "view"), async (_req: Request, res: Response) => {
+  app.get("/api/permissions", requireAuth, async (req: Request, res: Response) => {
     try {
-      const permissions = await storage.getPermissions();
-      res.json(permissions);
+      const user = req.user as any;
+      
+      // Admin users can see all permissions
+      if (user.isAdmin) {
+        const permissions = await storage.getPermissions();
+        res.json(permissions);
+      } else {
+        // Regular users can only see permissions for their section
+        if (!user.sectionId) {
+          return res.json([]); // No section assigned, no permissions
+        }
+        
+        const sectionPermissions = await storage.getPermissionsBySection(user.sectionId);
+        res.json(sectionPermissions);
+      }
     } catch (error) {
+      console.error("Error fetching permissions:", error);
       res.status(500).json({ message: "Failed to get permissions" });
     }
   });
