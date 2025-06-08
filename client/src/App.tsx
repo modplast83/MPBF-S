@@ -42,6 +42,7 @@ import MainLayout from "@/components/layout/main-layout";
 import { AuthProvider } from "@/hooks/use-auth-v2";
 import { PermissionsProvider } from "@/hooks/use-permissions";
 import { ProtectedRoute } from "@/components/auth/protected-route-v2";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { useEffect } from "react";
 import ToolsPage from "@/pages/tools/ToolsPage";
 import BagWeightCalculator from "@/pages/tools/bag-weight";
@@ -82,14 +83,15 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      {(authContext) => (
-        <PermissionsProvider user={authContext.user}>
-          <Switch>
-            <Route path="/auth" component={AuthPage} />
-            <Route path="*">
-              <MainLayout>
-                <Switch>
+    <ErrorBoundary>
+      <AuthProvider>
+        {(authContext) => (
+          <PermissionsProvider user={authContext.user}>
+            <Switch>
+              <Route path="/auth" component={AuthPage} />
+              <Route path="*">
+                <MainLayout>
+                  <Switch>
                   <ProtectedRoute path="/" component={Dashboard} />
                   <ProtectedRoute path="/setup" component={SetupIndex} module="Setup" />
                   <ProtectedRoute path="/setup/categories" component={Categories} module="Categories" />
@@ -146,7 +148,8 @@ function App() {
                   <ProtectedRoute path="/maintenance/actions" component={MaintenanceActionsPage} module="Maintenance Actions" />
                   <ProtectedRoute path="/maintenance/schedule" component={MaintenanceSchedulePage} module="Maintenance Schedule" />
                   <ProtectedRoute path="/maintenance/dashboard" component={MaintenanceDashboard} module="Dashboard" />
-                  {/* Bottleneck Notification System Routes */}
+                  {/* Production Module Routes */}
+                  <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" />
                   <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
                   <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />
                   {/* IoT Integration Module Routes */}
