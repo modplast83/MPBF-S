@@ -119,12 +119,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    
-    // Check if user has admin role
-    if (req.user && (req.user as any).role !== "admin" && (req.user as any).role !== "administrator") {
-      return res.status(403).json({ message: "Permission denied" });
-    }
     next();
+  };
+
+  // Helper function to check if user has permission for a specific module action
+  const requirePermission = (moduleName: string, action: 'view' | 'create' | 'edit' | 'delete' = 'view') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = req.user as any;
+      
+      // Administrator role bypasses permission checks
+      if (user.role === "administrator") {
+        return next();
+      }
+
+      try {
+        // Get all modules first to find the moduleId
+        const modules = await storage.getModules();
+        const module = modules.find(m => m.name === moduleName);
+        
+        if (!module) {
+          return res.status(403).json({ message: `Module ${moduleName} not found` });
+        }
+
+        // Check section-based permissions
+        const permissions = await storage.getPermissionsBySection(user.sectionId || '');
+        const modulePermission = permissions.find(p => p.moduleId === module.id);
+
+        if (!modulePermission || !modulePermission.isActive) {
+          return res.status(403).json({ message: "Access denied" });
+        }
+
+        // Check specific action permission
+        const hasPermission = action === 'view' ? modulePermission.canView :
+                            action === 'create' ? modulePermission.canCreate :
+                            action === 'edit' ? modulePermission.canEdit :
+                            action === 'delete' ? modulePermission.canDelete : false;
+
+        if (!hasPermission) {
+          return res.status(403).json({ message: `Permission denied for ${action} on ${moduleName}` });
+        }
+
+        next();
+      } catch (error) {
+        console.error('Permission check error:', error);
+        res.status(500).json({ message: "Permission check failed" });
+      }
+    };
   };
   
   // Categories
@@ -3530,7 +3574,7 @@ COMMIT;
   });
 
   // Permissions
-  app.get("/api/permissions", requireAuth, async (_req: Request, res: Response) => {
+  app.get("/api/permissions", requirePermission("Permissions", "view"), async (_req: Request, res: Response) => {
     try {
       const permissions = await storage.getPermissions();
       res.json(permissions);
@@ -3631,12 +3675,8 @@ COMMIT;
     }
   });
 
-  app.put("/api/permissions/:id", requireAuth, async (req: Request, res: Response) => {
+  app.put("/api/permissions/:id", requirePermission("Permissions", "edit"), async (req: Request, res: Response) => {
     try {
-      // Make sure only administrators can update permissions
-      if (req.user && (req.user as any).role !== "administrator") {
-        return res.status(403).json({ message: "Only administrators can manage permissions" });
-      }
 
       const id = parseInt(req.params.id);
       if (isNaN(id)) {

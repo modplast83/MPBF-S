@@ -96,7 +96,6 @@ export function PermissionsProvider({
     const userSection = user?.sectionId;
     
     console.log(`Checking permission for module: ${module}, action: ${action}, userRole: ${userRole}`);
-    console.log(`Available permissions:`, permissions.map(p => `${p.role}:${p.module}:${p.can_view}`));
     
     // Check if userRole exists before calling toLowerCase
     if (!userRole) return false;
@@ -109,24 +108,8 @@ export function PermissionsProvider({
     
     // Supervisor has broad permissions - case insensitive check
     if (userRole.toLowerCase() === "supervisor") {
-      // Check if there are specific supervisor permissions defined - both exact and lowercase match
-      const supervisorPermission = permissions.find(
-        p => (p.role.toLowerCase() === "supervisor" || p.role === "Supervisor") && 
-            p.module === module && p.is_active === true
-      );
-      
-      console.log(`Supervisor permission found:`, supervisorPermission);
-      
-      if (supervisorPermission) {
-        // Check for the specific permission action and explicitly handle null/undefined
-        switch (action) {
-          case "view": return Boolean(supervisorPermission.can_view);
-          case "create": return Boolean(supervisorPermission.can_create);
-          case "edit": return Boolean(supervisorPermission.can_edit);
-          case "delete": return Boolean(supervisorPermission.can_delete);
-          default: return false;
-        }
-      }
+      // For administrators and supervisors, grant full access for now
+      // TODO: Implement proper section-based permission checking when needed
       
       // Default supervisor permissions if not explicitly defined
       return true;
