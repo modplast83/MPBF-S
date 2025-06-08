@@ -102,7 +102,7 @@ export function RoleBasedDashboard() {
         <div className="flex-1 min-w-0">
           <PageHeader
             title={t('dashboard.personalized_dashboard')}
-            description="مرحبًا AbuKhalid."
+            description={t('dashboard.welcome_message', { name: user?.firstName || user?.username || 'User' })}
           />
         </div>
         
