@@ -226,7 +226,7 @@ export function GroupedRolls({ rolls, stage }: GroupedRollsProps) {
                   </div>
                   <div className="text-left">
                     <h4 className="font-medium text-sm sm:text-base">
-                      <span className="text-primary-600">Order #{orderId}</span>
+                      <span className="text-[#ff0000] font-extrabold text-[16px]">Order #{orderId}</span>
                       <Badge variant="outline" className="ml-2 text-xs">
                         {jobOrders.length} JO{jobOrders.length > 1 ? 's' : ''}
                       </Badge>
