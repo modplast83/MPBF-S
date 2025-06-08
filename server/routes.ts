@@ -2265,8 +2265,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create database backup
   app.post("/api/database/backup", requireAuth, async (req: Request, res: Response) => {
     try {
-      // Only users with Admin role can access database functions
-      if (req.user && req.user.role !== "admin") {
+      // Only administrators can access database functions
+      if (req.user && !req.user.isAdmin) {
         return res.status(403).json({ message: "Permission denied" });
       }
 

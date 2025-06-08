@@ -66,9 +66,9 @@ export function RoleBasedDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPreset, setSelectedPreset] = useState('balanced');
   
-  // Determine available tabs based on user role
-  const userRole = user?.role?.toLowerCase() || 'default';
-  const availableTabs = ROLE_BASED_VIEWS[userRole as keyof typeof ROLE_BASED_VIEWS] || ROLE_BASED_VIEWS.default;
+  // Determine available tabs based on user permissions
+  const isAdmin = user?.isAdmin || false;
+  const availableTabs = isAdmin ? ROLE_BASED_VIEWS.administrator : ROLE_BASED_VIEWS.default;
   
   // If the active tab isn't available for this role, select the first available tab
   useEffect(() => {

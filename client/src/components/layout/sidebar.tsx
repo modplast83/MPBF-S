@@ -93,9 +93,8 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
             if (subItem.title === 'Mix Materials') {
               return hasPermission(subItem.title);
             }
-            // Special case for operators
-            return (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
-              || hasPermission(subItem.title);
+            // Check permissions for this item
+            return hasPermission(subItem.title);
           });
           
           // Only keep parent item if there are visible subitems
@@ -111,9 +110,8 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
                 if (subItem.title === 'Mix Materials') {
                   return hasPermission(subItem.title);
                 }
-                // Special case for operators
-                return (user?.role === 'operator' && (subItem.title === 'Workflow' || subItem.title === 'Mix Materials')) 
-                  || hasPermission(subItem.title);
+                // Check permissions for this item
+                return hasPermission(subItem.title);
               }),
             };
           }

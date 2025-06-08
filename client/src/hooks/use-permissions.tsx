@@ -26,13 +26,19 @@ export function PermissionsProvider({
 }) {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   
-  // Fetch permissions for the current user's role
+  // Fetch permissions for the current user
   const { 
     data: rolePermissions = [], 
     isLoading,
   } = useQuery<Permission[]>({ 
     queryKey: ['/api/permissions'],
     // Only fetch permissions if user is logged in
+    enabled: !!user,
+  });
+
+  // Fetch modules for permission checking
+  const { data: modules = [] } = useQuery<any[]>({ 
+    queryKey: ['/api/modules'],
     enabled: !!user,
   });
 
