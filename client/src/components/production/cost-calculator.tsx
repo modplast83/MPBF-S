@@ -48,22 +48,22 @@ export default function CostCalculator() {
   });
 
   // Fetch customers
-  const { data: customers } = useQuery<Customer[]>({
+  const { data: customers, isLoading: customersLoading } = useQuery<Customer[]>({
     queryKey: ['/api/customers'],
   });
 
   // Fetch customer products
-  const { data: customerProducts } = useQuery<CustomerProduct[]>({
+  const { data: customerProducts, isLoading: customerProductsLoading } = useQuery<CustomerProduct[]>({
     queryKey: ['/api/customer-products'],
   });
 
   // Fetch items
-  const { data: items } = useQuery<Item[]>({
+  const { data: items, isLoading: itemsLoading } = useQuery<Item[]>({
     queryKey: ['/api/items'],
   });
 
   // Fetch categories
-  const { data: categories } = useQuery<Category[]>({
+  const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
   });
 
@@ -103,8 +103,18 @@ export default function CostCalculator() {
 
   // Get customer name for a job order
   const getCustomerName = (jobOrder: JobOrder): string => {
-    const customer = customers?.find(c => c.id === jobOrder.customerId);
-    return customer?.name || 'Unknown Customer';
+    if (!customers) {
+      return 'Loading...';
+    }
+    if (!jobOrder.customerId) {
+      console.log('Job order missing customerId:', jobOrder);
+      return 'No Customer ID';
+    }
+    const customer = customers.find(c => c.id === jobOrder.customerId);
+    if (!customer) {
+      console.log('Customer not found for ID:', jobOrder.customerId, 'Available customers:', customers.map(c => ({ id: c.id, name: c.name })));
+    }
+    return customer?.name || `Customer ID: ${jobOrder.customerId}`;
   };
 
   // Get customer product details for a job order
@@ -114,16 +124,22 @@ export default function CostCalculator() {
 
   // Get item name for a customer product
   const getItemName = (customerProduct: CustomerProduct): string => {
-    const item = items?.find(i => i.id === customerProduct.itemId);
-    return item?.name || 'Unknown Item';
+    if (!items) {
+      return 'Loading...';
+    }
+    const item = items.find(i => i.id === customerProduct.itemId);
+    return item?.name || `Item ID: ${customerProduct.itemId}`;
   };
 
   // Get category name for a customer product
   const getCategoryName = (customerProduct: CustomerProduct): string => {
-    const item = items?.find(i => i.id === customerProduct.itemId);
-    if (!item) return 'Unknown Category';
-    const category = categories?.find(c => c.id === item.categoryId);
-    return category?.name || 'Unknown Category';
+    if (!items || !categories) {
+      return 'Loading...';
+    }
+    const item = items.find(i => i.id === customerProduct.itemId);
+    if (!item) return `Item ID: ${customerProduct.itemId}`;
+    const category = categories.find(c => c.id === item.categoryId);
+    return category?.name || `Category ID: ${item.categoryId}`;
   };
 
   // Get selected job order details
@@ -373,10 +389,14 @@ export default function CostCalculator() {
                 <Label htmlFor="job-order">{t('cost_calculator.select_job_order')}</Label>
                 <Select
                   onValueChange={(value) => setSelectedJobOrderId(parseInt(value))}
-                  disabled={jobOrdersLoading}
+                  disabled={jobOrdersLoading || customersLoading}
                 >
                   <SelectTrigger id="job-order">
-                    <SelectValue placeholder={t('cost_calculator.select_job_order')} />
+                    <SelectValue placeholder={
+                      jobOrdersLoading || customersLoading 
+                        ? t('common.loading') + '...' 
+                        : t('cost_calculator.select_job_order')
+                    } />
                   </SelectTrigger>
                   <SelectContent>
                     {jobOrders && jobOrders.map((job) => (
