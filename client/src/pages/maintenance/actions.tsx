@@ -479,16 +479,16 @@ export default function MaintenanceActionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t("maintenance.actions.id")}</TableHead>
-                    <TableHead>{t("maintenance.actions.date")}</TableHead>
-                    <TableHead>{t("maintenance.actions.request")}</TableHead>
-                    <TableHead>{t("maintenance.actions.machine")}</TableHead>
-                    <TableHead>{t("maintenance.actions.actionsTaken")}</TableHead>
-                    <TableHead>{t("maintenance.actions.actionBy")}</TableHead>
-                    <TableHead>{t("maintenance.actions.laborHours")}</TableHead>
-                    <TableHead>{t("maintenance.actions.partsCost")}</TableHead>
-                    <TableHead>{t("maintenance.actions.status")}</TableHead>
-                    <TableHead>{t("maintenance.actions.description")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.id")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.date")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.request")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.machine")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.actionsTaken")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.actionBy")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.laborHours")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.partsCost")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.status")}</TableHead>
+                    <TableHead className="text-center">{t("maintenance.actions.description")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
