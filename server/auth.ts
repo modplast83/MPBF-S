@@ -60,6 +60,7 @@ export function setupAuth(app: Express) {
           id: user.id,
           username: user.username,
           isAdmin: user.isAdmin || false,
+          sectionId: user.sectionId || undefined,
           email: user.email || undefined,
           firstName: user.firstName || undefined,
           lastName: user.lastName || undefined
@@ -84,6 +85,7 @@ export function setupAuth(app: Express) {
         id: user.id,
         username: user.username,
         isAdmin: user.isAdmin || false,
+        sectionId: user.sectionId || undefined,
         email: user.email || undefined,
         firstName: user.firstName || undefined,
         lastName: user.lastName || undefined
