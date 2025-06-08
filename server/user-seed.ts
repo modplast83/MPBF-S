@@ -23,7 +23,7 @@ export async function ensureAdminUser() {
         password: hashedPassword,
         firstName: 'System',
         lastName: 'Administrator',
-        role: 'administrator',
+        isAdmin: true,
         isActive: true,
         phone: null,
         email: 'admin@example.com',
