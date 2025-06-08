@@ -1257,7 +1257,16 @@
       "waste_cost": "Waste Cost",
       "total_cost": "Total Cost",
       "cost_per_kg": "Cost Per KG",
-      "total_quantity": "Total Quantity"
+      "total_quantity": "Total Quantity",
+      "job_order_details": "Job Order Details",
+      "customer": "Customer",
+      "item": "Item",
+      "category": "Category",
+      "size": "Size",
+      "width": "Width",
+      "length": "Length",
+      "thickness": "Thickness",
+      "raw_material": "Raw Material"
     },
     "orders": {
       "title": "Orders",

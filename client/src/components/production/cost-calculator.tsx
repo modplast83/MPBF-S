@@ -12,7 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { JobOrder } from "@shared/schema";
+import { Badge } from "@/components/ui/badge";
+import { JobOrder, Customer, CustomerProduct, Item, Category } from "@shared/schema";
 
 // Material cost calculation result interface
 interface MaterialCost {
@@ -44,6 +45,26 @@ export default function CostCalculator() {
   const { data: jobOrders, isLoading: jobOrdersLoading } = useQuery<JobOrder[]>({
     queryKey: ['/api/job-orders'],
     select: (data) => data.filter(job => job.status === 'pending' || job.status === 'in_progress'),
+  });
+
+  // Fetch customers
+  const { data: customers } = useQuery<Customer[]>({
+    queryKey: ['/api/customers'],
+  });
+
+  // Fetch customer products
+  const { data: customerProducts } = useQuery<CustomerProduct[]>({
+    queryKey: ['/api/customer-products'],
+  });
+
+  // Fetch items
+  const { data: items } = useQuery<Item[]>({
+    queryKey: ['/api/items'],
+  });
+
+  // Fetch categories
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ['/api/categories'],
   });
 
   // State for selected job order
@@ -79,6 +100,35 @@ export default function CostCalculator() {
       maximumFractionDigits: decimals
     });
   };
+
+  // Get customer name for a job order
+  const getCustomerName = (jobOrder: JobOrder): string => {
+    const customer = customers?.find(c => c.id === jobOrder.customerId);
+    return customer?.name || 'Unknown Customer';
+  };
+
+  // Get customer product details for a job order
+  const getCustomerProduct = (jobOrder: JobOrder): CustomerProduct | undefined => {
+    return customerProducts?.find(cp => cp.id === jobOrder.customerProductId);
+  };
+
+  // Get item name for a customer product
+  const getItemName = (customerProduct: CustomerProduct): string => {
+    const item = items?.find(i => i.id === customerProduct.itemId);
+    return item?.name || 'Unknown Item';
+  };
+
+  // Get category name for a customer product
+  const getCategoryName = (customerProduct: CustomerProduct): string => {
+    const item = items?.find(i => i.id === customerProduct.itemId);
+    if (!item) return 'Unknown Category';
+    const category = categories?.find(c => c.id === item.categoryId);
+    return category?.name || 'Unknown Category';
+  };
+
+  // Get selected job order details
+  const selectedJobOrder = selectedJobOrderId ? jobOrders?.find(job => job.id === selectedJobOrderId) : null;
+  const selectedCustomerProduct = selectedJobOrder ? getCustomerProduct(selectedJobOrder) : null;
   
   // Calculate total percentage whenever material percentages change
   useEffect(() => {
@@ -331,12 +381,67 @@ export default function CostCalculator() {
                   <SelectContent>
                     {jobOrders && jobOrders.map((job) => (
                       <SelectItem key={job.id} value={job.id.toString()}>
-                        #{job.id} - ({job.quantity} kg)
+                        #{job.id} - {getCustomerName(job)} ({job.quantity} kg)
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Display selected job order details */}
+              {selectedJobOrder && selectedCustomerProduct && (
+                <div className="border-t pt-4">
+                  <h3 className="font-medium mb-3">{t('cost_calculator.job_order_details')}</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('cost_calculator.customer')}:</span>
+                      <span className="font-medium">{getCustomerName(selectedJobOrder)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('cost_calculator.item')}:</span>
+                      <span className="font-medium">{getItemName(selectedCustomerProduct)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('cost_calculator.category')}:</span>
+                      <span className="font-medium">{getCategoryName(selectedCustomerProduct)}</span>
+                    </div>
+                    {selectedCustomerProduct.sizeCaption && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('cost_calculator.size')}:</span>
+                        <span className="font-medium">{selectedCustomerProduct.sizeCaption}</span>
+                      </div>
+                    )}
+                    {selectedCustomerProduct.width && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('cost_calculator.width')}:</span>
+                        <span className="font-medium">{selectedCustomerProduct.width} cm</span>
+                      </div>
+                    )}
+                    {selectedCustomerProduct.lengthCm && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('cost_calculator.length')}:</span>
+                        <span className="font-medium">{selectedCustomerProduct.lengthCm} cm</span>
+                      </div>
+                    )}
+                    {selectedCustomerProduct.thickness && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('cost_calculator.thickness')}:</span>
+                        <span className="font-medium">{selectedCustomerProduct.thickness} mm</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('cost_calculator.quantity')}:</span>
+                      <span className="font-medium text-blue-600">{selectedJobOrder.quantity} kg</span>
+                    </div>
+                    {selectedCustomerProduct.rawMaterial && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('cost_calculator.raw_material')}:</span>
+                        <span className="font-medium">{selectedCustomerProduct.rawMaterial}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               
               <div className="border-t pt-4">
                 <h3 className="font-medium mb-2">{t('cost_calculator.manual_calculation')}</h3>
