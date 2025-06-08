@@ -135,7 +135,6 @@
         "delete_product": "Delete Product",
         "select_customer": "Select Customer",
         "select_customer_to_view": "Select a customer to view products",
-        "select_customer_to_view_products": "Select a customer to view their products",
         "products_for": "Products for {{customer}}",
         "search_placeholder": "Search products...",
         "select_a_customer": "Select a customer",
@@ -1258,16 +1257,7 @@
       "waste_cost": "Waste Cost",
       "total_cost": "Total Cost",
       "cost_per_kg": "Cost Per KG",
-      "total_quantity": "Total Quantity",
-      "job_order_details": "Job Order Details",
-      "customer": "Customer",
-      "item": "Item",
-      "category": "Category",
-      "size": "Size",
-      "width": "Width",
-      "length": "Length",
-      "thickness": "Thickness",
-      "raw_material": "Raw Material"
+      "total_quantity": "Total Quantity"
     },
     "orders": {
       "title": "Orders",

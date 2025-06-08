@@ -578,18 +578,18 @@ export default function MaintenanceRequestsPage() {
                 <TableBody>
                   {filteredRequests.map((request: MaintenanceRequest) => (
                     <TableRow key={request.id}>
-                      <TableCell className="font-medium text-center">#{request.id}</TableCell>
-                      <TableCell className="text-center">{format(new Date(request.createdAt), 'MMM dd, yyyy')}</TableCell>
-                      <TableCell className="text-center">{getMachineName(request.machineId)}</TableCell>
-                      <TableCell className="text-center">{request.damageType}</TableCell>
-                      <TableCell className="text-center">{getSeverityBadge(request.severity)}</TableCell>
-                      <TableCell className="text-center">{getStatusBadge(request.status)}</TableCell>
-                      <TableCell className="text-center">{getUserName(request.reportedBy)}</TableCell>
-                      <TableCell className="max-w-xs truncate text-center" title={request.description}>
+                      <TableCell className="font-medium">#{request.id}</TableCell>
+                      <TableCell>{format(new Date(request.createdAt), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{getMachineName(request.machineId)}</TableCell>
+                      <TableCell>{request.damageType}</TableCell>
+                      <TableCell>{getSeverityBadge(request.severity)}</TableCell>
+                      <TableCell>{getStatusBadge(request.status)}</TableCell>
+                      <TableCell>{getUserName(request.reportedBy)}</TableCell>
+                      <TableCell className="max-w-xs truncate" title={request.description}>
                         {request.description}
                       </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex space-x-1 justify-center">
+                      <TableCell>
+                        <div className="flex space-x-1">
                           {request.status === 'pending' && (
                             <Button
                               size="sm"

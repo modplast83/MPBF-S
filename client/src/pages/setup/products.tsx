@@ -323,7 +323,7 @@ export default function Products() {
             <span>
               {selectedCustomerId 
                 ? t("setup.products.products_for", { customer: getCustomerName(selectedCustomerId) })
-                : t("setup.products.select_customer_to_view_products")}
+                : "حدد عميل لعرض المنتجات الخاصة به"}
             </span>
             {selectedCustomerId && products && products.length > 0 && (
               <Button 
