@@ -36,6 +36,7 @@ import fs from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import fileUpload from 'express-fileupload';
+import { validateRequest } from './types-fix';
 import { setupAuth } from "./auth";
 import { ensureAdminUser } from "./user-seed";
 import { setupHRRoutes } from "./hr-routes";
@@ -203,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/categories", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertCategorySchema.parse(req.body) as InsertCategory;
+      const validatedData = validateRequest<InsertCategory>(insertCategorySchema, req.body);
       const existingCategory = await storage.getCategoryByCode(validatedData.code);
       if (existingCategory) {
         return res.status(409).json({ message: "Category code already exists" });
@@ -225,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Category not found" });
       }
       
-      const validatedData = insertCategorySchema.parse(req.body);
+      const validatedData = validateRequest<InsertCategory>(insertCategorySchema, req.body);
       
       // If code is being changed, check it doesn't conflict
       if (validatedData.code !== existingCategory.code) {
