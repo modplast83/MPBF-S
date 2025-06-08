@@ -211,21 +211,49 @@ export type InsertRoll = z.infer<typeof insertRollSchema>;
 export type CreateRoll = z.infer<typeof createRollSchema>;
 export type Roll = typeof rolls.$inferSelect;
 
-// Permissions table
+// Modules table for system modules
+export const modules = pgTable("modules", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(), // 'setup', 'production', 'quality', 'warehouse', 'system', etc.
+  route: text("route"), // URL route for the module
+  icon: text("icon"), // Icon name for UI
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertModuleSchema = createInsertSchema(modules).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+export type InsertModule = z.infer<typeof insertModuleSchema>;
+export type Module = typeof modules.$inferSelect;
+
+// Section-based permissions table
 export const permissions = pgTable("permissions", {
   id: serial("id").primaryKey(),
-  role: text("role").notNull(),
-  module: text("module").notNull(),
-  can_view: boolean("can_view").default(false),
-  can_create: boolean("can_create").default(false),
-  can_edit: boolean("can_edit").default(false),
-  can_delete: boolean("can_delete").default(false),
-  is_active: boolean("is_active").default(true),
+  sectionId: text("section_id").notNull().references(() => sections.id),
+  moduleId: integer("module_id").notNull().references(() => modules.id),
+  canView: boolean("can_view").default(false),
+  canCreate: boolean("can_create").default(false),
+  canEdit: boolean("can_edit").default(false),
+  canDelete: boolean("can_delete").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
-  uniqueIndex: unique().on(table.role, table.module),
+  uniqueIndex: unique().on(table.sectionId, table.moduleId),
 }));
 
-export const insertPermissionSchema = createInsertSchema(permissions).omit({ id: true });
+export const insertPermissionSchema = createInsertSchema(permissions).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
 export type InsertPermission = z.infer<typeof insertPermissionSchema>;
 export type Permission = typeof permissions.$inferSelect;
 
