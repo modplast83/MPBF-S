@@ -135,6 +135,7 @@
         "delete_product": "Delete Product",
         "select_customer": "Select Customer",
         "select_customer_to_view": "Select a customer to view products",
+        "select_customer_to_view_products": "Select a customer to view their products",
         "products_for": "Products for {{customer}}",
         "search_placeholder": "Search products...",
         "select_a_customer": "Select a customer",
