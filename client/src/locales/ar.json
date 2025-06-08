@@ -1105,7 +1105,16 @@
       "waste_cost": "تكلفة الهدر",
       "total_cost": "التكلفة الإجمالية",
       "cost_per_kg": "التكلفة لكل كجم",
-      "total_quantity": "الكمية الإجمالية"
+      "total_quantity": "الكمية الإجمالية",
+      "job_order_details": "تفاصيل أمر العمل",
+      "customer": "العميل",
+      "item": "الصنف",
+      "category": "الفئة",
+      "size": "الحجم",
+      "width": "العرض",
+      "length": "الطول",
+      "thickness": "السمك",
+      "raw_material": "المادة الخام"
     },
     "orders": {
       "title": "الطلبات",
