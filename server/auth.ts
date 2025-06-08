@@ -12,7 +12,7 @@ declare global {
     interface User {
       id: string;
       username: string;
-      role: string;
+      isAdmin: boolean;
       email?: string | null;
       firstName?: string | null;
       lastName?: string | null;
@@ -58,7 +58,7 @@ export function setupAuth(app: Express) {
         return done(null, {
           id: user.id,
           username: user.username,
-          role: user.role,
+          isAdmin: user.isAdmin || false,
           email: user.email || undefined,
           firstName: user.firstName || undefined,
           lastName: user.lastName || undefined
@@ -82,7 +82,7 @@ export function setupAuth(app: Express) {
       done(null, {
         id: user.id,
         username: user.username,
-        role: user.role,
+        isAdmin: user.isAdmin || false,
         email: user.email || undefined,
         firstName: user.firstName || undefined,
         lastName: user.lastName || undefined
@@ -114,7 +114,7 @@ export function setupAuth(app: Express) {
         email,
         firstName,
         lastName,
-        role: "user",
+        isAdmin: false,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),

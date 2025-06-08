@@ -47,40 +47,33 @@ export function PermissionsProvider({
     // If no user or user data is loading, deny permission
     if (!user) return false;
     
-    // Get the user's role and section
-    const userRole = user.role;
+    // Get the user's admin status and section
+    const isAdmin = user.isAdmin;
     const userSection = user.sectionId;
     
-    // Administrator role has all permissions - case insensitive check
-    if (userRole.toLowerCase() === "administrator" || userRole.toLowerCase() === "supervisor") return true;
+    // Administrator has all permissions
+    if (isAdmin) return true;
 
     // For section-specific roles, check if the tab matches their section
     if (userSection) {
-      // First check if tab matches user's section (section-based permission)
-      for (const [sectionName, workflowTab] of Object.entries(SECTION_WORKFLOW_MAPPING)) {
-        // If the tab matches the workflow tab for the user's section, allow access
-        if (tab === workflowTab && userRole === sectionName) {
+      // Check if the tab is associated with the user's section through section name matching
+      // This allows section-based access to their respective workflow tabs
+      
+      // Check for specific workflow tab permissions based on section
+      const sectionTabModule = `Workflow-${tab.charAt(0).toUpperCase() + tab.slice(1)} Tab`;
+      const matchingModules = modules.filter(m => m.name === sectionTabModule);
+      
+      for (const moduleData of matchingModules) {
+        const permission = permissions.find(
+          p => p.sectionId === userSection && 
+             p.moduleId === moduleData.id && 
+             p.isActive === true
+        );
+        
+        if (permission && permission.canView === true) {
           return true;
         }
       }
-      
-      // Check for specific workflow tab permissions based on section name
-      // This handles cases like "Workflow-Extrusion Tab"
-      const sectionTabModule = `Workflow-${tab.charAt(0).toUpperCase() + tab.slice(1)} Tab`;
-      const permission = permissions.find(
-        p => p.role.toLowerCase() === userRole.toLowerCase() && 
-           p.module === sectionTabModule && 
-           p.is_active === true
-      );
-      
-      if (permission && permission.can_view === true) {
-        return true;
-      }
-    }
-    
-    // For operators without specific section assignment
-    if (userRole.toLowerCase() === "operator") {
-      return true; // All operators can see workflow tabs by default
     }
     
     return false;
@@ -91,17 +84,17 @@ export function PermissionsProvider({
     // If no user or user data is loading, deny permission
     if (!user) return false;
     
-    // Get the user's role and section
-    const userRole = user?.role;
+    // Get the user's admin status and section
+    const isAdmin = user?.isAdmin;
     const userSection = user?.sectionId;
     
-    console.log(`Checking permission for module: ${module}, action: ${action}, userRole: ${userRole}, userSection: ${userSection}`);
+    console.log(`Checking permission for module: ${module}, action: ${action}, isAdmin: ${isAdmin}, userSection: ${userSection}`);
     
-    // Administrator role has all permissions
-    if (userRole === "administrator") return true;
+    // Administrator has all permissions
+    if (isAdmin) return true;
     
     // If permissions are still loading, allow access for administrators to prevent blocking
-    if (isLoading && userRole === "administrator") return true;
+    if (isLoading && isAdmin) return true;
     
     // For non-administrators, check section-based permissions
     if (!userSection) {
