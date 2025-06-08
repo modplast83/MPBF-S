@@ -48,7 +48,7 @@ app.use('/api/auth', (req, res, next) => {
       res.setHeader('Content-Type', 'application/json');
       return originalSend.call(this, JSON.stringify(body));
     }
-    return originalSend.apply(this, arguments);
+    return originalSend.call(this, body);
   };
   
   // Override the JSON method
@@ -121,13 +121,24 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000 - this is the main frontend port
-  const mainPort = 5000;
+  // Use dynamic port allocation to avoid conflicts
+  const mainPort = process.env.PORT || 5000;
   server.listen({
-    port: mainPort,
+    port: parseInt(mainPort.toString()),
     host: "0.0.0.0",
-    reusePort: true,
   }, () => {
     log(`serving on port ${mainPort}`);
+  }).on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`Port ${mainPort} is busy, trying ${parseInt(mainPort.toString()) + 1}`);
+      server.listen({
+        port: parseInt(mainPort.toString()) + 1,
+        host: "0.0.0.0",
+      }, () => {
+        log(`serving on port ${parseInt(mainPort.toString()) + 1}`);
+      });
+    } else {
+      throw err;
+    }
   });
 })();
