@@ -21,57 +21,84 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { apiRequest } from "@/lib/queryClient";
 
-// Define the API format from server (snake_case)
+// Define the API format from server (section-based)
 interface PermissionDTO {
   id: number;
-  role: string;
-  module: string;
-  can_view: boolean;
-  can_create: boolean;
-  can_edit: boolean;
-  can_delete: boolean;
-  is_active: boolean;
+  sectionId: string;
+  moduleId: number;
+  canView: boolean | null;
+  canCreate: boolean | null;
+  canEdit: boolean | null;
+  canDelete: boolean | null;
+  isActive: boolean | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
-// Define UI format (camelCase)
+// Define UI format for permissions
 interface Permission {
   id: number;
-  role: string;
-  module: string;
+  sectionId: string;
+  moduleId: number;
   canView: boolean;
   canCreate: boolean;
   canEdit: boolean;
   canDelete: boolean;
   isActive: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
-// Transform API to UI format (handles converting from snake_case to camelCase)
+// Section interface
+interface Section {
+  id: string;
+  name: string;
+  code: string;
+  nameAr: string | null;
+  userId: string | null;
+  plateDrawerCode: string | null;
+}
+
+// Module interface
+interface Module {
+  id: number;
+  name: string;
+  category: string;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string | null;
+}
+
+// Transform API to UI format
 function apiToUiFormat(dto: PermissionDTO): Permission {
   return {
     id: dto.id,
-    role: dto.role,
-    module: dto.module,
-    canView: dto.can_view === true,
-    canCreate: dto.can_create === true,
-    canEdit: dto.can_edit === true,
-    canDelete: dto.can_delete === true,
-    isActive: dto.is_active === true
+    sectionId: dto.sectionId,
+    moduleId: dto.moduleId,
+    canView: dto.canView ?? false,
+    canCreate: dto.canCreate ?? false,
+    canEdit: dto.canEdit ?? false,
+    canDelete: dto.canDelete ?? false,
+    isActive: dto.isActive ?? true,
+    createdAt: dto.createdAt,
+    updatedAt: dto.updatedAt
   };
 }
 
-// Transform UI to API format (handles converting from camelCase to snake_case)
+// Transform UI to API format
 function uiToApiFormat(permission: Partial<Permission>): Partial<PermissionDTO> {
-  const result: Partial<PermissionDTO> = {};
-  
-  if (permission.role !== undefined) result.role = permission.role;
-  if (permission.module !== undefined) result.module = permission.module;
-  if (permission.canView !== undefined) result.can_view = permission.canView;
-  if (permission.canCreate !== undefined) result.can_create = permission.canCreate;
-  if (permission.canEdit !== undefined) result.can_edit = permission.canEdit;
-  if (permission.canDelete !== undefined) result.can_delete = permission.canDelete;
-  if (permission.isActive !== undefined) result.is_active = permission.isActive;
-  
-  return result;
+  return {
+    id: permission.id,
+    sectionId: permission.sectionId,
+    moduleId: permission.moduleId,
+    canView: permission.canView,
+    canCreate: permission.canCreate,
+    canEdit: permission.canEdit,
+    canDelete: permission.canDelete,
+    isActive: permission.isActive,
+    createdAt: permission.createdAt,
+    updatedAt: permission.updatedAt
+  };
 }
 
 // All available modules in the system

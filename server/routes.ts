@@ -3750,6 +3750,129 @@ COMMIT;
     }
   });
 
+  // Modules management API endpoints
+  app.get("/api/modules", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Check if user has permission to view modules
+      if (req.user && (req.user as any).role !== "administrator") {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const modules = await storage.getModules();
+      res.json(modules);
+    } catch (error) {
+      console.error("Error getting modules:", error);
+      res.status(500).json({ message: "Failed to get modules" });
+    }
+  });
+
+  app.get("/api/modules/category/:category", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Check if user has permission to view modules
+      if (req.user && (req.user as any).role !== "administrator") {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const { category } = req.params;
+      const modules = await storage.getModulesByCategory(category);
+      res.json(modules);
+    } catch (error) {
+      console.error("Error getting modules by category:", error);
+      res.status(500).json({ message: "Failed to get modules by category" });
+    }
+  });
+
+  app.get("/api/modules/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Check if user has permission to view modules
+      if (req.user && (req.user as any).role !== "administrator") {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid module ID" });
+      }
+
+      const module = await storage.getModule(id);
+      if (!module) {
+        return res.status(404).json({ message: "Module not found" });
+      }
+
+      res.json(module);
+    } catch (error) {
+      console.error("Error getting module:", error);
+      res.status(500).json({ message: "Failed to get module" });
+    }
+  });
+
+  app.post("/api/modules", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Check if user has permission to create modules
+      if (req.user && (req.user as any).role !== "administrator") {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const validatedData = insertModuleSchema.parse(req.body);
+      const module = await storage.createModule(validatedData);
+      res.status(201).json(module);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid module data", errors: error.errors });
+      }
+      console.error("Error creating module:", error);
+      res.status(500).json({ message: "Failed to create module" });
+    }
+  });
+
+  app.patch("/api/modules/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Check if user has permission to update modules
+      if (req.user && (req.user as any).role !== "administrator") {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid module ID" });
+      }
+
+      const module = await storage.updateModule(id, req.body);
+      if (!module) {
+        return res.status(404).json({ message: "Module not found" });
+      }
+
+      res.json(module);
+    } catch (error) {
+      console.error("Error updating module:", error);
+      res.status(500).json({ message: "Failed to update module" });
+    }
+  });
+
+  app.delete("/api/modules/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      // Check if user has permission to delete modules
+      if (req.user && (req.user as any).role !== "administrator") {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid module ID" });
+      }
+
+      const success = await storage.deleteModule(id);
+      if (!success) {
+        return res.status(404).json({ message: "Module not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting module:", error);
+      res.status(500).json({ message: "Failed to delete module" });
+    }
+  });
+
   // Material Inputs API endpoints
   app.get("/api/material-inputs", requireAuth, async (req: Request, res: Response) => {
     try {

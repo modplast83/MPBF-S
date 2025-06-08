@@ -33,7 +33,7 @@ import QualityPenalties from "@/pages/quality/penalties";
 import QualityCorrectiveActions from "@/pages/quality/corrective-actions";
 import UnifiedQualityDashboard from "@/pages/quality/unified-dashboard";
 import Database from "@/pages/system/database";
-import Permissions from "@/pages/system/permissions-fixed";
+import Permissions from "@/pages/system/permissions-section-based";
 import ImportExport from "@/pages/system/import-export";
 import SmsIndex from "@/pages/system/sms/index";
 import AuthPage from "@/pages/AuthPage";
