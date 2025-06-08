@@ -126,7 +126,7 @@ export class HRStorage {
     return this.hrComplaints;
   }
 
-  async getHrComplaintsByUser(userId: number): Promise<any[]> {
+  async getHrComplaintsByUser(userId: string): Promise<any[]> {
     return this.hrComplaints.filter(comp => comp.complainant_id === userId);
   }
 

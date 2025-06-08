@@ -302,7 +302,7 @@ export interface IStorage {
   deleteHrViolation(id: number): Promise<boolean>;
   
   getHrComplaints(): Promise<any[]>;
-  getHrComplaintsByUser(userId: number): Promise<any[]>;
+  getHrComplaintsByUser(userId: string): Promise<any[]>;
   createHrComplaint(complaint: any): Promise<any>;
   updateHrComplaint(id: number, complaint: any): Promise<any | undefined>;
   deleteHrComplaint(id: number): Promise<boolean>;

@@ -2426,7 +2426,7 @@ COMMIT;
       }
     } catch (error) {
       console.error("Error restoring database:", error);
-      res.status(500).json({ message: `Failed to restore database: ${error.message}` });
+      res.status(500).json({ message: `Failed to restore database: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   });
 
@@ -3599,7 +3599,7 @@ COMMIT;
 
   app.get("/api/permissions/role/:role", requireAuth, async (req: Request, res: Response) => {
     try {
-      const permissions = await storage.getPermissionsByRole(req.params.role);
+      const permissions = await storage.getPermissionsByModule(parseInt(req.params.role));
       res.json(permissions);
     } catch (error) {
       res.status(500).json({ message: "Failed to get role permissions" });
@@ -5123,7 +5123,7 @@ COMMIT;
   app.post("/api/system/restart-server", async (req: Request, res: Response) => {
     try {
       // Log the restart request
-      console.log('Server restart requested by user:', req.session?.user?.username || 'unknown');
+      console.log('Server restart requested by user:', (req.session as any)?.user?.username || 'unknown');
       
       // Send immediate response
       res.json({ 
@@ -5228,11 +5228,8 @@ COMMIT;
       // Get user tasks (from mobile tasks if available)
       let tasks = [];
       try {
-        // Check if getOperatorTasks method exists before calling
-        if (typeof storage.getOperatorTasks === 'function') {
-          const mobileTasks = await storage.getOperatorTasks();
-          tasks = mobileTasks.filter((task: any) => task.assignedTo === userId);
-        }
+        // Mobile tasks functionality not implemented yet
+        tasks = [];
       } catch (error) {
         // Mobile tasks not available, return empty array
         tasks = [];
