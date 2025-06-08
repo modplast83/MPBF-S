@@ -71,39 +71,18 @@ export function QualityViolations() {
   });
 
   // Fetch quality violations
-  const { data: violations = [], isLoading: violationsLoading, refetch: refetchViolations } = useQuery({
-    queryKey: ["/api/quality-violations"],
-    queryFn: async () => {
-      const response = await fetch("/api/quality-violations");
-      if (!response.ok) {
-        throw new Error("Failed to fetch quality violations");
-      }
-      return response.json();
-    }
+  const { data: violations = [], isLoading: violationsLoading, refetch: refetchViolations } = useQuery<any[]>({
+    queryKey: ["/api/quality-violations"]
   });
 
   // Fetch quality checks
   const { data: checks = [], isLoading: checksLoading } = useQuery({
-    queryKey: ["/api/quality-checks"],
-    queryFn: async () => {
-      const response = await fetch("/api/quality-checks");
-      if (!response.ok) {
-        throw new Error("Failed to fetch quality checks");
-      }
-      return response.json();
-    }
+    queryKey: ["/api/quality-checks"]
   });
 
   // Fetch users
   const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/users"],
-    queryFn: async () => {
-      const response = await fetch("/api/users");
-      if (!response.ok) {
-        throw new Error("Failed to fetch users");
-      }
-      return response.json();
-    }
+    queryKey: ["/api/users"]
   });
 
   // Create mutation
