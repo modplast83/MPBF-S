@@ -13,7 +13,7 @@ import {
   insertSmsMessageSchema, InsertSmsMessage,
   insertSmsTemplateSchema, insertSmsNotificationRuleSchema,
   insertMixMaterialSchema, insertMixItemSchema,
-  insertPermissionSchema, insertMaterialInputSchema,
+  insertPermissionSchema, insertModuleSchema, insertMaterialInputSchema,
   insertMaterialInputItemSchema,
   insertPlatePricingParameterSchema, insertPlateCalculationSchema,
   plateCalculationRequestSchema, PlateCalculationRequest,

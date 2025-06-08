@@ -7,8 +7,9 @@ import {
   QualityCheckType, InsertQualityCheckType, QualityCheck, InsertQualityCheck,
   CorrectiveAction, InsertCorrectiveAction, SmsMessage, InsertSmsMessage,
   MixMaterial, InsertMixMaterial, MixItem, InsertMixItem,
-  MixMachine, InsertMixMachine, mixMachines, permissions,
-  Permission, InsertPermission, MaterialInput, InsertMaterialInput,
+  MixMachine, InsertMixMachine, mixMachines, permissions, modules,
+  Permission, InsertPermission, Module, InsertModule,
+  MaterialInput, InsertMaterialInput,
   MaterialInputItem, InsertMaterialInputItem,
   PlatePricingParameter, InsertPlatePricingParameter,
   PlateCalculation, InsertPlateCalculation,
@@ -34,13 +35,22 @@ export interface IStorage {
   deleteUser(id: string): Promise<boolean>;
   upsertUser(user: UpsertUser): Promise<User>;
   
-  // Permissions management
+  // Permissions management (section-based)
   getPermissions(): Promise<Permission[]>;
-  getPermissionsByRole(role: string): Promise<Permission[]>;
+  getPermissionsBySection(sectionId: string): Promise<Permission[]>;
+  getPermissionsByModule(moduleId: number): Promise<Permission[]>;
   getPermission(id: number): Promise<Permission | undefined>;
   createPermission(permission: InsertPermission): Promise<Permission>;
   updatePermission(id: number, permission: Partial<Permission>): Promise<Permission | undefined>;
   deletePermission(id: number): Promise<boolean>;
+  
+  // Modules management
+  getModules(): Promise<Module[]>;
+  getModulesByCategory(category: string): Promise<Module[]>;
+  getModule(id: number): Promise<Module | undefined>;
+  createModule(module: InsertModule): Promise<Module>;
+  updateModule(id: number, module: Partial<Module>): Promise<Module | undefined>;
+  deleteModule(id: number): Promise<boolean>;
   
   // SMS Messages
   getSmsMessages(): Promise<SmsMessage[]>;
