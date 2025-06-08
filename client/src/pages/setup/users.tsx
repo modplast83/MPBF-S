@@ -77,9 +77,9 @@ export default function Users() {
     return sections?.find(s => s.id === sectionId)?.name || "Unknown";
   };
 
-  // Function to capitalize role for display
-  const formatRole = (role: string) => {
-    return role.charAt(0).toUpperCase() + role.slice(1);
+  // Function to format admin status for display
+  const formatAdminStatus = (isAdmin: boolean) => {
+    return isAdmin ? "Administrator" : "User";
   };
 
   const columns = [
@@ -95,8 +95,8 @@ export default function Users() {
     },
     {
       header: t('setup.users.role'),
-      accessorKey: "role" as keyof User,
-      cell: (row: { role: string }) => formatRole(row.role),
+      accessorKey: "isAdmin" as keyof User,
+      cell: (row: { isAdmin: boolean }) => formatAdminStatus(row.isAdmin),
     },
     {
       header: t('setup.users.section'),
