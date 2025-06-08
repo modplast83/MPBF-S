@@ -3608,71 +3608,40 @@ COMMIT;
 
 
 
-  app.post("/api/permissions", requireAuth, async (req: Request, res: Response) => {
+  app.post("/api/permissions", requirePermission("Permissions", "create"), async (req: Request, res: Response) => {
     try {
-      // Make sure only administrators can add permissions
-      if (req.user && (req.user as any).role !== "administrator") {
-        return res.status(403).json({ message: "Only administrators can manage permissions" });
-      }
-
-      // Define expected fields
+      // Define section-based permission creation schema
       const createSchema = z.object({
-        role: z.string(),
-        module: z.string(),
-        can_view: z.boolean().optional(),
-        can_create: z.boolean().optional(),
-        can_edit: z.boolean().optional(), 
-        can_delete: z.boolean().optional(),
-        is_active: z.boolean().optional(),
-        // Also accept camelCase versions
-        canView: z.boolean().optional(),
-        canCreate: z.boolean().optional(),
-        canEdit: z.boolean().optional(),
-        canDelete: z.boolean().optional(),
-        isActive: z.boolean().optional()
+        sectionId: z.string(),
+        moduleId: z.number(),
+        canView: z.boolean().optional().default(false),
+        canCreate: z.boolean().optional().default(false),
+        canEdit: z.boolean().optional().default(false),
+        canDelete: z.boolean().optional().default(false),
+        isActive: z.boolean().optional().default(true)
       });
 
       // Validate the request body
-      const rawData = createSchema.parse(req.body);
+      const validatedData = createSchema.parse(req.body);
       
-      // Convert camelCase to snake_case if needed
-      const validatedData: Record<string, any> = {
-        role: rawData.role,
-        module: rawData.module
-      };
-      
-      // Handle each field, preferring snake_case if both formats are present
-      if (rawData.can_view !== undefined) validatedData.can_view = rawData.can_view;
-      else if (rawData.canView !== undefined) validatedData.can_view = rawData.canView;
-      
-      if (rawData.can_create !== undefined) validatedData.can_create = rawData.can_create;
-      else if (rawData.canCreate !== undefined) validatedData.can_create = rawData.canCreate;
-      
-      if (rawData.can_edit !== undefined) validatedData.can_edit = rawData.can_edit;
-      else if (rawData.canEdit !== undefined) validatedData.can_edit = rawData.canEdit;
-      
-      if (rawData.can_delete !== undefined) validatedData.can_delete = rawData.can_delete;
-      else if (rawData.canDelete !== undefined) validatedData.can_delete = rawData.canDelete;
-      
-      if (rawData.is_active !== undefined) validatedData.is_active = rawData.is_active;
-      else if (rawData.isActive !== undefined) validatedData.is_active = rawData.isActive;
-      
-      console.log("Creating permission with data:", JSON.stringify(validatedData));
+      console.log("Creating section-based permission with data:", JSON.stringify(validatedData));
       
       // Use the validated data to create the permission
       try {
         const permission = await storage.createPermission(validatedData);
         
-        // Transform to camelCase for client compatibility
+        // Transform to section-based format for client compatibility
         const transformedPermission = {
           id: permission.id,
-          role: permission.role,
-          module: permission.module,
-          canView: permission.can_view,
-          canCreate: permission.can_create,
-          canEdit: permission.can_edit,
-          canDelete: permission.can_delete,
-          isActive: permission.is_active
+          sectionId: permission.sectionId,
+          moduleId: permission.moduleId,
+          canView: permission.canView,
+          canCreate: permission.canCreate,
+          canEdit: permission.canEdit,
+          canDelete: permission.canDelete,
+          isActive: permission.isActive,
+          createdAt: permission.createdAt,
+          updatedAt: permission.updatedAt
         };
         
         res.status(201).json(transformedPermission);
@@ -3697,47 +3666,19 @@ COMMIT;
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
-      // Define a schema for validated fields that might be updated
+      // Define a schema for section-based permission updates
       const updateSchema = z.object({
-        can_view: z.boolean().optional(),
-        can_create: z.boolean().optional(),
-        can_edit: z.boolean().optional(),
-        can_delete: z.boolean().optional(),
-        is_active: z.boolean().optional(),
-        canView: z.boolean().optional(), // Also accept camelCase format
+        sectionId: z.string().optional(),
+        moduleId: z.number().optional(),
+        canView: z.boolean().optional(),
         canCreate: z.boolean().optional(),
         canEdit: z.boolean().optional(),
         canDelete: z.boolean().optional(),
-        isActive: z.boolean().optional(),
-        role: z.string().optional(),
-        module: z.string().optional()
+        isActive: z.boolean().optional()
       });
 
       // Validate the request body
-      const rawData = updateSchema.parse(req.body);
-      
-      // Convert camelCase to snake_case if needed
-      const validatedData: Record<string, any> = {};
-      
-      // Handle each field, preferring snake_case if both formats are present
-      if (rawData.can_view !== undefined) validatedData.can_view = rawData.can_view;
-      else if (rawData.canView !== undefined) validatedData.can_view = rawData.canView;
-      
-      if (rawData.can_create !== undefined) validatedData.can_create = rawData.can_create;
-      else if (rawData.canCreate !== undefined) validatedData.can_create = rawData.canCreate;
-      
-      if (rawData.can_edit !== undefined) validatedData.can_edit = rawData.can_edit;
-      else if (rawData.canEdit !== undefined) validatedData.can_edit = rawData.canEdit;
-      
-      if (rawData.can_delete !== undefined) validatedData.can_delete = rawData.can_delete;
-      else if (rawData.canDelete !== undefined) validatedData.can_delete = rawData.canDelete;
-      
-      if (rawData.is_active !== undefined) validatedData.is_active = rawData.is_active;
-      else if (rawData.isActive !== undefined) validatedData.is_active = rawData.isActive;
-      
-      // Direct pass-through for role and module
-      if (rawData.role !== undefined) validatedData.role = rawData.role;
-      if (rawData.module !== undefined) validatedData.module = rawData.module;
+      const validatedData = updateSchema.parse(req.body);
       
       console.log(`Updating permission ${id} with data:`, JSON.stringify(validatedData));
       
@@ -3759,16 +3700,18 @@ COMMIT;
           return res.status(404).json({ message: "Failed to update permission" });
         }
         
-        // Transform to camelCase for client compatibility
+        // Transform to section-based format for client compatibility
         const transformedPermission = {
           id: permission.id,
-          role: permission.role,
-          module: permission.module,
-          canView: permission.can_view,
-          canCreate: permission.can_create,
-          canEdit: permission.can_edit,
-          canDelete: permission.can_delete,
-          isActive: permission.is_active
+          sectionId: permission.sectionId,
+          moduleId: permission.moduleId,
+          canView: permission.canView,
+          canCreate: permission.canCreate,
+          canEdit: permission.canEdit,
+          canDelete: permission.canDelete,
+          isActive: permission.isActive,
+          createdAt: permission.createdAt,
+          updatedAt: permission.updatedAt
         };
         
         res.json(transformedPermission);
