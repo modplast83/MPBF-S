@@ -66,37 +66,19 @@ export default function UnifiedQualityDashboard() {
   };
 
   // Fetch violations by severity
-  const { data: violations = [], isLoading: violationsLoading } = useQuery({
+  const { data: violations = [], isLoading: violationsLoading } = useQuery<any[]>({
     queryKey: ["/api/quality-violations"],
-    queryFn: async () => {
-      try {
-        const response = await fetch("/api/quality-violations");
-        if (!response.ok) {
-          throw new Error("Failed to fetch violations");
-        }
-        return response.json();
-      } catch (error) {
-        console.error("Error fetching violations:", error);
-        return [];
-      }
-    }
+    retry: 3,
+    staleTime: 30000,
+    refetchOnWindowFocus: false
   });
   
   // Fetch quality checks
-  const { data: checks = [], isLoading: checksLoading } = useQuery({
+  const { data: checks = [], isLoading: checksLoading } = useQuery<any[]>({
     queryKey: ["/api/quality-checks"],
-    queryFn: async () => {
-      try {
-        const response = await fetch("/api/quality-checks");
-        if (!response.ok) {
-          throw new Error("Failed to fetch quality checks");
-        }
-        return response.json();
-      } catch (error) {
-        console.error("Error fetching quality checks:", error);
-        return [];
-      }
-    }
+    retry: 3,
+    staleTime: 30000,
+    refetchOnWindowFocus: false
   });
   
   // Use stats from API or default values

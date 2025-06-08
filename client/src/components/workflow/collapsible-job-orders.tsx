@@ -395,7 +395,7 @@ export function CollapsibleJobOrdersForExtrusion() {
                       </div>
                       <div>
                         <h4 className="text-left text-[19px] text-[#ff1212] font-bold">Order #{orderId}</h4>
-                        <p className="text-secondary-600 truncate max-w-[200px] sm:max-w-[300px] text-[18px] font-bold">
+                        <p className="text-secondary-600 truncate max-w-[200px] sm:max-w-[300px] font-bold text-[15px]">
                           {customerName} {customerNameAr && <span className="font-bold mr-1 text-primary-700">({customerNameAr})</span>}
                         </p>
                       </div>
