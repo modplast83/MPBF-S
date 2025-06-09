@@ -307,21 +307,21 @@ export function QualityPenaltiesManagement() {
     }
     
     const assignedUser = Array.isArray(users) 
-      ? users.find((u: any) => u.id === currentPenalty.assignedTo)
+      ? users.find((u: any) => u.id === penaltyToPrint.assignedTo)
       : null;
     const assignedUserName = assignedUser 
       ? `${assignedUser.firstName || ''} ${assignedUser.lastName || ''}`
-      : currentPenalty.assignedTo || t("common.unknown");
+      : penaltyToPrint.assignedTo || t("common.unknown");
     
     const violation = Array.isArray(violations) 
-      ? violations.find((v: any) => v.id === currentPenalty.violationId)
+      ? violations.find((v: any) => v.id === penaltyToPrint.violationId)
       : null;
     
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>${t("quality.penalty_document")} #${currentPenalty.id}</title>
+        <title>${t("quality.penalty_document")} #${penaltyToPrint.id}</title>
         <style>
           body {
             font-family: Arial, sans-serif;
@@ -398,28 +398,28 @@ export function QualityPenaltiesManagement() {
       <body>
         <div class="header">
           <h1>${t("quality.quality_penalty_notice")}</h1>
-          <div class="document-id">${t("quality.document_id")}: PEN-${currentPenalty.id}</div>
+          <div class="document-id">${t("quality.document_id")}: PEN-${penaltyToPrint.id}</div>
         </div>
         
         <div class="section">
           <div class="section-title">${t("quality.penalty_information")}</div>
           <div class="field">
             <span class="label">${t("quality.penalty_type")}:</span>
-            <span class="value">${currentPenalty.penaltyType}</span>
+            <span class="value">${penaltyToPrint.penaltyType}</span>
           </div>
           <div class="field">
             <span class="label">${t("common.status")}:</span>
-            <span class="value">${currentPenalty.status}</span>
+            <span class="value">${penaltyToPrint.status}</span>
           </div>
           <div class="field">
             <span class="label">${t("quality.issue_date")}:</span>
-            <span class="value">${currentPenalty.assignedDate ? format(new Date(currentPenalty.assignedDate), 'MMMM d, yyyy') : t("common.not_available")}</span>
+            <span class="value">${penaltyToPrint.startDate ? new Date(penaltyToPrint.startDate).toLocaleDateString() : t("common.not_available")}</span>
           </div>
         </div>
         
-        ${currentPenalty.penaltyType === 'Financial' ? `
+        ${penaltyToPrint.penaltyType === 'financial' && penaltyToPrint.amount ? `
           <div class="amount">
-            ${t("quality.amount")}: $${parseFloat(currentPenalty.penaltyAmount).toFixed(2)}
+            ${t("quality.amount")}: $${parseFloat(penaltyToPrint.amount).toFixed(2)} ${penaltyToPrint.currency || 'USD'}
           </div>
         ` : ''}
         
@@ -435,7 +435,7 @@ export function QualityPenaltiesManagement() {
           <div class="section-title">${t("quality.violation_information")}</div>
           <div class="field">
             <span class="label">${t("quality.violation_id")}:</span>
-            <span class="value">#${currentPenalty.violationId || t("common.not_available")}</span>
+            <span class="value">#${penaltyToPrint.violationId || t("common.not_available")}</span>
           </div>
           ${violation ? `
             <div class="field">
@@ -451,8 +451,15 @@ export function QualityPenaltiesManagement() {
         
         <div class="section">
           <div class="section-title">${t("common.description")}</div>
-          <p>${currentPenalty.description || t("common.not_available")}</p>
+          <p>${penaltyToPrint.description || t("common.not_available")}</p>
         </div>
+        
+        ${penaltyToPrint.comments ? `
+          <div class="section">
+            <div class="section-title">${t("common.comments")}</div>
+            <p>${penaltyToPrint.comments}</p>
+          </div>
+        ` : ''}
         
         <div class="signature-area">
           <div class="signature-box">
