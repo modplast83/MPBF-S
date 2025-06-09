@@ -169,6 +169,18 @@ export function QualityChecksManagement() {
     }
   });
 
+  // Fetch items for product name resolution
+  const { data: items = [], isLoading: itemsLoading } = useQuery({
+    queryKey: ["/api/items"],
+    queryFn: async () => {
+      const response = await fetch("/api/items");
+      if (!response.ok) {
+        throw new Error("Failed to fetch items");
+      }
+      return response.json();
+    }
+  });
+
   // Create mutation
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -671,10 +683,11 @@ export function QualityChecksManagement() {
                         <SelectItem value="none">{t("common.none")}</SelectItem>
                         {jobOrders.map((jo: any) => {
                           const customer = customers.find(c => c.id === jo.customerId);
-                          const product = customerProducts.find(p => p.id === jo.customerProductId);
+                          const customerProduct = customerProducts.find(p => p.id === jo.customerProductId);
+                          const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
                           return (
                             <SelectItem key={jo.id} value={jo.id.toString()}>
-                              JO #{jo.id} - {customer?.name || "Unknown Customer"} - {product?.name || "Unknown Item"}
+                              JO #{jo.id} - {customer?.name || "No Customer"} - {item?.name || customerProduct?.sizeCaption || "No Item"}
                             </SelectItem>
                           );
                         })}
@@ -810,8 +823,9 @@ export function QualityChecksManagement() {
                     {check.jobOrderId ? (() => {
                       const jobOrder = jobOrders.find(jo => jo.id === check.jobOrderId);
                       const customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
-                      const product = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
-                      return `JO #${check.jobOrderId} - ${customer?.name || "Unknown Customer"} - ${product?.name || "Unknown Item"}`;
+                      const customerProduct = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
+                      const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
+                      return `JO #${check.jobOrderId} - ${customer?.name || "No Customer"} - ${item?.name || customerProduct?.sizeCaption || "No Item"}`;
                     })() : (
                       <span className="text-muted-foreground italic">{t("common.none")}</span>
                     )}
@@ -900,8 +914,9 @@ export function QualityChecksManagement() {
                   <p>{currentCheck.jobOrderId ? (() => {
                     const jobOrder = jobOrders.find(jo => jo.id === currentCheck.jobOrderId);
                     const customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
-                    const product = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
-                    return `JO #${currentCheck.jobOrderId} - ${customer?.name || "Unknown Customer"} - ${product?.name || "Unknown Item"}`;
+                    const customerProduct = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
+                    const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
+                    return `JO #${currentCheck.jobOrderId} - ${customer?.name || "No Customer"} - ${item?.name || customerProduct?.sizeCaption || "No Item"}`;
                   })() : t("common.none")}</p>
                 </div>
                 
