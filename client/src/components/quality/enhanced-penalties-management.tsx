@@ -1011,30 +1011,45 @@ export function QualityPenaltiesManagement() {
                       <SelectValue placeholder={t("quality.select_status")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Pending">{t("quality.status_pending")}</SelectItem>
-                      <SelectItem value="Active">{t("quality.status_active")}</SelectItem>
-                      <SelectItem value="Completed">{t("quality.status_completed")}</SelectItem>
-                      <SelectItem value="Dismissed">{t("quality.status_dismissed")}</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="dismissed">Dismissed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               
               {formData.penaltyType === "financial" && (
-                <div>
-                  <Label htmlFor="amount">{t("quality.penalty_amount")} *</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2">$</span>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-2">
+                    <Label htmlFor="amount">Penalty Amount *</Label>
                     <Input 
                       id="amount" 
                       type="number" 
                       value={formData.amount}
                       onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                      className="pl-8"
+                      placeholder="0.00"
                       min="0"
                       step="0.01"
                       required={formData.penaltyType === "financial"}
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="currency">Currency</Label>
+                    <Select 
+                      value={formData.currency} 
+                      onValueChange={(value) => setFormData({...formData, currency: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               )}
@@ -1058,25 +1073,48 @@ export function QualityPenaltiesManagement() {
                 </Select>
               </div>
               
-              <div>
-                <Label htmlFor="startDate">{t("quality.start_date")} *</Label>
-                <Input 
-                  id="startDate" 
-                  type="date" 
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Input 
+                    id="startDate" 
+                    type="date" 
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endDate">End Date</Label>
+                  <Input 
+                    id="endDate" 
+                    type="date" 
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                  />
+                </div>
               </div>
               
               <div>
-                <Label htmlFor="description">{t("common.description")} *</Label>
+                <Label htmlFor="description">Description *</Label>
                 <Textarea 
                   id="description" 
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  placeholder="Describe the penalty details and requirements..."
                   rows={3}
                   required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="comments">Additional Comments</Label>
+                <Textarea 
+                  id="comments" 
+                  value={formData.comments}
+                  onChange={(e) => setFormData({...formData, comments: e.target.value})}
+                  placeholder="Add any additional notes or comments..."
+                  rows={2}
                 />
               </div>
             </div>
