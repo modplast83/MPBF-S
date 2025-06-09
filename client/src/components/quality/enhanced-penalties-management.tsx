@@ -827,9 +827,9 @@ export function QualityPenaltiesManagement() {
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         {getPenaltyTypeBadge(penalty.penaltyType)}
-                        {penalty.penaltyType === "Financial" && penalty.penaltyAmount && (
+                        {penalty.penaltyType === "financial" && penalty.amount && (
                           <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-1 rounded-full transition-all duration-300 hover:bg-amber-200 hover:scale-105 animate-pulse">
-                            ${parseFloat(penalty.penaltyAmount).toFixed(2)}
+                            ${parseFloat(penalty.amount).toFixed(2)}
                           </span>
                         )}
                       </div>
@@ -854,6 +854,15 @@ export function QualityPenaltiesManagement() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={() => handleViewClick(penalty)}
+                          title={t("quality.view_penalty")}
+                          className="transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600"
+                        >
+                          <Eye className="h-4 w-4 transition-transform duration-300 hover:rotate-12" />
+                        </Button>
                         <Button 
                           variant="outline" 
                           size="icon" 
