@@ -570,14 +570,14 @@ export function QualityViolations() {
                     <div>
                       <Label htmlFor="qualityCheckId">Quality Check (Optional)</Label>
                       <Select 
-                        value={formData.qualityCheckId?.toString() || ""} 
-                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? parseInt(value) : null})}
+                        value={formData.qualityCheckId ? formData.qualityCheckId.toString() : "none"} 
+                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value === "none" ? null : parseInt(value)})}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select quality check (optional)" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No associated check</SelectItem>
+                          <SelectItem value="none">No associated check</SelectItem>
                           {Array.isArray(checks) && checks.length > 0 ? (
                             checks.map((check: any) => (
                               <SelectItem key={check.id} value={check.id.toString()}>
@@ -1002,14 +1002,14 @@ export function QualityViolations() {
                 <div>
                   <Label htmlFor="edit-qualityCheckId">Quality Check</Label>
                   <Select 
-                    value={formData.qualityCheckId?.toString() || ""} 
-                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? parseInt(value) : null})}
+                    value={formData.qualityCheckId ? formData.qualityCheckId.toString() : "none"} 
+                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value === "none" ? null : parseInt(value)})}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select quality check (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No associated check</SelectItem>
+                      <SelectItem value="none">No associated check</SelectItem>
                       {Array.isArray(checks) && checks.length > 0 ? (
                         checks.map((check: any) => (
                           <SelectItem key={check.id} value={check.id.toString()}>
