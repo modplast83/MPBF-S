@@ -121,22 +121,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use fixed port allocation with proper error handling
-  const port = parseInt((process.env.PORT || "5000").toString());
+  // Use environment port or default to 5000
+  const port = parseInt(process.env.PORT || "5000");
   
-  const startServer = (portToTry: number) => {
-    server.listen(portToTry, "0.0.0.0", () => {
-      log(`serving on port ${portToTry}`);
-    }).on('error', (err: any) => {
-      if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${portToTry} is busy, trying ${portToTry + 1000}`);
-        startServer(portToTry + 1000);
-      } else {
-        console.error('Server error:', err);
-        process.exit(1);
-      }
-    });
-  };
-  
-  startServer(port);
+  server.listen(port, "0.0.0.0", () => {
+    log(`serving on port ${port}`);
+  });
 })();
