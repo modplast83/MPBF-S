@@ -10,6 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { 
   BarChart, 
   Bar, 
@@ -29,6 +33,10 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { formatDateString, formatNumber } from "@/lib/utils";
 import { User, Section } from "@shared/schema";
 import { PDFExportButton } from "@/components/ui/pdf-export-button";
+import { toast } from "@/hooks/use-toast";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Interface for workflow report data
 interface WorkflowReportData {
@@ -83,6 +91,299 @@ export default function WorkflowReportsPage() {
     operatorId: "",
     itemId: ""
   });
+
+  // Export configuration state
+  const [exportConfig, setExportConfig] = useState({
+    format: "excel" as "excel" | "pdf" | "csv",
+    includeCharts: true,
+    includeSections: true,
+    includeOperators: true,
+    includeItems: true,
+    fileName: `workflow-report-${format(new Date(), "yyyy-MM-dd")}`,
+    orientation: "landscape" as "landscape" | "portrait"
+  });
+
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  // Export functions
+  const exportToExcel = () => {
+    if (!filteredReportData) return;
+
+    const workbook = XLSX.utils.book_new();
+
+    // Add sections sheet if included
+    if (exportConfig.includeSections && filteredReportData.sections?.length > 0) {
+      const sectionsData = filteredReportData.sections.map(section => ({
+        'Section ID': section.id,
+        'Section Name': section.name,
+        'Rolls Count': section.rollCount,
+        'Total Quantity (kg)': formatNumber(section.totalQuantity, 1),
+        'Waste Quantity (kg)': formatNumber(section.wasteQuantity, 1),
+        'Waste Percentage': `${formatNumber(section.wastePercentage, 1)}%`,
+        'Efficiency': `${formatNumber(section.efficiency, 1)}%`,
+        'Production Time (hours)': formatNumber(section.productionTime, 1)
+      }));
+      const sectionsSheet = XLSX.utils.json_to_sheet(sectionsData);
+      XLSX.utils.book_append_sheet(workbook, sectionsSheet, 'Sections');
+    }
+
+    // Add operators sheet if included
+    if (exportConfig.includeOperators && filteredReportData.operators?.length > 0) {
+      const operatorsData = filteredReportData.operators.map(operator => {
+        const user = users?.find(u => u.id === operator.id);
+        const section = sections?.find(s => s.id === user?.sectionId);
+        return {
+          'Operator ID': operator.id,
+          'Operator Name': operator.name,
+          'Section': section ? section.name : (user?.sectionId || '-'),
+          'Jobs Count': operator.jobsCount,
+          'Rolls Processed': operator.rollsProcessed,
+          'Total Quantity (kg)': formatNumber(operator.totalQuantity, 1),
+          'Production Time (hours)': formatNumber(operator.productionTime, 1),
+          'Efficiency': `${formatNumber(operator.efficiency, 1)}%`
+        };
+      });
+      const operatorsSheet = XLSX.utils.json_to_sheet(operatorsData);
+      XLSX.utils.book_append_sheet(workbook, operatorsSheet, 'Operators');
+    }
+
+    // Add items sheet if included
+    if (exportConfig.includeItems && filteredReportData.items?.length > 0) {
+      const itemsData = filteredReportData.items.map(item => ({
+        'Item ID': item.id,
+        'Item Name': item.name,
+        'Category': item.category,
+        'Jobs Count': item.jobsCount,
+        'Total Quantity (kg)': formatNumber(item.totalQuantity, 1),
+        'Finished Quantity (kg)': formatNumber(item.finishedQuantity, 1),
+        'Waste Quantity (kg)': formatNumber(item.wasteQuantity, 1),
+        'Waste Percentage': `${formatNumber(item.wastePercentage, 1)}%`
+      }));
+      const itemsSheet = XLSX.utils.json_to_sheet(itemsData);
+      XLSX.utils.book_append_sheet(workbook, itemsSheet, 'Items');
+    }
+
+    // Add summary sheet
+    const summaryData = [
+      { 'Metric': 'Report Generated', 'Value': format(new Date(), 'yyyy-MM-dd HH:mm:ss') },
+      { 'Metric': 'Total Sections', 'Value': filteredReportData.sections?.length || 0 },
+      { 'Metric': 'Total Operators', 'Value': filteredReportData.operators?.length || 0 },
+      { 'Metric': 'Total Items', 'Value': filteredReportData.items?.length || 0 },
+    ];
+    const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+
+    XLSX.writeFile(workbook, `${exportConfig.fileName}.xlsx`);
+  };
+
+  const exportToPDF = () => {
+    if (!filteredReportData) return;
+
+    const doc = new jsPDF(exportConfig.orientation);
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+
+    // Add title
+    doc.setFontSize(18);
+    doc.text('Workflow Report', pageWidth / 2, 20, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(`Generated on: ${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}`, pageWidth / 2, 30, { align: 'center' });
+
+    let yPosition = 50;
+
+    // Add sections table if included
+    if (exportConfig.includeSections && filteredReportData.sections?.length > 0) {
+      doc.setFontSize(14);
+      doc.text('Sections Performance', 14, yPosition);
+      yPosition += 10;
+
+      const sectionsTableData = filteredReportData.sections.map(section => [
+        section.id,
+        section.name,
+        section.rollCount.toString(),
+        `${formatNumber(section.totalQuantity, 1)} kg`,
+        `${formatNumber(section.wasteQuantity, 1)} kg`,
+        `${formatNumber(section.wastePercentage, 1)}%`,
+        `${formatNumber(section.efficiency, 1)}%`,
+        `${formatNumber(section.productionTime, 1)} hrs`
+      ]);
+
+      autoTable(doc, {
+        head: [['ID', 'Name', 'Rolls', 'Total Qty', 'Waste Qty', 'Waste %', 'Efficiency', 'Time']],
+        body: sectionsTableData,
+        startY: yPosition,
+        theme: 'grid',
+        headStyles: { fillColor: [66, 139, 202] },
+        styles: { fontSize: 8 }
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+    }
+
+    // Add operators table if included and there's space
+    if (exportConfig.includeOperators && filteredReportData.operators?.length > 0) {
+      if (yPosition > pageHeight - 100) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text('Operators Performance', 14, yPosition);
+      yPosition += 10;
+
+      const operatorsTableData = filteredReportData.operators.map(operator => {
+        const user = users?.find(u => u.id === operator.id);
+        const section = sections?.find(s => s.id === user?.sectionId);
+        return [
+          operator.id,
+          operator.name,
+          section ? section.name : (user?.sectionId || '-'),
+          operator.jobsCount.toString(),
+          operator.rollsProcessed.toString(),
+          `${formatNumber(operator.totalQuantity, 1)} kg`,
+          `${formatNumber(operator.productionTime, 1)} hrs`,
+          `${formatNumber(operator.efficiency, 1)}%`
+        ];
+      });
+
+      autoTable(doc, {
+        head: [['ID', 'Name', 'Section', 'Jobs', 'Rolls', 'Total Qty', 'Time', 'Efficiency']],
+        body: operatorsTableData,
+        startY: yPosition,
+        theme: 'grid',
+        headStyles: { fillColor: [66, 139, 202] },
+        styles: { fontSize: 8 }
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+    }
+
+    // Add items table if included and there's space
+    if (exportConfig.includeItems && filteredReportData.items?.length > 0) {
+      if (yPosition > pageHeight - 100) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text('Items Performance', 14, yPosition);
+      yPosition += 10;
+
+      const itemsTableData = filteredReportData.items.map(item => [
+        item.id.toString(),
+        item.name,
+        item.category,
+        item.jobsCount.toString(),
+        `${formatNumber(item.totalQuantity, 1)} kg`,
+        `${formatNumber(item.finishedQuantity, 1)} kg`,
+        `${formatNumber(item.wasteQuantity, 1)} kg`,
+        `${formatNumber(item.wastePercentage, 1)}%`
+      ]);
+
+      autoTable(doc, {
+        head: [['ID', 'Name', 'Category', 'Jobs', 'Total Qty', 'Finished', 'Waste', 'Waste %']],
+        body: itemsTableData,
+        startY: yPosition,
+        theme: 'grid',
+        headStyles: { fillColor: [66, 139, 202] },
+        styles: { fontSize: 8 }
+      });
+    }
+
+    doc.save(`${exportConfig.fileName}.pdf`);
+  };
+
+  const exportToCSV = () => {
+    if (!filteredReportData) return;
+
+    let csvContent = '';
+
+    // Add sections data if included
+    if (exportConfig.includeSections && filteredReportData.sections?.length > 0) {
+      csvContent += 'SECTIONS\n';
+      csvContent += 'Section ID,Section Name,Rolls Count,Total Quantity (kg),Waste Quantity (kg),Waste Percentage,Efficiency,Production Time (hours)\n';
+      filteredReportData.sections.forEach(section => {
+        csvContent += `${section.id},${section.name},${section.rollCount},${formatNumber(section.totalQuantity, 1)},${formatNumber(section.wasteQuantity, 1)},${formatNumber(section.wastePercentage, 1)}%,${formatNumber(section.efficiency, 1)}%,${formatNumber(section.productionTime, 1)}\n`;
+      });
+      csvContent += '\n';
+    }
+
+    // Add operators data if included
+    if (exportConfig.includeOperators && filteredReportData.operators?.length > 0) {
+      csvContent += 'OPERATORS\n';
+      csvContent += 'Operator ID,Operator Name,Section,Jobs Count,Rolls Processed,Total Quantity (kg),Production Time (hours),Efficiency\n';
+      filteredReportData.operators.forEach(operator => {
+        const user = users?.find(u => u.id === operator.id);
+        const section = sections?.find(s => s.id === user?.sectionId);
+        const sectionName = section ? section.name : (user?.sectionId || '-');
+        csvContent += `${operator.id},${operator.name},${sectionName},${operator.jobsCount},${operator.rollsProcessed},${formatNumber(operator.totalQuantity, 1)},${formatNumber(operator.productionTime, 1)},${formatNumber(operator.efficiency, 1)}%\n`;
+      });
+      csvContent += '\n';
+    }
+
+    // Add items data if included
+    if (exportConfig.includeItems && filteredReportData.items?.length > 0) {
+      csvContent += 'ITEMS\n';
+      csvContent += 'Item ID,Item Name,Category,Jobs Count,Total Quantity (kg),Finished Quantity (kg),Waste Quantity (kg),Waste Percentage\n';
+      filteredReportData.items.forEach(item => {
+        csvContent += `${item.id},${item.name},${item.category},${item.jobsCount},${formatNumber(item.totalQuantity, 1)},${formatNumber(item.finishedQuantity, 1)},${formatNumber(item.wasteQuantity, 1)},${formatNumber(item.wastePercentage, 1)}%\n`;
+      });
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${exportConfig.fileName}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExport = async () => {
+    if (!filteredReportData) {
+      toast({
+        title: t("common.error"),
+        description: t("reports.no_data_to_export"),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      switch (exportConfig.format) {
+        case 'excel':
+          exportToExcel();
+          break;
+        case 'pdf':
+          exportToPDF();
+          break;
+        case 'csv':
+          exportToCSV();
+          break;
+      }
+
+      toast({
+        title: t("common.success"),
+        description: t("reports.export_success"),
+      });
+
+      setIsExportDialogOpen(false);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: t("common.error"),
+        description: t("reports.export_error"),
+        variant: "destructive"
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
   
   // Fetch users for operators filter dropdown
   const { data: users, isLoading: usersLoading } = useQuery<User[]>({
@@ -235,7 +536,16 @@ export default function WorkflowReportsPage() {
     },
     { 
       header: t("reports.section"), 
-      accessorKey: "section" 
+      accessorKey: "section",
+      cell: (row: any) => {
+        // Find the user to get their section ID
+        const user = users?.find(u => u.id === row.id);
+        if (!user || !user.sectionId) return '-';
+        
+        // Find the section name from the sections data
+        const section = sections?.find(s => s.id === user.sectionId);
+        return section ? section.name : user.sectionId;
+      }
     },
     { 
       header: t("reports.jobs_count"), 
@@ -619,15 +929,181 @@ export default function WorkflowReportsPage() {
             </TabsContent>
           </Tabs>
           
-          {/* Export buttons */}
+          {/* Export section */}
           <div className="flex justify-end mt-6 space-x-2">
-            <Button variant="outline">
-              <span className="material-icons text-sm mr-1">download</span>
-              {t("reports.export_excel")}
+            <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <span className="material-icons text-sm mr-1">download</span>
+                  {t("reports.export_report")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>{t("reports.export_configuration")}</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  {/* Format Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">{t("reports.export_format")}</Label>
+                    <RadioGroup
+                      value={exportConfig.format}
+                      onValueChange={(value: "excel" | "pdf" | "csv") =>
+                        setExportConfig(prev => ({ ...prev, format: value }))
+                      }
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="excel" id="excel" />
+                        <Label htmlFor="excel" className="flex items-center cursor-pointer">
+                          <span className="material-icons text-green-600 text-sm mr-1">table_chart</span>
+                          Excel (.xlsx)
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="pdf" id="pdf" />
+                        <Label htmlFor="pdf" className="flex items-center cursor-pointer">
+                          <span className="material-icons text-red-600 text-sm mr-1">picture_as_pdf</span>
+                          PDF (.pdf)
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="csv" id="csv" />
+                        <Label htmlFor="csv" className="flex items-center cursor-pointer">
+                          <span className="material-icons text-blue-600 text-sm mr-1">description</span>
+                          CSV (.csv)
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Content Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">{t("reports.include_content")}</Label>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="sections"
+                          checked={exportConfig.includeSections}
+                          onCheckedChange={(checked) =>
+                            setExportConfig(prev => ({ ...prev, includeSections: !!checked }))
+                          }
+                        />
+                        <Label htmlFor="sections" className="cursor-pointer">{t("reports.sections_data")}</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="operators"
+                          checked={exportConfig.includeOperators}
+                          onCheckedChange={(checked) =>
+                            setExportConfig(prev => ({ ...prev, includeOperators: !!checked }))
+                          }
+                        />
+                        <Label htmlFor="operators" className="cursor-pointer">{t("reports.operators_data")}</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="items"
+                          checked={exportConfig.includeItems}
+                          onCheckedChange={(checked) =>
+                            setExportConfig(prev => ({ ...prev, includeItems: !!checked }))
+                          }
+                        />
+                        <Label htmlFor="items" className="cursor-pointer">{t("reports.items_data")}</Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PDF Orientation (only for PDF) */}
+                  {exportConfig.format === 'pdf' && (
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">{t("reports.pdf_orientation")}</Label>
+                      <RadioGroup
+                        value={exportConfig.orientation}
+                        onValueChange={(value: "landscape" | "portrait") =>
+                          setExportConfig(prev => ({ ...prev, orientation: value }))
+                        }
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="landscape" id="landscape" />
+                          <Label htmlFor="landscape" className="cursor-pointer">{t("reports.landscape")}</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="portrait" id="portrait" />
+                          <Label htmlFor="portrait" className="cursor-pointer">{t("reports.portrait")}</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  )}
+
+                  {/* File Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="fileName" className="text-sm font-medium">{t("reports.file_name")}</Label>
+                    <input
+                      id="fileName"
+                      type="text"
+                      value={exportConfig.fileName}
+                      onChange={(e) =>
+                        setExportConfig(prev => ({ ...prev, fileName: e.target.value }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="workflow-report"
+                    />
+                  </div>
+
+                  {/* Export Button */}
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsExportDialogOpen(false)}
+                      disabled={isExporting}
+                    >
+                      {t("common.cancel")}
+                    </Button>
+                    <Button
+                      onClick={handleExport}
+                      disabled={isExporting || (!exportConfig.includeSections && !exportConfig.includeOperators && !exportConfig.includeItems)}
+                    >
+                      {isExporting ? (
+                        <>
+                          <span className="material-icons animate-spin text-sm mr-1">hourglass_empty</span>
+                          {t("reports.exporting")}
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-icons text-sm mr-1">download</span>
+                          {t("reports.export")}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Quick Export Buttons */}
+            <Button
+              variant="outline"
+              onClick={() => {
+                setExportConfig(prev => ({ ...prev, format: 'excel' }));
+                handleExport();
+              }}
+              disabled={!filteredReportData}
+            >
+              <span className="material-icons text-sm mr-1">table_chart</span>
+              {t("reports.quick_excel")}
             </Button>
-            <Button variant="outline">
-              <span className="material-icons text-sm mr-1">print</span>
-              {t("reports.print_report")}
+            
+            <Button
+              variant="outline"
+              onClick={() => {
+                setExportConfig(prev => ({ ...prev, format: 'pdf' }));
+                handleExport();
+              }}
+              disabled={!filteredReportData}
+            >
+              <span className="material-icons text-sm mr-1">picture_as_pdf</span>
+              {t("reports.quick_pdf")}
             </Button>
           </div>
         </CardContent>
