@@ -1,43 +1,32 @@
 #!/usr/bin/env node
 
 import { build } from 'esbuild';
-import { writeFileSync, mkdirSync, existsSync, rmSync, cpSync } from 'fs';
-import { execSync } from 'child_process';
+import { writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
 
-async function buildForDeployment() {
+async function buildProductionServer() {
   try {
-    console.log('Building for deployment...');
+    console.log('Building production server...');
     
-    // Clean and create dist directory
+    // Clean and prepare dist directory
     if (existsSync('dist')) {
       rmSync('dist', { recursive: true, force: true });
     }
     mkdirSync('dist', { recursive: true });
 
-    // Build frontend first
-    console.log('Building frontend...');
-    execSync('vite build', { stdio: 'inherit' });
-    
-    // Copy frontend build to dist/public
-    if (existsSync('client/dist')) {
-      cpSync('client/dist', 'dist/public', { recursive: true });
-      console.log('Frontend assets copied to dist/public');
-    }
-
-    // Build server with production optimizations
-    console.log('Building server...');
+    // Build only the server with ES module support
     await build({
       entryPoints: ['server/index.ts'],
       bundle: true,
       platform: 'node',
       target: 'node18',
       format: 'esm',
-      outfile: 'dist/index.js',
+      outfile: 'dist/server.js',
       packages: 'external',
       mainFields: ['module', 'main'],
       conditions: ['import', 'node'],
       banner: {
-        js: `import { createRequire } from 'module';
+        js: `// Production ES Module Server
+import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const require = createRequire(import.meta.url);
@@ -66,7 +55,29 @@ const __dirname = dirname(__filename);`
       ]
     });
 
-    // Create proper package.json for ES modules
+    // Create production entry point that handles deployment requirements
+    const entryScript = `#!/usr/bin/env node
+// Production deployment entry point
+process.env.NODE_ENV = 'production';
+
+// Configure port for Replit deployment
+const PORT = process.env.PORT || 5000;
+process.env.PORT = PORT.toString();
+
+console.log('Starting production server...');
+console.log('Port:', PORT);
+console.log('Environment:', process.env.NODE_ENV);
+
+// Import the server
+import('./server.js').catch(error => {
+  console.error('Server startup failed:', error);
+  process.exit(1);
+});
+`;
+
+    writeFileSync('dist/index.js', entryScript);
+
+    // Create package.json with proper ES module configuration
     const packageJson = {
       type: 'module',
       main: 'index.js',
@@ -79,19 +90,13 @@ const __dirname = dirname(__filename);`
     };
     writeFileSync('dist/package.json', JSON.stringify(packageJson, null, 2));
 
-    // Create theme.json in dist if it exists in root
-    if (existsSync('theme.json')) {
-      cpSync('theme.json', 'dist/theme.json');
-    }
-
-    console.log('Deployment build completed successfully!');
-    console.log('Created files:');
-    execSync('find dist -type f | head -10', { stdio: 'inherit' });
+    console.log('Production server build completed!');
+    console.log('Ready for deployment with ES module support');
     
   } catch (error) {
-    console.error('Build failed:', error);
+    console.error('Production build failed:', error);
     process.exit(1);
   }
 }
 
-buildForDeployment();
+buildProductionServer();
