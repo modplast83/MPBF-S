@@ -139,19 +139,19 @@ export function setupMobileRoutes(app: Express) {
     }
   });
 
-  // Create quality check action
-  app.post('/api/quality-checks', requireAuth, async (req: Request, res: Response) => {
+  // Create quality check action via mobile
+  app.post('/api/mobile/quality-checks', requireAuth, async (req: Request, res: Response) => {
     try {
       const { timestamp, source, rollId, jobOrderId } = req.body;
       
-      // Create a quality check
+      // Create a quality check using a valid check type ID
       const qualityCheck = await storage.createQualityCheck({
-        checkType: 'mobile_gesture',
-        result: 'pending',
+        checkTypeId: 'QCT-001', // Use existing Film Size check type
+        status: 'pending',
         notes: `Quality check initiated via ${source}`,
         rollId: rollId || null,
         jobOrderId: jobOrderId || null,
-        checkedBy: req.user?.id || 'unknown'
+        performedBy: req.user?.id || 'unknown'
       });
 
       console.log(`Quality check created via ${source} at ${timestamp} by user ${req.user?.id}`);
