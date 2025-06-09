@@ -2,14 +2,13 @@
 
 import { build } from 'esbuild';
 import { writeFileSync, mkdirSync } from 'fs';
-import { dirname } from 'path';
 
 async function buildProject() {
   try {
     // Create dist directory
     mkdirSync('dist', { recursive: true });
 
-    // Build server with proper ES module configuration  
+    // Build server for production with explicit TypeScript entry
     console.log('Building server for production...');
     await build({
       entryPoints: ['server/index.ts'],
@@ -17,10 +16,17 @@ async function buildProject() {
       platform: 'node',
       target: 'node18',
       format: 'esm',
-      outfile: 'dist/server.mjs',
+      outfile: 'dist/index.js',
       packages: 'external',
+      tsconfig: 'tsconfig.json',
       banner: {
-        js: '// ES Module server build'
+        js: `// Production server - ES Module
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);`
       },
       define: {
         'process.env.NODE_ENV': '"production"'
@@ -29,17 +35,24 @@ async function buildProject() {
         'express',
         'pg',
         'drizzle-orm',
-        '@neondatabase/serverless'
-      ]
+        '@neondatabase/serverless',
+        'express-session',
+        'passport',
+        'passport-local',
+        'connect-pg-simple',
+        'express-fileupload',
+        '@sendgrid/mail',
+        'twilio',
+        'bcrypt',
+        'uuid',
+        'memorystore'
+      ],
+      loader: {
+        '.ts': 'ts'
+      }
     });
 
-    // Create entry point that imports the server
-    const entryContent = `#!/usr/bin/env node
-import './server.mjs';
-`;
-    writeFileSync('dist/index.js', entryContent);
-
-    // Create package.json in dist to ensure proper ES module handling
+    // Create package.json in dist for proper ES module handling
     const distPackageJson = {
       type: 'module'
     };
