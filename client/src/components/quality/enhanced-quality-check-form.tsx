@@ -807,9 +807,12 @@ export function QualityChecksManagement() {
                   <TableCell className="font-medium">{check.id}</TableCell>
                   <TableCell>{getCheckTypeName(check.checkTypeId)}</TableCell>
                   <TableCell>
-                    {check.jobOrderId ? (
-                      `JO #${check.jobOrderId}`
-                    ) : (
+                    {check.jobOrderId ? (() => {
+                      const jobOrder = jobOrders.find(jo => jo.id === check.jobOrderId);
+                      const customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
+                      const product = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
+                      return `JO #${check.jobOrderId} - ${customer?.name || "Unknown Customer"} - ${product?.name || "Unknown Item"}`;
+                    })() : (
                       <span className="text-muted-foreground italic">{t("common.none")}</span>
                     )}
                   </TableCell>
@@ -894,7 +897,12 @@ export function QualityChecksManagement() {
                 
                 <div>
                   <h4 className="text-sm font-medium">{t("quality.related_job_order")}</h4>
-                  <p>{currentCheck.jobOrderId ? `JO #${currentCheck.jobOrderId}` : t("common.none")}</p>
+                  <p>{currentCheck.jobOrderId ? (() => {
+                    const jobOrder = jobOrders.find(jo => jo.id === currentCheck.jobOrderId);
+                    const customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
+                    const product = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
+                    return `JO #${currentCheck.jobOrderId} - ${customer?.name || "Unknown Customer"} - ${product?.name || "Unknown Item"}`;
+                  })() : t("common.none")}</p>
                 </div>
                 
                 <div>
