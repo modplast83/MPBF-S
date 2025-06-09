@@ -503,11 +503,15 @@ export function QualityChecksManagement() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">{t("common.none")}</SelectItem>
-                        {jobOrders.map((jo: any) => (
-                          <SelectItem key={jo.id} value={jo.id.toString()}>
-                            JO #{jo.id}
-                          </SelectItem>
-                        ))}
+                        {jobOrders.map((jo: any) => {
+                          const customer = customers.find(c => c.id === jo.customerId);
+                          const product = customerProducts.find(p => p.id === jo.customerProductId);
+                          return (
+                            <SelectItem key={jo.id} value={jo.id.toString()}>
+                              JO #{jo.id} - {customer?.name || "Unknown Customer"} - {product?.name || "Unknown Item"}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
@@ -528,27 +532,28 @@ export function QualityChecksManagement() {
                         <SelectItem value="none">{t("common.none")}</SelectItem>
                         {(filteredRolls.length > 0 ? filteredRolls : []).map((roll: any) => (
                           <SelectItem key={roll.id} value={roll.id}>
-                            {roll.id} - {roll.stage || t("common.unknown")}
+                            {roll.id}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   
-                  {/* User Selection */}
+                  {/* User Selection - Auto-selected for current user */}
                   <div>
                     <Label htmlFor="performedBy">{t("quality.performed_by")} *</Label>
                     <Select 
                       value={formData.performedBy} 
                       onValueChange={(value) => setFormData({...formData, performedBy: value})}
+                      disabled={true}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder={t("quality.select_user")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {users.map((user: any) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.firstName} {user.lastName}
+                        {users.map((userItem: any) => (
+                          <SelectItem key={userItem.id} value={userItem.id}>
+                            {userItem.firstName} {userItem.lastName}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -801,11 +806,15 @@ export function QualityChecksManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{t("common.none")}</SelectItem>
-                    {jobOrders.map((jo: any) => (
-                      <SelectItem key={jo.id} value={jo.id.toString()}>
-                        JO #{jo.id}
-                      </SelectItem>
-                    ))}
+                    {jobOrders.map((jo: any) => {
+                      const customer = customers.find(c => c.id === jo.customerId);
+                      const product = customerProducts.find(p => p.id === jo.customerProductId);
+                      return (
+                        <SelectItem key={jo.id} value={jo.id.toString()}>
+                          JO #{jo.id} - {customer?.name || "Unknown Customer"} - {product?.name || "Unknown Item"}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -826,27 +835,28 @@ export function QualityChecksManagement() {
                     <SelectItem value="none">{t("common.none")}</SelectItem>
                     {(filteredRolls.length > 0 ? filteredRolls : []).map((roll: any) => (
                       <SelectItem key={roll.id} value={roll.id}>
-                        {roll.id} - {roll.stage || t("common.unknown")}
+                        {roll.id}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               
-              {/* User Selection */}
+              {/* User Selection - Auto-selected for current user */}
               <div>
                 <Label htmlFor="performedBy">{t("quality.performed_by")} *</Label>
                 <Select 
                   value={formData.performedBy} 
                   onValueChange={(value) => setFormData({...formData, performedBy: value})}
+                  disabled={true}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={t("quality.select_user")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {users.map((user: any) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.firstName} {user.lastName}
+                    {users.map((userItem: any) => (
+                      <SelectItem key={userItem.id} value={userItem.id}>
+                        {userItem.firstName} {userItem.lastName}
                       </SelectItem>
                     ))}
                   </SelectContent>
