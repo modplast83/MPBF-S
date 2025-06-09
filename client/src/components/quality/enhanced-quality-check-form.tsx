@@ -491,6 +491,22 @@ export function QualityChecksManagement() {
               <div class="detail-label">Roll ID:</div>
               <div class="detail-value">${check.rollId || 'Not specified'}</div>
             </div>
+            <div class="detail-row">
+              <div class="detail-label">Size Caption:</div>
+              <div class="detail-value">${customerProduct?.sizeCaption || 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Thickness:</div>
+              <div class="detail-value">${customerProduct?.thickness ? `${customerProduct.thickness} mm` : 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Length (cm):</div>
+              <div class="detail-value">${customerProduct?.lengthCm ? `${customerProduct.lengthCm} cm` : 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Raw Material:</div>
+              <div class="detail-value">${customerProduct?.rawMaterial || 'Not specified'}</div>
+            </div>
           </div>
 
           <div class="section">
