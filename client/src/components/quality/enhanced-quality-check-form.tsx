@@ -133,6 +133,18 @@ export function QualityChecksManagement() {
     }
   });
 
+  // Fetch orders for customer resolution
+  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+    queryKey: ["/api/orders"],
+    queryFn: async () => {
+      const response = await fetch("/api/orders");
+      if (!response.ok) {
+        throw new Error("Failed to fetch orders");
+      }
+      return response.json();
+    }
+  });
+
   // Fetch users for dropdown selection
   const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ["/api/users"],
@@ -346,7 +358,11 @@ export function QualityChecksManagement() {
 
     const checkType = checkTypes.find(ct => ct.id === check.checkTypeId);
     const jobOrder = jobOrders.find(jo => jo.id === check.jobOrderId);
-    const customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
+    let customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
+    if (!customer && jobOrder?.orderId) {
+      const order = orders.find(o => o.id === jobOrder.orderId);
+      customer = order ? customers.find(c => c.id === order.customerId) : null;
+    }
     const customerProduct = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
     const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
     const performer = users.find(u => u.id === check.performedBy);
@@ -683,7 +699,12 @@ export function QualityChecksManagement() {
                       <SelectContent>
                         <SelectItem value="none">{t("common.none")}</SelectItem>
                         {jobOrders.map((jo: any) => {
-                          const customer = customers.find(c => c.id === jo.customerId);
+                          // Try to get customer directly from job order, then from related order
+                          let customer = customers.find(c => c.id === jo.customerId);
+                          if (!customer && jo.orderId) {
+                            const order = orders.find(o => o.id === jo.orderId);
+                            customer = order ? customers.find(c => c.id === order.customerId) : null;
+                          }
                           const customerProduct = customerProducts.find(p => p.id === jo.customerProductId);
                           const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
                           return (
@@ -823,7 +844,11 @@ export function QualityChecksManagement() {
                   <TableCell>
                     {check.jobOrderId ? (() => {
                       const jobOrder = jobOrders.find(jo => jo.id === check.jobOrderId);
-                      const customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
+                      let customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
+                      if (!customer && jobOrder?.orderId) {
+                        const order = orders.find(o => o.id === jobOrder.orderId);
+                        customer = order ? customers.find(c => c.id === order.customerId) : null;
+                      }
                       const customerProduct = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
                       const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
                       return `JO #${check.jobOrderId} - ${customer?.name || "No Customer"} - ${item?.name || customerProduct?.sizeCaption || "No Item"}`;
@@ -914,7 +939,11 @@ export function QualityChecksManagement() {
                   <h4 className="text-sm font-medium">{t("quality.related_job_order")}</h4>
                   <p>{currentCheck.jobOrderId ? (() => {
                     const jobOrder = jobOrders.find(jo => jo.id === currentCheck.jobOrderId);
-                    const customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
+                    let customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
+                    if (!customer && jobOrder?.orderId) {
+                      const order = orders.find(o => o.id === jobOrder.orderId);
+                      customer = order ? customers.find(c => c.id === order.customerId) : null;
+                    }
                     const customerProduct = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
                     const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
                     return `JO #${currentCheck.jobOrderId} - ${customer?.name || "No Customer"} - ${item?.name || customerProduct?.sizeCaption || "No Item"}`;
@@ -1009,7 +1038,11 @@ export function QualityChecksManagement() {
                   <SelectContent>
                     <SelectItem value="none">{t("common.none")}</SelectItem>
                     {jobOrders.map((jo: any) => {
-                      const customer = customers.find(c => c.id === jo.customerId);
+                      let customer = customers.find(c => c.id === jo.customerId);
+                      if (!customer && jo.orderId) {
+                        const order = orders.find(o => o.id === jo.orderId);
+                        customer = order ? customers.find(c => c.id === order.customerId) : null;
+                      }
                       const customerProduct = customerProducts.find(p => p.id === jo.customerProductId);
                       const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
                       return (
