@@ -1093,7 +1093,26 @@ export class DatabaseStorage implements IStorage {
       
       // Import the pool from db.ts and the quality check adapter
       const { pool } = await import('./db');
-      const { adaptToFrontend } = await import('./quality-check-adapter');
+      const { adaptToDatabase, adaptToFrontend } = await import('./quality-check-adapter');
+      
+      // Transform frontend data to database format if needed
+      let dbData;
+      if (qualityCheckData.checkTypeId || qualityCheckData.performedBy) {
+        // This is frontend format, transform it
+        dbData = adaptToDatabase(qualityCheckData);
+      } else {
+        // This is already in database format or needs direct mapping
+        dbData = {
+          check_type_id: qualityCheckData.checkTypeId || qualityCheckData.check_type_id || qualityCheckData.checkType,
+          checked_by: qualityCheckData.performedBy || qualityCheckData.checked_by || qualityCheckData.checkedBy,
+          job_order_id: qualityCheckData.jobOrderId || qualityCheckData.job_order_id,
+          roll_id: qualityCheckData.rollId || qualityCheckData.roll_id,
+          status: qualityCheckData.status || 'pending',
+          notes: qualityCheckData.notes || null
+        };
+      }
+      
+      console.log("Mapped to database format:", dbData);
       
       // Use direct SQL with the pool to execute the query
       const query = `
@@ -1105,14 +1124,14 @@ export class DatabaseStorage implements IStorage {
       `;
       
       const values = [
-        qualityCheckData.check_type_id,
-        qualityCheckData.checked_by,
-        qualityCheckData.job_order_id,
-        qualityCheckData.roll_id,
-        qualityCheckData.status,
-        qualityCheckData.notes,
-        qualityCheckData.checked_at || new Date(),
-        qualityCheckData.created_at || new Date()
+        dbData.check_type_id,
+        dbData.checked_by,
+        dbData.job_order_id,
+        dbData.roll_id,
+        dbData.status,
+        dbData.notes,
+        new Date(),
+        new Date()
       ];
       
       console.log("Executing SQL with values:", values);
