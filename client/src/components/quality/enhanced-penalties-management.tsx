@@ -678,10 +678,10 @@ export function QualityPenaltiesManagement() {
                           <SelectValue placeholder={t("quality.select_type")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Financial">{t("quality.type_financial")}</SelectItem>
-                          <SelectItem value="Warning">{t("quality.type_warning")}</SelectItem>
-                          <SelectItem value="Training">{t("quality.type_training")}</SelectItem>
-                          <SelectItem value="Suspension">{t("quality.type_suspension")}</SelectItem>
+                          <SelectItem value="financial">Financial</SelectItem>
+                          <SelectItem value="warning">Warning</SelectItem>
+                          <SelectItem value="training">Training</SelectItem>
+                          <SelectItem value="suspension">Suspension</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -696,10 +696,10 @@ export function QualityPenaltiesManagement() {
                           <SelectValue placeholder={t("quality.select_status")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Pending">{t("quality.status_pending")}</SelectItem>
-                          <SelectItem value="Active">{t("quality.status_active")}</SelectItem>
-                          <SelectItem value="Completed">{t("quality.status_completed")}</SelectItem>
-                          <SelectItem value="Dismissed">{t("quality.status_dismissed")}</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="dismissed">Dismissed</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -748,16 +748,61 @@ export function QualityPenaltiesManagement() {
                     </Select>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="startDate">Start Date *</Label>
-                    <Input 
-                      id="startDate" 
-                      type="date" 
-                      value={formData.startDate}
-                      onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                      required
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="startDate">Start Date *</Label>
+                      <Input 
+                        id="startDate" 
+                        type="date" 
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="endDate">End Date</Label>
+                      <Input 
+                        id="endDate" 
+                        type="date" 
+                        value={formData.endDate}
+                        onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                      />
+                    </div>
                   </div>
+
+                  {formData.penaltyType === "financial" && (
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="col-span-2">
+                        <Label htmlFor="amount">Penalty Amount *</Label>
+                        <Input 
+                          id="amount" 
+                          type="number" 
+                          value={formData.amount}
+                          onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                          placeholder="0.00"
+                          min="0"
+                          step="0.01"
+                          required={formData.penaltyType === "financial"}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="currency">Currency</Label>
+                        <Select 
+                          value={formData.currency} 
+                          onValueChange={(value) => setFormData({...formData, currency: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="USD">USD</SelectItem>
+                            <SelectItem value="EUR">EUR</SelectItem>
+                            <SelectItem value="GBP">GBP</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
                   
                   <div>
                     <Label htmlFor="description">Description *</Label>
@@ -768,6 +813,17 @@ export function QualityPenaltiesManagement() {
                       placeholder="Describe the penalty details and requirements..."
                       rows={3}
                       required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="comments">Additional Comments</Label>
+                    <Textarea 
+                      id="comments" 
+                      value={formData.comments}
+                      onChange={(e) => setFormData({...formData, comments: e.target.value})}
+                      placeholder="Add any additional notes or comments..."
+                      rows={2}
                     />
                   </div>
                 </div>
@@ -937,10 +993,10 @@ export function QualityPenaltiesManagement() {
                       <SelectValue placeholder={t("quality.select_type")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Financial">{t("quality.type_financial")}</SelectItem>
-                      <SelectItem value="Warning">{t("quality.type_warning")}</SelectItem>
-                      <SelectItem value="Training">{t("quality.type_training")}</SelectItem>
-                      <SelectItem value="Suspension">{t("quality.type_suspension")}</SelectItem>
+                      <SelectItem value="financial">Financial</SelectItem>
+                      <SelectItem value="warning">Warning</SelectItem>
+                      <SelectItem value="training">Training</SelectItem>
+                      <SelectItem value="suspension">Suspension</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
