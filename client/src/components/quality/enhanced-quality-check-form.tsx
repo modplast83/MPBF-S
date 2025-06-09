@@ -40,7 +40,8 @@ import {
   Filter,
   Search,
   Eye,
-  CheckCircle2
+  CheckCircle2,
+  Printer
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth-v2";
@@ -325,6 +326,171 @@ export function QualityChecksManagement() {
     if (currentCheck) {
       deleteMutation.mutate(currentCheck.id);
     }
+  };
+
+  const handlePrintClick = (check: any) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const checkType = checkTypes.find(ct => ct.id === check.checkTypeId);
+    const jobOrder = jobOrders.find(jo => jo.id === check.jobOrderId);
+    const customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
+    const product = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
+    const performer = users.find(u => u.id === check.performedBy);
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Quality Check Report - ${check.id}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 20px; 
+              color: #333;
+              line-height: 1.6;
+            }
+            .header { 
+              text-align: center; 
+              border-bottom: 2px solid #007bff; 
+              padding-bottom: 20px; 
+              margin-bottom: 30px;
+            }
+            .company-name {
+              font-size: 24px;
+              font-weight: bold;
+              color: #007bff;
+              margin-bottom: 5px;
+            }
+            .report-title {
+              font-size: 18px;
+              color: #666;
+            }
+            .section { 
+              margin-bottom: 25px; 
+              padding: 15px;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+            }
+            .section-title { 
+              font-weight: bold; 
+              font-size: 16px;
+              color: #007bff;
+              margin-bottom: 10px;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 5px;
+            }
+            .detail-row { 
+              display: flex; 
+              margin-bottom: 8px; 
+            }
+            .detail-label { 
+              font-weight: bold; 
+              width: 150px; 
+              color: #555;
+            }
+            .detail-value { 
+              flex: 1; 
+            }
+            .status-passed { 
+              color: #28a745; 
+              font-weight: bold; 
+            }
+            .status-failed { 
+              color: #dc3545; 
+              font-weight: bold; 
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              font-size: 12px;
+              color: #666;
+              border-top: 1px solid #ddd;
+              padding-top: 20px;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="company-name">Production Management System</div>
+            <div class="report-title">Quality Check Report</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Check Information</div>
+            <div class="detail-row">
+              <div class="detail-label">Check ID:</div>
+              <div class="detail-value">#${check.id}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Check Type:</div>
+              <div class="detail-value">${checkType?.name || 'Unknown'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Status:</div>
+              <div class="detail-value">
+                <span class="${check.status === 'passed' ? 'status-passed' : 'status-failed'}">
+                  ${check.status === 'passed' ? 'PASSED' : 'FAILED'}
+                </span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Date & Time:</div>
+              <div class="detail-value">${format(new Date(check.timestamp || check.checkDate), 'MMM dd, yyyy - HH:mm')}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Production Details</div>
+            <div class="detail-row">
+              <div class="detail-label">Job Order:</div>
+              <div class="detail-value">${jobOrder ? `JO #${jobOrder.id}` : 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Customer:</div>
+              <div class="detail-value">${customer?.name || 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Product:</div>
+              <div class="detail-value">${product?.name || 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Roll ID:</div>
+              <div class="detail-value">${check.rollId || 'Not specified'}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Quality Control</div>
+            <div class="detail-row">
+              <div class="detail-label">Performed By:</div>
+              <div class="detail-value">${performer ? `${performer.firstName} ${performer.lastName}` : 'Unknown'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Notes:</div>
+              <div class="detail-value">${check.notes || 'No additional notes'}</div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>Generated on ${format(new Date(), 'MMM dd, yyyy - HH:mm')} | Production Management System</p>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            }
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
   };
 
   const handleEditClick = (check: any) => {
@@ -667,13 +833,24 @@ export function QualityChecksManagement() {
                         variant="ghost" 
                         size="icon"
                         onClick={() => handleViewClick(check)}
+                        title="View Details"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="icon"
+                        onClick={() => handlePrintClick(check)}
+                        title="Print Quality Check"
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <Printer className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
                         onClick={() => handleEditClick(check)}
+                        title="Edit"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -681,6 +858,7 @@ export function QualityChecksManagement() {
                         variant="ghost" 
                         size="icon"
                         onClick={() => handleDeleteClick(check)}
+                        title="Delete"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
