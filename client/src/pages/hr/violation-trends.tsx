@@ -246,7 +246,7 @@ export default function ViolationTrendsPage() {
   });
   
   const trend = totalViolations - previousPeriod.length;
-  const trendPercentage = previousPeriod.length > 0 ? ((trend / previousPeriod.length) * 100).toFixed(1) : '0';
+  const trendPercentage = previousPeriod.length > 0 ? ((Math.abs(trend) / previousPeriod.length) * 100).toFixed(1) : '0';
 
   const typeBreakdown = {
     attendance: filteredViolations.filter((v: HrViolation) => v.violationType === 'attendance').length,
@@ -477,14 +477,14 @@ export default function ViolationTrendsPage() {
               </div>
             )}
 
-            {mostCommonType[1] > totalViolations * 0.3 && (
+            {totalViolations > 0 && mostCommonType[1] > totalViolations * 0.3 && (
               <div className="p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
                 <div className="flex items-center gap-2 text-yellow-700 font-medium mb-2">
                   <BarChart3 className="h-4 w-4" />
                   Pattern Detected
                 </div>
                 <p className="text-sm text-yellow-600">
-                  {mostCommonType[0]} violations account for {totalViolations > 0 && mostCommonType[1] > 0 ? ((mostCommonType[1] / totalViolations) * 100).toFixed(0) : '0'}% of all cases. 
+                  {mostCommonType[0]} violations account for {((mostCommonType[1] / totalViolations) * 100).toFixed(0)}% of all cases. 
                   Consider targeted training for this area.
                 </p>
               </div>

@@ -218,11 +218,13 @@ export class BottleneckStorage {
   }
 
   private calculateEstimatedDelay(actualEfficiency: number, targetEfficiency: number): number {
+    if (actualEfficiency <= 0 || targetEfficiency <= 0) return 0;
     const efficiencyRatio = targetEfficiency / actualEfficiency;
     return Math.ceil((efficiencyRatio - 1) * 8); // Estimate delay in hours for an 8-hour shift
   }
 
   private calculateDelayFromRate(actualRate: number, targetRate: number): number {
+    if (actualRate <= 0 || targetRate <= 0) return 0;
     const rateRatio = targetRate / actualRate;
     return Math.ceil((rateRatio - 1) * 4); // Estimate delay in hours
   }
@@ -267,7 +269,8 @@ export class BottleneckStorage {
     const sectionMetrics = metrics.filter(m => m.sectionId === sectionId);
     
     return {
-      averageEfficiency: sectionMetrics.reduce((sum, m) => sum + m.efficiency, 0) / sectionMetrics.length || 0,
+      averageEfficiency: sectionMetrics.length > 0 ? 
+        sectionMetrics.reduce((sum, m) => sum + m.efficiency, 0) / sectionMetrics.length : 0,
       dailyTrends: this.groupMetricsByDay(sectionMetrics),
       alertCount: this.bottleneckAlerts.filter(a => 
         a.sectionId === sectionId && 
@@ -288,9 +291,11 @@ export class BottleneckStorage {
 
     return Object.values(grouped).map((day: any) => ({
       date: day.date,
-      averageEfficiency: day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + m.efficiency, 0) / day.metrics.length,
+      averageEfficiency: day.metrics.length > 0 ? 
+        day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + m.efficiency, 0) / day.metrics.length : 0,
       totalDowntime: day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + (m.downtime || 0), 0),
-      averageRate: day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + m.actualRate, 0) / day.metrics.length
+      averageRate: day.metrics.length > 0 ?
+        day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + m.actualRate, 0) / day.metrics.length : 0
     }));
   }
 }

@@ -121,20 +121,22 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use fixed port allocation with fallback
+  // Use fixed port allocation with proper error handling
   const port = parseInt((process.env.PORT || "5000").toString());
   
-  server.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
-  }).on('error', (err: any) => {
-    if (err.code === 'EADDRINUSE') {
-      console.log(`Port ${port} is busy, trying ${port + 1000}`);
-      const fallbackPort = port + 1000;
-      server.listen(fallbackPort, "0.0.0.0", () => {
-        log(`serving on port ${fallbackPort}`);
-      });
-    } else {
-      throw err;
-    }
-  });
+  const startServer = (portToTry: number) => {
+    server.listen(portToTry, "0.0.0.0", () => {
+      log(`serving on port ${portToTry}`);
+    }).on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`Port ${portToTry} is busy, trying ${portToTry + 1000}`);
+        startServer(portToTry + 1000);
+      } else {
+        console.error('Server error:', err);
+        process.exit(1);
+      }
+    });
+  };
+  
+  startServer(port);
 })();

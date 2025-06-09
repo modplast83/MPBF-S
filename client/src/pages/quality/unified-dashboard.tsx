@@ -409,7 +409,8 @@ export default function UnifiedQualityDashboard() {
                             <div>
                               <div className="font-semibold">Quality Check #{check.id}</div>
                               <div className="text-sm text-muted-foreground">
-                                {check.notes?.substring(0, 60) || t("common.not_available")}...
+                                {check.notes?.substring(0, 60) || t("common.not_available")}
+                                {check.notes && check.notes.length > 60 ? '...' : ''}
                               </div>
                               <div className="flex mt-1">
                                 <QualityBadge variant={check.status === "Passed" ? "success" : "destructive"}>
