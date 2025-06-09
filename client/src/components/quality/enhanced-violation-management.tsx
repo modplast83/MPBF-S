@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/hooks/use-auth-v2";
 import { format } from "date-fns";
 import { 
   Dialog, 
@@ -52,6 +53,7 @@ import { queryClient } from "@/lib/queryClient";
 export function QualityViolations() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterSeverity, setFilterSeverity] = useState("all");
@@ -177,7 +179,7 @@ export function QualityViolations() {
 
   const resetForm = () => {
     setFormData({
-      reportedBy: "",
+      reportedBy: user?.id || "",
       qualityCheckId: null,
       violationType: "material",
       description: "",
@@ -189,6 +191,16 @@ export function QualityViolations() {
     });
     setCurrentViolation(null);
   };
+
+  // Auto-populate reportedBy when component mounts or user changes
+  useEffect(() => {
+    if (user?.id && !formData.reportedBy && !currentViolation) {
+      setFormData(prev => ({
+        ...prev,
+        reportedBy: user.id
+      }));
+    }
+  }, [user?.id, formData.reportedBy, currentViolation]);
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -551,6 +563,71 @@ export function QualityViolations() {
                           ) : (
                             <SelectItem value="no-users">{t("common.loading")}</SelectItem>
                           )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="qualityCheckId">Quality Check (Optional)</Label>
+                      <Select 
+                        value={formData.qualityCheckId?.toString() || ""} 
+                        onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? parseInt(value) : null})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select quality check (optional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No associated check</SelectItem>
+                          {Array.isArray(checks) && checks.length > 0 ? (
+                            checks.map((check: any) => (
+                              <SelectItem key={check.id} value={check.id.toString()}>
+                                Check #{check.id} - {check.checkTypeId}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="no-checks">{t("common.loading")}</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="violationType">Violation Type *</Label>
+                      <Select 
+                        value={formData.violationType} 
+                        onValueChange={(value) => setFormData({...formData, violationType: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="material">Material</SelectItem>
+                          <SelectItem value="process">Process</SelectItem>
+                          <SelectItem value="equipment">Equipment</SelectItem>
+                          <SelectItem value="safety">Safety</SelectItem>
+                          <SelectItem value="environmental">Environmental</SelectItem>
+                          <SelectItem value="documentation">Documentation</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="affectedArea">Affected Area *</Label>
+                      <Select 
+                        value={formData.affectedArea} 
+                        onValueChange={(value) => setFormData({...formData, affectedArea: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="extrusion">Extrusion</SelectItem>
+                          <SelectItem value="printing">Printing</SelectItem>
+                          <SelectItem value="cutting">Cutting</SelectItem>
+                          <SelectItem value="packaging">Packaging</SelectItem>
+                          <SelectItem value="quality_control">Quality Control</SelectItem>
+                          <SelectItem value="storage">Storage</SelectItem>
+                          <SelectItem value="general">General</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

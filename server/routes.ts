@@ -2020,10 +2020,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.body.reportedBy = (req.user as any).id;
       }
       
-      // Validate required fields
-      if (!req.body.qualityCheckId) {
-        return res.status(400).json({ message: "Quality check ID is required" });
-      }
+      // Quality check ID is optional - violations can exist without being tied to a specific check
       if (!req.body.violationType) {
         return res.status(400).json({ message: "Violation type is required" });
       }
