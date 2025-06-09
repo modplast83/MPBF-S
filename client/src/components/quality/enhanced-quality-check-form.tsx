@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
@@ -43,6 +43,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 
 // Badge variants for success/warning states
 const badgeVariants = {
@@ -53,6 +54,7 @@ const badgeVariants = {
 export function QualityChecksManagement() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterResult, setFilterResult] = useState("all");
   const [filterType, setFilterType] = useState("all");
@@ -71,6 +73,16 @@ export function QualityChecksManagement() {
     passed: true,
     notes: ""
   });
+
+  // Auto-set performedBy when user is available
+  useEffect(() => {
+    if (user && !formData.performedBy) {
+      setFormData(prev => ({
+        ...prev,
+        performedBy: user.id
+      }));
+    }
+  }, [user, formData.performedBy]);
 
   // Fetch quality checks
   const { data: checks = [], isLoading: checksLoading, refetch: refetchChecks } = useQuery({
@@ -127,6 +139,30 @@ export function QualityChecksManagement() {
       const response = await fetch("/api/users");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
+      }
+      return response.json();
+    }
+  });
+
+  // Fetch customers for better job order display
+  const { data: customers = [], isLoading: customersLoading } = useQuery({
+    queryKey: ["/api/customers"],
+    queryFn: async () => {
+      const response = await fetch("/api/customers");
+      if (!response.ok) {
+        throw new Error("Failed to fetch customers");
+      }
+      return response.json();
+    }
+  });
+
+  // Fetch customer products for better job order display
+  const { data: customerProducts = [], isLoading: productsLoading } = useQuery({
+    queryKey: ["/api/customer-products"],
+    queryFn: async () => {
+      const response = await fetch("/api/customer-products");
+      if (!response.ok) {
+        throw new Error("Failed to fetch customer products");
       }
       return response.json();
     }
@@ -240,7 +276,7 @@ export function QualityChecksManagement() {
       checkTypeId: "",
       rollId: "none",
       jobOrderId: "none",
-      performedBy: "",
+      performedBy: user?.id || "",
       checkDate: new Date().toISOString().split('T')[0],
       passed: true,
       notes: ""
@@ -251,22 +287,36 @@ export function QualityChecksManagement() {
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Convert passed boolean to status string for the database
+    
+    // Map form data to proper database fields
     const dataToSubmit = {
-      ...formData,
-      status: formData.passed ? 'passed' : 'failed'
+      checkTypeId: formData.checkTypeId,
+      rollId: formData.rollId === "none" ? null : formData.rollId,
+      jobOrderId: formData.jobOrderId === "none" ? null : parseInt(formData.jobOrderId),
+      performedBy: formData.performedBy,
+      status: formData.passed ? 'passed' : 'failed',
+      notes: formData.notes,
+      timestamp: new Date().toISOString()
     };
+    
+    console.log("Submitting quality check data:", dataToSubmit);
     createMutation.mutate(dataToSubmit);
   };
 
   const handleUpdateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (currentCheck) {
-      // Convert passed boolean to status string for the database
+      // Map form data to proper database fields for update
       const dataToSubmit = {
-        ...formData,
-        status: formData.passed ? 'passed' : 'failed'
+        checkTypeId: formData.checkTypeId,
+        rollId: formData.rollId === "none" ? null : formData.rollId,
+        jobOrderId: formData.jobOrderId === "none" ? null : parseInt(formData.jobOrderId),
+        performedBy: formData.performedBy,
+        status: formData.passed ? 'passed' : 'failed',
+        notes: formData.notes
       };
+      
+      console.log("Updating quality check data:", dataToSubmit);
       updateMutation.mutate({ id: currentCheck.id, data: dataToSubmit });
     }
   };
