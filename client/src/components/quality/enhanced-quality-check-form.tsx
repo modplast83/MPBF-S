@@ -347,7 +347,8 @@ export function QualityChecksManagement() {
     const checkType = checkTypes.find(ct => ct.id === check.checkTypeId);
     const jobOrder = jobOrders.find(jo => jo.id === check.jobOrderId);
     const customer = jobOrder ? customers.find(c => c.id === jobOrder.customerId) : null;
-    const product = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
+    const customerProduct = jobOrder ? customerProducts.find(p => p.id === jobOrder.customerProductId) : null;
+    const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
     const performer = users.find(u => u.id === check.performedBy);
 
     const printContent = `
@@ -468,7 +469,7 @@ export function QualityChecksManagement() {
             </div>
             <div class="detail-row">
               <div class="detail-label">Product:</div>
-              <div class="detail-value">${product?.name || 'Not specified'}</div>
+              <div class="detail-value">${item?.name || customerProduct?.sizeCaption || 'Not specified'}</div>
             </div>
             <div class="detail-row">
               <div class="detail-label">Roll ID:</div>
@@ -1009,10 +1010,11 @@ export function QualityChecksManagement() {
                     <SelectItem value="none">{t("common.none")}</SelectItem>
                     {jobOrders.map((jo: any) => {
                       const customer = customers.find(c => c.id === jo.customerId);
-                      const product = customerProducts.find(p => p.id === jo.customerProductId);
+                      const customerProduct = customerProducts.find(p => p.id === jo.customerProductId);
+                      const item = customerProduct ? items.find(i => i.id === customerProduct.itemId) : null;
                       return (
                         <SelectItem key={jo.id} value={jo.id.toString()}>
-                          JO #{jo.id} - {customer?.name || "Unknown Customer"} - {product?.name || "Unknown Item"}
+                          JO #{jo.id} - {customer?.name || "No Customer"} - {item?.name || customerProduct?.sizeCaption || "No Item"}
                         </SelectItem>
                       );
                     })}
