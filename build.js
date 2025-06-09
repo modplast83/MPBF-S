@@ -1,14 +1,24 @@
 #!/usr/bin/env node
 
 import { build } from 'esbuild';
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
+import { execSync } from 'child_process';
 
 async function buildProject() {
   try {
-    // Create dist directory
+    console.log('Starting production build...');
+    
+    // Clean dist directory
+    if (existsSync('dist')) {
+      rmSync('dist', { recursive: true, force: true });
+    }
     mkdirSync('dist', { recursive: true });
 
-    // Build server for production with explicit TypeScript entry
+    // First run vite build for frontend
+    console.log('Building frontend...');
+    execSync('vite build', { stdio: 'inherit' });
+
+    // Build server for production with explicit ES module configuration
     console.log('Building server for production...');
     await build({
       entryPoints: ['server/index.ts'],
@@ -19,6 +29,8 @@ async function buildProject() {
       outfile: 'dist/index.js',
       packages: 'external',
       tsconfig: 'tsconfig.json',
+      mainFields: ['module', 'main'],
+      conditions: ['import'],
       banner: {
         js: `// Production server - ES Module
 import { createRequire } from 'module';
@@ -45,20 +57,57 @@ const __dirname = dirname(__filename);`
         'twilio',
         'bcrypt',
         'uuid',
-        'memorystore'
+        'memorystore',
+        'ws'
       ],
       loader: {
-        '.ts': 'ts'
-      }
+        '.ts': 'ts',
+        '.js': 'js'
+      },
+      resolveExtensions: ['.ts', '.js', '.mjs'],
+      metafile: true
     });
 
     // Create package.json in dist for proper ES module handling
     const distPackageJson = {
-      type: 'module'
+      type: 'module',
+      main: 'index.js',
+      engines: {
+        node: '>=18.0.0'
+      }
     };
     writeFileSync('dist/package.json', JSON.stringify(distPackageJson, null, 2));
 
-    console.log('Server build completed successfully!');
+    // Create a startup script that ensures proper port binding
+    const startupScript = `#!/usr/bin/env node
+// Deployment startup script
+process.env.NODE_ENV = 'production';
+
+// Ensure port is set correctly for deployment
+const port = process.env.PORT || 5000;
+process.env.PORT = port.toString();
+
+console.log('Starting production server...');
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Port:', port);
+
+// Import the main server
+import('./index.js').catch(error => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+});
+`;
+    writeFileSync('dist/start.js', startupScript);
+
+    console.log('Build completed successfully!');
+    console.log('Files created in dist/:');
+    try {
+      execSync('ls -la dist/', { stdio: 'inherit' });
+    } catch (e) {
+      // Fallback for non-unix systems
+      console.log('Dist directory contents created');
+    }
+
   } catch (error) {
     console.error('Build failed:', error);
     process.exit(1);
