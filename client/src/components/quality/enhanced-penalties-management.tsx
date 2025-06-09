@@ -291,8 +291,9 @@ export function QualityPenaltiesManagement() {
     handlePrint(penalty);
   };
 
-  const handlePrint = () => {
-    if (!currentPenalty) return;
+  const handlePrint = (penalty?: any) => {
+    const penaltyToPrint = penalty || currentPenalty;
+    if (!penaltyToPrint) return;
     
     // Create a printable version in a new window
     const printWindow = window.open('', '_blank');
@@ -477,7 +478,6 @@ export function QualityPenaltiesManagement() {
     `);
     
     printWindow.document.close();
-    setShowPrintDialog(false);
   };
 
   // Filter and search functionality
@@ -705,21 +705,21 @@ export function QualityPenaltiesManagement() {
                     </div>
                   </div>
                   
-                  {formData.penaltyType === "Financial" && (
+                  {formData.penaltyType === "financial" && (
                     <div>
-                      <Label htmlFor="penaltyAmount">Penalty Amount *</Label>
+                      <Label htmlFor="amount">Penalty Amount *</Label>
                       <div className="relative">
                         <span className="absolute left-3 top-2">$</span>
                         <Input 
-                          id="penaltyAmount" 
+                          id="amount" 
                           type="number" 
-                          value={formData.penaltyAmount}
-                          onChange={(e) => setFormData({...formData, penaltyAmount: e.target.value})}
+                          value={formData.amount}
+                          onChange={(e) => setFormData({...formData, amount: e.target.value})}
                           className="pl-8"
                           placeholder="0.00"
                           min="0"
                           step="0.01"
-                          required={formData.penaltyType === "Financial"}
+                          required={formData.penaltyType === "financial"}
                         />
                       </div>
                     </div>
@@ -749,12 +749,12 @@ export function QualityPenaltiesManagement() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="assignedDate">Assignment Date *</Label>
+                    <Label htmlFor="startDate">Start Date *</Label>
                     <Input 
-                      id="assignedDate" 
+                      id="startDate" 
                       type="date" 
-                      value={formData.assignedDate}
-                      onChange={(e) => setFormData({...formData, assignedDate: e.target.value})}
+                      value={formData.startDate}
+                      onChange={(e) => setFormData({...formData, startDate: e.target.value})}
                       required
                     />
                   </div>
@@ -775,7 +775,7 @@ export function QualityPenaltiesManagement() {
                   <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createMutation.isPending || !formData.violationId || !formData.assignedTo || (formData.penaltyType === "Financial" && !formData.penaltyAmount) || !formData.description}>
+                  <Button type="submit" disabled={createMutation.isPending || !formData.violationId || !formData.assignedTo || (formData.penaltyType === "financial" && !formData.amount) || !formData.description}>
                     {createMutation.isPending ? "Creating..." : "Create Penalty"}
                   </Button>
                 </DialogFooter>
@@ -955,20 +955,20 @@ export function QualityPenaltiesManagement() {
                 </div>
               </div>
               
-              {formData.penaltyType === "Financial" && (
+              {formData.penaltyType === "financial" && (
                 <div>
-                  <Label htmlFor="penaltyAmount">{t("quality.penalty_amount")} *</Label>
+                  <Label htmlFor="amount">{t("quality.penalty_amount")} *</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-2">$</span>
                     <Input 
-                      id="penaltyAmount" 
+                      id="amount" 
                       type="number" 
-                      value={formData.penaltyAmount}
-                      onChange={(e) => setFormData({...formData, penaltyAmount: e.target.value})}
+                      value={formData.amount}
+                      onChange={(e) => setFormData({...formData, amount: e.target.value})}
                       className="pl-8"
                       min="0"
                       step="0.01"
-                      required={formData.penaltyType === "Financial"}
+                      required={formData.penaltyType === "financial"}
                     />
                   </div>
                 </div>
@@ -994,12 +994,12 @@ export function QualityPenaltiesManagement() {
               </div>
               
               <div>
-                <Label htmlFor="assignedDate">{t("quality.assigned_date")} *</Label>
+                <Label htmlFor="startDate">{t("quality.start_date")} *</Label>
                 <Input 
-                  id="assignedDate" 
+                  id="startDate" 
                   type="date" 
-                  value={formData.assignedDate}
-                  onChange={(e) => setFormData({...formData, assignedDate: e.target.value})}
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
                   required
                 />
               </div>
@@ -1019,7 +1019,7 @@ export function QualityPenaltiesManagement() {
               <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
                 {t("common.cancel")}
               </Button>
-              <Button type="submit" disabled={updateMutation.isPending || !formData.violationId || !formData.assignedTo || (formData.penaltyType === "Financial" && !formData.penaltyAmount) || !formData.description}>
+              <Button type="submit" disabled={updateMutation.isPending || !formData.violationId || !formData.assignedTo || (formData.penaltyType === "financial" && !formData.amount) || !formData.description}>
                 {updateMutation.isPending ? t("common.updating") : t("common.update")}
               </Button>
             </DialogFooter>
@@ -1057,21 +1057,64 @@ export function QualityPenaltiesManagement() {
         </DialogContent>
       </Dialog>
       
-      {/* Print Preview Dialog */}
-      <Dialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+      {/* View Penalty Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>{t("quality.print_penalty")}</DialogTitle>
-            <DialogDescription>{t("quality.print_penalty_description")}</DialogDescription>
+            <DialogTitle>{t("quality.view_penalty")}</DialogTitle>
+            <DialogDescription>{t("quality.penalty_details")}</DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <p>{t("quality.print_confirmation")}</p>
-          </div>
+          {currentPenalty && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Violation ID</Label>
+                  <p className="text-sm">{currentPenalty.violationId || "N/A"}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Penalty Type</Label>
+                  <p className="text-sm">{currentPenalty.penaltyType || "N/A"}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Amount</Label>
+                  <p className="text-sm">{currentPenalty.amount ? `$${currentPenalty.amount}` : "N/A"}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Currency</Label>
+                  <p className="text-sm">{currentPenalty.currency || "N/A"}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Assigned To</Label>
+                  <p className="text-sm">{currentPenalty.assignedTo || "N/A"}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Status</Label>
+                  <p className="text-sm">{currentPenalty.status || "N/A"}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">Start Date</Label>
+                  <p className="text-sm">{currentPenalty.startDate ? new Date(currentPenalty.startDate).toLocaleDateString() : "N/A"}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">End Date</Label>
+                  <p className="text-sm">{currentPenalty.endDate ? new Date(currentPenalty.endDate).toLocaleDateString() : "N/A"}</p>
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">Description</Label>
+                <p className="text-sm mt-1">{currentPenalty.description || "N/A"}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">Comments</Label>
+                <p className="text-sm mt-1">{currentPenalty.comments || "N/A"}</p>
+              </div>
+            </div>
+          )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPrintDialog(false)}>
-              {t("common.cancel")}
+            <Button variant="outline" onClick={() => setShowViewDialog(false)}>
+              {t("common.close")}
             </Button>
-            <Button onClick={handlePrint}>
+            <Button onClick={() => handlePrint(currentPenalty)}>
               <Printer className="mr-2 h-4 w-4" />
               {t("common.print")}
             </Button>
