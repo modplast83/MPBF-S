@@ -389,9 +389,9 @@ export function QualityViolationsManagement() {
     // Filter by search term
     if (filters.searchTerm) {
       const searchLower = filters.searchTerm.toLowerCase();
-      const descMatch = violation.description.toLowerCase().includes(searchLower);
+      const descMatch = violation.description?.toLowerCase().includes(searchLower) || false;
       const notesMatch = violation.notes?.toLowerCase().includes(searchLower) || false;
-      const areaMatch = violation.affectedArea.toLowerCase().includes(searchLower);
+      const areaMatch = violation.affectedArea?.toLowerCase().includes(searchLower) || false;
       
       if (!descMatch && !notesMatch && !areaMatch) {
         match = false;
