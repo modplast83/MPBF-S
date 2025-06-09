@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/hooks/use-auth-v2";
 import { format } from "date-fns";
 import { 
   Dialog, 
@@ -41,29 +42,34 @@ import {
   Filter,
   Search,
   Printer,
-  DollarSign
+  DollarSign,
+  Eye
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 
 export function QualityPenaltiesManagement() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterType, setFilterType] = useState("all");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
   const [currentPenalty, setCurrentPenalty] = useState<any>(null);
   const [formData, setFormData] = useState({
     violationId: "",
-    penaltyType: "Financial",
-    penaltyAmount: "",
+    penaltyType: "warning",
+    description: "",
+    amount: "",
+    currency: "USD",
     assignedTo: "",
-    assignedDate: new Date().toISOString().split('T')[0],
-    status: "Pending",
-    description: ""
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: "",
+    status: "pending",
+    comments: ""
   });
 
   // Fetch penalties
@@ -91,10 +97,10 @@ export function QualityPenaltiesManagement() {
   });
 
   // Fetch users for user selection
-  const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/user"],
+  const { data: users = [], isLoading: usersLoading } = useQuery<any[]>({
+    queryKey: ["/api/users"],
     queryFn: async () => {
-      const response = await fetch("/api/user");
+      const response = await fetch("/api/users");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
@@ -210,22 +216,26 @@ export function QualityPenaltiesManagement() {
   const resetForm = () => {
     setFormData({
       violationId: "",
-      penaltyType: "Financial",
-      penaltyAmount: "",
+      penaltyType: "warning",
+      description: "",
+      amount: "",
+      currency: "USD",
       assignedTo: "",
-      assignedDate: new Date().toISOString().split('T')[0],
-      status: "Pending",
-      description: ""
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: "",
+      status: "pending",
+      comments: ""
     });
     setCurrentPenalty(null);
   };
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Convert penaltyAmount to number if it's a financial penalty
+    // Convert amount to number if it's a financial penalty
     const processedData = {
       ...formData,
-      penaltyAmount: formData.penaltyType === "Financial" ? parseFloat(formData.penaltyAmount as string) : null
+      amount: formData.penaltyType === "financial" ? parseFloat(formData.amount) : null,
+      violationId: parseInt(formData.violationId)
     };
     createMutation.mutate(processedData);
   };
@@ -233,10 +243,11 @@ export function QualityPenaltiesManagement() {
   const handleUpdateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (currentPenalty) {
-      // Convert penaltyAmount to number if it's a financial penalty
+      // Convert amount to number if it's a financial penalty
       const processedData = {
         ...formData,
-        penaltyAmount: formData.penaltyType === "Financial" ? parseFloat(formData.penaltyAmount as string) : null
+        amount: formData.penaltyType === "financial" ? parseFloat(formData.amount) : null,
+        violationId: parseInt(formData.violationId)
       };
       updateMutation.mutate({ id: currentPenalty.id, data: processedData });
     }
@@ -252,12 +263,15 @@ export function QualityPenaltiesManagement() {
     setCurrentPenalty(penalty);
     setFormData({
       violationId: penalty.violationId ? String(penalty.violationId) : "",
-      penaltyType: penalty.penaltyType || "Financial",
-      penaltyAmount: penalty.penaltyAmount !== null ? String(penalty.penaltyAmount) : "",
+      penaltyType: penalty.penaltyType || "warning",
+      description: penalty.description || "",
+      amount: penalty.amount !== null ? String(penalty.amount) : "",
+      currency: penalty.currency || "USD",
       assignedTo: penalty.assignedTo || "",
-      assignedDate: penalty.assignedDate ? new Date(penalty.assignedDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      status: penalty.status || "Pending",
-      description: penalty.description || ""
+      startDate: penalty.startDate ? new Date(penalty.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      endDate: penalty.endDate ? new Date(penalty.endDate).toISOString().split('T')[0] : "",
+      status: penalty.status || "pending",
+      comments: penalty.comments || ""
     });
     setShowEditDialog(true);
   };
@@ -267,9 +281,14 @@ export function QualityPenaltiesManagement() {
     setShowDeleteDialog(true);
   };
 
+  const handleViewClick = (penalty: any) => {
+    setCurrentPenalty(penalty);
+    setShowViewDialog(true);
+  };
+
   const handlePrintClick = (penalty: any) => {
     setCurrentPenalty(penalty);
-    setShowPrintDialog(true);
+    handlePrint(penalty);
   };
 
   const handlePrint = () => {
