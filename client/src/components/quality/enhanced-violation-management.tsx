@@ -44,7 +44,8 @@ import {
   FileText, 
   Search,
   Filter,
-  Printer
+  Printer,
+  Eye
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 
@@ -57,6 +58,7 @@ export function QualityViolations() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
   const [currentViolation, setCurrentViolation] = useState<any>(null);
   const [formData, setFormData] = useState({
     reportedBy: "",
@@ -76,12 +78,12 @@ export function QualityViolations() {
   });
 
   // Fetch quality checks
-  const { data: checks = [], isLoading: checksLoading } = useQuery({
+  const { data: checks = [], isLoading: checksLoading } = useQuery<any[]>({
     queryKey: ["/api/quality-checks"]
   });
 
   // Fetch users
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { data: users = [], isLoading: usersLoading } = useQuery<any[]>({
     queryKey: ["/api/users"]
   });
 
@@ -225,6 +227,201 @@ export function QualityViolations() {
   const handleDeleteClick = (violation: any) => {
     setCurrentViolation(violation);
     setShowDeleteDialog(true);
+  };
+
+  const handleViewClick = (violation: any) => {
+    setCurrentViolation(violation);
+    setShowViewDialog(true);
+  };
+
+  const handlePrintClick = (violation: any) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const reporter = users.find((u: any) => u.id === violation.reportedBy);
+    const qualityCheck = checks.find((c: any) => c.id === violation.qualityCheckId);
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Quality Violation Report - ${violation.id}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 20px; 
+              color: #333;
+              line-height: 1.6;
+            }
+            .header { 
+              text-align: center; 
+              border-bottom: 2px solid #dc3545; 
+              padding-bottom: 20px; 
+              margin-bottom: 30px;
+            }
+            .company-name {
+              font-size: 24px;
+              font-weight: bold;
+              color: #dc3545;
+              margin-bottom: 5px;
+            }
+            .report-title {
+              font-size: 18px;
+              color: #666;
+            }
+            .section { 
+              margin-bottom: 25px; 
+              padding: 15px;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+            }
+            .section-title { 
+              font-weight: bold; 
+              font-size: 16px;
+              color: #dc3545;
+              margin-bottom: 10px;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 5px;
+            }
+            .detail-row { 
+              display: flex; 
+              margin-bottom: 8px; 
+            }
+            .detail-label { 
+              font-weight: bold; 
+              width: 150px; 
+              color: #555;
+            }
+            .detail-value { 
+              flex: 1; 
+            }
+            .severity-high { 
+              color: #dc3545; 
+              font-weight: bold; 
+            }
+            .severity-medium { 
+              color: #ffc107; 
+              font-weight: bold; 
+            }
+            .severity-low { 
+              color: #17a2b8; 
+              font-weight: bold; 
+            }
+            .status-open { 
+              color: #dc3545; 
+              font-weight: bold; 
+            }
+            .status-progress { 
+              color: #ffc107; 
+              font-weight: bold; 
+            }
+            .status-resolved { 
+              color: #28a745; 
+              font-weight: bold; 
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              font-size: 12px;
+              color: #666;
+              border-top: 1px solid #ddd;
+              padding-top: 20px;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="company-name">Production Management System</div>
+            <div class="report-title">Quality Violation Report</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Violation Information</div>
+            <div class="detail-row">
+              <div class="detail-label">Violation ID:</div>
+              <div class="detail-value">#${violation.id}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Type:</div>
+              <div class="detail-value">${violation.violationType || 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Severity:</div>
+              <div class="detail-value">
+                <span class="severity-${violation.severity?.toLowerCase()}">
+                  ${violation.severity?.toUpperCase() || 'UNKNOWN'}
+                </span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Status:</div>
+              <div class="detail-value">
+                <span class="status-${violation.status?.toLowerCase().replace(' ', '-')}">
+                  ${violation.status?.toUpperCase() || 'UNKNOWN'}
+                </span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Report Date:</div>
+              <div class="detail-value">${violation.reportDate ? format(new Date(violation.reportDate), 'MMM dd, yyyy - HH:mm') : 'Not specified'}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Details</div>
+            <div class="detail-row">
+              <div class="detail-label">Reported By:</div>
+              <div class="detail-value">${reporter ? `${reporter.firstName} ${reporter.lastName}` : 'Unknown'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Quality Check:</div>
+              <div class="detail-value">${qualityCheck ? `Check #${qualityCheck.id}` : 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Affected Area:</div>
+              <div class="detail-value">${violation.affectedArea || 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Description:</div>
+              <div class="detail-value">${violation.description || 'No description provided'}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Resolution Information</div>
+            <div class="detail-row">
+              <div class="detail-label">Root Cause:</div>
+              <div class="detail-value">${violation.rootCause || 'Not identified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Resolution Date:</div>
+              <div class="detail-value">${violation.resolutionDate ? format(new Date(violation.resolutionDate), 'MMM dd, yyyy - HH:mm') : 'Not resolved'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Notes:</div>
+              <div class="detail-value">${violation.notes || 'No additional notes'}</div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>Generated on ${format(new Date(), 'MMM dd, yyyy - HH:mm')} | Production Management System</p>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            }
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
   };
 
   // Filter and search functionality
@@ -488,6 +685,24 @@ export function QualityViolations() {
                             variant="outline" 
                             size="sm"
                             className="h-8 w-8 p-0"
+                            onClick={() => handleViewClick(violation)}
+                            title={t("common.view")}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handlePrintClick(violation)}
+                            title={t("common.print")}
+                          >
+                            <Printer className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="h-8 w-8 p-0"
                             onClick={() => handleEditClick(violation)}
                             title={t("common.edit")}
                           >
@@ -545,6 +760,323 @@ export function QualityViolations() {
               {deleteMutation.isPending ? t("common.deleting") : t("common.delete")}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="max-w-[95vw] sm:max-w-[600px] p-4 sm:p-6">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-lg">Quality Violation Details - #{currentViolation?.id}</DialogTitle>
+          </DialogHeader>
+          {currentViolation && (
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Violation ID</Label>
+                  <p className="text-sm font-medium">#{currentViolation.id}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Report Date</Label>
+                  <p className="text-sm">
+                    {currentViolation.reportDate 
+                      ? format(new Date(currentViolation.reportDate), 'MMM dd, yyyy - HH:mm') 
+                      : 'Not specified'}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Reported By</Label>
+                  <p className="text-sm">
+                    {(() => {
+                      const reporter = users.find((u: any) => u.id === currentViolation.reportedBy);
+                      return reporter ? `${reporter.firstName} ${reporter.lastName}` : 'Unknown';
+                    })()}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Quality Check</Label>
+                  <p className="text-sm">
+                    {(() => {
+                      const qualityCheck = checks.find((c: any) => c.id === currentViolation.qualityCheckId);
+                      return qualityCheck ? `Check #${qualityCheck.id}` : 'Not specified';
+                    })()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status and Severity */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Type</Label>
+                  <p className="text-sm font-medium">{currentViolation.violationType || 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Severity</Label>
+                  <div className="mt-1">{getSeverityBadge(currentViolation.severity)}</div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+                  <div className="mt-1">{getStatusBadge(currentViolation.status)}</div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">Description</Label>
+                <div className="mt-1 p-3 bg-muted rounded-md">
+                  <p className="text-sm leading-relaxed">
+                    {currentViolation.description || 'No description provided'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Additional Details */}
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Affected Area</Label>
+                  <p className="text-sm">{currentViolation.affectedArea || 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Root Cause</Label>
+                  <p className="text-sm">{currentViolation.rootCause || 'Not identified'}</p>
+                </div>
+              </div>
+
+              {/* Resolution Information */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-sm mb-3">Resolution Information</h4>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Resolution Date</Label>
+                    <p className="text-sm">
+                      {currentViolation.resolutionDate 
+                        ? format(new Date(currentViolation.resolutionDate), 'MMM dd, yyyy - HH:mm')
+                        : 'Not resolved'}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Notes</Label>
+                    <div className="mt-1 p-3 bg-muted rounded-md">
+                      <p className="text-sm leading-relaxed">
+                        {currentViolation.notes || 'No additional notes'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="mt-6">
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                className="flex-1 sm:flex-none"
+                onClick={() => handlePrintClick(currentViolation)}
+              >
+                <Printer className="h-4 w-4 mr-2" />
+                Print
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex-1 sm:flex-none"
+                onClick={() => setShowViewDialog(false)}
+              >
+                Close
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-[95vw] sm:max-w-[500px] p-4 sm:p-6">
+          <DialogHeader className="mb-2">
+            <DialogTitle className="text-lg">Edit Quality Violation - #{currentViolation?.id}</DialogTitle>
+            <DialogDescription className="text-sm">Update the violation details and status</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateSubmit}>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="edit-reportedBy">{t("quality.reported_by")} *</Label>
+                  <Select 
+                    value={formData.reportedBy} 
+                    onValueChange={(value) => setFormData({...formData, reportedBy: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("quality.select_reporter")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray(users) && users.length > 0 ? (
+                        users.map((user: any) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.firstName || ''} {user.lastName || ''}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-users">{t("common.loading")}</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-qualityCheckId">Quality Check</Label>
+                  <Select 
+                    value={formData.qualityCheckId?.toString() || ""} 
+                    onValueChange={(value) => setFormData({...formData, qualityCheckId: value ? parseInt(value) : null})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select quality check (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No associated check</SelectItem>
+                      {Array.isArray(checks) && checks.length > 0 ? (
+                        checks.map((check: any) => (
+                          <SelectItem key={check.id} value={check.id.toString()}>
+                            Check #{check.id} - {check.checkTypeId}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-checks">{t("common.loading")}</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="edit-violationType">Violation Type *</Label>
+                  <Select 
+                    value={formData.violationType} 
+                    onValueChange={(value) => setFormData({...formData, violationType: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="material">Material</SelectItem>
+                      <SelectItem value="process">Process</SelectItem>
+                      <SelectItem value="equipment">Equipment</SelectItem>
+                      <SelectItem value="safety">Safety</SelectItem>
+                      <SelectItem value="environmental">Environmental</SelectItem>
+                      <SelectItem value="documentation">Documentation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="edit-description">Description *</Label>
+                  <Textarea 
+                    id="edit-description" 
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    rows={3}
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-severity">{t("quality.severity")} *</Label>
+                    <Select 
+                      value={formData.severity} 
+                      onValueChange={(value) => setFormData({...formData, severity: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-status">{t("common.status")} *</Label>
+                    <Select 
+                      value={formData.status} 
+                      onValueChange={(value) => setFormData({...formData, status: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Open">Open</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Resolved">Resolved</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-affectedArea">Affected Area *</Label>
+                  <Select 
+                    value={formData.affectedArea} 
+                    onValueChange={(value) => setFormData({...formData, affectedArea: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="extrusion">Extrusion</SelectItem>
+                      <SelectItem value="printing">Printing</SelectItem>
+                      <SelectItem value="cutting">Cutting</SelectItem>
+                      <SelectItem value="packaging">Packaging</SelectItem>
+                      <SelectItem value="quality_control">Quality Control</SelectItem>
+                      <SelectItem value="storage">Storage</SelectItem>
+                      <SelectItem value="general">General</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {formData.status === "Resolved" && (
+                  <>
+                    <div>
+                      <Label htmlFor="edit-resolvedDate">Resolution Date</Label>
+                      <Input
+                        id="edit-resolvedDate"
+                        type="datetime-local"
+                        value={formData.resolvedDate}
+                        onChange={(e) => setFormData({...formData, resolvedDate: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-resolutionNotes">Resolution Notes</Label>
+                      <Textarea 
+                        id="edit-resolutionNotes" 
+                        value={formData.resolutionNotes}
+                        onChange={(e) => setFormData({...formData, resolutionNotes: e.target.value})}
+                        rows={2}
+                        placeholder="Describe how the violation was resolved..."
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full sm:w-auto"
+                onClick={() => setShowEditDialog(false)}
+              >
+                {t("common.cancel")}
+              </Button>
+              <Button 
+                type="submit" 
+                className="w-full sm:w-auto"
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending ? t("common.updating") : t("common.update")}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
