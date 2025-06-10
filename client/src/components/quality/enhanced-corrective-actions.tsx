@@ -385,6 +385,7 @@ export function QualityCorrectiveActions() {
     }
     const user = users.find((user: any) => user.id === id);
     if (user) {
+      // Prioritize firstName, fallback to username if no firstName
       return user.firstName || user.username || `User ${user.id}`;
     }
     return id || "Unknown";
@@ -650,7 +651,7 @@ export function QualityCorrectiveActions() {
                         </div>
                         
                         <div>
-                          <Label htmlFor="verifiedDate">{t("quality.verification_date")} *</Label>
+                          <Label htmlFor="verifiedDate">Verification Date *</Label>
                           <Input 
                             id="verifiedDate" 
                             type="date" 
@@ -661,7 +662,7 @@ export function QualityCorrectiveActions() {
                         </div>
                         
                         <div>
-                          <Label htmlFor="verificationNotes">{t("quality.verification_notes")}</Label>
+                          <Label htmlFor="verificationNotes">Notes</Label>
                           <Textarea 
                             id="verificationNotes" 
                             value={formData.verificationNotes}
@@ -675,10 +676,10 @@ export function QualityCorrectiveActions() {
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
-                    {t("common.cancel")}
+                    Cancel
                   </Button>
                   <Button type="submit" disabled={createMutation.isPending || !formData.qualityCheckId || !formData.action || !formData.implementedBy || !formData.implementationDate || (!!formData.verifiedDate && !formData.verifiedBy)}>
-                    {createMutation.isPending ? t("common.saving") : t("common.save")}
+                    {createMutation.isPending ? "Saving..." : "Save"}
                   </Button>
                 </DialogFooter>
               </form>
