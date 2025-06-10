@@ -218,11 +218,12 @@ export default function OrdersIndex() {
 
   // Selection helper functions
   const handleSelectOrder = (orderId: number) => {
-    setSelectedOrders(prev => 
-      prev.includes(orderId) 
+    setSelectedOrders(prev => {
+      const isSelected = prev.includes(orderId);
+      return isSelected 
         ? prev.filter(id => id !== orderId)
-        : [...prev, orderId]
-    );
+        : [...prev, orderId];
+    });
   };
 
   const handleSelectAll = () => {
@@ -276,7 +277,11 @@ export default function OrdersIndex() {
           <input
             type="checkbox"
             checked={selectedOrders.includes(row.id)}
-            onChange={() => handleSelectOrder(row.id)}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleSelectOrder(row.id);
+            }}
+            onClick={(e) => e.stopPropagation()}
             className="rounded border-gray-300"
           />
         </div>
@@ -439,7 +444,11 @@ export default function OrdersIndex() {
                 <input
                   type="checkbox"
                   checked={selectedOrders.includes(order.id)}
-                  onChange={() => handleSelectOrder(order.id)}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    handleSelectOrder(order.id);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
                   className="rounded border-gray-300 w-4 h-4"
                 />
               </div>
