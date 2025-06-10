@@ -207,8 +207,8 @@ export default function Products() {
     doc.save(`${customerName}_Products_${currentDate.replace(/\//g, '-')}.pdf`);
     
     toast({
-      title: "PDF Generated",
-      description: `Products list for ${customerName} has been downloaded.`,
+      title: t("setup.products.pdf_generated"),
+      description: t("setup.products.pdf_generated_desc", { customer: customerName }),
     });
   };
 
