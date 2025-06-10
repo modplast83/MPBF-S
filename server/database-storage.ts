@@ -114,7 +114,7 @@ import {
   smsNotificationRules,
   type SmsNotificationRule,
   type InsertSmsNotificationRule
-} from "@shared/schema";
+} from "../shared/schema";
 import { db, pool } from "./db";
 import { IStorage } from "./storage";
 import connectPg from "connect-pg-simple";

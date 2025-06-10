@@ -429,7 +429,7 @@ export default function OrdersIndex() {
     
     return (
       <div className="space-y-3">
-        {filteredOrders.map((order) => (
+        {filteredOrders?.map((order) => (
           <Card key={order.id} className="overflow-hidden hover:shadow-md transition-all border-l-4 border-l-primary-500">
             <div className="relative">
               <div 

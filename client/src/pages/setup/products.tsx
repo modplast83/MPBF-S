@@ -151,7 +151,7 @@ export default function Products() {
     doc.text(`${t("setup.products.total_products")}: ${products.length}`, 20, 55);
     
     // Prepare table data
-    const tableData = products.map((product, index) => [
+    const tableData = products?.map((product, index) => [
       index + 1,
       product.id.toString(),
       getCategoryName(product.categoryId),
