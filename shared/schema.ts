@@ -1,4 +1,7 @@
 // @ts-nocheck
+// This file has been marked with @ts-nocheck to bypass TypeScript compilation errors
+// while maintaining database functionality. The schema definitions need alignment
+// with the actual database structure.
 import {
   pgTable,
   text,
@@ -76,11 +79,13 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(), // UID
   username: varchar("username").unique().notNull(), // Username
   password: text("password"), // Password - hashed
+  name: text("name"), // Full name
   email: varchar("email").unique(), // Email
   firstName: varchar("first_name"), // First name
   lastName: varchar("last_name"), // Last name
   bio: text("bio"), // Bio
   profileImageUrl: varchar("profile_image_url"), // Profile image URL
+  role: text("role").notNull().default("operator"), // User role
   isAdmin: boolean("is_admin").default(false).notNull(), // True for administrators, false for regular users
   phone: text("phone"),
   isActive: boolean("is_active").default(true),

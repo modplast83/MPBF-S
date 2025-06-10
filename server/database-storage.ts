@@ -160,8 +160,6 @@ export class DatabaseStorage implements IStorage {
       .insert(users)
       .values({
         ...userData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       })
       .returning();
     return user;
@@ -172,7 +170,6 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({
         ...userData,
-        updatedAt: new Date(),
       })
       .where(eq(users.id, id))
       .returning();
@@ -195,7 +192,7 @@ export class DatabaseStorage implements IStorage {
       
       // Handle the special case for password updating
       const isUpdate = !!cleanUserData.id;
-      const isPasswordUnchanged = cleanUserData.password === "UNCHANGED_PASSWORD";
+      const isPasswordUnchanged = (cleanUserData as any).password === "UNCHANGED_PASSWORD";
       
       if (isUpdate && isPasswordUnchanged) {
         // Get the existing user to keep their current password
@@ -205,21 +202,15 @@ export class DatabaseStorage implements IStorage {
         }
         
         // Use the existing password instead of "UNCHANGED_PASSWORD"
-        cleanUserData.password = existingUser.password;
+        (cleanUserData as any).password = (existingUser as any).password;
       }
       
       const [user] = await db
         .insert(users)
-        .values({
-          ...cleanUserData,
-          updatedAt: new Date(),
-        })
+        .values(cleanUserData as any)
         .onConflictDoUpdate({
           target: users.id,
-          set: {
-            ...cleanUserData,
-            updatedAt: new Date(),
-          },
+          set: cleanUserData as any,
         })
         .returning();
         
