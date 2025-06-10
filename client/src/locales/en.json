@@ -129,6 +129,7 @@
       "products": {
         "title": "Customer Products",
         "description": "Manage customer products and their specifications",
+        "customer_products": "Customer Products",
         "add_new": "Add New Product",
         "edit_product": "Edit Product",
         "duplicate_product": "Duplicate Product",
