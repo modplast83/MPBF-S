@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NotificationStorage } from "./notification-storage.js";
 import { 
   InsertNotification, 

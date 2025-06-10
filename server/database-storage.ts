@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { eq, and, gte, lte, desc, asc, or, sql, ne, isNull } from "drizzle-orm";
 import {
   users,

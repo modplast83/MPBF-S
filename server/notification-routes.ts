@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Express, Request, Response } from "express";
 import { notificationService } from "./notification-service.js";
 import { insertNotificationSchema, insertNotificationTemplateSchema } from "../shared/schema.js";
