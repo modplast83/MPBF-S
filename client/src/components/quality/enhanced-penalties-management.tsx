@@ -519,25 +519,25 @@ export function QualityPenaltiesManagement() {
     switch (type) {
       case "Financial":
         return (
-          <Badge className="bg-amber-500 hover:bg-amber-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg animate-pulse hover:animate-none cursor-pointer">
+          <Badge className="bg-amber-500 hover:bg-amber-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg animate-pulse hover:animate-none cursor-pointer text-center pl-[15px] pr-[15px] ml-[3px] mr-[3px]">
             {type}
           </Badge>
         );
       case "Warning":
         return (
-          <Badge className="bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg animate-bounce hover:animate-none cursor-pointer">
+          <Badge className="bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg animate-bounce hover:animate-none cursor-pointer text-center pl-[15px] pr-[15px] ml-[3px] mr-[3px]">
             {type}
           </Badge>
         );
       case "Training":
         return (
-          <Badge className="bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:animate-pulse cursor-pointer">
+          <Badge className="bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:animate-pulse cursor-pointer text-center pl-[15px] pr-[15px] ml-[3px] mr-[3px]">
             {type}
           </Badge>
         );
       case "Suspension":
         return (
-          <Badge className="bg-red-600 hover:bg-red-700 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg animate-pulse hover:animate-bounce cursor-pointer">
+          <Badge className="bg-red-600 hover:bg-red-700 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg animate-pulse hover:animate-bounce cursor-pointer text-center pl-[15px] pr-[15px] ml-[3px] mr-[3px]">
             {type}
           </Badge>
         );
@@ -554,19 +554,19 @@ export function QualityPenaltiesManagement() {
     switch (status) {
       case "Pending":
         return (
-          <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white transition-all duration-500 hover:scale-105 hover:shadow-lg animate-pulse hover:animate-spin cursor-pointer">
+          <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white transition-all duration-500 hover:scale-105 hover:shadow-lg animate-pulse hover:animate-spin cursor-pointer text-center pl-[15px] pr-[15px] ml-[3px] mr-[3px]">
             {status}
           </Badge>
         );
       case "Active":
         return (
-          <Badge className="bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg animate-bounce hover:animate-pulse cursor-pointer">
+          <Badge className="bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg animate-bounce hover:animate-pulse cursor-pointer text-center pl-[15px] pr-[15px] ml-[3px] mr-[3px]">
             {status}
           </Badge>
         );
       case "Completed":
         return (
-          <Badge className="bg-green-500 hover:bg-green-600 text-white transition-all duration-400 hover:scale-105 hover:shadow-lg hover:animate-bounce cursor-pointer">
+          <Badge className="bg-green-500 hover:bg-green-600 text-white transition-all duration-400 hover:scale-105 hover:shadow-lg hover:animate-bounce cursor-pointer text-center pl-[15px] pr-[15px] ml-[3px] mr-[3px]">
             {status}
           </Badge>
         );
@@ -907,7 +907,7 @@ export function QualityPenaltiesManagement() {
                     <TableCell>
                       {getUserById(penalty.assignedTo)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center pl-[23px] pr-[23px] ml-[0px] mr-[0px]">
                       {getStatusBadge(penalty.status)}
                     </TableCell>
                     <TableCell className="max-w-[200px]">

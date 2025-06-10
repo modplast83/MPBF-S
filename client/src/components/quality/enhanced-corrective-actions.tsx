@@ -707,7 +707,7 @@ export function QualityCorrectiveActions() {
                 <TableHead>Action Description</TableHead>
                 <TableHead>Implementation Details</TableHead>
                 <TableHead>Verification Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -752,7 +752,7 @@ export function QualityCorrectiveActions() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-center">
                       <div className="flex justify-end gap-2">
                         <Button 
                           variant="outline" 
