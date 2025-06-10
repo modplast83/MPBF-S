@@ -789,24 +789,24 @@ export function QualityCorrectiveActions() {
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>{t("quality.edit_corrective_action")}</DialogTitle>
-            <DialogDescription>{t("quality.edit_corrective_action_description")}</DialogDescription>
+            <DialogTitle>Edit Corrective Action</DialogTitle>
+            <DialogDescription>Update the corrective action details and verification status</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleUpdateSubmit}>
             <div className="space-y-4 py-4">
               <div>
-                <Label htmlFor="qualityCheckId">{t("quality.related_check")} *</Label>
+                <Label htmlFor="qualityCheckId">Related Quality Check *</Label>
                 <Select 
                   value={formData.qualityCheckId} 
                   onValueChange={(value) => setFormData({...formData, qualityCheckId: value})}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("quality.select_check")} />
+                    <SelectValue placeholder="Select a quality check" />
                   </SelectTrigger>
                   <SelectContent>
                     {checks.map((check: any) => (
                       <SelectItem key={check.id} value={String(check.id)}>
-                        {t("quality.check")} #{check.id} - {new Date(check.timestamp).toLocaleDateString()}
+                        Check #{check.id} - {new Date(check.timestamp).toLocaleDateString()}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -814,7 +814,7 @@ export function QualityCorrectiveActions() {
               </div>
               
               <div>
-                <Label htmlFor="action">{t("quality.action_description")} *</Label>
+                <Label htmlFor="action">Action Description *</Label>
                 <Textarea 
                   id="action" 
                   value={formData.action}
@@ -825,13 +825,13 @@ export function QualityCorrectiveActions() {
               </div>
               
               <div>
-                <Label htmlFor="implementedBy">{t("quality.implemented_by")} *</Label>
+                <Label htmlFor="implementedBy">Implemented By *</Label>
                 <Select 
                   value={formData.implementedBy} 
                   onValueChange={(value) => setFormData({...formData, implementedBy: value})}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("quality.select_user")} />
+                    <SelectValue placeholder="Select a user" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.isArray(users) ? users.map((user: any) => (
@@ -844,7 +844,7 @@ export function QualityCorrectiveActions() {
               </div>
               
               <div>
-                <Label htmlFor="implementationDate">{t("quality.implementation_date")} *</Label>
+                <Label htmlFor="implementationDate">Implementation Date *</Label>
                 <Input 
                   id="implementationDate" 
                   type="date" 
@@ -883,13 +883,13 @@ export function QualityCorrectiveActions() {
                 {formData.verifiedDate && (
                   <>
                     <div>
-                      <Label htmlFor="verifiedBy">{t("quality.verified_by")} *</Label>
+                      <Label htmlFor="verifiedBy">Verified By *</Label>
                       <Select 
                         value={formData.verifiedBy} 
                         onValueChange={(value) => setFormData({...formData, verifiedBy: value})}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={t("quality.select_user")} />
+                          <SelectValue placeholder="Select a user" />
                         </SelectTrigger>
                         <SelectContent>
                           {Array.isArray(users) ? users.map((user: any) => (
@@ -902,7 +902,7 @@ export function QualityCorrectiveActions() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="verifiedDate">{t("quality.verification_date")} *</Label>
+                      <Label htmlFor="verifiedDate">Verification Date *</Label>
                       <Input 
                         id="verifiedDate" 
                         type="date" 
@@ -913,7 +913,7 @@ export function QualityCorrectiveActions() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="verificationNotes">{t("quality.verification_notes")}</Label>
+                      <Label htmlFor="verificationNotes">Verification Notes</Label>
                       <Textarea 
                         id="verificationNotes" 
                         value={formData.verificationNotes}
@@ -927,10 +927,10 @@ export function QualityCorrectiveActions() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
-                {t("common.cancel")}
+                Cancel
               </Button>
               <Button type="submit" disabled={updateMutation.isPending || !formData.qualityCheckId || !formData.action || !formData.implementedBy || !formData.implementationDate || (formData.verifiedDate !== "" && !formData.verifiedBy)}>
-                {updateMutation.isPending ? t("common.updating") : t("common.update")}
+                {updateMutation.isPending ? "Updating..." : "Update"}
               </Button>
             </DialogFooter>
           </form>
@@ -941,27 +941,27 @@ export function QualityCorrectiveActions() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{t("common.delete_confirmation")}</DialogTitle>
+            <DialogTitle>Delete Confirmation</DialogTitle>
             <DialogDescription>
-              {t("quality.delete_action_confirmation", { id: currentAction?.id })}
+              Are you sure you want to delete corrective action #{currentAction?.id}?
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <p className="text-destructive flex items-center">
               <AlertCircle className="h-4 w-4 mr-2" />
-              {t("quality.delete_action_warning")}
+              This action cannot be undone. The corrective action will be permanently removed.
             </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              {t("common.cancel")}
+              Cancel
             </Button>
             <Button 
               variant="destructive" 
               onClick={handleDeleteConfirm}
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? t("common.deleting") : t("common.delete")}
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
