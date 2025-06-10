@@ -156,8 +156,26 @@
         "generated_by": "تم إنشاؤه بواسطة نظام إدارة الإنتاج",
         "pdf_generated": "تم إنشاء PDF",
         "pdf_generated_desc": "تم تحميل قائمة المنتجات لـ {{customer}}"
-      },
-      "customers": {
+      }
+    },
+    "setup.products": {
+      "title": "إدارة المنتجات",
+      "customer_products": "إدارة منتجات العملاء",
+      "select_customer_to_view": "اختر عميلاً لعرض المنتجات",
+      "please_select_customer": "اختر عميلاً لعرض منتجاته",
+      "products_for": "منتجات {{customer}}",
+      "search_placeholder": "البحث في العملاء بالاسم أو الرمز...",
+      "select_a_customer": "اختر العميل",
+      "print_a4": "تصدير PDF",
+      "duplicate_product": "نسخ المنتج",
+      "edit_product": "تعديل المنتج",
+      "add_new": "إضافة منتج جديد",
+      "are_you_sure": "تأكيد الحذف",
+      "delete_confirmation": "سيتم حذف هذا المنتج نهائياً من النظام. لا يمكن التراجع عن هذا الإجراء.",
+      "cancel": "إلغاء",
+      "delete": "حذف"
+    },
+    "customers": {
         "title": "العملاء",
         "description": "إدارة معلومات العملاء وبياناتهم",
         "add_new": "إضافة عميل جديد",
