@@ -5615,8 +5615,16 @@ COMMIT;
   app.put("/api/hr-violations/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: 'Invalid violation ID' });
+      }
+      
       const data = req.body;
       const violation = await storage.updateHrViolation(id, data);
+      if (!violation) {
+        return res.status(404).json({ error: 'HR violation not found' });
+      }
+      
       res.json(violation);
     } catch (error) {
       console.error('Error updating HR violation:', error);

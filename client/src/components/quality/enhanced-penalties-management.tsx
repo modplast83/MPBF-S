@@ -97,7 +97,7 @@ export function QualityPenaltiesManagement() {
   });
 
   // Fetch users for user selection
-  const { data: users = [], isLoading: usersLoading } = useQuery<any[]>({
+  const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ["/api/users"],
     queryFn: async () => {
       const response = await fetch("/api/users");
