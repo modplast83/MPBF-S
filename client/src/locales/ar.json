@@ -333,6 +333,24 @@
       "not_found": "غير موجود",
       "unauthorized": "وصول غير مصرح",
       "forbidden": "وصول محظور"
+    },
+    "maintenance": {
+      "title": "الصيانة",
+      "description": "إدارة صيانة المعدات والجداول الزمنية",
+      "requests": "طلبات الصيانة",
+      "actions": "إجراءات الصيانة",
+      "schedule": "جدولة الصيانة",
+      "actionTypes": {
+        "repair": "إصلاح",
+        "changeParts": "تغيير القطع",
+        "workshop": "ورشة العمل"
+      },
+      "maintenanceTypes": {
+        "corrective": "تصحيحية",
+        "preventive": "وقائية",
+        "predictive": "تنبؤية",
+        "emergency": "طارئة"
+      }
     }
   }
 }
