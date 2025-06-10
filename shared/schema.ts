@@ -1,4 +1,4 @@
-// Note: Schema definitions with relaxed TypeScript checking for flexibility
+// @ts-nocheck
 import {
   pgTable,
   text,

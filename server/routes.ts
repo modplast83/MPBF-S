@@ -2039,7 +2039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.body.status = "open";
       }
       
-      console.log("Creating quality violation with data:", JSON.stringify(req.body, undefined, 2));
+      console.log("Creating quality violation with data:", JSON.stringify(req.body, null, 2));
       
       const violation = await storage.createQualityViolation(req.body);
       res.status(201).json(violation);

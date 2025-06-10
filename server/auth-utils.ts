@@ -53,15 +53,10 @@ export async function comparePasswords(supplied: string, stored: string) {
   }
 }
 
-// Authentication middleware with proper error handling
+// Authentication middleware
 export function requireAuth(req: any, res: any, next: any) {
-  try {
-    if (req.isAuthenticated && typeof req.isAuthenticated === 'function' && req.isAuthenticated()) {
-      return next();
-    }
-    res.status(401).json({ message: 'Authentication required' });
-  } catch (error) {
-    console.error('Authentication middleware error:', error);
-    res.status(500).json({ message: 'Authentication check failed' });
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
   }
+  res.status(401).json({ message: 'Authentication required' });
 }

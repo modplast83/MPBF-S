@@ -29,7 +29,7 @@ export function setupAuth(app: Express) {
     store: storage.sessionStore,
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-      secure: process.env.NODE_ENV === 'production' && !!process.env.REPLIT_DOMAINS, // Secure in production with proper domain
+      secure: process.env.NODE_ENV === 'production', // Only secure in production
       httpOnly: true,
       sameSite: 'lax',
       path: '/'

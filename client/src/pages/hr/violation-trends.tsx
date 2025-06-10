@@ -484,7 +484,7 @@ export default function ViolationTrendsPage() {
                   Pattern Detected
                 </div>
                 <p className="text-sm text-yellow-600">
-                  {mostCommonType[0]} violations account for {totalViolations > 0 ? ((mostCommonType[1] / totalViolations) * 100).toFixed(0) : '0'}% of all cases. 
+                  {mostCommonType[0]} violations account for {((mostCommonType[1] / totalViolations) * 100).toFixed(0)}% of all cases. 
                   Consider targeted training for this area.
                 </p>
               </div>
