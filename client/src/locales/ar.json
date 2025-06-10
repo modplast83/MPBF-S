@@ -4,6 +4,68 @@
       "title": "نظام MPBF",
       "full_title": "مصنع الأكياس البلاستيكية الحديث"
     },
+    "auth": {
+      "username": "اسم المستخدم",
+      "password": "كلمة المرور",
+      "login": "تسجيل الدخول",
+      "logout": "تسجيل الخروج",
+      "register": "إنشاء حساب",
+      "welcome": "مرحباً",
+      "sign_in_description": "سجل دخولك للوصول إلى نظام مصنع الأكياس البلاستيكية الحديث",
+      "enter_username": "أدخل اسم المستخدم",
+      "enter_password": "أدخل كلمة المرور",
+      "invalid_credentials": "اسم المستخدم أو كلمة المرور غير صحيحة",
+      "logging_in": "جارِ تسجيل الدخول...",
+      "no_account": "ليس لديك حساب؟",
+      "have_account": "لديك حساب بالفعل؟",
+      "remember_me": "تذكرني",
+      "forgot_password": "نسيت كلمة المرور؟"
+    },
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "orders": "الطلبات",
+      "production": "الإنتاج",
+      "quality": "الجودة",
+      "setup": "الإعدادات",
+      "reports": "التقارير",
+      "settings": "الإعدادات"
+    },
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "welcome": "مرحباً بك في نظام MPBF",
+      "overview": "نظرة عامة على النظام",
+      "recent_orders": "الطلبات الأخيرة",
+      "production_status": "حالة الإنتاج",
+      "quality_metrics": "مقاييس الجودة"
+    },
+    "orders": {
+      "title": "إدارة الطلبات",
+      "description": "إدارة طلبات العملاء وتتبع تقدم الإنتاج",
+      "new_order": "طلب جديد",
+      "order_details": "تفاصيل الطلب",
+      "customer": "العميل",
+      "product": "المنتج",
+      "quantity": "الكمية",
+      "status": "الحالة",
+      "due_date": "تاريخ التسليم",
+      "actions": "الإجراءات"
+    },
+    "production": {
+      "title": "إدارة الإنتاج",
+      "description": "مراقبة والتحكم في عمليات الإنتاج",
+      "current_jobs": "المهام الحالية",
+      "machine_status": "حالة الآلات",
+      "efficiency": "الكفاءة",
+      "output": "الإنتاج"
+    },
+    "quality": {
+      "title": "إدارة الجودة",
+      "description": "مراقبة والتحكم في الجودة من خلال التفتيش والفحوصات",
+      "inspections": "فحوصات الجودة",
+      "defects": "العيوب",
+      "compliance": "الامتثال",
+      "reports": "تقارير الجودة"
+    },
     "setup": {
       "title": "الإعدادات",
       "description": "إدارة إعدادات النظام الأساسية",
@@ -52,16 +114,127 @@
         "report_title": "تقرير منتجات العميل",
         "date": "التاريخ",
         "total_products": "إجمالي المنتجات",
-        "sn": "ر.م",
-        "id": "المعرف",
+        "sn": "الرقم التسلسلي",
+        "id": "الهوية",
         "size_caption": "وصف الحجم",
         "length_cm": "الطول (سم)",
         "width": "العرض",
         "unit_weight": "وزن الوحدة",
         "generated_by": "تم إنشاؤه بواسطة نظام إدارة الإنتاج",
         "pdf_generated": "تم إنشاء PDF",
-        "pdf_generated_desc": "تم تحميل قائمة المنتجات لـ {{customer}}"
+        "pdf_generated_desc": "تم تحميل قائمة المنتجات للعميل {{customer}}"
+      },
+      "customers": {
+        "title": "إدارة العملاء",
+        "description": "إدارة معلومات العملاء وجهات الاتصال",
+        "add_new": "إضافة عميل جديد",
+        "edit_customer": "تعديل العميل",
+        "customer_name": "اسم العميل",
+        "contact_info": "معلومات الاتصال",
+        "address": "العنوان"
+      },
+      "machines": {
+        "title": "إدارة الآلات",
+        "description": "إدارة آلات ومعدات الإنتاج",
+        "add_new": "إضافة آلة جديدة",
+        "edit_machine": "تعديل الآلة",
+        "machine_name": "اسم الآلة",
+        "machine_type": "نوع الآلة",
+        "status": "الحالة"
       }
+    },
+    "common": {
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete": "حذف",
+      "edit": "تعديل",
+      "add": "إضافة",
+      "search": "بحث",
+      "filter": "تصفية",
+      "export": "تصدير",
+      "import": "استيراد",
+      "loading": "جارِ التحميل...",
+      "error": "خطأ",
+      "success": "نجح",
+      "warning": "تحذير",
+      "info": "معلومات",
+      "confirm": "تأكيد",
+      "yes": "نعم",
+      "no": "لا",
+      "ok": "موافق",
+      "close": "إغلاق",
+      "back": "رجوع",
+      "next": "التالي",
+      "previous": "السابق",
+      "first": "الأول",
+      "last": "الأخير",
+      "page": "صفحة",
+      "of": "من",
+      "total": "الإجمالي",
+      "name": "الاسم",
+      "description": "الوصف",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "created": "تم الإنشاء",
+      "updated": "تم التحديث",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "status": {
+      "pending": "في الانتظار",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "cancelled": "ملغي",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "language": {
+      "english": "English",
+      "arabic": "العربية",
+      "select_language": "اختر اللغة",
+      "change_language": "تغيير اللغة"
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "no_notifications": "لا توجد إشعارات",
+      "mark_read": "وضع علامة كمقروء",
+      "mark_all_read": "وضع علامة على الكل كمقروء"
+    },
+    "reports": {
+      "title": "التقارير",
+      "description": "إنشاء وعرض تقارير النظام",
+      "production_report": "تقرير الإنتاج",
+      "quality_report": "تقرير الجودة",
+      "inventory_report": "تقرير المخزون",
+      "generate": "إنشاء التقرير",
+      "download": "تحميل",
+      "print": "طباعة"
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "description": "تكوين تفضيلات النظام",
+      "general": "الإعدادات العامة",
+      "users": "إدارة المستخدمين",
+      "permissions": "الصلاحيات",
+      "backup": "النسخ الاحتياطي والاستعادة"
+    },
+    "validation": {
+      "required": "هذا الحقل مطلوب",
+      "invalid_email": "عنوان بريد إلكتروني غير صحيح",
+      "min_length": "الحد الأدنى للطول هو {{min}} أحرف",
+      "max_length": "الحد الأقصى للطول هو {{max}} أحرف",
+      "numeric_only": "الأرقام فقط مسموحة",
+      "positive_number": "يجب أن يكون رقماً موجباً"
+    },
+    "errors": {
+      "general": "حدث خطأ",
+      "network": "خطأ في الشبكة",
+      "server": "خطأ في الخادم",
+      "not_found": "غير موجود",
+      "unauthorized": "وصول غير مصرح",
+      "forbidden": "وصول محظور"
     }
   }
 }
