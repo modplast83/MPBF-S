@@ -14,7 +14,7 @@
       "edit": "Edit",
       "create": "Create",
       "creating": "Creating...",
-      "update": "Update", 
+      "update": "Update",
       "updating": "Updating...",
       "popup_blocked": "Pop-up blocked. Please allow pop-ups for this site to print the label.",
       "search": "Search",
@@ -425,7 +425,7 @@
       "title": "Quick Actions",
       "new_order": "New Order",
       "new_order_desc": "Create new",
-      "start_production": "Start Production", 
+      "start_production": "Start Production",
       "start_production_desc": "Begin production",
       "quality_check": "Quality Check",
       "quality_check_desc": "Perform inspection",
@@ -615,7 +615,7 @@
         "enter_production_data": "Enter production performance data for real-time monitoring",
         "metrics_record_failed": "Failed to record production metrics",
         "extruding": "Extruding",
-        "printing": "Printing", 
+        "printing": "Printing",
         "cutting": "Cutting",
         "mixing": "Mixing",
         "day_shift": "Day Shift",
@@ -818,7 +818,7 @@
       "input_material": "Input Material",
       "add_new_material": "Add New Material",
       "name": "Name",
-      "type": "Type", 
+      "type": "Type",
       "quantity": "Quantity",
       "unit": "Unit",
       "select_unit": "Select a unit",
@@ -887,7 +887,7 @@
       "corrective_actions": "Corrective Actions",
       "actions_desc": "Track and resolve quality issues",
       "actions_details": "Assign, monitor, and verify corrective actions to address quality issues and prevent recurrence.",
-      "manage_actions": "Manage Actions", 
+      "manage_actions": "Manage Actions",
       "pending": "Pending",
       "completed": "Completed",
       "penalties": "Penalties",
@@ -921,7 +921,7 @@
       "pending": "Pending",
       "verified": "Verified",
       "verification_date": "Verification Date",
-      "verified_by": "Verified By", 
+      "verified_by": "Verified By",
       "recent_activity": "Recent Quality Activity",
       "recent_activity_description": "Latest quality checks, violations, and corrective actions",
       "select_tab_for_details": "Select a tab above to view detailed information",
@@ -963,7 +963,7 @@
       "delete_violation_confirmation": "Are you sure you want to delete violation #{id}?",
       "violation_created_success": "Quality violation created successfully",
       "violation_updated_success": "Quality violation updated successfully",
-      "violation_deleted_success": "Quality violation deleted successfully", 
+      "violation_deleted_success": "Quality violation deleted successfully",
       "no_violations_found": "No quality violations found",
       "violation_id": "Violation ID",
       "violation_severity": "Severity",
@@ -997,7 +997,7 @@
       "reports_desc": "Generate quality violation reports",
       "reports_details": "Create detailed reports on quality violations, identify trends, and track improvement initiatives across production areas.",
       "view_reports": "View Reports",
-      "unified_dashboard": "Unified Dashboard", 
+      "unified_dashboard": "Unified Dashboard",
       "unified_dashboard_desc": "All-in-one quality control dashboard",
       "unified_dashboard_details": "Access all quality management features in a professional, mobile-optimized interface.",
       "open_dashboard": "Open Dashboard",
@@ -1024,12 +1024,12 @@
       "analyze_by_section_operator_item": "Analyze production by sections, operators, and items",
       "analyze_manufacturing_efficiency": "Review manufacturing efficiency and performance metrics",
       "production_cost_analysis": "Analyze production costs and material usage",
-      
+
       "filters": "Filters",
       "production_analytics": "Production Analytics",
       "inventory_analysis": "Inventory Analysis",
       "quality_analytics": "Quality Analytics",
-      
+
       "start_date": "Start Date",
       "end_date": "End Date",
       "customer": "Customer",
@@ -1038,19 +1038,19 @@
       "all_statuses": "All Statuses",
       "reset": "Reset",
       "apply": "Apply",
-      
+
       "total_orders": "Total Orders",
       "total_production": "Total Production",
       "waste_percentage": "Waste Percentage",
       "avg_efficiency": "Avg. Efficiency",
-      
+
       "order_id": "Order ID",
       "date": "Date",
       "ordered_quantity": "Ordered Qty",
       "completed_quantity": "Completed Qty",
       "waste": "Waste",
       "efficiency": "Efficiency",
-      
+
       "export_excel": "Export to Excel",
       "print_report": "Print Report",
       "export_report": "Export Report",
@@ -1058,7 +1058,7 @@
       "export_format": "Export Format",
       "include_content": "Include Content",
       "sections_data": "Sections Data",
-      "operators_data": "Operators Data", 
+      "operators_data": "Operators Data",
       "items_data": "Items Data",
       "pdf_orientation": "PDF Orientation",
       "landscape": "Landscape",
@@ -1090,7 +1090,7 @@
       "finished_quantity": "Finished Quantity",
       "no_data_available": "No data available",
       "try_different_filters": "Try different filters",
-      
+
       "material_id": "Material ID",
       "material_name": "Material Name",
       "material_type": "Material Type",
@@ -1103,12 +1103,12 @@
       "all_types": "All Types",
       "material": "Material",
       "all_materials": "All Materials",
-      
+
       "total_materials": "Total Materials",
       "total_inventory": "Total Inventory",
       "material_types": "Material Types",
       "recent_updates": "Recent Updates",
-      
+
       "inventory_by_type": "Inventory by Type",
       "inventory_history": "Inventory History",
       "quantity_added": "Quantity Added",
@@ -1116,7 +1116,7 @@
       "no_inventory_data": "No inventory data",
       "no_history_data": "No history data",
       "materials": "Materials",
-      
+
       "quality_checks": "Quality Checks",
       "passed": "Passed",
       "failed": "Failed",
@@ -1151,30 +1151,30 @@
       "implementation_date": "Implementation Date",
       "deleting": "Deleting...",
       "notes": "Notes",
-      
+
       "workflow_analytics": "Workflow Analytics",
       "by_section": "By Section",
       "by_operator": "By Operator",
       "by_item": "By Item",
-      
+
       "section": "Section",
       "all_sections": "All Sections",
       "section_id": "Section ID",
       "section_name": "Section Name",
       "section_performance": "Section Performance",
       "section_details": "Section Details",
-      
+
       "operator": "Operator",
       "all_operators": "All Operators",
       "operator_id": "Operator ID",
       "operator_name": "Operator Name",
       "operator_performance": "Operator Performance",
       "operator_details": "Operator Details",
-      
+
       "jobs_count": "Jobs Count",
       "rolls_processed": "Rolls Processed",
       "production_time": "Production Time",
-      
+
       "item": "Item",
       "item_id": "Item ID",
       "item_name": "Item Name",
@@ -1439,7 +1439,7 @@
       "en": "English",
       "ar": "العربية",
       "es": "Español",
-      "fr": "Français", 
+      "fr": "Français",
       "de": "Deutsch",
       "zh": "中文",
       "change_interface": "Change interface language",
@@ -1481,7 +1481,7 @@
       "delivered": "Delivered"
     },
     "products": {
-      "thickness": "Thickness", 
+      "thickness": "Thickness",
       "raw_material": "Raw Material",
       "master_batch": "Master Batch",
       "product_details": "Product Details"
