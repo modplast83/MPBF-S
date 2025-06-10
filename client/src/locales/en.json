@@ -1,6 +1,5 @@
 {
   "translation": {
- {
     "app": {
       "title": "MPBF System",
       "full_title": "Modern Plastic Bag Factory"
@@ -1847,9 +1846,8 @@
         "workshop": "Workshop"
       },
       "maintenanceTypes": {
-        "cor
         "corrective": "Corrective",
-        "preventive": "Preventive", 
+        "preventive": "Preventive",
         "predictive": "Predictive",
         "emergency": "Emergency"
       }
