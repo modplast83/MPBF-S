@@ -208,23 +208,27 @@ export class DatabaseStorage implements IStorage {
         cleanUserData.password = existingUser.password;
       }
       
-      const [user] = await db
-        .insert(users)
-        .values({
-          ...cleanUserData,
-          updatedAt: new Date(),
-        })
-        .onConflictDoUpdate({
-          target: users.id,
-          set: {
+      // Start database transaction for safety
+      const result = await db.transaction(async (tx) => {
+        const [user] = await tx
+          .insert(users)
+          .values({
             ...cleanUserData,
             updatedAt: new Date(),
-          },
-        })
-        .returning();
+          })
+          .onConflictDoUpdate({
+            target: users.id,
+            set: {
+              ...cleanUserData,
+              updatedAt: new Date(),
+            },
+          })
+          .returning();
+        return user;
+      });
         
       console.log("Upsert user success for:", cleanUserData.username);
-      return user;
+      return result;
     } catch (error) {
       console.error("Error upserting user:", error);
       throw error;

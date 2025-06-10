@@ -332,7 +332,7 @@ export default function UnifiedQualityDashboard() {
                         <div className="flex items-center gap-2">
                           <QualityBadge variant="destructive">{violationsBySeverity.Critical}</QualityBadge>
                           <span className="text-muted-foreground text-xs">
-                            {violations.length > 0 ? Math.round((violationsBySeverity.Critical / violations.length) * 100) : 0}%
+{violations.length > 0 ? Math.round((violationsBySeverity.Critical / violations.length) * 100) : 0}%
                           </span>
                         </div>
                       </div>

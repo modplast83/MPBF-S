@@ -94,7 +94,7 @@ export function QualityMetricsWidget() {
                 <span className="text-sm">{t('dashboard.pass_rate')}</span>
                 <span className="text-sm font-medium">
                   {stats.totalChecks > 0 
-                    ? Math.round((stats.passedChecks / stats.totalChecks) * 100) 
+                    ? (stats.totalChecks > 0 ? Math.round((stats.passedChecks / stats.totalChecks) * 100) : 0) 
                     : 0}%
                 </span>
               </div>

@@ -250,8 +250,8 @@ export function QualityViolations() {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const reporter = users.find((u: any) => u.id === violation.reportedBy);
-    const qualityCheck = checks.find((c: any) => c.id === violation.qualityCheckId);
+    const reporter = users.find((u: any) => u.id === violation.reportedBy) || { username: 'Unknown' };
+    const qualityCheck = checks.find((c: any) => c.id === violation.qualityCheckId) || { checkType: 'N/A' };
 
     const printContent = `
       <!DOCTYPE html>

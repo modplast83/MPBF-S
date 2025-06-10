@@ -226,7 +226,7 @@ function HealthMetric({
 function calculateOrderCompletionRate(orders: Order[]): number {
   if (orders.length === 0) return 0;
   const completed = orders.filter(order => order.status === "completed").length;
-  return Math.round((completed / orders.length) * 100);
+  return orders.length > 0 ? Math.round((completed / orders.length) * 100) : 0;
 }
 
 function calculateProductionEfficiency(jobOrders: JobOrder[], rolls: Roll[]): number {
@@ -254,7 +254,7 @@ function calculateRawMaterialAlert(materials: RawMaterial[]): number {
     }
   });
   
-  return Math.round((adequateCount / materials.length) * 100);
+  return materials.length > 0 ? Math.round((adequateCount / materials.length) * 100) : 0;
 }
 
 function calculateQualityRate(rolls: Roll[]): number {
@@ -266,7 +266,7 @@ function calculateQualityRate(rolls: Roll[]): number {
 function calculateOverallHealth(metrics: number[]): number {
   if (metrics.length === 0) return 0;
   // Weight the metrics differently if needed
-  return Math.round(metrics.reduce((sum, metric) => sum + metric, 0) / metrics.length);
+  return metrics.length > 0 ? Math.round(metrics.reduce((sum, metric) => sum + metric, 0) / metrics.length) : 0;
 }
 
 // Helper functions for status levels
