@@ -67,7 +67,10 @@
       "customer": "العميل",
       "quantity": "الكمية",
       "raw_material": "المادة الخام",
-      "required": "المطلوب"
+      "required": "المطلوب",
+      "item": "الصنف",
+      "length": "الطول",
+      "no_data": "لا توجد بيانات"
     },
     "auth": {
       "username": "اسم المستخدم",
@@ -142,7 +145,20 @@
         "are_you_sure": "هل أنت متأكد؟",
         "delete_confirmation": "سيتم حذف هذا المنتج نهائياً. لا يمكن التراجع عن هذا الإجراء.",
         "cancel": "إلغاء",
-        "delete": "حذف"
+        "delete": "حذف",
+        "customer_products": "منتجات العملاء",
+        "report_title": "تقرير منتجات العملاء",
+        "date": "التاريخ",
+        "total_products": "إجمالي المنتجات",
+        "sn": "م.",
+        "id": "المعرف",
+        "size_caption": "وصف الحجم",
+        "length_cm": "الطول (سم)",
+        "width": "العرض",
+        "unit_weight": "وزن الوحدة",
+        "generated_by": "تم إنشاؤه بواسطة نظام إدارة الإنتاج",
+        "pdf_generated": "تم إنشاء ملف PDF",
+        "pdf_generated_desc": "تم تنزيل قائمة المنتجات للعميل {{customer}}"
       },
       "customers": {
         "title": "العملاء",
