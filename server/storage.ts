@@ -1,4 +1,4 @@
-// @ts-nocheck
+// Note: Storage interface with controlled TypeScript checking
 import {
   User, UpsertUser, Customer, InsertCustomer, Category, InsertCategory,
   Item, InsertItem, Section, InsertSection, Machine, InsertMachine,
