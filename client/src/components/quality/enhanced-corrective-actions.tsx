@@ -256,6 +256,117 @@ export function QualityCorrectiveActions() {
     setShowDeleteDialog(true);
   };
 
+  const handlePrintAction = (action: any) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const relatedCheck = getCheckById(action.qualityCheckId);
+    
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Corrective Action #${action.id}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+            .company-info { margin-bottom: 20px; }
+            .action-details { margin-bottom: 30px; }
+            .detail-row { display: flex; margin-bottom: 10px; }
+            .detail-label { font-weight: bold; width: 150px; }
+            .detail-value { flex: 1; }
+            .section-header { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+            .status-verified { color: #16a34a; font-weight: bold; }
+            .status-pending { color: #ea580c; font-weight: bold; }
+            .print-date { text-align: right; margin-top: 30px; font-size: 12px; border-top: 1px solid #ddd; padding-top: 10px; }
+            .verification-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 15px; }
+            @media print { 
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Corrective Action Report</h1>
+            <div class="company-info">
+              <h3>Quality Management System</h3>
+              <p>Action ID: #${action.id}</p>
+            </div>
+          </div>
+          
+          <div class="section-header">Action Information</div>
+          <div class="action-details">
+            <div class="detail-row">
+              <div class="detail-label">Action ID:</div>
+              <div class="detail-value">#${action.id}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Related Quality Check:</div>
+              <div class="detail-value">${action.qualityCheckId ? `#${action.qualityCheckId}` : 'Not Specified'}</div>
+            </div>
+            ${relatedCheck ? `
+            <div class="detail-row">
+              <div class="detail-label">Check Date:</div>
+              <div class="detail-value">${format(new Date(relatedCheck.timestamp), 'MMM d, yyyy HH:mm')}</div>
+            </div>
+            ` : ''}
+            <div class="detail-row">
+              <div class="detail-label">Action Description:</div>
+              <div class="detail-value">${action.action || 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Implemented By:</div>
+              <div class="detail-value">${getUserById(action.implementedBy) || 'Not assigned'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Implementation Date:</div>
+              <div class="detail-value">${action.implementationDate ? format(new Date(action.implementationDate), 'MMM d, yyyy') : 'Not set'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Status:</div>
+              <div class="detail-value">
+                <span class="${action.verifiedDate ? 'status-verified' : 'status-pending'}">
+                  ${action.verifiedDate ? 'Verified' : 'Pending Verification'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          ${action.verifiedDate ? `
+          <div class="section-header">Verification Information</div>
+          <div class="verification-info">
+            <div class="detail-row">
+              <div class="detail-label">Verified By:</div>
+              <div class="detail-value">${getUserById(action.verifiedBy) || 'Not specified'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Verification Date:</div>
+              <div class="detail-value">${format(new Date(action.verifiedDate), 'MMM d, yyyy')}</div>
+            </div>
+            ${action.verificationNotes ? `
+            <div class="detail-row">
+              <div class="detail-label">Verification Notes:</div>
+              <div class="detail-value">${action.verificationNotes}</div>
+            </div>
+            ` : ''}
+          </div>
+          ` : ''}
+          
+          <div class="print-date">
+            Report printed on ${new Date().toLocaleString()} by ${getUserById(action.implementedBy)}
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+
   // Filter and search functionality
   const filteredActions = actions.filter((action: any) => {
     const matchesSearch = searchQuery === "" || 
@@ -617,12 +728,14 @@ export function QualityCorrectiveActions() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        <div>{getUserById(action.implementedBy)}</div>
+                      <div className="text-sm space-y-1">
+                        <div className="font-medium">
+                          {getUserById(action.implementedBy) || "Not Assigned"}
+                        </div>
                         <div className="text-muted-foreground text-xs">
                           {action.implementationDate 
                             ? format(new Date(action.implementationDate), 'MMM d, yyyy') 
-                            : ""}
+                            : "No Date Set"}
                         </div>
                       </div>
                     </TableCell>
@@ -640,6 +753,14 @@ export function QualityCorrectiveActions() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={() => handlePrintAction(action)}
+                          title="Print Action"
+                        >
+                          <Printer className="h-4 w-4" />
+                        </Button>
                         <Button 
                           variant="outline" 
                           size="icon" 
