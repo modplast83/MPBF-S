@@ -80,11 +80,11 @@ export function CollapsibleJobOrdersForExtrusion() {
 
   // Mutation for creating a roll
   const createRollMutation = useMutation({
-    mutationFn: (data: CreateRoll) => {
-      return apiRequest("POST", API_ENDPOINTS.ROLLS, data);
+    mutationFn: async (data: CreateRoll) => {
+      return await apiRequest("POST", API_ENDPOINTS.ROLLS, data);
     },
-    onSuccess: (data, variables: CreateRoll) => {
-      // Invalidate relevant queries
+    onSuccess: (data: any, variables: CreateRoll) => {
+      // Invalidate relevant queries using the jobOrderId from the variables
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${variables.jobOrderId}/rolls`] });
       // Invalidate rolls in all stages to ensure proper progress calculation
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/extrusion`] });

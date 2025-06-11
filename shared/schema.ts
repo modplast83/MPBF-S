@@ -210,7 +210,10 @@ export const insertRollSchema = createInsertSchema(rolls);
 // since they'll be auto-generated on the server
 export const createRollSchema = insertRollSchema.omit({ 
   id: true, 
-  serialNumber: true 
+  serialNumber: true,
+  createdAt: true,
+  printedAt: true,
+  cutAt: true
 });
 
 export type InsertRoll = z.infer<typeof insertRollSchema>;

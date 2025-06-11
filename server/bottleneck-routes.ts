@@ -5,7 +5,7 @@ import {
   insertBottleneckAlertSchema,
   insertNotificationSettingsSchema,
   insertProductionTargetsSchema 
-} from "@shared/schema";
+} from "../shared/schema";
 
 export function setupBottleneckRoutes(app: Express) {
   // Production Metrics endpoints
