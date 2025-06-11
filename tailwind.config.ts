@@ -83,6 +83,25 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "shimmer": "shimmer 2s ease-in-out infinite",
+        "gentle-bounce": "gentle-bounce 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        "pulse-scale": "pulse-scale 2.5s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 4s ease infinite",
+        "slide-in-left": "slide-in-left 0.6s ease-out",
+        "slide-in-right": "slide-in-right 0.6s ease-out",
+        "slide-in-up": "slide-in-up 0.5s ease-out",
+        "hover-lift": "hover-lift 0.3s ease-out forwards",
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
       },
     },
   },

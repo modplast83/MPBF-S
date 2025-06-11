@@ -26,12 +26,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const { isRTL } = useLanguage();
   const [location] = useLocation();
   const isMobile = useIsMobile();
-  
+
   const isAuthPage = location === "/auth";
 
   // We're removing the automatic sidebar closing on navigation
   // This will allow the sidebar to stay open when navigating between pages
-  
+
   // Separate return for auth page to avoid conditional rendering of components with hooks
   if (isAuthPage) {
     return <div className="h-screen overflow-hidden">{children}</div>;
@@ -70,8 +70,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
         }`}
       >
         {isAuthenticated && <Header mobileMenuOpen={isOpen} setMobileMenuOpen={handleMobileMenuToggle} />}
-        <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-2 sm:p-4 lg:p-6 pl-[3px] pr-[3px]">
-          <div className="max-w-full mx-auto h-full">
+        <main className="flex-1 p-6 overflow-auto bg-gradient-to-br from-gray-50/50 via-white to-gray-50/30 min-h-screen">
+          <div className="animate-slide-in-up">
             {children}
           </div>
         </main>
