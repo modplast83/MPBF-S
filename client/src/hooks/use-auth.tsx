@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode | ((authContext
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
-  // Using a more controlled query approach with explicit staleTime
+  // Using a more controlled query approach with longer stale time to prevent race conditions
   const {
     data: user,
     error,
@@ -56,9 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode | ((authContext
       }
       return failureCount < 2;
     },
-    refetchOnWindowFocus: true, // Enable refetch on focus to check auth state
-    staleTime: 30000, // Reduced stale time for more frequent auth checks
-    gcTime: 60000, // Keep in cache for 1 minute
+    refetchOnWindowFocus: false, // Disable refetch on focus to prevent auth loops
+    staleTime: 5 * 60 * 1000, // 5 minutes - longer stale time to maintain auth state
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     initialData: null
   });
 
@@ -72,23 +72,17 @@ export function AuthProvider({ children }: { children: ReactNode | ((authContext
     onSuccess: (userData) => {
       console.log("Login successful, user data:", userData);
       
-      // Set the user data in the cache immediately
+      // Set the user data in the cache immediately and don't invalidate
       queryClient.setQueryData(["/api/user"], userData);
-      
-      // Force a refetch to ensure fresh data and proper authentication state
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.username}!`,
       });
       
-      // Use React Router navigation instead of window.location
+      // Use React Router navigation with immediate redirect
       console.log("Redirecting to dashboard with user:", userData);
-      setTimeout(() => {
-        console.log("Performing navigation to dashboard");
-        setLocation("/");
-      }, 100);
+      setLocation("/");
     },
     onError: (error) => {
       console.error("Login error:", error);
