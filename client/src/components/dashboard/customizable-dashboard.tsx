@@ -10,7 +10,7 @@ import { QualityMetricsWidget } from './quality-metrics-widget';
 import { ProductivityWidget } from './productivity-widget';
 import { QualityViolationsWidget } from './quality-violations-widget';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth-v2';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/ui/page-header';
 import {
@@ -88,8 +88,8 @@ export function CustomizableDashboard() {
     <div className="container mx-auto p-4 sm:p-6">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
         <PageHeader
-          heading={t('dashboard.personalized_dashboard')}
-          text={t('dashboard.welcome_message', { name: user?.firstName || 'User' })}
+          title={t('dashboard.personalized_dashboard')}
+          description={t('dashboard.welcome_message', { name: user?.firstName || 'User' })}
         />
         
         <div className="flex items-center mt-4 md:mt-0 gap-2">

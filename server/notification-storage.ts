@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { db } from "./db.js";
 import { 
   notificationCenter, 

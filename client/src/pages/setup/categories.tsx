@@ -116,7 +116,7 @@ export default function Categories() {
     
     return (
       <div className="space-y-4">
-        {categories?.map((category) => (
+        {categories.map((category) => (
           <Card 
             key={category.id} 
             className="overflow-hidden hover:shadow-md transition-all"

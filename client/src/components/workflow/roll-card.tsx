@@ -10,7 +10,7 @@ import { UpdateRollDialog } from "./update-roll-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-v2";
 
 interface RollCardProps {
   roll: Roll;

@@ -25,19 +25,11 @@ export function ProtectedRoute({ path, component: Component, module }: Protected
     );
   }
 
-  // Redirect to auth page if not authenticated
-  if (!user) {
-    return (
-      <Route path={path}>
-        <Redirect to="/auth" />
-      </Route>
-    );
-  }
-
-  // Show protected component when authenticated
+  // Only show a protected component when user is authenticated
+  // Otherwise render nothing, letting the app handle navigation
   return (
     <Route path={path}>
-      <Component />
+      {user ? <Component /> : null}
     </Route>
   );
 }

@@ -20,7 +20,7 @@ import {
   SmsTemplate, InsertSmsTemplate,
   SmsNotificationRule, InsertSmsNotificationRule,
   TimeAttendance, InsertTimeAttendance
-} from "../shared/schema";
+} from "@shared/schema";
 import session from "express-session";
 
 // Interface for storage operations

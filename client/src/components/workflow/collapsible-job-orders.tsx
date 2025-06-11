@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { RollDialog } from "@/components/workflow/roll-dialog";
-import { useAuth } from "@/hooks/use-auth";
+import { AuthProvider } from "@/hooks/useAuth";
 import { JobOrder, Roll, CustomerProduct, Customer, CreateRoll, Item, MasterBatch, Order } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
@@ -80,15 +80,12 @@ export function CollapsibleJobOrdersForExtrusion() {
 
   // Mutation for creating a roll
   const createRollMutation = useMutation({
-    mutationFn: async (data: CreateRoll) => {
-      return await apiRequest("POST", API_ENDPOINTS.ROLLS, data);
+    mutationFn: (data: CreateRoll) => {
+      return apiRequest("POST", API_ENDPOINTS.ROLLS, data);
     },
-    onSuccess: (data: any, variables: CreateRoll) => {
-      // Store jobOrderId before invalidating queries
-      const jobOrderId = variables.jobOrderId;
-      
-      // Invalidate relevant queries using the jobOrderId from the variables
-      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${jobOrderId}/rolls`] });
+    onSuccess: (_data, variables) => {
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${variables.jobOrderId}/rolls`] });
       // Invalidate rolls in all stages to ensure proper progress calculation
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/extrusion`] });
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/printing`] });
@@ -102,7 +99,7 @@ export function CollapsibleJobOrdersForExtrusion() {
       });
       
       // Update job order status if needed
-      checkAndUpdateJobOrderStatus(jobOrderId);
+      checkAndUpdateJobOrderStatus(variables.jobOrderId);
     },
     onError: (error) => {
       toast({
@@ -347,13 +344,17 @@ export function CollapsibleJobOrdersForExtrusion() {
   return (
     <div className="space-y-4">
       {/* Roll Creation Dialog */}
-      <RollDialog
-        open={isRollDialogOpen}
-        onOpenChange={setIsRollDialogOpen}
-        jobOrder={selectedJobOrder}
-        onSubmit={handleRollDialogSubmit}
-        isLoading={createRollMutation.isPending}
-      />
+      <AuthProvider>
+        {(user) => (
+          <RollDialog
+            open={isRollDialogOpen}
+            onOpenChange={setIsRollDialogOpen}
+            jobOrder={selectedJobOrder}
+            onSubmit={handleRollDialogSubmit}
+            isLoading={createRollMutation.isPending}
+          />
+        )}
+      </AuthProvider>
       {filteredJobOrders.length === 0 ? (
         <Card className="bg-white border border-dashed border-secondary-200">
           <CardContent className="py-6 text-center">

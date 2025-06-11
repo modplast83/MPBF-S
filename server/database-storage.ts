@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { eq, and, gte, lte, desc, asc, or, sql, ne, isNull } from "drizzle-orm";
 import {
   users,
@@ -115,7 +114,7 @@ import {
   smsNotificationRules,
   type SmsNotificationRule,
   type InsertSmsNotificationRule
-} from "../shared/schema";
+} from "@shared/schema";
 import { db, pool } from "./db";
 import { IStorage } from "./storage";
 import connectPg from "connect-pg-simple";
@@ -161,6 +160,8 @@ export class DatabaseStorage implements IStorage {
       .insert(users)
       .values({
         ...userData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
       .returning();
     return user;
@@ -171,6 +172,7 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({
         ...userData,
+        updatedAt: new Date(),
       })
       .where(eq(users.id, id))
       .returning();
@@ -193,7 +195,7 @@ export class DatabaseStorage implements IStorage {
       
       // Handle the special case for password updating
       const isUpdate = !!cleanUserData.id;
-      const isPasswordUnchanged = (cleanUserData as any).password === "UNCHANGED_PASSWORD";
+      const isPasswordUnchanged = cleanUserData.password === "UNCHANGED_PASSWORD";
       
       if (isUpdate && isPasswordUnchanged) {
         // Get the existing user to keep their current password
@@ -203,15 +205,21 @@ export class DatabaseStorage implements IStorage {
         }
         
         // Use the existing password instead of "UNCHANGED_PASSWORD"
-        (cleanUserData as any).password = (existingUser as any).password;
+        cleanUserData.password = existingUser.password;
       }
       
       const [user] = await db
         .insert(users)
-        .values(cleanUserData as any)
+        .values({
+          ...cleanUserData,
+          updatedAt: new Date(),
+        })
         .onConflictDoUpdate({
           target: users.id,
-          set: cleanUserData as any,
+          set: {
+            ...cleanUserData,
+            updatedAt: new Date(),
+          },
         })
         .returning();
         

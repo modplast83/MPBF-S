@@ -19,7 +19,7 @@ import { z } from "zod";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-v2";
 import { useToast } from "@/hooks/use-toast";
 import type { HrViolation, HrComplaint, User } from "@shared/schema";
 

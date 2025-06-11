@@ -44,7 +44,7 @@ import {
   Printer
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-v2";
 
 // Badge variants for success/warning states
 const badgeVariants = {

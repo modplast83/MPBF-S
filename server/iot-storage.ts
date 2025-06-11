@@ -9,7 +9,7 @@ import {
   MachineSensor,
   SensorData,
   IotAlert
-} from "../shared/schema";
+} from "@shared/schema";
 import { eq, desc, and, gte, lte, isNull } from "drizzle-orm";
 
 export class IotStorage {

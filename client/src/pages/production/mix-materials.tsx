@@ -22,7 +22,7 @@ import { FilterSummary } from "@/components/production/filter-summary";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-v2";
 import { usePermissions } from "@/hooks/use-permissions";
 import { 
   AlertDialog,
@@ -44,7 +44,36 @@ interface PrintData {
   userData?: any[];
 }
 
-// Helper functions to convert between different MaterialDistribution types - moved to avoid duplication
+// Helper functions to convert between different MaterialDistribution types
+const convertConfigToDnd = (configMaterials: ConfigMaterialDistribution[]): DndMaterialDistribution[] => {
+  return configMaterials.map((item, index) => ({
+    id: `material-${index}`,
+    materialId: index + 1,
+    materialName: item.material,
+    screwAPercentage: item.aPercentage,
+    screwBPercentage: item.bPercentage,
+    totalPercentage: 100 * (item.totalKg / configMaterials.reduce((sum, m) => sum + m.totalKg, 0))
+  }));
+};
+
+const convertDndToConfig = (dndMaterials: DndMaterialDistribution[]): ConfigMaterialDistribution[] => {
+  // Assuming a total of 100kg for the base distribution
+  const total = 100; 
+  return dndMaterials.map(item => {
+    const totalKg = total * (item.totalPercentage / 100);
+    const aKg = totalKg * (item.screwAPercentage / 100);
+    const bKg = totalKg * (item.screwBPercentage / 100);
+    
+    return {
+      material: item.materialName,
+      aKg,
+      bKg,
+      totalKg,
+      aPercentage: item.screwAPercentage,
+      bPercentage: item.screwBPercentage
+    };
+  });
+};
 
 export default function MixMaterialsPage() {
   const { t } = useTranslation();

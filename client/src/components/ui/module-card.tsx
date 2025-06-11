@@ -1,98 +1,65 @@
-
-import React from 'react';
-import { Link } from 'wouter';
-import { LucideIcon } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/hooks/use-language";
+import { ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 
 interface ModuleCardProps {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: any;
   path: string;
-  color?: string;
+  color: string;
   count?: number;
-  isNew?: boolean;
-  disabled?: boolean;
-  className?: string;
+  action?: string;
 }
 
 export function ModuleCard({ 
   title, 
   description, 
-  icon: Icon, 
+  icon: IconComponent, 
   path, 
-  color = "bg-gradient-to-br from-blue-500 to-blue-600", 
-  count,
-  isNew = false,
-  disabled = false,
-  className
+  color, 
+  count, 
+  action = "Access" 
 }: ModuleCardProps) {
-  const cardContent = (
-    <Card className={cn(
-      "group relative overflow-hidden transition-all duration-300 ease-out",
-      "hover:shadow-xl hover:-translate-y-1",
-      "border-0 bg-white/80 backdrop-blur-sm",
-      "before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent",
-      "before:translate-x-[-100%] before:transition-transform before:duration-700",
-      "hover:before:translate-x-[100%]",
-      disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-[1.02]",
-      className
-    )}>
-      <CardHeader className="pb-3 relative">
-        <div className="flex items-start justify-between">
-          <div className={cn(
-            "p-3 rounded-xl shadow-lg transition-transform duration-300",
-            "group-hover:scale-110 group-hover:shadow-xl",
-            color
-          )}>
-            <Icon className="h-6 w-6 text-white" />
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            {isNew && (
-              <Badge 
-                variant="secondary" 
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 animate-pulse-scale"
-              >
-                New
-              </Badge>
-            )}
-            {count !== undefined && (
-              <Badge 
-                variant="outline" 
-                className="bg-gray-50/80 backdrop-blur-sm border-gray-200 text-gray-700 font-semibold"
-              >
-                {count}
-              </Badge>
-            )}
-          </div>
-        </div>
-        <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-200">
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <CardDescription className="text-sm text-gray-600 leading-relaxed">
-          {description}
-        </CardDescription>
-        
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-50/20 pointer-events-none" />
-        
-        {/* Hover indicator */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-      </CardContent>
-    </Card>
-  );
-
-  if (disabled) {
-    return cardContent;
-  }
-
+  const { isRTL } = useLanguage();
+  
   return (
-    <Link href={path} className="block">
-      {cardContent}
+    <Link href={path}>
+      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer bg-gradient-to-br from-white to-slate-50 border-0 shadow-md h-full">
+        <CardHeader className={`${color} text-white p-6 relative overflow-hidden`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+          <CardTitle className={`flex items-center justify-between relative z-10 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                <IconComponent className="h-6 w-6 text-white" />
+              </div>
+              <span className={`font-bold text-lg ${isRTL ? 'mr-4' : 'ml-4'}`}>{title}</span>
+            </div>
+            {count !== undefined && (
+              <div className="bg-white/20 backdrop-blur-sm text-white rounded-full px-3 py-1 text-sm font-semibold border border-white/30">
+                {count}
+              </div>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <p className="text-slate-600 text-sm leading-relaxed mb-4">
+            {description}
+          </p>
+          <div className={`flex justify-end ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 group-hover:bg-slate-800 group-hover:text-white transition-all duration-300"
+            >
+              <span className={isRTL ? 'ml-2' : 'mr-2'}>{action}</span>
+              <ArrowRight className={`h-4 w-4 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </Link>
   );
 }

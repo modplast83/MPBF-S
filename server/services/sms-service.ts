@@ -1,5 +1,5 @@
 import { storage } from '../storage';
-import { SmsMessage, InsertSmsMessage } from '../../shared/schema';
+import { SmsMessage, InsertSmsMessage } from '@shared/schema';
 
 // Initialize Taqnyat credentials with environment variables
 const taqnyatApiKey = process.env.TAQNYAT_API_KEY;

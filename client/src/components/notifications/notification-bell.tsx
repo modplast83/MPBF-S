@@ -18,7 +18,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth-v2';
 import { Link } from 'wouter';
 
 interface Notification {
@@ -56,14 +56,14 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
 
   // Fetch recent notifications
-  const { data: notifications = [] } = useQuery<Notification[]>({
+  const { data: notifications = [] } = useQuery({
     queryKey: ['/api/notifications', { limit: 5, unreadOnly: true }],
     enabled: !!user,
     refetchInterval: 30000 // Refetch every 30 seconds for real-time updates
   });
 
   // Fetch unread count
-  const { data: unreadCount = 0 } = useQuery<number>({
+  const { data: unreadCount = 0 } = useQuery({
     queryKey: ['/api/notifications/unread-count'],
     enabled: !!user,
     refetchInterval: 30000

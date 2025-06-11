@@ -218,12 +218,11 @@ export default function OrdersIndex() {
 
   // Selection helper functions
   const handleSelectOrder = (orderId: number) => {
-    setSelectedOrders(prev => {
-      const isSelected = prev.includes(orderId);
-      return isSelected 
+    setSelectedOrders(prev => 
+      prev.includes(orderId) 
         ? prev.filter(id => id !== orderId)
-        : [...prev, orderId];
-    });
+        : [...prev, orderId]
+    );
   };
 
   const handleSelectAll = () => {
@@ -277,11 +276,7 @@ export default function OrdersIndex() {
           <input
             type="checkbox"
             checked={selectedOrders.includes(row.id)}
-            onChange={(e) => {
-              e.stopPropagation();
-              handleSelectOrder(row.id);
-            }}
-            onClick={(e) => e.stopPropagation()}
+            onChange={() => handleSelectOrder(row.id)}
             className="rounded border-gray-300"
           />
         </div>
@@ -434,7 +429,7 @@ export default function OrdersIndex() {
     
     return (
       <div className="space-y-3">
-        {filteredOrders?.map((order) => (
+        {filteredOrders.map((order) => (
           <Card key={order.id} className="overflow-hidden hover:shadow-md transition-all border-l-4 border-l-primary-500">
             <div className="relative">
               <div 
@@ -444,11 +439,7 @@ export default function OrdersIndex() {
                 <input
                   type="checkbox"
                   checked={selectedOrders.includes(order.id)}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleSelectOrder(order.id);
-                  }}
-                  onClick={(e) => e.stopPropagation()}
+                  onChange={() => handleSelectOrder(order.id)}
                   className="rounded border-gray-300 w-4 h-4"
                 />
               </div>

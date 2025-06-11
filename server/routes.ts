@@ -30,7 +30,7 @@ import {
   InsertMixMaterial, InsertMixItem, InsertPermission, InsertModule,
   InsertMaterialInput, InsertMaterialInputItem, InsertAbaMaterialConfig,
   InsertTimeAttendance, InsertEmployeeOfMonth, InsertHrViolation, InsertHrComplaint
-} from "../shared/schema";
+} from "@shared/schema";
 import { z } from "zod";
 import path from 'path';
 import fs from 'fs';

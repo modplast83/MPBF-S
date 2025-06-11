@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/use-language";
+import { useTranslation } from "react-i18next";
 import { 
   Tag, 
   Package, 
@@ -61,6 +62,7 @@ function SetupCard({ title, description, icon: IconComponent, path, count }: Set
 }
 
 export default function SetupIndex() {
+  const { t } = useTranslation();
   const { isRTL } = useLanguage();
   
   // In a real application, these counts would come from API queries

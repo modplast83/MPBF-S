@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-v2";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useLocation } from "wouter";
@@ -13,7 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 
-// Company logo will be loaded dynamically
+// Import company logo
+import companyLogo from "/assets/company-logo.png";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -85,13 +86,7 @@ export default function AuthPage() {
     try {
       setIsSubmitting(true);
       const { confirmPassword, ...registerData } = data;
-      await registerUser({
-        username: registerData.username || "",
-        password: registerData.password || "",
-        email: registerData.email,
-        firstName: registerData.firstName,
-        lastName: registerData.lastName,
-      });
+      await registerUser(registerData);
     } finally {
       setIsSubmitting(false);
     }
@@ -139,7 +134,7 @@ export default function AuthPage() {
                 </Button>
               </div>
             </div>
-            <img src="/assets/company-logo.png" alt="MPBF Logo" className="h-20 mb-4" />
+            <img src={companyLogo} alt="MPBF Logo" className="h-20 mb-4" />
             <CardTitle className="text-3xl font-bold">{t("auth.welcome")}</CardTitle>
             <CardDescription>
               {t("auth.sign_in_description")}
