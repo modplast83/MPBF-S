@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 
 interface RollDialogProps {
   open: boolean;

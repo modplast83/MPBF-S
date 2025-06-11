@@ -14,7 +14,7 @@ import { API_ENDPOINTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
-import { useAuth } from "@/hooks/use-auth-v2";
+import { useAuth } from "@/hooks/use-auth";
 
 interface UpdateRollDialogProps {
   open: boolean;

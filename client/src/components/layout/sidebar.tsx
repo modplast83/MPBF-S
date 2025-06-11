@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { usePermissions } from "@/hooks/use-permissions";
 import { ChevronDown, ChevronRight, Home, Settings, Factory, Users, BarChart3, Package, Wrench, FileText, Shield, HelpCircle } from "lucide-react";
-import factoryLogo from "@assets/FactoryLogoHPNGW Green.png";
+// Factory logo will be loaded dynamically
 
 interface SidebarProps {
   onNavItemClick?: () => void;
@@ -139,7 +139,7 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
             <div className="flex flex-col items-center w-full space-y-3">
               <div className="bg-white/95 p-3 rounded-2xl shadow-lg ring-1 ring-white/20 backdrop-blur-sm">
                 <img 
-                  src={factoryLogo} 
+                  src="/assets/company-logo.png" 
                   alt="Modern Plastic Bag Factory" 
                   className="h-16 w-16 object-contain"
                 />
@@ -155,7 +155,7 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
             <div className="flex items-center justify-center w-full">
               <div className="bg-white/95 p-2 rounded-xl shadow-lg ring-1 ring-white/20">
                 <img 
-                  src={factoryLogo} 
+                  src="/assets/company-logo.png" 
                   alt="Factory Logo" 
                   className="h-10 w-10 object-contain"
                 />
