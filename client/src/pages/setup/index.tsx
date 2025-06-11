@@ -62,7 +62,6 @@ function SetupCard({ title, description, icon: IconComponent, path, count }: Set
 }
 
 export default function SetupIndex() {
-  const { t } = useTranslation();
   const { isRTL } = useLanguage();
   
   // In a real application, these counts would come from API queries
