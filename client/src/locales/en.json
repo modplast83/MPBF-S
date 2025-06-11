@@ -139,6 +139,7 @@
         "products_for": "Products for {{customer}}",
         "search_placeholder": "Search products...",
         "select_a_customer": "Select a customer",
+      "select_customer": "Select Customer",
         "please_select_customer": "Please select a customer to view their products",
         "no_products_found": "No products found",
         "product_code": "Product Code",

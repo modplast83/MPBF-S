@@ -117,6 +117,7 @@
         "products_for": "منتجات {{customer}}",
         "search_placeholder": "البحث في المنتجات...",
         "select_a_customer": "اختر عميلاً",
+      "select_customer": "اختيار العميل",
         "please_select_customer": "يرجى اختيار عميل لعرض منتجاته",
         "no_products_found": "لم يتم العثور على منتجات",
         "product_code": "رمز المنتج",
