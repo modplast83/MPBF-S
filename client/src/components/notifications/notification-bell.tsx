@@ -18,7 +18,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useAuth } from '@/hooks/use-auth-v2';
+import { useAuth } from '@/hooks/use-auth';
 import { Link } from 'wouter';
 
 interface Notification {

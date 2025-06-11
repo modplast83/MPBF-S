@@ -139,7 +139,7 @@ export default function AuthPage() {
                 </Button>
               </div>
             </div>
-            <img src={companyLogo} alt="MPBF Logo" className="h-20 mb-4" />
+            <img src="/assets/company-logo.png" alt="MPBF Logo" className="h-20 mb-4" />
             <CardTitle className="text-3xl font-bold">{t("auth.welcome")}</CardTitle>
             <CardDescription>
               {t("auth.sign_in_description")}
