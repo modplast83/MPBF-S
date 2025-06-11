@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/use-auth-v2";
+import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useLocation } from "wouter";

@@ -34,7 +34,7 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode | ((authContext: AuthContextType) => ReactNode) }) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   

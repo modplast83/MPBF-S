@@ -10,7 +10,7 @@ interface PageHeaderProps {
   gradient?: boolean;
 }
 
-export function PageHeader({
+function PageHeader({
   heading,
   text,
   children,
@@ -61,6 +61,9 @@ export function PageHeader({
     </div>
   );
 }
+
+export default PageHeader;
+export { PageHeader };
 
 /* CSS for grid pattern - add this to your index.css if not already present */
 const gridPatternCSS = `
