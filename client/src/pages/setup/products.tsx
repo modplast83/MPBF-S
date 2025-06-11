@@ -285,7 +285,7 @@ export default function Products() {
       </div>
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>{t("setup.products.customer_products")}</CardTitle>
+          <CardTitle>{t("setup.products.select_customer")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

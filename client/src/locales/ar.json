@@ -112,7 +112,7 @@
         "edit_product": "تعديل المنتج",
         "duplicate_product": "نسخ المنتج",
         "delete_product": "حذف المنتج",
-        "select_customer": "اضافة منتجات العملاء",
+        "select_customer": "اختيار العميل",
         "select_customer_to_view": "حدد عميل لعرض المنتجات الخاصة به",
         "products_for": "منتجات {{customer}}",
         "search_placeholder": "البحث في المنتجات...",
