@@ -83,7 +83,7 @@ export function CollapsibleJobOrdersForExtrusion() {
     mutationFn: (data: CreateRoll) => {
       return apiRequest("POST", API_ENDPOINTS.ROLLS, data);
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: (data, variables: CreateRoll) => {
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${variables.jobOrderId}/rolls`] });
       // Invalidate rolls in all stages to ensure proper progress calculation

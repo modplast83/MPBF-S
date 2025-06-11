@@ -44,36 +44,7 @@ interface PrintData {
   userData?: any[];
 }
 
-// Helper functions to convert between different MaterialDistribution types
-const convertConfigToDnd = (configMaterials: ConfigMaterialDistribution[]): DndMaterialDistribution[] => {
-  return configMaterials.map((item, index) => ({
-    id: `material-${index}`,
-    materialId: index + 1,
-    materialName: item.material,
-    screwAPercentage: item.aPercentage,
-    screwBPercentage: item.bPercentage,
-    totalPercentage: 100 * (item.totalKg / configMaterials.reduce((sum, m) => sum + m.totalKg, 0))
-  }));
-};
-
-const convertDndToConfig = (dndMaterials: DndMaterialDistribution[]): ConfigMaterialDistribution[] => {
-  // Assuming a total of 100kg for the base distribution
-  const total = 100; 
-  return dndMaterials.map(item => {
-    const totalKg = total * (item.totalPercentage / 100);
-    const aKg = totalKg * (item.screwAPercentage / 100);
-    const bKg = totalKg * (item.screwBPercentage / 100);
-    
-    return {
-      material: item.materialName,
-      aKg,
-      bKg,
-      totalKg,
-      aPercentage: item.screwAPercentage,
-      bPercentage: item.screwBPercentage
-    };
-  });
-};
+// Helper functions to convert between different MaterialDistribution types - moved to avoid duplication
 
 export default function MixMaterialsPage() {
   const { t } = useTranslation();
