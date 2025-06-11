@@ -49,10 +49,17 @@ export function AuthProvider({ children }: { children: ReactNode | ((authContext
   } = useQuery<SelectUser | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
-    retry: false,
-    refetchOnWindowFocus: false,
-    staleTime: 60000, // Consider data fresh for 1 minute
-    initialData: null // Set initial data to null to avoid undefined
+    retry: (failureCount, error) => {
+      // Don't retry on 401 errors, but retry other errors up to 2 times
+      if (error.message.includes('401')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    refetchOnWindowFocus: true, // Enable refetch on focus to check auth state
+    staleTime: 30000, // Reduced stale time for more frequent auth checks
+    gcTime: 60000, // Keep in cache for 1 minute
+    initialData: null
   });
 
   const loginMutation = useMutation<SelectUser, Error, LoginCredentials>({
@@ -65,23 +72,23 @@ export function AuthProvider({ children }: { children: ReactNode | ((authContext
     onSuccess: (userData) => {
       console.log("Login successful, user data:", userData);
       
-      // Set the user data in the cache and ensure it's properly saved
+      // Set the user data in the cache immediately
       queryClient.setQueryData(["/api/user"], userData);
       
-      // Disable immediate refetch to avoid race conditions
-      // Instead, rely on the explicitly set cache data
+      // Force a refetch to ensure fresh data and proper authentication state
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.username}!`,
       });
       
-      // Use direct navigation to ensure redirect works properly
+      // Use direct navigation after ensuring state is set
       console.log("Redirecting to dashboard with user:", userData);
       setTimeout(() => {
         console.log("Performing direct navigation to /");
         window.location.href = "/";
-      }, 500);
+      }, 100); // Reduced timeout for faster redirect
     },
     onError: (error) => {
       console.error("Login error:", error);
