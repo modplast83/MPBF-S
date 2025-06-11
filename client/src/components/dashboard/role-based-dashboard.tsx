@@ -7,7 +7,7 @@ import { ProductionChart } from './production-chart';
 import { RecentOrders } from './recent-orders';
 import { QuickActions } from './quick-actions';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/use-auth-v2';
+import { useAuth } from '@/hooks/use-auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/ui/page-header';
 import {
@@ -101,8 +101,8 @@ export function RoleBasedDashboard() {
       <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 mb-4 lg:mb-6">
         <div className="flex-1 min-w-0">
           <PageHeader
-            title={t('dashboard.personalized_dashboard')}
-            description={t('dashboard.welcome_message', { name: user?.firstName || user?.username || 'User' })}
+            heading={t('dashboard.personalized_dashboard')}
+            text={t('dashboard.welcome_message', { name: user?.firstName || user?.username || 'User' })}
           />
         </div>
         

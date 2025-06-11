@@ -56,14 +56,14 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
 
   // Fetch recent notifications
-  const { data: notifications = [] } = useQuery({
+  const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ['/api/notifications', { limit: 5, unreadOnly: true }],
     enabled: !!user,
     refetchInterval: 30000 // Refetch every 30 seconds for real-time updates
   });
 
   // Fetch unread count
-  const { data: unreadCount = 0 } = useQuery({
+  const { data: unreadCount = 0 } = useQuery<number>({
     queryKey: ['/api/notifications/unread-count'],
     enabled: !!user,
     refetchInterval: 30000

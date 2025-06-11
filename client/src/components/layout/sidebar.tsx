@@ -12,7 +12,7 @@ import {
   CollapsibleContent 
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/use-auth-v2";
+import { useAuth } from "@/hooks/use-auth";
 import { usePermissions } from "@/hooks/use-permissions";
 import { ChevronDown, ChevronRight, Home, Settings, Factory, Users, BarChart3, Package, Wrench, FileText, Shield, HelpCircle } from "lucide-react";
 import factoryLogo from "@assets/FactoryLogoHPNGW Green.png";

@@ -28,7 +28,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { AbaMaterialConfig, RawMaterial, User } from "@shared/schema";
 import { formatNumber } from "@/lib/utils";
-import { useAuth } from "@/hooks/use-auth-v2";
+import { useAuth } from "@/hooks/use-auth";
 
 // Material distribution with new formula format
 export interface MaterialDistribution {
