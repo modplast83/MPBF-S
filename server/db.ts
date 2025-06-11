@@ -19,16 +19,32 @@ export const pool = new Pool({
 });
 
 // Add connection event handlers for monitoring
-pool.on('connect', () => {
-  console.log('Database connected successfully');
+pool.on('connect', (client) => {
+  console.log(`Database connected successfully. Pool: ${pool.totalCount} total, ${pool.idleCount} idle`);
 });
 
-pool.on('error', (err) => {
+pool.on('error', (err, client) => {
   console.error('Database connection error:', err);
+  console.error('Error details:', {
+    message: err.message,
+    code: err.code,
+    severity: err.severity
+  });
 });
 
-pool.on('remove', () => {
-  console.log('Database connection removed from pool');
+pool.on('remove', (client) => {
+  console.log(`Database connection removed from pool. Pool: ${pool.totalCount} total, ${pool.idleCount} idle`);
+});
+
+pool.on('acquire', (client) => {
+  console.log(`Database client acquired. Pool: ${pool.totalCount} total, ${pool.idleCount} idle, ${pool.waitingCount} waiting`);
+});
+
+pool.on('release', (err, client) => {
+  if (err) {
+    console.error('Error releasing database client:', err);
+  }
+  console.log(`Database client released. Pool: ${pool.totalCount} total, ${pool.idleCount} idle`);
 });
 
 export const db = drizzle({ client: pool, schema });
