@@ -4,7 +4,7 @@ import {
   BottleneckAlert, InsertBottleneckAlert,
   NotificationSettings, InsertNotificationSettings,
   ProductionTargets, InsertProductionTargets
-} from "@shared/schema";
+} from "../shared/schema";
 
 export class BottleneckStorage {
   private productionMetrics: ProductionMetrics[] = [];

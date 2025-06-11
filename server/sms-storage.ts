@@ -10,7 +10,7 @@ import {
   type InsertSmsTemplate,
   type SmsNotificationRule, 
   type InsertSmsNotificationRule
-} from "@shared/schema";
+} from "../shared/schema";
 
 export class SmsStorage {
   // SMS Messages

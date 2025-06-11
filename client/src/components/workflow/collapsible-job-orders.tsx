@@ -84,8 +84,11 @@ export function CollapsibleJobOrdersForExtrusion() {
       return await apiRequest("POST", API_ENDPOINTS.ROLLS, data);
     },
     onSuccess: (data: any, variables: CreateRoll) => {
+      // Store jobOrderId before invalidating queries
+      const jobOrderId = variables.jobOrderId;
+      
       // Invalidate relevant queries using the jobOrderId from the variables
-      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${variables.jobOrderId}/rolls`] });
+      queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.JOB_ORDERS}/${jobOrderId}/rolls`] });
       // Invalidate rolls in all stages to ensure proper progress calculation
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/extrusion`] });
       queryClient.invalidateQueries({ queryKey: [`${API_ENDPOINTS.ROLLS}/stage/printing`] });
@@ -99,7 +102,7 @@ export function CollapsibleJobOrdersForExtrusion() {
       });
       
       // Update job order status if needed
-      checkAndUpdateJobOrderStatus(variables.jobOrderId);
+      checkAndUpdateJobOrderStatus(jobOrderId);
     },
     onError: (error) => {
       toast({

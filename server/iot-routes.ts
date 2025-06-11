@@ -5,7 +5,7 @@ import {
   insertMachineSensorSchema, 
   insertSensorDataSchema, 
   insertIotAlertSchema 
-} from "@shared/schema";
+} from "../shared/schema";
 import { requireAuth } from "./auth-utils";
 
 export function setupIotRoutes(app: Express) {

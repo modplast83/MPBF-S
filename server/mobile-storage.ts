@@ -9,7 +9,7 @@ import {
   OperatorTask,
   OperatorUpdate,
   MobileDevice
-} from "@shared/schema";
+} from "../shared/schema";
 import { eq, desc, and, or, isNull } from "drizzle-orm";
 
 export class MobileStorage {
