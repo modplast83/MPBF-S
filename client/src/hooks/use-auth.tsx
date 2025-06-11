@@ -83,12 +83,12 @@ export function AuthProvider({ children }: { children: ReactNode | ((authContext
         description: `Welcome back, ${userData.username}!`,
       });
       
-      // Use direct navigation after ensuring state is set
+      // Use React Router navigation instead of window.location
       console.log("Redirecting to dashboard with user:", userData);
       setTimeout(() => {
-        console.log("Performing direct navigation to /");
-        window.location.href = "/";
-      }, 100); // Reduced timeout for faster redirect
+        console.log("Performing navigation to dashboard");
+        setLocation("/");
+      }, 100);
     },
     onError: (error) => {
       console.error("Login error:", error);
