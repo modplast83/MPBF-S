@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@/hooks/use-auth-v2";
+import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
 import { 
   Dialog, 

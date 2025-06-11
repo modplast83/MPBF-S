@@ -27,6 +27,9 @@ type AuthContextType = {
   isLoading: boolean;
   error: Error | null;
   isAuthenticated: boolean;
+  login: (username: string, password: string) => Promise<void>;
+  register: (userData: RegisterData) => Promise<void>;
+  logout: () => Promise<void>;
   loginMutation: UseMutationResult<SelectUser, Error, LoginCredentials>;
   registerMutation: UseMutationResult<SelectUser, Error, RegisterData>;
   logoutMutation: UseMutationResult<void, Error, void>;
@@ -164,6 +167,43 @@ export function AuthProvider({ children }: { children: ReactNode | ((authContext
     },
   });
 
+  // Helper functions
+  const login = async (username: string, password: string) => {
+    return new Promise<void>((resolve, reject) => {
+      loginMutation.mutate(
+        { username, password },
+        {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error),
+        }
+      );
+    });
+  };
+
+  const register = async (userData: RegisterData) => {
+    return new Promise<void>((resolve, reject) => {
+      registerMutation.mutate(
+        userData,
+        {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error),
+        }
+      );
+    });
+  };
+
+  const logout = async () => {
+    return new Promise<void>((resolve, reject) => {
+      logoutMutation.mutate(
+        undefined,
+        {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error),
+        }
+      );
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -171,12 +211,26 @@ export function AuthProvider({ children }: { children: ReactNode | ((authContext
         isLoading,
         error,
         isAuthenticated: !!user,
+        login,
+        register,
+        logout,
         loginMutation,
         registerMutation,
         logoutMutation,
       }}
     >
-      {children}
+      {typeof children === 'function' ? children({
+        user: user || null,
+        isLoading,
+        error,
+        isAuthenticated: !!user,
+        login,
+        register,
+        logout,
+        loginMutation,
+        registerMutation,
+        logoutMutation,
+      }) : children}
     </AuthContext.Provider>
   );
 }

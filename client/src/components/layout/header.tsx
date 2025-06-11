@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth-v2";
+import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
 import { Loader2, Menu, HelpCircle } from "lucide-react";

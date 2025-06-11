@@ -13,8 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 
-// Import company logo
-import companyLogo from "/assets/company-logo.png";
+// Company logo will be loaded dynamically
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -86,7 +85,13 @@ export default function AuthPage() {
     try {
       setIsSubmitting(true);
       const { confirmPassword, ...registerData } = data;
-      await registerUser(registerData);
+      await registerUser({
+        username: registerData.username || "",
+        password: registerData.password || "",
+        email: registerData.email,
+        firstName: registerData.firstName,
+        lastName: registerData.lastName,
+      });
     } finally {
       setIsSubmitting(false);
     }

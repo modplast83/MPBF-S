@@ -11,7 +11,7 @@ import { Roll } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/use-permissions";
-import { useAuth } from "@/hooks/use-auth-v2";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function WorkflowIndex() {
   const { t } = useTranslation();
