@@ -20,13 +20,13 @@ export function AuthRedirect() {
     if (isAuthenticated && isAuthPage) {
       // If authenticated and on auth page, redirect to dashboard
       console.log("User is authenticated but on auth page, redirecting to dashboard");
-      window.location.href = "/";
+      setLocation("/");
     } else if (!isAuthenticated && !isAuthPage) {
       // If not authenticated and not on auth page, redirect to auth
       console.log("User is not authenticated and not on auth page, redirecting to auth");
-      window.location.href = "/auth";
+      setLocation("/auth");
     }
-  }, [user, isLoading, location]);
+  }, [user, isLoading, location, setLocation]);
   
   // This component doesn't render anything
   return null;

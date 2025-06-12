@@ -1506,7 +1506,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/raw-materials/:id", async (req: Request, res: Response) => {
     try {
-      const rawMaterial = await storage.getRawMaterial(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "Invalid raw material ID" });
+      }
+      
+      const rawMaterial = await storage.getRawMaterial(id);
       if (!rawMaterial) {
         return res.status(404).json({ message: "Raw material not found" });
       }
@@ -1531,13 +1536,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.put("/api/raw-materials/:id", async (req: Request, res: Response) => {
     try {
-      const existingRawMaterial = await storage.getRawMaterial(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "Invalid raw material ID" });
+      }
+      
+      const existingRawMaterial = await storage.getRawMaterial(id);
       if (!existingRawMaterial) {
         return res.status(404).json({ message: "Raw material not found" });
       }
       
       const validatedData = insertRawMaterialSchema.parse(req.body);
-      const rawMaterial = await storage.updateRawMaterial(parseInt(req.params.id), validatedData);
+      const rawMaterial = await storage.updateRawMaterial(id, validatedData);
       res.json(rawMaterial);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1549,12 +1559,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.delete("/api/raw-materials/:id", async (req: Request, res: Response) => {
     try {
-      const rawMaterial = await storage.getRawMaterial(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "Invalid raw material ID" });
+      }
+      
+      const rawMaterial = await storage.getRawMaterial(id);
       if (!rawMaterial) {
         return res.status(404).json({ message: "Raw material not found" });
       }
       
-      await storage.deleteRawMaterial(parseInt(req.params.id));
+      await storage.deleteRawMaterial(id);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete raw material" });
@@ -1573,7 +1588,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/final-products/:id", async (req: Request, res: Response) => {
     try {
-      const finalProduct = await storage.getFinalProduct(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "Invalid final product ID" });
+      }
+      
+      const finalProduct = await storage.getFinalProduct(id);
       if (!finalProduct) {
         return res.status(404).json({ message: "Final product not found" });
       }
@@ -1605,7 +1625,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.put("/api/final-products/:id", async (req: Request, res: Response) => {
     try {
-      const existingFinalProduct = await storage.getFinalProduct(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "Invalid final product ID" });
+      }
+      
+      const existingFinalProduct = await storage.getFinalProduct(id);
       if (!existingFinalProduct) {
         return res.status(404).json({ message: "Final product not found" });
       }
@@ -1618,7 +1643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Job order not found" });
       }
       
-      const finalProduct = await storage.updateFinalProduct(parseInt(req.params.id), validatedData);
+      const finalProduct = await storage.updateFinalProduct(id, validatedData);
       res.json(finalProduct);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1630,12 +1655,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.delete("/api/final-products/:id", async (req: Request, res: Response) => {
     try {
-      const finalProduct = await storage.getFinalProduct(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "Invalid final product ID" });
+      }
+      
+      const finalProduct = await storage.getFinalProduct(id);
       if (!finalProduct) {
         return res.status(404).json({ message: "Final product not found" });
       }
       
-      await storage.deleteFinalProduct(parseInt(req.params.id));
+      await storage.deleteFinalProduct(id);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete final product" });
@@ -4784,7 +4814,7 @@ COMMIT;
           jobOrder: jobOrder ? {
             id: jobOrder.id,
             status: jobOrder.status
-          } : nulll,
+          } : null,
           result: check.status === "passed" ? "Pass" : "Fail",
           notes: check.notes,
           correctiveActions: actions.map(action => ({
