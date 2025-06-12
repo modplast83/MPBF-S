@@ -4784,7 +4784,7 @@ COMMIT;
           jobOrder: jobOrder ? {
             id: jobOrder.id,
             status: jobOrder.status
-          } : null,
+          } : nulll,
           result: check.status === "passed" ? "Pass" : "Fail",
           notes: check.notes,
           correctiveActions: actions.map(action => ({

@@ -315,7 +315,8 @@ async function analyzeImage(file: File): Promise<ExtractedColor[]> {
           return;
         }
         
-        // Draw image on canvas
+        try {
+          // Draw image on canvas
         ctx.drawImage(img, 0, 0, width, height);
         
         // Get all pixel data
@@ -363,6 +364,10 @@ async function analyzeImage(file: File): Promise<ExtractedColor[]> {
         const clusteredColors = clusterColors(extractedColors, 16);
         
         resolve(clusteredColors);
+        } catch (error) {
+          console.error('Error processing image:', error);
+          reject(new Error(`Image processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`));
+        }
       };
       
       img.onerror = () => {
