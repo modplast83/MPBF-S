@@ -50,6 +50,7 @@ import InkConsumptionCalculator from "@/pages/tools/ink-consumption";
 import UtilityTools from "@/pages/tools/utilities";
 import CostCalculatorPage from "@/pages/tools/cost-calculator";
 import MixColorsCalculator from "@/pages/tools/mix-colors";
+import OrderDesignPage from "@/pages/tools/order-design";
 import ClichePage from "@/pages/cliches/index";
 // HR Module imports
 import HRIndex from "@/pages/hr/index";
@@ -129,6 +130,7 @@ function App() {
                     <ProtectedRoute path="/system/sms" component={SmsIndex} module="SMS Management" />
                     <ProtectedRoute path="/system/server-restart" component={ServerRestart} module="Server Management" />
                     <ProtectedRoute path="/tools" component={ToolsPage} module="Tools" />
+                    <ProtectedRoute path="/tools/order-design" component={OrderDesignPage} module="Order Design" />
                     <ProtectedRoute path="/tools/bag-weight" component={BagWeightCalculator} module="Bag Weight Calculator" />
                     <ProtectedRoute path="/tools/ink-consumption" component={InkConsumptionCalculator} module="Ink Consumption" />
                     <ProtectedRoute path="/tools/utilities" component={UtilityTools} module="Utility Tools" />
