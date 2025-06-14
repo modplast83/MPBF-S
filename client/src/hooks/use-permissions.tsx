@@ -34,6 +34,10 @@ export function PermissionsProvider({
     queryKey: ['/api/permissions'],
     // Only fetch permissions if user is logged in
     enabled: !!user,
+    // Refresh permissions more frequently to catch updates
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 60000, // Refetch every minute
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   // Fetch modules for permission checking

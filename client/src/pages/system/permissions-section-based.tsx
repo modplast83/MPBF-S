@@ -220,7 +220,8 @@ export default function Permissions() {
       return await apiRequest("PATCH", `/api/permissions/${id}`, uiToApiFormat(permission));
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
+      // Invalidate all queries to force refresh across all user sessions
+      queryClient.invalidateQueries();
       toast({
         title: "Success",
         description: "Permission updated successfully",
