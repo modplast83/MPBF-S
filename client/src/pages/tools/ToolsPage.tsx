@@ -8,10 +8,18 @@ import {
   DollarSign,
   Beaker,
   Settings,
-  Zap
+  Zap,
+  Package
 } from "lucide-react";
 
 const tools = [
+  {
+    title: "Order Design",
+    description: "Professional product customization wizard for packaging solutions",
+    icon: Package,
+    path: "/tools/order-design",
+    color: "bg-gradient-to-br from-indigo-500 to-purple-600"
+  },
   {
     title: "Bag Weight Calculator",
     description: "Calculate optimal bag weights and material requirements",
