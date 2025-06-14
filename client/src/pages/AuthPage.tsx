@@ -68,7 +68,6 @@ export default function AuthPage() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      console.log("User already authenticated, redirecting to dashboard");
       setLocation("/");
     }
   }, [isAuthenticated, isLoading, setLocation]);

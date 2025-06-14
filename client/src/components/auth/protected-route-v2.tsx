@@ -38,7 +38,6 @@ export function ProtectedRoute({
   useEffect(() => {
     // Only redirect if not already on the auth page
     if (!isLoading && !isAuthenticated && location !== "/auth") {
-      console.log("User is not authenticated and not on auth page, redirecting to auth");
       setLocation("/auth");
       return;
     }
@@ -46,21 +45,18 @@ export function ProtectedRoute({
     if (!isLoading && isAuthenticated) {
       // Check for workflow tab permission if specified
       if (workflowTab && !hasWorkflowTabPermission(workflowTab)) {
-        console.log(`User doesn't have permission for workflow tab: ${workflowTab}, redirecting to dashboard`);
         setLocation("/");
         return;
       }
       
       // If module is specified, check if user has permission
       if (module && !hasPermission(module)) {
-        console.log(`User doesn't have permission for module: ${module}, redirecting to dashboard`);
         setLocation("/");
         return;
       }
       
       // If sectionOnly is specified, ensure the user has a section assigned
       if (sectionOnly && user && (!user.sectionId || user.sectionId === "")) {
-        console.log(`User doesn't have a section assigned, section is required for: ${path}, redirecting to dashboard`);
         setLocation("/");
         return;
       }
