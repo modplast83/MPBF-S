@@ -237,12 +237,7 @@ export class DatabaseStorage implements IStorage {
     return allPermissions;
   }
 
-  async getPermissionsByUser(userId: string): Promise<Permission[]> {
-    const userPermissions = await db.select()
-      .from(permissions)
-      .where(eq(permissions.userId, userId));
-    return userPermissions;
-  }
+
 
   async getPermissionsBySection(sectionId: string): Promise<Permission[]> {
     const sectionPermissions = await db.select()
