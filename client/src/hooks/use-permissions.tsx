@@ -24,11 +24,9 @@ export function PermissionsProvider({
   children: ReactNode;
   user: User | null;
 }) {
-  const [permissions, setPermissions] = useState<Permission[]>([]);
-  
   // Fetch permissions for the current user
   const { 
-    data: rolePermissions = [], 
+    data: permissions = [], 
     isLoading,
   } = useQuery<Permission[]>({ 
     queryKey: ['/api/permissions'],
@@ -41,16 +39,12 @@ export function PermissionsProvider({
   });
 
   // Fetch modules for permission checking
-  const { data: modules = [] } = useQuery<any[]>({ 
+  const { data: modules = [], isLoading: modulesLoading } = useQuery<any[]>({ 
     queryKey: ['/api/modules'],
     enabled: !!user,
+    staleTime: 30000,
+    refetchOnWindowFocus: true,
   });
-
-  useEffect(() => {
-    if (rolePermissions.length > 0) {
-      setPermissions(rolePermissions);
-    }
-  }, [rolePermissions]);
 
   // Function to check if user has permission for a specific workflow tab
   const hasWorkflowTabPermission = (tab: string): boolean => {
@@ -103,8 +97,11 @@ export function PermissionsProvider({
     // Administrator has all permissions
     if (isAdmin) return true;
     
-    // If permissions are still loading, allow access for administrators to prevent blocking
-    if (isLoading && isAdmin) return true;
+    // If data is still loading, deny access for non-admins to prevent unauthorized access
+    if (isLoading || modulesLoading || modules.length === 0 || permissions.length === 0) {
+      console.log(`Data still loading or empty - isLoading: ${isLoading}, modulesLoading: ${modulesLoading}, modules: ${modules.length}, permissions: ${permissions.length}`);
+      return false;
+    }
     
     // For non-administrators, check section-based permissions
     if (!userSection) {
@@ -147,7 +144,7 @@ export function PermissionsProvider({
       value={{
         hasPermission,
         hasWorkflowTabPermission,
-        isLoading,
+        isLoading: isLoading || modulesLoading,
       }}
     >
       {children}
