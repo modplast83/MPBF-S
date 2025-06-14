@@ -537,7 +537,14 @@ function PermissionDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.sectionId || !formData.moduleId) {
+    if (!formData.sectionId || formData.moduleId === 0) {
+      // Add visual feedback for validation errors
+      if (!formData.sectionId) {
+        console.error("Please select a section");
+      }
+      if (formData.moduleId === 0) {
+        console.error("Please select a module");
+      }
       return;
     }
     onSave(formData);
