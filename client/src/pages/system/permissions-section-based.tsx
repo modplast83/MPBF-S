@@ -322,22 +322,62 @@ export default function Permissions() {
         <CardContent>
           <div className="space-y-3">
             {sectionPermissions.map((permission) => (
-              <div key={permission.id} className="flex items-center justify-between p-3 border rounded-lg">
+              <div key={permission.id} className={`flex items-center justify-between p-3 border rounded-lg ${updatePermissionMutation.isPending ? 'opacity-50' : ''}`}>
                 <div className="flex-1">
                   <div className="font-medium">{getModuleName(permission.moduleId)}</div>
-                  <div className="text-sm text-muted-foreground flex gap-4 mt-1">
-                    <span className={`px-2 py-1 rounded text-xs ${permission.canView ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                      View: {permission.canView ? 'Yes' : 'No'}
-                    </span>
-                    <span className={`px-2 py-1 rounded text-xs ${permission.canCreate ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                      Create: {permission.canCreate ? 'Yes' : 'No'}
-                    </span>
-                    <span className={`px-2 py-1 rounded text-xs ${permission.canEdit ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                      Edit: {permission.canEdit ? 'Yes' : 'No'}
-                    </span>
-                    <span className={`px-2 py-1 rounded text-xs ${permission.canDelete ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                      Delete: {permission.canDelete ? 'Yes' : 'No'}
-                    </span>
+                  <div className="text-sm flex gap-4 mt-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={permission.canView}
+                        onCheckedChange={(checked) => {
+                          updatePermissionMutation.mutate({
+                            id: permission.id,
+                            permission: { ...permission, canView: !!checked }
+                          });
+                        }}
+                        disabled={updatePermissionMutation.isPending}
+                      />
+                      <Label className="text-xs">View</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={permission.canCreate}
+                        onCheckedChange={(checked) => {
+                          updatePermissionMutation.mutate({
+                            id: permission.id,
+                            permission: { ...permission, canCreate: !!checked }
+                          });
+                        }}
+                        disabled={updatePermissionMutation.isPending}
+                      />
+                      <Label className="text-xs">Create</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={permission.canEdit}
+                        onCheckedChange={(checked) => {
+                          updatePermissionMutation.mutate({
+                            id: permission.id,
+                            permission: { ...permission, canEdit: !!checked }
+                          });
+                        }}
+                        disabled={updatePermissionMutation.isPending}
+                      />
+                      <Label className="text-xs">Edit</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={permission.canDelete}
+                        onCheckedChange={(checked) => {
+                          updatePermissionMutation.mutate({
+                            id: permission.id,
+                            permission: { ...permission, canDelete: !!checked }
+                          });
+                        }}
+                        disabled={updatePermissionMutation.isPending}
+                      />
+                      <Label className="text-xs">Delete</Label>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
