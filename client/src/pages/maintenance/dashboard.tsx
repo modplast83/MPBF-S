@@ -83,15 +83,17 @@ export default function MaintenanceDashboard() {
     queryFn: () => apiRequest('GET', '/api/machines')
   });
 
-  // Filter data by time range
-  const filteredRequests = requests.filter((request: MaintenanceRequest) => {
+  // Filter data by time range with null checking
+  const filteredRequests = (requests || []).filter((request: MaintenanceRequest) => {
+    if (!request || !request.createdAt) return false;
     const requestDate = new Date(request.createdAt);
-    return requestDate >= startDate && requestDate <= endDate;
+    return !isNaN(requestDate.getTime()) && requestDate >= startDate && requestDate <= endDate;
   });
 
-  const filteredActions = actions.filter((action: MaintenanceAction) => {
+  const filteredActions = (actions || []).filter((action: MaintenanceAction) => {
+    if (!action || !action.actionDate) return false;
     const actionDate = new Date(action.actionDate);
-    return actionDate >= startDate && actionDate <= endDate;
+    return !isNaN(actionDate.getTime()) && actionDate >= startDate && actionDate <= endDate;
   });
 
   // Calculate metrics

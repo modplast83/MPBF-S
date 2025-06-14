@@ -417,7 +417,7 @@ export default function UnifiedQualityDashboard() {
                                   {check.status === "Passed" ? t("quality.passed") : t("quality.failed")}
                                 </QualityBadge>
                                 <span className="text-xs text-muted-foreground ml-2 mt-0.5">
-                                  {new Date(check.timestamp).toLocaleDateString()}
+                                  {check.timestamp ? new Date(check.timestamp).toLocaleDateString() : t("common.not_available")}
                                 </span>
                               </div>
                             </div>
