@@ -116,9 +116,16 @@ export function PermissionsProvider({
     const moduleMatch = modules.find((m: any) => m.name === module);
     const moduleId = moduleMatch?.id;
     
+    console.log(`DEBUG: Looking for module "${module}", found moduleId: ${moduleId}`);
+    console.log(`DEBUG: Available modules:`, modules.map(m => ({ id: m.id, name: m.name })));
+    console.log(`DEBUG: User section: ${userSection}`);
+    console.log(`DEBUG: Available permissions:`, permissions.map(p => ({ sectionId: p.sectionId, moduleId: p.moduleId, isActive: p.isActive })));
+    
     const userPermission = permissions.find(p => 
       p.sectionId === userSection && p.moduleId === moduleId
     );
+    
+    console.log(`DEBUG: Found permission:`, userPermission);
     
     if (!userPermission || !userPermission.isActive) {
       console.log(`No active permission found for section ${userSection} and module ${module}`);
