@@ -3703,8 +3703,9 @@ COMMIT;
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
-      // Define a schema for section-based permission updates
+      // Define a schema for user-specific permission updates
       const updateSchema = z.object({
+        userId: z.string().optional(),
         sectionId: z.string().optional(),
         moduleId: z.number().optional(),
         canView: z.boolean().optional(),

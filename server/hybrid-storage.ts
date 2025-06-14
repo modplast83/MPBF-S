@@ -96,8 +96,8 @@ export class HybridStorage implements IStorage {
     return this.dbStorage.getPermissions();
   }
   
-  async getPermissionsByRole(role: string): Promise<Permission[]> {
-    return this.dbStorage.getPermissionsByRole(role);
+  async getPermissionsByUser(userId: string): Promise<Permission[]> {
+    return this.dbStorage.getPermissionsByUser(userId);
   }
   
   async getPermissionsBySection(sectionId: string): Promise<Permission[]> {
