@@ -262,11 +262,40 @@ export class DatabaseStorage implements IStorage {
 
   async createPermission(permission: InsertPermission): Promise<Permission> {
     try {
-      const [created] = await db
-        .insert(permissions)
-        .values(permission)
-        .returning();
-      return created;
+      // First, try to find existing permission for this section and module
+      const existing = await db
+        .select()
+        .from(permissions)
+        .where(
+          and(
+            eq(permissions.sectionId, permission.sectionId),
+            eq(permissions.moduleId, permission.moduleId)
+          )
+        )
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Update existing permission
+        const [updated] = await db
+          .update(permissions)
+          .set({
+            canView: permission.canView,
+            canCreate: permission.canCreate,
+            canEdit: permission.canEdit,
+            canDelete: permission.canDelete,
+            isActive: permission.isActive
+          })
+          .where(eq(permissions.id, existing[0].id))
+          .returning();
+        return updated;
+      } else {
+        // Create new permission
+        const [created] = await db
+          .insert(permissions)
+          .values(permission)
+          .returning();
+        return created;
+      }
     } catch (error) {
       console.error('Error in createPermission:', error);
       throw error;
