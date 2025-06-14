@@ -125,7 +125,7 @@ export function QualityViolationsWidget() {
                   </div>
                   <div className="flex items-center gap-1">
                     <User className="h-3 w-3" />
-                    <span>Reported by: {violation.reportedBy}</span>
+                    <span>Reported by: {violation.reportedBy || 'Unknown'}</span>
                   </div>
                   <div className="w-full mt-1">
                     {getStatusBadge(violation.status)}

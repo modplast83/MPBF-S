@@ -731,10 +731,10 @@ export function QualityViolations() {
                 {filteredViolations.map((violation: any) => {
                   let reporterName = violation.reportedBy || t("common.unknown");
                   
-                  if (Array.isArray(users)) {
+                  if (Array.isArray(users) && users.length > 0) {
                     const reporter = users.find((u: any) => u.id === violation.reportedBy);
-                    if (reporter && reporter.firstName) {
-                      reporterName = `${reporter.firstName || ''} ${reporter.lastName || ''}`;
+                    if (reporter && (reporter.firstName || reporter.lastName)) {
+                      reporterName = `${reporter.firstName || ''} ${reporter.lastName || ''}`.trim();
                     }
                   }
                   

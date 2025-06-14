@@ -341,9 +341,9 @@ export default function ViolationTrendsPage() {
             <BarChart3 className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold capitalize">{mostCommonType[0]}</div>
+            <div className="text-2xl font-bold capitalize">{mostCommonType[0] || 'None'}</div>
             <p className="text-xs text-gray-600 mt-1">
-              {mostCommonType[1]} incidents ({totalViolations > 0 && mostCommonType[1] > 0 ? ((mostCommonType[1] / totalViolations) * 100).toFixed(0) : '0'}%)
+              {mostCommonType[1] || 0} incidents ({totalViolations > 0 && mostCommonType[1] > 0 ? ((mostCommonType[1] / totalViolations) * 100).toFixed(0) : '0'}%)
             </p>
           </CardContent>
         </Card>
@@ -484,7 +484,7 @@ export default function ViolationTrendsPage() {
                   Pattern Detected
                 </div>
                 <p className="text-sm text-yellow-600">
-                  {mostCommonType[0]} violations account for {((mostCommonType[1] / totalViolations) * 100).toFixed(0)}% of all cases. 
+                  {mostCommonType[0] || 'Unknown'} violations account for {((mostCommonType[1] / totalViolations) * 100).toFixed(0)}% of all cases. 
                   Consider targeted training for this area.
                 </p>
               </div>
