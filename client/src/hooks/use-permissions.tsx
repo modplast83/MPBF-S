@@ -58,29 +58,8 @@ export function PermissionsProvider({
     // Administrator has all permissions
     if (isAdmin) return true;
 
-    // For section-specific roles, check if the tab matches their section
-    if (userSection) {
-      // Check if the tab is associated with the user's section through section name matching
-      // This allows section-based access to their respective workflow tabs
-      
-      // Check for specific workflow tab permissions based on section
-      const sectionTabModule = `Workflow-${tab.charAt(0).toUpperCase() + tab.slice(1)} Tab`;
-      const matchingModules = modules.filter(m => m.name === sectionTabModule);
-      
-      for (const moduleData of matchingModules) {
-        const permission = permissions.find(
-          p => p.sectionId === userSection && 
-             p.moduleId === moduleData.id && 
-             p.isActive === true
-        );
-        
-        if (permission && permission.canView === true) {
-          return true;
-        }
-      }
-    }
-    
-    return false;
+    // Check if user has general Workflow module permission
+    return hasPermission("Workflow", "view");
   };
 
   // Function to check if user has permission for a specific module and action
@@ -92,20 +71,18 @@ export function PermissionsProvider({
     const isAdmin = user?.isAdmin;
     const userSection = user?.sectionId;
     
-    console.log(`Checking permission for module: ${module}, action: ${action}, isAdmin: ${isAdmin}, userSection: ${userSection}`);
+
     
     // Administrator has all permissions
     if (isAdmin) return true;
     
     // If data is still loading, deny access for non-admins to prevent unauthorized access
     if (isLoading || modulesLoading || modules.length === 0 || permissions.length === 0) {
-      console.log(`Data still loading or empty - isLoading: ${isLoading}, modulesLoading: ${modulesLoading}, modules: ${modules.length}, permissions: ${permissions.length}`);
       return false;
     }
     
     // For non-administrators, check section-based permissions
     if (!userSection) {
-      console.log(`User has no section assigned, denying access to ${module}`);
       return false;
     }
     
@@ -113,19 +90,11 @@ export function PermissionsProvider({
     const moduleMatch = modules.find((m: any) => m.name === module);
     const moduleId = moduleMatch?.id;
     
-    console.log(`DEBUG: Looking for module "${module}", found moduleId: ${moduleId}`);
-    console.log(`DEBUG: Available modules:`, modules.map(m => ({ id: m.id, name: m.name })));
-    console.log(`DEBUG: User section: ${userSection}`);
-    console.log(`DEBUG: Available permissions:`, permissions.map(p => ({ sectionId: p.sectionId, moduleId: p.moduleId, isActive: p.isActive })));
-    
     const userPermission = permissions.find(p => 
       p.sectionId === userSection && p.moduleId === moduleId
     );
     
-    console.log(`DEBUG: Found permission:`, userPermission);
-    
     if (!userPermission || !userPermission.isActive) {
-      console.log(`No active permission found for section ${userSection} and module ${module}`);
       return false;
     }
     
@@ -135,7 +104,6 @@ export function PermissionsProvider({
                                action === 'edit' ? userPermission.canEdit :
                                action === 'delete' ? userPermission.canDelete : false;
     
-    console.log(`Permission check result: ${hasActionPermission} for ${action} on ${module}`);
     return Boolean(hasActionPermission);
   };
 
