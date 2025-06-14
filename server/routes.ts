@@ -3670,7 +3670,7 @@ COMMIT;
         // Transform to user-specific format for client compatibility
         const transformedPermission = {
           id: permission.id,
-          userId: permission.userId,
+          
           sectionId: permission.sectionId,
           moduleId: permission.moduleId,
           canView: permission.canView,
@@ -3704,9 +3704,9 @@ COMMIT;
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
-      // Define a schema for user-specific permission updates
+      // Define a schema for section-based permission updates
       const updateSchema = z.object({
-        userId: z.string().optional(),
+        
         sectionId: z.string().optional(),
         moduleId: z.number().optional(),
         canView: z.boolean().optional(),
@@ -3742,7 +3742,7 @@ COMMIT;
         // Transform to user-specific format for client compatibility
         const transformedPermission = {
           id: permission.id,
-          userId: permission.userId,
+          
           sectionId: permission.sectionId,
           moduleId: permission.moduleId,
           canView: permission.canView,
@@ -3776,9 +3776,9 @@ COMMIT;
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
-      // Define a schema for user-specific permission updates
+      // Define a schema for section-based permission updates
       const updateSchema = z.object({
-        userId: z.string().optional(),
+        
         sectionId: z.string().optional(),
         moduleId: z.number().optional(),
         canView: z.boolean().optional(),
@@ -3814,7 +3814,7 @@ COMMIT;
         // Transform to user-specific format for client compatibility
         const transformedPermission = {
           id: permission.id,
-          userId: permission.userId,
+          
           sectionId: permission.sectionId,
           moduleId: permission.moduleId,
           canView: permission.canView,

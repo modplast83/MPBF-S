@@ -21,10 +21,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { apiRequest } from "@/lib/queryClient";
 
-// Define the API format from server (user-specific within sections)
+// Define the API format from server (section-based)
 interface PermissionDTO {
   id: number;
-  userId: string;
   sectionId: string;
   moduleId: number;
   canView: boolean | null;
@@ -39,7 +38,6 @@ interface PermissionDTO {
 // Define UI format for permissions
 interface Permission {
   id: number;
-  userId: string;
   sectionId: string;
   moduleId: number;
   canView: boolean;
@@ -86,7 +84,6 @@ interface Module {
 function apiToUiFormat(dto: PermissionDTO): Permission {
   return {
     id: dto.id,
-    userId: dto.userId,
     sectionId: dto.sectionId,
     moduleId: dto.moduleId,
     canView: dto.canView ?? false,
@@ -103,7 +100,6 @@ function apiToUiFormat(dto: PermissionDTO): Permission {
 function uiToApiFormat(permission: Partial<Permission>): Partial<PermissionDTO> {
   return {
     id: permission.id,
-    userId: permission.userId,
     sectionId: permission.sectionId,
     moduleId: permission.moduleId,
     canView: permission.canView,
@@ -120,11 +116,9 @@ export default function Permissions() {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPermission, setEditingPermission] = useState<Permission | null>(null);
   const [filterSection, setFilterSection] = useState<string | null>(null);
-  const [filterUser, setFilterUser] = useState<string | null>(null);
   const [filterModule, setFilterModule] = useState<number | null>(null);
   const [showInactive, setShowInactive] = useState(true);
   const { toast } = useToast();
@@ -143,11 +137,6 @@ export default function Permissions() {
   // Fetch modules
   const modulesQuery = useQuery<Module[]>({
     queryKey: ["/api/modules"],
-  });
-
-  // Fetch users
-  const usersQuery = useQuery<User[]>({
-    queryKey: ["/api/users"],
   });
 
   // Update local state when queries succeed
@@ -169,11 +158,7 @@ export default function Permissions() {
     }
   }, [modulesQuery.data]);
 
-  useEffect(() => {
-    if (usersQuery.data) {
-      setUsers(usersQuery.data);
-    }
-  }, [usersQuery.data]);
+
 
   // Handle query errors
   useEffect(() => {
