@@ -3667,9 +3667,10 @@ COMMIT;
       try {
         const permission = await storage.createPermission(validatedData);
         
-        // Transform to section-based format for client compatibility
+        // Transform to user-specific format for client compatibility
         const transformedPermission = {
           id: permission.id,
+          userId: permission.userId,
           sectionId: permission.sectionId,
           moduleId: permission.moduleId,
           canView: permission.canView,
@@ -3738,9 +3739,10 @@ COMMIT;
           return res.status(404).json({ message: "Failed to update permission" });
         }
         
-        // Transform to section-based format for client compatibility
+        // Transform to user-specific format for client compatibility
         const transformedPermission = {
           id: permission.id,
+          userId: permission.userId,
           sectionId: permission.sectionId,
           moduleId: permission.moduleId,
           canView: permission.canView,
@@ -3766,7 +3768,7 @@ COMMIT;
     }
   });
 
-  // PATCH route for section-based permissions (same as PUT but for compatibility)
+  // PATCH route for user-specific permissions (same as PUT but for compatibility)
   app.patch("/api/permissions/:id", requirePermission("Permissions", "edit"), async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
@@ -3774,8 +3776,9 @@ COMMIT;
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
-      // Define a schema for section-based permission updates
+      // Define a schema for user-specific permission updates
       const updateSchema = z.object({
+        userId: z.string().optional(),
         sectionId: z.string().optional(),
         moduleId: z.number().optional(),
         canView: z.boolean().optional(),
@@ -3808,9 +3811,10 @@ COMMIT;
           return res.status(404).json({ message: "Failed to update permission" });
         }
         
-        // Transform to section-based format for client compatibility
+        // Transform to user-specific format for client compatibility
         const transformedPermission = {
           id: permission.id,
+          userId: permission.userId,
           sectionId: permission.sectionId,
           moduleId: permission.moduleId,
           canView: permission.canView,
