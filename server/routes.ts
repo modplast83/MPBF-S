@@ -3765,6 +3765,76 @@ COMMIT;
     }
   });
 
+  // PATCH route for section-based permissions (same as PUT but for compatibility)
+  app.patch("/api/permissions/:id", requirePermission("Permissions", "edit"), async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      // Define a schema for section-based permission updates
+      const updateSchema = z.object({
+        sectionId: z.string().optional(),
+        moduleId: z.number().optional(),
+        canView: z.boolean().optional(),
+        canCreate: z.boolean().optional(),
+        canEdit: z.boolean().optional(),
+        canDelete: z.boolean().optional(),
+        isActive: z.boolean().optional()
+      });
+
+      // Validate the request body
+      const validatedData = updateSchema.parse(req.body);
+      
+      console.log(`PATCH: Updating permission ${id} with data:`, JSON.stringify(validatedData));
+      
+      if (Object.keys(validatedData).length === 0) {
+        return res.status(400).json({ message: "No valid fields to update" });
+      }
+      
+      // Get the existing permission to confirm it exists
+      const existingPermission = await storage.getPermission(id);
+      if (!existingPermission) {
+        return res.status(404).json({ message: "Permission not found" });
+      }
+      
+      // Send the validated data to storage
+      try {
+        const permission = await storage.updatePermission(id, validatedData);
+        
+        if (!permission) {
+          return res.status(404).json({ message: "Failed to update permission" });
+        }
+        
+        // Transform to section-based format for client compatibility
+        const transformedPermission = {
+          id: permission.id,
+          sectionId: permission.sectionId,
+          moduleId: permission.moduleId,
+          canView: permission.canView,
+          canCreate: permission.canCreate,
+          canEdit: permission.canEdit,
+          canDelete: permission.canDelete,
+          isActive: permission.isActive,
+          createdAt: permission.createdAt,
+          updatedAt: permission.updatedAt
+        };
+        
+        res.json(transformedPermission);
+      } catch (updateError) {
+        console.error("SQL update error:", updateError);
+        return res.status(500).json({ message: "Database error updating permission", error: String(updateError) });
+      }
+    } catch (error) {
+      console.error("Permission update error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid permission data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update permission", error: String(error) });
+    }
+  });
+
   app.delete("/api/permissions/:id", requirePermission("Permissions", "delete"), async (req: Request, res: Response) => {
     try {
 

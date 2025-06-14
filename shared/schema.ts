@@ -234,9 +234,10 @@ export const insertModuleSchema = createInsertSchema(modules).omit({
 export type InsertModule = z.infer<typeof insertModuleSchema>;
 export type Module = typeof modules.$inferSelect;
 
-// Section-based permissions table
+// User-specific permissions table within sections
 export const permissions = pgTable("permissions", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
   sectionId: text("section_id").notNull().references(() => sections.id),
   moduleId: integer("module_id").notNull().references(() => modules.id),
   canView: boolean("can_view").default(false),
@@ -247,7 +248,7 @@ export const permissions = pgTable("permissions", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
-  uniqueIndex: unique().on(table.sectionId, table.moduleId),
+  uniqueIndex: unique().on(table.userId, table.moduleId),
 }));
 
 export const insertPermissionSchema = createInsertSchema(permissions).omit({ 
