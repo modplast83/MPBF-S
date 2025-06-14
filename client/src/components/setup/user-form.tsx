@@ -39,17 +39,13 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
     queryKey: [API_ENDPOINTS.SECTIONS],
   });
   
-  // Extended schema for the form
+  // Use the base schema directly
   const userFormSchema = upsertUserSchema.extend({
-    firstName: z.string().optional().nullable(),
-    lastName: z.string().optional().nullable(),
-    email: z.string().email().optional().nullable(),
-    phone: z.string().optional().nullable(),
     displayName: z.string().optional(),
   });
   
   // Set up the form
-  const form = useForm<z.infer<typeof userFormSchema>>({
+  const form = useForm({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       id: user?.id || "",
@@ -59,7 +55,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
       lastName: user?.lastName || null,
       bio: user?.bio || null,
       profileImageUrl: user?.profileImageUrl || null,
-      role: user?.role || "user",
+      isAdmin: user?.isAdmin ?? false,
       phone: user?.phone || null,
       isActive: user?.isActive ?? true,
       sectionId: user?.sectionId || null,
@@ -79,8 +75,6 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
         userData.firstName = nameParts[0];
         userData.lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : null;
       }
-      
-      // Remove the old 'name' field reference since it's no longer used
       
       // When editing, we need to preserve the password field
       if (isEditing && user) {
@@ -193,28 +187,21 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="role"
+            name="isAdmin"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="administrator">Administrator</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="operator">Operator</SelectItem>
-                    <SelectItem value="sales">Sales</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <div className="space-y-0.5">
+                  <FormLabel>Administrator</FormLabel>
+                  <div className="text-sm text-secondary-500">
+                    Grant administrator privileges to this user
+                  </div>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={!!field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
               </FormItem>
             )}
           />
