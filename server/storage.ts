@@ -36,8 +36,9 @@ export interface IStorage {
   deleteUser(id: string): Promise<boolean>;
   upsertUser(user: UpsertUser): Promise<User>;
   
-  // Permissions management (section-based)
+  // Permissions management (user-specific within sections)
   getPermissions(): Promise<Permission[]>;
+  getPermissionsByUser(userId: string): Promise<Permission[]>;
   getPermissionsBySection(sectionId: string): Promise<Permission[]>;
   getPermissionsByModule(moduleId: number): Promise<Permission[]>;
   getPermission(id: number): Promise<Permission | undefined>;
