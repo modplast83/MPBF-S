@@ -119,12 +119,12 @@ export default function Permissions() {
   });
 
   // Fetch sections
-  const sectionsQuery = useQuery({
+  const sectionsQuery = useQuery<Section[]>({
     queryKey: ["/api/sections"],
   });
 
   // Fetch modules
-  const modulesQuery = useQuery({
+  const modulesQuery = useQuery<Module[]>({
     queryKey: ["/api/modules"],
   });
 
@@ -181,17 +181,7 @@ export default function Permissions() {
   // Create permission mutation
   const createPermissionMutation = useMutation({
     mutationFn: async (permission: Partial<Permission>) => {
-      const response = await fetch("/api/permissions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(uiToApiFormat(permission)),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to create permission");
-      }
-      return response.json();
+      return await apiRequest("POST", "/api/permissions", uiToApiFormat(permission));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
@@ -214,17 +204,7 @@ export default function Permissions() {
   // Update permission mutation
   const updatePermissionMutation = useMutation({
     mutationFn: async ({ id, permission }: { id: number; permission: Partial<Permission> }) => {
-      const response = await fetch(`/api/permissions/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(uiToApiFormat(permission)),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update permission");
-      }
-      return response.json();
+      return await apiRequest("PATCH", `/api/permissions/${id}`, uiToApiFormat(permission));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
@@ -247,13 +227,7 @@ export default function Permissions() {
   // Delete permission mutation
   const deletePermissionMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/permissions/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to delete permission");
-      }
-      return response.json();
+      return await apiRequest("DELETE", `/api/permissions/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
