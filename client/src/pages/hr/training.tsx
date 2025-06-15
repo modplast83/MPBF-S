@@ -161,11 +161,54 @@ export default function TrainingPage() {
           notes: data.notes,
         }),
       });
+      
+      // Handle 409 conflict - evaluation already exists, try updating instead
+      if (response.status === 409 && method === 'POST') {
+        try {
+          const conflictData = await response.json();
+          const existingEvaluation = conflictData.existingEvaluation;
+          
+          if (existingEvaluation && existingEvaluation.id) {
+            const updateResponse = await fetch(`/api/training-evaluations/${existingEvaluation.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                status: data.status,
+                notes: data.notes,
+              }),
+            });
+            if (!updateResponse.ok) throw new Error('Failed to update existing evaluation');
+            return updateResponse.json();
+          }
+        } catch (parseError) {
+          // If we can't parse the response, fall back to original logic
+          const existingEvaluation = evaluations.find(e => 
+            e.trainingId === data.trainingId && e.trainingPointId === data.trainingPointId
+          );
+          
+          if (existingEvaluation) {
+            const updateResponse = await fetch(`/api/training-evaluations/${existingEvaluation.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                status: data.status,
+                notes: data.notes,
+              }),
+            });
+            if (!updateResponse.ok) throw new Error('Failed to update existing evaluation');
+            return updateResponse.json();
+          }
+        }
+      }
+      
       if (!response.ok) throw new Error(`Failed to ${data.evaluationId ? 'update' : 'create'} evaluation`);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trainings', selectedTraining?.id, 'evaluations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/training-certificates'] });
     },
   });
 
@@ -176,8 +219,10 @@ export default function TrainingPage() {
   const handleEvaluationUpdate = (trainingPointId: number, status: string, notes?: string) => {
     if (!selectedTraining) return;
     
-    // Check if evaluation already exists
-    const existingEvaluation = evaluations.find(e => e.trainingPointId === trainingPointId);
+    // Check if evaluation already exists for this training and training point
+    const existingEvaluation = evaluations.find(e => 
+      e.trainingId === selectedTraining.id && e.trainingPointId === trainingPointId
+    );
     
     createEvaluationMutation.mutate({
       trainingId: selectedTraining.id,
