@@ -187,6 +187,13 @@ export default function OrderDesignPage() {
     setEstimatedCost(calculateCost());
   }, [customization]);
 
+  // Redraw canvas when elements change
+  useEffect(() => {
+    if (canvasElements.length > 0 || designPreview) {
+      setTimeout(() => redrawCanvas(), 100);
+    }
+  }, [canvasElements, designPreview]);
+
   // Canvas element functions
   const redrawCanvas = () => {
     const canvas = canvasRef.current;
