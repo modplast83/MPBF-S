@@ -25,6 +25,21 @@ interface TrainingCertificate {
   customDesign?: any;
 }
 
+interface Training {
+  id: number;
+  trainingId: string;
+  date: string;
+  traineeId: string;
+  trainingSection: string;
+  numberOfDays: number;
+  supervisorId: string;
+  supervisorSignature?: string;
+  report?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface CertificateListProps {
   trainingId?: number;
 }
@@ -35,11 +50,11 @@ export default function CertificateList({ trainingId }: CertificateListProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: certificates = [], isLoading } = useQuery({
+  const { data: certificates = [], isLoading } = useQuery<TrainingCertificate[]>({
     queryKey: trainingId ? [`/api/trainings/${trainingId}/certificates`] : ["/api/training-certificates"]
   });
 
-  const { data: trainings } = useQuery({
+  const { data: trainings } = useQuery<Training[]>({
     queryKey: ["/api/trainings"]
   });
 
@@ -100,7 +115,7 @@ export default function CertificateList({ trainingId }: CertificateListProps) {
 
   const getTrainingInfo = (trainingId: number) => {
     const training = trainings?.find((t: any) => t.id === trainingId);
-    return training ? `Training #${training.id} - ${training.sections?.join(", ") || ""}` : `Training #${trainingId}`;
+    return training ? `Training #${training.id} - ${training.trainingSection || ""}` : `Training #${trainingId}`;
   };
 
   const downloadCertificate = (certificate: TrainingCertificate) => {

@@ -58,7 +58,7 @@ export default function CertificatesPage() {
     const training = trainings.find((t: any) => t.id === trainingId);
     return training ? {
       id: training.id,
-      sections: training.sections || [],
+      sections: training.trainingSection || "",
       trainee: training.traineeId,
       date: training.date
     } : null;

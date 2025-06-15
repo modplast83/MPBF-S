@@ -39,6 +39,30 @@ const certificateSchema = z.object({
 
 type CertificateFormData = z.infer<typeof certificateSchema>;
 
+interface Training {
+  id: number;
+  trainingId: string;
+  date: string;
+  traineeId: string;
+  trainingSection: string;
+  numberOfDays: number;
+  supervisorId: string;
+  supervisorSignature?: string;
+  report?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface User {
+  id: string;
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  isAdmin: boolean;
+}
+
 interface CertificateGeneratorProps {
   trainingId?: number;
   onClose?: () => void;
@@ -85,17 +109,17 @@ export default function CertificateGenerator({ trainingId, onClose }: Certificat
     }
   });
 
-  const { data: trainings } = useQuery({
+  const { data: trainings } = useQuery<Training[]>({
     queryKey: ["/api/trainings"],
     enabled: !trainingId
   });
 
-  const { data: selectedTraining } = useQuery({
+  const { data: selectedTraining } = useQuery<Training>({
     queryKey: ["/api/trainings", form.watch("trainingId")],
     enabled: !!form.watch("trainingId")
   });
 
-  const { data: users } = useQuery({
+  const { data: users } = useQuery<User[]>({
     queryKey: ["/api/users"]
   });
 
@@ -217,7 +241,7 @@ export default function CertificateGenerator({ trainingId, onClose }: Certificat
                           <SelectContent>
                             {trainings?.map((training: any) => (
                               <SelectItem key={training.id} value={training.id.toString()}>
-                                Training #{training.id} - {training.sections.join(", ")}
+                                Training #{training.id} - {training.trainingSection}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -444,7 +468,7 @@ export default function CertificateGenerator({ trainingId, onClose }: Certificat
                       className="text-2xl font-semibold mb-4"
                       style={{ color: form.watch("customDesign.primaryColor") }}
                     >
-                      {selectedTraining?.sections?.join(", ") || "[Training Sections]"}
+                      {selectedTraining?.trainingSection || "[Training Section]"}
                     </div>
                     <div className="text-gray-600">
                       Duration: {selectedTraining?.numberOfDays || "[X]"} days
