@@ -282,7 +282,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               issuerName: 'Training Department',
               issuerTitle: 'Training Manager',
               companyName: 'Production Management Factory',
-              status: 'active'
+              status: 'active',
+              validUntil: null
             });
           }
         }
@@ -6398,7 +6399,21 @@ COMMIT;
   app.post("/api/training-certificates", requireAuth, async (req: Request, res: Response) => {
     try {
       const { insertCertificateSchema } = await import("@shared/schema");
-      const validatedData = insertCertificateSchema.parse(req.body);
+      
+      // Process the request data and provide defaults for required fields
+      const processedData = {
+        ...req.body,
+        // Generate certificate number if not provided
+        certificateNumber: req.body.certificateNumber || `CERT-${req.body.trainingId}-${Date.now()}`,
+        // Convert validUntil string to Date if provided, otherwise set to null
+        validUntil: req.body.validUntil ? new Date(req.body.validUntil) : null,
+        // Provide defaults for required fields
+        issuerName: req.body.issuerName || 'Training Department',
+        issuerTitle: req.body.issuerTitle || 'Training Manager',
+        companyName: req.body.companyName || 'Production Management Factory'
+      };
+      
+      const validatedData = insertCertificateSchema.parse(processedData);
       
       // Verify training exists
       const training = await storage.getTraining(validatedData.trainingId);
