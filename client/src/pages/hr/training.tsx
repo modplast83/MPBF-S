@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { Calendar, User, Clock, CheckCircle, XCircle, Briefcase, AlertTriangle, GraduationCap, FileText, Users, Trophy } from "lucide-react";
-import { useLanguage } from "@/lib/language";
+import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -94,7 +94,7 @@ export default function TrainingPage() {
   });
 
   // Queries
-  const { data: trainings = [], isLoading: trainingsLoading } = useQuery({
+  const { data: trainings = [], isLoading: trainingsLoading } = useQuery<Training[]>({
     queryKey: ['/api/trainings'],
   });
 
@@ -113,7 +113,15 @@ export default function TrainingPage() {
 
   // Mutations
   const createTrainingMutation = useMutation({
-    mutationFn: (data: TrainingFormData) => apiRequest('/api/trainings', { method: 'POST', body: data }),
+    mutationFn: async (data: TrainingFormData) => {
+      const response = await fetch('/api/trainings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create training');
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trainings'] });
       setIsDialogOpen(false);
@@ -122,8 +130,15 @@ export default function TrainingPage() {
   });
 
   const updateTrainingMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Training> }) => 
-      apiRequest(`/api/trainings/${id}`, { method: 'PUT', body: data }),
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Training> }) => {
+      const response = await fetch(`/api/trainings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update training');
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trainings'] });
       setSelectedTraining(null);
@@ -131,8 +146,15 @@ export default function TrainingPage() {
   });
 
   const createEvaluationMutation = useMutation({
-    mutationFn: (data: { trainingId: number; trainingPointId: number; status: string; notes?: string }) =>
-      apiRequest('/api/training-evaluations', { method: 'POST', body: data }),
+    mutationFn: async (data: { trainingId: number; trainingPointId: number; status: string; notes?: string }) => {
+      const response = await fetch('/api/training-evaluations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create evaluation');
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trainings', selectedTraining?.id, 'evaluations'] });
     },
@@ -365,7 +387,7 @@ export default function TrainingPage() {
       <div className="grid gap-6">
         {trainingsLoading ? (
           <div className="text-center py-8">Loading trainings...</div>
-        ) : trainings.length === 0 ? (
+        ) : (trainings as Training[]).length === 0 ? (
           <Card>
             <CardContent className="text-center py-8">
               <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -373,7 +395,7 @@ export default function TrainingPage() {
             </CardContent>
           </Card>
         ) : (
-          trainings.map((training: Training) => (
+          (trainings as Training[]).map((training: Training) => (
             <Card key={training.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">

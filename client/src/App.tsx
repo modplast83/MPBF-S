@@ -56,6 +56,7 @@ import ClichePage from "@/pages/cliches/index";
 import HRIndex from "@/pages/hr/index";
 import TimeAttendancePage from "@/pages/hr/time-attendance";
 import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
+import TrainingPage from "@/pages/hr/training";
 // Maintenance Module imports
 import MaintenancePage from "@/pages/maintenance/index";
 import MaintenanceRequestsPage from "@/pages/maintenance/requests";
@@ -143,6 +144,7 @@ function App() {
                     <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
                     <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />
                     <ProtectedRoute path="/hr/violation-trends" component={ViolationTrendsPage} module="Violation Trends" />
+                    <ProtectedRoute path="/hr/training" component={TrainingPage} module="Training" />
                     {/* Maintenance Module Routes */}
                     <ProtectedRoute path="/maintenance" component={MaintenancePage} module="Maintenance" />
                     <ProtectedRoute path="/maintenance/requests" component={MaintenanceRequestsPage} module="Maintenance Requests" />

@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Trophy, AlertTriangle, TrendingUp, ArrowRight, Users, Calendar } from "lucide-react";
+import { Clock, Trophy, AlertTriangle, TrendingUp, ArrowRight, Users, Calendar, GraduationCap } from "lucide-react";
 import { Link } from "wouter";
 
 interface HRModuleCardProps {
@@ -80,6 +80,13 @@ export default function HRIndex() {
       icon: TrendingUp,
       path: "/hr/violation-trends",
       color: "bg-gradient-to-br from-purple-500 to-purple-600"
+    },
+    {
+      title: "Training",
+      description: "Manage and evaluate training processes for employees",
+      icon: GraduationCap,
+      path: "/hr/training",
+      color: "bg-gradient-to-br from-indigo-500 to-indigo-600"
     }
   ];
 
