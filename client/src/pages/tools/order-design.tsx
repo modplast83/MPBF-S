@@ -149,12 +149,15 @@ export default function OrderDesignPage() {
   });
 
   const [designPreview, setDesignPreview] = useState<string | null>(null);
-  const [selectedTool, setSelectedTool] = useState("brush");
-  const [brushSize, setBrushSize] = useState(5);
+  const [selectedTool, setSelectedTool] = useState("rectangle");
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [estimatedCost, setEstimatedCost] = useState(0);
+  const [textInput, setTextInput] = useState("");
+  const [showTextDialog, setShowTextDialog] = useState(false);
+  const [canvasElements, setCanvasElements] = useState<any[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
   const { toast } = useToast();
 
@@ -184,9 +187,57 @@ export default function OrderDesignPage() {
     setEstimatedCost(calculateCost());
   }, [customization]);
 
-  // Canvas drawing functions
+  // Canvas element functions
+  const redrawCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw uploaded design if exists
+    if (customization.uploadedDesign && designPreview) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.globalAlpha = 0.5;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1.0;
+        
+        // Redraw all canvas elements
+        canvasElements.forEach(element => {
+          drawElement(ctx, element);
+        });
+      };
+      img.src = designPreview;
+    } else {
+      // Just redraw canvas elements
+      canvasElements.forEach(element => {
+        drawElement(ctx, element);
+      });
+    }
+  };
+
+  const drawElement = (ctx: CanvasRenderingContext2D, element: any) => {
+    ctx.strokeStyle = element.color;
+    ctx.fillStyle = element.color;
+    ctx.lineWidth = 2;
+    
+    if (element.type === "rectangle") {
+      ctx.strokeRect(element.x, element.y, element.width, element.height);
+    } else if (element.type === "circle") {
+      ctx.beginPath();
+      ctx.arc(element.x, element.y, element.radius, 0, 2 * Math.PI);
+      ctx.stroke();
+    } else if (element.type === "text") {
+      ctx.font = "16px Arial";
+      ctx.fillText(element.text, element.x, element.y);
+    }
+  };
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    setIsDrawing(true);
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -194,15 +245,18 @@ export default function OrderDesignPage() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.beginPath();
-      ctx.moveTo(x, y);
+    setStartPos({ x, y });
+    
+    if (selectedTool === "text") {
+      setShowTextDialog(true);
+      return;
     }
+    
+    setIsDrawing(true);
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
+    if (!isDrawing || selectedTool === "text") return;
     
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -211,19 +265,62 @@ export default function OrderDesignPage() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
+    // Clear canvas and redraw all elements plus current preview
+    redrawCanvas();
+    
     const ctx = canvas.getContext("2d");
     if (ctx) {
-      ctx.lineWidth = brushSize;
-      ctx.lineCap = "round";
       ctx.strokeStyle = selectedColor;
-      ctx.lineTo(x, y);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x, y);
+      ctx.lineWidth = 2;
+      
+      if (selectedTool === "rectangle") {
+        const width = x - startPos.x;
+        const height = y - startPos.y;
+        ctx.strokeRect(startPos.x, startPos.y, width, height);
+      } else if (selectedTool === "circle") {
+        const radius = Math.sqrt(Math.pow(x - startPos.x, 2) + Math.pow(y - startPos.y, 2));
+        ctx.beginPath();
+        ctx.arc(startPos.x, startPos.y, radius, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
     }
   };
 
-  const stopDrawing = () => {
+  const stopDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || selectedTool === "text") return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Add the completed element to the elements array
+    if (selectedTool === "rectangle") {
+      const width = x - startPos.x;
+      const height = y - startPos.y;
+      const newElement = {
+        type: "rectangle",
+        x: startPos.x,
+        y: startPos.y,
+        width,
+        height,
+        color: selectedColor
+      };
+      setCanvasElements(prev => [...prev, newElement]);
+    } else if (selectedTool === "circle") {
+      const radius = Math.sqrt(Math.pow(x - startPos.x, 2) + Math.pow(y - startPos.y, 2));
+      const newElement = {
+        type: "circle",
+        x: startPos.x,
+        y: startPos.y,
+        radius,
+        color: selectedColor
+      };
+      setCanvasElements(prev => [...prev, newElement]);
+    }
+    
     setIsDrawing(false);
   };
 
@@ -235,6 +332,26 @@ export default function OrderDesignPage() {
     if (ctx) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
+    setCanvasElements([]);
+  };
+
+  const addTextElement = () => {
+    if (!textInput.trim()) return;
+    
+    const newElement = {
+      type: "text",
+      x: startPos.x,
+      y: startPos.y,
+      text: textInput,
+      color: selectedColor
+    };
+    
+    setCanvasElements(prev => [...prev, newElement]);
+    setTextInput("");
+    setShowTextDialog(false);
+    
+    // Redraw canvas with new text
+    setTimeout(() => redrawCanvas(), 100);
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -886,13 +1003,6 @@ export default function OrderDesignPage() {
                     {/* Enhanced Tool Selection */}
                     <div className="flex space-x-3 mb-6">
                       <Button
-                        variant={selectedTool === "brush" ? "default" : "outline"}
-                        onClick={() => setSelectedTool("brush")}
-                        className="flex-1"
-                      >
-                        <Brush className="h-4 w-4 mr-2" /> Brush
-                      </Button>
-                      <Button
                         variant={selectedTool === "rectangle" ? "default" : "outline"}
                         onClick={() => setSelectedTool("rectangle")}
                         className="flex-1"
@@ -965,22 +1075,7 @@ export default function OrderDesignPage() {
                       )}
                     </div>
 
-                    {/* Brush Size Control */}
-                    {selectedTool === "brush" && (
-                      <div className="mb-6">
-                        <Label className="text-base font-semibold mb-3 block">
-                          Brush Size: {brushSize}px
-                        </Label>
-                        <Slider
-                          value={[brushSize]}
-                          onValueChange={(value) => setBrushSize(value[0])}
-                          max={25}
-                          min={1}
-                          step={1}
-                          className="w-48"
-                        />
-                      </div>
-                    )}
+
 
                     {/* Enhanced Drawing Canvas */}
                     <div className="border-2 rounded-xl p-6 bg-white shadow-sm">
@@ -1007,6 +1102,42 @@ export default function OrderDesignPage() {
                         />
                       </div>
                     </div>
+
+                    {/* Text Input Dialog */}
+                    {showTextDialog && (
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+                          <h3 className="text-lg font-semibold mb-4">Add Text</h3>
+                          <Input
+                            type="text"
+                            placeholder="Enter your text..."
+                            value={textInput}
+                            onChange={(e) => setTextInput(e.target.value)}
+                            className="mb-4"
+                            autoFocus
+                          />
+                          <div className="flex space-x-3">
+                            <Button
+                              onClick={addTextElement}
+                              disabled={!textInput.trim()}
+                              className="flex-1"
+                            >
+                              Add Text
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setShowTextDialog(false);
+                                setTextInput("");
+                              }}
+                              className="flex-1"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
