@@ -921,6 +921,57 @@ export const insertHrComplaintSchema = createInsertSchema(hrComplaints).omit({ i
 export type InsertHrComplaint = z.infer<typeof insertHrComplaintSchema>;
 export type HrComplaint = typeof hrComplaints.$inferSelect;
 
+// Training Module
+export const trainings = pgTable("trainings", {
+  id: serial("id").primaryKey(),
+  trainingId: text("training_id").notNull().unique(), // Custom training ID
+  date: timestamp("date").notNull(),
+  traineeId: text("trainee_id").notNull().references(() => users.id),
+  trainingSection: text("training_section").notNull(), // "extrusion", "printing", "cutting", "safety"
+  numberOfDays: integer("number_of_days").notNull(),
+  supervisorId: text("supervisor_id").notNull().references(() => users.id),
+  supervisorSignature: text("supervisor_signature"), // Base64 encoded signature
+  report: text("report"),
+  status: text("status").notNull().default("in_progress"), // "in_progress", "completed", "cancelled"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertTrainingSchema = createInsertSchema(trainings).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTraining = z.infer<typeof insertTrainingSchema>;
+export type Training = typeof trainings.$inferSelect;
+
+// Training Points (available training points)
+export const trainingPoints = pgTable("training_points", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // "machine_operation", "safety", "setup"
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertTrainingPointSchema = createInsertSchema(trainingPoints).omit({ id: true, createdAt: true });
+export type InsertTrainingPoint = z.infer<typeof insertTrainingPointSchema>;
+export type TrainingPoint = typeof trainingPoints.$inferSelect;
+
+// Training Evaluations (linking trainings to training points with evaluations)
+export const trainingEvaluations = pgTable("training_evaluations", {
+  id: serial("id").primaryKey(),
+  trainingId: integer("training_id").notNull().references(() => trainings.id, { onDelete: "cascade" }),
+  trainingPointId: integer("training_point_id").notNull().references(() => trainingPoints.id),
+  status: text("status").notNull(), // "pass", "not_pass", "pending"
+  notes: text("notes"),
+  evaluatedAt: timestamp("evaluated_at"),
+  evaluatedBy: text("evaluated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  uniqueTrainingPoint: unique().on(table.trainingId, table.trainingPointId),
+}));
+
+export const insertTrainingEvaluationSchema = createInsertSchema(trainingEvaluations).omit({ id: true, createdAt: true });
+export type InsertTrainingEvaluation = z.infer<typeof insertTrainingEvaluationSchema>;
+export type TrainingEvaluation = typeof trainingEvaluations.$inferSelect;
+
 // Production Bottleneck Detection System
 export const productionMetrics = pgTable("production_metrics", {
   id: serial("id").primaryKey(),

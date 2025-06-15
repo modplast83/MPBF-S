@@ -22,6 +22,8 @@ import {
   AbaMaterialConfig, insertAbaMaterialConfigSchema,
   insertTimeAttendanceSchema, insertEmployeeOfMonthSchema,
   insertHrViolationSchema, insertHrComplaintSchema,
+  insertTrainingSchema, insertTrainingPointSchema,
+  insertTrainingEvaluationSchema,
   insertNotificationSchema, insertNotificationTemplateSchema,
   InsertNotification, InsertNotificationTemplate,
   InsertCategory, InsertCustomer, InsertItem, InsertSection, InsertMachine,
@@ -29,7 +31,8 @@ import {
   InsertRawMaterial, InsertFinalProduct, InsertSmsTemplate, InsertSmsNotificationRule,
   InsertMixMaterial, InsertMixItem, InsertPermission, InsertModule,
   InsertMaterialInput, InsertMaterialInputItem, InsertAbaMaterialConfig,
-  InsertTimeAttendance, InsertEmployeeOfMonth, InsertHrViolation, InsertHrComplaint
+  InsertTimeAttendance, InsertEmployeeOfMonth, InsertHrViolation, InsertHrComplaint,
+  InsertTraining, InsertTrainingPoint, InsertTrainingEvaluation
 } from "@shared/schema";
 import { z } from "zod";
 import path from 'path';

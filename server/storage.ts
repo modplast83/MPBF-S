@@ -19,7 +19,10 @@ import {
   QualityPenalty, InsertQualityPenalty,
   SmsTemplate, InsertSmsTemplate,
   SmsNotificationRule, InsertSmsNotificationRule,
-  TimeAttendance, InsertTimeAttendance
+  TimeAttendance, InsertTimeAttendance,
+  Training, InsertTraining,
+  TrainingPoint, InsertTrainingPoint,
+  TrainingEvaluation, InsertTrainingEvaluation
 } from "@shared/schema";
 import session from "express-session";
 
@@ -307,6 +310,33 @@ export interface IStorage {
   createHrComplaint(complaint: any): Promise<any>;
   updateHrComplaint(id: number, complaint: any): Promise<any | undefined>;
   deleteHrComplaint(id: number): Promise<boolean>;
+  
+  // Training methods
+  getTrainings(): Promise<Training[]>;
+  getTrainingsByTrainee(traineeId: string): Promise<Training[]>;
+  getTrainingsBySupervisor(supervisorId: string): Promise<Training[]>;
+  getTrainingsBySection(section: string): Promise<Training[]>;
+  getTraining(id: number): Promise<Training | undefined>;
+  createTraining(training: InsertTraining): Promise<Training>;
+  updateTraining(id: number, training: Partial<Training>): Promise<Training | undefined>;
+  deleteTraining(id: number): Promise<boolean>;
+  
+  // Training Points methods
+  getTrainingPoints(): Promise<TrainingPoint[]>;
+  getActiveTrainingPoints(): Promise<TrainingPoint[]>;
+  getTrainingPointsByCategory(category: string): Promise<TrainingPoint[]>;
+  getTrainingPoint(id: number): Promise<TrainingPoint | undefined>;
+  createTrainingPoint(point: InsertTrainingPoint): Promise<TrainingPoint>;
+  updateTrainingPoint(id: number, point: Partial<TrainingPoint>): Promise<TrainingPoint | undefined>;
+  deleteTrainingPoint(id: number): Promise<boolean>;
+  
+  // Training Evaluations methods
+  getTrainingEvaluations(): Promise<TrainingEvaluation[]>;
+  getTrainingEvaluationsByTraining(trainingId: number): Promise<TrainingEvaluation[]>;
+  getTrainingEvaluation(id: number): Promise<TrainingEvaluation | undefined>;
+  createTrainingEvaluation(evaluation: InsertTrainingEvaluation): Promise<TrainingEvaluation>;
+  updateTrainingEvaluation(id: number, evaluation: Partial<TrainingEvaluation>): Promise<TrainingEvaluation | undefined>;
+  deleteTrainingEvaluation(id: number): Promise<boolean>;
 }
 
 export class MemStorage {
