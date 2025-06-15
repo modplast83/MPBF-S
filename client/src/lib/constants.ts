@@ -138,6 +138,8 @@ export const SIDEBAR_ITEMS = [
           { title: "Time Attendance", path: "/hr/time-attendance" },
           { title: "Employee of the Month", path: "/hr/employee-of-month" },
           { title: "Violation and Complaint", path: "/hr/violations-complaints" },
+          { title: "Training", path: "/hr/training" },
+          { title: "Certificates", path: "/hr/certificates" },
         ],
       },
       {
