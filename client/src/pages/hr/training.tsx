@@ -104,6 +104,14 @@ export default function TrainingPage() {
 
   const { data: evaluations = [] } = useQuery<TrainingEvaluation[]>({
     queryKey: ['/api/trainings', selectedTraining?.id, 'evaluations'],
+    queryFn: async () => {
+      if (!selectedTraining) return [];
+      const response = await fetch(`/api/trainings/${selectedTraining.id}/evaluations`, {
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to fetch evaluations');
+      return response.json();
+    },
     enabled: !!selectedTraining,
   });
 
@@ -228,6 +236,10 @@ export default function TrainingPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trainings', selectedTraining?.id, 'evaluations'] });
       queryClient.invalidateQueries({ queryKey: ['/api/training-certificates'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trainings'] });
+    },
+    onError: (error) => {
+      console.error('Evaluation update error:', error);
     },
   });
 
@@ -687,7 +699,9 @@ export default function TrainingPage() {
                 <CardContent>
                   <div className="space-y-4">
                     {trainingPoints.filter(point => point.isActive).map((point) => {
-                      const evaluation = evaluations.find(e => e.trainingPointId === point.id);
+                      const evaluation = evaluations.find(e => 
+                        e.trainingId === selectedTraining.id && e.trainingPointId === point.id
+                      );
                       return (
                         <div key={point.id} className="border rounded-lg p-4">
                           <div className="flex items-center justify-between mb-3">
@@ -701,18 +715,20 @@ export default function TrainingPage() {
                                 variant={evaluation?.status === 'pass' ? 'default' : 'outline'}
                                 className={evaluation?.status === 'pass' ? 'bg-green-600 hover:bg-green-700' : ''}
                                 onClick={() => handleEvaluationUpdate(point.id, 'pass')}
+                                disabled={createEvaluationMutation.isPending}
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
-                                Pass
+                                {createEvaluationMutation.isPending ? 'Saving...' : 'Pass'}
                               </Button>
                               <Button
                                 size="sm"
                                 variant={evaluation?.status === 'not_pass' ? 'default' : 'outline'}
                                 className={evaluation?.status === 'not_pass' ? 'bg-red-600 hover:bg-red-700' : ''}
                                 onClick={() => handleEvaluationUpdate(point.id, 'not_pass')}
+                                disabled={createEvaluationMutation.isPending}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
-                                Not Pass
+                                {createEvaluationMutation.isPending ? 'Saving...' : 'Not Pass'}
                               </Button>
                             </div>
                           </div>
