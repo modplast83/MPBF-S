@@ -135,7 +135,9 @@ function PerformanceCharts({ data, isMobile, isRTL }: {
   // Format data for charts
   const wasteData = [
     { name: t("performance.waste"), value: data.wasteMetrics.totalWasteQty },
-    { name: t("performance.good_product"), value: data.wasteMetrics.totalWasteQty / (data.wasteMetrics.overallWastePercentage / 100) - data.wasteMetrics.totalWasteQty }
+    { name: t("performance.good_product"), value: data.wasteMetrics.overallWastePercentage > 0 
+      ? (data.wasteMetrics.totalWasteQty / (data.wasteMetrics.overallWastePercentage / 100) - data.wasteMetrics.totalWasteQty)
+      : 0 }
   ];
   
   const qualityData = [
@@ -152,11 +154,15 @@ function PerformanceCharts({ data, isMobile, isRTL }: {
   })).sort((a, b) => a.rollId - b.rollId).slice(0, 10);
   
   // Format throughput data
-  const throughputData = data.throughput.slice(-10).map(item => ({
-    date: item.date.split('-')[2] + '/' + item.date.split('-')[1],  // Day/Month format
-    count: item.count,
-    weight: parseFloat((item.totalWeight / 1000).toFixed(1))  // Convert to tons
-  }));
+  const throughputData = data.throughput.slice(-10).map(item => {
+    const dateParts = item.date.split('-');
+    const dateFormat = dateParts.length >= 3 ? `${dateParts[2]}/${dateParts[1]}` : item.date;
+    return {
+      date: dateFormat,
+      count: item.count,
+      weight: parseFloat((item.totalWeight / 1000).toFixed(1))  // Convert to tons
+    };
+  });
   
   return (
     <div className="space-y-6">
