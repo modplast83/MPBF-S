@@ -48,6 +48,7 @@ import { ensureAdminUser } from "./user-seed";
 import { setupHRRoutes } from "./hr-routes";
 import { setupBottleneckRoutes } from "./bottleneck-routes";
 import { notificationService } from "./notification-service";
+import sgMail from '@sendgrid/mail';
 import { setupNotificationRoutes } from "./notification-routes";
 import { setupIotRoutes } from "./iot-routes";
 import { setupMobileRoutes } from "./mobile-routes";
@@ -6500,7 +6501,6 @@ COMMIT;
         return res.status(500).json({ message: "Email service not configured" });
       }
 
-      const sgMail = require('@sendgrid/mail');
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
       const emailContent = `
