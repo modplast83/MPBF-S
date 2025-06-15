@@ -113,7 +113,16 @@ import {
   type InsertSmsTemplate,
   smsNotificationRules,
   type SmsNotificationRule,
-  type InsertSmsNotificationRule
+  type InsertSmsNotificationRule,
+  trainings,
+  type Training,
+  type InsertTraining,
+  trainingPoints,
+  type TrainingPoint,
+  type InsertTrainingPoint,
+  trainingEvaluations,
+  type TrainingEvaluation,
+  type InsertTrainingEvaluation
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { IStorage } from "./storage";
@@ -2329,6 +2338,141 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMaintenanceSchedule(id: number): Promise<boolean> {
     await db.delete(maintenanceSchedule).where(eq(maintenanceSchedule.id, id));
+    return true;
+  }
+
+  // Training methods
+  async getTrainings(): Promise<Training[]> {
+    return await db.select().from(trainings).orderBy(desc(trainings.createdAt));
+  }
+
+  async getTrainingsByTrainee(traineeId: string): Promise<Training[]> {
+    return await db.select().from(trainings)
+      .where(eq(trainings.traineeId, traineeId))
+      .orderBy(desc(trainings.createdAt));
+  }
+
+  async getTrainingsBySupervisor(supervisorId: string): Promise<Training[]> {
+    return await db.select().from(trainings)
+      .where(eq(trainings.supervisorId, supervisorId))
+      .orderBy(desc(trainings.createdAt));
+  }
+
+  async getTrainingsBySection(section: string): Promise<Training[]> {
+    return await db.select().from(trainings)
+      .where(eq(trainings.trainingSection, section))
+      .orderBy(desc(trainings.createdAt));
+  }
+
+  async getTraining(id: number): Promise<Training | undefined> {
+    const [training] = await db.select().from(trainings).where(eq(trainings.id, id));
+    return training || undefined;
+  }
+
+  async createTraining(training: InsertTraining): Promise<Training> {
+    const [created] = await db
+      .insert(trainings)
+      .values(training)
+      .returning();
+    return created;
+  }
+
+  async updateTraining(id: number, training: Partial<Training>): Promise<Training | undefined> {
+    const [updated] = await db
+      .update(trainings)
+      .set({ ...training, updatedAt: new Date() })
+      .where(eq(trainings.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteTraining(id: number): Promise<boolean> {
+    await db.delete(trainings).where(eq(trainings.id, id));
+    return true;
+  }
+
+  // Training Points methods
+  async getTrainingPoints(): Promise<TrainingPoint[]> {
+    return await db.select().from(trainingPoints).orderBy(asc(trainingPoints.name));
+  }
+
+  async getActiveTrainingPoints(): Promise<TrainingPoint[]> {
+    return await db.select().from(trainingPoints)
+      .where(eq(trainingPoints.isActive, true))
+      .orderBy(asc(trainingPoints.name));
+  }
+
+  async getTrainingPointsByCategory(category: string): Promise<TrainingPoint[]> {
+    return await db.select().from(trainingPoints)
+      .where(and(eq(trainingPoints.category, category), eq(trainingPoints.isActive, true)))
+      .orderBy(asc(trainingPoints.name));
+  }
+
+  async getTrainingPoint(id: number): Promise<TrainingPoint | undefined> {
+    const [point] = await db.select().from(trainingPoints).where(eq(trainingPoints.id, id));
+    return point || undefined;
+  }
+
+  async createTrainingPoint(point: InsertTrainingPoint): Promise<TrainingPoint> {
+    const [created] = await db
+      .insert(trainingPoints)
+      .values(point)
+      .returning();
+    return created;
+  }
+
+  async updateTrainingPoint(id: number, point: Partial<TrainingPoint>): Promise<TrainingPoint | undefined> {
+    const [updated] = await db
+      .update(trainingPoints)
+      .set(point)
+      .where(eq(trainingPoints.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteTrainingPoint(id: number): Promise<boolean> {
+    await db.delete(trainingPoints).where(eq(trainingPoints.id, id));
+    return true;
+  }
+
+  // Training Evaluations methods
+  async getTrainingEvaluations(): Promise<TrainingEvaluation[]> {
+    return await db.select().from(trainingEvaluations).orderBy(desc(trainingEvaluations.createdAt));
+  }
+
+  async getTrainingEvaluationsByTraining(trainingId: number): Promise<TrainingEvaluation[]> {
+    return await db.select().from(trainingEvaluations)
+      .where(eq(trainingEvaluations.trainingId, trainingId))
+      .orderBy(asc(trainingEvaluations.id));
+  }
+
+  async getTrainingEvaluation(id: number): Promise<TrainingEvaluation | undefined> {
+    const [evaluation] = await db.select().from(trainingEvaluations).where(eq(trainingEvaluations.id, id));
+    return evaluation || undefined;
+  }
+
+  async createTrainingEvaluation(evaluation: InsertTrainingEvaluation): Promise<TrainingEvaluation> {
+    const [created] = await db
+      .insert(trainingEvaluations)
+      .values({
+        ...evaluation,
+        evaluatedAt: new Date()
+      })
+      .returning();
+    return created;
+  }
+
+  async updateTrainingEvaluation(id: number, evaluation: Partial<TrainingEvaluation>): Promise<TrainingEvaluation | undefined> {
+    const [updated] = await db
+      .update(trainingEvaluations)
+      .set(evaluation)
+      .where(eq(trainingEvaluations.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteTrainingEvaluation(id: number): Promise<boolean> {
+    await db.delete(trainingEvaluations).where(eq(trainingEvaluations.id, id));
     return true;
   }
 }

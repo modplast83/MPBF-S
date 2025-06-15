@@ -91,6 +91,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Mobile App routes
   setupMobileRoutes(app);
   
+  // Training API Routes
+  
+  // Get all trainings
+  app.get("/api/trainings", async (req: Request, res: Response) => {
+    try {
+      const trainings = await storage.getTrainings();
+      res.json(trainings);
+    } catch (error) {
+      console.error("Error fetching trainings:", error);
+      res.status(500).json({ message: "Failed to get trainings" });
+    }
+  });
+
+  // Get training by ID
+  app.get("/api/trainings/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid training ID" });
+      }
+      
+      const training = await storage.getTraining(id);
+      if (!training) {
+        return res.status(404).json({ message: "Training not found" });
+      }
+      
+      res.json(training);
+    } catch (error) {
+      console.error("Error fetching training:", error);
+      res.status(500).json({ message: "Failed to get training" });
+    }
+  });
+
+  // Create new training
+  app.post("/api/trainings", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertTrainingSchema.parse(req.body);
+      const training = await storage.createTraining(validatedData);
+      res.status(201).json(training);
+    } catch (error) {
+      console.error("Error creating training:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid training data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create training" });
+    }
+  });
+
+  // Update training
+  app.put("/api/trainings/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid training ID" });
+      }
+      
+      const updates = req.body;
+      const training = await storage.updateTraining(id, updates);
+      
+      if (!training) {
+        return res.status(404).json({ message: "Training not found" });
+      }
+      
+      res.json(training);
+    } catch (error) {
+      console.error("Error updating training:", error);
+      res.status(500).json({ message: "Failed to update training" });
+    }
+  });
+
+  // Delete training
+  app.delete("/api/trainings/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid training ID" });
+      }
+      
+      const deleted = await storage.deleteTraining(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Training not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting training:", error);
+      res.status(500).json({ message: "Failed to delete training" });
+    }
+  });
+
+  // Get training points
+  app.get("/api/training-points", async (_req: Request, res: Response) => {
+    try {
+      const points = await storage.getTrainingPoints();
+      res.json(points);
+    } catch (error) {
+      console.error("Error fetching training points:", error);
+      res.status(500).json({ message: "Failed to get training points" });
+    }
+  });
+
+  // Get training evaluations by training ID
+  app.get("/api/trainings/:id/evaluations", async (req: Request, res: Response) => {
+    try {
+      const trainingId = parseInt(req.params.id);
+      if (isNaN(trainingId)) {
+        return res.status(400).json({ message: "Invalid training ID" });
+      }
+      
+      const evaluations = await storage.getTrainingEvaluationsByTraining(trainingId);
+      res.json(evaluations);
+    } catch (error) {
+      console.error("Error fetching training evaluations:", error);
+      res.status(500).json({ message: "Failed to get training evaluations" });
+    }
+  });
+
+  // Create training evaluation
+  app.post("/api/training-evaluations", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertTrainingEvaluationSchema.parse(req.body);
+      const evaluation = await storage.createTrainingEvaluation(validatedData);
+      res.status(201).json(evaluation);
+    } catch (error) {
+      console.error("Error creating training evaluation:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid evaluation data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create training evaluation" });
+    }
+  });
+
+  // Update training evaluation
+  app.put("/api/training-evaluations/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid evaluation ID" });
+      }
+      
+      const updates = req.body;
+      const evaluation = await storage.updateTrainingEvaluation(id, updates);
+      
+      if (!evaluation) {
+        return res.status(404).json({ message: "Training evaluation not found" });
+      }
+      
+      res.json(evaluation);
+    } catch (error) {
+      console.error("Error updating training evaluation:", error);
+      res.status(500).json({ message: "Failed to update training evaluation" });
+    }
+  });
+  
   // User is now handled directly by auth.ts
   
   // Debug endpoint to check session status - using manual response to bypass Vite
