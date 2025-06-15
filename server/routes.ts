@@ -6284,6 +6284,148 @@ COMMIT;
     }
   });
 
+  // Training Certificates API
+  app.get("/api/training-certificates", requireAuth, async (_req: Request, res: Response) => {
+    try {
+      const certificates = await storage.getTrainingCertificates();
+      res.json(certificates);
+    } catch (error) {
+      console.error("Error fetching training certificates:", error);
+      res.status(500).json({ message: "Failed to get training certificates" });
+    }
+  });
+
+  app.get("/api/training-certificates/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid certificate ID" });
+      }
+
+      const certificate = await storage.getTrainingCertificate(id);
+      if (!certificate) {
+        return res.status(404).json({ message: "Training certificate not found" });
+      }
+
+      res.json(certificate);
+    } catch (error) {
+      console.error("Error fetching training certificate:", error);
+      res.status(500).json({ message: "Failed to get training certificate" });
+    }
+  });
+
+  app.get("/api/training-certificates/number/:certificateNumber", async (req: Request, res: Response) => {
+    try {
+      const certificateNumber = req.params.certificateNumber;
+      const certificate = await storage.getTrainingCertificateByNumber(certificateNumber);
+      
+      if (!certificate) {
+        return res.status(404).json({ message: "Certificate not found" });
+      }
+
+      res.json(certificate);
+    } catch (error) {
+      console.error("Error fetching certificate by number:", error);
+      res.status(500).json({ message: "Failed to get certificate" });
+    }
+  });
+
+  app.get("/api/trainings/:trainingId/certificates", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const trainingId = parseInt(req.params.trainingId);
+      if (isNaN(trainingId)) {
+        return res.status(400).json({ message: "Invalid training ID" });
+      }
+
+      const certificates = await storage.getTrainingCertificatesByTraining(trainingId);
+      res.json(certificates);
+    } catch (error) {
+      console.error("Error fetching training certificates:", error);
+      res.status(500).json({ message: "Failed to get training certificates" });
+    }
+  });
+
+  app.post("/api/training-certificates", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { insertCertificateSchema } = await import("@shared/schema");
+      const validatedData = insertCertificateSchema.parse(req.body);
+      
+      // Verify training exists
+      const training = await storage.getTraining(validatedData.trainingId);
+      if (!training) {
+        return res.status(404).json({ message: "Training not found" });
+      }
+
+      const certificate = await storage.createTrainingCertificate(validatedData);
+      res.status(201).json(certificate);
+    } catch (error) {
+      console.error("Error creating training certificate:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid certificate data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create training certificate" });
+    }
+  });
+
+  app.put("/api/training-certificates/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid certificate ID" });
+      }
+
+      const existingCertificate = await storage.getTrainingCertificate(id);
+      if (!existingCertificate) {
+        return res.status(404).json({ message: "Training certificate not found" });
+      }
+
+      const certificate = await storage.updateTrainingCertificate(id, req.body);
+      res.json(certificate);
+    } catch (error) {
+      console.error("Error updating training certificate:", error);
+      res.status(500).json({ message: "Failed to update training certificate" });
+    }
+  });
+
+  app.post("/api/training-certificates/:id/revoke", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid certificate ID" });
+      }
+
+      const certificate = await storage.revokeCertificate(id);
+      if (!certificate) {
+        return res.status(404).json({ message: "Training certificate not found" });
+      }
+
+      res.json(certificate);
+    } catch (error) {
+      console.error("Error revoking training certificate:", error);
+      res.status(500).json({ message: "Failed to revoke training certificate" });
+    }
+  });
+
+  app.delete("/api/training-certificates/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid certificate ID" });
+      }
+
+      const existingCertificate = await storage.getTrainingCertificate(id);
+      if (!existingCertificate) {
+        return res.status(404).json({ message: "Training certificate not found" });
+      }
+
+      await storage.deleteTrainingCertificate(id);
+      res.json({ message: "Training certificate deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting training certificate:", error);
+      res.status(500).json({ message: "Failed to delete training certificate" });
+    }
+  });
+
   // Setup notification routes
   setupNotificationRoutes(app);
   

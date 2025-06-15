@@ -974,6 +974,27 @@ export const insertTrainingEvaluationSchema = createInsertSchema(trainingEvaluat
 export type InsertTrainingEvaluation = z.infer<typeof insertTrainingEvaluationSchema>;
 export type TrainingEvaluation = typeof trainingEvaluations.$inferSelect;
 
+// Training Certificates
+export const trainingCertificates = pgTable("training_certificates", {
+  id: serial("id").primaryKey(),
+  trainingId: integer("training_id").notNull().references(() => trainings.id, { onDelete: "cascade" }),
+  certificateNumber: text("certificate_number").notNull().unique(),
+  templateId: text("template_id").notNull().default("default"),
+  customDesign: jsonb("custom_design"), // Stores design configuration
+  issuedDate: timestamp("issued_date").defaultNow().notNull(),
+  validUntil: timestamp("valid_until"), // Optional expiration date
+  issuerName: text("issuer_name").notNull(),
+  issuerTitle: text("issuer_title").notNull(),
+  companyName: text("company_name").notNull().default("Production Management Factory"),
+  logoUrl: text("logo_url"), // Optional company logo
+  status: text("status").notNull().default("active"), // "active", "revoked", "expired"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCertificateSchema = createInsertSchema(trainingCertificates).omit({ id: true, createdAt: true });
+export type InsertCertificate = z.infer<typeof insertCertificateSchema>;
+export type TrainingCertificate = typeof trainingCertificates.$inferSelect;
+
 // Production Bottleneck Detection System
 export const productionMetrics = pgTable("production_metrics", {
   id: serial("id").primaryKey(),

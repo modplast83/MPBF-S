@@ -122,7 +122,10 @@ import {
   type InsertTrainingPoint,
   trainingEvaluations,
   type TrainingEvaluation,
-  type InsertTrainingEvaluation
+  type InsertTrainingEvaluation,
+  trainingCertificates,
+  type TrainingCertificate,
+  type InsertCertificate
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { IStorage } from "./storage";
@@ -2474,5 +2477,67 @@ export class DatabaseStorage implements IStorage {
   async deleteTrainingEvaluation(id: number): Promise<boolean> {
     await db.delete(trainingEvaluations).where(eq(trainingEvaluations.id, id));
     return true;
+  }
+
+  // Training Certificates methods
+  async getTrainingCertificates(): Promise<TrainingCertificate[]> {
+    return await db.select().from(trainingCertificates).orderBy(desc(trainingCertificates.issuedDate));
+  }
+
+  async getTrainingCertificatesByTraining(trainingId: number): Promise<TrainingCertificate[]> {
+    return await db.select().from(trainingCertificates)
+      .where(eq(trainingCertificates.trainingId, trainingId))
+      .orderBy(desc(trainingCertificates.issuedDate));
+  }
+
+  async getTrainingCertificate(id: number): Promise<TrainingCertificate | undefined> {
+    const [certificate] = await db.select().from(trainingCertificates).where(eq(trainingCertificates.id, id));
+    return certificate || undefined;
+  }
+
+  async getTrainingCertificateByNumber(certificateNumber: string): Promise<TrainingCertificate | undefined> {
+    const [certificate] = await db.select().from(trainingCertificates)
+      .where(eq(trainingCertificates.certificateNumber, certificateNumber));
+    return certificate || undefined;
+  }
+
+  async createTrainingCertificate(certificate: InsertCertificate): Promise<TrainingCertificate> {
+    // Generate unique certificate number if not provided
+    if (!certificate.certificateNumber) {
+      const prefix = "CERT";
+      const timestamp = Date.now().toString().slice(-6);
+      const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+      certificate.certificateNumber = `${prefix}-${timestamp}-${random}`;
+    }
+
+    const [created] = await db
+      .insert(trainingCertificates)
+      .values(certificate)
+      .returning();
+    return created;
+  }
+
+  async updateTrainingCertificate(id: number, certificate: Partial<TrainingCertificate>): Promise<TrainingCertificate | undefined> {
+    const [updated] = await db
+      .update(trainingCertificates)
+      .set(certificate)
+      .where(eq(trainingCertificates.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteTrainingCertificate(id: number): Promise<boolean> {
+    await db.delete(trainingCertificates).where(eq(trainingCertificates.id, id));
+    return true;
+  }
+
+  async revokeCertificate(id: number): Promise<TrainingCertificate | undefined> {
+    return await this.updateTrainingCertificate(id, { status: "revoked" });
+  }
+
+  async getActiveCertificates(): Promise<TrainingCertificate[]> {
+    return await db.select().from(trainingCertificates)
+      .where(eq(trainingCertificates.status, "active"))
+      .orderBy(desc(trainingCertificates.issuedDate));
   }
 }
