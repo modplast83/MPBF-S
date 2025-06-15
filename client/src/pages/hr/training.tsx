@@ -56,7 +56,6 @@ interface User {
 }
 
 const trainingFormSchema = z.object({
-  trainingId: z.string().min(1, "Training ID is required"),
   date: z.string().min(1, "Date is required"),
   traineeId: z.string().min(1, "Trainee is required"),
   trainingSection: z.string().min(1, "Training section is required"),
@@ -79,7 +78,6 @@ export default function TrainingPage() {
   const form = useForm<TrainingFormData>({
     resolver: zodResolver(trainingFormSchema),
     defaultValues: {
-      trainingId: "",
       date: "",
       traineeId: "",
       trainingSection: "",
@@ -109,13 +107,33 @@ export default function TrainingPage() {
   });
 
   // Mutations
+  // Function to generate training ID
+  const generateTrainingId = () => {
+    const existingIds = trainings.map(t => t.trainingId);
+    let counter = 1;
+    let newId = `TRN-${String(counter).padStart(3, '0')}`;
+    
+    while (existingIds.includes(newId)) {
+      counter++;
+      newId = `TRN-${String(counter).padStart(3, '0')}`;
+    }
+    
+    return newId;
+  };
+
   const createTrainingMutation = useMutation({
     mutationFn: async (data: TrainingFormData) => {
+      const trainingId = generateTrainingId();
+      const trainingData = {
+        ...data,
+        trainingId,
+      };
+      
       const response = await fetch('/api/trainings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(data),
+        body: JSON.stringify(trainingData),
       });
       if (!response.ok) throw new Error('Failed to create training');
       return response.json();
@@ -291,20 +309,12 @@ export default function TrainingPage() {
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="trainingId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Training ID</FormLabel>
-                          <FormControl>
-                            <Input placeholder="TRN-001" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="mb-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-blue-700">
+                        <strong>Training ID:</strong> Will be automatically generated (e.g., TRN-001, TRN-002, etc.)
+                      </p>
+                    </div>
                     <FormField
                       control={form.control}
                       name="date"
