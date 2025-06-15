@@ -188,25 +188,25 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
     
     // Create aggregated items based on the formula
     // but scale them to the total quantity
-    const scaleFactor = quantity / 100;
+    const scaleFactor = quantity > 0 ? quantity / 100 : 0;
     
     // HDPE
     const hdpeScrewA = 13 * scaleFactor;
     const hdpeScrewB = 13 * scaleFactor;
     const hdpeTotal = hdpeScrewA + hdpeScrewB;
-    const hdpePercentage = (hdpeTotal / quantity) * 100;
+    const hdpePercentage = quantity > 0 ? (hdpeTotal / quantity) * 100 : 0;
 
     // LLDPE
     const lldpeScrewA = 12 * scaleFactor;
     const lldpeScrewB = 10 * scaleFactor;
     const lldpeTotal = lldpeScrewA + lldpeScrewB;
-    const lldpePercentage = (lldpeTotal / quantity) * 100;
+    const lldpePercentage = quantity > 0 ? (lldpeTotal / quantity) * 100 : 0;
 
     // Filler
     const fillerScrewA = 5 * scaleFactor;
     const fillerScrewB = 46 * scaleFactor;
     const fillerTotal = fillerScrewA + fillerScrewB;
-    const fillerPercentage = (fillerTotal / quantity) * 100;
+    const fillerPercentage = quantity > 0 ? (fillerTotal / quantity) * 100 : 0;
 
     // Masterbatch
     const mbScrewA = 1 * scaleFactor;
