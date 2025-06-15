@@ -18,16 +18,45 @@ interface CertificateStats {
   thisMonth: number;
 }
 
+interface TrainingCertificate {
+  id: number;
+  trainingId: number;
+  certificateNumber: string;
+  templateId: string;
+  issuedDate: string;
+  validUntil?: string;
+  issuerName: string;
+  issuerTitle: string;
+  companyName: string;
+  status: string;
+  customDesign?: any;
+}
+
+interface Training {
+  id: number;
+  trainingId: string;
+  date: string;
+  traineeId: string;
+  trainingSection: string;
+  numberOfDays: number;
+  supervisorId: string;
+  supervisorSignature?: string;
+  report?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function CertificatesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showGenerator, setShowGenerator] = useState(false);
 
-  const { data: certificates = [] } = useQuery({
+  const { data: certificates = [] } = useQuery<TrainingCertificate[]>({
     queryKey: ["/api/training-certificates"]
   });
 
-  const { data: trainings = [] } = useQuery({
+  const { data: trainings = [] } = useQuery<Training[]>({
     queryKey: ["/api/trainings"]
   });
 
