@@ -257,7 +257,7 @@ export default function CertificatesPage() {
                     <div className="bg-blue-50 p-3 rounded-lg">
                       <p className="text-sm font-medium text-blue-900">Training #{trainingInfo.id}</p>
                       <p className="text-sm text-blue-700">
-                        {trainingInfo.sections.join(", ") || "General Training"}
+                        {trainingInfo.sections || "General Training"}
                       </p>
                     </div>
                   )}

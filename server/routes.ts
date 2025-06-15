@@ -212,6 +212,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/training-evaluations", async (req: Request, res: Response) => {
     try {
       const validatedData = insertTrainingEvaluationSchema.parse(req.body);
+      
+      // Check if evaluation already exists for this training and training point
+      const existingEvaluations = await storage.getTrainingEvaluationsByTraining(validatedData.trainingId);
+      const duplicateEvaluation = existingEvaluations.find(
+        evaluation => evaluation.trainingPointId === validatedData.trainingPointId
+      );
+      
+      if (duplicateEvaluation) {
+        return res.status(409).json({ 
+          message: "Evaluation already exists for this training point",
+          existingEvaluation: duplicateEvaluation
+        });
+      }
+      
       const evaluation = await storage.createTrainingEvaluation(validatedData);
       res.status(201).json(evaluation);
     } catch (error) {
@@ -219,6 +233,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid evaluation data", errors: error.errors });
       }
+      
+      // Handle duplicate key constraint specifically
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+        return res.status(409).json({ 
+          message: "Evaluation already exists for this training point" 
+        });
+      }
+      
       res.status(500).json({ message: "Failed to create training evaluation" });
     }
   });
