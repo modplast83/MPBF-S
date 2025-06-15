@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +8,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,7 +15,6 @@ import { format } from "date-fns";
 import { Calendar, User, Clock, CheckCircle, XCircle, Briefcase, AlertTriangle, GraduationCap, FileText, Users, Trophy } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
-import { apiRequest } from "@/lib/queryClient";
 
 interface Training {
   id: number;
@@ -117,6 +114,7 @@ export default function TrainingPage() {
       const response = await fetch('/api/trainings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error('Failed to create training');
@@ -134,6 +132,7 @@ export default function TrainingPage() {
       const response = await fetch(`/api/trainings/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error('Failed to update training');
@@ -150,6 +149,7 @@ export default function TrainingPage() {
       const response = await fetch('/api/training-evaluations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error('Failed to create evaluation');
@@ -387,7 +387,7 @@ export default function TrainingPage() {
       <div className="grid gap-6">
         {trainingsLoading ? (
           <div className="text-center py-8">Loading trainings...</div>
-        ) : (trainings as Training[]).length === 0 ? (
+        ) : trainings.length === 0 ? (
           <Card>
             <CardContent className="text-center py-8">
               <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -395,7 +395,7 @@ export default function TrainingPage() {
             </CardContent>
           </Card>
         ) : (
-          (trainings as Training[]).map((training: Training) => (
+          trainings.map((training: Training) => (
             <Card key={training.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">

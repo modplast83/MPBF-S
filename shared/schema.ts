@@ -937,7 +937,9 @@ export const trainings = pgTable("trainings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertTrainingSchema = createInsertSchema(trainings).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertTrainingSchema = createInsertSchema(trainings).omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  date: z.string().transform((str) => new Date(str))
+});
 export type InsertTraining = z.infer<typeof insertTrainingSchema>;
 export type Training = typeof trainings.$inferSelect;
 
