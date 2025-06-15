@@ -10,6 +10,8 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import jsPDF from 'jspdf';
+import { useMutation } from '@tanstack/react-query';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -160,6 +162,32 @@ export default function OrderDesignPage() {
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
   const { toast } = useToast();
+
+  // Email quote request mutation
+  const emailQuoteMutation = useMutation({
+    mutationFn: async (quoteData: any) => {
+      const response = await fetch('/api/send-quote-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(quoteData)
+      });
+      if (!response.ok) throw new Error('Failed to send email');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Quote Request Sent",
+        description: "Your quote request has been emailed to management.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Email Failed",
+        description: "Failed to send quote request. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
 
   const steps = [
     "Product Selection",
@@ -448,6 +476,85 @@ export default function OrderDesignPage() {
       case 6: return true;
       default: return false;
     }
+  };
+
+  // Handle sending quote request via email
+  const handleSendQuoteRequest = () => {
+    const quoteData = {
+      customerInfo: customization.customerInfo,
+      productType: customization.productType,
+      template: customization.template,
+      dimensions: customization.dimensions,
+      materialColor: customization.materialColor,
+      quantity: customization.quantity,
+      estimatedCost,
+      notes: customization.notes,
+      designColors: customization.designColors,
+      timestamp: new Date().toISOString()
+    };
+    
+    emailQuoteMutation.mutate(quoteData);
+  };
+
+  // Handle PDF download
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('Quote Request', 20, 20);
+    
+    // Customer Information
+    doc.setFontSize(14);
+    doc.text('Customer Information:', 20, 40);
+    doc.setFontSize(11);
+    doc.text(`Name: ${customization.customerInfo.name}`, 20, 50);
+    doc.text(`Email: ${customization.customerInfo.email}`, 20, 60);
+    doc.text(`Phone: ${customization.customerInfo.phone}`, 20, 70);
+    
+    // Product Details
+    doc.setFontSize(14);
+    doc.text('Product Details:', 20, 90);
+    doc.setFontSize(11);
+    doc.text(`Product Type: ${customization.productType}`, 20, 100);
+    doc.text(`Template: ${customization.template}`, 20, 110);
+    doc.text(`Material Color: ${customization.materialColor}`, 20, 120);
+    
+    // Dimensions
+    doc.text(`Dimensions:`, 20, 140);
+    doc.text(`  Width: ${customization.dimensions.width} cm`, 30, 150);
+    doc.text(`  Length: ${customization.dimensions.length} cm`, 30, 160);
+    doc.text(`  Gusset: ${customization.dimensions.gusset} cm`, 30, 170);
+    doc.text(`  Thickness: ${customization.dimensions.thickness} mm`, 30, 180);
+    
+    // Pricing
+    doc.setFontSize(14);
+    doc.text('Pricing:', 20, 200);
+    doc.setFontSize(11);
+    doc.text(`Quantity: ${customization.quantity.toLocaleString()}`, 20, 210);
+    doc.text(`Unit Price: ${((estimatedCost / customization.quantity)).toFixed(3)} SR per piece`, 20, 220);
+    doc.text(`Total Estimated Cost: ${estimatedCost.toLocaleString()} SR`, 20, 230);
+    
+    // Notes
+    if (customization.notes) {
+      doc.setFontSize(14);
+      doc.text('Notes:', 20, 250);
+      doc.setFontSize(11);
+      const splitNotes = doc.splitTextToSize(customization.notes, 170);
+      doc.text(splitNotes, 20, 260);
+    }
+    
+    // Footer
+    doc.setFontSize(8);
+    doc.text('*Final pricing may vary based on design complexity and material availability', 20, 280);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 290);
+    
+    doc.save(`quote-${customization.customerInfo.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    toast({
+      title: "PDF Downloaded",
+      description: "Quote has been saved as PDF file.",
+    });
   };
 
   const renderTemplatePreview = (template: string, materialColor: string) => {
@@ -1289,10 +1396,10 @@ export default function OrderDesignPage() {
                         </div>
                         <div className="text-center space-y-2">
                           <div className="text-3xl font-bold text-blue-600">
-                            ${estimatedCost.toLocaleString()}
+                            {estimatedCost.toLocaleString()} SR
                           </div>
                           <div className="text-sm text-blue-700">
-                            Unit Price: ${((estimatedCost / customization.quantity)).toFixed(3)} per piece
+                            Unit Price: {((estimatedCost / customization.quantity)).toFixed(3)} SR per piece
                           </div>
                           <div className="text-xs text-blue-600">
                             *Final pricing may vary based on design complexity and material availability
@@ -1453,10 +1560,10 @@ export default function OrderDesignPage() {
             <CardContent className="p-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600 mb-2">
-                  ${estimatedCost.toLocaleString()}
+                  {estimatedCost.toLocaleString()} SR
                 </div>
                 <div className="text-sm text-gray-600 mb-4">
-                  ${((estimatedCost / customization.quantity)).toFixed(3)} per unit
+                  {((estimatedCost / customization.quantity)).toFixed(3)} SR per unit
                 </div>
                 <div className="text-xs text-gray-500">
                   Estimate includes materials, printing, and processing
