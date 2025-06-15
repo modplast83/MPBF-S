@@ -260,6 +260,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Training evaluation not found" });
       }
       
+      // Check if all evaluations for this training are completed and passed
+      if (evaluation.status === 'pass') {
+        const allEvaluations = await storage.getTrainingEvaluationsByTraining(evaluation.trainingId);
+        const allPassed = allEvaluations.every(evaluation => evaluation.status === 'pass');
+        
+        if (allPassed) {
+          // Check if certificate already exists
+          const existingCertificates = await storage.getTrainingCertificatesByTraining(evaluation.trainingId);
+          
+          if (existingCertificates.length === 0) {
+            // Generate certificate number
+            const training = await storage.getTraining(evaluation.trainingId);
+            const certificateNumber = `CERT-${training?.trainingId || evaluation.trainingId}-${Date.now()}`;
+            
+            // Create certificate automatically
+            await storage.createTrainingCertificate({
+              trainingId: evaluation.trainingId,
+              certificateNumber,
+              templateId: 'default',
+              issuerName: 'Training Department',
+              issuerTitle: 'Training Manager',
+              companyName: 'Production Management Factory',
+              status: 'active'
+            });
+          }
+        }
+      }
+      
       res.json(evaluation);
     } catch (error) {
       console.error("Error updating training evaluation:", error);
