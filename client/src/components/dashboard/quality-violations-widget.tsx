@@ -29,7 +29,7 @@ type Violation = {
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   status: 'pending' | 'in_progress' | 'resolved';
-  createdAt: string;
+  reportDate: string;
   reportedBy: string;
   assignedTo?: string;
   resolvedAt?: string;

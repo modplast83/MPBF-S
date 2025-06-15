@@ -287,8 +287,8 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
     const totalWeight = totalA + totalB;
 
     // Calculate percentages of A and B in the overall mix
-    const aPercentage = (totalA / totalWeight) * 100;
-    const bPercentage = (totalB / totalWeight) * 100;
+    const aPercentage = totalWeight > 0 ? (totalA / totalWeight) * 100 : 0;
+    const bPercentage = totalWeight > 0 ? (totalB / totalWeight) * 100 : 0;
 
     // Get the target weights from the formula parameters
     const { aTotalWeight, bTotalWeight } = formulaParameters;
