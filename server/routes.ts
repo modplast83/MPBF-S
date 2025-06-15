@@ -6491,6 +6491,68 @@ COMMIT;
     }
   });
 
+  // Email quote request endpoint
+  app.post("/api/send-quote-email", async (req: Request, res: Response) => {
+    try {
+      const quoteData = req.body;
+      
+      if (!process.env.SENDGRID_API_KEY) {
+        return res.status(500).json({ message: "Email service not configured" });
+      }
+
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+      const emailContent = `
+        <h2>New Quote Request</h2>
+        
+        <h3>Customer Information:</h3>
+        <p><strong>Name:</strong> ${quoteData.customerInfo.name}</p>
+        <p><strong>Email:</strong> ${quoteData.customerInfo.email}</p>
+        <p><strong>Phone:</strong> ${quoteData.customerInfo.phone}</p>
+        
+        <h3>Product Details:</h3>
+        <p><strong>Product Type:</strong> ${quoteData.productType}</p>
+        <p><strong>Template:</strong> ${quoteData.template}</p>
+        <p><strong>Material Color:</strong> ${quoteData.materialColor}</p>
+        <p><strong>Quantity:</strong> ${quoteData.quantity.toLocaleString()} pieces</p>
+        
+        <h3>Dimensions:</h3>
+        <ul>
+          <li>Width: ${quoteData.dimensions.width} cm</li>
+          <li>Length: ${quoteData.dimensions.length} cm</li>
+          <li>Gusset: ${quoteData.dimensions.gusset} cm</li>
+          <li>Thickness: ${quoteData.dimensions.thickness} mm</li>
+        </ul>
+        
+        <h3>Pricing:</h3>
+        <p><strong>Unit Price:</strong> ${(quoteData.estimatedCost / quoteData.quantity).toFixed(3)} SR per piece</p>
+        <p><strong>Total Estimated Cost:</strong> ${quoteData.estimatedCost.toLocaleString()} SR</p>
+        
+        ${quoteData.notes ? `<h3>Additional Notes:</h3><p>${quoteData.notes}</p>` : ''}
+        
+        <hr>
+        <p><em>Quote request submitted on: ${new Date(quoteData.timestamp).toLocaleString()}</em></p>
+        <p><em>*Final pricing may vary based on design complexity and material availability</em></p>
+      `;
+
+      const msg = {
+        to: 'Modplast83@gmail.com',
+        from: 'noreply@modplast.com', // Use your verified sender
+        subject: `New Quote Request from ${quoteData.customerInfo.name}`,
+        html: emailContent,
+        replyTo: quoteData.customerInfo.email
+      };
+
+      await sgMail.send(msg);
+      res.json({ success: true, message: "Quote request sent successfully" });
+      
+    } catch (error) {
+      console.error("Error sending quote email:", error);
+      res.status(500).json({ message: "Failed to send quote request" });
+    }
+  });
+
   // Setup notification routes
   setupNotificationRoutes(app);
   

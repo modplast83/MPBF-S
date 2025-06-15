@@ -1411,7 +1411,7 @@ export default function OrderDesignPage() {
                     <div className="mt-8 flex justify-center space-x-4">
                       <Button 
                         variant="outline" 
-                        onClick={generateQuote}
+                        onClick={handleDownloadPDF}
                         size="lg"
                         className="px-8"
                       >
@@ -1419,18 +1419,13 @@ export default function OrderDesignPage() {
                         Download Quote
                       </Button>
                       <Button 
-                        onClick={() => {
-                          generateQuote();
-                          toast({
-                            title: "Quote Request Submitted",
-                            description: "We'll contact you within 24 hours with final pricing and production timeline.",
-                          });
-                        }}
+                        onClick={handleSendQuoteRequest}
                         size="lg"
                         className="px-8"
+                        disabled={emailQuoteMutation.isPending}
                       >
                         <FileText className="h-5 w-5 mr-2" />
-                        Submit Quote Request
+                        {emailQuoteMutation.isPending ? "Sending..." : "Submit Quote Request"}
                       </Button>
                     </div>
                   </div>
