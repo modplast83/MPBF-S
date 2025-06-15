@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -145,14 +145,23 @@ export default function TrainingPage() {
   });
 
   const createEvaluationMutation = useMutation({
-    mutationFn: async (data: { trainingId: number; trainingPointId: number; status: string; notes?: string }) => {
-      const response = await fetch('/api/training-evaluations', {
-        method: 'POST',
+    mutationFn: async (data: { trainingId: number; trainingPointId: number; status: string; notes?: string; evaluationId?: number }) => {
+      // If evaluation exists, update it; otherwise create new one
+      const method = data.evaluationId ? 'PUT' : 'POST';
+      const url = data.evaluationId ? `/api/training-evaluations/${data.evaluationId}` : '/api/training-evaluations';
+      
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          trainingId: data.trainingId,
+          trainingPointId: data.trainingPointId,
+          status: data.status,
+          notes: data.notes,
+        }),
       });
-      if (!response.ok) throw new Error('Failed to create evaluation');
+      if (!response.ok) throw new Error(`Failed to ${data.evaluationId ? 'update' : 'create'} evaluation`);
       return response.json();
     },
     onSuccess: () => {
@@ -167,11 +176,15 @@ export default function TrainingPage() {
   const handleEvaluationUpdate = (trainingPointId: number, status: string, notes?: string) => {
     if (!selectedTraining) return;
     
+    // Check if evaluation already exists
+    const existingEvaluation = evaluations.find(e => e.trainingPointId === trainingPointId);
+    
     createEvaluationMutation.mutate({
       trainingId: selectedTraining.id,
       trainingPointId,
       status,
       notes,
+      evaluationId: existingEvaluation?.id,
     });
   };
 
@@ -227,6 +240,9 @@ export default function TrainingPage() {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Training</DialogTitle>
+                <DialogDescription>
+                  Create a new training session by selecting trainee, supervisor, and training details.
+                </DialogDescription>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -476,6 +492,9 @@ export default function TrainingPage() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Training Evaluation - {selectedTraining?.trainingId}</DialogTitle>
+            <DialogDescription>
+              Evaluate training points and update training status for the selected training session.
+            </DialogDescription>
           </DialogHeader>
           {selectedTraining && (
             <div className="space-y-6">
