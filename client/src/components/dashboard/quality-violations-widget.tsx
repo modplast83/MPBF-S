@@ -121,7 +121,7 @@ export function QualityViolationsWidget() {
                 <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    <span>{format(new Date(violation.createdAt), 'MMM d, yyyy')}</span>
+                    <span>{format(new Date(violation.reportDate), 'MMM d, yyyy')}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <User className="h-3 w-3" />

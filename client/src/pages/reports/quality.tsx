@@ -565,15 +565,15 @@ export default function QualityReportsPage() {
                                   {t("reports.passed")} ({reportData.passedChecks})
                                 </span>
                                 <span className="text-sm font-medium text-green-600">
-                                  {((reportData.passedChecks / reportData.totalChecks) * 100).toFixed(1)}%
+                                  {reportData.totalChecks > 0 ? ((reportData.passedChecks / reportData.totalChecks) * 100).toFixed(1) : '0'}%
                                 </span>
                               </div>
                               <Progress 
-                                value={(reportData.passedChecks / reportData.totalChecks) * 100} 
+                                value={reportData.totalChecks > 0 ? (reportData.passedChecks / reportData.totalChecks) * 100 : 0} 
                                 className="h-2 bg-gray-100" 
                               >
                                 <div className="h-full bg-green-500" style={{ 
-                                  width: `${(reportData.passedChecks / reportData.totalChecks) * 100}%` 
+                                  width: `${reportData.totalChecks > 0 ? (reportData.passedChecks / reportData.totalChecks) * 100 : 0}%` 
                                 }} />
                               </Progress>
                             </div>
@@ -583,15 +583,15 @@ export default function QualityReportsPage() {
                                   {t("reports.failed")} ({reportData.failedChecks})
                                 </span>
                                 <span className="text-sm font-medium text-red-600">
-                                  {((reportData.failedChecks / reportData.totalChecks) * 100).toFixed(1)}%
+                                  {reportData.totalChecks > 0 ? ((reportData.failedChecks / reportData.totalChecks) * 100).toFixed(1) : '0'}%
                                 </span>
                               </div>
                               <Progress 
-                                value={(reportData.failedChecks / reportData.totalChecks) * 100} 
+                                value={reportData.totalChecks > 0 ? (reportData.failedChecks / reportData.totalChecks) * 100 : 0} 
                                 className="h-2 bg-gray-100" 
                               >
                                 <div className="h-full bg-red-500" style={{ 
-                                  width: `${(reportData.failedChecks / reportData.totalChecks) * 100}%` 
+                                  width: `${reportData.totalChecks > 0 ? (reportData.failedChecks / reportData.totalChecks) * 100 : 0}%` 
                                 }} />
                               </Progress>
                             </div>
