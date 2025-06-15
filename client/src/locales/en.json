@@ -394,6 +394,8 @@
       "time_attendance": "Time Attendance",
       "employee_of_the_month": "Employee of the Month",
       "violation_and_complaint": "Violation and Complaint",
+      "training": "Training",
+      "certificates": "Certificates",
       "maintenance": "Maintenance",
       "maintenance_requests": "Maintenance Requests",
       "maintenance_actions": "Maintenance Actions",
