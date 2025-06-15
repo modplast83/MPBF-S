@@ -60,9 +60,7 @@ const PRODUCT_TYPES = [
   { id: "shopping-bag", name: "Shopping Bag", icon: "🛍️", description: "T-shirt and D-cut handle bags" },
   { id: "table-cover", name: "Table Cover", icon: "🪑", description: "Protective table coverings" },
   { id: "packing-bags", name: "Packing Bags", icon: "📦", description: "Industrial packaging solutions" },
-  { id: "garbage-bags", name: "Garbage Bags", icon: "🗑️", description: "Waste management bags" },
-  { id: "food-packaging", name: "Food Packaging", icon: "🍽️", description: "Food-safe packaging materials" },
-  { id: "custom-pouches", name: "Custom Pouches", icon: "📱", description: "Specialized pouch designs" }
+  { id: "garbage-bags", name: "Garbage Bags", icon: "🗑️", description: "Waste management bags" }
 ];
 
 const TEMPLATES = [
