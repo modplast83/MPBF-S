@@ -380,22 +380,23 @@ export function QualityCorrectiveActions() {
   });
 
   const getUserById = (id: string) => {
-    if (!Array.isArray(users)) {
-      return id || "Unknown";
+    if (!id) return "Unknown";
+    if (!Array.isArray(users) || users.length === 0) {
+      return id;
     }
-    const user = users.find((user: any) => user.id === id);
+    const user = users.find((user: any) => user?.id === id);
     if (user) {
       // Prioritize firstName, fallback to username if no firstName
       return user.firstName || user.username || `User ${user.id}`;
     }
-    return id || "Unknown";
+    return id;
   };
 
   const getCheckById = (id: number) => {
-    if (!Array.isArray(checks)) {
+    if (!id || !Array.isArray(checks) || checks.length === 0) {
       return null;
     }
-    return checks.find((check: any) => check.id === id);
+    return checks.find((check: any) => check?.id === id);
   };
 
   const isLoading = actionsLoading || checksLoading || usersLoading;
