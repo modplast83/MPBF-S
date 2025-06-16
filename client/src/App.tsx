@@ -58,6 +58,11 @@ import TimeAttendancePage from "@/pages/hr/time-attendance";
 import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
 import TrainingPage from "@/pages/hr/training";
 import CertificatesPage from "@/pages/hr/certificates";
+import EnhancedAttendance from "@/pages/hr/enhanced-attendance";
+import EmployeeManagement from "@/pages/hr/employee-management";
+import EmployeeRanks from "@/pages/hr/employee-ranks";
+import OvertimeLeave from "@/pages/hr/overtime-leave";
+import GeofenceManagement from "@/pages/hr/geofences";
 // Maintenance Module imports
 import MaintenancePage from "@/pages/maintenance/index";
 import MaintenanceRequestsPage from "@/pages/maintenance/requests";
@@ -143,6 +148,11 @@ function App() {
                     <ProtectedRoute path="/cliches" component={ClichePage} module="Cliches" />
                     {/* HR Module Routes */}
                     <ProtectedRoute path="/hr" component={HRIndex} module="HR" />
+                    <ProtectedRoute path="/hr/enhanced-attendance" component={EnhancedAttendance} module="Enhanced Attendance" />
+                    <ProtectedRoute path="/hr/employee-management" component={EmployeeManagement} module="Employee Management" />
+                    <ProtectedRoute path="/hr/employee-ranks" component={EmployeeRanks} module="Employee Ranks" />
+                    <ProtectedRoute path="/hr/overtime-leave" component={OvertimeLeave} module="Overtime & Leave" />
+                    <ProtectedRoute path="/hr/geofences" component={GeofenceManagement} module="Geofence Management" />
                     <ProtectedRoute path="/hr/time-attendance" component={TimeAttendancePage} module="Time Attendance" />
                     <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
                     <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />

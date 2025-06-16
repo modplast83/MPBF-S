@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Trophy, AlertTriangle, TrendingUp, ArrowRight, Users, Calendar, GraduationCap, Award } from "lucide-react";
+import { Clock, Trophy, AlertTriangle, TrendingUp, ArrowRight, Users, Calendar, GraduationCap, Award, CalendarDays, MapPin, DollarSign } from "lucide-react";
 import { Link } from "wouter";
 
 interface HRModuleCardProps {
@@ -54,11 +54,53 @@ export default function HRIndex() {
 
   const hrModules = [
     {
+      title: "Enhanced Attendance",
+      description: "Smart attendance tracking with geofencing and automatic check-out",
+      icon: Clock,
+      path: "/hr/enhanced-attendance",
+      color: "bg-gradient-to-br from-blue-500 to-blue-600"
+    },
+    {
+      title: "Employee Management",
+      description: "Comprehensive employee profiles, ranks, and work details",
+      icon: Users,
+      path: "/hr/employee-management",
+      color: "bg-gradient-to-br from-green-500 to-green-600"
+    },
+    {
+      title: "Employee Ranks & Levels",
+      description: "Manage hierarchy, salary scales, and overtime policies",
+      icon: Award,
+      path: "/hr/employee-ranks",
+      color: "bg-gradient-to-br from-purple-500 to-purple-600"
+    },
+    {
+      title: "Overtime & Leave",
+      description: "Request and approve overtime hours and leave applications",
+      icon: CalendarDays,
+      path: "/hr/overtime-leave",
+      color: "bg-gradient-to-br from-orange-500 to-orange-600"
+    },
+    {
+      title: "Geofence Management",
+      description: "Configure factory areas for automatic attendance tracking",
+      icon: MapPin,
+      path: "/hr/geofences",
+      color: "bg-gradient-to-br from-cyan-500 to-cyan-600"
+    },
+    {
+      title: "Payroll & Performance",
+      description: "Manage payroll records and employee performance reviews",
+      icon: DollarSign,
+      path: "/hr/payroll-performance",
+      color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
+    },
+    {
       title: t("hr.time_attendance.title"),
-      description: t("hr.time_attendance.attendance_summary"),
+      description: "Basic time tracking and attendance records",
       icon: Clock,
       path: "/hr/time-attendance",
-      color: "bg-gradient-to-br from-blue-500 to-blue-600"
+      color: "bg-gradient-to-br from-gray-500 to-gray-600"
     },
     {
       title: t("hr.employee_of_month.title"),
@@ -75,25 +117,11 @@ export default function HRIndex() {
       color: "bg-gradient-to-br from-red-500 to-red-600"
     },
     {
-      title: "Violation Trends",
-      description: "Smart data visualization and analytics for violation patterns",
-      icon: TrendingUp,
-      path: "/hr/violation-trends",
-      color: "bg-gradient-to-br from-purple-500 to-purple-600"
-    },
-    {
-      title: "Training",
-      description: "Manage and evaluate training processes for employees",
+      title: "Training & Certificates",
+      description: "Manage training programs and completion certificates",
       icon: GraduationCap,
       path: "/hr/training",
       color: "bg-gradient-to-br from-indigo-500 to-indigo-600"
-    },
-    {
-      title: "Certificates",
-      description: "Generate and manage training completion certificates",
-      icon: Award,
-      path: "/hr/certificates",
-      color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
     }
   ];
 
