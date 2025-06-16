@@ -11,7 +11,10 @@ export default function EmailConfiguration() {
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const testEmailMutation = useMutation({
-    mutationFn: () => fetch('/api/test-email-config').then(res => res.json()),
+    mutationFn: async () => {
+      const response = await fetch('/api/test-email-config');
+      return response.json();
+    },
     onSuccess: (data) => {
       setTestResult(data);
     },
@@ -24,33 +27,37 @@ export default function EmailConfiguration() {
   });
 
   const sendTestQuoteMutation = useMutation({
-    mutationFn: () => apiRequest('/api/send-quote-email', {
-      method: 'POST',
-      body: {
-        customerInfo: {
-          name: 'Test Customer',
-          email: 'test@example.com',
-          phone: '+966501234567'
+    mutationFn: () => 
+      fetch('/api/send-quote-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        productType: 'Custom Plastic Bags',
-        template: 'Standard Template',
-        materialColor: 'White',
-        quantity: 1000,
-        dimensions: {
-          width: 30,
-          length: 40,
-          gusset: 10,
-          thickness: 0.05
-        },
-        clichesCost: 600,
-        bagsCost: 3000,
-        minimumKg: 300,
-        numberOfColors: 2,
-        estimatedCost: 3600,
-        notes: 'This is a test quote request to verify email functionality.',
-        timestamp: new Date().toISOString()
-      }
-    }),
+        body: JSON.stringify({
+          customerInfo: {
+            name: 'Test Customer',
+            email: 'test@example.com',
+            phone: '+966501234567'
+          },
+          productType: 'Custom Plastic Bags',
+          template: 'Standard Template',
+          materialColor: 'White',
+          quantity: 1000,
+          dimensions: {
+            width: 30,
+            length: 40,
+            gusset: 10,
+            thickness: 0.05
+          },
+          clichesCost: 600,
+          bagsCost: 3000,
+          minimumKg: 300,
+          numberOfColors: 2,
+          estimatedCost: 3600,
+          notes: 'This is a test quote request to verify email functionality.',
+          timestamp: new Date().toISOString()
+        })
+      }).then(res => res.json()),
     onSuccess: (data) => {
       setTestResult(data);
     },

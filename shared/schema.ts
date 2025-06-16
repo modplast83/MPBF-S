@@ -1178,3 +1178,34 @@ export type SmsProviderSettings = typeof smsProviderSettings.$inferSelect;
 export const insertSmsProviderHealthSchema = createInsertSchema(smsProviderHealth).omit({ id: true, checkedAt: true });
 export type InsertSmsProviderHealth = z.infer<typeof insertSmsProviderHealthSchema>;
 export type SmsProviderHealth = typeof smsProviderHealth.$inferSelect;
+
+// Dashboard Widgets and Layouts
+export const dashboardWidgets = pgTable("dashboard_widgets", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  widgetType: text("widget_type").notNull(),
+  widgetConfig: jsonb("widget_config").notNull(),
+  position: jsonb("position").notNull(), // { x: number, y: number, w: number, h: number }
+  isVisible: boolean("is_visible").default(true),
+  dashboardLayout: text("dashboard_layout").default("default"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const dashboardLayouts = pgTable("dashboard_layouts", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  layoutName: text("layout_name").notNull(),
+  layoutConfig: jsonb("layout_config").notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDashboardWidgetSchema = createInsertSchema(dashboardWidgets).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertDashboardWidget = z.infer<typeof insertDashboardWidgetSchema>;
+export type DashboardWidget = typeof dashboardWidgets.$inferSelect;
+
+export const insertDashboardLayoutSchema = createInsertSchema(dashboardLayouts).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertDashboardLayout = z.infer<typeof insertDashboardLayoutSchema>;
+export type DashboardLayout = typeof dashboardLayouts.$inferSelect;

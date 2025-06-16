@@ -131,6 +131,7 @@ function App() {
                     <ProtectedRoute path="/system/permissions" component={Permissions} module="Permissions" />
                     <ProtectedRoute path="/system/import-export" component={ImportExport} module="Import & Export" />
                     <ProtectedRoute path="/system/sms" component={SmsIndex} module="SMS Management" />
+                    <ProtectedRoute path="/system/email-config" component={EmailConfiguration} module="Email Configuration" />
                     <ProtectedRoute path="/system/server-restart" component={ServerRestart} module="Server Management" />
                     <ProtectedRoute path="/tools" component={ToolsPage} module="Tools" />
                     <ProtectedRoute path="/tools/order-design" component={OrderDesignPage} module="Order Design" />
