@@ -563,6 +563,12 @@ export default function MaintenanceRequestsPage() {
                   </div>
                   
                   <div className="mt-3 pt-3 border-t">
+                    <div className="flex justify-between items-center mb-2">
+                      <p className="text-sm font-medium">Actions:</p>
+                      <Badge variant="outline" className="text-xs">
+                        {getActionCount(request.id)} action{getActionCount(request.id) !== 1 ? 's' : ''}
+                      </Badge>
+                    </div>
                     <p className="text-sm text-gray-700 mb-3" title={request.description}>
                       {request.description.length > 100 ? `${request.description.substring(0, 100)}...` : request.description}
                     </p>
@@ -588,7 +594,7 @@ export default function MaintenanceRequestsPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleAddMaintenanceAction(request)}
-                        title="Add Maintenance Action"
+                        title="Add New Maintenance Action (Multiple actions allowed)"
                       >
                         <Wrench className="h-4 w-4" />
                       </Button>
@@ -618,6 +624,7 @@ export default function MaintenanceRequestsPage() {
                     <TableHead className="text-center">{t("maintenance.requests.severity")}</TableHead>
                     <TableHead className="text-center">{t("maintenance.requests.status")}</TableHead>
                     <TableHead className="text-center">Reported By</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
                     <TableHead className="text-center">{t("maintenance.requests.description")}</TableHead>
                     <TableHead className="text-center">{t("common.actions")}</TableHead>
                   </TableRow>
@@ -632,6 +639,11 @@ export default function MaintenanceRequestsPage() {
                       <TableCell>{getSeverityBadge(request.severity)}</TableCell>
                       <TableCell>{getStatusBadge(request.status)}</TableCell>
                       <TableCell>{getUserName(request.reportedBy)}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className="text-xs">
+                          {getActionCount(request.id)} action{getActionCount(request.id) !== 1 ? 's' : ''}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="max-w-xs truncate" title={request.description}>
                         {request.description}
                       </TableCell>
@@ -657,7 +669,7 @@ export default function MaintenanceRequestsPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleAddMaintenanceAction(request)}
-                            title="Add Maintenance Action"
+                            title="Add New Maintenance Action (Multiple actions allowed)"
                           >
                             <Wrench className="h-4 w-4" />
                           </Button>
