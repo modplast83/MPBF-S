@@ -28,7 +28,7 @@ const DAMAGE_TYPES = [
 ];
 
 const SEVERITY_LEVELS = ["High", "Normal", "Low"];
-const STATUS_OPTIONS = ["pending", "progress", "completed", "cancelled"];
+const STATUS_OPTIONS = ["pending", "progress", "completed", "cancelled", "repaired", "waiting_for_parts"];
 
 interface MaintenanceRequest {
   id: number;
@@ -67,6 +67,9 @@ export default function MaintenanceRequestsPage() {
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<MaintenanceRequest | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
@@ -158,6 +161,26 @@ export default function MaintenanceRequestsPage() {
     },
   });
 
+  // Delete request mutation
+  const deleteRequestMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `${API_ENDPOINTS.MAINTENANCE_REQUESTS}/${id}`),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Maintenance request deleted successfully",
+      });
+      refetchRequests();
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.MAINTENANCE_REQUESTS] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete maintenance request",
+        variant: "destructive",
+      });
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       machineId: "",
@@ -193,6 +216,28 @@ export default function MaintenanceRequestsPage() {
       ...(newStatus === 'completed' && { completedAt: new Date().toISOString() })
     };
     updateRequestMutation.mutate({ id: requestId, data: updateData });
+    setIsStatusDialogOpen(false);
+  };
+
+  const handleViewRequest = (request: MaintenanceRequest) => {
+    setSelectedRequest(request);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleDeleteRequest = (requestId: number) => {
+    if (window.confirm('Are you sure you want to delete this maintenance request?')) {
+      deleteRequestMutation.mutate(requestId);
+    }
+  };
+
+  const handleAddMaintenanceAction = (request: MaintenanceRequest) => {
+    // Navigate to maintenance actions page with pre-filled request data
+    window.location.href = `/maintenance/actions?requestId=${request.id}`;
+  };
+
+  const handleChangeStatus = (request: MaintenanceRequest) => {
+    setSelectedRequest(request);
+    setIsStatusDialogOpen(true);
   };
 
   // Filter requests
@@ -231,6 +276,10 @@ export default function MaintenanceRequestsPage() {
         return <Badge variant="default"><CheckCircle className="w-3 h-3 mr-1" />{status}</Badge>;
       case "cancelled":
         return <Badge variant="outline"><X className="w-3 h-3 mr-1" />{status}</Badge>;
+      case "repaired":
+        return <Badge variant="default"><CheckCircle className="w-3 h-3 mr-1" />Repaired</Badge>;
+      case "waiting_for_parts":
+        return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Waiting For Parts</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -506,27 +555,40 @@ export default function MaintenanceRequestsPage() {
                       {request.description.length > 100 ? `${request.description.substring(0, 100)}...` : request.description}
                     </p>
                     
-                    <div className="flex space-x-2">
-                      {request.status === 'pending' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => handleStatusUpdate(request.id, 'in_progress')}
-                        >
-                          {t("common.start")}
-                        </Button>
-                      )}
-                      {request.status === 'in_progress' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => handleStatusUpdate(request.id, 'completed')}
-                        >
-                          {t("common.complete")}
-                        </Button>
-                      )}
+                    <div className="flex space-x-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleViewRequest(request)}
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleChangeStatus(request)}
+                        title="Change Status"
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleAddMaintenanceAction(request)}
+                        title="Add Maintenance Action"
+                      >
+                        <Wrench className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDeleteRequest(request.id)}
+                        title="Delete Request"
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </Card>
@@ -563,24 +625,39 @@ export default function MaintenanceRequestsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-1">
-                          {request.status === 'pending' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleStatusUpdate(request.id, 'in_progress')}
-                            >
-                              {t("common.start")}
-                            </Button>
-                          )}
-                          {request.status === 'in_progress' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleStatusUpdate(request.id, 'completed')}
-                            >
-                              {t("common.complete")}
-                            </Button>
-                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewRequest(request)}
+                            title="View Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleChangeStatus(request)}
+                            title="Change Status"
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAddMaintenanceAction(request)}
+                            title="Add Maintenance Action"
+                          >
+                            <Wrench className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteRequest(request.id)}
+                            title="Delete Request"
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -591,6 +668,139 @@ export default function MaintenanceRequestsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* View Request Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Maintenance Request Details</DialogTitle>
+            <DialogDescription>
+              View complete information about this maintenance request
+            </DialogDescription>
+          </DialogHeader>
+          {selectedRequest && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="font-semibold">Request ID:</Label>
+                  <p>#{selectedRequest.id}</p>
+                </div>
+                <div>
+                  <Label className="font-semibold">Date Created:</Label>
+                  <p>{format(new Date(selectedRequest.createdAt), 'MMM dd, yyyy HH:mm')}</p>
+                </div>
+                <div>
+                  <Label className="font-semibold">Machine:</Label>
+                  <p>{getMachineName(selectedRequest.machineId)}</p>
+                </div>
+                <div>
+                  <Label className="font-semibold">Damage Type:</Label>
+                  <p>{selectedRequest.damageType}</p>
+                </div>
+                <div>
+                  <Label className="font-semibold">Severity:</Label>
+                  <p>{getSeverityBadge(selectedRequest.severity)}</p>
+                </div>
+                <div>
+                  <Label className="font-semibold">Status:</Label>
+                  <p>{getStatusBadge(selectedRequest.status)}</p>
+                </div>
+                <div>
+                  <Label className="font-semibold">Reported By:</Label>
+                  <p>{getUserName(selectedRequest.reportedBy)}</p>
+                </div>
+                <div>
+                  <Label className="font-semibold">Priority:</Label>
+                  <p>{selectedRequest.priority === 1 ? 'High' : selectedRequest.priority === 2 ? 'Normal' : 'Low'}</p>
+                </div>
+              </div>
+              <div>
+                <Label className="font-semibold">Description:</Label>
+                <p className="mt-1 p-3 bg-gray-50 rounded border">{selectedRequest.description}</p>
+              </div>
+              {selectedRequest.completedAt && (
+                <div>
+                  <Label className="font-semibold">Completed At:</Label>
+                  <p>{format(new Date(selectedRequest.completedAt), 'MMM dd, yyyy HH:mm')}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Status Dialog */}
+      <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Request Status</DialogTitle>
+            <DialogDescription>
+              Update the status of this maintenance request
+            </DialogDescription>
+          </DialogHeader>
+          {selectedRequest && (
+            <div className="space-y-4">
+              <div>
+                <Label className="font-semibold">Current Status:</Label>
+                <p className="mt-1">{getStatusBadge(selectedRequest.status)}</p>
+              </div>
+              <div>
+                <Label className="font-semibold">Select New Status:</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleStatusUpdate(selectedRequest.id, 'pending')}
+                    className="justify-start"
+                  >
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    Pending
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleStatusUpdate(selectedRequest.id, 'progress')}
+                    className="justify-start"
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    In Progress
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleStatusUpdate(selectedRequest.id, 'repaired')}
+                    className="justify-start"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Repaired
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleStatusUpdate(selectedRequest.id, 'waiting_for_parts')}
+                    className="justify-start"
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    Waiting For Parts
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleStatusUpdate(selectedRequest.id, 'completed')}
+                    className="justify-start"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Completed
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleStatusUpdate(selectedRequest.id, 'cancelled')}
+                    className="justify-start"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancelled
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
