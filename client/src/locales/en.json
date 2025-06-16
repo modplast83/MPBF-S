@@ -133,6 +133,7 @@
                 "no_categories": "No categories found"
             },
             "products": {
+                "add_customer_products": "Add Customer Products",
                 "print_a4": "Print A4",
                 "select_a_customer": "Select a customer",
                 "thickness": "Thickness",
