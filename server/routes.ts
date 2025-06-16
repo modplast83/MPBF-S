@@ -6525,9 +6525,18 @@ COMMIT;
           <li>Thickness: ${quoteData.dimensions.thickness} mm</li>
         </ul>
         
-        <h3>Pricing:</h3>
+        <h3>Pricing Breakdown:</h3>
+        <p><strong>1. Clichés Cost:</strong> ${quoteData.clichesCost.toLocaleString()} SR</p>
+        <p style="margin-left: 20px; font-size: 12px; color: #666;">
+          (${quoteData.dimensions.width} × ${quoteData.dimensions.length} cm² × ${quoteData.numberOfColors} colors × 0.5 SR)
+        </p>
+        <p><strong>2. Bags Cost:</strong> ${quoteData.bagsCost.toLocaleString()} SR</p>
+        <p style="margin-left: 20px; font-size: 12px; color: #666;">
+          (Minimum ${quoteData.minimumKg} kg × 10 SR/kg for ${quoteData.numberOfColors} color${quoteData.numberOfColors > 1 ? 's' : ''})
+        </p>
+        <hr style="margin: 15px 0;">
+        <p><strong>Total Cost:</strong> ${quoteData.estimatedCost.toLocaleString()} SR</p>
         <p><strong>Unit Price:</strong> ${(quoteData.estimatedCost / quoteData.quantity).toFixed(3)} SR per piece</p>
-        <p><strong>Total Estimated Cost:</strong> ${quoteData.estimatedCost.toLocaleString()} SR</p>
         
         ${quoteData.notes ? `<h3>Additional Notes:</h3><p>${quoteData.notes}</p>` : ''}
         
