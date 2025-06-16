@@ -533,6 +533,7 @@
         "no_categories": "No categories found"
       },
       "products": {
+        "thickness": "Thickness"
         "categories": "Categories",
         "thikness": "Thickness",
         "raw_material": "Raw Material",
