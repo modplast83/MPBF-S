@@ -12,6 +12,7 @@ import {
   jsonb,
   index
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -882,8 +883,11 @@ export const geofences = pgTable("geofences", {
   centerLongitude: doublePrecision("center_longitude").notNull(),
   radius: doublePrecision("radius").notNull(), // in meters
   isActive: boolean("is_active").default(true),
-  sectionIds: jsonb("section_ids"), // which sections this geofence applies to
+  sectionIds: text("section_ids").array().default(sql`'{}'`), // which sections this geofence applies to
+  geofenceType: text("geofence_type").default("factory"),
+  description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertGeofenceSchema = createInsertSchema(geofences).omit({ id: true, createdAt: true });
