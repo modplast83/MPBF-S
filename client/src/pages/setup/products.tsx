@@ -354,7 +354,7 @@ export default function Products() {
           ) : (
             <div className="text-center py-8 text-gray-500">
               <span className="material-icons text-4xl mb-2">people</span>
-              <p>{t("setup.products.please_select_customer")}</p>
+              <p>{t('setup.products.please_select_customer')}</p>
             </div>
           )}
         </CardContent>

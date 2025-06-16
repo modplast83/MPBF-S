@@ -131,7 +131,7 @@
         "validation_error": "خطأ في التحقق",
         "fill_required_fields": "يرجى ملء جميع الحقول المطلوبة",
         "product_created": "تم إنشاء المنتج",
-        "product_updated": "تم تحديث المنتج", 
+        "product_updated": "تم تحديث المنتج",
         "product_deleted": "تم حذف المنتج",
         "product_created_success": "تم إنشاء المنتج بنجاح",
         "product_updated_success": "تم تحديث المنتج بنجاح",
@@ -388,7 +388,7 @@
       "title": "الإجراءات السريعة",
       "new_order": "طلبية جديدة",
       "new_order_desc": "إنشاء طلبية",
-      "start_production": "بدء الإنتاج", 
+      "start_production": "بدء الإنتاج",
       "start_production_desc": "بدء العملية",
       "quality_check": "فحص الجودة",
       "quality_check_desc": "إجراء فحص",
@@ -736,7 +736,7 @@
       "input_material": "إدخال مادة",
       "add_new_material": "إضافة مادة جديدة",
       "name": "الاسم",
-      "type": "النوع", 
+      "type": "النوع",
       "quantity": "الكمية",
       "unit": "الوحدة",
       "select_unit": "اختر وحدة",
@@ -879,12 +879,12 @@
       "analyze_by_section_operator_item": "تحليل الإنتاج حسب الأقسام والمشغلين والمواد",
       "analyze_manufacturing_efficiency": "مراجعة كفاءة التصنيع ومقاييس الأداء",
       "production_cost_analysis": "تحليل تكاليف الإنتاج واستخدام المواد",
-      
+
       "filters": "التصفية",
       "production_analytics": "تحليلات الإنتاج",
       "inventory_analysis": "تحليل المخزون",
       "quality_analytics": "تحليلات الجودة",
-      
+
       "start_date": "تاريخ البدء",
       "end_date": "تاريخ الانتهاء",
       "customer": "العميل",
@@ -893,24 +893,24 @@
       "all_statuses": "جميع الحالات",
       "reset": "إعادة تعيين",
       "apply": "تطبيق",
-      
+
       "total_orders": "إجمالي الطلبات",
       "total_production": "إجمالي الإنتاج",
       "waste_percentage": "نسبة الهدر",
       "avg_efficiency": "متوسط الكفاءة",
-      
+
       "order_id": "رقم الطلب",
       "date": "التاريخ",
       "ordered_quantity": "الكمية المطلوبة",
       "completed_quantity": "الكمية المكتملة",
       "waste": "الهدر",
       "efficiency": "الكفاءة",
-      
+
       "export_excel": "تصدير إلى إكسل",
       "print_report": "طباعة التقرير",
       "no_data_available": "لا توجد بيانات متاحة",
       "try_different_filters": "جرب مرشحات مختلفة",
-      
+
       "material_id": "رقم المادة",
       "material_name": "اسم المادة",
       "material_type": "نوع المادة",
@@ -923,12 +923,12 @@
       "all_types": "جميع الأنواع",
       "material": "المادة",
       "all_materials": "جميع المواد",
-      
+
       "total_materials": "إجمالي المواد",
       "total_inventory": "إجمالي المخزون",
       "material_types": "أنواع المواد",
       "recent_updates": "التحديثات الأخيرة",
-      
+
       "inventory_by_type": "المخزون حسب النوع",
       "inventory_history": "سجل المخزون",
       "quantity_added": "الكمية المضافة",
@@ -936,7 +936,7 @@
       "no_inventory_data": "لا توجد بيانات مخزون",
       "no_history_data": "لا توجد بيانات سجل",
       "materials": "المواد",
-      
+
       "quality_checks": "فحوصات الجودة",
       "passed": "ناجح",
       "failed": "فاشل",
@@ -952,7 +952,7 @@
       "action": "الإجراء",
       "implemented_by": "نفذ بواسطة",
       "implementation_date": "تاريخ التنفيذ",
-      
+
       "workflow_analytics": "تحليلات سير العمل",
       "by_section": "حسب القسم",
       "by_operator": "حسب المشغل",
@@ -961,26 +961,26 @@
       "operator_performance": "أداء المشغلين",
       "section_details": "تفاصيل الأقسام",
       "operator_details": "تفاصيل المشغلين",
-      
+
       "section_id": "رقم القسم",
       "section_name": "اسم القسم",
       "section": "القسم",
       "rolls_count": "عدد الرولات",
       "waste_quantity": "كمية الهدر",
       "production_time": "وقت الإنتاج",
-      
+
       "operator_id": "رقم المشغل",
       "operator_name": "اسم المشغل",
       "operator": "المشغل",
       "all_operators": "جميع المشغلين",
       "jobs_count": "عدد المهام",
       "rolls_processed": "الرولات المعالجة",
-      
+
       "item_id": "رقم الصنف",
       "item_name": "اسم الصنف",
       "category": "الفئة",
       "finished_quantity": "الكمية المنتهية",
-      
+
       "all_sections": "جميع الأقسام"
     },
     "tools": {
@@ -1274,7 +1274,7 @@
       "en": "English",
       "ar": "العربية",
       "es": "Español",
-      "fr": "Français", 
+      "fr": "Français",
       "de": "Deutsch",
       "zh": "中文",
       "change_interface": "تغيير لغة الواجهة",
@@ -1316,7 +1316,7 @@
       "delivered": "تم التسليم"
     },
     "products": {
-      "thickness": "السماكة", 
+      "thickness": "السماكة",
       "raw_material": "المادة الخام",
       "master_batch": "الماستر باتش",
       "product_details": "تفاصيل المنتج"
@@ -1500,6 +1500,7 @@
         "investigation_notes": "ملاحظات التحقيق"
       },
       "common": {
+        "item": "الصنف","
         "employee": "الموظف",
         "date": "التاريخ",
         "time": "الوقت",

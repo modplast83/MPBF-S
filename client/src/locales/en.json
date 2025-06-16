@@ -5,6 +5,7 @@
       "full_title": "Modern Plastic Bag Factory"
     },
     "common": {
+      "item": "Item",
       "loading": "Loading...",
       "save": "Save",
       "saving": "Saving...",
@@ -532,6 +533,30 @@
         "no_categories": "No categories found"
       },
       "products": {
+        "categories": "Categories",
+        "thikness": "Thickness",
+        "raw_material": "Raw Material",
+        "product_details": "Product Details",
+        "product_name": "Product Name",
+        "product_code": "Product Code",
+        "category": "Category",
+        "size": "Size",
+        "color": "Color",
+        "master_batch": "Master Batch",
+        "ink_coverage": "Ink Coverage",
+        "print_colors": "Print Colors",
+        "customer": "Customer",
+        "actions": "Actions",
+        "no_products_found": "No products found",
+        "add_new": "Add New Product",
+        "edit_product": "Edit Product",
+        "duplicate_product": "Duplicate Product",
+        "delete_product": "Delete Product",
+        "select_customer": "Select Customer",
+        "select_customer_to_view": "Select a customer to view products",
+        "products_for": "Products for {{customer}}",
+        "search_placeholder": "Search products...",
+        "please_select_customer": "Please select a customer to view their products",
         "title": "Products",
         "description": "Manage customer-specific product specifications"
       },
