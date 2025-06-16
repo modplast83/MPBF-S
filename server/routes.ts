@@ -50,6 +50,7 @@ import { setupBottleneckRoutes } from "./bottleneck-routes";
 import { notificationService } from "./notification-service";
 import sgMail from '@sendgrid/mail';
 import { emailService } from './services/email-service';
+import { dashboardStorage } from './dashboard-storage';
 import { setupNotificationRoutes } from "./notification-routes";
 import { setupIotRoutes } from "./iot-routes";
 import { setupMobileRoutes } from "./mobile-routes";
@@ -6520,6 +6521,57 @@ COMMIT;
         success: false, 
         message: "Failed to test email configuration" 
       });
+    }
+  });
+
+  // Dashboard widget endpoints
+  app.get("/api/dashboard-widgets", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      const layoutName = req.query.layout as string || 'default';
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const widgets = await dashboardStorage.getUserWidgets(userId, layoutName);
+      res.json(widgets);
+    } catch (error) {
+      console.error("Error fetching dashboard widgets:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard widgets" });
+    }
+  });
+
+  app.post("/api/dashboard-widgets", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      const { layoutName, widgets } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      await dashboardStorage.saveUserLayout(userId, layoutName || 'default', widgets);
+      res.json({ success: true, message: "Dashboard layout saved successfully" });
+    } catch (error) {
+      console.error("Error saving dashboard layout:", error);
+      res.status(500).json({ message: "Failed to save dashboard layout" });
+    }
+  });
+
+  app.get("/api/dashboard-stats", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const stats = await dashboardStorage.getDashboardStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
     }
   });
 
