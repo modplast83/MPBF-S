@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { QuickActions } from "@/components/ui/quick-actions";
-import { Plus, RefreshCw, Filter, Search, AlertTriangle, Clock, CheckCircle, X } from "lucide-react";
+import { Plus, RefreshCw, Filter, Search, AlertTriangle, Clock, CheckCircle, X, Eye, Trash2, Wrench, Settings } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { CelebrationScreen, useCelebration } from "@/components/maintenance/celebration-screen";
@@ -77,8 +77,6 @@ export default function MaintenanceRequestsPage() {
     damageType: "",
     severity: "Normal",
     description: "",
-    notes: "",
-    estimatedRepairTime: "",
   });
 
   // Fetch maintenance requests
@@ -166,8 +164,6 @@ export default function MaintenanceRequestsPage() {
       damageType: "",
       severity: "Normal",
       description: "",
-      notes: "",
-      estimatedRepairTime: "",
     });
   };
 
@@ -185,7 +181,6 @@ export default function MaintenanceRequestsPage() {
 
     const requestData = {
       ...formData,
-      estimatedRepairTime: formData.estimatedRepairTime ? parseInt(formData.estimatedRepairTime) : null,
       priority: formData.severity === "High" ? 1 : formData.severity === "Normal" ? 2 : 3,
     };
 
@@ -445,28 +440,6 @@ export default function MaintenanceRequestsPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   rows={3}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="estimatedRepairTime">{t("maintenance.requests.estimatedRepairTime")}</Label>
-                <Input
-                  id="estimatedRepairTime"
-                  type="number"
-                  placeholder="Enter estimated hours"
-                  value={formData.estimatedRepairTime}
-                  onChange={(e) => setFormData({...formData, estimatedRepairTime: e.target.value})}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="notes">{t("maintenance.requests.notes")}</Label>
-                <Textarea
-                  id="notes"
-                  placeholder={t("maintenance.requests.notes")}
-                  value={formData.notes}
-                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                  rows={2}
                 />
               </div>
 
