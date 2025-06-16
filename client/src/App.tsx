@@ -77,6 +77,7 @@ import NotificationsPage from "@/pages/notifications";
 
 import EmployeeDashboard from "@/pages/employee-dashboard";
 import ServerRestart from "@/pages/system/server-restart";
+import EmailConfiguration from "@/pages/system/email-config";
 import { User } from "@shared/schema";
 
 function App() {

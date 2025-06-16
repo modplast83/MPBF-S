@@ -69,7 +69,7 @@ export class EmailService {
       
       const msg = {
         to: 'Modplast83@gmail.com',
-        from: 'noreply@modplast.com', // Must be verified in SendGrid
+        from: 'Modplast83@gmail.com', // Using the same email as sender and recipient
         subject: `New Quote Request from ${quoteData.customerInfo.name}`,
         html: emailContent,
         replyTo: quoteData.customerInfo.email
@@ -196,12 +196,12 @@ export class EmailService {
     }
 
     try {
-      // Test with a simple email validation call
+      // Test with sandbox mode enabled
       const testMsg = {
-        to: 'test@example.com',
-        from: 'noreply@modplast.com',
-        subject: 'Test Connection',
-        text: 'This is a test',
+        to: 'Modplast83@gmail.com',
+        from: 'Modplast83@gmail.com',
+        subject: 'SendGrid Configuration Test',
+        text: 'This is a test email to verify SendGrid configuration.',
         mailSettings: {
           sandboxMode: {
             enable: true
@@ -209,15 +209,17 @@ export class EmailService {
         }
       };
 
+      console.log('Testing SendGrid connection with sandbox mode...');
       await sgMail.send(testMsg);
       return {
         success: true,
         message: 'SendGrid connection successful'
       };
     } catch (error: any) {
+      console.error('SendGrid test failed:', error);
       return {
         success: false,
-        message: `SendGrid connection failed: ${error.message}`
+        message: `SendGrid connection failed: ${error.message || 'Unknown error'}`
       };
     }
   }
