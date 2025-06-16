@@ -135,6 +135,11 @@ export const SIDEBAR_ITEMS = [
         path: "/hr",
         icon: "people",
         subItems: [
+          { title: "Enhanced Attendance", path: "/hr/enhanced-attendance" },
+          { title: "Employee Management", path: "/hr/employee-management" },
+          { title: "Employee Ranks", path: "/hr/employee-ranks" },
+          { title: "Overtime & Leave", path: "/hr/overtime-leave" },
+          { title: "Geofence Management", path: "/hr/geofences" },
           { title: "Time Attendance", path: "/hr/time-attendance" },
           { title: "Employee of the Month", path: "/hr/employee-of-month" },
           { title: "Violation and Complaint", path: "/hr/violations-complaints" },
