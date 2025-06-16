@@ -49,6 +49,7 @@ import { setupHRRoutes } from "./hr-routes";
 import { setupBottleneckRoutes } from "./bottleneck-routes";
 import { notificationService } from "./notification-service";
 import sgMail from '@sendgrid/mail';
+import { emailService } from './services/email-service';
 import { setupNotificationRoutes } from "./notification-routes";
 import { setupIotRoutes } from "./iot-routes";
 import { setupMobileRoutes } from "./mobile-routes";
@@ -6495,76 +6496,30 @@ COMMIT;
   // Email quote request endpoint
   app.post("/api/send-quote-email", async (req: Request, res: Response) => {
     try {
-      const quoteData = req.body;
+      const result = await emailService.sendQuoteRequest(req.body);
       
-      if (!process.env.SENDGRID_API_KEY) {
-        return res.status(500).json({ message: "Email service not configured" });
-      }
-
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-      const emailContent = `
-        <h2>New Quote Request</h2>
-        
-        <h3>Customer Information:</h3>
-        <p><strong>Name:</strong> ${quoteData.customerInfo.name}</p>
-        <p><strong>Email:</strong> ${quoteData.customerInfo.email}</p>
-        <p><strong>Phone:</strong> ${quoteData.customerInfo.phone}</p>
-        
-        <h3>Product Details:</h3>
-        <p><strong>Product Type:</strong> ${quoteData.productType}</p>
-        <p><strong>Template:</strong> ${quoteData.template}</p>
-        <p><strong>Material Color:</strong> ${quoteData.materialColor}</p>
-        <p><strong>Quantity:</strong> ${quoteData.quantity.toLocaleString()} pieces</p>
-        
-        <h3>Dimensions:</h3>
-        <ul>
-          <li>Width: ${quoteData.dimensions.width} cm</li>
-          <li>Length: ${quoteData.dimensions.length} cm</li>
-          <li>Gusset: ${quoteData.dimensions.gusset} cm</li>
-          <li>Thickness: ${quoteData.dimensions.thickness} mm</li>
-        </ul>
-        
-        <h3>Pricing Breakdown:</h3>
-        <p><strong>1. Clichés Cost:</strong> ${quoteData.clichesCost.toLocaleString()} SR</p>
-        <p style="margin-left: 20px; font-size: 12px; color: #666;">
-          (${quoteData.dimensions.width} × ${quoteData.dimensions.length} cm² × ${quoteData.numberOfColors} colors × 0.5 SR)
-        </p>
-        <p><strong>2. Bags Cost:</strong> ${quoteData.bagsCost.toLocaleString()} SR</p>
-        <p style="margin-left: 20px; font-size: 12px; color: #666;">
-          (Minimum ${quoteData.minimumKg} kg × 10 SR/kg for ${quoteData.numberOfColors} color${quoteData.numberOfColors > 1 ? 's' : ''})
-        </p>
-        <hr style="margin: 15px 0;">
-        <p><strong>Total Cost:</strong> ${quoteData.estimatedCost.toLocaleString()} SR</p>
-        <p><strong>Unit Price:</strong> ${(quoteData.estimatedCost / quoteData.quantity).toFixed(3)} SR per piece</p>
-        
-        ${quoteData.notes ? `<h3>Additional Notes:</h3><p>${quoteData.notes}</p>` : ''}
-        
-        <hr>
-        <p><em>Quote request submitted on: ${new Date(quoteData.timestamp).toLocaleString()}</em></p>
-        <p><em>*Final pricing may vary based on design complexity and material availability</em></p>
-      `;
-
-      const msg = {
-        to: 'Modplast83@gmail.com',
-        from: 'test@example.com', // Use a verified sender email from your SendGrid account
-        subject: `New Quote Request from ${quoteData.customerInfo.name}`,
-        html: emailContent,
-        replyTo: quoteData.customerInfo.email
-      };
-
-      await sgMail.send(msg);
-      res.json({ success: true, message: "Quote request sent successfully" });
-      
-    } catch (error) {
-      console.error("Error sending quote email:", error);
-      if (error.code === 403) {
-        res.status(500).json({ 
-          message: "Email service authentication failed. Please check SendGrid configuration and verify sender email address." 
-        });
+      if (result.success) {
+        res.json({ success: true, message: result.message });
       } else {
-        res.status(500).json({ message: "Failed to send quote request" });
+        res.status(500).json({ message: result.message });
       }
+    } catch (error) {
+      console.error("Unexpected error in quote email endpoint:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Test SendGrid configuration endpoint
+  app.get("/api/test-email-config", async (req: Request, res: Response) => {
+    try {
+      const result = await emailService.testConnection();
+      res.json(result);
+    } catch (error) {
+      console.error("Error testing email configuration:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to test email configuration" 
+      });
     }
   });
 
