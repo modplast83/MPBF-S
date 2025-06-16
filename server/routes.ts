@@ -6547,7 +6547,7 @@ COMMIT;
 
       const msg = {
         to: 'Modplast83@gmail.com',
-        from: 'noreply@modplast.com', // Use your verified sender
+        from: 'test@example.com', // Use a verified sender email from your SendGrid account
         subject: `New Quote Request from ${quoteData.customerInfo.name}`,
         html: emailContent,
         replyTo: quoteData.customerInfo.email
@@ -6558,7 +6558,13 @@ COMMIT;
       
     } catch (error) {
       console.error("Error sending quote email:", error);
-      res.status(500).json({ message: "Failed to send quote request" });
+      if (error.code === 403) {
+        res.status(500).json({ 
+          message: "Email service authentication failed. Please check SendGrid configuration and verify sender email address." 
+        });
+      } else {
+        res.status(500).json({ message: "Failed to send quote request" });
+      }
     }
   });
 
