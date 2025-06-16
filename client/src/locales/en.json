@@ -185,6 +185,7 @@
             },
             "machines": {
                 "title": "Machines",
+                "add_new": "Add New Machine",
                 "description": "Manage production machinery and equipment"
             },
             "users": {

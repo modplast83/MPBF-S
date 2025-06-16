@@ -16,6 +16,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { QuickActions } from "@/components/ui/quick-actions";
 import { Plus, RefreshCw, Filter, Search, AlertTriangle, Clock, CheckCircle, X, Eye, Trash2, Wrench, Settings } from "lucide-react";
+import { useLocation } from "wouter";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { CelebrationScreen, useCelebration } from "@/components/maintenance/celebration-screen";
@@ -66,6 +67,7 @@ export default function MaintenanceRequestsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  const [location, setLocation] = useLocation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
@@ -98,6 +100,12 @@ export default function MaintenanceRequestsPage() {
   const { data: users = [] } = useQuery({
     queryKey: ['/api/users'],
     queryFn: () => apiRequest('GET', '/api/users')
+  });
+
+  // Fetch maintenance actions to show action counts
+  const { data: actions = [] } = useQuery({
+    queryKey: [API_ENDPOINTS.MAINTENANCE_ACTIONS],
+    queryFn: () => apiRequest('GET', API_ENDPOINTS.MAINTENANCE_ACTIONS)
   });
 
   // Create request mutation
@@ -232,7 +240,7 @@ export default function MaintenanceRequestsPage() {
 
   const handleAddMaintenanceAction = (request: MaintenanceRequest) => {
     // Navigate to maintenance actions page with pre-filled request data
-    window.location.href = `/maintenance/actions?requestId=${request.id}`;
+    setLocation(`/maintenance/actions?requestId=${request.id}`);
   };
 
   const handleChangeStatus = (request: MaintenanceRequest) => {
@@ -293,6 +301,10 @@ export default function MaintenanceRequestsPage() {
   const getUserName = (userId: string) => {
     const user = users.find((u: User) => u.id === userId);
     return user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : userId;
+  };
+
+  const getActionCount = (requestId: number) => {
+    return actions.filter((action: any) => action.requestId === requestId).length;
   };
 
   // Calculate progress statistics
