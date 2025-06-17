@@ -5946,6 +5946,36 @@ COMMIT;
     }
   });
 
+  // HR Violation Status Update Route
+  app.patch("/api/hr-violations/:id/status", async (req: Request, res: Response) => {
+    try {
+      const violationId = parseInt(req.params.id);
+      const { status, notes } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ error: 'Status is required' });
+      }
+
+      // Get existing violation
+      const existingViolation = await storage.getHrViolation(violationId);
+      if (!existingViolation) {
+        return res.status(404).json({ error: 'Violation not found' });
+      }
+
+      // Update the violation with new status
+      const updatedViolation = await storage.updateHrViolation(violationId, {
+        status,
+        notes: notes || existingViolation.notes,
+        updatedAt: new Date()
+      });
+
+      res.json(updatedViolation);
+    } catch (error) {
+      console.error('Error updating violation status:', error);
+      res.status(500).json({ error: 'Failed to update violation status' });
+    }
+  });
+
   // HR Complaints Routes
   app.get("/api/hr-complaints", async (req: Request, res: Response) => {
     try {
