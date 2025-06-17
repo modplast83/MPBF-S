@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -234,6 +234,9 @@ export function WidgetLibrary({ onAddWidget, onClose }: WidgetLibraryProps) {
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Widget Library</DialogTitle>
+          <DialogDescription>
+            Browse and add widgets to customize your dashboard
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden flex gap-6">
