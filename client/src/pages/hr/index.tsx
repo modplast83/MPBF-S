@@ -96,13 +96,6 @@ export default function HRIndex() {
       color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
     },
     {
-      title: t("hr.time_attendance.title"),
-      description: "Basic time tracking and attendance records",
-      icon: Clock,
-      path: "/hr/time-attendance",
-      color: "bg-gradient-to-br from-gray-500 to-gray-600"
-    },
-    {
       title: t("hr.employee_of_month.title"),
       description: t("hr.employee_of_month.performance_evaluation"),
       icon: Trophy,
