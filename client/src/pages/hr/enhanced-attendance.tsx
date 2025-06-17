@@ -515,48 +515,48 @@ export default function EnhancedAttendance() {
                     .slice(0, 20)
                     .map((record: AttendanceRecord) => (
                       <TableRow key={record.id}>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-medium text-xs sm:text-sm">
                           {getUserName(record.userId)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-xs sm:text-sm">
                           {new Date(record.date).toLocaleDateString()}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-xs sm:text-sm">
                           {formatTime(record.checkInTime)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-xs sm:text-sm">
                           {formatTime(record.checkOutTime)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-xs sm:text-sm">
                           {formatDuration(record.workingHours)}
                         </TableCell>
                         <TableCell>
-                          <div className="font-medium">
+                          <div className="font-medium text-xs sm:text-sm">
                             {formatDuration(record.overtimeHours)}
                           </div>
                           {record.overtimeHours > 0 && (
                             <Badge 
-                              className={record.overtimeApproved 
+                              className={`text-xs mt-1 ${record.overtimeApproved 
                                 ? "bg-green-100 text-green-800" 
                                 : "bg-yellow-100 text-yellow-800"
-                              }
+                              }`}
                             >
                               {record.overtimeApproved ? "Approved" : "Pending"}
                             </Badge>
                           )}
                         </TableCell>
                         <TableCell>
-                          <Badge className={getStatusBadge(record.status)}>
+                          <Badge className={`text-xs ${getStatusBadge(record.status)}`}>
                             {record.status.replace('_', ' ').toUpperCase()}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           {record.isAutoCheckedOut ? (
-                            <Badge className="bg-orange-100 text-orange-800">
+                            <Badge className="text-xs bg-orange-100 text-orange-800">
                               Auto
                             </Badge>
                           ) : (
-                            <Badge className="bg-gray-100 text-gray-800">
+                            <Badge className="text-xs bg-gray-100 text-gray-800">
                               Manual
                             </Badge>
                           )}
