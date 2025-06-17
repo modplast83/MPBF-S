@@ -308,34 +308,34 @@ export default function EnhancedAttendance() {
 
       {/* Location Status Card */}
       <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
             Location Status
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+        <CardContent className="pt-0">
+          <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:gap-4">
               {locationError ? (
-                <div className="flex items-center gap-2 text-red-600">
-                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="text-sm sm:text-base">{locationError}</span>
+                <div className="flex items-center gap-2 text-red-600 p-2 bg-red-50 rounded-md">
+                  <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm break-words">{locationError}</span>
                 </div>
               ) : currentPosition ? (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                    <span className="text-sm sm:text-base">Location detected</span>
+                <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:gap-3">
+                  <div className="flex items-center gap-2 p-2 bg-green-50 rounded-md">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span className="text-sm font-medium">Location detected</span>
                   </div>
-                  <Badge className={`text-xs sm:text-sm ${isInGeofence ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                  <Badge className={`text-xs font-medium px-2 py-1 ${isInGeofence ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
                     {isInGeofence ? "Inside Factory Area" : "Outside Factory Area"}
                   </Badge>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-yellow-600">
-                  <Timer className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="text-sm sm:text-base">Getting location...</span>
+                <div className="flex items-center gap-2 text-yellow-600 p-2 bg-yellow-50 rounded-md">
+                  <Timer className="h-4 w-4 animate-spin flex-shrink-0" />
+                  <span className="text-sm">Getting location...</span>
                 </div>
               )}
             </div>
@@ -481,9 +481,9 @@ export default function EnhancedAttendance() {
 
       {/* Attendance Records */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
             Recent Attendance Records
           </CardTitle>
         </CardHeader>
@@ -499,14 +499,14 @@ export default function EnhancedAttendance() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Check In</TableHead>
-                    <TableHead>Check Out</TableHead>
-                    <TableHead>Working Hours</TableHead>
-                    <TableHead>Overtime</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Auto Check-out</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Employee</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Check In</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Check Out</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Working Hours</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Overtime</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Auto Check-out</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

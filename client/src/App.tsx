@@ -54,7 +54,6 @@ import OrderDesignPage from "@/pages/tools/order-design";
 import ClichePage from "@/pages/cliches/index";
 // HR Module imports
 import HRIndex from "@/pages/hr/index";
-import TimeAttendancePage from "@/pages/hr/time-attendance";
 import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
 import TrainingPage from "@/pages/hr/training";
 import CertificatesPage from "@/pages/hr/certificates";
@@ -153,7 +152,7 @@ function App() {
                     <ProtectedRoute path="/hr/employee-ranks" component={EmployeeRanks} module="Employee Ranks" />
                     <ProtectedRoute path="/hr/overtime-leave" component={OvertimeLeave} module="Overtime & Leave" />
                     <ProtectedRoute path="/hr/geofences" component={GeofenceManagement} module="Geofence Management" />
-                    <ProtectedRoute path="/hr/time-attendance" component={TimeAttendancePage} module="Time Attendance" />
+
                     <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
                     <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />
                     <ProtectedRoute path="/hr/violation-trends" component={ViolationTrendsPage} module="Violation Trends" />
