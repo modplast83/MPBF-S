@@ -300,10 +300,10 @@ export default function EnhancedAttendance() {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Enhanced Attendance System</h1>
-        <p className="text-gray-600 mt-2">Smart attendance tracking with geofencing and automatic check-out</p>
+    <div className="container mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Enhanced Attendance System</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-2">Smart attendance tracking with geofencing and automatic check-out</p>
       </div>
 
       {/* Location Status Card */}
@@ -342,7 +342,7 @@ export default function EnhancedAttendance() {
       </Card>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
           <CardContent className="p-6">
             <div className="text-center">
