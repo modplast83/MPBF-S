@@ -259,6 +259,12 @@ export default function ViolationsComplaintsPage() {
     return matchesStatus && matchesSearch;
   });
 
+  // Helper function to get user name by ID
+  const getUserName = (userId: string) => {
+    const user = users?.find((u: User) => u.id === userId);
+    return user ? user.firstName || user.username : userId;
+  };
+
   return (
     <div className={`container mx-auto ${isMobile ? "p-3" : "p-3 sm:p-6"}`}>
       <div className={isMobile ? "mb-4" : "mb-6 sm:mb-8"}>
@@ -627,7 +633,7 @@ export default function ViolationsComplaintsPage() {
                     {filteredViolations?.map((violation: HrViolation) => (
                       <TableRow key={violation.id}>
                         <TableCell className="font-medium">{violation.title}</TableCell>
-                        <TableCell>{violation.userId}</TableCell>
+                        <TableCell>{getUserName(violation.userId)}</TableCell>
                         <TableCell>
                           <Badge variant="outline">
                             {t(`hr.violations_complaints.${violation.violationType}`)}
@@ -638,7 +644,7 @@ export default function ViolationsComplaintsPage() {
                             {t(`hr.violations_complaints.${violation.severity}`)}
                           </Badge>
                         </TableCell>
-                        <TableCell>{violation.reportedBy}</TableCell>
+                        <TableCell>{getUserName(violation.reportedBy)}</TableCell>
                         <TableCell>{format(new Date(violation.reportDate), 'MMM dd, yyyy')}</TableCell>
                         <TableCell>
                           <Badge className={getStatusBadge(violation.status)}>
@@ -767,8 +773,8 @@ export default function ViolationsComplaintsPage() {
                   <p className="text-sm">{selectedViolation.id}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Employee ID</label>
-                  <p className="text-sm">{selectedViolation.userId}</p>
+                  <label className="text-sm font-medium text-gray-500">Employee</label>
+                  <p className="text-sm">{getUserName(selectedViolation.userId)}</p>
                 </div>
               </div>
               
@@ -807,7 +813,7 @@ export default function ViolationsComplaintsPage() {
 
               <div>
                 <label className="text-sm font-medium text-gray-500">Reported By</label>
-                <p className="text-sm">{selectedViolation.reportedBy}</p>
+                <p className="text-sm">{getUserName(selectedViolation.reportedBy)}</p>
               </div>
 
               <div>
