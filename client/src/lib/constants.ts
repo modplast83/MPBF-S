@@ -140,7 +140,6 @@ export const SIDEBAR_ITEMS = [
           { title: "employee_ranks", path: "/hr/employee-ranks" },
           { title: "overtime_leave", path: "/hr/overtime-leave" },
           { title: "geofence_management", path: "/hr/geofences" },
-          { title: "time_attendance", path: "/hr/time-attendance" },
           { title: "employee_of_the_month", path: "/hr/employee-of-month" },
           { title: "violation_and_complaint", path: "/hr/violations-complaints" },
           { title: "training", path: "/hr/training" },
