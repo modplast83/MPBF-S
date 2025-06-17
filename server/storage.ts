@@ -420,7 +420,7 @@ export class MemStorage {
     this.initializeData();
   }
 
-  private initializeData() {
+  private async initializeData() {
     // Add an admin user
     this.createUser({
       id: "admin-user-001",
@@ -462,28 +462,28 @@ export class MemStorage {
     });
     
     // Add categories
-    const bagCategory = this.createCategory({
+    const bagCategory = await this.createCategory({
       id: "CAT001",
       name: "Plastic Bags",
       code: "PB",
     });
     
     // Add items
-    this.createItem({
+    await this.createItem({
       id: "ITM019",
       categoryId: bagCategory.id,
       name: "Small Plastic Bag",
       fullName: "Small HDPE Plastic Bag",
     });
     
-    this.createItem({
+    await this.createItem({
       id: "ITM020",
       categoryId: bagCategory.id,
       name: "Medium Plastic Bag",
       fullName: "Medium HDPE Plastic Bag",
     });
     
-    this.createItem({
+    await this.createItem({
       id: "ITM022",
       categoryId: bagCategory.id,
       name: "Large Plastic Bag",
@@ -1329,6 +1329,32 @@ export class MemStorage {
     }
     
     return this.mixItems.delete(id);
+  }
+
+  // Quality Checks methods - Missing implementations
+  async getQualityChecksByRoll(rollId: string): Promise<QualityCheck[]> {
+    return Array.from(this.qualityChecks.values()).filter(check => check.rollId === rollId);
+  }
+
+  async getCorrectiveActionsByQualityCheck(qualityCheckId: number): Promise<CorrectiveAction[]> {
+    return Array.from(this.correctiveActions.values()).filter(action => action.qualityCheckId === qualityCheckId);
+  }
+
+  async deleteCorrectiveAction(id: number): Promise<boolean> {
+    return this.correctiveActions.delete(id);
+  }
+
+  async deleteQualityCheck(id: number): Promise<boolean> {
+    // Also delete associated corrective actions
+    const actions = await this.getCorrectiveActionsByQualityCheck(id);
+    for (const action of actions) {
+      this.correctiveActions.delete(action.id);
+    }
+    return this.qualityChecks.delete(id);
+  }
+
+  async getQualityChecksByJobOrder(jobOrderId: number): Promise<QualityCheck[]> {
+    return Array.from(this.qualityChecks.values()).filter(check => check.jobOrderId === jobOrderId);
   }
 }
 

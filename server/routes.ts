@@ -5764,7 +5764,7 @@ COMMIT;
   app.post("/api/time-attendance", async (req: Request, res: Response) => {
     try {
       // Get current user from session or request
-      const currentUser = (req as any).user || req.session?.user;
+      const currentUser = (req as any).user || (req.session as any)?.user;
       if (!currentUser) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
