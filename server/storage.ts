@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   User, UpsertUser, Customer, InsertCustomer, Category, InsertCategory,
   Item, InsertItem, Section, InsertSection, Machine, InsertMachine,

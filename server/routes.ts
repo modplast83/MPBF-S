@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -40,7 +39,6 @@ import fs from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import fileUpload from 'express-fileupload';
-// @ts-nocheck
 import { validateRequest, assertType } from './types-fix';
 import { typeAssertion } from './temp-type-bypass';
 import { setupAuth } from "./auth";

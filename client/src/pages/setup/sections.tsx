@@ -69,11 +69,11 @@ export default function Sections() {
   const columns = [
     {
       header: "ID",
-      accessorKey: "id",
+      accessorKey: "id" as const,
     },
     {
       header: "Name",
-      accessorKey: "name",
+      accessorKey: "name" as const,
     },
     {
       header: "Actions",
