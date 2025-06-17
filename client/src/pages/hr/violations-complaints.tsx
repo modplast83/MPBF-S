@@ -8,10 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, MessageSquare, Plus, Filter, Search } from "lucide-react";
+import { AlertTriangle, MessageSquare, Plus, Filter, Search, Eye, Printer, Edit3, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,8 +46,14 @@ const complaintSchema = z.object({
   notes: z.string().optional()
 });
 
+const statusChangeSchema = z.object({
+  status: z.string().min(1, "Status is required"),
+  notes: z.string().optional()
+});
+
 type ViolationForm = z.infer<typeof violationSchema>;
 type ComplaintForm = z.infer<typeof complaintSchema>;
+type StatusChangeForm = z.infer<typeof statusChangeSchema>;
 
 export default function ViolationsComplaintsPage() {
   const { t } = useTranslation();
@@ -58,6 +65,9 @@ export default function ViolationsComplaintsPage() {
   const [isComplaintDialogOpen, setIsComplaintDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedViolation, setSelectedViolation] = useState<HrViolation | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
 
   const violationForm = useForm<ViolationForm>({
     resolver: zodResolver(violationSchema),
@@ -73,6 +83,13 @@ export default function ViolationsComplaintsPage() {
       priority: "medium",
       complaintType: "work_environment",
       isAnonymous: false
+    }
+  });
+
+  const statusChangeForm = useForm<StatusChangeForm>({
+    resolver: zodResolver(statusChangeSchema),
+    defaultValues: {
+      status: ""
     }
   });
 
@@ -128,12 +145,72 @@ export default function ViolationsComplaintsPage() {
     }
   });
 
+  // Update violation status mutation
+  const updateViolationStatusMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: StatusChangeForm }) => 
+      apiRequest('PATCH', `${API_ENDPOINTS.HR_VIOLATIONS}/${id}/status`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.HR_VIOLATIONS] });
+      toast({
+        title: "Success",
+        description: "Violation status updated successfully"
+      });
+      setIsStatusDialogOpen(false);
+      statusChangeForm.reset();
+    }
+  });
+
   const onViolationSubmit = (data: ViolationForm) => {
     createViolationMutation.mutate(data);
   };
 
   const onComplaintSubmit = (data: ComplaintForm) => {
     createComplaintMutation.mutate(data);
+  };
+
+  const onStatusChangeSubmit = (data: StatusChangeForm) => {
+    if (selectedViolation) {
+      updateViolationStatusMutation.mutate({ id: selectedViolation.id, data });
+    }
+  };
+
+  const handleViewViolation = (violation: HrViolation) => {
+    setSelectedViolation(violation);
+    setIsViewDialogOpen(true);
+  };
+
+  const handlePrintViolation = (violation: HrViolation) => {
+    const printContent = `
+      <div style="padding: 20px; font-family: Arial, sans-serif;">
+        <h2 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">Violation Report</h2>
+        <div style="margin: 20px 0;">
+          <p><strong>ID:</strong> ${violation.id}</p>
+          <p><strong>Title:</strong> ${violation.title}</p>
+          <p><strong>Employee ID:</strong> ${violation.userId}</p>
+          <p><strong>Violation Type:</strong> ${violation.violationType}</p>
+          <p><strong>Severity:</strong> ${violation.severity}</p>
+          <p><strong>Status:</strong> ${violation.status}</p>
+          <p><strong>Reported By:</strong> ${violation.reportedBy}</p>
+          <p><strong>Report Date:</strong> ${format(new Date(violation.reportDate), 'MMM dd, yyyy HH:mm')}</p>
+          <p><strong>Description:</strong></p>
+          <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">${violation.description}</div>
+          ${violation.actionTaken ? `<p><strong>Action Taken:</strong></p><div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">${violation.actionTaken}</div>` : ''}
+        </div>
+      </div>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const handleChangeStatus = (violation: HrViolation) => {
+    setSelectedViolation(violation);
+    statusChangeForm.setValue('status', violation.status);
+    setIsStatusDialogOpen(true);
   };
 
   const getStatusBadge = (status: string) => {
@@ -543,6 +620,7 @@ export default function ViolationsComplaintsPage() {
                       <TableHead>{t("hr.violations_complaints.reported_by")}</TableHead>
                       <TableHead>{t("hr.violations_complaints.report_date")}</TableHead>
                       <TableHead>{t("hr.common.status")}</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -566,6 +644,30 @@ export default function ViolationsComplaintsPage() {
                           <Badge className={getStatusBadge(violation.status)}>
                             {t(`hr.violations_complaints.${violation.status}`)}
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleViewViolation(violation)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handlePrintViolation(violation)}>
+                                <Printer className="mr-2 h-4 w-4" />
+                                Print
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeStatus(violation)}>
+                                <Edit3 className="mr-2 h-4 w-4" />
+                                Change Status
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))}
