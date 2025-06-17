@@ -315,25 +315,27 @@ export default function EnhancedAttendance() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
               {locationError ? (
                 <div className="flex items-center gap-2 text-red-600">
-                  <AlertTriangle className="h-5 w-5" />
-                  <span>{locationError}</span>
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">{locationError}</span>
                 </div>
               ) : currentPosition ? (
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <span>Location detected</span>
-                  <Badge className={isInGeofence ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                    <span className="text-sm sm:text-base">Location detected</span>
+                  </div>
+                  <Badge className={`text-xs sm:text-sm ${isInGeofence ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
                     {isInGeofence ? "Inside Factory Area" : "Outside Factory Area"}
                   </Badge>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-yellow-600">
-                  <Timer className="h-5 w-5" />
-                  <span>Getting location...</span>
+                  <Timer className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">Getting location...</span>
                 </div>
               )}
             </div>
@@ -344,19 +346,20 @@ export default function EnhancedAttendance() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="text-center">
-              <UserCheck className="h-8 w-8 mx-auto mb-4 text-green-500" />
-              <h3 className="font-semibold mb-2">Check In</h3>
+              <UserCheck className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-3 sm:mb-4 text-green-500" />
+              <h3 className="text-sm sm:text-base font-semibold mb-2">Check In</h3>
               <Button 
                 onClick={handleCheckIn}
                 disabled={!isInGeofence || !!todayRecord?.checkInTime || checkInMutation.isPending}
-                className="w-full"
+                className="w-full text-sm sm:text-base"
+                size="sm"
               >
                 {checkInMutation.isPending ? "Checking In..." : "Check In"}
               </Button>
               {todayRecord?.checkInTime && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-xs sm:text-sm text-gray-500 mt-2">
                   Checked in at {formatTime(todayRecord.checkInTime)}
                 </p>
               )}
@@ -365,40 +368,43 @@ export default function EnhancedAttendance() {
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="text-center">
-              <LogOut className="h-8 w-8 mx-auto mb-4 text-blue-500" />
-              <h3 className="font-semibold mb-2">Check Out</h3>
+              <LogOut className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-3 sm:mb-4 text-blue-500" />
+              <h3 className="text-sm sm:text-base font-semibold mb-2">Check Out</h3>
               <Button 
                 onClick={handleCheckOut}
                 disabled={!todayRecord?.checkInTime || !!todayRecord?.checkOutTime || checkOutMutation.isPending}
                 variant="outline"
-                className="w-full"
+                className="w-full text-sm sm:text-base"
+                size="sm"
               >
                 {checkOutMutation.isPending ? "Checking Out..." : "Check Out"}
               </Button>
               {todayRecord?.checkOutTime && (
-                <p className="text-sm text-gray-500 mt-2">
-                  Checked out at {formatTime(todayRecord.checkOutTime)}
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    Checked out at {formatTime(todayRecord.checkOutTime)}
+                  </p>
                   {todayRecord.isAutoCheckedOut && (
-                    <Badge className="ml-2 bg-orange-100 text-orange-800">Auto</Badge>
+                    <Badge className="text-xs bg-orange-100 text-orange-800">Auto</Badge>
                   )}
-                </p>
+                </div>
               )}
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="text-center">
-              <Clock className="h-8 w-8 mx-auto mb-4 text-purple-500" />
-              <h3 className="font-semibold mb-2">Working Hours</h3>
-              <div className="text-2xl font-bold text-gray-900">
+              <Clock className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-3 sm:mb-4 text-purple-500" />
+              <h3 className="text-sm sm:text-base font-semibold mb-2">Working Hours</h3>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">
                 {todayRecord ? formatDuration(todayRecord.workingHours) : "0h 0m"}
               </div>
               {todayRecord?.overtimeHours > 0 && (
-                <p className="text-sm text-orange-600 mt-1">
+                <p className="text-xs sm:text-sm text-orange-600 mt-1">
                   +{formatDuration(todayRecord.overtimeHours)} overtime
                 </p>
               )}
@@ -407,15 +413,15 @@ export default function EnhancedAttendance() {
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="text-center">
-              <Coffee className="h-8 w-8 mx-auto mb-4 text-orange-500" />
-              <h3 className="font-semibold mb-2">Break Time</h3>
-              <div className="text-lg font-semibold text-gray-900">
+              <Coffee className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-3 sm:mb-4 text-orange-500" />
+              <h3 className="text-sm sm:text-base font-semibold mb-2">Break Time</h3>
+              <div className="text-lg sm:text-xl font-semibold text-gray-900">
                 {todayRecord?.breakDuration ? formatDuration(todayRecord.breakDuration) : "0h 0m"}
               </div>
               {todayRecord?.breakStartTime && !todayRecord?.breakEndTime && (
-                <Badge className="mt-2 bg-yellow-100 text-yellow-800">On Break</Badge>
+                <Badge className="mt-2 text-xs bg-yellow-100 text-yellow-800">On Break</Badge>
               )}
             </div>
           </CardContent>
@@ -425,49 +431,49 @@ export default function EnhancedAttendance() {
       {/* Today's Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Employees</p>
-                <p className="text-3xl font-bold text-gray-900">{todayStats.totalEmployees}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Employees</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{todayStats.totalEmployees}</p>
               </div>
-              <Users className="h-8 w-8 text-blue-500" />
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Checked In Today</p>
-                <p className="text-3xl font-bold text-gray-900">{todayStats.checkedIn}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Checked In Today</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{todayStats.checkedIn}</p>
               </div>
-              <UserCheck className="h-8 w-8 text-green-500" />
+              <UserCheck className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">On Time</p>
-                <p className="text-3xl font-bold text-gray-900">{todayStats.onTime}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">On Time</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{todayStats.onTime}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Avg Hours</p>
-                <p className="text-3xl font-bold text-gray-900">{todayStats.avgWorkingHours.toFixed(1)}h</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Avg Hours</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{todayStats.avgWorkingHours.toFixed(1)}h</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-500" />
+              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500" />
             </div>
           </CardContent>
         </Card>
