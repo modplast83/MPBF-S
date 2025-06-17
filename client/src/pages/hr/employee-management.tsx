@@ -563,13 +563,14 @@ export default function EmployeeManagement() {
                           {employee.hireDate ? new Date(employee.hireDate).toLocaleDateString() : '-'}
                         </TableCell>
                         <TableCell>
-                          <div className="flex space-x-2">
+                          <div className="flex space-x-1 sm:space-x-2">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => handleEdit(employee)}
+                              className="p-1 sm:p-2"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                           </div>
                         </TableCell>

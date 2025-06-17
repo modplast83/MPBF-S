@@ -159,11 +159,11 @@ export default function EmployeeRanks() {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container mx-auto p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Employee Ranks & Levels</h1>
-          <p className="text-gray-600 mt-2">Manage employee hierarchies, salary scales, and overtime policies</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Employee Ranks & Levels</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">Manage employee hierarchies, salary scales, and overtime policies</p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -171,7 +171,7 @@ export default function EmployeeRanks() {
             <Button onClick={() => {
               setSelectedRank(null);
               form.reset();
-            }}>
+            }} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Rank
             </Button>
@@ -184,8 +184,8 @@ export default function EmployeeRanks() {
             </DialogHeader>
             
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="name"
@@ -333,7 +333,7 @@ export default function EmployeeRanks() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
