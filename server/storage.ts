@@ -22,7 +22,7 @@ import {
   Training, InsertTraining,
   TrainingPoint, InsertTrainingPoint,
   TrainingEvaluation, InsertTrainingEvaluation
-} from "@shared/schema";
+} from "../shared/schema";
 import session from "express-session";
 
 // Interface for storage operations
@@ -417,12 +417,12 @@ export class MemStorage {
     this.currentPermissionId = 1;
     
     // Initialize with sample data
-    this.initializeData();
+    this.initializeData().catch(console.error);
   }
 
   private async initializeData() {
     // Add an admin user
-    this.createUser({
+    await this.createUser({
       id: "admin-user-001",
       username: "admin",
       password: "admin123",

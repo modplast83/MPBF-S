@@ -32,7 +32,7 @@ import {
   InsertMaterialInput, InsertMaterialInputItem, InsertAbaMaterialConfig,
   InsertTimeAttendance, InsertEmployeeOfMonth, InsertHrViolation, InsertHrComplaint,
   InsertTraining, InsertTrainingPoint, InsertTrainingEvaluation
-} from "@shared/schema";
+} from "../shared/schema";
 import { z } from "zod";
 import path from 'path';
 import fs from 'fs';
@@ -5731,7 +5731,7 @@ COMMIT;
   // Time Attendance Routes
   app.get("/api/time-attendance", async (req: Request, res: Response) => {
     try {
-      const timeAttendance = await storage.getTimeAttendance(req.query.userId as string);
+      const timeAttendance = await storage.getTimeAttendance();
       res.json(timeAttendance);
     } catch (error) {
       console.error('Error fetching time attendance:', error);
