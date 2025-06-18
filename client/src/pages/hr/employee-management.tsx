@@ -220,13 +220,13 @@ export default function EmployeeManagement() {
               form.reset();
             }} className="w-full sm:w-auto">
               <UserPlus className="h-4 w-4 mr-2" />
-              Add Employee
+              {t("hr.employee_management.add_employee")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedEmployee ? "Edit Employee Profile" : "Create New Employee Profile"}
+                {selectedEmployee ? t("hr.employee_management.edit_profile") : t("hr.employee_management.create_profile")}
               </DialogTitle>
             </DialogHeader>
             
@@ -235,18 +235,18 @@ export default function EmployeeManagement() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* Basic Information */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Basic Information</h3>
+                    <h3 className="text-lg font-semibold">{t("hr.employee_management.basic_info")}</h3>
                     
                     <FormField
                       control={form.control}
                       name="userId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>User</FormLabel>
+                          <FormLabel>{t("common.user")}</FormLabel>
                           <FormControl>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select user" />
+                                <SelectValue placeholder={t("hr.employee_management.select_user")} />
                               </SelectTrigger>
                               <SelectContent>
                                 {users.map((user: any) => (

@@ -1547,7 +1547,12 @@
             },
             "employee_management": {
                 "title": "Employee Management",
-                "description": "Manage employee profiles, personal information, and employment details"
+                "description": "Manage employee profiles, personal information, and employment details",
+                "add_employee": "Add Employee",
+                "edit_profile": "Edit Employee Profile",
+                "create_profile": "Create New Employee Profile",
+                "basic_info": "Basic Information",
+                "select_user": "Select user"
             },
             "employee_ranks": {
                 "title": "Employee Ranks & Levels",
