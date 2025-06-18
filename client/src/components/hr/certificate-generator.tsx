@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar, Download, Eye, Palette, Save, Settings, Award } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -87,6 +88,7 @@ export default function CertificateGenerator({ trainingId, onClose }: Certificat
   const [selectedColorScheme, setSelectedColorScheme] = useState(colorSchemes[0]);
   const certificateRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const form = useForm<CertificateFormData>({

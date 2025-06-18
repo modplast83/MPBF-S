@@ -1562,6 +1562,14 @@
                 "basic_info": "Basic Information",
                 "select_user": "Select user"
             },
+            "certificate": {
+                "edit": "Edit",
+                "preview": "Preview",
+                "download_pdf": "Download PDF",
+                "configuration": "Certificate Configuration",
+                "training_session": "Training Session",
+                "select_training": "Select training"
+            },
             "employee_ranks": {
                 "title": "Employee Ranks & Levels",
                 "description": "Define and manage employee ranks, levels, and career progression paths"

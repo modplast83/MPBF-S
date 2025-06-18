@@ -32,7 +32,7 @@ import { apiRequest } from "@/lib/queryClient";
 // Create a simplified form schema without machine or order
 const formSchema = insertMixMaterialSchema
   .omit({
-    mixPerson: true, // We'll set this automatically from the current user
+    mixPerson: true as any, // We'll set this automatically from the current user
   });
 
 type FormValues = z.infer<typeof formSchema>;
