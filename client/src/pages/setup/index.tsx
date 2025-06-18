@@ -51,7 +51,7 @@ function SetupCard({ title, description, icon: IconComponent, path, count }: Set
               size="sm" 
               className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 group-hover:bg-slate-800 group-hover:text-white transition-all duration-300"
             >
-              <span className={isRTL ? 'ml-2' : 'mr-2'}>Manage</span>
+              <span className={isRTL ? 'ml-2' : 'mr-2'}>{t('common.manage')}</span>
               <ArrowRight className={`h-4 w-4 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
             </Button>
           </div>
@@ -68,50 +68,50 @@ export default function SetupIndex() {
   // In a real application, these counts would come from API queries
   const [setupModules] = useState([
     {
-      title: "Categories",
-      description: "Manage product categories for organization",
+      title: t("setup.categories.title"),
+      description: t("setup.categories.description"),
       icon: Tag,
       path: "/setup/categories",
       count: 5
     },
     {
-      title: "Products",
-      description: "Manage customer-specific product specifications",
+      title: t("setup.products.title"),
+      description: t("setup.products.description"),
       icon: Package,
       path: "/setup/products",
       count: 24
     },
     {
-      title: "Customers",
-      description: "Manage customer information and relationships",
+      title: t("setup.customers.title"),
+      description: t("setup.customers.description"),
       icon: Users,
       path: "/setup/customers",
       count: 12
     },
     {
-      title: "Items",
-      description: "Manage product items and details",
+      title: t("setup.items.title"),
+      description: t("setup.items.description"),
       icon: ShoppingBag,
       path: "/setup/items",
       count: 37
     },
     {
-      title: "Sections",
-      description: "Manage factory production sections",
+      title: t("setup.sections.title"),
+      description: t("setup.sections.description"),
       icon: Building2,
       path: "/setup/sections",
       count: 3
     },
     {
-      title: "Machines",
-      description: "Manage production machinery and equipment",
+      title: t("setup.machines.title"),
+      description: t("setup.machines.description"),
       icon: Cog,
       path: "/setup/machines",
       count: 8
     },
     {
-      title: "Users",
-      description: "Manage system users and permissions",
+      title: t("setup.users.title"),
+      description: t("setup.users.description"),
       icon: UserCheck,
       path: "/setup/users",
       count: 6
@@ -123,10 +123,10 @@ export default function SetupIndex() {
       {/* Header Section */}
       <div className={`mb-12 text-center ${isRTL ? 'text-right' : 'text-left'}`}>
         <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
-          Setup & Configuration
+          {t('setup.title')}
         </h1>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Manage your system configuration and settings with our comprehensive setup modules
+          {t('setup.description')}
         </p>
       </div>
       

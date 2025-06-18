@@ -140,23 +140,23 @@ export default function ReportsIndex() {
 
   // Report columns for desktop view
   const productionColumns = [
-    { header: "Order ID", accessorKey: "id" },
-    { header: "Date", accessorKey: "date" },
-    { header: "Customer", accessorKey: "customer" },
-    { header: "Product", accessorKey: "product" },
-    { header: "Size", accessorKey: "size" },
+    { header: t('reports.order_id'), accessorKey: "id" },
+    { header: t('reports.date'), accessorKey: "date" },
+    { header: t('reports.customer'), accessorKey: "customer" },
+    { header: t('reports.product'), accessorKey: "product" },
+    { header: t('reports.size'), accessorKey: "size" },
     { 
-      header: "Ordered (Kg)", 
+      header: t('reports.ordered_kg'), 
       accessorKey: "ordered",
       cell: (row: any) => formatNumber(row.ordered, 1),
     },
     { 
-      header: "Completed (Kg)", 
+      header: t('reports.completed_kg'), 
       accessorKey: "completed",
       cell: (row: any) => formatNumber(row.completed, 1),
     },
-    { header: "Efficiency", accessorKey: "efficiency" },
-    { header: "Status", accessorKey: "status" },
+    { header: t('reports.efficiency'), accessorKey: "efficiency" },
+    { header: t('reports.status'), accessorKey: "status" },
   ];
   
   // Mobile card view for report data
@@ -164,7 +164,7 @@ export default function ReportsIndex() {
     if (!reportData || reportData.length === 0) {
       return (
         <div className="text-center p-4 bg-gray-50 rounded-md">
-          <p className="text-gray-500">No data available for the selected criteria.</p>
+          <p className="text-gray-500">{t('reports.no_data_available')}</p>
         </div>
       );
     }
@@ -182,33 +182,33 @@ export default function ReportsIndex() {
             <CardContent className="p-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-gray-500">Date</p>
+                  <p className="text-xs text-gray-500">{t('reports.date')}</p>
                   <p className="text-sm font-medium">{row.date}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Customer</p>
+                  <p className="text-xs text-gray-500">{t('reports.customer')}</p>
                   <p className="text-sm font-medium truncate">{row.customer}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Product</p>
+                  <p className="text-xs text-gray-500">{t('reports.product')}</p>
                   <p className="text-sm font-medium truncate">{row.product}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Size</p>
+                  <p className="text-xs text-gray-500">{t('reports.size')}</p>
                   <p className="text-sm font-medium">{row.size}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Ordered</p>
+                  <p className="text-xs text-gray-500">{t('reports.ordered')}</p>
                   <p className="text-sm font-medium">{formatNumber(row.ordered, 1)} Kg</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Completed</p>
+                  <p className="text-xs text-gray-500">{t('reports.completed')}</p>
                   <p className="text-sm font-medium">{formatNumber(row.completed, 1)} Kg</p>
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Efficiency</span>
+                  <span className="text-xs text-gray-500">{t('reports.efficiency')}</span>
                   <span className="text-sm font-medium">{row.efficiency}</span>
                 </div>
               </div>
@@ -386,10 +386,10 @@ export default function ReportsIndex() {
           <div>
             <h3 className="text-lg font-medium mb-4">
               {reportType === "production" 
-                ? "Production Summary" 
+                ? t('reports.production_summary')
                 : reportType === "inventory" 
-                  ? "Inventory Summary" 
-                  : "Efficiency Summary"}
+                  ? t('reports.inventory_summary')
+                  : t('reports.efficiency_summary')}
             </h3>
             
             {isMobile ? (

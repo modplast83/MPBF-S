@@ -75,7 +75,8 @@
             "raw_material": "Raw Material",
             "required": "Required",
             "unauthorized": "Unauthorized",
-            "roll_information": "Roll information and processing details"
+            "roll_information": "Roll information and processing details",
+            "manage": "Manage"
         },
         "auth": {
             "username": "Username",
@@ -121,7 +122,8 @@
             "feature_3_description": "Efficiently manage raw materials and finished products."
         },
         "setup": {
-            "title": "System Setup",
+            "title": "Setup & Configuration",
+            "description": "Manage your system configuration and settings with our comprehensive setup modules",
             "categories": {
                 "title": "Categories",
                 "description": "Manage product categories for organization",
@@ -815,7 +817,8 @@
             "efficiency": "Efficiency",
             "status": "Status",
             "ordered": "Ordered",
-            "completed": "Completed"
+            "completed": "Completed",
+            "inventory_report": "Inventory Report"
         },
         "analytics": {
             "production_analytics": "Production Analytics",
