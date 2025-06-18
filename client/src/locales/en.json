@@ -1504,6 +1504,30 @@
                 "complaint_details": "Complaint Details",
                 "investigation_notes": "Investigation Notes"
             },
+            "enhanced_attendance": {
+                "title": "Enhanced Attendance System",
+                "description": "Smart attendance tracking with geofencing and automatic check-out"
+            },
+            "employee_management": {
+                "title": "Employee Management",
+                "description": "Manage employee profiles, personal information, and employment details"
+            },
+            "employee_ranks": {
+                "title": "Employee Ranks & Levels",
+                "description": "Define and manage employee ranks, levels, and career progression paths"
+            },
+            "overtime_leave": {
+                "title": "Overtime & Leave Management",
+                "description": "Manage overtime requests, leave applications, and work schedule adjustments"
+            },
+            "geofence_management": {
+                "title": "Geofence Management",
+                "description": "Configure factory areas for automatic attendance tracking and security"
+            },
+            "training_management": {
+                "title": "Training Management",
+                "description": "Organize and track employee training programs and certifications"
+            },
             "common": {
                 "employee": "Employee",
                 "date": "Date",
