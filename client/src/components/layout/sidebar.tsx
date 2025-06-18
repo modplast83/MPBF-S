@@ -145,9 +145,9 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
                 />
               </div>
               <div className="text-center">
-                <h1 className="text-lg text-white leading-tight font-semibold">MPBF</h1>
+                <h1 className="text-lg text-white leading-tight font-semibold">{t('app.title')}</h1>
                 <p className="text-xs text-slate-300 mt-1">
-                  Manufacturing System
+                  {t('app.manufacturing_short')}
                 </p>
               </div>
             </div>
