@@ -402,6 +402,38 @@
             "overall_performance": "Overall Performance",
             "overall_performance_message": "Combined health score across all metrics"
         },
+        "maintenance": {
+            "damage_types": {
+                "motor": "Motor",
+                "bearing": "Bearing",
+                "roller": "Roller",
+                "printing_roller": "Printing Roller",
+                "gear": "Gear",
+                "fan": "Fan",
+                "fuse": "Fuse",
+                "sealing": "Sealing",
+                "knife": "Knife",
+                "heater": "Heater",
+                "inverter": "Inverter",
+                "power_supply": "Power Supply",
+                "shaft": "Shaft",
+                "take_up": "Take up",
+                "short": "Short",
+                "other": "Other"
+            },
+            "severity": {
+                "high": "High",
+                "normal": "Normal",
+                "low": "Low"
+            },
+            "requests": {
+                "allSeverity": "All Severities",
+                "filterBySeverity": "Filter by Severity",
+                "damageType": "Damage Type",
+                "severity": "Severity",
+                "description": "Description"
+            }
+        },
         "production": {
             "title": "Production",
             "orders": "Orders",
@@ -1566,6 +1598,8 @@
                 "description": "Manage employee profiles, personal information, and employment details",
                 "add_employee": "Add Employee",
                 "edit_profile": "Edit Employee Profile",
+                "employee_id": "Employee ID",
+                "employee_id_placeholder": "EMP001",
                 "create_profile": "Create New Employee Profile",
                 "basic_info": "Basic Information",
                 "select_user": "Select user"

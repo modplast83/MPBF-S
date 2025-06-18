@@ -485,7 +485,7 @@ export default function MaintenanceRequestsPage() {
                     <SelectValue placeholder={t("maintenance.requests.damageType")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {DAMAGE_TYPES.map((type) => (
+                    {damageTypes.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
                       </SelectItem>
@@ -504,9 +504,9 @@ export default function MaintenanceRequestsPage() {
                     <SelectValue placeholder={t("maintenance.requests.severity")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {SEVERITY_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level}
+                    {severityLevels.map((level) => (
+                      <SelectItem key={level.value} value={level.value}>
+                        {level.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

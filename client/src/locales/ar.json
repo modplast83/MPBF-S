@@ -527,6 +527,38 @@
       "submitting": "جاري التقديم...",
       "submit_request": "تقديم الطلب"
     },
+    "maintenance": {
+      "damage_types": {
+        "motor": "موتور",
+        "bearing": "بيرنغ",
+        "roller": "رولر",
+        "printing_roller": "رولر الطباعة",
+        "gear": "ترس",
+        "fan": "مروحة",
+        "fuse": "فيوز",
+        "sealing": "ختم",
+        "knife": "سكين",
+        "heater": "سخان",
+        "inverter": "انفرتر",
+        "power_supply": "مزود الطاقة",
+        "shaft": "عمود",
+        "take_up": "سحب",
+        "short": "قصر كهربائي",
+        "other": "أخرى"
+      },
+      "severity": {
+        "high": "عالية",
+        "normal": "عادية",
+        "low": "منخفضة"
+      },
+      "requests": {
+        "allSeverity": "جميع الأولويات",
+        "filterBySeverity": "تصفية حسب الأولوية",
+        "damageType": "نوع العطل",
+        "severity": "الأولوية",
+        "description": "الوصف"
+      }
+    },
     "dashboard": {
       "title": "لوحة التحكم",
       "orders_count": "الطلبات",

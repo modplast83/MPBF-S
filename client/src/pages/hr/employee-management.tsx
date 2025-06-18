@@ -266,9 +266,9 @@ export default function EmployeeManagement() {
                       name="employeeId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Employee ID</FormLabel>
+                          <FormLabel>{t("hr.employee_id")}</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="EMP001" />
+                            <Input {...field} placeholder={t("hr.employee_id_placeholder")} />
                           </FormControl>
                         </FormItem>
                       )}
