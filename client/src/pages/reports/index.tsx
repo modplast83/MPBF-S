@@ -20,10 +20,10 @@ function LineChart({ isMobile = false }: { isMobile?: boolean }) {
       <div className="text-center px-4">
         <span className="material-icons text-4xl text-secondary-300">insert_chart</span>
         <p className={`mt-2 text-secondary-500 ${isMobile ? 'text-sm' : ''}`}>
-          Production report chart shows here
+          {t('reports.production_report_chart')}
         </p>
         <p className="text-xs text-secondary-400 mt-1">
-          This would be a real chart in production
+          {t('reports.chart_placeholder')}
         </p>
       </div>
     </div>
@@ -222,7 +222,7 @@ export default function ReportsIndex() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-secondary-900">Reports</h1>
+        <h1 className="text-2xl font-bold text-secondary-900">{t('reports.title')}</h1>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -337,26 +337,26 @@ export default function ReportsIndex() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Generate Reports</CardTitle>
+          <CardTitle>{t('reports.generate_reports')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="w-full md:w-1/4">
-              <label className="block text-sm font-medium mb-1">Report Type</label>
+              <label className="block text-sm font-medium mb-1">{t('reports.report_type')}</label>
               <Select value={reportType} onValueChange={setReportType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select report type" />
+                  <SelectValue placeholder={t('reports.select_report_type')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="production">Production Report</SelectItem>
-                  <SelectItem value="inventory">Inventory Report</SelectItem>
-                  <SelectItem value="efficiency">Efficiency Report</SelectItem>
+                  <SelectItem value="production">{t('reports.production_report')}</SelectItem>
+                  <SelectItem value="inventory">{t('reports.inventory_report')}</SelectItem>
+                  <SelectItem value="efficiency">{t('reports.efficiency_report')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="w-full md:w-1/4">
-              <label className="block text-sm font-medium mb-1">Start Date</label>
+              <label className="block text-sm font-medium mb-1">{t('reports.start_date')}</label>
               <DatePicker
                 selected={dateRange.start}
                 onSelect={(date) => setDateRange({ ...dateRange, start: date })}
@@ -364,7 +364,7 @@ export default function ReportsIndex() {
             </div>
             
             <div className="w-full md:w-1/4">
-              <label className="block text-sm font-medium mb-1">End Date</label>
+              <label className="block text-sm font-medium mb-1">{t('reports.end_date')}</label>
               <DatePicker
                 selected={dateRange.end}
                 onSelect={(date) => setDateRange({ ...dateRange, end: date })}
@@ -374,7 +374,7 @@ export default function ReportsIndex() {
             <div className="w-full md:w-1/4 flex items-end">
               <Button className="w-full">
                 <span className="material-icons text-sm mr-1">search</span>
-                Generate Report
+{t('reports.generate_report')}
               </Button>
             </div>
           </div>
