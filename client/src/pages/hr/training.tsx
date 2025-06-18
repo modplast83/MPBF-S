@@ -387,8 +387,8 @@ export default function TrainingPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Training Management</h1>
-            <p className="text-gray-600">Manage and evaluate training processes for employees</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("hr.training_management.title")}</h1>
+            <p className="text-gray-600">{t("hr.training_management.description")}</p>
           </div>
           <div className="flex gap-2">
             <Button 

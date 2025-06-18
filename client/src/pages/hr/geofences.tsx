@@ -13,6 +13,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 import { 
   MapPin, 
   Plus, 
@@ -35,6 +37,8 @@ const geofenceSchema = z.object({
 type GeofenceForm = z.infer<typeof geofenceSchema>;
 
 export default function GeofenceManagement() {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const { toast } = useToast();
   const [selectedGeofence, setSelectedGeofence] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -157,8 +161,8 @@ export default function GeofenceManagement() {
     <div className="container mx-auto p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Geofence Management</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-2">Configure factory areas for automatic attendance tracking and security</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t("hr.geofence_management.title")}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">{t("hr.geofence_management.description")}</p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
