@@ -265,6 +265,10 @@
       "items": {
         "title": "الأصناف",
         "description": "إدارة أصناف المنتجات وتفاصيلها",
+        "name": "اسم الصنف",
+        "name_placeholder": "أدخل اسم الصنف",
+        "full_name": "الاسم الكامل",
+        "full_name_placeholder": "أدخل الاسم الكامل للصنف",
         "add_new": "إضافة صنف جديد",
         "edit_item": "تعديل الصنف",
         "delete_item": "حذف الصنف",

@@ -76,7 +76,11 @@
             "required": "Required",
             "unauthorized": "Unauthorized",
             "roll_information": "Roll information and processing details",
-            "manage": "Manage"
+            "manage": "Manage",
+            "description": "Description",
+            "type": "Type",
+            "affected_area": "Affected Area",
+            "notes": "Notes"
         },
         "auth": {
             "username": "Username",

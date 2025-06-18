@@ -22,13 +22,30 @@ import { apiRequest } from "@/lib/queryClient";
 import { CelebrationScreen, useCelebration } from "@/components/maintenance/celebration-screen";
 import { ProgressTracker } from "@/components/maintenance/progress-tracker";
 
-const DAMAGE_TYPES = [
-  "Motor", "Bearing", "Roller", "Printing Roller", "Gear", "Fan", 
-  "Fuse", "Sealing", "Knife", "Heater", "Inverter", "Power Supply", 
-  "Shaft", "Take up", "Short", "Other"
+const getDamageTypes = (t: any) => [
+  t("maintenance.damage_types.motor"),
+  t("maintenance.damage_types.bearing"),
+  t("maintenance.damage_types.roller"),
+  t("maintenance.damage_types.printing_roller"),
+  t("maintenance.damage_types.gear"),
+  t("maintenance.damage_types.fan"),
+  t("maintenance.damage_types.fuse"),
+  t("maintenance.damage_types.sealing"),
+  t("maintenance.damage_types.knife"),
+  t("maintenance.damage_types.heater"),
+  t("maintenance.damage_types.inverter"),
+  t("maintenance.damage_types.power_supply"),
+  t("maintenance.damage_types.shaft"),
+  t("maintenance.damage_types.take_up"),
+  t("maintenance.damage_types.short"),
+  t("maintenance.damage_types.other")
 ];
 
-const SEVERITY_LEVELS = ["High", "Normal", "Low"];
+const getSeverityLevels = (t: any) => [
+  { value: "High", label: t("maintenance.severity.high") },
+  { value: "Normal", label: t("maintenance.severity.normal") },
+  { value: "Low", label: t("maintenance.severity.low") }
+];
 const STATUS_OPTIONS = ["pending", "progress", "completed", "cancelled", "repaired", "waiting_for_parts"];
 
 interface MaintenanceRequest {
@@ -67,6 +84,9 @@ export default function MaintenanceRequestsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  
+  const damageTypes = getDamageTypes(t);
+  const severityLevels = getSeverityLevels(t);
   const [location, setLocation] = useLocation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -412,9 +432,9 @@ export default function MaintenanceRequestsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("maintenance.requests.allSeverity")}</SelectItem>
-              {SEVERITY_LEVELS.map((severity) => (
-                <SelectItem key={severity} value={severity}>
-                  {severity}
+              {severityLevels.map((severity) => (
+                <SelectItem key={severity.value} value={severity.value}>
+                  {severity.label}
                 </SelectItem>
               ))}
             </SelectContent>
