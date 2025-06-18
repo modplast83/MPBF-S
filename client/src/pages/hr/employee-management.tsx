@@ -497,13 +497,13 @@ export default function EmployeeManagement() {
                     variant="outline" 
                     onClick={() => setIsDialogOpen(false)}
                   >
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                   <Button 
                     type="submit" 
                     disabled={createEmployeeMutation.isPending || updateEmployeeMutation.isPending}
                   >
-                    {createEmployeeMutation.isPending || updateEmployeeMutation.isPending ? "Saving..." : "Save"}
+                    {createEmployeeMutation.isPending || updateEmployeeMutation.isPending ? t("common.saving") : t("common.save")}
                   </Button>
                 </div>
               </form>

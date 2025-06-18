@@ -181,7 +181,11 @@
             },
             "items": {
                 "title": "Items",
-                "description": "Manage product items and details"
+                "description": "Manage product items and details",
+                "name": "Item Name",
+                "name_placeholder": "Enter item name",
+                "full_name": "Full Name",
+                "full_name_placeholder": "Enter full item name"
             },
             "sections": {
                 "title": "Sections",

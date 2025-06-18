@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { insertItemSchema, Item } from "@shared/schema";
@@ -30,6 +31,7 @@ interface ItemFormProps {
 }
 
 export function ItemForm({ item, onSuccess }: ItemFormProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditing = !!item;
   
@@ -139,9 +141,9 @@ export function ItemForm({ item, onSuccess }: ItemFormProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Item Name</FormLabel>
+                <FormLabel>{t("setup.items.name")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter item name" {...field} />
+                  <Input placeholder={t("setup.items.name_placeholder")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -153,9 +155,9 @@ export function ItemForm({ item, onSuccess }: ItemFormProps) {
             name="fullName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>{t("setup.items.full_name")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter full item name" {...field} />
+                  <Input placeholder={t("setup.items.full_name_placeholder")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -170,7 +172,7 @@ export function ItemForm({ item, onSuccess }: ItemFormProps) {
               variant="outline"
               onClick={onSuccess}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
           )}
           <Button
