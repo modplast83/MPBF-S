@@ -508,7 +508,20 @@
                 "select_screw": "Select extruder screw",
                 "scaled_results_description": "Results scaled to specified quantity",
                 "input_summary": "Formula Summary"
-            }
+            },
+            "bottleneck_monitor": "Bottleneck Monitor",
+            "bottleneck_monitor_description": "Monitor and analyze production bottlenecks and performance issues",
+            "analytics": "Analytics",
+            "active_alerts": "Active Alerts",
+            "critical_issues": "Critical Issues",
+            "overall_efficiency": "Overall Efficiency",
+            "metrics_today": "Today's Metrics",
+            "top_bottlenecks": "Top Bottlenecks",
+            "recent_activity": "Recent Activity",
+            "active_production_alerts": "Active Production Alerts",
+            "current_bottlenecks_description": "Current production bottlenecks and performance issues requiring attention",
+            "no_active_alerts": "No Active Alerts",
+            "all_lines_operating_normally": "All production lines are operating normally"
         },
         "warehouse": {
             "title": "Warehouse",
