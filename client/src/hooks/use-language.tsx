@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 // Define available languages
-export type Language = "en" | "ar";
+export type Language = "en" | "ar" | "ml" | "ur";
 
 // Language context type
 type LanguageContextType = {
@@ -29,7 +29,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const { i18n } = useTranslation();
   
   // Track if the current language is RTL
-  const isRTL = language === "ar";
+  const isRTL = language === "ar" || language === "ur";
 
   // Function to set language
   const setLanguage = (newLanguage: Language) => {

@@ -46,6 +46,42 @@ const FlagSA = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// Indian Flag for Malayalam
+const FlagIN = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 16" className={className}>
+    <rect width="24" height="5.33" fill="#FF9933"/>
+    <rect width="24" height="5.33" y="5.33" fill="white"/>
+    <rect width="24" height="5.33" y="10.67" fill="#138808"/>
+    <circle cx="12" cy="8" r="2" fill="none" stroke="#000080" strokeWidth="0.3"/>
+    <g transform="translate(12,8)">
+      {/* Ashoka Chakra spokes */}
+      {Array.from({ length: 24 }, (_, i) => (
+        <line
+          key={i}
+          x1="0"
+          y1="0"
+          x2={Math.cos((i * 15 * Math.PI) / 180) * 1.8}
+          y2={Math.sin((i * 15 * Math.PI) / 180) * 1.8}
+          stroke="#000080"
+          strokeWidth="0.1"
+        />
+      ))}
+    </g>
+  </svg>
+);
+
+// Pakistani Flag for Urdu
+const FlagPK = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 16" className={className}>
+    <rect width="24" height="16" fill="#01411C"/>
+    <rect width="6" height="16" fill="white"/>
+    <g transform="translate(15,8)">
+      <path d="M-2,-3 A3,3 0 1,1 -2,3 L0,0 Z" fill="white"/>
+      <polygon points="-1,-1 0,-2 1,-1 0,0" fill="white"/>
+    </g>
+  </svg>
+);
+
 // Language data with enhanced information
 const languages = {
   en: {
@@ -60,6 +96,20 @@ const languages = {
     name: 'Arabic',
     nativeName: 'العربية',
     flag: FlagSA,
+    dir: 'rtl'
+  },
+  ml: {
+    code: 'ml',
+    name: 'Malayalam',
+    nativeName: 'മലയാളം',
+    flag: FlagIN,
+    dir: 'ltr'
+  },
+  ur: {
+    code: 'ur',
+    name: 'Urdu',
+    nativeName: 'اردو',
+    flag: FlagPK,
     dir: 'rtl'
   }
 } as const;
@@ -81,7 +131,17 @@ export default function AnimatedLanguageToggle({
   const [isOpen, setIsOpen] = useState(false);
 
   const currentLanguage = languages[language];
-  const otherLanguage = languages[language === 'en' ? 'ar' : 'en'];
+  
+  // Helper function to get next language in cycle
+  const getNextLanguage = (currentLang: Language): Language => {
+    const languageOrder: Language[] = ['en', 'ar', 'ml', 'ur'];
+    const currentIndex = languageOrder.indexOf(currentLang);
+    const nextIndex = (currentIndex + 1) % languageOrder.length;
+    return languageOrder[nextIndex];
+  };
+  
+  const nextLanguage = getNextLanguage(language);
+  const nextLanguageData = languages[nextLanguage];
 
   const handleLanguageChange = async (newLanguage: Language) => {
     if (newLanguage === language) return;

@@ -5,6 +5,8 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 // Import translation files
 import enTranslation from '@/locales/en.json';
 import arTranslation from '@/locales/ar.json';
+import mlTranslation from '@/locales/ml.json';
+import urTranslation from '@/locales/ur.json';
 
 // Set up i18next
 i18n
@@ -13,7 +15,9 @@ i18n
   .init({
     resources: {
       en: enTranslation,
-      ar: arTranslation
+      ar: arTranslation,
+      ml: mlTranslation,
+      ur: urTranslation
     },
     fallbackLng: 'en',
     debug: false,
