@@ -15,6 +15,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 import { 
   Users, 
   UserPlus, 

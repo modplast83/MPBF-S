@@ -54,36 +54,36 @@ export default function HRIndex() {
 
   const hrModules = [
     {
-      title: "Enhanced Attendance",
-      description: "Smart attendance tracking with geofencing and automatic check-out",
+      title: t("hr.enhanced_attendance.title"),
+      description: t("hr.enhanced_attendance.description"),
       icon: Clock,
       path: "/hr/enhanced-attendance",
       color: "bg-gradient-to-br from-blue-500 to-blue-600"
     },
     {
-      title: "Employee Management",
-      description: "Comprehensive employee profiles, ranks, and work details",
+      title: t("hr.employee_management.title"),
+      description: t("hr.employee_management.description"),
       icon: Users,
       path: "/hr/employee-management",
       color: "bg-gradient-to-br from-green-500 to-green-600"
     },
     {
-      title: "Employee Ranks & Levels",
-      description: "Manage hierarchy, salary scales, and overtime policies",
+      title: t("hr.employee_ranks.title"),
+      description: t("hr.employee_ranks.description"),
       icon: Award,
       path: "/hr/employee-ranks",
       color: "bg-gradient-to-br from-purple-500 to-purple-600"
     },
     {
-      title: "Overtime & Leave",
-      description: "Request and approve overtime hours and leave applications",
+      title: t("hr.overtime_leave.title"),
+      description: t("hr.overtime_leave.description"),
       icon: CalendarDays,
       path: "/hr/overtime-leave",
       color: "bg-gradient-to-br from-orange-500 to-orange-600"
     },
     {
-      title: "Geofence Management",
-      description: "Configure factory areas for automatic attendance tracking",
+      title: t("hr.geofence_management.title"),
+      description: t("hr.geofence_management.description"),
       icon: MapPin,
       path: "/hr/geofences",
       color: "bg-gradient-to-br from-cyan-500 to-cyan-600"
@@ -110,8 +110,8 @@ export default function HRIndex() {
       color: "bg-gradient-to-br from-red-500 to-red-600"
     },
     {
-      title: "Training & Certificates",
-      description: "Manage training programs and completion certificates",
+      title: t("hr.training_management.title"),
+      description: t("hr.training_management.description"),
       icon: GraduationCap,
       path: "/hr/training",
       color: "bg-gradient-to-br from-indigo-500 to-indigo-600"
@@ -131,7 +131,7 @@ export default function HRIndex() {
           {t("hr.title")}
         </h1>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Manage employee attendance, performance, and workplace issues with comprehensive HR tools
+          {t("hr.enhanced_attendance.description")}
         </p>
       </div>
 

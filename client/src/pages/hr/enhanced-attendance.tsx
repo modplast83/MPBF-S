@@ -10,6 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 import { 
   MapPin, 
   Clock, 
@@ -55,6 +57,8 @@ interface AttendanceRecord {
 }
 
 export default function EnhancedAttendance() {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const { toast } = useToast();
   const [currentPosition, setCurrentPosition] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -302,8 +306,8 @@ export default function EnhancedAttendance() {
   return (
     <div className="container mx-auto p-4 sm:p-6">
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Enhanced Attendance System</h1>
-        <p className="text-sm sm:text-base text-gray-600 mt-2">Smart attendance tracking with geofencing and automatic check-out</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t("hr.enhanced_attendance.title")}</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-2">{t("hr.enhanced_attendance.description")}</p>
       </div>
 
       {/* Location Status Card */}
