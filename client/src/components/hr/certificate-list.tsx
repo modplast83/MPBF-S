@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Award, Download, Eye, MoreHorizontal, Trash2, Calendar, User, Building, FileText } from "lucide-react";
@@ -270,6 +270,9 @@ export default function CertificateList({ trainingId }: CertificateListProps) {
         <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Generate Training Certificate</DialogTitle>
+            <DialogDescription>
+              Create and customize a training certificate for this course
+            </DialogDescription>
           </DialogHeader>
           <CertificateGenerator
             trainingId={trainingId}
@@ -286,6 +289,9 @@ export default function CertificateList({ trainingId }: CertificateListProps) {
               <Award className="h-5 w-5" />
               Certificate Details
             </DialogTitle>
+            <DialogDescription>
+              View and manage this training certificate
+            </DialogDescription>
           </DialogHeader>
           {selectedCertificate && (
             <div className="space-y-4">

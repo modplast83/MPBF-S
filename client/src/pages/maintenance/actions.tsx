@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,6 +69,10 @@ export default function MaintenanceActionsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  
+  // Get URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const preSelectedRequestId = urlParams.get('requestId');
 
   const [formData, setFormData] = useState({
     requestId: "",
@@ -105,6 +109,21 @@ export default function MaintenanceActionsPage() {
     queryFn: () => apiRequest('GET', '/api/users')
   });
 
+  // Auto-populate form when requestId is provided in URL
+  useEffect(() => {
+    if (preSelectedRequestId && requests.length > 0) {
+      const selectedRequest = requests.find((r: MaintenanceRequest) => r.id.toString() === preSelectedRequestId);
+      if (selectedRequest) {
+        setFormData(prev => ({
+          ...prev,
+          requestId: selectedRequest.id.toString(),
+          machineId: selectedRequest.machineId
+        }));
+        setIsDialogOpen(true); // Auto-open the dialog
+      }
+    }
+  }, [preSelectedRequestId, requests]);
+
   // Create action mutation
   const createActionMutation = useMutation({
     mutationFn: (data: any) => apiRequest('POST', API_ENDPOINTS.MAINTENANCE_ACTIONS, data),
@@ -139,6 +158,10 @@ export default function MaintenanceActionsPage() {
       notes: "",
       readyToWork: false,
     });
+    // Clear URL parameters when form is reset
+    if (preSelectedRequestId) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {

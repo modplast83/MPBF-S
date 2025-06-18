@@ -8,10 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, MessageSquare, Plus, Filter, Search } from "lucide-react";
+import { AlertTriangle, MessageSquare, Plus, Filter, Search, Eye, Printer, Edit3, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,8 +46,14 @@ const complaintSchema = z.object({
   notes: z.string().optional()
 });
 
+const statusChangeSchema = z.object({
+  status: z.string().min(1, "Status is required"),
+  notes: z.string().optional()
+});
+
 type ViolationForm = z.infer<typeof violationSchema>;
 type ComplaintForm = z.infer<typeof complaintSchema>;
+type StatusChangeForm = z.infer<typeof statusChangeSchema>;
 
 export default function ViolationsComplaintsPage() {
   const { t } = useTranslation();
@@ -58,6 +65,9 @@ export default function ViolationsComplaintsPage() {
   const [isComplaintDialogOpen, setIsComplaintDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedViolation, setSelectedViolation] = useState<HrViolation | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
 
   const violationForm = useForm<ViolationForm>({
     resolver: zodResolver(violationSchema),
@@ -73,6 +83,13 @@ export default function ViolationsComplaintsPage() {
       priority: "medium",
       complaintType: "work_environment",
       isAnonymous: false
+    }
+  });
+
+  const statusChangeForm = useForm<StatusChangeForm>({
+    resolver: zodResolver(statusChangeSchema),
+    defaultValues: {
+      status: ""
     }
   });
 
@@ -128,12 +145,72 @@ export default function ViolationsComplaintsPage() {
     }
   });
 
+  // Update violation status mutation
+  const updateViolationStatusMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: StatusChangeForm }) => 
+      apiRequest('PATCH', `${API_ENDPOINTS.HR_VIOLATIONS}/${id}/status`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.HR_VIOLATIONS] });
+      toast({
+        title: "Success",
+        description: "Violation status updated successfully"
+      });
+      setIsStatusDialogOpen(false);
+      statusChangeForm.reset();
+    }
+  });
+
   const onViolationSubmit = (data: ViolationForm) => {
     createViolationMutation.mutate(data);
   };
 
   const onComplaintSubmit = (data: ComplaintForm) => {
     createComplaintMutation.mutate(data);
+  };
+
+  const onStatusChangeSubmit = (data: StatusChangeForm) => {
+    if (selectedViolation) {
+      updateViolationStatusMutation.mutate({ id: selectedViolation.id, data });
+    }
+  };
+
+  const handleViewViolation = (violation: HrViolation) => {
+    setSelectedViolation(violation);
+    setIsViewDialogOpen(true);
+  };
+
+  const handlePrintViolation = (violation: HrViolation) => {
+    const printContent = `
+      <div style="padding: 20px; font-family: Arial, sans-serif;">
+        <h2 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">Violation Report</h2>
+        <div style="margin: 20px 0;">
+          <p><strong>ID:</strong> ${violation.id}</p>
+          <p><strong>Title:</strong> ${violation.title}</p>
+          <p><strong>Employee ID:</strong> ${violation.userId}</p>
+          <p><strong>Violation Type:</strong> ${violation.violationType}</p>
+          <p><strong>Severity:</strong> ${violation.severity}</p>
+          <p><strong>Status:</strong> ${violation.status}</p>
+          <p><strong>Reported By:</strong> ${violation.reportedBy}</p>
+          <p><strong>Report Date:</strong> ${format(new Date(violation.reportDate), 'MMM dd, yyyy HH:mm')}</p>
+          <p><strong>Description:</strong></p>
+          <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">${violation.description}</div>
+          ${violation.actionTaken ? `<p><strong>Action Taken:</strong></p><div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">${violation.actionTaken}</div>` : ''}
+        </div>
+      </div>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const handleChangeStatus = (violation: HrViolation) => {
+    setSelectedViolation(violation);
+    statusChangeForm.setValue('status', violation.status);
+    setIsStatusDialogOpen(true);
   };
 
   const getStatusBadge = (status: string) => {
@@ -181,6 +258,12 @@ export default function ViolationsComplaintsPage() {
                          (complaint.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+
+  // Helper function to get user name by ID
+  const getUserName = (userId: string) => {
+    const user = users?.find((u: User) => u.id === userId);
+    return user ? user.firstName || user.username : userId;
+  };
 
   return (
     <div className={`container mx-auto ${isMobile ? "p-3" : "p-3 sm:p-6"}`}>
@@ -543,13 +626,14 @@ export default function ViolationsComplaintsPage() {
                       <TableHead>{t("hr.violations_complaints.reported_by")}</TableHead>
                       <TableHead>{t("hr.violations_complaints.report_date")}</TableHead>
                       <TableHead>{t("hr.common.status")}</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredViolations?.map((violation: HrViolation) => (
                       <TableRow key={violation.id}>
                         <TableCell className="font-medium">{violation.title}</TableCell>
-                        <TableCell>{violation.userId}</TableCell>
+                        <TableCell>{getUserName(violation.userId)}</TableCell>
                         <TableCell>
                           <Badge variant="outline">
                             {t(`hr.violations_complaints.${violation.violationType}`)}
@@ -560,18 +644,42 @@ export default function ViolationsComplaintsPage() {
                             {t(`hr.violations_complaints.${violation.severity}`)}
                           </Badge>
                         </TableCell>
-                        <TableCell>{violation.reportedBy}</TableCell>
+                        <TableCell>{getUserName(violation.reportedBy)}</TableCell>
                         <TableCell>{format(new Date(violation.reportDate), 'MMM dd, yyyy')}</TableCell>
                         <TableCell>
                           <Badge className={getStatusBadge(violation.status)}>
                             {t(`hr.violations_complaints.${violation.status}`)}
                           </Badge>
                         </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleViewViolation(violation)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handlePrintViolation(violation)}>
+                                <Printer className="mr-2 h-4 w-4" />
+                                Print
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeStatus(violation)}>
+                                <Edit3 className="mr-2 h-4 w-4" />
+                                Change Status
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                       </TableRow>
                     ))}
                     {(!filteredViolations || filteredViolations.length === 0) && (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-4">
+                        <TableCell colSpan={8} className="text-center py-4">
                           {t("hr.common.no_data")}
                         </TableCell>
                       </TableRow>
@@ -647,6 +755,153 @@ export default function ViolationsComplaintsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* View Violation Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Violation Details</DialogTitle>
+            <DialogDescription>
+              Complete information about the violation
+            </DialogDescription>
+          </DialogHeader>
+          {selectedViolation && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Violation ID</label>
+                  <p className="text-sm">{selectedViolation.id}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Employee</label>
+                  <p className="text-sm">{getUserName(selectedViolation.userId)}</p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-500">Title</label>
+                <p className="text-sm font-medium">{selectedViolation.title}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Violation Type</label>
+                  <Badge variant="outline" className="mt-1">
+                    {t(`hr.violations_complaints.${selectedViolation.violationType}`)}
+                  </Badge>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Severity</label>
+                  <Badge className={`mt-1 ${getSeverityBadge(selectedViolation.severity)}`}>
+                    {t(`hr.violations_complaints.${selectedViolation.severity}`)}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Status</label>
+                  <Badge className={`mt-1 ${getStatusBadge(selectedViolation.status)}`}>
+                    {t(`hr.violations_complaints.${selectedViolation.status}`)}
+                  </Badge>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Report Date</label>
+                  <p className="text-sm">{format(new Date(selectedViolation.reportDate), 'MMM dd, yyyy HH:mm')}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-500">Reported By</label>
+                <p className="text-sm">{getUserName(selectedViolation.reportedBy)}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-500">Description</label>
+                <div className="mt-1 p-3 border rounded-md bg-gray-50 text-sm">
+                  {selectedViolation.description}
+                </div>
+              </div>
+
+              {selectedViolation.actionTaken && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Action Taken</label>
+                  <div className="mt-1 p-3 border rounded-md bg-gray-50 text-sm">
+                    {selectedViolation.actionTaken}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Status Dialog */}
+      <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Change Violation Status</DialogTitle>
+            <DialogDescription>
+              Update the status of this violation
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...statusChangeForm}>
+            <form onSubmit={statusChangeForm.handleSubmit(onStatusChangeSubmit)} className="space-y-4">
+              <FormField
+                control={statusChangeForm.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Status</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="investigating">Investigating</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="dismissed">Dismissed</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={statusChangeForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} placeholder="Add notes about the status change..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsStatusDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={updateViolationStatusMutation.isPending}
+                >
+                  {updateViolationStatusMutation.isPending ? "Updating..." : "Update Status"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

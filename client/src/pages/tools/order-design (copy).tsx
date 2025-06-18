@@ -10,8 +10,6 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import jsPDF from 'jspdf';
-import { useMutation } from '@tanstack/react-query';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -151,46 +149,14 @@ export default function OrderDesignPage() {
   });
 
   const [designPreview, setDesignPreview] = useState<string | null>(null);
-  const [selectedTool, setSelectedTool] = useState("rectangle");
+  const [selectedTool, setSelectedTool] = useState("brush");
+  const [brushSize, setBrushSize] = useState(5);
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [estimatedCost, setEstimatedCost] = useState(0);
-  const [clichesCost, setClichesCost] = useState(0);
-  const [bagsCost, setBagsCost] = useState(0);
-  const [minimumKg, setMinimumKg] = useState(0);
-  const [textInput, setTextInput] = useState("");
-  const [showTextDialog, setShowTextDialog] = useState(false);
-  const [canvasElements, setCanvasElements] = useState<any[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
   const { toast } = useToast();
-
-  // Email quote request mutation
-  const emailQuoteMutation = useMutation({
-    mutationFn: async (quoteData: any) => {
-      const response = await fetch('/api/send-quote-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(quoteData)
-      });
-      if (!response.ok) throw new Error('Failed to send email');
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Quote Request Sent",
-        description: "Your quote request has been emailed to management.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Email Failed",
-        description: "Failed to send quote request. Please try again.",
-        variant: "destructive"
-      });
-    }
-  });
 
   const steps = [
     "Product Selection",
@@ -204,154 +170,39 @@ export default function OrderDesignPage() {
 
   // Calculate estimated cost based on specifications
   useEffect(() => {
-    const calculateCosts = () => {
-      if (!customization.productType) {
-        setClichesCost(0);
-        setBagsCost(0);
-        setEstimatedCost(0);
-        setMinimumKg(0);
-        return;
-      }
+    const calculateCost = () => {
+      if (!customization.productType) return 0;
       
-      // 1. Clichés cost = printed area cm² × number of colors × 0.5 SR
-      const printedAreaCm2 = customization.dimensions.width * customization.dimensions.length;
-      const numberOfColors = Math.max(customization.designColors.length, 1); // At least 1 color if design exists
-      const calculatedClichesCost = printedAreaCm2 * numberOfColors * 0.5;
+      const area = (customization.dimensions.width * customization.dimensions.length) / 10000; // m²
+      const materialCost = area * 2.5; // Base cost per m²
+      const colorMultiplier = customization.designColors.length > 0 ? 1 + (customization.designColors.length * 0.1) : 1;
+      const quantityDiscount = customization.quantity >= 5000 ? 0.85 : customization.quantity >= 1000 ? 0.9 : 1;
       
-      // 2. Bags cost = price per kg = 10 SR with minimum quantities based on colors
-      let minimumKgRequired = 0;
-      if (numberOfColors >= 1 && numberOfColors <= 2) {
-        minimumKgRequired = 300;
-      } else if (numberOfColors === 3) {
-        minimumKgRequired = 500;
-      } else if (numberOfColors >= 4) {
-        minimumKgRequired = 1000;
-      }
-      
-      // Calculate weight needed for the quantity (approximate 1 bag = 0.01 kg)
-      const estimatedWeight = customization.quantity * 0.01;
-      const finalWeight = Math.max(estimatedWeight, minimumKgRequired);
-      const calculatedBagsCost = finalWeight * 10; // 10 SR per kg
-      
-      const totalCost = calculatedClichesCost + calculatedBagsCost;
-      
-      setClichesCost(Math.round(calculatedClichesCost * 100) / 100);
-      setBagsCost(Math.round(calculatedBagsCost * 100) / 100);
-      setEstimatedCost(Math.round(totalCost * 100) / 100);
-      setMinimumKg(minimumKgRequired);
+      return Math.round(materialCost * colorMultiplier * quantityDiscount * customization.quantity * 100) / 100;
     };
     
-    calculateCosts();
+    setEstimatedCost(calculateCost());
   }, [customization]);
 
-  // Redraw canvas when elements change
-  useEffect(() => {
-    if (canvasElements.length > 0 || designPreview) {
-      setTimeout(() => redrawCanvas(), 100);
-    }
-  }, [canvasElements, designPreview]);
-
-  // Canvas element functions
-  const redrawCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw uploaded design if exists
-    if (customization.uploadedDesign && designPreview) {
-      const img = new Image();
-      img.onload = () => {
-        ctx.globalAlpha = 0.5;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        ctx.globalAlpha = 1.0;
-        
-        // Redraw all canvas elements
-        canvasElements.forEach(element => {
-          drawElement(ctx, element);
-        });
-      };
-      img.src = designPreview;
-    } else {
-      // Just redraw canvas elements
-      canvasElements.forEach(element => {
-        drawElement(ctx, element);
-      });
-    }
-  };
-
-  const drawElement = (ctx: CanvasRenderingContext2D, element: any) => {
-    ctx.strokeStyle = element.color;
-    ctx.fillStyle = element.color;
-    ctx.lineWidth = 2;
-    
-    if (element.type === "rectangle") {
-      ctx.strokeRect(element.x, element.y, element.width, element.height);
-    } else if (element.type === "circle") {
-      ctx.beginPath();
-      ctx.arc(element.x, element.y, element.radius, 0, 2 * Math.PI);
-      ctx.stroke();
-    } else if (element.type === "text") {
-      ctx.font = "16px Arial";
-      ctx.fillText(element.text, element.x, element.y);
-    }
-  };
-
+  // Canvas drawing functions
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    setStartPos({ x, y });
-    
-    if (selectedTool === "text") {
-      setShowTextDialog(true);
-      return;
-    }
-    
     setIsDrawing(true);
-  };
-
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || selectedTool === "text") return;
-    
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
-    // Clear canvas and redraw all elements plus current preview
-    redrawCanvas();
     
     const ctx = canvas.getContext("2d");
     if (ctx) {
-      ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = 2;
-      
-      if (selectedTool === "rectangle") {
-        const width = x - startPos.x;
-        const height = y - startPos.y;
-        ctx.strokeRect(startPos.x, startPos.y, width, height);
-      } else if (selectedTool === "circle") {
-        const radius = Math.sqrt(Math.pow(x - startPos.x, 2) + Math.pow(y - startPos.y, 2));
-        ctx.beginPath();
-        ctx.arc(startPos.x, startPos.y, radius, 0, 2 * Math.PI);
-        ctx.stroke();
-      }
+      ctx.beginPath();
+      ctx.moveTo(x, y);
     }
   };
 
-  const stopDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || selectedTool === "text") return;
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
     
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -360,31 +211,19 @@ export default function OrderDesignPage() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Add the completed element to the elements array
-    if (selectedTool === "rectangle") {
-      const width = x - startPos.x;
-      const height = y - startPos.y;
-      const newElement = {
-        type: "rectangle",
-        x: startPos.x,
-        y: startPos.y,
-        width,
-        height,
-        color: selectedColor
-      };
-      setCanvasElements(prev => [...prev, newElement]);
-    } else if (selectedTool === "circle") {
-      const radius = Math.sqrt(Math.pow(x - startPos.x, 2) + Math.pow(y - startPos.y, 2));
-      const newElement = {
-        type: "circle",
-        x: startPos.x,
-        y: startPos.y,
-        radius,
-        color: selectedColor
-      };
-      setCanvasElements(prev => [...prev, newElement]);
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = selectedColor;
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
     }
-    
+  };
+
+  const stopDrawing = () => {
     setIsDrawing(false);
   };
 
@@ -396,26 +235,6 @@ export default function OrderDesignPage() {
     if (ctx) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-    setCanvasElements([]);
-  };
-
-  const addTextElement = () => {
-    if (!textInput.trim()) return;
-    
-    const newElement = {
-      type: "text",
-      x: startPos.x,
-      y: startPos.y,
-      text: textInput,
-      color: selectedColor
-    };
-    
-    setCanvasElements(prev => [...prev, newElement]);
-    setTextInput("");
-    setShowTextDialog(false);
-    
-    // Redraw canvas with new text
-    setTimeout(() => redrawCanvas(), 100);
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -505,101 +324,6 @@ export default function OrderDesignPage() {
       case 6: return true;
       default: return false;
     }
-  };
-
-  // Handle sending quote request via email
-  const handleSendQuoteRequest = () => {
-    const quoteData = {
-      customerInfo: customization.customerInfo,
-      productType: customization.productType,
-      template: customization.template,
-      dimensions: customization.dimensions,
-      materialColor: customization.materialColor,
-      quantity: customization.quantity,
-      estimatedCost,
-      clichesCost,
-      bagsCost,
-      minimumKg,
-      numberOfColors: Math.max(customization.designColors.length, 1),
-      notes: customization.notes,
-      designColors: customization.designColors,
-      timestamp: new Date().toISOString()
-    };
-    
-    emailQuoteMutation.mutate(quoteData);
-  };
-
-  // Handle PDF download
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    
-    // Header
-    doc.setFontSize(20);
-    doc.text('Quote Request', 20, 20);
-    
-    // Customer Information
-    doc.setFontSize(14);
-    doc.text('Customer Information:', 20, 40);
-    doc.setFontSize(11);
-    doc.text(`Name: ${customization.customerInfo.name}`, 20, 50);
-    doc.text(`Email: ${customization.customerInfo.email}`, 20, 60);
-    doc.text(`Phone: ${customization.customerInfo.phone}`, 20, 70);
-    
-    // Product Details
-    doc.setFontSize(14);
-    doc.text('Product Details:', 20, 90);
-    doc.setFontSize(11);
-    doc.text(`Product Type: ${customization.productType}`, 20, 100);
-    doc.text(`Template: ${customization.template}`, 20, 110);
-    doc.text(`Material Color: ${customization.materialColor}`, 20, 120);
-    
-    // Dimensions
-    doc.text(`Dimensions:`, 20, 140);
-    doc.text(`  Width: ${customization.dimensions.width} cm`, 30, 150);
-    doc.text(`  Length: ${customization.dimensions.length} cm`, 30, 160);
-    doc.text(`  Gusset: ${customization.dimensions.gusset} cm`, 30, 170);
-    doc.text(`  Thickness: ${customization.dimensions.thickness} mm`, 30, 180);
-    
-    // Pricing
-    doc.setFontSize(14);
-    doc.text('Pricing Breakdown:', 20, 200);
-    doc.setFontSize(11);
-    doc.text(`Quantity: ${customization.quantity.toLocaleString()} pieces`, 20, 210);
-    
-    // Cost breakdown
-    doc.text('1. Clichés Cost:', 20, 225);
-    doc.text(`   ${customization.dimensions.width} × ${customization.dimensions.length} cm² × ${Math.max(customization.designColors.length, 1)} colors × 0.5 SR`, 30, 235);
-    doc.text(`   = ${clichesCost.toLocaleString()} SR`, 30, 245);
-    
-    doc.text('2. Bags Cost:', 20, 260);
-    doc.text(`   Minimum ${minimumKg} kg × 10 SR/kg (for ${Math.max(customization.designColors.length, 1)} color${Math.max(customization.designColors.length, 1) > 1 ? 's' : ''})`, 30, 270);
-    doc.text(`   = ${bagsCost.toLocaleString()} SR`, 30, 280);
-    
-    // Total
-    doc.setFontSize(12);
-    doc.text(`Total Cost: ${estimatedCost.toLocaleString()} SR`, 20, 295);
-    doc.text(`Unit Price: ${((estimatedCost / customization.quantity)).toFixed(3)} SR per piece`, 20, 305);
-    
-    // Notes
-    if (customization.notes) {
-      doc.setFontSize(14);
-      doc.text('Notes:', 20, 250);
-      doc.setFontSize(11);
-      const splitNotes = doc.splitTextToSize(customization.notes, 170);
-      doc.text(splitNotes, 20, 260);
-    }
-    
-    // Footer
-    doc.setFontSize(8);
-    doc.text('*Final pricing may vary based on design complexity and material availability', 20, 280);
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 290);
-    
-    doc.save(`quote-${customization.customerInfo.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
-    
-    toast({
-      title: "PDF Downloaded",
-      description: "Quote has been saved as PDF file.",
-    });
   };
 
   const renderTemplatePreview = (template: string, materialColor: string) => {
@@ -1162,6 +886,13 @@ export default function OrderDesignPage() {
                     {/* Enhanced Tool Selection */}
                     <div className="flex space-x-3 mb-6">
                       <Button
+                        variant={selectedTool === "brush" ? "default" : "outline"}
+                        onClick={() => setSelectedTool("brush")}
+                        className="flex-1"
+                      >
+                        <Brush className="h-4 w-4 mr-2" /> Brush
+                      </Button>
+                      <Button
                         variant={selectedTool === "rectangle" ? "default" : "outline"}
                         onClick={() => setSelectedTool("rectangle")}
                         className="flex-1"
@@ -1234,7 +965,22 @@ export default function OrderDesignPage() {
                       )}
                     </div>
 
-
+                    {/* Brush Size Control */}
+                    {selectedTool === "brush" && (
+                      <div className="mb-6">
+                        <Label className="text-base font-semibold mb-3 block">
+                          Brush Size: {brushSize}px
+                        </Label>
+                        <Slider
+                          value={[brushSize]}
+                          onValueChange={(value) => setBrushSize(value[0])}
+                          max={25}
+                          min={1}
+                          step={1}
+                          className="w-48"
+                        />
+                      </div>
+                    )}
 
                     {/* Enhanced Drawing Canvas */}
                     <div className="border-2 rounded-xl p-6 bg-white shadow-sm">
@@ -1261,42 +1007,6 @@ export default function OrderDesignPage() {
                         />
                       </div>
                     </div>
-
-                    {/* Text Input Dialog */}
-                    {showTextDialog && (
-                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-                          <h3 className="text-lg font-semibold mb-4">Add Text</h3>
-                          <Input
-                            type="text"
-                            placeholder="Enter your text..."
-                            value={textInput}
-                            onChange={(e) => setTextInput(e.target.value)}
-                            className="mb-4"
-                            autoFocus
-                          />
-                          <div className="flex space-x-3">
-                            <Button
-                              onClick={addTextElement}
-                              disabled={!textInput.trim()}
-                              className="flex-1"
-                            >
-                              Add Text
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => {
-                                setShowTextDialog(false);
-                                setTextInput("");
-                              }}
-                              className="flex-1"
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
@@ -1439,39 +1149,15 @@ export default function OrderDesignPage() {
                           <Zap className="h-6 w-6 text-blue-600 mr-2" />
                           <strong className="text-xl text-blue-900">Estimated Quote</strong>
                         </div>
-                        <div className="space-y-4">
-                          {/* Cost Breakdown */}
-                          <div className="space-y-3 text-left">
-                            <div className="flex justify-between items-center p-3 bg-white rounded-lg">
-                              <span className="text-gray-700">1. Clichés Cost:</span>
-                              <span className="font-semibold text-blue-600">{clichesCost.toLocaleString()} SR</span>
-                            </div>
-                            <div className="text-xs text-gray-500 pl-3">
-                              ({customization.dimensions.width} × {customization.dimensions.length} cm² × {Math.max(customization.designColors.length, 1)} colors × 0.5 SR)
-                            </div>
-                            
-                            <div className="flex justify-between items-center p-3 bg-white rounded-lg">
-                              <span className="text-gray-700">2. Bags Cost:</span>
-                              <span className="font-semibold text-blue-600">{bagsCost.toLocaleString()} SR</span>
-                            </div>
-                            <div className="text-xs text-gray-500 pl-3">
-                              (Min. {minimumKg} kg × 10 SR/kg for {Math.max(customization.designColors.length, 1)} color{Math.max(customization.designColors.length, 1) > 1 ? 's' : ''})
-                            </div>
+                        <div className="text-center space-y-2">
+                          <div className="text-3xl font-bold text-blue-600">
+                            ${estimatedCost.toLocaleString()}
                           </div>
-                          
-                          {/* Total */}
-                          <div className="border-t border-blue-200 pt-4">
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-blue-600 mb-2">
-                                Total: {estimatedCost.toLocaleString()} SR
-                              </div>
-                              <div className="text-sm text-blue-700">
-                                Unit Price: {((estimatedCost / customization.quantity)).toFixed(3)} SR per piece
-                              </div>
-                              <div className="text-xs text-blue-600 mt-2">
-                                *Final pricing may vary based on design complexity and material availability
-                              </div>
-                            </div>
+                          <div className="text-sm text-blue-700">
+                            Unit Price: ${((estimatedCost / customization.quantity)).toFixed(3)} per piece
+                          </div>
+                          <div className="text-xs text-blue-600">
+                            *Final pricing may vary based on design complexity and material availability
                           </div>
                         </div>
                       </div>
@@ -1480,7 +1166,7 @@ export default function OrderDesignPage() {
                     <div className="mt-8 flex justify-center space-x-4">
                       <Button 
                         variant="outline" 
-                        onClick={handleDownloadPDF}
+                        onClick={generateQuote}
                         size="lg"
                         className="px-8"
                       >
@@ -1488,13 +1174,18 @@ export default function OrderDesignPage() {
                         Download Quote
                       </Button>
                       <Button 
-                        onClick={handleSendQuoteRequest}
+                        onClick={() => {
+                          generateQuote();
+                          toast({
+                            title: "Quote Request Submitted",
+                            description: "We'll contact you within 24 hours with final pricing and production timeline.",
+                          });
+                        }}
                         size="lg"
                         className="px-8"
-                        disabled={emailQuoteMutation.isPending}
                       >
                         <FileText className="h-5 w-5 mr-2" />
-                        {emailQuoteMutation.isPending ? "Sending..." : "Submit Quote Request"}
+                        Submit Quote Request
                       </Button>
                     </div>
                   </div>
@@ -1622,30 +1313,15 @@ export default function OrderDesignPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="space-y-4">
-                {/* Cost Breakdown */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <span className="text-sm text-gray-700">Clichés Cost:</span>
-                    <span className="font-semibold text-blue-600">{clichesCost.toLocaleString()} SR</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <span className="text-sm text-gray-700">Bags Cost:</span>
-                    <span className="font-semibold text-blue-600">{bagsCost.toLocaleString()} SR</span>
-                  </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600 mb-2">
+                  ${estimatedCost.toLocaleString()}
                 </div>
-                
-                {/* Total */}
-                <div className="border-t pt-4 text-center">
-                  <div className="text-2xl font-bold text-blue-600 mb-2">
-                    Total: {estimatedCost.toLocaleString()} SR
-                  </div>
-                  <div className="text-sm text-gray-600 mb-4">
-                    {((estimatedCost / customization.quantity)).toFixed(3)} SR per unit
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Minimum {minimumKg} kg required for {Math.max(customization.designColors.length, 1)} color{Math.max(customization.designColors.length, 1) > 1 ? 's' : ''}
-                  </div>
+                <div className="text-sm text-gray-600 mb-4">
+                  ${((estimatedCost / customization.quantity)).toFixed(3)} per unit
+                </div>
+                <div className="text-xs text-gray-500">
+                  Estimate includes materials, printing, and processing
                 </div>
               </div>
             </CardContent>
@@ -1655,4 +1331,3 @@ export default function OrderDesignPage() {
     </div>
   );
 }
-

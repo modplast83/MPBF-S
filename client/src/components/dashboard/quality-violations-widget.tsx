@@ -110,7 +110,7 @@ export function QualityViolationsWidget() {
             <Skeleton className="w-full h-12" />
             <Skeleton className="w-full h-12" />
           </div>
-        ) : data && data.violations.length > 0 ? (
+        ) : data && data.violations && data.violations.length > 0 ? (
           <div className="space-y-3">
             {data.violations.slice(0, 3).map((violation) => (
               <div key={violation.id} className="border rounded-md p-3 text-sm">

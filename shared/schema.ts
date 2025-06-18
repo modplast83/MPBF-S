@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   pgTable,
   text,
@@ -12,6 +11,7 @@ import {
   jsonb,
   index
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -833,7 +833,67 @@ export type AbaMaterialConfig = typeof abaMaterialConfigs.$inferSelect;
 
 // HR Module Tables
 
-// Time Attendance
+// Employee Ranks and Levels
+export const employeeRanks = pgTable("employee_ranks", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  level: integer("level").notNull().unique(),
+  baseSalary: doublePrecision("base_salary").default(0),
+  overtimeRate: doublePrecision("overtime_rate").default(1.5), // multiplier for overtime pay
+  maxOvertimeHours: integer("max_overtime_hours").default(20), // max overtime hours per month
+  permissions: jsonb("permissions"), // specific permissions for this rank
+  benefits: text("benefits"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertEmployeeRankSchema = createInsertSchema(employeeRanks).omit({ id: true, createdAt: true });
+export type InsertEmployeeRank = z.infer<typeof insertEmployeeRankSchema>;
+export type EmployeeRank = typeof employeeRanks.$inferSelect;
+
+// Employee Profiles (extends user data)
+export const employeeProfiles = pgTable("employee_profiles", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id).unique(),
+  employeeId: text("employee_id").notNull().unique(),
+  rankId: integer("rank_id").references(() => employeeRanks.id),
+  department: text("department"),
+  position: text("position"),
+  hireDate: timestamp("hire_date"),
+  contractType: text("contract_type").default("full_time"), // full_time, part_time, contract, intern
+  workSchedule: jsonb("work_schedule"), // working hours, days off, shift patterns
+  emergencyContact: jsonb("emergency_contact"),
+  bankDetails: jsonb("bank_details"),
+  allowances: jsonb("allowances"), // transport, housing, etc.
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertEmployeeProfileSchema = createInsertSchema(employeeProfiles).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertEmployeeProfile = z.infer<typeof insertEmployeeProfileSchema>;
+export type EmployeeProfile = typeof employeeProfiles.$inferSelect;
+
+// Geofences for automatic check-out
+export const geofences = pgTable("geofences", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  centerLatitude: doublePrecision("center_latitude").notNull(),
+  centerLongitude: doublePrecision("center_longitude").notNull(),
+  radius: doublePrecision("radius").notNull(), // in meters
+  isActive: boolean("is_active").default(true),
+  sectionIds: text("section_ids").array().default(sql`'{}'`), // which sections this geofence applies to
+  geofenceType: text("geofence_type").default("factory"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertGeofenceSchema = createInsertSchema(geofences).omit({ id: true, createdAt: true });
+export type InsertGeofence = z.infer<typeof insertGeofenceSchema>;
+export type Geofence = typeof geofences.$inferSelect;
+
+// Time Attendance with enhanced tracking
 export const timeAttendance = pgTable("time_attendance", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
@@ -842,11 +902,18 @@ export const timeAttendance = pgTable("time_attendance", {
   checkOutTime: timestamp("check_out_time"),
   breakStartTime: timestamp("break_start_time"),
   breakEndTime: timestamp("break_end_time"),
-  workingHours: doublePrecision("working_hours").default(0), // in hours
-  overtimeHours: doublePrecision("overtime_hours").default(0), // in hours
-  location: text("location"), // GPS coordinates or location name
-  status: text("status").notNull().default("present"), // present, absent, late, early_leave
+  scheduledStartTime: timestamp("scheduled_start_time"),
+  scheduledEndTime: timestamp("scheduled_end_time"),
+  workingHours: doublePrecision("working_hours").default(0),
+  overtimeHours: doublePrecision("overtime_hours").default(0),
+  breakDuration: doublePrecision("break_duration").default(0), // in hours
+  checkInLocation: text("check_in_location"),
+  checkOutLocation: text("check_out_location"),
+  status: text("status").notNull().default("present"), // present, absent, late, early_leave, sick, vacation
   isAutoCheckedOut: boolean("is_auto_checked_out").default(false),
+  autoCheckOutReason: text("auto_check_out_reason"),
+  overtimeApproved: boolean("overtime_approved").default(false),
+  overtimeApprovedBy: text("overtime_approved_by").references(() => users.id),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -854,6 +921,100 @@ export const timeAttendance = pgTable("time_attendance", {
 export const insertTimeAttendanceSchema = createInsertSchema(timeAttendance).omit({ id: true, createdAt: true });
 export type InsertTimeAttendance = z.infer<typeof insertTimeAttendanceSchema>;
 export type TimeAttendance = typeof timeAttendance.$inferSelect;
+
+// Leave Management
+export const leaveRequests = pgTable("leave_requests", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  leaveType: text("leave_type").notNull(), // sick, vacation, personal, emergency, maternity, paternity
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  totalDays: doublePrecision("total_days").notNull(),
+  reason: text("reason").notNull(),
+  status: text("status").notNull().default("pending"), // pending, approved, rejected, cancelled
+  approvedBy: text("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  rejectionReason: text("rejection_reason"),
+  attachments: jsonb("attachments"), // medical certificates, etc.
+  requestedAt: timestamp("requested_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertLeaveRequestSchema = createInsertSchema(leaveRequests).omit({ id: true, createdAt: true, requestedAt: true });
+export type InsertLeaveRequest = z.infer<typeof insertLeaveRequestSchema>;
+export type LeaveRequest = typeof leaveRequests.$inferSelect;
+
+// Overtime Requests
+export const overtimeRequests = pgTable("overtime_requests", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  date: timestamp("date").notNull(),
+  requestedHours: doublePrecision("requested_hours").notNull(),
+  reason: text("reason").notNull(),
+  status: text("status").notNull().default("pending"), // pending, approved, rejected
+  approvedBy: text("approved_by").references(() => users.id),
+  approvedHours: doublePrecision("approved_hours"),
+  approvedAt: timestamp("approved_at"),
+  rejectionReason: text("rejection_reason"),
+  actualHours: doublePrecision("actual_hours"), // filled after work is done
+  requestedAt: timestamp("requested_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOvertimeRequestSchema = createInsertSchema(overtimeRequests).omit({ id: true, createdAt: true, requestedAt: true });
+export type InsertOvertimeRequest = z.infer<typeof insertOvertimeRequestSchema>;
+export type OvertimeRequest = typeof overtimeRequests.$inferSelect;
+
+// Payroll Records
+export const payrollRecords = pgTable("payroll_records", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  payPeriodStart: timestamp("pay_period_start").notNull(),
+  payPeriodEnd: timestamp("pay_period_end").notNull(),
+  baseSalary: doublePrecision("base_salary").notNull(),
+  overtimePay: doublePrecision("overtime_pay").default(0),
+  allowances: doublePrecision("allowances").default(0),
+  bonuses: doublePrecision("bonuses").default(0),
+  deductions: doublePrecision("deductions").default(0),
+  grossPay: doublePrecision("gross_pay").notNull(),
+  netPay: doublePrecision("net_pay").notNull(),
+  workingDays: integer("working_days").notNull(),
+  absentDays: integer("absent_days").default(0),
+  lateDays: integer("late_days").default(0),
+  overtimeHours: doublePrecision("overtime_hours").default(0),
+  status: text("status").notNull().default("draft"), // draft, approved, paid
+  processedBy: text("processed_by").references(() => users.id),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPayrollRecordSchema = createInsertSchema(payrollRecords).omit({ id: true, createdAt: true });
+export type InsertPayrollRecord = z.infer<typeof insertPayrollRecordSchema>;
+export type PayrollRecord = typeof payrollRecords.$inferSelect;
+
+// Employee Performance Reviews
+export const performanceReviews = pgTable("performance_reviews", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  reviewerId: text("reviewer_id").notNull().references(() => users.id),
+  reviewPeriodStart: timestamp("review_period_start").notNull(),
+  reviewPeriodEnd: timestamp("review_period_end").notNull(),
+  attendanceScore: doublePrecision("attendance_score").default(0),
+  qualityScore: doublePrecision("quality_score").default(0),
+  productivityScore: doublePrecision("productivity_score").default(0),
+  teamworkScore: doublePrecision("teamwork_score").default(0),
+  overallScore: doublePrecision("overall_score").default(0),
+  strengths: text("strengths"),
+  improvements: text("improvements"),
+  goals: text("goals"),
+  status: text("status").notNull().default("draft"), // draft, submitted, approved
+  reviewDate: timestamp("review_date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPerformanceReviewSchema = createInsertSchema(performanceReviews).omit({ id: true, createdAt: true });
+export type InsertPerformanceReview = z.infer<typeof insertPerformanceReviewSchema>;
+export type PerformanceReview = typeof performanceReviews.$inferSelect;
 
 // Employee of the Month
 export const employeeOfMonth = pgTable("employee_of_month", {
@@ -1178,3 +1339,34 @@ export type SmsProviderSettings = typeof smsProviderSettings.$inferSelect;
 export const insertSmsProviderHealthSchema = createInsertSchema(smsProviderHealth).omit({ id: true, checkedAt: true });
 export type InsertSmsProviderHealth = z.infer<typeof insertSmsProviderHealthSchema>;
 export type SmsProviderHealth = typeof smsProviderHealth.$inferSelect;
+
+// Dashboard Widgets and Layouts
+export const dashboardWidgets = pgTable("dashboard_widgets", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  widgetType: text("widget_type").notNull(),
+  widgetConfig: jsonb("widget_config").notNull(),
+  position: jsonb("position").notNull(), // { x: number, y: number, w: number, h: number }
+  isVisible: boolean("is_visible").default(true),
+  dashboardLayout: text("dashboard_layout").default("default"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const dashboardLayouts = pgTable("dashboard_layouts", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  layoutName: text("layout_name").notNull(),
+  layoutConfig: jsonb("layout_config").notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDashboardWidgetSchema = createInsertSchema(dashboardWidgets).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertDashboardWidget = z.infer<typeof insertDashboardWidgetSchema>;
+export type DashboardWidget = typeof dashboardWidgets.$inferSelect;
+
+export const insertDashboardLayoutSchema = createInsertSchema(dashboardLayouts).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertDashboardLayout = z.infer<typeof insertDashboardLayoutSchema>;
+export type DashboardLayout = typeof dashboardLayouts.$inferSelect;

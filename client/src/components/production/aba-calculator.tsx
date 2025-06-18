@@ -188,31 +188,31 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
     
     // Create aggregated items based on the formula
     // but scale them to the total quantity
-    const scaleFactor = quantity / 100;
+    const scaleFactor = quantity > 0 ? quantity / 100 : 0;
     
     // HDPE
     const hdpeScrewA = 13 * scaleFactor;
     const hdpeScrewB = 13 * scaleFactor;
     const hdpeTotal = hdpeScrewA + hdpeScrewB;
-    const hdpePercentage = (hdpeTotal / quantity) * 100;
+    const hdpePercentage = quantity > 0 ? (hdpeTotal / quantity) * 100 : 0;
 
     // LLDPE
     const lldpeScrewA = 12 * scaleFactor;
     const lldpeScrewB = 10 * scaleFactor;
     const lldpeTotal = lldpeScrewA + lldpeScrewB;
-    const lldpePercentage = (lldpeTotal / quantity) * 100;
+    const lldpePercentage = quantity > 0 ? (lldpeTotal / quantity) * 100 : 0;
 
     // Filler
     const fillerScrewA = 5 * scaleFactor;
     const fillerScrewB = 46 * scaleFactor;
     const fillerTotal = fillerScrewA + fillerScrewB;
-    const fillerPercentage = (fillerTotal / quantity) * 100;
+    const fillerPercentage = quantity > 0 ? (fillerTotal / quantity) * 100 : 0;
 
     // Masterbatch
     const mbScrewA = 1 * scaleFactor;
     const mbScrewB = 1 * scaleFactor;
     const mbTotal = mbScrewA + mbScrewB;
-    const mbPercentage = (mbTotal / quantity) * 100;
+    const mbPercentage = quantity > 0 ? (mbTotal / quantity) * 100 : 0;
 
     const items: AbaCalculationItem[] = [
       {
@@ -295,25 +295,25 @@ export function AbaCalculator({ onPrint }: AbaCalculatorProps) {
     const hdpeScrewA = 13 * scaleFactor; // 13 kg for A in 100kg example
     const hdpeScrewB = 13 * scaleFactor; // 13 kg for B in 100kg example
     const hdpeTotal = hdpeScrewA + hdpeScrewB;
-    const hdpePercentage = (hdpeTotal / quantity) * 100;
+    const hdpePercentage = quantity > 0 ? (hdpeTotal / quantity) * 100 : 0;
 
     // LLDPE - exact values from example image
     const lldpeScrewA = 12 * scaleFactor; // 12 kg for A in 100kg example
     const lldpeScrewB = 10 * scaleFactor; // 10 kg for B in 100kg example
     const lldpeTotal = lldpeScrewA + lldpeScrewB;
-    const lldpePercentage = (lldpeTotal / quantity) * 100;
+    const lldpePercentage = quantity > 0 ? (lldpeTotal / quantity) * 100 : 0;
 
     // Filler - exact values from example image
     const fillerScrewA = 5 * scaleFactor; // 5 kg for A in 100kg example
     const fillerScrewB = 46 * scaleFactor; // 46 kg for B in 100kg example
     const fillerTotal = fillerScrewA + fillerScrewB;
-    const fillerPercentage = (fillerTotal / quantity) * 100;
+    const fillerPercentage = quantity > 0 ? (fillerTotal / quantity) * 100 : 0;
 
     // Masterbatch - exact values from example image
     const mbScrewA = 1 * scaleFactor; // 1 kg for A in 100kg example
     const mbScrewB = 1 * scaleFactor; // 1 kg for B in 100kg example
     const mbTotal = mbScrewA + mbScrewB;
-    const mbPercentage = (mbTotal / quantity) * 100;
+    const mbPercentage = quantity > 0 ? (mbTotal / quantity) * 100 : 0;
 
     // Create the items array based on the example formula
     const items: AbaCalculationItem[] = [

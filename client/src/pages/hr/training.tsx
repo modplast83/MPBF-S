@@ -12,9 +12,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { Calendar, User, Clock, CheckCircle, XCircle, Briefcase, AlertTriangle, GraduationCap, FileText, Users, Trophy, Award } from "lucide-react";
+import { Calendar, User, Clock, CheckCircle, XCircle, Briefcase, AlertTriangle, GraduationCap, FileText, Users, Trophy, Award, Printer, Download } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
+import jsPDF from "jspdf";
 
 interface Training {
   id: number;
@@ -56,7 +57,6 @@ interface User {
 }
 
 const trainingFormSchema = z.object({
-  trainingId: z.string().min(1, "Training ID is required"),
   date: z.string().min(1, "Date is required"),
   traineeId: z.string().min(1, "Trainee is required"),
   trainingSection: z.string().min(1, "Training section is required"),
@@ -79,7 +79,6 @@ export default function TrainingPage() {
   const form = useForm<TrainingFormData>({
     resolver: zodResolver(trainingFormSchema),
     defaultValues: {
-      trainingId: "",
       date: "",
       traineeId: "",
       trainingSection: "",
@@ -105,17 +104,45 @@ export default function TrainingPage() {
 
   const { data: evaluations = [] } = useQuery<TrainingEvaluation[]>({
     queryKey: ['/api/trainings', selectedTraining?.id, 'evaluations'],
+    queryFn: async () => {
+      if (!selectedTraining) return [];
+      const response = await fetch(`/api/trainings/${selectedTraining.id}/evaluations`, {
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to fetch evaluations');
+      return response.json();
+    },
     enabled: !!selectedTraining,
   });
 
   // Mutations
+  // Function to generate training ID
+  const generateTrainingId = () => {
+    const existingIds = trainings.map(t => t.trainingId);
+    let counter = 1;
+    let newId = `TRN-${String(counter).padStart(3, '0')}`;
+    
+    while (existingIds.includes(newId)) {
+      counter++;
+      newId = `TRN-${String(counter).padStart(3, '0')}`;
+    }
+    
+    return newId;
+  };
+
   const createTrainingMutation = useMutation({
     mutationFn: async (data: TrainingFormData) => {
+      const trainingId = generateTrainingId();
+      const trainingData = {
+        ...data,
+        trainingId,
+      };
+      
       const response = await fetch('/api/trainings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(data),
+        body: JSON.stringify(trainingData),
       });
       if (!response.ok) throw new Error('Failed to create training');
       return response.json();
@@ -161,11 +188,58 @@ export default function TrainingPage() {
           notes: data.notes,
         }),
       });
+      
+      // Handle 409 conflict - evaluation already exists, try updating instead
+      if (response.status === 409 && method === 'POST') {
+        try {
+          const conflictData = await response.json();
+          const existingEvaluation = conflictData.existingEvaluation;
+          
+          if (existingEvaluation && existingEvaluation.id) {
+            const updateResponse = await fetch(`/api/training-evaluations/${existingEvaluation.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                status: data.status,
+                notes: data.notes,
+              }),
+            });
+            if (!updateResponse.ok) throw new Error('Failed to update existing evaluation');
+            return updateResponse.json();
+          }
+        } catch (parseError) {
+          // If we can't parse the response, fall back to original logic
+          const existingEvaluation = evaluations.find(e => 
+            e.trainingId === data.trainingId && e.trainingPointId === data.trainingPointId
+          );
+          
+          if (existingEvaluation) {
+            const updateResponse = await fetch(`/api/training-evaluations/${existingEvaluation.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                status: data.status,
+                notes: data.notes,
+              }),
+            });
+            if (!updateResponse.ok) throw new Error('Failed to update existing evaluation');
+            return updateResponse.json();
+          }
+        }
+      }
+      
       if (!response.ok) throw new Error(`Failed to ${data.evaluationId ? 'update' : 'create'} evaluation`);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trainings', selectedTraining?.id, 'evaluations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/training-certificates'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trainings'] });
+    },
+    onError: (error) => {
+      console.error('Evaluation update error:', error);
     },
   });
 
@@ -176,8 +250,10 @@ export default function TrainingPage() {
   const handleEvaluationUpdate = (trainingPointId: number, status: string, notes?: string) => {
     if (!selectedTraining) return;
     
-    // Check if evaluation already exists
-    const existingEvaluation = evaluations.find(e => e.trainingPointId === trainingPointId);
+    // Check if evaluation already exists for this training and training point
+    const existingEvaluation = evaluations.find(e => 
+      e.trainingId === selectedTraining.id && e.trainingPointId === trainingPointId
+    );
     
     createEvaluationMutation.mutate({
       trainingId: selectedTraining.id,
@@ -186,6 +262,90 @@ export default function TrainingPage() {
       notes,
       evaluationId: existingEvaluation?.id,
     });
+  };
+
+  const printTrainingEvaluation = () => {
+    if (!selectedTraining) return;
+    
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('Training Evaluation Report', pageWidth / 2, 30, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.text(`Training ID: ${selectedTraining.trainingId}`, 20, 50);
+    doc.text(`Date: ${format(new Date(selectedTraining.date), 'MMM dd, yyyy')}`, 20, 60);
+    doc.text(`Trainee: ${getUserName(selectedTraining.traineeId)}`, 20, 70);
+    doc.text(`Supervisor: ${getUserName(selectedTraining.supervisorId)}`, 20, 80);
+    doc.text(`Section: ${selectedTraining.trainingSection}`, 20, 90);
+    doc.text(`Duration: ${selectedTraining.numberOfDays} days`, 20, 100);
+    
+    // Evaluation Results
+    doc.setFontSize(14);
+    doc.text('Training Point Evaluations:', 20, 120);
+    
+    let yPosition = 140;
+    trainingPoints.filter(point => point.isActive).forEach((point) => {
+      const evaluation = evaluations.find(e => e.trainingPointId === point.id);
+      doc.setFontSize(11);
+      doc.text(`${point.name}:`, 25, yPosition);
+      doc.text(`Status: ${evaluation?.status?.replace('_', ' ') || 'Not Evaluated'}`, 120, yPosition);
+      yPosition += 15;
+      
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 30;
+      }
+    });
+    
+    // Report section
+    if (selectedTraining.report) {
+      doc.setFontSize(14);
+      doc.text('Training Report:', 20, yPosition + 20);
+      doc.setFontSize(11);
+      const reportLines = doc.splitTextToSize(selectedTraining.report, pageWidth - 40);
+      doc.text(reportLines, 20, yPosition + 35);
+    }
+    
+    doc.save(`Training_Evaluation_${selectedTraining.trainingId}.pdf`);
+  };
+
+  const printTrainingList = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('Training Management Report', pageWidth / 2, 30, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.text(`Generated on: ${format(new Date(), 'MMM dd, yyyy HH:mm')}`, 20, 50);
+    doc.text(`Total Trainings: ${trainings.length}`, 20, 60);
+    
+    // Training List
+    doc.setFontSize(14);
+    doc.text('Training Sessions:', 20, 80);
+    
+    let yPosition = 100;
+    trainings.forEach((training, index) => {
+      doc.setFontSize(11);
+      doc.text(`${index + 1}. ${training.trainingId}`, 25, yPosition);
+      doc.text(`Trainee: ${getUserName(training.traineeId)}`, 30, yPosition + 10);
+      doc.text(`Section: ${training.trainingSection}`, 30, yPosition + 20);
+      doc.text(`Status: ${training.status}`, 30, yPosition + 30);
+      doc.text(`Date: ${format(new Date(training.date), 'MMM dd, yyyy')}`, 30, yPosition + 40);
+      
+      yPosition += 60;
+      
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 30;
+      }
+    });
+    
+    doc.save(`Training_Management_Report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
   };
 
   const getUserName = (userId: string) => {
@@ -227,17 +387,26 @@ export default function TrainingPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Training Management</h1>
-            <p className="text-gray-600">Manage and evaluate training processes for employees</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("hr.training_management.title")}</h1>
+            <p className="text-gray-600">{t("hr.training_management.description")}</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <GraduationCap className="h-4 w-4 mr-2" />
-                New Training
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={printTrainingList}
+              className="text-blue-600 border-blue-200 hover:bg-blue-50"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Print Report
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <GraduationCap className="h-4 w-4 mr-2" />
+                  New Training
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Training</DialogTitle>
                 <DialogDescription>
@@ -246,20 +415,12 @@ export default function TrainingPage() {
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="trainingId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Training ID</FormLabel>
-                          <FormControl>
-                            <Input placeholder="TRN-001" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="mb-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-blue-700">
+                        <strong>Training ID:</strong> Will be automatically generated (e.g., TRN-001, TRN-002, etc.)
+                      </p>
+                    </div>
                     <FormField
                       control={form.control}
                       name="date"
@@ -395,7 +556,8 @@ export default function TrainingPage() {
                 </form>
               </Form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
       </div>
 
@@ -491,10 +653,22 @@ export default function TrainingPage() {
       <Dialog open={showEvaluationDialog} onOpenChange={setShowEvaluationDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Training Evaluation - {selectedTraining?.trainingId}</DialogTitle>
-            <DialogDescription>
-              Evaluate training points and update training status for the selected training session.
-            </DialogDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle>Training Evaluation - {selectedTraining?.trainingId}</DialogTitle>
+                <DialogDescription>
+                  Evaluate training points and update training status for the selected training session.
+                </DialogDescription>
+              </div>
+              <Button 
+                variant="outline"
+                onClick={printTrainingEvaluation}
+                className="text-green-600 border-green-200 hover:bg-green-50"
+              >
+                <Printer className="h-4 w-4 mr-2" />
+                Print Evaluation
+              </Button>
+            </div>
           </DialogHeader>
           {selectedTraining && (
             <div className="space-y-6">
@@ -525,7 +699,9 @@ export default function TrainingPage() {
                 <CardContent>
                   <div className="space-y-4">
                     {trainingPoints.filter(point => point.isActive).map((point) => {
-                      const evaluation = evaluations.find(e => e.trainingPointId === point.id);
+                      const evaluation = evaluations.find(e => 
+                        e.trainingId === selectedTraining.id && e.trainingPointId === point.id
+                      );
                       return (
                         <div key={point.id} className="border rounded-lg p-4">
                           <div className="flex items-center justify-between mb-3">
@@ -539,18 +715,20 @@ export default function TrainingPage() {
                                 variant={evaluation?.status === 'pass' ? 'default' : 'outline'}
                                 className={evaluation?.status === 'pass' ? 'bg-green-600 hover:bg-green-700' : ''}
                                 onClick={() => handleEvaluationUpdate(point.id, 'pass')}
+                                disabled={createEvaluationMutation.isPending}
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
-                                Pass
+                                {createEvaluationMutation.isPending ? 'Saving...' : 'Pass'}
                               </Button>
                               <Button
                                 size="sm"
                                 variant={evaluation?.status === 'not_pass' ? 'default' : 'outline'}
                                 className={evaluation?.status === 'not_pass' ? 'bg-red-600 hover:bg-red-700' : ''}
                                 onClick={() => handleEvaluationUpdate(point.id, 'not_pass')}
+                                disabled={createEvaluationMutation.isPending}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
-                                Not Pass
+                                {createEvaluationMutation.isPending ? 'Saving...' : 'Not Pass'}
                               </Button>
                             </div>
                           </div>

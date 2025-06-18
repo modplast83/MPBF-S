@@ -1,0 +1,246 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+SendGrid email service initialized successfully
+Checking for admin user existence...
+Admin user already exists, no need to create.
+Admin user check completed
+2:25:17 AM [express] serving on port 5000
+Getting user data for: admin
+2:26:37 AM [express] GET /api/user 200 in 695ms :: {"id":"00U1","username":"admin","isAdmin":true,"s…
+2:26:38 AM [express] GET /api/modules 304 in 932ms :: [{"id":1,"name":"Categories","displayName":"Ca…
+2:26:38 AM [express] GET /api/notifications/unread-count 304 in 930ms
+2:26:38 AM [express] GET /api/permissions 304 in 1161ms :: [{"id":2070,"sectionId":"SEC001","moduleI…
+2:26:39 AM [express] GET /api/dashboard-stats 304 in 694ms :: {"totalOrders":125,"completedOrders":9…
+2:26:39 AM [express] GET /api/notifications 304 in 1662ms :: []
+2:26:39 AM [express] GET /api/orders 304 in 930ms :: [{"id":85,"date":"2025-06-10T07:00:14.815Z","cu…
+2:26:40 AM [express] GET /api/customers 304 in 1620ms :: [{"id":"CID001","code":"CID001","name":"200…
+2:26:40 AM [express] GET /api/quality/stats 304 in 1644ms :: {"totalChecks":0,"passedChecks":0,"fail…
+2:27:11 AM [express] GET /api/notifications/unread-count 304 in 3051ms
+2:27:12 AM [express] GET /api/notifications 304 in 3067ms :: []
+2:27:26 AM [express] GET /api/hr/time-attendance 200 in 3030ms :: [{"id":3,"userId":"00U1","date":"2…
+2:27:26 AM [express] GET /api/users 200 in 3043ms :: [{"id":"00U4","username":"2052646771","email":"…
+2:27:26 AM [express] GET /api/time-attendance/user/00U1 200 in 3055ms :: [{"id":3,"userId":"00U1","d…
+2:27:26 AM [express] GET /api/hr/geofences 200 in 3054ms :: [{"id":1,"name":"Factory","centerLatitud…
+Error fetching employee profiles: error: column "is_active" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getEmployeeProfiles (/home/runner/workspace/server/database-storage.ts:2106:12)
+    at async <anonymous> (/home/runner/workspace/server/hr-routes.ts:54:24) {
+  length: 110,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '175',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+2:27:27 AM [express] GET /api/hr/employee-profiles 500 in 1647ms :: {"error":"Failed to fetch employ…
+2:27:27 AM [express] GET /api/hr/employee-ranks 200 in 1652ms :: [{"id":1,"name":"Junior Operator","…
+2:27:30 AM [express] POST /api/hr/check-geofence 200 in 934ms :: []
+Error fetching employee profiles: error: column "is_active" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getEmployeeProfiles (/home/runner/workspace/server/database-storage.ts:2106:12)
+    at async <anonymous> (/home/runner/workspace/server/hr-routes.ts:54:24) {
+  length: 110,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '175',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+Error fetching overtime requests: error: column "requested_at" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getOvertimeRequests (/home/runner/workspace/server/database-storage.ts:2194:12)
+    at async <anonymous> (/home/runner/workspace/server/hr-routes.ts:202:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '156',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+Error fetching leave requests: error: column "requested_at" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getLeaveRequests (/home/runner/workspace/server/database-storage.ts:2161:12)
+    at async <anonymous> (/home/runner/workspace/server/hr-routes.ts:157:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '164',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+2:27:31 AM [express] GET /api/hr/employee-profiles 500 in 932ms :: {"error":"Failed to fetch employe…
+2:27:31 AM [express] GET /api/hr/overtime-requests 500 in 928ms :: {"error":"Failed to fetch overtim…
+2:27:31 AM [express] GET /api/hr/leave-requests 500 in 935ms :: {"error":"Failed to fetch leave requ…
+2:27:33 AM [express] GET /api/sections 200 in 930ms :: [{"id":"SEC001","name":"Management"},{"id":"S…
+2:27:35 AM [express] POST /api/hr/check-geofence 200 in 928ms :: []
+2:27:35 AM [express] POST /api/hr/check-geofence 200 in 934ms :: []
+2:27:36 AM [express] POST /api/hr/check-geofence 200 in 1647ms :: []
+2:27:40 AM [express] GET /api/permissions 304 in 1167ms :: [{"id":2070,"sectionId":"SEC001","moduleI…
+2:27:42 AM [express] GET /api/notifications/unread-count 304 in 934ms
+2:27:43 AM [express] GET /api/notifications 304 in 932ms :: []
+2:27:43 AM [express] POST /api/hr/check-geofence 200 in 928ms :: []
+Error fetching employee profiles: error: column "is_active" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getEmployeeProfiles (/home/runner/workspace/server/database-storage.ts:2106:12)
+    at async <anonymous> (/home/runner/workspace/server/hr-routes.ts:54:24) {
+  length: 110,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '175',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+2:27:45 AM [express] GET /api/hr/employee-profiles 500 in 929ms :: {"error":"Failed to fetch employe…
+Error fetching employee profiles: error: column "is_active" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getEmployeeProfiles (/home/runner/workspace/server/database-storage.ts:2106:12)
+    at async <anonymous> (/home/runner/workspace/server/hr-routes.ts:54:24) {
+  length: 110,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '175',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+2:27:50 AM [express] GET /api/hr/employee-profiles 500 in 931ms :: {"error":"Failed to fetch employe…
+Error fetching overtime requests: error: column "requested_at" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getOvertimeRequests (/home/runner/workspace/server/database-storage.ts:2194:12)
+    at async <anonymous> (/home/runner/workspace/server/hr-routes.ts:202:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '156',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+Error fetching leave requests: error: column "requested_at" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getLeaveRequests (/home/runner/workspace/server/database-storage.ts:2161:12)
+    at async <anonymous> (/home/runner/workspace/server/hr-routes.ts:157:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '164',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+2:27:51 AM [express] GET /api/hr/overtime-requests 500 in 1638ms :: {"error":"Failed to fetch overti…
+2:27:51 AM [express] GET /api/hr/leave-requests 500 in 1660ms :: {"error":"Failed to fetch leave req…
+2:27:53 AM [express] GET /api/employee-of-month/year/2025 200 in 1644ms :: [{"id":1,"userId":"0U50",…
+2:27:54 AM [express] GET /api/hr-violations 200 in 937ms :: [{"id":1,"userId":"00U0","reportedBy":"0…
+2:27:55 AM [express] GET /api/hr-complaints 200 in 1635ms :: []
+2:27:55 AM [express] GET /api/training-points 304 in 936ms :: [{"id":4,"name":"Adjust Size","categor…
+2:27:56 AM [express] GET /api/trainings 304 in 1646ms :: [{"id":3,"trainingId":"TRN-003","date":"202…
+2:27:59 AM [express] GET /api/trainings/3/evaluations 200 in 942ms :: [{"id":19,"trainingId":3,"trai…
+2:28:16 AM [express] GET /api/notifications/unread-count 304 in 3046ms
+2:28:16 AM [express] GET /api/notifications 304 in 3050ms :: []
+2:28:43 AM [express] GET /api/permissions 304 in 3265ms :: [{"id":2070,"sectionId":"SEC001","moduleI…
+2:28:47 AM [express] GET /api/notifications/unread-count 304 in 935ms
+2:28:49 AM [express] GET /api/notifications 304 in 2361ms :: []

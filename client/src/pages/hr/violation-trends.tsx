@@ -64,7 +64,8 @@ export default function ViolationTrendsPage() {
   };
 
   const { start, end } = getDateRange();
-  const filteredViolations = violations.filter((v: HrViolation) => {
+  const filteredViolations = (violations || []).filter((v: HrViolation) => {
+    if (!v?.createdAt) return false;
     const reportDate = new Date(v.createdAt);
     return reportDate >= start && reportDate <= end;
   });
@@ -238,7 +239,8 @@ export default function ViolationTrendsPage() {
 
   // Calculate statistics
   const totalViolations = filteredViolations.length;
-  const previousPeriod = violations.filter((v: HrViolation) => {
+  const previousPeriod = (violations || []).filter((v: HrViolation) => {
+    if (!v?.createdAt) return false;
     const reportDate = new Date(v.createdAt);
     const prevStart = new Date(start);
     prevStart.setMonth(prevStart.getMonth() - (timeRange === "3months" ? 3 : timeRange === "6months" ? 6 : 12));

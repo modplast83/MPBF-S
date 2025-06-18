@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { SectionForm } from "@/components/setup/section-form";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -69,11 +69,11 @@ export default function Sections() {
   const columns = [
     {
       header: "ID",
-      accessorKey: "id",
+      accessorKey: "id" as const,
     },
     {
       header: "Name",
-      accessorKey: "name",
+      accessorKey: "name" as const,
     },
     {
       header: "Actions",
@@ -126,6 +126,9 @@ export default function Sections() {
             <DialogTitle>
               {editSection ? t('setup.sections.edit_section') : t('setup.sections.add_new')}
             </DialogTitle>
+            <DialogDescription>
+              {editSection ? 'Modify the section details below' : 'Fill in the form below to create a new section'}
+            </DialogDescription>
           </DialogHeader>
           <SectionForm 
             section={editSection || undefined}

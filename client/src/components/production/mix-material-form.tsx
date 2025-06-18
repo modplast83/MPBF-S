@@ -107,8 +107,9 @@ export function MixMaterialForm({ rawMaterials, onSuccess }: MixMaterialFormProp
       toast({
         title: t('common.success'),
         description: t('production.mix_materials.mix_created_success'),
-        variant: "destructive",
       });
+      setMaterials([]);
+      setMixScrew("A");
       onSuccess?.();
     },
     onError: (error: any) => {

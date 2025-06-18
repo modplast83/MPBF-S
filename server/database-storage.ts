@@ -125,7 +125,28 @@ import {
   type InsertTrainingEvaluation,
   trainingCertificates,
   type TrainingCertificate,
-  type InsertCertificate
+  type InsertCertificate,
+  employeeRanks,
+  type EmployeeRank,
+  type InsertEmployeeRank,
+  employeeProfiles,
+  type EmployeeProfile,
+  type InsertEmployeeProfile,
+  geofences,
+  type Geofence,
+  type InsertGeofence,
+  leaveRequests,
+  type LeaveRequest,
+  type InsertLeaveRequest,
+  overtimeRequests,
+  type OvertimeRequest,
+  type InsertOvertimeRequest,
+  payrollRecords,
+  type PayrollRecord,
+  type InsertPayrollRecord,
+  performanceReviews,
+  type PerformanceReview,
+  type InsertPerformanceReview
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { IStorage } from "./storage";
@@ -2053,6 +2074,273 @@ export class DatabaseStorage implements IStorage {
   async deleteTimeAttendance(id: number): Promise<boolean> {
     await db.delete(timeAttendance).where(eq(timeAttendance.id, id));
     return true;
+  }
+
+  // Employee Ranks
+  async getEmployeeRanks(): Promise<EmployeeRank[]> {
+    return await db.select().from(employeeRanks).orderBy(employeeRanks.level);
+  }
+
+  async getEmployeeRank(id: number): Promise<EmployeeRank | undefined> {
+    const [rank] = await db.select().from(employeeRanks).where(eq(employeeRanks.id, id));
+    return rank;
+  }
+
+  async createEmployeeRank(rankData: InsertEmployeeRank): Promise<EmployeeRank> {
+    const [rank] = await db.insert(employeeRanks).values(rankData).returning();
+    return rank;
+  }
+
+  async updateEmployeeRank(id: number, rankData: Partial<EmployeeRank>): Promise<EmployeeRank | undefined> {
+    const [updated] = await db.update(employeeRanks).set(rankData).where(eq(employeeRanks.id, id)).returning();
+    return updated;
+  }
+
+  async deleteEmployeeRank(id: number): Promise<boolean> {
+    await db.delete(employeeRanks).where(eq(employeeRanks.id, id));
+    return true;
+  }
+
+  // Employee Profiles
+  async getEmployeeProfiles(): Promise<EmployeeProfile[]> {
+    return await db.select().from(employeeProfiles).where(eq(employeeProfiles.isActive, true));
+  }
+
+  async getEmployeeProfile(id: number): Promise<EmployeeProfile | undefined> {
+    const [profile] = await db.select().from(employeeProfiles).where(eq(employeeProfiles.id, id));
+    return profile;
+  }
+
+  async getEmployeeProfileByUserId(userId: string): Promise<EmployeeProfile | undefined> {
+    const [profile] = await db.select().from(employeeProfiles).where(eq(employeeProfiles.userId, userId));
+    return profile;
+  }
+
+  async createEmployeeProfile(profileData: InsertEmployeeProfile): Promise<EmployeeProfile> {
+    const [profile] = await db.insert(employeeProfiles).values(profileData).returning();
+    return profile;
+  }
+
+  async updateEmployeeProfile(id: number, profileData: Partial<EmployeeProfile>): Promise<EmployeeProfile | undefined> {
+    const [updated] = await db.update(employeeProfiles).set(profileData).where(eq(employeeProfiles.id, id)).returning();
+    return updated;
+  }
+
+  async deleteEmployeeProfile(id: number): Promise<boolean> {
+    await db.update(employeeProfiles).set({ isActive: false }).where(eq(employeeProfiles.id, id));
+    return true;
+  }
+
+  // Geofences
+  async getGeofences(): Promise<Geofence[]> {
+    return await db.select().from(geofences).where(eq(geofences.isActive, true));
+  }
+
+  async getGeofence(id: number): Promise<Geofence | undefined> {
+    const [geofence] = await db.select().from(geofences).where(eq(geofences.id, id));
+    return geofence;
+  }
+
+  async createGeofence(geofenceData: InsertGeofence): Promise<Geofence> {
+    const [geofence] = await db.insert(geofences).values(geofenceData).returning();
+    return geofence;
+  }
+
+  async updateGeofence(id: number, geofenceData: Partial<Geofence>): Promise<Geofence | undefined> {
+    const [updated] = await db.update(geofences).set(geofenceData).where(eq(geofences.id, id)).returning();
+    return updated;
+  }
+
+  async deleteGeofence(id: number): Promise<boolean> {
+    await db.update(geofences).set({ isActive: false }).where(eq(geofences.id, id));
+    return true;
+  }
+
+  // Leave Requests
+  async getLeaveRequests(): Promise<LeaveRequest[]> {
+    return await db.select().from(leaveRequests).orderBy(desc(leaveRequests.requestedAt));
+  }
+
+  async getLeaveRequestsByUser(userId: string): Promise<LeaveRequest[]> {
+    return await db.select().from(leaveRequests).where(eq(leaveRequests.userId, userId)).orderBy(desc(leaveRequests.requestedAt));
+  }
+
+  async getLeaveRequestsByStatus(status: string): Promise<LeaveRequest[]> {
+    return await db.select().from(leaveRequests).where(eq(leaveRequests.status, status)).orderBy(desc(leaveRequests.requestedAt));
+  }
+
+  async getLeaveRequest(id: number): Promise<LeaveRequest | undefined> {
+    const [request] = await db.select().from(leaveRequests).where(eq(leaveRequests.id, id));
+    return request;
+  }
+
+  async createLeaveRequest(requestData: InsertLeaveRequest): Promise<LeaveRequest> {
+    const [request] = await db.insert(leaveRequests).values(requestData).returning();
+    return request;
+  }
+
+  async updateLeaveRequest(id: number, requestData: Partial<LeaveRequest>): Promise<LeaveRequest | undefined> {
+    const [updated] = await db.update(leaveRequests).set(requestData).where(eq(leaveRequests.id, id)).returning();
+    return updated;
+  }
+
+  async deleteLeaveRequest(id: number): Promise<boolean> {
+    await db.delete(leaveRequests).where(eq(leaveRequests.id, id));
+    return true;
+  }
+
+  // Overtime Requests
+  async getOvertimeRequests(): Promise<OvertimeRequest[]> {
+    return await db.select().from(overtimeRequests).orderBy(desc(overtimeRequests.requestedAt));
+  }
+
+  async getOvertimeRequestsByUser(userId: string): Promise<OvertimeRequest[]> {
+    return await db.select().from(overtimeRequests).where(eq(overtimeRequests.userId, userId)).orderBy(desc(overtimeRequests.requestedAt));
+  }
+
+  async getOvertimeRequestsByStatus(status: string): Promise<OvertimeRequest[]> {
+    return await db.select().from(overtimeRequests).where(eq(overtimeRequests.status, status)).orderBy(desc(overtimeRequests.requestedAt));
+  }
+
+  async getOvertimeRequest(id: number): Promise<OvertimeRequest | undefined> {
+    const [request] = await db.select().from(overtimeRequests).where(eq(overtimeRequests.id, id));
+    return request;
+  }
+
+  async createOvertimeRequest(requestData: InsertOvertimeRequest): Promise<OvertimeRequest> {
+    const [request] = await db.insert(overtimeRequests).values(requestData).returning();
+    return request;
+  }
+
+  async updateOvertimeRequest(id: number, requestData: Partial<OvertimeRequest>): Promise<OvertimeRequest | undefined> {
+    const [updated] = await db.update(overtimeRequests).set(requestData).where(eq(overtimeRequests.id, id)).returning();
+    return updated;
+  }
+
+  async deleteOvertimeRequest(id: number): Promise<boolean> {
+    await db.delete(overtimeRequests).where(eq(overtimeRequests.id, id));
+    return true;
+  }
+
+  // Payroll Records
+  async getPayrollRecords(): Promise<PayrollRecord[]> {
+    return await db.select().from(payrollRecords).orderBy(desc(payrollRecords.payPeriodEnd));
+  }
+
+  async getPayrollRecordsByUser(userId: string): Promise<PayrollRecord[]> {
+    return await db.select().from(payrollRecords).where(eq(payrollRecords.userId, userId)).orderBy(desc(payrollRecords.payPeriodEnd));
+  }
+
+  async getPayrollRecordsByStatus(status: string): Promise<PayrollRecord[]> {
+    return await db.select().from(payrollRecords).where(eq(payrollRecords.status, status)).orderBy(desc(payrollRecords.payPeriodEnd));
+  }
+
+  async getPayrollRecord(id: number): Promise<PayrollRecord | undefined> {
+    const [record] = await db.select().from(payrollRecords).where(eq(payrollRecords.id, id));
+    return record;
+  }
+
+  async createPayrollRecord(recordData: InsertPayrollRecord): Promise<PayrollRecord> {
+    const [record] = await db.insert(payrollRecords).values(recordData).returning();
+    return record;
+  }
+
+  async updatePayrollRecord(id: number, recordData: Partial<PayrollRecord>): Promise<PayrollRecord | undefined> {
+    const [updated] = await db.update(payrollRecords).set(recordData).where(eq(payrollRecords.id, id)).returning();
+    return updated;
+  }
+
+  async deletePayrollRecord(id: number): Promise<boolean> {
+    await db.delete(payrollRecords).where(eq(payrollRecords.id, id));
+    return true;
+  }
+
+  // Performance Reviews
+  async getPerformanceReviews(): Promise<PerformanceReview[]> {
+    return await db.select().from(performanceReviews).orderBy(desc(performanceReviews.reviewDate));
+  }
+
+  async getPerformanceReviewsByUser(userId: string): Promise<PerformanceReview[]> {
+    return await db.select().from(performanceReviews).where(eq(performanceReviews.userId, userId)).orderBy(desc(performanceReviews.reviewDate));
+  }
+
+  async getPerformanceReviewsByReviewer(reviewerId: string): Promise<PerformanceReview[]> {
+    return await db.select().from(performanceReviews).where(eq(performanceReviews.reviewerId, reviewerId)).orderBy(desc(performanceReviews.reviewDate));
+  }
+
+  async getPerformanceReview(id: number): Promise<PerformanceReview | undefined> {
+    const [review] = await db.select().from(performanceReviews).where(eq(performanceReviews.id, id));
+    return review;
+  }
+
+  async createPerformanceReview(reviewData: InsertPerformanceReview): Promise<PerformanceReview> {
+    const [review] = await db.insert(performanceReviews).values(reviewData).returning();
+    return review;
+  }
+
+  async updatePerformanceReview(id: number, reviewData: Partial<PerformanceReview>): Promise<PerformanceReview | undefined> {
+    const [updated] = await db.update(performanceReviews).set(reviewData).where(eq(performanceReviews.id, id)).returning();
+    return updated;
+  }
+
+  async deletePerformanceReview(id: number): Promise<boolean> {
+    await db.delete(performanceReviews).where(eq(performanceReviews.id, id));
+    return true;
+  }
+
+  // Overtime Analysis Methods
+  async getMonthlyOvertimeByUser(userId: string, year: number, month: number): Promise<{ totalHours: number; approvedHours: number }> {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    
+    const result = await db
+      .select({
+        totalHours: sql<number>`COALESCE(SUM(${overtimeRequests.requestedHours}), 0)`,
+        approvedHours: sql<number>`COALESCE(SUM(CASE WHEN ${overtimeRequests.status} = 'approved' THEN ${overtimeRequests.approvedHours} ELSE 0 END), 0)`
+      })
+      .from(overtimeRequests)
+      .where(
+        and(
+          eq(overtimeRequests.userId, userId),
+          gte(overtimeRequests.date, startDate),
+          lte(overtimeRequests.date, endDate)
+        )
+      );
+    
+    return result[0] || { totalHours: 0, approvedHours: 0 };
+  }
+
+  // Geofence Checking Method
+  async checkUserInGeofence(latitude: number, longitude: number): Promise<Geofence[]> {
+    // This would typically use a spatial query in PostGIS, but for now we'll use a simple distance calculation
+    const geofences = await this.getGeofences();
+    const inGeofences: Geofence[] = [];
+    
+    for (const geofence of geofences) {
+      const distance = this.calculateDistance(
+        latitude,
+        longitude,
+        geofence.centerLatitude,
+        geofence.centerLongitude
+      );
+      
+      if (distance <= geofence.radius) {
+        inGeofences.push(geofence);
+      }
+    }
+    
+    return inGeofences;
+  }
+
+  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371000; // Earth's radius in meters
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   }
 
   // Employee of the Month

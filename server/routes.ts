@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -33,14 +32,13 @@ import {
   InsertMaterialInput, InsertMaterialInputItem, InsertAbaMaterialConfig,
   InsertTimeAttendance, InsertEmployeeOfMonth, InsertHrViolation, InsertHrComplaint,
   InsertTraining, InsertTrainingPoint, InsertTrainingEvaluation
-} from "@shared/schema";
+} from "../shared/schema";
 import { z } from "zod";
 import path from 'path';
 import fs from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import fileUpload from 'express-fileupload';
-// @ts-nocheck
 import { validateRequest, assertType } from './types-fix';
 import { typeAssertion } from './temp-type-bypass';
 import { setupAuth } from "./auth";
@@ -48,6 +46,9 @@ import { ensureAdminUser } from "./user-seed";
 import { setupHRRoutes } from "./hr-routes";
 import { setupBottleneckRoutes } from "./bottleneck-routes";
 import { notificationService } from "./notification-service";
+import sgMail from '@sendgrid/mail';
+import { emailService } from './services/email-service';
+import { dashboardStorage } from './dashboard-storage';
 import { setupNotificationRoutes } from "./notification-routes";
 import { setupIotRoutes } from "./iot-routes";
 import { setupMobileRoutes } from "./mobile-routes";
@@ -282,7 +283,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               issuerName: 'Training Department',
               issuerTitle: 'Training Manager',
               companyName: 'Production Management Factory',
-              status: 'active'
+              status: 'active',
+              validUntil: null
             });
           }
         }
@@ -5729,7 +5731,7 @@ COMMIT;
   // Time Attendance Routes
   app.get("/api/time-attendance", async (req: Request, res: Response) => {
     try {
-      const timeAttendance = await storage.getTimeAttendance(req.query.userId as string);
+      const timeAttendance = await storage.getTimeAttendance();
       res.json(timeAttendance);
     } catch (error) {
       console.error('Error fetching time attendance:', error);
@@ -5762,7 +5764,7 @@ COMMIT;
   app.post("/api/time-attendance", async (req: Request, res: Response) => {
     try {
       // Get current user from session or request
-      const currentUser = (req as any).user || req.session?.user;
+      const currentUser = (req as any).user || (req.session as any)?.user;
       if (!currentUser) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
@@ -5941,6 +5943,36 @@ COMMIT;
     } catch (error) {
       console.error('Error updating HR violation:', error);
       res.status(500).json({ error: 'Failed to update HR violation' });
+    }
+  });
+
+  // HR Violation Status Update Route
+  app.patch("/api/hr-violations/:id/status", async (req: Request, res: Response) => {
+    try {
+      const violationId = parseInt(req.params.id);
+      const { status, notes } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ error: 'Status is required' });
+      }
+
+      // Get existing violation
+      const existingViolation = await storage.getHrViolation(violationId);
+      if (!existingViolation) {
+        return res.status(404).json({ error: 'Violation not found' });
+      }
+
+      // Update the violation with new status
+      const updatedViolation = await storage.updateHrViolation(violationId, {
+        status,
+        notes: notes || existingViolation.notes,
+        updatedAt: new Date()
+      });
+
+      res.json(updatedViolation);
+    } catch (error) {
+      console.error('Error updating violation status:', error);
+      res.status(500).json({ error: 'Failed to update violation status' });
     }
   });
 
@@ -6398,7 +6430,21 @@ COMMIT;
   app.post("/api/training-certificates", requireAuth, async (req: Request, res: Response) => {
     try {
       const { insertCertificateSchema } = await import("@shared/schema");
-      const validatedData = insertCertificateSchema.parse(req.body);
+      
+      // Process the request data and provide defaults for required fields
+      const processedData = {
+        ...req.body,
+        // Generate certificate number if not provided
+        certificateNumber: req.body.certificateNumber || `CERT-${req.body.trainingId}-${Date.now()}`,
+        // Convert validUntil string to Date if provided, otherwise set to null
+        validUntil: req.body.validUntil ? new Date(req.body.validUntil) : null,
+        // Provide defaults for required fields
+        issuerName: req.body.issuerName || 'Training Department',
+        issuerTitle: req.body.issuerTitle || 'Training Manager',
+        companyName: req.body.companyName || 'Production Management Factory'
+      };
+      
+      const validatedData = insertCertificateSchema.parse(processedData);
       
       // Verify training exists
       const training = await storage.getTraining(validatedData.trainingId);
@@ -6473,6 +6519,87 @@ COMMIT;
     } catch (error) {
       console.error("Error deleting training certificate:", error);
       res.status(500).json({ message: "Failed to delete training certificate" });
+    }
+  });
+
+  // Email quote request endpoint
+  app.post("/api/send-quote-email", async (req: Request, res: Response) => {
+    try {
+      const result = await emailService.sendQuoteRequest(req.body);
+      
+      if (result.success) {
+        res.json({ success: true, message: result.message });
+      } else {
+        res.status(500).json({ message: result.message });
+      }
+    } catch (error) {
+      console.error("Unexpected error in quote email endpoint:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Test SendGrid configuration endpoint
+  app.get("/api/test-email-config", async (req: Request, res: Response) => {
+    try {
+      const result = await emailService.testConnection();
+      res.json(result);
+    } catch (error) {
+      console.error("Error testing email configuration:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to test email configuration" 
+      });
+    }
+  });
+
+  // Dashboard widget endpoints
+  app.get("/api/dashboard-widgets", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      const layoutName = req.query.layout as string || 'default';
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const widgets = await dashboardStorage.getUserWidgets(userId, layoutName);
+      res.json(widgets);
+    } catch (error) {
+      console.error("Error fetching dashboard widgets:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard widgets" });
+    }
+  });
+
+  app.post("/api/dashboard-widgets", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      const { layoutName, widgets } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      await dashboardStorage.saveUserLayout(userId, layoutName || 'default', widgets);
+      res.json({ success: true, message: "Dashboard layout saved successfully" });
+    } catch (error) {
+      console.error("Error saving dashboard layout:", error);
+      res.status(500).json({ message: "Failed to save dashboard layout" });
+    }
+  });
+
+  app.get("/api/dashboard-stats", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const stats = await dashboardStorage.getDashboardStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
     }
   });
 
