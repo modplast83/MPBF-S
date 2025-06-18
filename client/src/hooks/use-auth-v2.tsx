@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { useUrlPreservation } from "@/hooks/use-url-preservation";
+
 
 type AuthContextType = {
   user: User | null;
@@ -30,7 +30,6 @@ export function AuthProvider({ children }: { children: ReactNode | ((data: AuthC
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const { getIntendedUrl, clearIntendedUrl, shouldPreserveUrl } = useUrlPreservation();
 
   // Fetch the current user
   const {
@@ -110,15 +109,15 @@ export function AuthProvider({ children }: { children: ReactNode | ((data: AuthC
         description: `Welcome back, ${userData.username}!`,
       });
       
-      // Check for intended URL and navigate appropriately
-      const intendedUrl = getIntendedUrl();
-      if (intendedUrl && shouldPreserveUrl(intendedUrl)) {
+      // Check for intended URL from localStorage and navigate appropriately
+      const intendedUrl = localStorage.getItem('intended_url');
+      if (intendedUrl && intendedUrl !== '/auth' && intendedUrl !== '/') {
         console.log("Redirecting to intended page after login:", intendedUrl);
-        clearIntendedUrl();
+        localStorage.removeItem('intended_url');
         navigate(intendedUrl);
       } else {
         console.log("No intended URL, redirecting to dashboard");
-        clearIntendedUrl();
+        localStorage.removeItem('intended_url');
         navigate("/");
       }
     },

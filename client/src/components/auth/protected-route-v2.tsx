@@ -3,7 +3,7 @@ import { Route, useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth-v2";
 import { usePermissions } from "@/hooks/use-permissions";
-import { useUrlPreservation } from "@/hooks/use-url-preservation";
+
 
 type ProtectedRouteProps = {
   path: string;
@@ -22,7 +22,6 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
   const [location, setLocation] = useLocation();
-  const { saveIntendedUrl, shouldPreserveUrl } = useUrlPreservation();
   
   // Add safety check for permissions provider
   let hasPermission = (module: string) => true;
@@ -40,9 +39,9 @@ export function ProtectedRoute({
   useEffect(() => {
     // Only redirect if not already on the auth page
     if (!isLoading && !isAuthenticated && location !== "/auth") {
-      // Save the current URL before redirecting to auth
-      if (shouldPreserveUrl(location)) {
-        saveIntendedUrl(location);
+      // Save the current URL before redirecting to auth (simple localStorage approach)
+      if (location !== '/auth' && location !== '/') {
+        localStorage.setItem('intended_url', location);
       }
       setLocation("/auth");
       return;
@@ -78,9 +77,7 @@ export function ProtectedRoute({
     setLocation,
     sectionOnly,
     user,
-    path,
-    saveIntendedUrl,
-    shouldPreserveUrl
+    path
   ]);
 
   // Loader while checking authentication
