@@ -74,7 +74,25 @@ export function setupHRRoutes(app: Express) {
 
   app.post("/api/hr/employee-profiles", async (req, res) => {
     try {
-      const profile = await storage.createEmployeeProfile(req.body);
+      const data = { ...req.body };
+      
+      // Transform hire date string to proper date format if provided
+      if (data.hireDate && typeof data.hireDate === 'string') {
+        // Parse date string and ensure it's valid
+        const parsedDate = new Date(data.hireDate);
+        if (!isNaN(parsedDate.getTime())) {
+          data.hireDate = parsedDate;
+        } else {
+          delete data.hireDate; // Remove invalid date
+        }
+      }
+      
+      // Remove undefined/null hire date to let database handle it
+      if (!data.hireDate) {
+        delete data.hireDate;
+      }
+      
+      const profile = await storage.createEmployeeProfile(data);
       res.json(profile);
     } catch (error) {
       console.error("Error creating employee profile:", error);
