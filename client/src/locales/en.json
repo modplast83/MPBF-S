@@ -601,6 +601,14 @@
             "added_materials": "Added Materials",
             "actions": "Actions",
             "add_quantities_desc": "Add quantities to existing raw materials",
+            "units": {
+                "kilogram": "Kilogram (Kg)",
+                "gram": "Gram (g)",
+                "ton": "Ton (T)",
+                "liter": "Liter (L)",
+                "milliliter": "Milliliter (ml)",
+                "pieces": "Pieces (pcs)"
+            },
             "customer_arabic_name": "Customer (Arabic)",
             "batch_print_label": "Print Daily Labels",
             "batch_print_description": "Print labels for all job orders received on {{date}}",

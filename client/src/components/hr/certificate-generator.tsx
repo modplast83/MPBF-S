@@ -198,12 +198,12 @@ export default function CertificateGenerator({ trainingId, onClose }: Certificat
             onClick={() => setPreviewMode(!previewMode)}
           >
             <Eye className="h-4 w-4 mr-1" />
-            {previewMode ? "Edit" : "Preview"}
+            {previewMode ? t("hr.certificate.edit") : t("hr.certificate.preview")}
           </Button>
           {previewMode && (
             <Button variant="outline" size="sm" onClick={downloadCertificate}>
               <Download className="h-4 w-4 mr-1" />
-              Download PDF
+              {t("hr.certificate.download_pdf")}
             </Button>
           )}
         </div>
@@ -215,7 +215,7 @@ export default function CertificateGenerator({ trainingId, onClose }: Certificat
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
-              Certificate Configuration
+              {t("hr.certificate.configuration")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -227,7 +227,7 @@ export default function CertificateGenerator({ trainingId, onClose }: Certificat
                     name="trainingId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Training Session</FormLabel>
+                        <FormLabel>{t("hr.certificate.training_session")}</FormLabel>
                         <Select
                           value={field.value?.toString()}
                           onValueChange={(value) => field.onChange(parseInt(value))}
@@ -235,7 +235,7 @@ export default function CertificateGenerator({ trainingId, onClose }: Certificat
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select training" />
+                              <SelectValue placeholder={t("hr.certificate.select_training")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>

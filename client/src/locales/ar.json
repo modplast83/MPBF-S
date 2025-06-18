@@ -174,6 +174,16 @@
       "no_hold_orders": "لا توجد طلبات معلقة",
       "no_pending_orders": "لا توجد طلبات في الانتظار"
     },
+    "warehouse": {
+      "units": {
+        "kilogram": "كيلوغرام (كغ)",
+        "gram": "غرام (غ)",
+        "ton": "طن (ط)",
+        "liter": "لتر (ل)",
+        "milliliter": "مليلتر (مل)",
+        "pieces": "قطعة (قطع)"
+      }
+    },
     "setup": {
       "title": "الإعدادات",
       "description": "إدارة إعدادات النظام الأساسية",

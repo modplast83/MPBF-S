@@ -452,12 +452,12 @@ export default function RawMaterials() {
                       <SelectValue placeholder={t('warehouse.select_unit')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Kg">Kilogram (Kg)</SelectItem>
-                      <SelectItem value="g">Gram (g)</SelectItem>
-                      <SelectItem value="T">Ton (T)</SelectItem>
-                      <SelectItem value="L">Liter (L)</SelectItem>
-                      <SelectItem value="ml">Milliliter (ml)</SelectItem>
-                      <SelectItem value="pcs">Pieces (pcs)</SelectItem>
+                      <SelectItem value="Kg">{t('warehouse.units.kilogram')}</SelectItem>
+                      <SelectItem value="g">{t('warehouse.units.gram')}</SelectItem>
+                      <SelectItem value="T">{t('warehouse.units.ton')}</SelectItem>
+                      <SelectItem value="L">{t('warehouse.units.liter')}</SelectItem>
+                      <SelectItem value="ml">{t('warehouse.units.milliliter')}</SelectItem>
+                      <SelectItem value="pcs">{t('warehouse.units.pieces')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -508,12 +508,12 @@ export default function RawMaterials() {
                       <SelectValue placeholder={t('warehouse.select_unit')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Kg">Kilogram (Kg)</SelectItem>
-                      <SelectItem value="g">Gram (g)</SelectItem>
-                      <SelectItem value="T">Ton (T)</SelectItem>
-                      <SelectItem value="L">Liter (L)</SelectItem>
-                      <SelectItem value="ml">Milliliter (ml)</SelectItem>
-                      <SelectItem value="pcs">Pieces (pcs)</SelectItem>
+                      <SelectItem value="Kg">{t('warehouse.units.kilogram')}</SelectItem>
+                      <SelectItem value="g">{t('warehouse.units.gram')}</SelectItem>
+                      <SelectItem value="T">{t('warehouse.units.ton')}</SelectItem>
+                      <SelectItem value="L">{t('warehouse.units.liter')}</SelectItem>
+                      <SelectItem value="ml">{t('warehouse.units.milliliter')}</SelectItem>
+                      <SelectItem value="pcs">{t('warehouse.units.pieces')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
