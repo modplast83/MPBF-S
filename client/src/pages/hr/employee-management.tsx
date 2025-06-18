@@ -36,7 +36,7 @@ const employeeProfileSchema = z.object({
   rankId: z.number().optional(),
   department: z.string().optional(),
   position: z.string().optional(),
-  hireDate: z.string().optional(),
+  hireDate: z.string().min(1, "Hire date is required"),
   contractType: z.enum(["full_time", "part_time", "contract", "intern"]).default("full_time"),
   workSchedule: z.object({
     startTime: z.string().default("08:00"),
@@ -93,6 +93,9 @@ export default function EmployeeManagement() {
   const form = useForm<EmployeeProfileForm>({
     resolver: zodResolver(employeeProfileSchema),
     defaultValues: {
+      userId: "",
+      employeeId: "",
+      hireDate: new Date().toISOString().split('T')[0], // Default to today's date
       contractType: "full_time",
       workSchedule: {
         startTime: "08:00",
