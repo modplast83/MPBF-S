@@ -1434,6 +1434,19 @@
         "create_schedule": "إنشاء جدول"
       }
     },
+    "auth": {
+      "welcome_back": "مرحباً بعودتك",
+      "enter_credentials_description": "أدخل بياناتك للوصول إلى النظام",
+      "username": "اسم المستخدم",
+      "password": "كلمة المرور",
+      "enter_username": "أدخل اسم المستخدم",
+      "enter_password": "أدخل كلمة المرور",
+      "login_successful": "تم تسجيل الدخول بنجاح",
+      "welcome_message": "مرحباً بك في نظام MPBF، {{username}}!",
+      "login_failed": "فشل تسجيل الدخول",
+      "enter_credentials": "يرجى إدخال اسم المستخدم وكلمة المرور",
+      "error_occurred": "حدث خطأ"
+    },
     "language": {
       "en": "English",
       "ar": "العربية",
