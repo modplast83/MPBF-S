@@ -24,16 +24,18 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { z } from "zod";
-import { insertMixMaterialSchema, RawMaterial } from "@shared/schema";
+import { RawMaterial } from "@shared/schema";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
-// Create a simplified form schema without machine or order
-const formSchema = insertMixMaterialSchema
-  .omit({
-    mixPerson: true as any, // We'll set this automatically from the current user
-  });
+// Create a simplified form schema without mixPerson (set automatically from current user)
+const formSchema = z.object({
+  mixDate: z.date().optional(),
+  orderId: z.number().optional(),
+  totalQuantity: z.number().optional(),
+  mixScrew: z.string().optional(),
+});
 
 type FormValues = z.infer<typeof formSchema>;
 

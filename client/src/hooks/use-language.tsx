@@ -43,20 +43,22 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     updateHtmlAttributes(newLanguage);
   };
   
-  // Function to toggle between available languages
+  // Function to cycle through all available languages
   const toggleLanguage = () => {
-    const newLanguage = language === "en" ? "ar" : "en";
-    setLanguage(newLanguage);
+    const languages: Language[] = ["en", "ar", "ur", "ml"];
+    const currentIndex = languages.indexOf(language);
+    const nextIndex = (currentIndex + 1) % languages.length;
+    setLanguage(languages[nextIndex]);
   };
   
   // Function to update HTML document attributes
   const updateHtmlAttributes = (lang: Language) => {
     const htmlElement = document.documentElement;
     htmlElement.setAttribute("lang", lang);
-    htmlElement.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    htmlElement.setAttribute("dir", (lang === "ar" || lang === "ur") ? "rtl" : "ltr");
     
     // Add or remove RTL class on body for global styling
-    if (lang === "ar") {
+    if (lang === "ar" || lang === "ur") {
       document.body.classList.add("rtl");
     } else {
       document.body.classList.remove("rtl");
