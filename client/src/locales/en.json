@@ -84,8 +84,17 @@
         },
         "auth": {
             "username": "Username",
-            "username_placeholder": "Enter your username",
+            "login": "Login",
+            "register": "Register",
             "password": "Password",
+            "confirm_password": "Confirm Password",
+            "email": "Email",
+            
+            "username_placeholder": "Enter your username",
+            "sign_in": "Sign In",
+            "sign_up": "Sign Up",
+            
+            
             "password_placeholder": "Enter your password",
             "confirm_password": "Confirm Password",
             "confirm_password_placeholder": "Confirm your password",
