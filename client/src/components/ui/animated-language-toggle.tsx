@@ -156,13 +156,13 @@ export default function AnimatedLanguageToggle({
     }, 150);
   };
 
-  // Button variant - simple toggle between two languages
+  // Button variant - cycles through all languages
   if (variant === 'button') {
     return (
       <Button
         variant="outline"
         size="sm"
-        onClick={() => handleLanguageChange(language === 'en' ? 'ar' : 'en')}
+        onClick={() => handleLanguageChange(nextLanguage)}
         className={`relative overflow-hidden transition-all duration-300 hover:scale-105 ${className}`}
         disabled={isAnimating}
       >
@@ -188,10 +188,10 @@ export default function AnimatedLanguageToggle({
   if (variant === 'compact') {
     return (
       <button
-        onClick={() => handleLanguageChange(language === 'en' ? 'ar' : 'en')}
+        onClick={() => handleLanguageChange(nextLanguage)}
         className={`relative w-8 h-6 rounded overflow-hidden transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-500 ${className}`}
         disabled={isAnimating}
-        title={`Switch to ${otherLanguage.nativeName}`}
+        title={`Switch to ${nextLanguageData.nativeName}`}
       >
         <currentLanguage.flag 
           className={`absolute inset-0 w-full h-full transition-all duration-300 ${
