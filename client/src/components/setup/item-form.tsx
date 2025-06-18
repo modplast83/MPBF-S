@@ -25,6 +25,15 @@ import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { insertItemSchema, Item } from "@shared/schema";
 
+const itemFormSchema = z.object({
+  id: z.string().min(1, "ID is required"),
+  categoryId: z.string().min(1, "Category is required"),
+  name: z.string().min(1, "Name is required"),
+  fullName: z.string().optional(),
+});
+
+type ItemFormData = z.infer<typeof itemFormSchema>;
+
 interface ItemFormProps {
   item?: Item;
   onSuccess?: () => void;
@@ -41,8 +50,8 @@ export function ItemForm({ item, onSuccess }: ItemFormProps) {
   });
   
   // Set up the form
-  const form = useForm<z.infer<typeof insertItemSchema>>({
-    resolver: zodResolver(insertItemSchema),
+  const form = useForm<ItemFormData>({
+    resolver: zodResolver(itemFormSchema),
     defaultValues: {
       id: item?.id || "",
       categoryId: item?.categoryId || "",
@@ -89,13 +98,13 @@ export function ItemForm({ item, onSuccess }: ItemFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="id"
+            name={"id" as keyof ItemFormData}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Item ID</FormLabel>
+                <FormLabel>{t("common.id")}</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="Enter item ID" 
+                    placeholder={t("common.enter_id")} 
                     {...field} 
                     disabled={isEditing}
                   />
@@ -107,10 +116,10 @@ export function ItemForm({ item, onSuccess }: ItemFormProps) {
           
           <FormField
             control={form.control}
-            name="categoryId"
+            name={"categoryId" as keyof ItemFormData}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>{t("common.category")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -118,11 +127,11 @@ export function ItemForm({ item, onSuccess }: ItemFormProps) {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t("common.select_category")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {categories?.map((category) => (
+                    {categories && Array.isArray(categories) && categories.map((category: any) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
@@ -138,7 +147,7 @@ export function ItemForm({ item, onSuccess }: ItemFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="name"
+            name={"name" as keyof ItemFormData}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("setup.items.name")}</FormLabel>
@@ -152,7 +161,7 @@ export function ItemForm({ item, onSuccess }: ItemFormProps) {
           
           <FormField
             control={form.control}
-            name="fullName"
+            name={"fullName" as keyof ItemFormData}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("setup.items.full_name")}</FormLabel>

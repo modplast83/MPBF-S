@@ -1709,6 +1709,8 @@
       "employee_management": {
         "title": "إدارة الموظفين",
         "description": "نظام شامل لإدارة ملفات الموظفين ومعلوماتهم",
+        "employee_id": "رقم الموظف",
+        "employee_id_placeholder": "EMP001",
         "employee_profiles": "ملفات الموظفين",
         "personal_information": "المعلومات الشخصية",
         "employment_details": "تفاصيل التوظيف",
