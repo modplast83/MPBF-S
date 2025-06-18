@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -28,19 +30,19 @@ export default function LoginPage() {
         localStorage.setItem('username', username);
         
         toast({
-          title: "Login successful",
-          description: `Welcome to MPBF System, ${username}!`,
+          title: t("auth.login_successful"),
+          description: t("auth.welcome_message", { username }),
         });
         
         // Redirect to dashboard
         setLocation('/');
       } else {
-        throw new Error("Please enter both username and password");
+        throw new Error(t("auth.enter_credentials"));
       }
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        title: t("auth.login_failed"),
+        description: error instanceof Error ? error.message : t("auth.error_occurred"),
         variant: "destructive",
       });
     } finally {
@@ -57,22 +59,22 @@ export default function LoginPage() {
             <CardHeader className="space-y-1 p-0 mb-6">
               <div className="flex items-center mb-1">
                 <span className="material-icons text-primary-600 mr-2">vpn_key</span>
-                <CardTitle className="text-2xl font-bold text-gray-800">Welcome Back</CardTitle>
+                <CardTitle className="text-2xl font-bold text-gray-800">{t("auth.welcome_back")}</CardTitle>
               </div>
               <CardDescription className="text-gray-500">
-                Enter your credentials to access the system
+                {t("auth.enter_credentials_description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="username" className="text-gray-700">Username</Label>
+                  <Label htmlFor="username" className="text-gray-700">{t("auth.username")}</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 material-icons">person</span>
                     <Input 
                       id="username"
                       type="text"
-                      placeholder="Enter your username"
+                      placeholder={t("auth.enter_username")}
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="pl-10 py-6 border-gray-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 rounded-lg"
@@ -81,13 +83,13 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-700">Password</Label>
+                  <Label htmlFor="password" className="text-gray-700">{t("auth.password")}</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 material-icons">lock</span>
                     <Input 
                       id="password"
                       type="password"
-                      placeholder="Enter your password"
+                      placeholder={t("auth.enter_password")}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10 py-6 border-gray-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 rounded-lg"

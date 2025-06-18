@@ -1360,6 +1360,19 @@
                 "emergency": "Emergency"
             }
         },
+        "auth": {
+            "welcome_back": "Welcome Back",
+            "enter_credentials_description": "Enter your credentials to access the system",
+            "username": "Username",
+            "password": "Password",
+            "enter_username": "Enter your username",
+            "enter_password": "Enter your password",
+            "login_successful": "Login successful",
+            "welcome_message": "Welcome to MPBF System, {{username}}!",
+            "login_failed": "Login failed",
+            "enter_credentials": "Please enter both username and password",
+            "error_occurred": "An error occurred"
+        },
         "language": {
             "en": "English",
             "ar": "العربية",
