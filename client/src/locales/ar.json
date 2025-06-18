@@ -1,8 +1,10 @@
 {
   "translation": {
     "app": {
-      "title": "مصنع أكياس البلاستيك الحديث",
-      "full_title": "مصنع أكياس البلاستيك الحديث"
+      "title": "نظام مصنع البلاستيك",
+      "full_title": "مصنع أكياس البلاستيك الحديث",
+      "manufacturing_system": "نظام التصنيع الحديث",
+      "manufacturing_short": "نظام التصنيع"
     },
     "common": {
       "loading": "جاري التحميل...",
@@ -67,7 +69,8 @@
       "customer": "العميل",
       "quantity": "الكمية",
       "raw_material": "المادة الخام",
-      "required": "المطلوب"
+      "required": "المطلوب",
+      "manage": "إدارة"
     },
     "auth": {
       "username": "اسم المستخدم",
@@ -98,6 +101,44 @@
       "feature_quality": "مراقبة الجودة",
       "feature_customer": "إدارة العملاء",
       "feature_production": "تحسين الإنتاج"
+    },
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "standard": "قياسي",
+      "customizable": "قابل للتخصيص"
+    },
+    "setup": {
+      "title": "الإعداد والتكوين",
+      "description": "إدارة تكوين النظام والإعدادات من خلال وحدات الإعداد الشاملة"
+    },
+    "reports": {
+      "title": "التقارير",
+      "generate_reports": "إنشاء التقارير",
+      "report_type": "نوع التقرير",
+      "select_report_type": "اختر نوع التقرير",
+      "start_date": "تاريخ البداية",
+      "end_date": "تاريخ النهاية",
+      "generate_report": "إنشاء تقرير",
+      "production_report": "تقرير الإنتاج",
+      "inventory_report": "تقرير المخزون",
+      "efficiency_report": "تقرير الكفاءة",
+      "production_summary": "ملخص الإنتاج",
+      "inventory_summary": "ملخص المخزون",
+      "efficiency_summary": "ملخص الكفاءة",
+      "no_data_available": "لا توجد بيانات متاحة للمعايير المحددة",
+      "order_id": "رقم الطلب",
+      "date": "التاريخ",
+      "customer": "العميل",
+      "product": "المنتج",
+      "size": "الحجم",
+      "ordered_kg": "مطلوب (كغ)",
+      "completed_kg": "مكتمل (كغ)",
+      "efficiency": "الكفاءة",
+      "status": "الحالة",
+      "ordered": "مطلوب",
+      "completed": "مكتمل",
+      "production_report_chart": "يظهر هنا مخطط تقرير الإنتاج",
+      "chart_placeholder": "سيكون هذا مخططًا حقيقيًا في الإنتاج"
     },
     "setup": {
       "title": "الإعدادات",

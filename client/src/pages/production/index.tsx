@@ -18,44 +18,44 @@ export default function ProductionIndex() {
 
   const productionModules = [
     {
-      title: "Orders",
-      description: "Manage production orders and job scheduling",
+      title: t("production.orders.title"),
+      description: t("production.orders.description"),
       icon: Factory,
       path: "/orders",
       color: "bg-gradient-to-br from-blue-500 to-blue-600",
       count: 24
     },
     {
-      title: "Workflow",
-      description: "Monitor production workflow and process stages",
+      title: t("production.workflow.title"),
+      description: t("production.workflow.description"),
       icon: Workflow,
       path: "/workflow",
       color: "bg-gradient-to-br from-green-500 to-green-600",
     },
     {
-      title: "Mix Materials",
-      description: "Material mixing and formula management",
+      title: t("production.mix_materials.title"),
+      description: t("production.mix_materials.description"),
       icon: Blend,
       path: "/production/mix-materials",
       color: "bg-gradient-to-br from-purple-500 to-purple-600",
     },
     {
-      title: "Bottleneck Monitor",
-      description: "Real-time bottleneck detection and alerts",
+      title: t("production.bottleneck_monitor.title"),
+      description: t("production.bottleneck_monitor.description"),
       icon: AlertTriangle,
       path: "/production/bottleneck-dashboard",
       color: "bg-gradient-to-br from-red-500 to-red-600",
     },
     {
-      title: "Production Metrics",
-      description: "Track KPIs and production performance",
+      title: t("production.metrics.title"),
+      description: t("production.metrics.description"),
       icon: BarChart3,
       path: "/production/metrics-input",
       color: "bg-gradient-to-br from-indigo-500 to-indigo-600",
     },
     {
-      title: "IoT Monitor",
-      description: "Connected device monitoring and analytics",
+      title: t("production.iot_monitor.title"),
+      description: t("production.iot_monitor.description"),
       icon: Wifi,
       path: "/production/iot-monitor",
       color: "bg-gradient-to-br from-teal-500 to-teal-600",
@@ -72,10 +72,10 @@ export default function ProductionIndex() {
           </div>
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
-          Production Management
+          {t('production.title')}
         </h1>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Comprehensive production control and monitoring for optimal manufacturing efficiency
+          {t('production.description')}
         </p>
       </div>
       

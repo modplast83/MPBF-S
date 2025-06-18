@@ -421,7 +421,7 @@ export default function OrdersIndex() {
           <p className="text-gray-500">
             {activeTab === "all" 
               ? t("orders.no_orders") 
-              : `No ${activeTab === "processing" ? "For Production" : activeTab === "hold" ? "On Hold" : "Pending"} orders found`}
+              : t(`orders.no_${activeTab}_orders`)}
           </p>
         </div>
       );
@@ -491,7 +491,7 @@ export default function OrdersIndex() {
               </CardContent>
               <CardFooter className="px-4 py-3 bg-gray-50 flex justify-between items-center">
                 <span className="text-primary-600 text-sm flex items-center font-medium">
-                  {t("common.view")} Details
+                  {t("orders.view_details")}
                   <span className="material-icons text-sm ml-1">arrow_forward</span>
                 </span>
                 <div className="flex space-x-2">
