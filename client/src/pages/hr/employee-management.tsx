@@ -65,6 +65,8 @@ const employeeProfileSchema = z.object({
 type EmployeeProfileForm = z.infer<typeof employeeProfileSchema>;
 
 export default function EmployeeManagement() {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const { toast } = useToast();
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -207,8 +209,8 @@ export default function EmployeeManagement() {
     <div className="container mx-auto p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Employee Management</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-2">Manage employee profiles, ranks, and work details</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t("hr.employee_management.title")}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">{t("hr.employee_management.description")}</p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

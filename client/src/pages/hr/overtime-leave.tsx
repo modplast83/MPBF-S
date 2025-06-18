@@ -15,6 +15,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 import { 
   Clock, 
   Calendar, 
@@ -49,6 +51,8 @@ type OvertimeRequestForm = z.infer<typeof overtimeRequestSchema>;
 type LeaveRequestForm = z.infer<typeof leaveRequestSchema>;
 
 export default function OvertimeLeave() {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const { toast } = useToast();
   const [selectedOvertimeRequest, setSelectedOvertimeRequest] = useState<any>(null);
   const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<any>(null);
@@ -316,8 +320,8 @@ export default function OvertimeLeave() {
     <div className="container mx-auto p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Overtime & Leave Management</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-2">Manage overtime requests and leave applications with automatic approval workflows</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t("hr.overtime_leave.title")}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">{t("hr.overtime_leave.description")}</p>
         </div>
       </div>
 
