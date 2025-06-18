@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useUrlPreservation } from "@/hooks/use-url-preservation";
 
 type AuthContextType = {
   user: User | null;
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode | ((data: AuthC
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const { getIntendedUrl, clearIntendedUrl, shouldPreserveUrl } = useUrlPreservation();
 
   // Fetch the current user
   const {
@@ -108,8 +110,17 @@ export function AuthProvider({ children }: { children: ReactNode | ((data: AuthC
         description: `Welcome back, ${userData.username}!`,
       });
       
-      console.log("Authentication state updated, routing will handle navigation");
-      // navigation happens via protected route and auth page components
+      // Check for intended URL and navigate appropriately
+      const intendedUrl = getIntendedUrl();
+      if (intendedUrl && shouldPreserveUrl(intendedUrl)) {
+        console.log("Redirecting to intended page after login:", intendedUrl);
+        clearIntendedUrl();
+        navigate(intendedUrl);
+      } else {
+        console.log("No intended URL, redirecting to dashboard");
+        clearIntendedUrl();
+        navigate("/");
+      }
     },
     onError: (error: Error) => {
       console.error("Login error:", error);

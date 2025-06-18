@@ -42,6 +42,7 @@ import MainLayout from "@/components/layout/main-layout";
 import { AuthProvider } from "@/hooks/use-auth-v2";
 import { PermissionsProvider } from "@/hooks/use-permissions";
 import { ProtectedRoute } from "@/components/auth/protected-route-v2";
+import { AuthRedirect } from "@/components/auth/auth-redirect";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { useEffect } from "react";
 import ToolsPage from "@/pages/tools/ToolsPage";
@@ -95,6 +96,7 @@ function App() {
       <AuthProvider>
         {(authContext) => (
           <PermissionsProvider user={authContext.user}>
+            <AuthRedirect />
             <Switch>
               <Route path="/auth" component={AuthPage} />
               <Route path="*">
