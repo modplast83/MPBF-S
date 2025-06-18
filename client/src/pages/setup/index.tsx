@@ -26,6 +26,7 @@ interface SetupCardProps {
 
 function SetupCard({ title, description, icon: IconComponent, path, count }: SetupCardProps) {
   const { isRTL } = useLanguage();
+  const { t } = useTranslation();
   
   return (
     <Link href={path}>

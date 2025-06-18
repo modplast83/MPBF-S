@@ -15,6 +15,8 @@ import { useTranslation } from "react-i18next";
 
 // Simple line chart component
 function LineChart({ isMobile = false }: { isMobile?: boolean }) {
+  const { t } = useTranslation();
+  
   return (
     <div className={`${isMobile ? 'h-60' : 'h-80'} flex items-center justify-center bg-secondary-50 rounded border border-dashed border-secondary-200`}>
       <div className="text-center px-4">

@@ -1099,7 +1099,11 @@
             "all_orders": "All Orders",
             "for_production": "For Production",
             "on_hold": "On Hold",
-            "hold": "Hold"
+            "hold": "Hold",
+            "view_details": "View Details",
+            "no_processing_orders": "No For Production orders found",
+            "no_hold_orders": "No On Hold orders found",
+            "no_pending_orders": "No Pending orders found"
         },
         "job_orders": {
             "title": "Job Orders",
@@ -1592,6 +1596,34 @@
                 "warning": "Warning",
                 "info": "Information"
             }
+        }
+    },
+    "production": {
+        "title": "Production Management",
+        "description": "Comprehensive production control and monitoring for optimal manufacturing efficiency",
+        "orders": {
+            "title": "Orders",
+            "description": "Manage production orders and job scheduling"
+        },
+        "workflow": {
+            "title": "Workflow",
+            "description": "Monitor production workflow and process stages"
+        },
+        "mix_materials": {
+            "title": "Mix Materials",
+            "description": "Material mixing and formula management"
+        },
+        "bottleneck_monitor": {
+            "title": "Bottleneck Monitor",
+            "description": "Real-time bottleneck detection and alerts"
+        },
+        "metrics": {
+            "title": "Production Metrics",
+            "description": "Track KPIs and production performance"
+        },
+        "iot_monitor": {
+            "title": "IoT Monitor",
+            "description": "Connected device monitoring and analytics"
         }
     }
 }
