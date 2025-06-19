@@ -56,7 +56,7 @@ import ClichePage from "@/pages/cliches/index";
 // HR Module imports
 import HRIndex from "@/pages/hr/index";
 import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
-import EnhancedAttendance from "@/pages/hr/enhanced-attendance";
+import AttendancePage from "@/pages/hr/attendance";
 import EmployeeManagement from "@/pages/hr/employee-management";
 import EmployeeRanks from "@/pages/hr/employee-ranks";
 import OvertimeLeave from "@/pages/hr/overtime-leave";
@@ -149,7 +149,7 @@ function App() {
                     <ProtectedRoute path="/cliches" component={ClichePage} module="Cliches" />
                     {/* HR Module Routes */}
                     <ProtectedRoute path="/hr" component={HRIndex} module="HR" />
-                    <ProtectedRoute path="/hr/enhanced-attendance" component={EnhancedAttendance} module="Enhanced Attendance" />
+                    <ProtectedRoute path="/hr/enhanced-attendance" component={AttendancePage} module="Attendance" />
                     <ProtectedRoute path="/hr/employee-management" component={EmployeeManagement} module="Employee Management" />
                     <ProtectedRoute path="/hr/employee-ranks" component={EmployeeRanks} module="Employee Ranks" />
                     <ProtectedRoute path="/hr/overtime-leave" component={OvertimeLeave} module="Overtime & Leave" />

@@ -137,7 +137,7 @@ export const SIDEBAR_ITEMS = [
         path: "/hr",
         icon: "people",
         subItems: [
-          { title: "enhanced_attendance", path: "/hr/enhanced-attendance" },
+          { title: "attendance", path: "/hr/enhanced-attendance" },
           { title: "employee_management", path: "/hr/employee-management" },
           { title: "employee_ranks", path: "/hr/employee-ranks" },
           { title: "overtime_leave", path: "/hr/overtime-leave" },

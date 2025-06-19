@@ -17,12 +17,9 @@ import {
   UserCheck, 
   LogOut, 
   Coffee, 
-  PlayCircle, 
   Users,
   Calendar,
-  TrendingUp,
-  Plus,
-  Edit
+  Plus
 } from "lucide-react";
 
 interface AttendanceRecord {
@@ -188,10 +185,10 @@ export default function AttendancePage() {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 space-y-4 lg:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {t("hr.attendance.title", "Attendance")}
+            Attendance
           </h1>
           <p className="text-gray-600 mt-2">
-            {t("hr.attendance.description", "Manage employee attendance and track working hours")}
+            Manage employee attendance and track working hours
           </p>
         </div>
         
