@@ -72,6 +72,8 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
     printed: z.boolean().optional(),
     cuttingUnit: z.string().optional(),
     unitWeight: z.number().optional(),
+    unitQty: z.number().optional(),
+    packageKg: z.number().optional(),
     packing: z.string().optional(),
     punching: z.string().optional(),
     cover: z.string().optional(),
@@ -101,6 +103,8 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       printed: product?.printed === "Yes" || false,
       cuttingUnit: product?.cuttingUnit || "",
       unitWeight: product?.unitWeight || undefined,
+      unitQty: product?.unitQty || undefined,
+      packageKg: product?.packageKg || undefined,
       packing: product?.packing || "",
       punching: product?.punching || "",
       cover: product?.cover || "",
@@ -160,6 +164,20 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       form.setValue("sizeCaption", sizeCaption);
     }
   }, [watchedWidth, watchedLeftF, watchedRightF, form]);
+
+  // Auto-calculate Package Kg when Unit Weight or Unit Qty change
+  const watchedUnitWeight = form.watch("unitWeight");
+  const watchedUnitQty = form.watch("unitQty");
+
+  useEffect(() => {
+    const unitWeight = watchedUnitWeight || 0;
+    const unitQty = watchedUnitQty || 0;
+
+    if (unitWeight > 0 && unitQty > 0) {
+      const packageKg = unitWeight * unitQty;
+      form.setValue("packageKg", packageKg);
+    }
+  }, [watchedUnitWeight, watchedUnitQty, form]);
   
   useEffect(() => {
     if (
@@ -695,6 +713,46 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
                     placeholder="Unit Weight" 
                     {...field}
                     onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="unitQty"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Unit Qty</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Unit Quantity" 
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="packageKg"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Package Kg (Auto-calculated)</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Auto-calculated from Unit Weight × Unit Qty"
+                    {...field}
+                    value={field.value || ""}
+                    readOnly
+                    className="bg-gray-50"
                   />
                 </FormControl>
                 <FormMessage />

@@ -137,6 +137,8 @@ export const customerProducts = pgTable("customer_products", {
   printed: text("printed"), // Printed
   cuttingUnit: text("cutting_unit"), // Cutting Unit
   unitWeight: doublePrecision("unit_weight_kg"), // Unit Weight (Kg)
+  unitQty: doublePrecision("unit_qty"), // Unit Qty
+  packageKg: doublePrecision("package_kg"), // Package Kg (auto-calculated)
   packing: text("packing"), // Packing
   punching: text("punching"), // Punching
   cover: text("cover"), // Cover
