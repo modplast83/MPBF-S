@@ -7,7 +7,7 @@ import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Button } from "@/components/ui/button";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { calculateProgress } from "@/lib/utils";
-import { Order, Customer, JobOrder, CustomerProduct } from "@shared/schema";
+import { Order, Customer, JobOrder, CustomerProduct, Item } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/use-language";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -35,6 +35,10 @@ export function ActiveOrdersTable() {
     queryKey: [API_ENDPOINTS.CUSTOMER_PRODUCTS],
   });
   
+  const { data: items } = useQuery<Item[]>({
+    queryKey: [API_ENDPOINTS.ITEMS],
+  });
+  
   // Get processing and pending orders
   const activeOrders = orders?.filter(
     order => order.status === "processing" || order.status === "pending"
@@ -49,6 +53,25 @@ export function ActiveOrdersTable() {
     return name;
   };
   
+  const getJobOrderCount = (orderId: number) => {
+    return jobOrders?.filter(jo => jo.orderId === orderId).length || 0;
+  };
+
+  const getOrderItemNames = (orderId: number) => {
+    const orderJobOrders = jobOrders?.filter(jo => jo.orderId === orderId) || [];
+    const uniqueItemIds = [...new Set(orderJobOrders.map(jo => {
+      const product = customerProducts?.find(cp => cp.id === jo.customerProductId);
+      return product?.itemId;
+    }).filter(Boolean))];
+    
+    const itemNames = uniqueItemIds.map(itemId => {
+      const item = items?.find(i => i.id === itemId);
+      return item?.name || t("common.unknown");
+    });
+    
+    return itemNames.length > 0 ? itemNames.join(", ") : t("common.not_available");
+  };
+
   const getOrderProducts = (orderId: number) => {
     const orderJobOrders = jobOrders?.filter(jo => jo.orderId === orderId) || [];
     
@@ -81,11 +104,23 @@ export function ActiveOrdersTable() {
       }
     },
     {
-      header: t("job_orders.customer_product"),
-      cell: (row: any) => {
-        const products = getOrderProducts(row.id);
-        return <span>{products.length > 0 ? products[0].productId : t("common.not_available")}</span>;
-      },
+      header: t("job_orders.job_order_count"),
+      cell: (row: any) => (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          {getJobOrderCount(row.id)}
+        </span>
+      ),
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("items.item_names"),
+      cell: (row: any) => (
+        <span className="text-sm max-w-xs truncate" title={getOrderItemNames(row.id)}>
+          {getOrderItemNames(row.id)}
+        </span>
+      ),
       meta: {
         className: isRTL ? "text-right" : ""
       }
@@ -232,11 +267,23 @@ export function ActiveOrdersTable() {
       }
     },
     {
-      header: t("job_orders.customer_product"),
-      cell: (row: any) => {
-        const products = getOrderProducts(row.id);
-        return products.length > 0 ? products[0].productId : t("common.not_available");
-      },
+      header: t("job_orders.job_order_count"),
+      cell: (row: any) => (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          {getJobOrderCount(row.id)}
+        </span>
+      ),
+      meta: {
+        className: isRTL ? "text-right" : ""
+      }
+    },
+    {
+      header: t("items.item_names"),
+      cell: (row: any) => (
+        <span className="text-sm max-w-[120px] truncate block" title={getOrderItemNames(row.id)}>
+          {getOrderItemNames(row.id)}
+        </span>
+      ),
       meta: {
         className: isRTL ? "text-right" : ""
       }

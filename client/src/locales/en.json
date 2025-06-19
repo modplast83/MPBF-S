@@ -1185,6 +1185,7 @@
             "customer_product": "Product",
             "quantity": "Quantity (Kg)",
             "status": "Status",
+            "job_order_count": "Job Orders",
             "pending": "Pending",
             "in_progress": "In Progress",
             "extrusion_completed": "Extrusion Completed",
@@ -1432,7 +1433,8 @@
             "product_details": "Product Details"
         },
         "items": {
-            "item_name": "Item Name"
+            "item_name": "Item Name",
+            "item_names": "Item Names"
         },
         "cliches": {
             "title": "Cliché (Plate) Pricing",
