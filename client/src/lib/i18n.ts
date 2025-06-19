@@ -14,15 +14,30 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      en: enTranslation,
-      ar: arTranslation,
-      ml: mlTranslation,
-      ur: urTranslation
+      en: {
+        translation: enTranslation.translation
+      },
+      ar: {
+        translation: arTranslation.translation
+      },
+      ml: {
+        translation: mlTranslation.translation
+      },
+      ur: {
+        translation: urTranslation.translation
+      }
     },
     fallbackLng: 'en',
     debug: false,
+    lng: 'en',
+    defaultNS: 'translation',
+    ns: ['translation'],
     interpolation: {
-      escapeValue: false // not needed for react as it escapes by default
+      escapeValue: false
+    },
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage']
     }
   });
 
