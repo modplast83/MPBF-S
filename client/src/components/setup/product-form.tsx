@@ -130,12 +130,36 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
     }
   }, [watchedPrintingCylinder, form]);
 
-  // Auto-calculate Volume when dependent fields change
+  // Auto-calculate Size Caption when width, leftF, or rightF change
   const watchedRightF = form.watch("rightF");
   const watchedWidth = form.watch("width");
   const watchedLeftF = form.watch("leftF");
   const watchedLengthCm = form.watch("lengthCm");
   const watchedThicknessOne = form.watch("thicknessOne");
+
+  useEffect(() => {
+    const rightF = watchedRightF || 0;
+    const leftF = watchedLeftF || 0;
+    const width = watchedWidth;
+
+    if (width !== undefined && width > 0) {
+      let sizeCaption = "";
+      
+      // If both Right F and Left F are null or 0, size caption = Width
+      if (rightF === 0 && leftF === 0) {
+        sizeCaption = width.toString();
+      } else {
+        // Otherwise format as "rightF+width+leftF" (only include non-zero values)
+        const parts = [];
+        if (rightF > 0) parts.push(rightF.toString());
+        parts.push(width.toString());
+        if (leftF > 0) parts.push(leftF.toString());
+        sizeCaption = parts.join("+");
+      }
+      
+      form.setValue("sizeCaption", sizeCaption);
+    }
+  }, [watchedWidth, watchedLeftF, watchedRightF, form]);
   
   useEffect(() => {
     if (

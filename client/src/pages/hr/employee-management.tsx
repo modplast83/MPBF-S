@@ -81,11 +81,7 @@ export default function EmployeeManagement() {
     queryFn: () => apiRequest('GET', '/api/users')
   });
 
-  // Fetch employee ranks
-  const { data: ranks = [] } = useQuery({
-    queryKey: ['/api/hr/employee-ranks'],
-    queryFn: () => apiRequest('GET', '/api/hr/employee-ranks')
-  });
+
 
   // Fetch sections
   const { data: sections = [] } = useQuery({
