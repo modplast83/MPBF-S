@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import fileUpload from "express-fileupload";
+import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -7,6 +8,9 @@ const app = express();
 
 // Enable trust proxy for Replit's environment
 app.set('trust proxy', 1);
+
+// Serve static assets
+app.use('/attached_assets', express.static(path.resolve(import.meta.dirname, '..', 'attached_assets')));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
