@@ -345,13 +345,13 @@ export default function AuthPage() {
       </div>
       
       {/* Hero Section */}
-      <div className="hidden md:flex flex-1 bg-gradient-to-r from-primary to-primary-600 text-white p-12 flex-col justify-center">
+      <div className={`hidden md:flex flex-1 bg-gradient-to-r from-primary to-primary-600 text-white p-12 flex-col justify-center ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className="max-w-md mx-auto space-y-6">
           <h1 className="text-4xl font-bold">{t("auth.hero_title")}</h1>
           <p className="text-xl leading-relaxed">{t("auth.hero_description")}</p>
           <div className="space-y-4 mt-8">
-            <div className="flex items-start">
-              <div className="rounded-full bg-white/20 p-2 mr-4">
+            <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`rounded-full bg-white/20 p-2 ${isRTL ? 'ml-4' : 'mr-4'}`}>
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -361,8 +361,8 @@ export default function AuthPage() {
                 <p className="text-white/80 mt-1">{t("auth.feature_1_description")}</p>
               </div>
             </div>
-            <div className="flex items-start">
-              <div className="rounded-full bg-white/20 p-2 mr-4">
+            <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`rounded-full bg-white/20 p-2 ${isRTL ? 'ml-4' : 'mr-4'}`}>
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -372,8 +372,8 @@ export default function AuthPage() {
                 <p className="text-white/80 mt-1">{t("auth.feature_2_description")}</p>
               </div>
             </div>
-            <div className="flex items-start">
-              <div className="rounded-full bg-white/20 p-2 mr-4">
+            <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`rounded-full bg-white/20 p-2 ${isRTL ? 'ml-4' : 'mr-4'}`}>
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
