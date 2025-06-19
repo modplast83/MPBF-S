@@ -38,9 +38,7 @@ const userSchema = z.object({
   lastName: z.string().optional(),
   phone: z.string().optional(),
   sectionId: z.string().optional(),
-  employeeId: z.string().optional(),
   rankId: z.number().optional(),
-  department: z.string().optional(),
   position: z.string().optional(),
   hireDate: z.string().optional(),
   contractType: z.enum(["full_time", "part_time", "contract", "intern"]).default("full_time"),
@@ -89,6 +87,12 @@ export default function EmployeeManagement() {
     queryFn: () => apiRequest('GET', '/api/hr/employee-ranks')
   });
 
+  // Fetch sections
+  const { data: sections = [] } = useQuery({
+    queryKey: ['/api/sections'],
+    queryFn: () => apiRequest('GET', '/api/sections')
+  });
+
   // Form setup
   const form = useForm<UserForm>({
     resolver: zodResolver(userSchema),
@@ -99,7 +103,6 @@ export default function EmployeeManagement() {
       firstName: "",
       lastName: "",
       phone: "",
-      employeeId: "",
       hireDate: new Date().toISOString().split('T')[0],
       contractType: "full_time",
       workSchedule: {
@@ -155,9 +158,8 @@ export default function EmployeeManagement() {
       firstName: employee.firstName || "",
       lastName: employee.lastName || "",
       phone: employee.phone || "",
-      employeeId: employee.employeeId || "",
+      sectionId: employee.sectionId || "",
       rankId: employee.rankId || undefined,
-      department: employee.department || "",
       position: employee.position || "",
       hireDate: employee.hireDate ? new Date(employee.hireDate).toISOString().split('T')[0] : "",
       contractType: employee.contractType || "full_time",
@@ -284,12 +286,23 @@ export default function EmployeeManagement() {
 
                     <FormField
                       control={form.control}
-                      name="employeeId"
+                      name="sectionId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t("hr.employee_id")}</FormLabel>
+                          <FormLabel>Section</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder={t("hr.employee_id_placeholder")} />
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select section" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {sections?.map((section) => (
+                                  <SelectItem key={section.id} value={section.id}>
+                                    {section.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </FormControl>
                         </FormItem>
                       )}
@@ -319,18 +332,7 @@ export default function EmployeeManagement() {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="department"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Department</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Production" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+
 
                     <FormField
                       control={form.control}

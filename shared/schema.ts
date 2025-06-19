@@ -87,9 +87,7 @@ export const users = pgTable("users", {
   sectionId: text("section_id").references(() => sections.id), // UserSection
   
   // Employee profile fields (moved from employee_profiles table)
-  employeeId: text("employee_id").unique(), // Employee ID
   rankId: integer("rank_id").references(() => employeeRanks.id), // Employee rank
-  department: text("department"), // Department
   position: text("position"), // Job position
   hireDate: timestamp("hire_date"), // Hire date
   contractType: text("contract_type").default("full_time"), // full_time, part_time, contract, intern
