@@ -46,7 +46,9 @@ import { toast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
 // Extended schema for the form
-const orderFormSchema = insertOrderSchema.extend({
+const orderFormSchema = z.object({
+  customerId: z.string().min(1, "Customer is required"),
+  note: z.string().optional(),
   jobOrders: z.array(
     z.object({
       customerProductId: z.number(),
@@ -413,11 +415,8 @@ export function OrderForm() {
                   <FormControl>
                     <Textarea 
                       placeholder={t("orders.order_note_placeholder")}
-                      onChange={field.onChange}
+                      {...field}
                       value={field.value || ""}
-                      name={field.name}
-                      ref={field.ref}
-                      onBlur={field.onBlur}
                     />
                   </FormControl>
                   <FormMessage />
