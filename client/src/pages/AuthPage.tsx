@@ -141,16 +141,16 @@ export default function AuthPage() {
               </div>
             </div>
             <img src={companyLogo} alt="MPBF Logo" className="h-20 mb-4" />
-            <CardTitle className="text-3xl font-bold">{t("auth.welcome")}</CardTitle>
+            <CardTitle className="text-3xl font-bold">{t("welcome")}</CardTitle>
             <CardDescription>
-              {t("auth.sign_in_description")}
+              Welcome in MPBF Production System 
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">{t("auth.login")}</TabsTrigger>
-                <TabsTrigger value="register">{t("auth.register")}</TabsTrigger>
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
               
               {/* Login Tab */}
@@ -165,7 +165,7 @@ export default function AuthPage() {
                           <FormLabel>{t("auth.username")}</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder={t("auth.username_placeholder")}
+                              placeholder={t("Enter your username")}
                               {...field}
                               autoComplete="username"
                             />
@@ -180,11 +180,11 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t("auth.password")}</FormLabel>
+                          <FormLabel>{t("Password")}</FormLabel>
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder={t("auth.password_placeholder")}
+                              placeholder={t("Enter your password")}
                               {...field}
                               autoComplete="current-password"
                             />
@@ -202,10 +202,10 @@ export default function AuthPage() {
                       {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t("auth.logging_in")}
+                          {t("Logging in")}
                         </>
                       ) : (
-                        t("auth.login")
+                        t("Login")
                       )}
                     </Button>
                   </form>
@@ -221,10 +221,10 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t("auth.username")}</FormLabel>
+                          <FormLabel>{t("Username")}</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder={t("auth.username_placeholder")}
+                              placeholder={t("Username")}
                               {...field}
                               autoComplete="username"
                             />
@@ -240,10 +240,10 @@ export default function AuthPage() {
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>{t("auth.first_name")}</FormLabel>
+                            <FormLabel>{t("First Name")}</FormLabel>
                             <FormControl>
                               <Input
-                                placeholder={t("auth.first_name_placeholder")}
+                                placeholder={t("Enter your first name")}
                                 {...field}
                                 autoComplete="given-name"
                               />
@@ -258,10 +258,10 @@ export default function AuthPage() {
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>{t("auth.last_name")}</FormLabel>
+                            <FormLabel>{t("Last Name")}</FormLabel>
                             <FormControl>
                               <Input
-                                placeholder={t("auth.last_name_placeholder")}
+                                placeholder={t("Enter your last name")}
                                 {...field}
                                 autoComplete="family-name"
                               />
@@ -277,11 +277,11 @@ export default function AuthPage() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t("auth.email")}</FormLabel>
+                          <FormLabel>{t("Email")}</FormLabel>
                           <FormControl>
                             <Input
                               type="email"
-                              placeholder={t("auth.email_placeholder")}
+                              placeholder={t("Enter your email")}
                               {...field}
                               autoComplete="email"
                             />
@@ -296,11 +296,11 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t("auth.password")}</FormLabel>
+                          <FormLabel>{t("Password")}</FormLabel>
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder={t("auth.password_placeholder")}
+                              placeholder={t("Enter your password")}
                               {...field}
                               autoComplete="new-password"
                             />
@@ -315,11 +315,11 @@ export default function AuthPage() {
                       name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t("auth.confirm_password")}</FormLabel>
+                          <FormLabel>{t("Confirm Password")}</FormLabel>
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder={t("auth.confirm_password_placeholder")}
+                              placeholder={t("Enter your password again")}
                               {...field}
                               autoComplete="new-password"
                             />
@@ -353,44 +353,11 @@ export default function AuthPage() {
       
       {/* Hero Section */}
       <div className={`hidden md:flex flex-1 bg-gradient-to-r from-primary to-primary-600 text-white p-12 flex-col justify-center ${isRTL ? 'text-right' : 'text-left'}`}>
-        <div className="max-w-md mx-auto space-y-6">
-          <h1 className="text-4xl font-bold">{t("auth.hero_title")}</h1>
-          <p className="text-xl leading-relaxed">{t("auth.hero_description")}</p>
-          <div className="space-y-4 mt-8">
-            <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={`rounded-full bg-white/20 p-2 ${isRTL ? 'ml-4' : 'mr-4'}`}>
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-xl">{t("auth.feature_1_title")}</h3>
-                <p className="text-white/80 mt-1">{t("auth.feature_1_description")}</p>
-              </div>
-            </div>
-            <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={`rounded-full bg-white/20 p-2 ${isRTL ? 'ml-4' : 'mr-4'}`}>
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-xl">{t("auth.feature_2_title")}</h3>
-                <p className="text-white/80 mt-1">{t("auth.feature_2_description")}</p>
-              </div>
-            </div>
-            <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={`rounded-full bg-white/20 p-2 ${isRTL ? 'ml-4' : 'mr-4'}`}>
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-xl">{t("auth.feature_3_title")}</h3>
-                <p className="text-white/80 mt-1">{t("auth.feature_3_description")}</p>
-              </div>
-            </div>
-          </div>
+        <div className="max-w-md mx-auto space-y-6 flex flex-col items-center text-center">
+          <img src={companyLogo} alt="MPBF Logo" className="h-32 w-32 mb-6" />
+          <h1 className="text-4xl font-bold">Modern Plastic Bag Factory</h1>
+          <h2 className="text-2xl font-semibold">MPBF System</h2>
+          <p className="text-xl leading-relaxed">Production Management System</p>
         </div>
       </div>
     </div>

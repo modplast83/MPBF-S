@@ -1,9 +1,9 @@
 {
   "translation": {
     "app": {
-      "title": " مصنع أكياس البلاستيك الحديث",
+      "title": "مصنع أكياس البلاستيك الحديث",
       "full_title": "مصنع أكياس البلاستيك الحديث",
-      "manufacturing_system": "نظام التصنيع الحديث",
+      "manufacturing_system": "نظام التصنيع",
       "manufacturing_short": "نظام التصنيع"
     },
     "common": {
@@ -106,6 +106,7 @@
       "feature_3_description": "اعتمد على قدرات إدارة الإنتاج المتقدمة لتحقيق أقصى كفاءة.",
       "validation": {
         "username_required": "اسم المستخدم مطلوب",
+        "hero_title": "مصنع أكياس البلاستيك الحديث",
         "password_required": "كلمة المرور مطلوبة",
         "username_min_length": "اسم المستخدم يجب أن يكون 3 أحرف على الأقل",
         "password_min_length": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
