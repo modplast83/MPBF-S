@@ -16,32 +16,33 @@ import { Loader2 } from "lucide-react";
 // Import company logo
 import companyLogo from "/assets/company-logo.png";
 
-const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
-});
-
-const registerSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(1, "Please confirm your password"),
-  email: z.string().email("Please enter a valid email").optional(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-type RegisterFormValues = z.infer<typeof registerSchema>;
-
 export default function AuthPage() {
   const { t } = useTranslation();
   const { language, setLanguage, isRTL } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("login");
   const { isAuthenticated, isLoading, login, register: registerUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  
+  // Create validation schemas with translation function
+  const loginSchema = z.object({
+    username: z.string().min(1, t("auth.validation.username_required")),
+    password: z.string().min(1, t("auth.validation.password_required")),
+  });
+
+  const registerSchema = z.object({
+    username: z.string().min(3, t("auth.validation.username_min_length")),
+    password: z.string().min(6, t("auth.validation.password_min_length")),
+    confirmPassword: z.string().min(1, t("auth.validation.confirm_password_required")),
+    email: z.string().optional().or(z.literal("")),
+    firstName: z.string().optional().or(z.literal("")),
+    lastName: z.string().optional().or(z.literal("")),
+  }).refine(data => data.password === data.confirmPassword, {
+    message: t("auth.validation.passwords_no_match"),
+    path: ["confirmPassword"],
+  });
+  
+  type LoginFormValues = z.infer<typeof loginSchema>;
+  type RegisterFormValues = z.infer<typeof registerSchema>;
   
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -84,7 +85,13 @@ export default function AuthPage() {
   async function onRegisterSubmit(data: RegisterFormValues) {
     try {
       setIsSubmitting(true);
-      const { confirmPassword, ...registerData } = data;
+      const registerData = {
+        username: data.username,
+        password: data.password,
+        email: data.email || undefined,
+        firstName: data.firstName || undefined,
+        lastName: data.lastName || undefined,
+      };
       await registerUser(registerData);
     } finally {
       setIsSubmitting(false);

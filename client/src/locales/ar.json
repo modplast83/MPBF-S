@@ -103,7 +103,20 @@
       "feature_2_title": "تكامل مراقبة الجودة",
       "feature_2_description": "حافظ على معايير الجودة العالية مع أدوات مراقبة الجودة المدمجة.",
       "feature_3_title": "تحسين الإنتاج",
-      "feature_3_description": "اعتمد على قدرات إدارة الإنتاج المتقدمة لتحقيق أقصى كفاءة."
+      "feature_3_description": "اعتمد على قدرات إدارة الإنتاج المتقدمة لتحقيق أقصى كفاءة.",
+      "validation": {
+        "username_required": "اسم المستخدم مطلوب",
+        "password_required": "كلمة المرور مطلوبة",
+        "username_min_length": "اسم المستخدم يجب أن يكون 3 أحرف على الأقل",
+        "password_min_length": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+        "confirm_password_required": "يرجى تأكيد كلمة المرور",
+        "email_invalid": "يرجى إدخال بريد إلكتروني صحيح",
+        "passwords_no_match": "كلمات المرور غير متطابقة"
+      }
+    },
+    "language": {
+      "en": "English",
+      "ar": "العربية"
     },
     "dashboard": {
       "title": "لوحة التحكم",

@@ -113,7 +113,20 @@
             "feature_2_title": "Quality Control Integration",
             "feature_2_description": "Maintain high product standards with built-in quality control tools.",
             "feature_3_title": "Production Optimization",
-            "feature_3_description": "Maximize efficiency with advanced production management capabilities."
+            "feature_3_description": "Maximize efficiency with advanced production management capabilities.",
+            "validation": {
+                "username_required": "Username is required",
+                "password_required": "Password is required",
+                "username_min_length": "Username must be at least 3 characters",
+                "password_min_length": "Password must be at least 6 characters",
+                "confirm_password_required": "Please confirm your password",
+                "email_invalid": "Please enter a valid email",
+                "passwords_no_match": "Passwords don't match"
+            }
+        },
+        "language": {
+            "en": "English",
+            "ar": "العربية"
         },
         "setup": {
             "title": "Setup & Configuration",
