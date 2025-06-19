@@ -9,7 +9,9 @@ import {
   ClipboardCheck,
   FileText,
   Settings,
-  BarChart3
+  BarChart3,
+  GraduationCap,
+  Award
 } from "lucide-react";
 
 export default function QualityIndex() {
@@ -40,6 +42,20 @@ export default function QualityIndex() {
       color: "bg-gradient-to-br from-red-500 to-red-600",
     },
     {
+      title: "Training Management",
+      description: "Organize and track quality training programs and certifications",
+      icon: GraduationCap,
+      path: "/quality/training",
+      color: "bg-gradient-to-br from-indigo-500 to-indigo-600",
+    },
+    {
+      title: "Training Certificates",
+      description: "Manage and track quality training completion certificates",
+      icon: Award,
+      path: "/quality/certificates",
+      color: "bg-gradient-to-br from-yellow-500 to-yellow-600",
+    },
+    {
       title: "Unified Dashboard",
       description: "Comprehensive quality overview and metrics",
       icon: BarChart3,
@@ -51,7 +67,7 @@ export default function QualityIndex() {
       description: "Quality performance reports and analytics",
       icon: FileText,
       path: "/quality/reports",
-      color: "bg-gradient-to-br from-indigo-500 to-indigo-600",
+      color: "bg-gradient-to-br from-slate-500 to-slate-600",
     },
     {
       title: "Violations & Complaints",
