@@ -1319,24 +1319,7 @@
                 "integration": "Integration",
                 "integrationDesc": "Seamlessly integrated with production, quality, and HR modules"
             },
-            "damageTypes": {
-                "motor": "Motor",
-                "bearing": "Bearing",
-                "roller": "Roller",
-                "printingRoller": "Printing Roller",
-                "gear": "Gear",
-                "fan": "Fan",
-                "fuse": "Fuse",
-                "sealing": "Sealing",
-                "knife": "Knife",
-                "heater": "Heater",
-                "inverter": "Inverter",
-                "powerSupply": "Power Supply",
-                "shaft": "Shaft",
-                "takeUp": "Take up",
-                "short": "Short",
-                "other": "Other"
-            },
+
             "severity": {
                 "high": "High",
                 "normal": "Normal",
