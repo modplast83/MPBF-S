@@ -126,9 +126,8 @@ import {
   trainingCertificates,
   type TrainingCertificate,
   type InsertCertificate,
-  employeeRanks,
-  type EmployeeRank,
-  type InsertEmployeeRank,
+
+
 
   geofences,
   type Geofence,
@@ -2074,30 +2073,7 @@ export class DatabaseStorage implements IStorage {
     return true;
   }
 
-  // Employee Ranks
-  async getEmployeeRanks(): Promise<EmployeeRank[]> {
-    return await db.select().from(employeeRanks).orderBy(employeeRanks.level);
-  }
 
-  async getEmployeeRank(id: number): Promise<EmployeeRank | undefined> {
-    const [rank] = await db.select().from(employeeRanks).where(eq(employeeRanks.id, id));
-    return rank;
-  }
-
-  async createEmployeeRank(rankData: InsertEmployeeRank): Promise<EmployeeRank> {
-    const [rank] = await db.insert(employeeRanks).values(rankData).returning();
-    return rank;
-  }
-
-  async updateEmployeeRank(id: number, rankData: Partial<EmployeeRank>): Promise<EmployeeRank | undefined> {
-    const [updated] = await db.update(employeeRanks).set(rankData).where(eq(employeeRanks.id, id)).returning();
-    return updated;
-  }
-
-  async deleteEmployeeRank(id: number): Promise<boolean> {
-    await db.delete(employeeRanks).where(eq(employeeRanks.id, id));
-    return true;
-  }
 
   // Employee profile data is now part of users table - no separate methods needed
 

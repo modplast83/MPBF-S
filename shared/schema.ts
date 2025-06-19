@@ -844,23 +844,7 @@ export type AbaMaterialConfig = typeof abaMaterialConfigs.$inferSelect;
 
 // HR Module Tables
 
-// Employee Ranks and Levels
-export const employeeRanks = pgTable("employee_ranks", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull().unique(),
-  level: integer("level").notNull().unique(),
-  baseSalary: doublePrecision("base_salary").default(0),
-  overtimeRate: doublePrecision("overtime_rate").default(1.5), // multiplier for overtime pay
-  maxOvertimeHours: integer("max_overtime_hours").default(20), // max overtime hours per month
-  permissions: jsonb("permissions"), // specific permissions for this rank
-  benefits: text("benefits"),
-  description: text("description"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
-export const insertEmployeeRankSchema = createInsertSchema(employeeRanks).omit({ id: true, createdAt: true });
-export type InsertEmployeeRank = z.infer<typeof insertEmployeeRankSchema>;
-export type EmployeeRank = typeof employeeRanks.$inferSelect;
 
 // Employee profile data is now part of the users table (removed separate employee_profiles table)
 
