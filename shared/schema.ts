@@ -71,7 +71,7 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Users table
+// Users table with employee profile data
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(), // UID
   username: varchar("username").unique().notNull(), // Username
@@ -85,6 +85,19 @@ export const users = pgTable("users", {
   phone: text("phone"),
   isActive: boolean("is_active").default(true),
   sectionId: text("section_id").references(() => sections.id), // UserSection
+  
+  // Employee profile fields (moved from employee_profiles table)
+  employeeId: text("employee_id").unique(), // Employee ID
+  rankId: integer("rank_id").references(() => employeeRanks.id), // Employee rank
+  department: text("department"), // Department
+  position: text("position"), // Job position
+  hireDate: timestamp("hire_date"), // Hire date
+  contractType: text("contract_type").default("full_time"), // full_time, part_time, contract, intern
+  workSchedule: jsonb("work_schedule"), // working hours, days off, shift patterns
+  emergencyContact: jsonb("emergency_contact"), // Emergency contact information
+  bankDetails: jsonb("bank_details"), // Banking information
+  allowances: jsonb("allowances"), // transport, housing, etc.
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -851,28 +864,7 @@ export const insertEmployeeRankSchema = createInsertSchema(employeeRanks).omit({
 export type InsertEmployeeRank = z.infer<typeof insertEmployeeRankSchema>;
 export type EmployeeRank = typeof employeeRanks.$inferSelect;
 
-// Employee Profiles (extends user data)
-export const employeeProfiles = pgTable("employee_profiles", {
-  id: serial("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id).unique(),
-  employeeId: text("employee_id").notNull().unique(),
-  rankId: integer("rank_id").references(() => employeeRanks.id),
-  department: text("department"),
-  position: text("position"),
-  hireDate: timestamp("hire_date"),
-  contractType: text("contract_type").default("full_time"), // full_time, part_time, contract, intern
-  workSchedule: jsonb("work_schedule"), // working hours, days off, shift patterns
-  emergencyContact: jsonb("emergency_contact"),
-  bankDetails: jsonb("bank_details"),
-  allowances: jsonb("allowances"), // transport, housing, etc.
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const insertEmployeeProfileSchema = createInsertSchema(employeeProfiles).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertEmployeeProfile = z.infer<typeof insertEmployeeProfileSchema>;
-export type EmployeeProfile = typeof employeeProfiles.$inferSelect;
+// Employee profile data is now part of the users table (removed separate employee_profiles table)
 
 // Geofences for automatic check-out
 export const geofences = pgTable("geofences", {

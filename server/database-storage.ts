@@ -129,9 +129,7 @@ import {
   employeeRanks,
   type EmployeeRank,
   type InsertEmployeeRank,
-  employeeProfiles,
-  type EmployeeProfile,
-  type InsertEmployeeProfile,
+
   geofences,
   type Geofence,
   type InsertGeofence,
@@ -2101,35 +2099,7 @@ export class DatabaseStorage implements IStorage {
     return true;
   }
 
-  // Employee Profiles
-  async getEmployeeProfiles(): Promise<EmployeeProfile[]> {
-    return await db.select().from(employeeProfiles).where(eq(employeeProfiles.isActive, true));
-  }
-
-  async getEmployeeProfile(id: number): Promise<EmployeeProfile | undefined> {
-    const [profile] = await db.select().from(employeeProfiles).where(eq(employeeProfiles.id, id));
-    return profile;
-  }
-
-  async getEmployeeProfileByUserId(userId: string): Promise<EmployeeProfile | undefined> {
-    const [profile] = await db.select().from(employeeProfiles).where(eq(employeeProfiles.userId, userId));
-    return profile;
-  }
-
-  async createEmployeeProfile(profileData: InsertEmployeeProfile): Promise<EmployeeProfile> {
-    const [profile] = await db.insert(employeeProfiles).values(profileData).returning();
-    return profile;
-  }
-
-  async updateEmployeeProfile(id: number, profileData: Partial<EmployeeProfile>): Promise<EmployeeProfile | undefined> {
-    const [updated] = await db.update(employeeProfiles).set(profileData).where(eq(employeeProfiles.id, id)).returning();
-    return updated;
-  }
-
-  async deleteEmployeeProfile(id: number): Promise<boolean> {
-    await db.update(employeeProfiles).set({ isActive: false }).where(eq(employeeProfiles.id, id));
-    return true;
-  }
+  // Employee profile data is now part of users table - no separate methods needed
 
   // Geofences
   async getGeofences(): Promise<Geofence[]> {
