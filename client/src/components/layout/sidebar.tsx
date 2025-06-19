@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth-v2";
 import { usePermissions } from "@/hooks/use-permissions";
 import { ChevronDown, ChevronRight, Home, Settings, Factory, Users, BarChart3, Package, Wrench, FileText, Shield, HelpCircle } from "lucide-react";
+import companyLogo from "@assets/FactoryLogoHPNGWg_1750292727900.png";
 // import factoryLogo from "@assets/FactoryLogoHPNGW Green.png";
 
 interface SidebarProps {
@@ -138,7 +139,7 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           {expanded ? (
             <div className="flex flex-col items-center w-full space-y-3">
               <div className="bg-white/95 p-3 rounded-2xl shadow-lg ring-1 ring-white/20 backdrop-blur-sm">
-                <Factory className="h-16 w-16 text-slate-700" />
+                <img src={companyLogo} alt="Modern Plastic Bag Factory" className="h-16 w-16 object-contain" />
               </div>
               <div className="text-center">
                 <h1 className="text-lg text-white leading-tight font-semibold">{t('app.title')}</h1>
@@ -150,7 +151,7 @@ export default function Sidebar({ onNavItemClick, isMobile = false }: SidebarPro
           ) : (
             <div className="flex items-center justify-center w-full">
               <div className="bg-white/95 p-2 rounded-xl shadow-lg ring-1 ring-white/20">
-                <Factory className="h-10 w-10 text-slate-700" />
+                <img src={companyLogo} alt="Modern Plastic Bag Factory" className="h-10 w-10 object-contain" />
               </div>
             </div>
           )}
