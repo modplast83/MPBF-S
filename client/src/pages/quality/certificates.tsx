@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Award, Search, Filter, Download, Eye, Plus, Calendar, Building, User } from "lucide-react";
 import { format } from "date-fns";
-import CertificateGenerator from "@/components/hr/certificate-generator";
-import CertificateList from "@/components/hr/certificate-list";
+// Components will be moved to quality-specific components
+// import CertificateGenerator from "@/components/hr/certificate-generator";
+// import CertificateList from "@/components/hr/certificate-list";
 
 interface CertificateStats {
   total: number;
@@ -180,10 +181,75 @@ export default function CertificatesPage() {
           </div>
 
           {/* Certificate List */}
-          <CertificateList
-            certificates={filteredCertificates}
-            trainings={trainings}
-          />
+          <div className="space-y-4">
+            {filteredCertificates.length === 0 ? (
+              <div className="text-center py-12">
+                <Award className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No certificates found</h3>
+                <p className="text-gray-500 mb-4">Generate your first training certificate to get started.</p>
+                <Button onClick={() => setShowGenerator(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Generate Certificate
+                </Button>
+              </div>
+            ) : (
+              filteredCertificates.map((certificate: any) => (
+                <Card key={certificate.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-2">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Certificate #{certificate.certificateNumber}
+                          </h3>
+                          <Badge className={
+                            certificate.status === "active" ? "bg-green-100 text-green-800" :
+                            certificate.status === "revoked" ? "bg-red-100 text-red-800" :
+                            certificate.status === "expired" ? "bg-gray-100 text-gray-800" :
+                            "bg-blue-100 text-blue-800"
+                          }>
+                            {certificate.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Building className="h-4 w-4" />
+                            Company: {certificate.companyName}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            Issuer: {certificate.issuerName}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            Issued: {format(new Date(certificate.issuedDate), "MMM dd, yyyy")}
+                          </div>
+                        </div>
+                        {certificate.validUntil && (
+                          <div className="mt-2 text-sm text-gray-600">
+                            <strong>Valid Until:</strong> {format(new Date(certificate.validUntil), "MMM dd, yyyy")}
+                          </div>
+                        )}
+                        {getTrainingInfo(certificate.trainingId) && (
+                          <div className="mt-2 text-sm text-gray-700">
+                            <strong>Training:</strong> {getTrainingInfo(certificate.trainingId)?.sections} - {getTrainingInfo(certificate.trainingId)?.trainee}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -193,10 +259,9 @@ export default function CertificatesPage() {
           <DialogHeader>
             <DialogTitle>Generate Training Certificate</DialogTitle>
           </DialogHeader>
-          <CertificateGenerator
-            trainings={trainings}
-            onClose={() => setShowGenerator(false)}
-          />
+          <div className="p-4 text-center text-gray-500">
+            Certificate generator component will be implemented for quality-specific training certificates.
+          </div>
         </DialogContent>
       </Dialog>
     </div>

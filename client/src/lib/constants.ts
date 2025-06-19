@@ -128,6 +128,8 @@ export const SIDEBAR_ITEMS = [
         icon: "verified",
         subItems: [
           { title: "Unified Dashboard", path: "/quality/unified-dashboard" },
+          { title: "Training", path: "/quality/training" },
+          { title: "Certificates", path: "/quality/certificates" },
         ],
       },
       {
@@ -142,8 +144,7 @@ export const SIDEBAR_ITEMS = [
           { title: "geofence_management", path: "/hr/geofences" },
           { title: "employee_of_the_month", path: "/hr/employee-of-month" },
           { title: "violation_and_complaint", path: "/hr/violations-complaints" },
-          { title: "training", path: "/hr/training" },
-          { title: "certificates", path: "/hr/certificates" },
+
         ],
       },
       {

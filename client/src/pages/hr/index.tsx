@@ -109,13 +109,7 @@ export default function HRIndex() {
       path: "/hr/violations-complaints",
       color: "bg-gradient-to-br from-red-500 to-red-600"
     },
-    {
-      title: t("hr.training_management.title"),
-      description: t("hr.training_management.description"),
-      icon: GraduationCap,
-      path: "/hr/training",
-      color: "bg-gradient-to-br from-indigo-500 to-indigo-600"
-    }
+
   ];
 
   return (

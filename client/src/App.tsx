@@ -56,13 +56,14 @@ import ClichePage from "@/pages/cliches/index";
 // HR Module imports
 import HRIndex from "@/pages/hr/index";
 import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
-import TrainingPage from "@/pages/hr/training";
-import CertificatesPage from "@/pages/hr/certificates";
 import EnhancedAttendance from "@/pages/hr/enhanced-attendance";
 import EmployeeManagement from "@/pages/hr/employee-management";
 import EmployeeRanks from "@/pages/hr/employee-ranks";
 import OvertimeLeave from "@/pages/hr/overtime-leave";
 import GeofenceManagement from "@/pages/hr/geofences";
+// Quality Training and Certificates
+import QualityTrainingPage from "@/pages/quality/training";
+import QualityCertificatesPage from "@/pages/quality/certificates";
 // Maintenance Module imports
 import MaintenancePage from "@/pages/maintenance/index";
 import MaintenanceRequestsPage from "@/pages/maintenance/requests";
@@ -157,8 +158,9 @@ function App() {
                     <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
                     <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />
                     <ProtectedRoute path="/hr/violation-trends" component={ViolationTrendsPage} module="Violation Trends" />
-                    <ProtectedRoute path="/hr/training" component={TrainingPage} module="Training" />
-                    <ProtectedRoute path="/hr/certificates" component={CertificatesPage} module="Certificates" />
+                    {/* Quality Module Routes */}
+                    <ProtectedRoute path="/quality/training" component={QualityTrainingPage} module="Training" />
+                    <ProtectedRoute path="/quality/certificates" component={QualityCertificatesPage} module="Certificates" />
                     {/* Maintenance Module Routes */}
                     <ProtectedRoute path="/maintenance" component={MaintenancePage} module="Maintenance" />
                     <ProtectedRoute path="/maintenance/requests" component={MaintenanceRequestsPage} module="Maintenance Requests" />
