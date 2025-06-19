@@ -8,9 +8,10 @@ import arJSON from '@/locales/ar.json';
 import mlJSON from '@/locales/ml.json';
 import urJSON from '@/locales/ur.json';
 
-// Debug log to check what's being imported
-console.log('EN Translation loaded:', enJSON);
-console.log('AR Translation loaded:', arJSON);
+// Clear any existing i18n instance
+if (i18n.isInitialized) {
+  i18n.changeLanguage('en');
+}
 
 // Set up i18next
 i18n
@@ -34,7 +35,17 @@ i18n
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage']
+    },
+    react: {
+      useSuspense: false
     }
   });
+
+console.log('i18next resources loaded:', {
+  en: !!enJSON?.translation?.auth,
+  ar: !!arJSON?.translation?.auth,
+  ml: !!mlJSON?.translation?.auth,
+  ur: !!urJSON?.translation?.auth
+});
 
 export default i18n;
