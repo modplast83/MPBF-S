@@ -54,8 +54,8 @@ export default function HRIndex() {
 
   const hrModules = [
     {
-      title: t("hr.enhanced_attendance.title"),
-      description: t("hr.enhanced_attendance.description"),
+      title: t("hr.attendance.title", "Attendance"),
+      description: t("hr.attendance.description", "Manage employee attendance and track working hours"),
       icon: Clock,
       path: "/hr/enhanced-attendance",
       color: "bg-gradient-to-br from-blue-500 to-blue-600"
