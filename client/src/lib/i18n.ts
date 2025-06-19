@@ -3,10 +3,14 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Import translation files
-import enTranslation from '@/locales/en.json';
-import arTranslation from '@/locales/ar.json';
-import mlTranslation from '@/locales/ml.json';
-import urTranslation from '@/locales/ur.json';
+import enJSON from '@/locales/en.json';
+import arJSON from '@/locales/ar.json';
+import mlJSON from '@/locales/ml.json';
+import urJSON from '@/locales/ur.json';
+
+// Debug log to check what's being imported
+console.log('EN Translation loaded:', enJSON);
+console.log('AR Translation loaded:', arJSON);
 
 // Set up i18next
 i18n
@@ -14,18 +18,10 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      en: {
-        translation: enTranslation.translation
-      },
-      ar: {
-        translation: arTranslation.translation
-      },
-      ml: {
-        translation: mlTranslation.translation
-      },
-      ur: {
-        translation: urTranslation.translation
-      }
+      en: enJSON,
+      ar: arJSON,
+      ml: mlJSON,
+      ur: urJSON
     },
     fallbackLng: 'en',
     debug: false,
