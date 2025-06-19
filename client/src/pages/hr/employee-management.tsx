@@ -149,9 +149,14 @@ export default function EmployeeManagement() {
   const handleEdit = (employee: any) => {
     setSelectedEmployee(employee);
     form.reset({
-      userId: employee.userId,
-      employeeId: employee.employeeId,
-      rankId: employee.rankId,
+      id: employee.id || "",
+      username: employee.username || "",
+      email: employee.email || "",
+      firstName: employee.firstName || "",
+      lastName: employee.lastName || "",
+      phone: employee.phone || "",
+      employeeId: employee.employeeId || "",
+      rankId: employee.rankId || undefined,
       department: employee.department || "",
       position: employee.position || "",
       hireDate: employee.hireDate ? new Date(employee.hireDate).toISOString().split('T')[0] : "",
@@ -177,6 +182,10 @@ export default function EmployeeManagement() {
   const getRankName = (rankId: number) => {
     const rank = ranks.find((r: any) => r.id === rankId);
     return rank ? rank.name : "No Rank";
+  };
+
+  const getUserName = (employee: any) => {
+    return `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || employee.username;
   };
 
   const getContractTypeBadge = (type: string) => {
@@ -555,44 +564,41 @@ export default function EmployeeManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {employees.map((employee: any) => {
-                    const user = users.find((u: any) => u.id === employee.userId);
-                    return (
-                      <TableRow key={employee.id}>
-                        <TableCell className="font-medium">{employee.employeeId}</TableCell>
-                        <TableCell>
-                          {user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Unknown User'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {getRankName(employee.rankId)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{employee.department || '-'}</TableCell>
-                        <TableCell>{employee.position || '-'}</TableCell>
-                        <TableCell>
-                          <Badge className={getContractTypeBadge(employee.contractType)}>
-                            {employee.contractType?.replace('_', ' ').toUpperCase()}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {employee.hireDate ? new Date(employee.hireDate).toLocaleDateString() : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-1 sm:space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEdit(employee)}
-                              className="p-1 sm:p-2"
-                            >
-                              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {employees.filter((employee: any) => employee.employeeId).map((employee: any) => (
+                    <TableRow key={employee.id}>
+                      <TableCell className="font-medium">{employee.employeeId}</TableCell>
+                      <TableCell>
+                        {getUserName(employee)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {getRankName(employee.rankId)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{employee.department || '-'}</TableCell>
+                      <TableCell>{employee.position || '-'}</TableCell>
+                      <TableCell>
+                        <Badge className={getContractTypeBadge(employee.contractType)}>
+                          {employee.contractType?.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {employee.hireDate ? new Date(employee.hireDate).toLocaleDateString() : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1 sm:space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEdit(employee)}
+                            className="p-1 sm:p-2"
+                          >
+                            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>
