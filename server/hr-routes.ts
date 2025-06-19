@@ -2,51 +2,6 @@ import type { Express } from "express";
 import { storage } from "./storage";
 
 export function setupHRRoutes(app: Express) {
-  // Employee Ranks
-  app.get("/api/hr/employee-ranks", async (req, res) => {
-    try {
-      const ranks = await storage.getEmployeeRanks();
-      res.json(ranks);
-    } catch (error) {
-      console.error("Error fetching employee ranks:", error);
-      res.status(500).json({ error: "Failed to fetch employee ranks" });
-    }
-  });
-
-  app.post("/api/hr/employee-ranks", async (req, res) => {
-    try {
-      const rank = await storage.createEmployeeRank(req.body);
-      res.json(rank);
-    } catch (error) {
-      console.error("Error creating employee rank:", error);
-      res.status(500).json({ error: "Failed to create employee rank" });
-    }
-  });
-
-  app.put("/api/hr/employee-ranks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const rank = await storage.updateEmployeeRank(id, req.body);
-      if (!rank) {
-        return res.status(404).json({ error: "Employee rank not found" });
-      }
-      res.json(rank);
-    } catch (error) {
-      console.error("Error updating employee rank:", error);
-      res.status(500).json({ error: "Failed to update employee rank" });
-    }
-  });
-
-  app.delete("/api/hr/employee-ranks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteEmployeeRank(id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting employee rank:", error);
-      res.status(500).json({ error: "Failed to delete employee rank" });
-    }
-  });
 
   // Employee profile data is now integrated into users - use /api/users endpoints instead
 

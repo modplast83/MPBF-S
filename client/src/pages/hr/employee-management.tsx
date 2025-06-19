@@ -38,7 +38,7 @@ const userSchema = z.object({
   lastName: z.string().optional(),
   phone: z.string().optional(),
   sectionId: z.string().optional(),
-  rankId: z.number().optional(),
+
   position: z.string().optional(),
   hireDate: z.string().optional(),
   contractType: z.enum(["full_time", "part_time", "contract", "intern"]).default("full_time"),
@@ -159,7 +159,7 @@ export default function EmployeeManagement() {
       lastName: employee.lastName || "",
       phone: employee.phone || "",
       sectionId: employee.sectionId || "",
-      rankId: employee.rankId || undefined,
+
       position: employee.position || "",
       hireDate: employee.hireDate ? new Date(employee.hireDate).toISOString().split('T')[0] : "",
       contractType: employee.contractType || "full_time",
@@ -299,30 +299,6 @@ export default function EmployeeManagement() {
                                 {sections?.map((section) => (
                                   <SelectItem key={section.id} value={section.id}>
                                     {section.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="rankId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Rank</FormLabel>
-                          <FormControl>
-                            <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select rank" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {ranks.map((rank: any) => (
-                                  <SelectItem key={rank.id} value={rank.id.toString()}>
-                                    {rank.name} (Level {rank.level})
                                   </SelectItem>
                                 ))}
                               </SelectContent>

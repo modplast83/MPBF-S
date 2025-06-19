@@ -58,7 +58,7 @@ import HRIndex from "@/pages/hr/index";
 import EmployeeOfMonthPage from "@/pages/hr/employee-of-month";
 import AttendancePage from "@/pages/hr/attendance";
 import EmployeeManagement from "@/pages/hr/employee-management";
-import EmployeeRanks from "@/pages/hr/employee-ranks";
+
 import OvertimeLeave from "@/pages/hr/overtime-leave";
 import GeofenceManagement from "@/pages/hr/geofences";
 // Quality Training and Certificates
@@ -151,7 +151,7 @@ function App() {
                     <ProtectedRoute path="/hr" component={HRIndex} module="HR" />
                     <ProtectedRoute path="/hr/enhanced-attendance" component={AttendancePage} module="Attendance" />
                     <ProtectedRoute path="/hr/employee-management" component={EmployeeManagement} module="Employee Management" />
-                    <ProtectedRoute path="/hr/employee-ranks" component={EmployeeRanks} module="Employee Ranks" />
+
                     <ProtectedRoute path="/hr/overtime-leave" component={OvertimeLeave} module="Overtime & Leave" />
                     <ProtectedRoute path="/hr/geofences" component={GeofenceManagement} module="Geofence Management" />
 
