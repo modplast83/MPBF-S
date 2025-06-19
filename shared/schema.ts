@@ -6,6 +6,7 @@ import {
   boolean,
   timestamp,
   doublePrecision,
+  numeric,
   unique,
   varchar,
   jsonb,

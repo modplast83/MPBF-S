@@ -50,9 +50,10 @@ export default function Products() {
     customer.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  // Filter products by selected customer
+  // Filter products by selected customer and sort by ID
   const products = selectedCustomerId 
     ? allProducts?.filter(product => product.customerId === selectedCustomerId)
+        .sort((a, b) => a.id - b.id)
     : [];
 
   // Delete mutation
@@ -247,6 +248,16 @@ export default function Products() {
       header: t("common.length") + " (cm)",
       id: "lengthCm",
       cell: (row: CustomerProduct) => row.lengthCm ? `${row.lengthCm}` : "-"
+    },
+    {
+      header: "Cutting Unit",
+      id: "cuttingUnit",
+      cell: (row: CustomerProduct) => row.cuttingUnit || "-"
+    },
+    {
+      header: "Package Kg",
+      id: "packageKg",
+      cell: (row: CustomerProduct) => row.packageKg ? `${Number(row.packageKg).toFixed(2)}` : "-"
     },
     {
       header: t("setup.products.actions"),
