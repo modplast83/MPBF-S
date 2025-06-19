@@ -166,7 +166,7 @@ export const orders = pgTable("orders", {
   userId: text("user_id").references(() => users.id), // Created by
 });
 
-export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, date: true, status: true });
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, date: true, status: true, userId: true });
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
