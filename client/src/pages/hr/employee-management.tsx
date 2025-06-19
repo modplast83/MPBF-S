@@ -30,19 +30,25 @@ import {
   MapPin
 } from "lucide-react";
 
-const employeeProfileSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
-  employeeId: z.string().min(1, "Employee ID is required"),
+const userSchema = z.object({
+  id: z.string(),
+  username: z.string().min(1, "Username is required"),
+  email: z.string().email().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  phone: z.string().optional(),
+  sectionId: z.string().optional(),
+  employeeId: z.string().optional(),
   rankId: z.number().optional(),
   department: z.string().optional(),
   position: z.string().optional(),
-  hireDate: z.string().min(1, "Hire date is required"),
+  hireDate: z.string().optional(),
   contractType: z.enum(["full_time", "part_time", "contract", "intern"]).default("full_time"),
   workSchedule: z.object({
     startTime: z.string().default("08:00"),
     endTime: z.string().default("17:00"),
     workingDays: z.array(z.string()).default(["monday", "tuesday", "wednesday", "thursday", "friday"]),
-    breakDuration: z.number().default(1) // hours
+    breakDuration: z.number().default(1)
   }).optional(),
   emergencyContact: z.object({
     name: z.string(),
@@ -62,7 +68,7 @@ const employeeProfileSchema = z.object({
   }).optional()
 });
 
-type EmployeeProfileForm = z.infer<typeof employeeProfileSchema>;
+type UserForm = z.infer<typeof userSchema>;
 
 export default function EmployeeManagement() {
   const { t } = useTranslation();
@@ -71,10 +77,10 @@ export default function EmployeeManagement() {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Fetch employee profiles
+  // Fetch users (employees)
   const { data: employees = [], isLoading: loadingEmployees } = useQuery({
-    queryKey: ['/api/hr/employee-profiles'],
-    queryFn: () => apiRequest('GET', '/api/hr/employee-profiles')
+    queryKey: ['/api/users'],
+    queryFn: () => apiRequest('GET', '/api/users')
   });
 
   // Fetch employee ranks
@@ -83,19 +89,18 @@ export default function EmployeeManagement() {
     queryFn: () => apiRequest('GET', '/api/hr/employee-ranks')
   });
 
-  // Fetch users for dropdown
-  const { data: users = [] } = useQuery({
-    queryKey: ['/api/users'],
-    queryFn: () => apiRequest('GET', '/api/users')
-  });
-
   // Form setup
-  const form = useForm<EmployeeProfileForm>({
-    resolver: zodResolver(employeeProfileSchema),
+  const form = useForm<UserForm>({
+    resolver: zodResolver(userSchema),
     defaultValues: {
-      userId: "",
+      id: "",
+      username: "",
+      email: "",
+      firstName: "",
+      lastName: "",
+      phone: "",
       employeeId: "",
-      hireDate: new Date().toISOString().split('T')[0], // Default to today's date
+      hireDate: new Date().toISOString().split('T')[0],
       contractType: "full_time",
       workSchedule: {
         startTime: "08:00",
@@ -112,34 +117,12 @@ export default function EmployeeManagement() {
     }
   });
 
-  // Create employee mutation
-  const createEmployeeMutation = useMutation({
-    mutationFn: (data: EmployeeProfileForm) => 
-      apiRequest('POST', '/api/hr/employee-profiles', data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/hr/employee-profiles'] });
-      setIsDialogOpen(false);
-      form.reset();
-      toast({
-        title: "Success",
-        description: "Employee profile created successfully"
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create employee profile",
-        variant: "destructive"
-      });
-    }
-  });
-
   // Update employee mutation
   const updateEmployeeMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number, data: Partial<EmployeeProfileForm> }) =>
-      apiRequest('PUT', `/api/hr/employee-profiles/${id}`, data),
+    mutationFn: ({ id, data }: { id: string, data: Partial<UserForm> }) =>
+      apiRequest('PUT', `/api/users/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/hr/employee-profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       setIsDialogOpen(false);
       setSelectedEmployee(null);
       form.reset();
@@ -157,11 +140,9 @@ export default function EmployeeManagement() {
     }
   });
 
-  const handleSubmit = (data: EmployeeProfileForm) => {
+  const handleSubmit = (data: UserForm) => {
     if (selectedEmployee) {
       updateEmployeeMutation.mutate({ id: selectedEmployee.id, data });
-    } else {
-      createEmployeeMutation.mutate(data);
     }
   };
 
@@ -242,23 +223,51 @@ export default function EmployeeManagement() {
                     
                     <FormField
                       control={form.control}
-                      name="userId"
+                      name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t("common.user")}</FormLabel>
+                          <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <SelectTrigger>
-                                <SelectValue placeholder={t("hr.employee_management.select_user")} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {users.map((user: any) => (
-                                  <SelectItem key={user.id} value={user.id}>
-                                    {user.firstName} {user.lastName} ({user.username})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Input {...field} placeholder="Enter username" disabled={!!selectedEmployee} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Enter first name" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Enter last name" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="email" placeholder="Enter email" />
                           </FormControl>
                         </FormItem>
                       )}
@@ -504,9 +513,9 @@ export default function EmployeeManagement() {
                   </Button>
                   <Button 
                     type="submit" 
-                    disabled={createEmployeeMutation.isPending || updateEmployeeMutation.isPending}
+                    disabled={updateEmployeeMutation.isPending}
                   >
-                    {createEmployeeMutation.isPending || updateEmployeeMutation.isPending ? t("common.saving") : t("common.save")}
+                    {updateEmployeeMutation.isPending ? t("common.saving") : t("common.save")}
                   </Button>
                 </div>
               </form>

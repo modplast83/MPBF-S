@@ -48,71 +48,7 @@ export function setupHRRoutes(app: Express) {
     }
   });
 
-  // Employee Profiles
-  app.get("/api/hr/employee-profiles", async (req, res) => {
-    try {
-      const profiles = await storage.getEmployeeProfiles();
-      res.json(profiles);
-    } catch (error) {
-      console.error("Error fetching employee profiles:", error);
-      res.status(500).json({ error: "Failed to fetch employee profiles" });
-    }
-  });
-
-  app.get("/api/hr/employee-profiles/user/:userId", async (req, res) => {
-    try {
-      const profile = await storage.getEmployeeProfileByUserId(req.params.userId);
-      if (!profile) {
-        return res.status(404).json({ error: "Employee profile not found" });
-      }
-      res.json(profile);
-    } catch (error) {
-      console.error("Error fetching employee profile:", error);
-      res.status(500).json({ error: "Failed to fetch employee profile" });
-    }
-  });
-
-  app.post("/api/hr/employee-profiles", async (req, res) => {
-    try {
-      const data = { ...req.body };
-      
-      // Transform hire date string to proper date format if provided
-      if (data.hireDate && typeof data.hireDate === 'string') {
-        // Parse date string and ensure it's valid
-        const parsedDate = new Date(data.hireDate);
-        if (!isNaN(parsedDate.getTime())) {
-          data.hireDate = parsedDate;
-        } else {
-          delete data.hireDate; // Remove invalid date
-        }
-      }
-      
-      // Remove undefined/null hire date to let database handle it
-      if (!data.hireDate) {
-        delete data.hireDate;
-      }
-      
-      const profile = await storage.createEmployeeProfile(data);
-      res.json(profile);
-    } catch (error) {
-      console.error("Error creating employee profile:", error);
-      res.status(500).json({ error: "Failed to create employee profile" });
-    }
-  });
-
-  app.put("/api/hr/employee-profiles/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const profile = await storage.updateEmployeeProfile(id, req.body);
-      if (!profile) {
-        return res.status(404).json({ error: "Employee profile not found" });
-      }
-      res.json(profile);
-    } catch (error) {
-      console.error("Error updating employee profile:", error);
-      res.status(500).json({ error: "Failed to update employee profile" });
-    }
-  });
+  // Employee profile data is now integrated into users - use /api/users endpoints instead
 
   // Geofences
   app.get("/api/hr/geofences", async (req, res) => {
