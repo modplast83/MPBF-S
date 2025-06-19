@@ -662,8 +662,8 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="true">Yes</SelectItem>
-                    <SelectItem value="false">No</SelectItem>
+                    <SelectItem value="true">TRUE</SelectItem>
+                    <SelectItem value="false">FALSE</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
