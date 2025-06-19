@@ -53,6 +53,8 @@ const orderFormSchema = insertOrderSchema.extend({
       quantity: z.number().positive("Quantity must be positive"),
     })
   ),
+}).extend({
+  customerId: z.string().min(1, "Customer is required"),
 });
 
 type OrderFormValues = z.infer<typeof orderFormSchema>;
