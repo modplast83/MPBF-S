@@ -142,6 +142,9 @@ const SendSmsDialog = ({ children, onSuccess, customers = [], orders = [], templ
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Send SMS Message</DialogTitle>
+          <DialogDescription>
+            Send an SMS message to a specific phone number with customizable content and priority.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>
@@ -228,6 +231,9 @@ const SmsTemplateDialog = ({ children, onSuccess, template }: {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{template ? "Edit" : "Create"} SMS Template</DialogTitle>
+          <DialogDescription>
+            {template ? "Modify an existing SMS template" : "Create a new reusable SMS template"} for automated messaging.
+          </DialogDescription>
         </DialogHeader>
         <div className="p-4 text-center text-gray-500">
           Template management functionality would be implemented here with form fields for template creation and editing.

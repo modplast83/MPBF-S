@@ -320,6 +320,9 @@ export default function Database() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create Database Backup</DialogTitle>
+            <DialogDescription>
+              Create a backup of your current database state for data protection and recovery purposes.
+            </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Label htmlFor="backupName">Backup Name</Label>
@@ -364,6 +367,9 @@ export default function Database() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Restore Database</DialogTitle>
+            <DialogDescription>
+              Restore your database from a backup file. This will replace all current data.
+            </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <p className="text-warning-500 font-medium flex items-center mb-4">
