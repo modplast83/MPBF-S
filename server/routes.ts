@@ -5465,6 +5465,92 @@ COMMIT;
     }
   });
 
+  // Quality Violations API routes (removed functionality)
+  app.get("/api/quality-violations", async (req: Request, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      res.json([]);
+    } catch (error) {
+      console.error('Error fetching quality violations:', error);
+      res.status(500).json({ error: 'Failed to fetch quality violations' });
+    }
+  });
+
+  app.post("/api/quality-violations", async (req: Request, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(410).json({ message: 'Quality violations functionality has been removed' });
+    } catch (error) {
+      console.error('Error creating quality violation:', error);
+      res.status(500).json({ error: 'Failed to create quality violation' });
+    }
+  });
+
+  app.patch("/api/quality-violations/:id", async (req: Request, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(410).json({ message: 'Quality violations functionality has been removed' });
+    } catch (error) {
+      console.error('Error updating quality violation:', error);
+      res.status(500).json({ error: 'Failed to update quality violation' });
+    }
+  });
+
+  app.delete("/api/quality-violations/:id", async (req: Request, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(410).json({ message: 'Quality violations functionality has been removed' });
+    } catch (error) {
+      console.error('Error deleting quality violation:', error);
+      res.status(500).json({ error: 'Failed to delete quality violation' });
+    }
+  });
+
+  // Quality Penalties API routes (removed functionality)
+  app.get("/api/quality-penalties", async (req: Request, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      res.json([]);
+    } catch (error) {
+      console.error('Error fetching quality penalties:', error);
+      res.status(500).json({ error: 'Failed to fetch quality penalties' });
+    }
+  });
+
+  app.post("/api/quality-penalties", async (req: Request, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(410).json({ message: 'Quality penalties functionality has been removed' });
+    } catch (error) {
+      console.error('Error creating quality penalty:', error);
+      res.status(500).json({ error: 'Failed to create quality penalty' });
+    }
+  });
+
+  app.patch("/api/quality-penalties/:id", async (req: Request, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(410).json({ message: 'Quality penalties functionality has been removed' });
+    } catch (error) {
+      console.error('Error updating quality penalty:', error);
+      res.status(500).json({ error: 'Failed to update quality penalty' });
+    }
+  });
+
+  app.delete("/api/quality-penalties/:id", async (req: Request, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(410).json({ message: 'Quality penalties functionality has been removed' });
+    } catch (error) {
+      console.error('Error deleting quality penalty:', error);
+      res.status(500).json({ error: 'Failed to delete quality penalty' });
+    }
+  });
+      console.error('Error deleting quality penalty:', error);
+      res.status(500).json({ error: 'Failed to delete quality penalty' });
+    }
+  }););
+
   app.get("/api/production/productivity", async (req: Request, res: Response) => {
     try {
       // Calculate productivity data from real sources when available
