@@ -207,6 +207,7 @@ export const SIDEBAR_ITEMS = [
         path: "/system",
         icon: "admin_panel_settings",
         subItems: [
+          { title: "Quality Check Types", path: "/quality/check-types" },
           { title: "Database", path: "/system/database" },
           { title: "Permissions", path: "/system/permissions" },
           { title: "Import & Export", path: "/system/import-export" },

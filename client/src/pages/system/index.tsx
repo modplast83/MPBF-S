@@ -18,6 +18,13 @@ export default function SystemIndex() {
 
   const systemModules = [
     {
+      title: "Quality Check Types",
+      description: "Define and manage quality check templates for different stages",
+      icon: Settings,
+      path: "/quality/check-types",
+      color: "bg-gradient-to-br from-indigo-500 to-indigo-600",
+    },
+    {
       title: "Database",
       description: "Database management and maintenance tools",
       icon: Database,
