@@ -262,6 +262,9 @@ const NotificationRuleDialog = ({ children, onSuccess, rule, templates = [] }: {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{rule ? "Edit" : "Create"} Notification Rule</DialogTitle>
+          <DialogDescription>
+            {rule ? "Modify notification rule settings" : "Configure automated SMS notification triggers"} for system events.
+          </DialogDescription>
         </DialogHeader>
         <div className="p-4 text-center text-gray-500">
           Notification rule management functionality would be implemented here with form fields for rule configuration.
@@ -290,6 +293,9 @@ const SmsMessageDetails = ({ message, open, onOpenChange, customer, order }: {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>SMS Message Details</DialogTitle>
+          <DialogDescription>
+            View detailed information about this SMS message including delivery status and content.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">

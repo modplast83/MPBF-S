@@ -117,7 +117,7 @@ export function QualityMetricsWidget() {
                 <div className="flex justify-center text-red-500 mb-1">
                   <XCircle className="h-5 w-5" />
                 </div>
-                <div className="text-xl font-semibold">{stats.totalChecks - stats.passedChecks}</div>
+                <div className="text-xl font-semibold">{Math.max(0, (stats.totalChecks || 0) - (stats.passedChecks || 0))}</div>
                 <div className="text-xs text-muted-foreground">{t('dashboard.failed_checks')}</div>
               </div>
               
@@ -125,7 +125,7 @@ export function QualityMetricsWidget() {
                 <div className="flex justify-center text-yellow-500 mb-1">
                   <AlertTriangle className="h-5 w-5" />
                 </div>
-                <div className="text-xl font-semibold">{stats.pendingViolations}</div>
+                <div className="text-xl font-semibold">{stats.pendingViolations || 0}</div>
                 <div className="text-xs text-muted-foreground">{t('dashboard.pending_violations')}</div>
               </div>
               
@@ -133,7 +133,7 @@ export function QualityMetricsWidget() {
                 <div className="flex justify-center text-green-500 mb-1">
                   <CheckCircle2 className="h-5 w-5" />
                 </div>
-                <div className="text-xl font-semibold">{stats.resolvedViolations}</div>
+                <div className="text-xl font-semibold">{stats.resolvedViolations || 0}</div>
                 <div className="text-xs text-muted-foreground">{t('dashboard.resolved_violations')}</div>
               </div>
             </div>
