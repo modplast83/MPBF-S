@@ -5407,19 +5407,12 @@ COMMIT;
     try {
       // Get all the necessary data
       const checks = await storage.getQualityChecks();
-      const violations = await storage.getQualityViolations();
       const correctiveActions = await storage.getCorrectiveActions();
-      const penalties = await storage.getQualityPenalties();
       
       // Calculate quality metrics for checks
       const totalChecks = checks.length;
       const passedChecks = checks.filter(check => check.status === 'passed').length;
       const failedChecks = totalChecks - passedChecks;
-      
-      // Calculate quality metrics for violations
-      const totalViolations = violations.length;
-      const openViolations = violations.filter(v => v.status === 'pending' || v.status === 'open').length;
-      const resolvedViolations = violations.filter(v => v.status === 'resolved' || v.status === 'closed').length;
       
       // Calculate metrics for corrective actions
       const totalCorrectiveActions = correctiveActions.length;
@@ -5430,35 +5423,26 @@ COMMIT;
         action.status === 'completed' || action.status === 'verified'
       ).length;
       
-      // Calculate metrics for penalties
-      const totalPenalties = penalties.length;
-      const activePenalties = penalties.filter(p => 
-        p.status === 'active' || p.status === 'pending'
-      ).length;
-      const closedPenalties = penalties.filter(p => 
-        p.status === 'closed' || p.status === 'completed'
-      ).length;
-      
       res.json({
         // Checks stats
         totalChecks,
         passedChecks,
         failedChecks,
         
-        // Violations stats
-        totalViolations,
-        openViolations,
-        resolvedViolations,
+        // Violations stats (removed functionality)
+        totalViolations: 0,
+        openViolations: 0,
+        resolvedViolations: 0,
         
         // Corrective actions stats
         totalCorrectiveActions,
         pendingActions,
         completedActions,
         
-        // Penalties stats
-        totalPenalties,
-        activePenalties,
-        closedPenalties
+        // Penalties stats (removed functionality)
+        totalPenalties: 0,
+        activePenalties: 0,
+        closedPenalties: 0
       });
     } catch (error) {
       console.error('Error fetching quality stats:', error);
@@ -5468,21 +5452,12 @@ COMMIT;
 
   app.get("/api/quality/recent-violations", async (req: Request, res: Response) => {
     try {
-      const violations = await storage.getQualityViolations();
-      const sortedViolations = violations
-        .sort((a, b) => new Date(b.reportDate || new Date()).getTime() - new Date(a.reportDate || new Date()).getTime())
-        .slice(0, 10); // Get the 10 most recent
-      
-      // Calculate totals by status
-      const totalPending = violations.filter(v => v.status === 'pending').length;
-      const totalInProgress = violations.filter(v => v.status === 'in_progress').length;
-      const totalResolved = violations.filter(v => v.status === 'resolved').length;
-      
+      // Quality violations functionality has been removed
       res.json({
-        violations: sortedViolations,
-        totalPending,
-        totalInProgress,
-        totalResolved
+        violations: [],
+        totalPending: 0,
+        totalInProgress: 0,
+        totalResolved: 0
       });
     } catch (error) {
       console.error('Error fetching recent violations:', error);

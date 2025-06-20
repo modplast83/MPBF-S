@@ -1,56 +1,23 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@/hooks/use-auth-v2";
-import { format } from "date-fns";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger,
-  DialogFooter,
-  DialogDescription 
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  AlertTriangle, 
-  FileText, 
-  Search,
-  Filter,
-  Printer,
-  Eye
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { queryClient } from "@/lib/queryClient";
 
 export function QualityViolations() {
+  const { t } = useTranslation();
+  
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{t("quality.violations", "Quality Violations")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">
+          {t("quality.violations_removed", "Quality violations functionality has been removed from the system.")}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
   const { t } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();

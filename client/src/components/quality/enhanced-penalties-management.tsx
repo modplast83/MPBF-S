@@ -1,79 +1,22 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@/hooks/use-auth-v2";
-import { format } from "date-fns";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger,
-  DialogFooter,
-  DialogDescription 
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  AlertCircle, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  Filter,
-  Search,
-  Printer,
-  DollarSign,
-  Eye
-} from "lucide-react";
-import { queryClient } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function QualityPenaltiesManagement() {
   const { t } = useTranslation();
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterType, setFilterType] = useState("all");
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showViewDialog, setShowViewDialog] = useState(false);
-  const [currentPenalty, setCurrentPenalty] = useState<any>(null);
-  const [formData, setFormData] = useState({
-    violationId: "",
-    penaltyType: "warning",
-    description: "",
-    amount: "",
-    currency: "USD",
-    assignedTo: "",
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: "",
-    status: "pending",
-    comments: ""
-  });
-
-  // Fetch penalties
-  const { data: penalties = [], isLoading: penaltiesLoading, refetch: refetchPenalties } = useQuery({
+  
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{t("quality.penalties", "Quality Penalties")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">
+          {t("quality.penalties_removed", "Quality penalties functionality has been removed from the system.")}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
     queryKey: ["/api/quality-penalties"],
     queryFn: async () => {
       const response = await fetch("/api/quality-penalties");
