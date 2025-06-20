@@ -520,18 +520,29 @@ export function IntegratedQualityChecksManagement() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">{t("quality.no_roll", "No Roll")}</SelectItem>
-                          {Array.isArray(rolls) && rolls.map((roll: any) => (
-                            <SelectItem key={roll.id} value={roll.id}>
-                              {getRollName(roll.id)}
-                            </SelectItem>
-                          ))}
+                          {Array.isArray(rolls) && rolls
+                            .filter(roll => {
+                              // If no job order is selected, show all rolls
+                              if (!formData.jobOrderId) return true;
+                              // Otherwise, only show rolls for the selected job order
+                              return roll.jobOrderId === formData.jobOrderId;
+                            })
+                            .map((roll: any) => (
+                              <SelectItem key={roll.id} value={roll.id}>
+                                {getRollName(roll.id)}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
                     
                     <div>
                       <Label htmlFor="jobOrderId">{t("quality.job_order", "Job Order")} ({t("common.optional", "Optional")})</Label>
-                      <Select value={formData.jobOrderId?.toString() || "none"} onValueChange={(value) => setFormData(prev => ({ ...prev, jobOrderId: value === "none" ? undefined : parseInt(value) }))}>
+                      <Select value={formData.jobOrderId?.toString() || "none"} onValueChange={(value) => setFormData(prev => ({ 
+                        ...prev, 
+                        jobOrderId: value === "none" ? undefined : parseInt(value),
+                        rollId: undefined // Reset roll selection when job order changes
+                      }))}>
                         <SelectTrigger>
                           <SelectValue placeholder={t("quality.select_job_order", "Select job order")} />
                         </SelectTrigger>
