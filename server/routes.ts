@@ -5546,10 +5546,6 @@ COMMIT;
       res.status(500).json({ error: 'Failed to delete quality penalty' });
     }
   });
-      console.error('Error deleting quality penalty:', error);
-      res.status(500).json({ error: 'Failed to delete quality penalty' });
-    }
-  }););
 
   app.get("/api/production/productivity", async (req: Request, res: Response) => {
     try {

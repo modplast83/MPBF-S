@@ -153,7 +153,7 @@ export default function UnifiedQualityDashboard() {
         value={activeTab}
         onValueChange={setActiveTab}
       >
-        <TabsList className="flex w-full h-auto flex-wrap md:grid md:grid-cols-5 mb-8 p-1 bg-muted rounded-md">
+        <TabsList className="flex w-full h-auto flex-wrap md:grid md:grid-cols-3 mb-8 p-1 bg-muted rounded-md">
           <TabsTrigger 
             value="overview" 
             className="flex items-center justify-center min-w-0 flex-1 md:flex-initial px-2 py-2 text-xs sm:text-sm whitespace-nowrap"
@@ -170,14 +170,7 @@ export default function UnifiedQualityDashboard() {
             <span className="hidden sm:inline">{t("quality.quality_checks")}</span>
             <span className="sm:hidden">Checks</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="violations" 
-            className="flex items-center justify-center min-w-0 flex-1 md:flex-initial px-2 py-2 text-xs sm:text-sm whitespace-nowrap"
-          >
-            <AlertTriangle className="h-4 w-4 mr-1 flex-shrink-0" />
-            <span className="hidden sm:inline">{t("quality.quality_violations")}</span>
-            <span className="sm:hidden">Violations</span>
-          </TabsTrigger>
+          
           <TabsTrigger 
             value="actions" 
             className="flex items-center justify-center min-w-0 flex-1 md:flex-initial px-2 py-2 text-xs sm:text-sm whitespace-nowrap"
@@ -186,14 +179,7 @@ export default function UnifiedQualityDashboard() {
             <span className="hidden sm:inline">{t("quality.corrective_actions")}</span>
             <span className="sm:hidden">Actions</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="penalties" 
-            className="flex items-center justify-center min-w-0 flex-1 md:flex-initial px-2 py-2 text-xs sm:text-sm whitespace-nowrap"
-          >
-            <FileWarning className="h-4 w-4 mr-1 flex-shrink-0" />
-            <span className="hidden sm:inline">{t("quality.penalties")}</span>
-            <span className="sm:hidden">Penalties</span>
-          </TabsTrigger>
+          
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -440,13 +426,7 @@ export default function UnifiedQualityDashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value="violations">
-          <div className="rounded-lg border p-3 sm:p-6 bg-card">
-            <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">{t("quality.quality_violations")}</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{t("quality.violations_description")}</p>
-            <QualityViolations />
-          </div>
-        </TabsContent>
+        
 
         <TabsContent value="actions">
           <div className="rounded-lg border p-3 sm:p-6 bg-card">
@@ -456,13 +436,7 @@ export default function UnifiedQualityDashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value="penalties">
-          <div className="rounded-lg border p-3 sm:p-6 bg-card">
-            <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">{t("quality.penalties")}</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{t("quality.penalties_description")}</p>
-            <QualityPenaltiesManagement />
-          </div>
-        </TabsContent>
+        
       </Tabs>
     </div>
   );

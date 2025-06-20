@@ -130,7 +130,6 @@ export const SIDEBAR_ITEMS = [
         subItems: [
           { title: "Unified Dashboard", path: "/quality/unified-dashboard" },
           { title: "Checks", path: "/quality/checks" },
-          { title: "Violations", path: "/quality/violations" },
           { title: "Reports", path: "/quality/reports" },
         ],
       },
