@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui/page-header";
-import { QualityChecksManagement } from "@/components/quality/enhanced-quality-check-form";
+import { IntegratedQualityChecksManagement } from "@/components/quality/integrated-quality-check-form";
 
 export default function QualityChecks() {
   const { t } = useTranslation();
@@ -13,7 +13,7 @@ export default function QualityChecks() {
       />
       
       <div className="mt-6">
-        <QualityChecksManagement />
+        <IntegratedQualityChecksManagement />
       </div>
     </div>
   );

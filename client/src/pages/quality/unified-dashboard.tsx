@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { QualityViolations } from "@/components/quality/enhanced-violation-management";
 import { QualityPenaltiesManagement } from "@/components/quality/enhanced-penalties-management";
 import { QualityCorrectiveActions } from "@/components/quality/enhanced-corrective-actions";
-import { QualityChecksManagement } from "@/components/quality/enhanced-quality-check-form";
+import { IntegratedQualityChecksManagement } from "@/components/quality/integrated-quality-check-form";
 import { 
   PieChart, 
   BarChart, 
@@ -436,7 +436,7 @@ export default function UnifiedQualityDashboard() {
           <div className="rounded-lg border p-6 bg-card">
             <h2 className="text-2xl font-bold mb-4">{t("quality.quality_checks")}</h2>
             <p className="text-muted-foreground mb-6">{t("quality.quality_checks_description")}</p>
-            <QualityChecksManagement />
+            <IntegratedQualityChecksManagement />
           </div>
         </TabsContent>
 
