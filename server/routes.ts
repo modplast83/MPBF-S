@@ -157,6 +157,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Training evaluation route
+  app.post("/api/trainings/:id/evaluate", async (req: Request, res: Response) => {
+    try {
+      const trainingId = parseInt(req.params.id);
+      if (isNaN(trainingId)) {
+        return res.status(400).json({ message: "Invalid training ID" });
+      }
+
+      const { evaluations, overallNotes } = req.body;
+      
+      if (!evaluations || !Array.isArray(evaluations)) {
+        return res.status(400).json({ message: "Evaluations array is required" });
+      }
+
+      // Get user ID from session
+      const userId = req.user ? (req.user as any).id : null;
+
+      // Create evaluation records for each training field
+      const evaluationPromises = evaluations.map((evaluation: any) =>
+        storage.createTrainingFieldEvaluation({
+          trainingId,
+          trainingField: evaluation.trainingField,
+          status: evaluation.status,
+          notes: evaluation.notes || null,
+          evaluatedAt: new Date(),
+          evaluatedBy: userId
+        })
+      );
+
+      await Promise.all(evaluationPromises);
+
+      // Update training status to completed if not already
+      await storage.updateTraining(trainingId, { 
+        status: 'completed',
+        notes: overallNotes || null
+      });
+
+      res.json({ message: "Training evaluation submitted successfully" });
+    } catch (error) {
+      console.error("Error submitting training evaluation:", error);
+      res.status(500).json({ message: "Failed to submit training evaluation" });
+    }
+  });
+
   // Update training
   app.put("/api/trainings/:id", async (req: Request, res: Response) => {
     try {

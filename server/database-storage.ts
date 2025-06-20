@@ -123,6 +123,9 @@ import {
   trainingEvaluations,
   type TrainingEvaluation,
   type InsertTrainingEvaluation,
+  trainingFieldEvaluations,
+  type TrainingFieldEvaluation,
+  type InsertTrainingFieldEvaluation,
   trainingCertificates,
   type TrainingCertificate,
   type InsertCertificate,
@@ -2710,6 +2713,47 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTrainingEvaluation(id: number): Promise<boolean> {
     await db.delete(trainingEvaluations).where(eq(trainingEvaluations.id, id));
+    return true;
+  }
+
+  // Training Field Evaluations methods
+  async getTrainingFieldEvaluations(): Promise<TrainingFieldEvaluation[]> {
+    return await db.select().from(trainingFieldEvaluations).orderBy(desc(trainingFieldEvaluations.createdAt));
+  }
+
+  async getTrainingFieldEvaluationsByTraining(trainingId: number): Promise<TrainingFieldEvaluation[]> {
+    return await db.select().from(trainingFieldEvaluations)
+      .where(eq(trainingFieldEvaluations.trainingId, trainingId))
+      .orderBy(asc(trainingFieldEvaluations.id));
+  }
+
+  async getTrainingFieldEvaluation(id: number): Promise<TrainingFieldEvaluation | undefined> {
+    const [evaluation] = await db.select().from(trainingFieldEvaluations).where(eq(trainingFieldEvaluations.id, id));
+    return evaluation || undefined;
+  }
+
+  async createTrainingFieldEvaluation(evaluation: InsertTrainingFieldEvaluation): Promise<TrainingFieldEvaluation> {
+    const [created] = await db
+      .insert(trainingFieldEvaluations)
+      .values({
+        ...evaluation,
+        evaluatedAt: evaluation.evaluatedAt || new Date()
+      })
+      .returning();
+    return created;
+  }
+
+  async updateTrainingFieldEvaluation(id: number, evaluation: Partial<TrainingFieldEvaluation>): Promise<TrainingFieldEvaluation | undefined> {
+    const [updated] = await db
+      .update(trainingFieldEvaluations)
+      .set(evaluation)
+      .where(eq(trainingFieldEvaluations.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteTrainingFieldEvaluation(id: number): Promise<boolean> {
+    await db.delete(trainingFieldEvaluations).where(eq(trainingFieldEvaluations.id, id));
     return true;
   }
 

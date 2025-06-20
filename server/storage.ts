@@ -336,6 +336,14 @@ export interface IStorage {
   createTrainingEvaluation(evaluation: InsertTrainingEvaluation): Promise<TrainingEvaluation>;
   updateTrainingEvaluation(id: number, evaluation: Partial<TrainingEvaluation>): Promise<TrainingEvaluation | undefined>;
   deleteTrainingEvaluation(id: number): Promise<boolean>;
+  
+  // Training Field Evaluations methods
+  getTrainingFieldEvaluations(): Promise<any[]>;
+  getTrainingFieldEvaluationsByTraining(trainingId: number): Promise<any[]>;
+  getTrainingFieldEvaluation(id: number): Promise<any | undefined>;
+  createTrainingFieldEvaluation(evaluation: any): Promise<any>;
+  updateTrainingFieldEvaluation(id: number, evaluation: Partial<any>): Promise<any | undefined>;
+  deleteTrainingFieldEvaluation(id: number): Promise<boolean>;
 }
 
 export class MemStorage {
