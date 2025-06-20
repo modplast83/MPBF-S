@@ -537,11 +537,16 @@ export function IntegratedQualityChecksManagement() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">{t("quality.no_job_order", "No Job Order")}</SelectItem>
-                          {Array.isArray(jobOrders) && jobOrders.map((jobOrder: any) => (
-                            <SelectItem key={jobOrder.id} value={jobOrder.id.toString()}>
-                              {getJobOrderName(jobOrder.id)}
-                            </SelectItem>
-                          ))}
+                          {Array.isArray(jobOrders) && jobOrders
+                            .filter(jobOrder => {
+                              // Only show job orders that have associated rolls
+                              return Array.isArray(rolls) && rolls.some(roll => roll.jobOrderId === jobOrder.id);
+                            })
+                            .map((jobOrder: any) => (
+                              <SelectItem key={jobOrder.id} value={jobOrder.id.toString()}>
+                                {getJobOrderName(jobOrder.id)}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
