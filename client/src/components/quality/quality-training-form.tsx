@@ -462,35 +462,7 @@ export default function QualityTrainingForm({ isOpen, onClose, editingTraining }
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="equipmentIds"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Related Equipment/Items</FormLabel>
-                      <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-                        {items.map((item: any) => (
-                          <div key={item.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={item.id}
-                              checked={field.value?.includes(item.id)}
-                              onCheckedChange={(checked) => {
-                                const updatedValue = checked
-                                  ? [...(field.value || []), item.id]
-                                  : (field.value || []).filter((id: string) => id !== item.id);
-                                field.onChange(updatedValue);
-                              }}
-                            />
-                            <label htmlFor={item.id} className="text-sm font-medium">
-                              {item.name}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                
 
                 <FormField
                   control={form.control}
