@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Calendar, Users, Clock, FileText, Plus, Search, Filter, Eye, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 // import TrainingForm from "@/components/hr/training-form"; // TODO: Create quality-specific training form
 
 interface Training {
@@ -48,6 +50,8 @@ export default function TrainingPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingTraining, setEditingTraining] = useState<Training | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const queryClient = useQueryClient();
 
   const { data: trainings = [] } = useQuery<Training[]>({
@@ -80,11 +84,11 @@ export default function TrainingPage() {
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Training deleted successfully" });
+      toast({ title: t("quality.training.delete_success") });
       queryClient.invalidateQueries({ queryKey: ["/api/trainings"] });
     },
     onError: () => {
-      toast({ title: "Failed to delete training", variant: "destructive" });
+      toast({ title: t("quality.training.delete_error"), variant: "destructive" });
     }
   });
 
@@ -102,11 +106,11 @@ export default function TrainingPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+        return <Badge className="bg-green-100 text-green-800">{t("quality.training.status_completed")}</Badge>;
       case "in_progress":
-        return <Badge className="bg-blue-100 text-blue-800">In Progress</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800">{t("quality.training.status_in_progress")}</Badge>;
       case "cancelled":
-        return <Badge className="bg-red-100 text-red-800">Cancelled</Badge>;
+        return <Badge className="bg-red-100 text-red-800">{t("quality.training.status_cancelled")}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -118,7 +122,7 @@ export default function TrainingPage() {
   };
 
   const handleDelete = (training: Training) => {
-    if (confirm(`Are you sure you want to delete training ${training.trainingId}?`)) {
+    if (confirm(t("quality.training.delete_confirm", { id: training.trainingId }))) {
       deleteTrainingMutation.mutate(training.id);
     }
   };
@@ -129,24 +133,24 @@ export default function TrainingPage() {
   };
 
   return (
-    <div className="min-h-full p-6 space-y-6">
+    <div className={`min-h-full p-6 space-y-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Quality Training Management</h1>
-          <p className="text-gray-600">Organize and track quality training programs and certifications</p>
+      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={isRTL ? 'text-right' : ''}>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("quality.training.title")}</h1>
+          <p className="text-gray-600">{t("quality.training.description")}</p>
         </div>
         <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 mr-2" />
-          New Training
+          <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+          {t("quality.training.new_training")}
         </Button>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Trainings</CardTitle>
+          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardTitle className="text-sm font-medium">{t("quality.training.stats.total_trainings")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -154,8 +158,8 @@ export default function TrainingPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardTitle className="text-sm font-medium">{t("quality.training.stats.completed")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -163,8 +167,8 @@ export default function TrainingPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardTitle className="text-sm font-medium">{t("quality.training.stats.in_progress")}</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -172,8 +176,8 @@ export default function TrainingPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardTitle className="text-sm font-medium">{t("quality.training.stats.this_month")}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
