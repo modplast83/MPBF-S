@@ -129,8 +129,10 @@ export const SIDEBAR_ITEMS = [
         icon: "verified",
         subItems: [
           { title: "Unified Dashboard", path: "/quality/unified-dashboard" },
-          { title: "Training", path: "/quality/training" },
-          { title: "Certificates", path: "/quality/certificates" },
+          { title: "Quality Training", path: "/quality/training" },
+          { title: "Checks", path: "/quality/checks" },
+          { title: "Violations", path: "/quality/violations" },
+          { title: "Reports", path: "/quality/reports" },
         ],
       },
       {

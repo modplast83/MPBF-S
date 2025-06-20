@@ -32,6 +32,7 @@ import QualityViolations from "@/pages/quality/violations";
 import QualityPenalties from "@/pages/quality/penalties";
 import QualityCorrectiveActions from "@/pages/quality/corrective-actions";
 import UnifiedQualityDashboard from "@/pages/quality/unified-dashboard";
+import QualityTraining from "@/pages/quality/training";
 import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions-section-based";
 import ImportExport from "@/pages/system/import-export";
@@ -131,6 +132,7 @@ function App() {
                     <ProtectedRoute path="/quality/violations" component={QualityViolations} module="Violations" />
                     <ProtectedRoute path="/quality/corrective-actions" component={QualityCorrectiveActions} module="Corrective Actions" />
                     <ProtectedRoute path="/quality/penalties" component={QualityPenalties} module="Penalties" />
+                    <ProtectedRoute path="/quality/training" component={QualityTraining} module="Quality Training" />
                     <ProtectedRoute path="/quality/reports" component={QualityReports} module="Quality Reports" />
                     <ProtectedRoute path="/system" component={SystemIndex} module="System Settings" />
                     <ProtectedRoute path="/system/database" component={Database} module="Database" />

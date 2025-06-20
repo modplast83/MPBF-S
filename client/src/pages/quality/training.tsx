@@ -1,311 +1,463 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, Users, Clock, FileText, Plus, Search, Filter, Eye, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "react-i18next";
+import { 
+  BookOpen, 
+  Calendar, 
+  User, 
+  Clock, 
+  Users, 
+  Award, 
+  AlertTriangle, 
+  CheckCircle,
+  Plus,
+  Search,
+  Filter,
+  Download,
+  Eye
+} from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
-// import TrainingForm from "@/components/hr/training-form"; // TODO: Create quality-specific training form
+import { useTranslation } from "react-i18next";
+import QualityTrainingForm from "@/components/quality/quality-training-form";
 
 interface Training {
   id: number;
   trainingId: string;
-  date: string;
-  traineeId: string;
-  trainingSection: string;
-  numberOfDays: number;
-  supervisorId: string;
-  supervisorSignature?: string;
-  report?: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface TrainingStats {
-  total: number;
-  completed: number;
-  inProgress: number;
-  thisMonth: number;
-}
-
-interface TrainingPoint {
-  id: number;
-  name: string;
+  title: string;
+  description: string;
+  instructor: string;
+  location: string;
+  scheduledDate: string;
+  duration: number;
+  maxParticipants: number;
   category: string;
-  description?: string;
-  estimatedDuration?: number;
-  isActive: boolean;
+  priority: string;
+  status: string;
+  certificationRequired: boolean;
+  qualityCheckTypes: string[];
+  equipmentIds: string[];
+  prerequisites: string[];
+  learningObjectives: string[];
+  type?: string;
 }
 
-export default function TrainingPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [showForm, setShowForm] = useState(false);
-  const [editingTraining, setEditingTraining] = useState<Training | null>(null);
-  const { toast } = useToast();
+export default function QualityTrainingPage() {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
-  const queryClient = useQueryClient();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingTraining, setEditingTraining] = useState<Training | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
 
-  const { data: trainings = [] } = useQuery<Training[]>({
-    queryKey: ["/api/trainings"]
+  // Fetch trainings with quality focus
+  const { data: trainings = [], isLoading } = useQuery({
+    queryKey: ['/api/trainings'],
   });
 
-  const { data: trainingPoints = [] } = useQuery<TrainingPoint[]>({
-    queryKey: ["/api/training-points"]
-  });
+  // Filter trainings to show quality-related ones
+  const qualityTrainings = trainings.filter((training: Training) => 
+    training.type === "quality" || 
+    training.category?.includes("quality") ||
+    training.qualityCheckTypes?.length > 0
+  );
 
-  // Calculate statistics
-  const stats: TrainingStats = {
-    total: trainings.length,
-    completed: trainings.filter((t: any) => t.status === "completed").length,
-    inProgress: trainings.filter((t: any) => t.status === "in_progress").length,
-    thisMonth: trainings.filter((t: any) => {
-      const trainingDate = new Date(t.date);
-      const now = new Date();
-      return trainingDate.getMonth() === now.getMonth() && trainingDate.getFullYear() === now.getFullYear();
-    }).length
-  };
-
-  const deleteTrainingMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`/api/trainings/${id}`, {
-        method: "DELETE",
-        credentials: "include"
-      });
-      if (!response.ok) throw new Error("Failed to delete training");
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({ title: t("quality.training.delete_success") });
-      queryClient.invalidateQueries({ queryKey: ["/api/trainings"] });
-    },
-    onError: () => {
-      toast({ title: t("quality.training.delete_error"), variant: "destructive" });
-    }
-  });
-
-  // Filter trainings based on search and status
-  const filteredTrainings = trainings.filter((training: any) => {
-    const matchesSearch = training.trainingId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         training.traineeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         training.trainingSection.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredTrainings = qualityTrainings.filter((training: Training) => {
+    const matchesSearch = training.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         training.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         training.description.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || training.status === statusFilter;
+    const matchesCategory = categoryFilter === "all" || training.category === categoryFilter;
+    const matchesPriority = priorityFilter === "all" || training.priority === priorityFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesCategory && matchesPriority;
   });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <Badge className="bg-green-100 text-green-800">{t("quality.training.status_completed")}</Badge>;
-      case "in_progress":
-        return <Badge className="bg-blue-100 text-blue-800">{t("quality.training.status_in_progress")}</Badge>;
-      case "cancelled":
-        return <Badge className="bg-red-100 text-red-800">{t("quality.training.status_cancelled")}</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  const handleEdit = (training: Training) => {
+  const handleEditTraining = (training: Training) => {
     setEditingTraining(training);
-    setShowForm(true);
+    setIsFormOpen(true);
   };
 
-  const handleDelete = (training: Training) => {
-    if (confirm(t("quality.training.delete_confirm", { id: training.trainingId }))) {
-      deleteTrainingMutation.mutate(training.id);
-    }
-  };
-
-  const closeForm = () => {
-    setShowForm(false);
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
     setEditingTraining(null);
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "scheduled": return "bg-blue-100 text-blue-800";
+      case "in_progress": return "bg-yellow-100 text-yellow-800";
+      case "completed": return "bg-green-100 text-green-800";
+      case "cancelled": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "low": return "bg-green-100 text-green-800";
+      case "medium": return "bg-yellow-100 text-yellow-800";
+      case "high": return "bg-orange-100 text-orange-800";
+      case "critical": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "quality_control": return CheckCircle;
+      case "equipment_operation": return User;
+      case "safety_procedures": return AlertTriangle;
+      case "process_improvement": return Award;
+      case "documentation": return BookOpen;
+      case "calibration": return Clock;
+      default: return BookOpen;
+    }
+  };
+
+  const TrainingCard = ({ training }: { training: Training }) => {
+    const CategoryIcon = getCategoryIcon(training.category);
+    
+    return (
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              <CategoryIcon className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <CardTitle className="text-lg">{training.title}</CardTitle>
+                <p className="text-sm text-muted-foreground">{training.trainingId}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge className={getPriorityColor(training.priority)}>
+                {training.priority}
+              </Badge>
+              <Badge className={getStatusColor(training.status)}>
+                {training.status}
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {training.description}
+          </p>
+          
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span>{training.instructor}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>{format(new Date(training.scheduledDate), "MMM dd, yyyy")}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span>{training.duration}h</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span>Max {training.maxParticipants}</span>
+            </div>
+          </div>
+
+          {training.certificationRequired && (
+            <div className="flex items-center gap-2 text-sm text-amber-600">
+              <Award className="h-4 w-4" />
+              <span>Certification Required</span>
+            </div>
+          )}
+
+          {training.qualityCheckTypes && training.qualityCheckTypes.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Related Quality Checks:</p>
+              <div className="flex flex-wrap gap-1">
+                {training.qualityCheckTypes.slice(0, 3).map((checkType, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {checkType}
+                  </Badge>
+                ))}
+                {training.qualityCheckTypes.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{training.qualityCheckTypes.length - 3} more
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center pt-2">
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleEditTraining(training)}
+              >
+                <Eye className="h-4 w-4 mr-1" />
+                View
+              </Button>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleEditTraining(training)}
+            >
+              Edit
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
-    <div className={`min-h-full p-6 space-y-6 ${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
-      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <div className={isRTL ? 'text-right' : ''}>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("quality.training.title")}</h1>
-          <p className="text-gray-600">{t("quality.training.description")}</p>
+    <div className={`container mx-auto p-6 space-y-6 ${isRTL ? 'rtl' : ''}`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Quality Training Management</h1>
+          <p className="text-muted-foreground">
+            Manage quality-focused training sessions and certifications
+          </p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-          {t("quality.training.new_training")}
+        <Button onClick={() => setIsFormOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          New Quality Training
         </Button>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <CardTitle className="text-sm font-medium">{t("quality.training.stats.total_trainings")}</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Total Trainings</p>
+                <p className="text-2xl font-bold">{qualityTrainings.length}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <CardTitle className="text-sm font-medium">{t("quality.training.stats.completed")}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-green-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Scheduled</p>
+                <p className="text-2xl font-bold">
+                  {qualityTrainings.filter(t => t.status === 'scheduled').length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <CardTitle className="text-sm font-medium">{t("quality.training.stats.in_progress")}</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Completed</p>
+                <p className="text-2xl font-bold">
+                  {qualityTrainings.filter(t => t.status === 'completed').length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <CardTitle className="text-sm font-medium">{t("quality.training.stats.this_month")}</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.thisMonth}</div>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Award className="h-5 w-5 text-amber-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Certifications</p>
+                <p className="text-2xl font-bold">
+                  {qualityTrainings.filter(t => t.certificationRequired).length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t("quality.training.training_sessions")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className={`flex gap-4 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <div className="flex-1">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
               <div className="relative">
-                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4`} />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder={t("quality.training.search_placeholder")}
+                  placeholder="Search trainings..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={isRTL ? 'pr-10' : 'pl-10'}
+                  className="pl-10"
                 />
               </div>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <Filter className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                <SelectValue placeholder={t("quality.training.filter_by_status")} />
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t("quality.training.all_status")}</SelectItem>
-                <SelectItem value="completed">{t("quality.training.status_completed")}</SelectItem>
-                <SelectItem value="in_progress">{t("quality.training.status_in_progress")}</SelectItem>
-                <SelectItem value="cancelled">{t("quality.training.status_cancelled")}</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="scheduled">Scheduled</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          {/* Training List */}
-          <div className="space-y-4">
-            {filteredTrainings.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">{t("quality.training.no_sessions_found")}</h3>
-                <p className="text-gray-500 mb-4">{t("quality.training.get_started_message")}</p>
-                <Button onClick={() => setShowForm(true)}>
-                  <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  {t("quality.training.create_training")}
-                </Button>
-              </div>
-            ) : (
-              filteredTrainings.map((training: any) => (
-                <Card key={training.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <div className="flex-1">
-                        <div className={`flex items-center gap-4 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {t("quality.training.training_id", { id: training.trainingId })}
-                          </h3>
-                          {getStatusBadge(training.status)}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <Users className="h-4 w-4" />
-                            {t("quality.training.trainee")}: {training.traineeId}
-                          </div>
-                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <Calendar className="h-4 w-4" />
-                            {t("quality.training.date")}: {format(new Date(training.date), "MMM dd, yyyy")}
-                          </div>
-                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <Clock className="h-4 w-4" />
-                            {t("quality.training.duration")}: {training.numberOfDays} {t("quality.training.days")}
-                          </div>
-                        </div>
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-700">
-                            <strong>{t("quality.training.section")}:</strong> {training.trainingSection}
-                          </p>
-                          {training.report && (
-                            <p className="text-sm text-gray-700 mt-1">
-                              <strong>{t("quality.training.report")}:</strong> {training.report}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(training)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(training)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="quality_control">Quality Control</SelectItem>
+                <SelectItem value="equipment_operation">Equipment Operation</SelectItem>
+                <SelectItem value="safety_procedures">Safety Procedures</SelectItem>
+                <SelectItem value="process_improvement">Process Improvement</SelectItem>
+                <SelectItem value="documentation">Documentation</SelectItem>
+                <SelectItem value="calibration">Calibration</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priority</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="critical">Critical</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Training Form Dialog */}
-      <Dialog open={showForm} onOpenChange={closeForm}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingTraining ? t("quality.training.edit_training") : t("quality.training.create_new_training")}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="p-4 text-center text-gray-500">
-            {t("quality.training.form_implementation_message")}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Training List */}
+      <Tabs defaultValue="grid" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="grid">Grid View</TabsTrigger>
+          <TabsTrigger value="list">List View</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="grid">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-16 bg-gray-200 rounded"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredTrainings.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Quality Trainings Found</h3>
+                <p className="text-muted-foreground mb-4">
+                  {searchTerm || statusFilter !== "all" || categoryFilter !== "all" || priorityFilter !== "all"
+                    ? "No trainings match your current filters."
+                    : "Get started by creating your first quality training session."}
+                </p>
+                <Button onClick={() => setIsFormOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Quality Training
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredTrainings.map((training) => (
+                <TrainingCard key={training.id} training={training} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="list">
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b">
+                    <tr>
+                      <th className="text-left p-4 font-medium">Training</th>
+                      <th className="text-left p-4 font-medium">Instructor</th>
+                      <th className="text-left p-4 font-medium">Date</th>
+                      <th className="text-left p-4 font-medium">Duration</th>
+                      <th className="text-left p-4 font-medium">Priority</th>
+                      <th className="text-left p-4 font-medium">Status</th>
+                      <th className="text-left p-4 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredTrainings.map((training) => (
+                      <tr key={training.id} className="border-b hover:bg-muted/50">
+                        <td className="p-4">
+                          <div>
+                            <p className="font-medium">{training.title}</p>
+                            <p className="text-sm text-muted-foreground">{training.trainingId}</p>
+                          </div>
+                        </td>
+                        <td className="p-4">{training.instructor}</td>
+                        <td className="p-4">
+                          {format(new Date(training.scheduledDate), "MMM dd, yyyy")}
+                        </td>
+                        <td className="p-4">{training.duration}h</td>
+                        <td className="p-4">
+                          <Badge className={getPriorityColor(training.priority)}>
+                            {training.priority}
+                          </Badge>
+                        </td>
+                        <td className="p-4">
+                          <Badge className={getStatusColor(training.status)}>
+                            {training.status}
+                          </Badge>
+                        </td>
+                        <td className="p-4">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditTraining(training)}
+                          >
+                            Edit
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Quality Training Form */}
+      <QualityTrainingForm
+        isOpen={isFormOpen}
+        onClose={handleCloseForm}
+        editingTraining={editingTraining}
+      />
     </div>
   );
 }

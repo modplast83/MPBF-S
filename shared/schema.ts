@@ -1058,18 +1058,34 @@ export const insertHrComplaintSchema = createInsertSchema(hrComplaints).omit({ i
 export type InsertHrComplaint = z.infer<typeof insertHrComplaintSchema>;
 export type HrComplaint = typeof hrComplaints.$inferSelect;
 
-// Training Module
+// Training Module - Enhanced for Quality Training
 export const trainings = pgTable("trainings", {
   id: serial("id").primaryKey(),
   trainingId: text("training_id").notNull().unique(), // Custom training ID
-  date: timestamp("date").notNull(),
-  traineeId: text("trainee_id").notNull().references(() => users.id),
-  trainingSection: text("training_section").notNull(), // "extrusion", "printing", "cutting", "safety"
-  numberOfDays: integer("number_of_days").notNull(),
-  supervisorId: text("supervisor_id").notNull().references(() => users.id),
+  title: text("title"), // Training title
+  description: text("description"), // Training description
+  instructor: text("instructor"), // Instructor name
+  location: text("location"), // Training location
+  scheduledDate: timestamp("scheduled_date"), // When training is scheduled
+  duration: doublePrecision("duration"), // Duration in hours
+  maxParticipants: integer("max_participants"), // Maximum participants
+  category: text("category"), // Training category
+  priority: text("priority").default("medium"), // Priority level
+  certificationRequired: boolean("certification_required").default(false),
+  qualityCheckTypes: text("quality_check_types").array().default(sql`'{}'`), // Related quality check types
+  equipmentIds: text("equipment_ids").array().default(sql`'{}'`), // Related equipment
+  prerequisites: text("prerequisites").array().default(sql`'{}'`), // Prerequisites
+  learningObjectives: text("learning_objectives").array().default(sql`'{}'`), // Learning objectives
+  type: text("type").default("general"), // "general" or "quality"
+  // Legacy fields for backward compatibility
+  date: timestamp("date"),
+  traineeId: text("trainee_id").references(() => users.id),
+  trainingSection: text("training_section"), // "extrusion", "printing", "cutting", "safety"
+  numberOfDays: integer("number_of_days"),
+  supervisorId: text("supervisor_id").references(() => users.id),
   supervisorSignature: text("supervisor_signature"), // Base64 encoded signature
   report: text("report"),
-  status: text("status").notNull().default("in_progress"), // "in_progress", "completed", "cancelled"
+  status: text("status").notNull().default("scheduled"), // "draft", "scheduled", "in_progress", "completed", "cancelled"
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
