@@ -940,6 +940,34 @@
           "in_progress": "جاری",
           "this_month": "اس ماہ"
         }
+      },
+      "certificates": {
+        "title": "کوالٹی ٹریننگ سرٹیفکیٹس",
+        "description": "تمام کوالٹی ٹریننگ مکمل کرنے کے سرٹیفکیٹس کا انتظام اور ٹریکنگ",
+        "generate_certificate": "سرٹیفکیٹ بنائیں",
+        "certificate_list": "ٹریننگ سرٹیفکیٹس",
+        "search_placeholder": "سرٹیفکیٹس تلاش کریں...",
+        "filter_by_status": "اسٹیٹس کے ذریعے فلٹر کریں",
+        "all_status": "تمام اسٹیٹس",
+        "status_active": "فعال",
+        "status_revoked": "منسوخ شدہ",
+        "status_expired": "ختم شدہ",
+        "no_certificates_found": "کوئی سرٹیفکیٹ نہیں ملا",
+        "get_started_message": "شروع کرنے کے لیے اپنا پہلا ٹریننگ سرٹیفکیٹ بنائیں۔",
+        "certificate_number": "سرٹیفکیٹ #{{number}}",
+        "company": "کمپنی",
+        "issuer": "جاری کنندہ",
+        "issued": "جاری کردہ",
+        "valid_until": "تک درست",
+        "training": "ٹریننگ",
+        "generate_training_certificate": "ٹریننگ سرٹیفکیٹ بنائیں",
+        "generator_implementation_message": "کوالٹی کے لیے مخصوص ٹریننگ سرٹیفکیٹس کے لیے سرٹیفکیٹ جنریٹر کمپوننٹ نافذ کیا جائے گا۔",
+        "stats": {
+          "total_certificates": "کل سرٹیفکیٹس",
+          "active": "فعال",
+          "revoked": "منسوخ شدہ",
+          "this_month": "اس ماہ"
+        }
       }
     },
     "maintenance": {
