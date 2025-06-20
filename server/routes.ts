@@ -128,9 +128,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new training
   app.post("/api/trainings", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertTrainingSchema.parse(req.body);
-      const training = await storage.createTraining(validatedData);
-      res.status(201).json(training);
+      // Handle both new quality training format and legacy format
+      const requestData = req.body;
+      
+      // If this is a quality training (has title, description, etc.), use minimal validation
+      if (requestData.type === 'quality' || requestData.title) {
+        // For quality trainings, only require essential fields
+        const qualityTrainingData = {
+          ...requestData,
+          // Provide fallback for legacy required field
+          date: requestData.scheduledDate || requestData.date || new Date().toISOString(),
+        };
+        
+        const training = await storage.createTraining(qualityTrainingData);
+        res.status(201).json(training);
+      } else {
+        // Use full validation for legacy training format
+        const validatedData = insertTrainingSchema.parse(requestData);
+        const training = await storage.createTraining(validatedData);
+        res.status(201).json(training);
+      }
     } catch (error) {
       console.error("Error creating training:", error);
       if (error instanceof z.ZodError) {
