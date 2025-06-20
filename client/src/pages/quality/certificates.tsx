@@ -189,11 +189,11 @@ export default function CertificatesPage() {
             {filteredCertificates.length === 0 ? (
               <div className="text-center py-12">
                 <Award className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No certificates found</h3>
-                <p className="text-gray-500 mb-4">Generate your first training certificate to get started.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t("quality.certificates.no_certificates_found")}</h3>
+                <p className="text-gray-500 mb-4">{t("quality.certificates.get_started_message")}</p>
                 <Button onClick={() => setShowGenerator(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Generate Certificate
+                  {t("quality.certificates.generate_certificate")}
                 </Button>
               </div>
             ) : (
@@ -204,7 +204,7 @@ export default function CertificatesPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-4 mb-2">
                           <h3 className="text-lg font-semibold text-gray-900">
-                            Certificate #{certificate.certificateNumber}
+                            {t("quality.certificates.certificate_number", { number: certificate.certificateNumber })}
                           </h3>
                           <Badge className={
                             certificate.status === "active" ? "bg-green-100 text-green-800" :
@@ -212,31 +212,31 @@ export default function CertificatesPage() {
                             certificate.status === "expired" ? "bg-gray-100 text-gray-800" :
                             "bg-blue-100 text-blue-800"
                           }>
-                            {certificate.status}
+                            {t(`quality.certificates.status_${certificate.status}`)}
                           </Badge>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-2">
                             <Building className="h-4 w-4" />
-                            Company: {certificate.companyName}
+                            {t("quality.certificates.company")}: {certificate.companyName}
                           </div>
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4" />
-                            Issuer: {certificate.issuerName}
+                            {t("quality.certificates.issuer")}: {certificate.issuerName}
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
-                            Issued: {format(new Date(certificate.issuedDate), "MMM dd, yyyy")}
+                            {t("quality.certificates.issued")}: {format(new Date(certificate.issuedDate), "MMM dd, yyyy")}
                           </div>
                         </div>
                         {certificate.validUntil && (
                           <div className="mt-2 text-sm text-gray-600">
-                            <strong>Valid Until:</strong> {format(new Date(certificate.validUntil), "MMM dd, yyyy")}
+                            <strong>{t("quality.certificates.valid_until")}:</strong> {format(new Date(certificate.validUntil), "MMM dd, yyyy")}
                           </div>
                         )}
                         {getTrainingInfo(certificate.trainingId) && (
                           <div className="mt-2 text-sm text-gray-700">
-                            <strong>Training:</strong> {getTrainingInfo(certificate.trainingId)?.sections} - {getTrainingInfo(certificate.trainingId)?.trainee}
+                            <strong>{t("quality.certificates.training")}:</strong> {getTrainingInfo(certificate.trainingId)?.sections} - {getTrainingInfo(certificate.trainingId)?.trainee}
                           </div>
                         )}
                       </div>
@@ -261,10 +261,10 @@ export default function CertificatesPage() {
       <Dialog open={showGenerator} onOpenChange={setShowGenerator}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Generate Training Certificate</DialogTitle>
+            <DialogTitle>{t("quality.certificates.generate_training_certificate")}</DialogTitle>
           </DialogHeader>
           <div className="p-4 text-center text-gray-500">
-            Certificate generator component will be implemented for quality-specific training certificates.
+            {t("quality.certificates.generator_implementation_message")}
           </div>
         </DialogContent>
       </Dialog>

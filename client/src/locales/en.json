@@ -856,6 +856,34 @@
                     "in_progress": "In Progress",
                     "this_month": "This Month"
                 }
+            },
+            "certificates": {
+                "title": "Quality Training Certificates",
+                "description": "Manage and track all quality training completion certificates",
+                "generate_certificate": "Generate Certificate",
+                "certificate_list": "Training Certificates",
+                "search_placeholder": "Search certificates...",
+                "filter_by_status": "Filter by status",
+                "all_status": "All Status",
+                "status_active": "Active",
+                "status_revoked": "Revoked",
+                "status_expired": "Expired",
+                "no_certificates_found": "No certificates found",
+                "get_started_message": "Generate your first training certificate to get started.",
+                "certificate_number": "Certificate #{{number}}",
+                "company": "Company",
+                "issuer": "Issuer",
+                "issued": "Issued",
+                "valid_until": "Valid Until",
+                "training": "Training",
+                "generate_training_certificate": "Generate Training Certificate",
+                "generator_implementation_message": "Certificate generator component will be implemented for quality-specific training certificates.",
+                "stats": {
+                    "total_certificates": "Total Certificates",
+                    "active": "Active",
+                    "revoked": "Revoked",
+                    "this_month": "This Month"
+                }
             }
         },
         "system": {

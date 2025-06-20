@@ -1377,6 +1377,34 @@
           "this_month": "هذا الشهر"
         }
       },
+      "certificates": {
+        "title": "شهادات التدريب على الجودة",
+        "description": "إدارة وتتبع جميع شهادات إكمال التدريب على الجودة",
+        "generate_certificate": "إنشاء شهادة",
+        "certificate_list": "شهادات التدريب",
+        "search_placeholder": "البحث في الشهادات...",
+        "filter_by_status": "فلترة حسب الحالة",
+        "all_status": "جميع الحالات",
+        "status_active": "نشطة",
+        "status_revoked": "مُلغاة",
+        "status_expired": "منتهية الصلاحية",
+        "no_certificates_found": "لم يتم العثور على شهادات",
+        "get_started_message": "قم بإنشاء أول شهادة تدريب للبدء.",
+        "certificate_number": "الشهادة رقم {{number}}",
+        "company": "الشركة",
+        "issuer": "جهة الإصدار",
+        "issued": "تاريخ الإصدار",
+        "valid_until": "صالحة حتى",
+        "training": "التدريب",
+        "generate_training_certificate": "إنشاء شهادة تدريب",
+        "generator_implementation_message": "سيتم تنفيذ مكون مولد الشهادات للشهادات التدريبية المخصصة للجودة.",
+        "stats": {
+          "total_certificates": "إجمالي الشهادات",
+          "active": "نشطة",
+          "revoked": "مُلغاة",
+          "this_month": "هذا الشهر"
+        }
+      },
       "add_violation": "إضافة مخالفة",
       "add_violation_description": "تسجيل مخالفة جديدة للجودة",
       "edit_violation": "تعديل المخالفة",
