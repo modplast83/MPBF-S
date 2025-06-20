@@ -1058,7 +1058,7 @@ export const insertHrComplaintSchema = createInsertSchema(hrComplaints).omit({ i
 export type InsertHrComplaint = z.infer<typeof insertHrComplaintSchema>;
 export type HrComplaint = typeof hrComplaints.$inferSelect;
 
-// Training Module - Enhanced for Quality Training
+// Training Module - Enhanced for General Employee Training
 export const trainings = pgTable("trainings", {
   id: serial("id").primaryKey(),
   trainingId: text("training_id").notNull().unique(), // Custom training ID
@@ -1077,6 +1077,10 @@ export const trainings = pgTable("trainings", {
   prerequisites: text("prerequisites").array().default(sql`'{}'`), // Prerequisites
   learningObjectives: text("learning_objectives").array().default(sql`'{}'`), // Learning objectives
   type: text("type").default("general"), // "general" or "quality"
+  // General Training fields
+  trainingCategory: text("training_category"), // "Extrusion", "Printing", "Cutting", "Maintenance", "Warehouse", "Safety"
+  trainingFields: text("training_fields").array().default(sql`'{}'`), // Array of specific training fields
+  notes: text("notes"), // Training notes
   // Legacy fields for backward compatibility
   date: timestamp("date"),
   traineeId: text("trainee_id").references(() => users.id),
@@ -1091,10 +1095,12 @@ export const trainings = pgTable("trainings", {
 });
 
 export const insertTrainingSchema = createInsertSchema(trainings).omit({ id: true, createdAt: true, updatedAt: true }).extend({
-  date: z.string().transform((str) => new Date(str)).optional(),
+  date: z.union([z.string(), z.date()]).transform((val) => typeof val === 'string' ? new Date(val) : val).optional(),
   scheduledDate: z.union([z.string(), z.date()]).transform((val) => typeof val === 'string' ? new Date(val) : val).optional(),
   traineeId: z.string().optional(),
   trainingSection: z.string().optional(),
+  trainingCategory: z.string().optional(),
+  trainingFields: z.array(z.string()).optional(),
   numberOfDays: z.number().optional(),
   supervisorId: z.string().optional(),
 });
@@ -1114,7 +1120,25 @@ export const insertTrainingPointSchema = createInsertSchema(trainingPoints).omit
 export type InsertTrainingPoint = z.infer<typeof insertTrainingPointSchema>;
 export type TrainingPoint = typeof trainingPoints.$inferSelect;
 
-// Training Evaluations (linking trainings to training points with evaluations)
+// Training Field Evaluations (for general training system)
+export const trainingFieldEvaluations = pgTable("training_field_evaluations", {
+  id: serial("id").primaryKey(),
+  trainingId: integer("training_id").notNull().references(() => trainings.id, { onDelete: "cascade" }),
+  trainingField: text("training_field").notNull(), // Specific training field being evaluated
+  status: text("status").notNull(), // "Pass", "Not Pass", "Not Evaluated"
+  notes: text("notes"),
+  evaluatedAt: timestamp("evaluated_at"),
+  evaluatedBy: text("evaluated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  uniqueTrainingField: unique().on(table.trainingId, table.trainingField),
+}));
+
+export const insertTrainingFieldEvaluationSchema = createInsertSchema(trainingFieldEvaluations).omit({ id: true, createdAt: true });
+export type InsertTrainingFieldEvaluation = z.infer<typeof insertTrainingFieldEvaluationSchema>;
+export type TrainingFieldEvaluation = typeof trainingFieldEvaluations.$inferSelect;
+
+// Training Evaluations (linking trainings to training points with evaluations) - Legacy support
 export const trainingEvaluations = pgTable("training_evaluations", {
   id: serial("id").primaryKey(),
   trainingId: integer("training_id").notNull().references(() => trainings.id, { onDelete: "cascade" }),

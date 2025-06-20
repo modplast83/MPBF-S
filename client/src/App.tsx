@@ -33,6 +33,8 @@ import QualityPenalties from "@/pages/quality/penalties";
 import QualityCorrectiveActions from "@/pages/quality/corrective-actions";
 import UnifiedQualityDashboard from "@/pages/quality/unified-dashboard";
 import QualityTraining from "@/pages/quality/training";
+// General Training imports
+import GeneralTrainingPage from "@/pages/training/general-training";
 import Database from "@/pages/system/database";
 import Permissions from "@/pages/system/permissions-section-based";
 import ImportExport from "@/pages/system/import-export";
@@ -160,6 +162,8 @@ function App() {
                     <ProtectedRoute path="/hr/employee-of-month" component={EmployeeOfMonthPage} module="Employee of the Month" />
                     <ProtectedRoute path="/hr/violations-complaints" component={ViolationsComplaintsPage} module="Violation and Complaint" />
                     <ProtectedRoute path="/hr/violation-trends" component={ViolationTrendsPage} module="Violation Trends" />
+                    {/* Training Module Routes */}
+                    <ProtectedRoute path="/training/general" component={GeneralTrainingPage} module="General Training" />
                     {/* Quality Module Routes */}
                     <ProtectedRoute path="/quality/training" component={QualityTrainingPage} module="Training" />
                     <ProtectedRoute path="/quality/certificates" component={QualityCertificatesPage} module="Certificates" />
