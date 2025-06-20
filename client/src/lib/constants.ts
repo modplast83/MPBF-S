@@ -98,6 +98,7 @@ export const SIDEBAR_ITEMS = [
           { title: "Sections", path: "/setup/sections" },
           { title: "Machines", path: "/setup/machines" },
           { title: "Users", path: "/setup/users" },
+          { title: "Quality Check Types", path: "/quality/check-types" },
         ],
       },
       {
@@ -207,7 +208,6 @@ export const SIDEBAR_ITEMS = [
         path: "/system",
         icon: "admin_panel_settings",
         subItems: [
-          { title: "Quality Check Types", path: "/quality/check-types" },
           { title: "Database", path: "/system/database" },
           { title: "Permissions", path: "/system/permissions" },
           { title: "Import & Export", path: "/system/import-export" },

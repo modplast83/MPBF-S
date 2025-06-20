@@ -228,6 +228,7 @@
             "sections": "Sections",
             "machines": "Machines",
             "users": "Users",
+            "quality_check_types": "Quality",
             "mix_colors": "Mix Colors",
             "production": "Production",
             "orders": "Orders",
