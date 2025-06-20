@@ -218,14 +218,16 @@ export class BottleneckStorage {
   }
 
   private calculateEstimatedDelay(actualEfficiency: number, targetEfficiency: number): number {
-    if (actualEfficiency <= 0 || targetEfficiency <= 0) return 0;
+    if (actualEfficiency <= 0 || targetEfficiency <= 0 || !isFinite(actualEfficiency) || !isFinite(targetEfficiency)) return 0;
     const efficiencyRatio = targetEfficiency / actualEfficiency;
+    if (!isFinite(efficiencyRatio)) return 0;
     return Math.ceil((efficiencyRatio - 1) * 8); // Estimate delay in hours for an 8-hour shift
   }
 
   private calculateDelayFromRate(actualRate: number, targetRate: number): number {
-    if (actualRate <= 0 || targetRate <= 0) return 0;
+    if (actualRate <= 0 || targetRate <= 0 || !isFinite(actualRate) || !isFinite(targetRate)) return 0;
     const rateRatio = targetRate / actualRate;
+    if (!isFinite(rateRatio)) return 0;
     return Math.ceil((rateRatio - 1) * 4); // Estimate delay in hours
   }
 
@@ -270,7 +272,7 @@ export class BottleneckStorage {
     
     return {
       averageEfficiency: sectionMetrics.length > 0 ? 
-        sectionMetrics.reduce((sum, m) => sum + m.efficiency, 0) / sectionMetrics.length : 0,
+        Math.max(0, sectionMetrics.reduce((sum, m) => sum + (m.efficiency || 0), 0) / sectionMetrics.length) : 0,
       dailyTrends: this.groupMetricsByDay(sectionMetrics),
       alertCount: this.bottleneckAlerts.filter(a => 
         a.sectionId === sectionId && 
@@ -292,10 +294,10 @@ export class BottleneckStorage {
     return Object.values(grouped).map((day: any) => ({
       date: day.date,
       averageEfficiency: day.metrics.length > 0 ? 
-        day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + m.efficiency, 0) / day.metrics.length : 0,
+        Math.max(0, day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + (m.efficiency || 0), 0) / day.metrics.length) : 0,
       totalDowntime: day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + (m.downtime || 0), 0),
       averageRate: day.metrics.length > 0 ?
-        day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + m.actualRate, 0) / day.metrics.length : 0
+        Math.max(0, day.metrics.reduce((sum: number, m: ProductionMetrics) => sum + (m.actualRate || 0), 0) / day.metrics.length) : 0
     }));
   }
 }
