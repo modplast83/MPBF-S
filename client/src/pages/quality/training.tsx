@@ -189,31 +189,31 @@ export default function TrainingPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Training Sessions</CardTitle>
+          <CardTitle>{t("quality.training.training_sessions")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4 mb-6">
+          <div className={`flex gap-4 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4`} />
                 <Input
-                  placeholder="Search trainings..."
+                  placeholder={t("quality.training.search_placeholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className={isRTL ? 'pr-10' : 'pl-10'}
                 />
               </div>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by status" />
+                <Filter className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                <SelectValue placeholder={t("quality.training.filter_by_status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="all">{t("quality.training.all_status")}</SelectItem>
+                <SelectItem value="completed">{t("quality.training.status_completed")}</SelectItem>
+                <SelectItem value="in_progress">{t("quality.training.status_in_progress")}</SelectItem>
+                <SelectItem value="cancelled">{t("quality.training.status_cancelled")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -223,51 +223,51 @@ export default function TrainingPage() {
             {filteredTrainings.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No training sessions found</h3>
-                <p className="text-gray-500 mb-4">Get started by creating your first training session.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t("quality.training.no_sessions_found")}</h3>
+                <p className="text-gray-500 mb-4">{t("quality.training.get_started_message")}</p>
                 <Button onClick={() => setShowForm(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Training
+                  <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {t("quality.training.create_training")}
                 </Button>
               </div>
             ) : (
               filteredTrainings.map((training: any) => (
                 <Card key={training.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-2">
+                        <div className={`flex items-center gap-4 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            Training #{training.trainingId}
+                            {t("quality.training.training_id", { id: training.trainingId })}
                           </h3>
                           {getStatusBadge(training.status)}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-2">
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <Users className="h-4 w-4" />
-                            Trainee: {training.traineeId}
+                            {t("quality.training.trainee")}: {training.traineeId}
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <Calendar className="h-4 w-4" />
-                            Date: {format(new Date(training.date), "MMM dd, yyyy")}
+                            {t("quality.training.date")}: {format(new Date(training.date), "MMM dd, yyyy")}
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <Clock className="h-4 w-4" />
-                            Duration: {training.numberOfDays} days
+                            {t("quality.training.duration")}: {training.numberOfDays} {t("quality.training.days")}
                           </div>
                         </div>
                         <div className="mt-2">
                           <p className="text-sm text-gray-700">
-                            <strong>Section:</strong> {training.trainingSection}
+                            <strong>{t("quality.training.section")}:</strong> {training.trainingSection}
                           </p>
                           {training.report && (
                             <p className="text-sm text-gray-700 mt-1">
-                              <strong>Report:</strong> {training.report}
+                              <strong>{t("quality.training.report")}:</strong> {training.report}
                             </p>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Button
                           variant="outline"
                           size="sm"
@@ -298,11 +298,11 @@ export default function TrainingPage() {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>
-              {editingTraining ? "Edit Training" : "Create New Training"}
+              {editingTraining ? t("quality.training.edit_training") : t("quality.training.create_new_training")}
             </DialogTitle>
           </DialogHeader>
           <div className="p-4 text-center text-gray-500">
-            Training form component will be implemented for quality-specific training management.
+            {t("quality.training.form_implementation_message")}
           </div>
         </DialogContent>
       </Dialog>

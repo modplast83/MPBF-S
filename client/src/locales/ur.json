@@ -906,7 +906,41 @@
       "resolution_notes": "حل کے نوٹس",
       "violation_created_success": "خلاف ورزی کامیابی سے بنائی گئی",
       "violation_updated_success": "خلاف ورزی کامیابی سے اپ ڈیٹ ہوئی",
-      "violation_deleted_success": "خلاف ورزی کامیابی سے حذف ہوئی"
+      "violation_deleted_success": "خلاف ورزی کامیابی سے حذف ہوئی",
+      "training": {
+        "title": "کوالٹی ٹریننگ مینجمنٹ",
+        "description": "کوالٹی ٹریننگ پروگرامز اور سرٹیفیکیشنز کو منظم اور ٹریک کریں",
+        "new_training": "نئی ٹریننگ",
+        "training_sessions": "ٹریننگ سیشن",
+        "search_placeholder": "ٹریننگز تلاش کریں...",
+        "filter_by_status": "اسٹیٹس کے ذریعے فلٹر کریں",
+        "all_status": "تمام اسٹیٹس",
+        "status_completed": "مکمل شدہ",
+        "status_in_progress": "جاری",
+        "status_cancelled": "منسوخ شدہ",
+        "no_sessions_found": "کوئی ٹریننگ سیشن نہیں ملا",
+        "get_started_message": "اپنا پہلا ٹریننگ سیشن بنا کر شروع کریں۔",
+        "create_training": "ٹریننگ بنائیں",
+        "training_id": "ٹریننگ #{{id}}",
+        "trainee": "ٹرینی",
+        "date": "تاریخ",
+        "duration": "مدت",
+        "days": "دن",
+        "section": "سیکشن",
+        "report": "رپورٹ",
+        "edit_training": "ٹریننگ میں ترمیم",
+        "create_new_training": "نئی ٹریننگ بنائیں",
+        "form_implementation_message": "کوالٹی کے لیے مخصوص ٹریننگ مینجمنٹ کے لیے ٹریننگ فارم کمپوننٹ نافذ کیا جائے گا۔",
+        "delete_confirm": "کیا آپ واقعی ٹریننگ {{id}} کو حذف کرنا چاہتے ہیں؟",
+        "delete_success": "ٹریننگ کامیابی سے حذف ہوگئی",
+        "delete_error": "ٹریننگ حذف کرنے میں ناکامی",
+        "stats": {
+          "total_trainings": "کل ٹریننگز",
+          "completed": "مکمل شدہ",
+          "in_progress": "جاری",
+          "this_month": "اس ماہ"
+        }
+      }
     },
     "maintenance": {
       "title": "مینٹیننس مینجمنٹ",

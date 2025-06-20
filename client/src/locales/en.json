@@ -822,7 +822,41 @@
             "unified_dashboard_desc": "All-in-one quality control dashboard",
             "unified_dashboard_details": "Access all quality management features in a professional, mobile-optimized interface.",
             "open_dashboard": "Open Dashboard",
-            "coming_soon": "This feature is coming soon."
+            "coming_soon": "This feature is coming soon.",
+            "training": {
+                "title": "Quality Training Management",
+                "description": "Organize and track quality training programs and certifications",
+                "new_training": "New Training",
+                "training_sessions": "Training Sessions",
+                "search_placeholder": "Search trainings...",
+                "filter_by_status": "Filter by status",
+                "all_status": "All Status",
+                "status_completed": "Completed",
+                "status_in_progress": "In Progress",
+                "status_cancelled": "Cancelled",
+                "no_sessions_found": "No training sessions found",
+                "get_started_message": "Get started by creating your first training session.",
+                "create_training": "Create Training",
+                "training_id": "Training #{{id}}",
+                "trainee": "Trainee",
+                "date": "Date",
+                "duration": "Duration",
+                "days": "days",
+                "section": "Section",
+                "report": "Report",
+                "edit_training": "Edit Training",
+                "create_new_training": "Create New Training",
+                "form_implementation_message": "Training form component will be implemented for quality-specific training management.",
+                "delete_confirm": "Are you sure you want to delete training {{id}}?",
+                "delete_success": "Training deleted successfully",
+                "delete_error": "Failed to delete training",
+                "stats": {
+                    "total_trainings": "Total Trainings",
+                    "completed": "Completed",
+                    "in_progress": "In Progress",
+                    "this_month": "This Month"
+                }
+            }
         },
         "system": {
             "title": "System Management",
