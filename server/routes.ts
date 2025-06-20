@@ -1935,6 +1935,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Transform frontend data to database format
       const dbFormatData = adaptToDatabase(req.body);
       
+      // Generate a unique ID for the quality check type
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      dbFormatData.id = `QCT-${timestamp}-${randomSuffix}`;
+      
       // Create the quality check type in the database
       const qualityCheckType = await storage.createQualityCheckType(dbFormatData);
       

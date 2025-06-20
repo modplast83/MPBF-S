@@ -69,7 +69,7 @@ export default function QualityCheckTypes() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: CheckTypeForm) => apiRequest("/api/quality-check-types", "POST", data),
+    mutationFn: (data: CheckTypeForm) => apiRequest("POST", "/api/quality-check-types", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quality-check-types"] });
       toast({ title: t("quality.check_type_created_success", "Quality check type created successfully") });
@@ -86,7 +86,7 @@ export default function QualityCheckTypes() {
 
   const updateMutation = useMutation({
     mutationFn: (data: CheckTypeForm & { id: string }) => 
-      apiRequest(`/api/quality-check-types/${data.id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/quality-check-types/${data.id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quality-check-types"] });
       toast({ title: t("quality.check_type_updated_success", "Quality check type updated successfully") });
@@ -103,7 +103,7 @@ export default function QualityCheckTypes() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/quality-check-types/${id}`, "DELETE"),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/quality-check-types/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quality-check-types"] });
       toast({ title: t("quality.check_type_deleted_success", "Quality check type deleted successfully") });
