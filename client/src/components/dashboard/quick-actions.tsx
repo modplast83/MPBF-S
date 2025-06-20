@@ -325,7 +325,7 @@ export function QuickActions() {
             <DialogHeader>
               <DialogTitle>{t('quick_actions.create_quick_order')}</DialogTitle>
               <DialogDescription>
-                {t('quick_actions.create_quick_order_desc')}
+                Create a new order quickly by selecting customer and products
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -410,7 +410,7 @@ export function QuickActions() {
             <DialogHeader>
               <DialogTitle>{t('quick_actions.report_maintenance_issue')}</DialogTitle>
               <DialogDescription>
-                {t('quick_actions.submit_maintenance_request')}
+                Report a maintenance issue or equipment damage
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">

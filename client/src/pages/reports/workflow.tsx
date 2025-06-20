@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -941,6 +941,9 @@ export default function WorkflowReportsPage() {
               <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>{t("reports.export_configuration")}</DialogTitle>
+                  <DialogDescription>
+                    Configure export settings for the workflow report
+                  </DialogDescription>
                 </DialogHeader>
                 
                 <div className="space-y-6">
