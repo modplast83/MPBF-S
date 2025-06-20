@@ -537,7 +537,7 @@ export function IntegratedQualityChecksManagement() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">{t("quality.no_job_order", "No Job Order")}</SelectItem>
-                          {jobOrders.map((jobOrder: any) => (
+                          {Array.isArray(jobOrders) && jobOrders.map((jobOrder: any) => (
                             <SelectItem key={jobOrder.id} value={jobOrder.id.toString()}>
                               {getJobOrderName(jobOrder.id)}
                             </SelectItem>
