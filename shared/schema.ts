@@ -365,50 +365,7 @@ export const insertCorrectiveActionSchema = createInsertSchema(correctiveActions
 export type InsertCorrectiveAction = z.infer<typeof insertCorrectiveActionSchema>;
 export type CorrectiveAction = typeof correctiveActions.$inferSelect;
 
-// Quality Violations
-export const qualityViolations = pgTable("quality_violations", {
-  id: serial("id").primaryKey(),
-  qualityCheckId: integer("quality_check_id").notNull().references(() => qualityChecks.id),
-  reportedBy: text("reported_by").references(() => users.id),
-  violationType: text("violation_type").notNull(), // "procedural", "material", "equipment", "personnel"
-  severity: text("severity").notNull(), // "minor", "major", "critical"
-  description: text("description").notNull(),
-  status: text("status").notNull().default("open"), // "open", "investigating", "resolved", "dismissed"
-  reportDate: timestamp("report_date").defaultNow().notNull(),
-  resolutionDate: timestamp("resolution_date"),
-  affectedArea: text("affected_area").notNull(), // "extrusion", "printing", "cutting", etc.
-  rootCause: text("root_cause"),
-  imageUrls: text("image_urls").array(),
-  notes: text("notes"),
-});
 
-export const insertQualityViolationSchema = createInsertSchema(qualityViolations).omit({ id: true, reportDate: true });
-export type InsertQualityViolation = z.infer<typeof insertQualityViolationSchema>;
-export type QualityViolation = typeof qualityViolations.$inferSelect;
-
-// Penalties for Quality Violations
-export const qualityPenalties = pgTable("quality_penalties", {
-  id: serial("id").primaryKey(),
-  violationId: integer("violation_id").notNull().references(() => qualityViolations.id),
-  assignedTo: text("assigned_to").notNull().references(() => users.id),
-  assignedBy: text("assigned_by").notNull().references(() => users.id),
-  penaltyType: text("penalty_type").notNull(), // "warning", "financial", "training", "suspension"
-  description: text("description").notNull(),
-  amount: doublePrecision("amount"), // For financial penalties
-  currency: text("currency"), // For financial penalties
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date"),
-  status: text("status").notNull().default("pending"), // "pending", "active", "completed", "appealed", "cancelled"
-  verifiedBy: text("verified_by").references(() => users.id),
-  verificationDate: timestamp("verification_date"),
-  comments: text("comments"),
-  appealDetails: text("appeal_details"),
-  supportingDocuments: text("supporting_documents").array(),
-});
-
-export const insertQualityPenaltySchema = createInsertSchema(qualityPenalties).omit({ id: true });
-export type InsertQualityPenalty = z.infer<typeof insertQualityPenaltySchema>;
-export type QualityPenalty = typeof qualityPenalties.$inferSelect;
 
 // SMS Messages with Professional Notifications
 export const smsMessages = pgTable("sms_messages", {
