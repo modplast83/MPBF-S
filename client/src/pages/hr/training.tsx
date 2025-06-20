@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { Calendar, User, Clock, CheckCircle, XCircle, Briefcase, AlertTriangle, GraduationCap, FileText, Users, Trophy, Award, Printer, Download } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
+import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 
 interface Training {
@@ -71,6 +72,7 @@ type TrainingFormData = z.infer<typeof trainingFormSchema>;
 export default function TrainingPage() {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
@@ -144,13 +146,27 @@ export default function TrainingPage() {
         credentials: 'include',
         body: JSON.stringify(trainingData),
       });
-      if (!response.ok) throw new Error('Failed to create training');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create training');
+      }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/trainings'] });
       setIsDialogOpen(false);
       form.reset();
+      toast({
+        title: "Training Created",
+        description: `Training ${data.trainingId} has been created successfully.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to create training. Please try again.",
+      });
     },
   });
 
