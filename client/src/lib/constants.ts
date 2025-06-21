@@ -145,7 +145,7 @@ export const SIDEBAR_ITEMS = [
           { title: "geofence_management", path: "/hr/geofences" },
           { title: "employee_of_the_month", path: "/hr/employee-of-month" },
           { title: "violation_and_complaint", path: "/hr/violations-complaints" },
-          { title: "Quality Training", path: "/quality/training" },
+          { title: "training_management", path: "/hr/training" },
         ],
       },
       {
