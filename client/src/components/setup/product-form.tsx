@@ -95,7 +95,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       rightF: product?.rightF || undefined,
       thickness: product?.thickness || undefined,
       thicknessOne: product?.thicknessOne || undefined,
-      printingCylinder: product?.printingCylinder || undefined,
+      printingCylinder: product?.printingCylinder || null,
       lengthCm: product?.lengthCm || undefined,
       cuttingLength: product?.cuttingLength || undefined,
       rawMaterial: product?.rawMaterial || "",
@@ -128,9 +128,12 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
   const watchedPrintingCylinder = form.watch("printingCylinder");
   
   useEffect(() => {
-    if (watchedPrintingCylinder !== undefined && watchedPrintingCylinder > 0) {
+    if (watchedPrintingCylinder !== undefined && watchedPrintingCylinder !== null && watchedPrintingCylinder > 0) {
       const calculatedLength = Math.round(watchedPrintingCylinder * 2.54);
       form.setValue("lengthCm", calculatedLength);
+    } else if (watchedPrintingCylinder === null) {
+      // Reset length when "Non" is selected
+      form.setValue("lengthCm", undefined);
     }
   }, [watchedPrintingCylinder, form]);
 
@@ -223,7 +226,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
         rightF: values.rightF !== undefined ? Number(values.rightF) : undefined,
         thickness: values.thickness !== undefined ? Number(values.thickness) : undefined,
         thicknessOne: values.thicknessOne !== undefined ? Number(values.thicknessOne) : undefined,
-        printingCylinder: values.printingCylinder !== undefined ? Number(values.printingCylinder) : undefined,
+        printingCylinder: values.printingCylinder !== undefined && values.printingCylinder !== null ? Number(values.printingCylinder) : null,
         lengthCm: values.lengthCm !== undefined ? Number(values.lengthCm) : undefined,
         cuttingLength: values.cuttingLength !== undefined ? Number(values.cuttingLength) : undefined,
         unitWeight: values.unitWeight !== undefined ? Number(values.unitWeight) : undefined,
@@ -525,8 +528,14 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
               <FormItem>
                 <FormLabel>Printing Cylinder (Inch)</FormLabel>
                 <Select
-                  onValueChange={(value) => field.onChange(parseFloat(value))}
-                  value={field.value ? field.value.toString() : ""}
+                  onValueChange={(value) => {
+                    if (value === "non") {
+                      field.onChange(null);
+                    } else {
+                      field.onChange(parseFloat(value));
+                    }
+                  }}
+                  value={field.value ? field.value.toString() : "non"}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -534,6 +543,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    <SelectItem value="non">Non</SelectItem>
                     {[8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 39].map((size) => (
                       <SelectItem key={size} value={size.toString()}>
                         {size}"
