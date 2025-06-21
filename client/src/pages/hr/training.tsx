@@ -292,7 +292,7 @@ export default function TrainingPage() {
     
     doc.setFontSize(12);
     doc.text(`Training ID: ${selectedTraining.trainingId}`, 20, 50);
-    doc.text(`Date: ${format(new Date(selectedTraining.date), 'MMM dd, yyyy')}`, 20, 60);
+    doc.text(`Date: ${selectedTraining.date ? format(new Date(selectedTraining.date), 'MMM dd, yyyy') : 'N/A'}`, 20, 60);
     doc.text(`Trainee: ${getUserName(selectedTraining.traineeId)}`, 20, 70);
     doc.text(`Supervisor: ${getUserName(selectedTraining.supervisorId)}`, 20, 80);
     doc.text(`Section: ${selectedTraining.trainingSection}`, 20, 90);
@@ -351,7 +351,7 @@ export default function TrainingPage() {
       doc.text(`Trainee: ${getUserName(training.traineeId)}`, 30, yPosition + 10);
       doc.text(`Section: ${training.trainingSection}`, 30, yPosition + 20);
       doc.text(`Status: ${training.status}`, 30, yPosition + 30);
-      doc.text(`Date: ${format(new Date(training.date), 'MMM dd, yyyy')}`, 30, yPosition + 40);
+      doc.text(`Date: ${training.date ? format(new Date(training.date), 'MMM dd, yyyy') : 'N/A'}`, 30, yPosition + 40);
       
       yPosition += 60;
       
@@ -382,7 +382,9 @@ export default function TrainingPage() {
     }
   };
 
-  const getTrainingSectionIcon = (section: string) => {
+  const getTrainingSectionIcon = (section: string | null | undefined) => {
+    if (!section) return <GraduationCap className="h-4 w-4" />;
+    
     switch (section.toLowerCase()) {
       case 'extrusion':
         return <Briefcase className="h-4 w-4" />;
@@ -598,7 +600,7 @@ export default function TrainingPage() {
                     <div>
                       <CardTitle className="text-lg">{training.trainingId}</CardTitle>
                       <p className="text-sm text-gray-600">
-                        {format(new Date(training.date), 'MMM dd, yyyy')}
+                        {training.date ? format(new Date(training.date), 'MMM dd, yyyy') : 'Date not set'}
                       </p>
                     </div>
                   </div>
