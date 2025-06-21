@@ -373,54 +373,161 @@ export default function TrainingPage() {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       
-      // Header
+      // Add company logo
+      try {
+        // Import and add the company logo
+        const logoImg = new Image();
+        logoImg.src = '/assets/FactoryLogoHPNGW Green.png';
+        logoImg.onload = () => {
+          try {
+            doc.addImage(logoImg, 'PNG', 20, 10, 30, 15);
+          } catch (imgError) {
+            console.log('Could not add logo to PDF');
+          }
+        };
+      } catch (logoError) {
+        console.log('Logo not available, continuing without logo');
+      }
+      
+      // Header with logo space
       doc.setFontSize(20);
       doc.text('Training Evaluation Report', pageWidth / 2, 30, { align: 'center' });
       
+      // Company info
+      doc.setFontSize(10);
+      doc.text('Manufacturing Training Department', pageWidth / 2, 40, { align: 'center' });
+      
+      // Training details
       doc.setFontSize(12);
-      doc.text(`Training ID: ${selectedTraining.trainingId || 'N/A'}`, 20, 50);
-      doc.text(`Date: ${selectedTraining.date ? format(new Date(selectedTraining.date), 'MMM dd, yyyy') : 'N/A'}`, 20, 60);
-      doc.text(`Trainee: ${getUserName(selectedTraining.traineeId) || 'N/A'}`, 20, 70);
-      doc.text(`Supervisor: ${getUserName(selectedTraining.supervisorId) || 'N/A'}`, 20, 80);
-      doc.text(`Section: ${selectedTraining.trainingSection || 'N/A'}`, 20, 90);
-      doc.text(`Duration: ${selectedTraining.numberOfDays || 0} days`, 20, 100);
+      doc.text(`Training ID: ${selectedTraining.trainingId || 'N/A'}`, 20, 60);
+      doc.text(`Date: ${selectedTraining.date ? format(new Date(selectedTraining.date), 'MMM dd, yyyy') : 'N/A'}`, 20, 70);
+      doc.text(`Trainee: ${getUserName(selectedTraining.traineeId) || 'N/A'}`, 20, 80);
+      doc.text(`Supervisor: ${getUserName(selectedTraining.supervisorId) || 'N/A'}`, 20, 90);
+      doc.text(`Section: ${selectedTraining.trainingSection || 'N/A'}`, 20, 100);
+      doc.text(`Duration: ${selectedTraining.numberOfDays || 0} days`, 20, 110);
       
-      // Evaluation Results
+      // Evaluation Results - Only show evaluated points
       doc.setFontSize(14);
-      doc.text('Training Point Evaluations:', 20, 120);
+      doc.text('Training Point Evaluations:', 20, 130);
       
-      let yPosition = 140;
+      let yPosition = 150;
       const activePoints = trainingPoints.filter(point => point.isActive);
       
-      if (activePoints.length === 0) {
+      // Filter to only include points that have been evaluated (pass or not_pass)
+      const evaluatedPoints = activePoints.filter(point => {
+        const evaluation = evaluations.find(e => 
+          e.trainingId === selectedTraining.id && e.trainingPointId === point.id
+        );
+        return evaluation && (evaluation.status === 'pass' || evaluation.status === 'not_pass');
+      });
+      
+      if (evaluatedPoints.length === 0) {
         doc.setFontSize(11);
-        doc.text('No training points available', 25, yPosition);
-        yPosition += 15;
+        doc.text('No training points have been evaluated yet', 25, yPosition);
+        yPosition += 20;
       } else {
-        activePoints.forEach((point) => {
+        // Group by status for better organization
+        const passedPoints = evaluatedPoints.filter(point => {
           const evaluation = evaluations.find(e => 
             e.trainingId === selectedTraining.id && e.trainingPointId === point.id
           );
-          
-          doc.setFontSize(11);
-          doc.text(`${point.name || 'Unknown Point'}:`, 25, yPosition);
-          const status = evaluation?.status?.replace('_', ' ') || 'Not Evaluated';
-          doc.text(`Status: ${status}`, 120, yPosition);
-          
-          if (evaluation?.notes) {
-            yPosition += 10;
-            doc.setFontSize(9);
-            doc.text(`Notes: ${evaluation.notes}`, 25, yPosition);
-            doc.setFontSize(11);
-          }
-          
+          return evaluation?.status === 'pass';
+        });
+        
+        const failedPoints = evaluatedPoints.filter(point => {
+          const evaluation = evaluations.find(e => 
+            e.trainingId === selectedTraining.id && e.trainingPointId === point.id
+          );
+          return evaluation?.status === 'not_pass';
+        });
+        
+        // Show passed points
+        if (passedPoints.length > 0) {
+          doc.setFontSize(12);
+          doc.setTextColor(0, 150, 0); // Green
+          doc.text('✓ PASSED TRAINING POINTS:', 25, yPosition);
+          doc.setTextColor(0, 0, 0); // Reset to black
           yPosition += 15;
           
-          if (yPosition > 250) {
-            doc.addPage();
-            yPosition = 30;
-          }
-        });
+          passedPoints.forEach((point) => {
+            const evaluation = evaluations.find(e => 
+              e.trainingId === selectedTraining.id && e.trainingPointId === point.id
+            );
+            
+            doc.setFontSize(11);
+            doc.text(`• ${point.name || 'Unknown Point'}`, 30, yPosition);
+            doc.text('PASS', 150, yPosition);
+            
+            if (evaluation?.notes) {
+              yPosition += 10;
+              doc.setFontSize(9);
+              doc.text(`  Notes: ${evaluation.notes}`, 35, yPosition);
+              doc.setFontSize(11);
+            }
+            
+            yPosition += 15;
+            
+            if (yPosition > 250) {
+              doc.addPage();
+              yPosition = 30;
+            }
+          });
+          yPosition += 10;
+        }
+        
+        // Show failed points
+        if (failedPoints.length > 0) {
+          doc.setFontSize(12);
+          doc.setTextColor(200, 0, 0); // Red
+          doc.text('✗ FAILED TRAINING POINTS:', 25, yPosition);
+          doc.setTextColor(0, 0, 0); // Reset to black
+          yPosition += 15;
+          
+          failedPoints.forEach((point) => {
+            const evaluation = evaluations.find(e => 
+              e.trainingId === selectedTraining.id && e.trainingPointId === point.id
+            );
+            
+            doc.setFontSize(11);
+            doc.text(`• ${point.name || 'Unknown Point'}`, 30, yPosition);
+            doc.text('NOT PASS', 150, yPosition);
+            
+            if (evaluation?.notes) {
+              yPosition += 10;
+              doc.setFontSize(9);
+              doc.text(`  Notes: ${evaluation.notes}`, 35, yPosition);
+              doc.setFontSize(11);
+            }
+            
+            yPosition += 15;
+            
+            if (yPosition > 250) {
+              doc.addPage();
+              yPosition = 30;
+            }
+          });
+          yPosition += 10;
+        }
+        
+        // Summary
+        doc.setFontSize(12);
+        doc.text('EVALUATION SUMMARY:', 25, yPosition);
+        yPosition += 15;
+        
+        doc.setFontSize(11);
+        doc.text(`Total Points Evaluated: ${evaluatedPoints.length}`, 30, yPosition);
+        yPosition += 10;
+        doc.setTextColor(0, 150, 0);
+        doc.text(`Passed: ${passedPoints.length}`, 30, yPosition);
+        yPosition += 10;
+        doc.setTextColor(200, 0, 0);
+        doc.text(`Failed: ${failedPoints.length}`, 30, yPosition);
+        doc.setTextColor(0, 0, 0);
+        yPosition += 10;
+        
+        const passPercentage = evaluatedPoints.length > 0 ? Math.round((passedPoints.length / evaluatedPoints.length) * 100) : 0;
+        doc.text(`Pass Rate: ${passPercentage}%`, 30, yPosition);
+        yPosition += 15;
       }
       
       // Report section
@@ -430,7 +537,48 @@ export default function TrainingPage() {
         doc.setFontSize(11);
         const reportLines = doc.splitTextToSize(selectedTraining.report, pageWidth - 40);
         doc.text(reportLines, 20, yPosition + 35);
+        yPosition += 50;
       }
+      
+      // Add signature section at the bottom
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let signatureY = Math.max(yPosition + 30, pageHeight - 60);
+      
+      // Check if we need a new page for signatures
+      if (signatureY > pageHeight - 60) {
+        doc.addPage();
+        signatureY = 50;
+      }
+      
+      doc.setFontSize(12);
+      doc.text('SIGNATURES:', 20, signatureY);
+      signatureY += 20;
+      
+      doc.setFontSize(10);
+      // Trainee signature
+      doc.text('Trainee Signature:', 20, signatureY);
+      doc.text('_'.repeat(25), 70, signatureY);
+      doc.text('Date:', 140, signatureY);
+      doc.text('_'.repeat(15), 155, signatureY);
+      signatureY += 20;
+      
+      // Supervisor signature
+      doc.text('Supervisor Signature:', 20, signatureY);
+      doc.text('_'.repeat(25), 70, signatureY);
+      doc.text('Date:', 140, signatureY);
+      doc.text('_'.repeat(15), 155, signatureY);
+      signatureY += 20;
+      
+      // HR signature
+      doc.text('HR Representative:', 20, signatureY);
+      doc.text('_'.repeat(25), 70, signatureY);
+      doc.text('Date:', 140, signatureY);
+      doc.text('_'.repeat(15), 155, signatureY);
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.text(`Generated on: ${format(new Date(), 'MMM dd, yyyy HH:mm')}`, 20, pageHeight - 20);
+      doc.text('Manufacturing Training Department', pageWidth - 80, pageHeight - 20);
       
       // Generate filename with timestamp
       const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
