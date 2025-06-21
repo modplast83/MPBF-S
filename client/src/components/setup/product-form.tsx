@@ -96,7 +96,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       thickness: product?.thickness || undefined,
       thicknessOne: product?.thicknessOne || undefined,
       printingCylinder: product?.printingCylinder || null,
-      lengthCm: product?.lengthCm || undefined,
+      lengthCm: product?.lengthCm === null ? "Not Printed" : (product?.lengthCm || undefined),
       cuttingLength: product?.cuttingLength || undefined,
       rawMaterial: product?.rawMaterial || "",
       masterBatchId: product?.masterBatchId || "none",
@@ -132,8 +132,8 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
       const calculatedLength = Math.round(watchedPrintingCylinder * 2.54);
       form.setValue("lengthCm", calculatedLength);
     } else if (watchedPrintingCylinder === null) {
-      // Reset length when "Non" is selected
-      form.setValue("lengthCm", undefined);
+      // Set "Not Printed" when "Non" is selected
+      form.setValue("lengthCm", "Not Printed");
     }
   }, [watchedPrintingCylinder, form]);
 
@@ -227,7 +227,7 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
         thickness: values.thickness !== undefined ? Number(values.thickness) : undefined,
         thicknessOne: values.thicknessOne !== undefined ? Number(values.thicknessOne) : undefined,
         printingCylinder: values.printingCylinder !== undefined && values.printingCylinder !== null ? Number(values.printingCylinder) : null,
-        lengthCm: values.lengthCm !== undefined ? Number(values.lengthCm) : undefined,
+        lengthCm: values.lengthCm === "Not Printed" ? null : (values.lengthCm !== undefined ? Number(values.lengthCm) : undefined),
         cuttingLength: values.cuttingLength !== undefined ? Number(values.cuttingLength) : undefined,
         unitWeight: values.unitWeight !== undefined ? Number(values.unitWeight) : undefined,
         
@@ -566,10 +566,9 @@ export function ProductForm({ product, onSuccess, preSelectedCustomerId, isDupli
                 <FormLabel>Length (cm) (Auto-calculated)</FormLabel>
                 <FormControl>
                   <Input 
-                    type="number" 
                     placeholder="Auto-calculated from printing cylinder"
                     {...field}
-                    value={field.value || ""}
+                    value={field.value === "Not Printed" ? "Not Printed" : (field.value || "")}
                     readOnly
                     className="bg-gray-50"
                   />
