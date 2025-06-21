@@ -152,7 +152,20 @@ export const customerProducts = pgTable("customer_products", {
   };
 });
 
-export const insertCustomerProductSchema = createInsertSchema(customerProducts).omit({ id: true });
+export const insertCustomerProductSchema = createInsertSchema(customerProducts).omit({ id: true }).extend({
+  width: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  leftF: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  rightF: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  thickness: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  thicknessOne: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  printingCylinder: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  lengthCm: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  cuttingLength: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  unitWeight: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  unitQty: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  packageKg: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+  volum: z.union([z.number(), z.string()]).transform(val => val === "" || val === null || val === undefined ? null : Number(val)).nullable(),
+});
 export type InsertCustomerProduct = z.infer<typeof insertCustomerProductSchema>;
 export type CustomerProduct = typeof customerProducts.$inferSelect;
 

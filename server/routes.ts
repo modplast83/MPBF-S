@@ -1170,29 +1170,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/customer-products", async (req: Request, res: Response) => {
     try {
-      console.log('POST /api/customer-products - Request body:', JSON.stringify(req.body, null, 2));
-      
       const validatedData = insertCustomerProductSchema.parse(req.body);
-      console.log('POST /api/customer-products - Validated data:', JSON.stringify(validatedData, null, 2));
       
       // Verify customer exists
       const customer = await storage.getCustomer(validatedData.customerId);
       if (!customer) {
-        console.log('POST /api/customer-products - Customer not found:', validatedData.customerId);
         return res.status(404).json({ message: "Customer not found" });
       }
       
       // Verify category exists
       const category = await storage.getCategory(validatedData.categoryId);
       if (!category) {
-        console.log('POST /api/customer-products - Category not found:', validatedData.categoryId);
         return res.status(404).json({ message: "Category not found" });
       }
       
       // Verify item exists
       const item = await storage.getItem(validatedData.itemId);
       if (!item) {
-        console.log('POST /api/customer-products - Item not found:', validatedData.itemId);
         return res.status(404).json({ message: "Item not found" });
       }
       
@@ -1200,23 +1194,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Verify master batch exists if provided
         const masterBatch = await storage.getMasterBatch(validatedData.masterBatchId);
         if (!masterBatch) {
-          console.log('POST /api/customer-products - Master batch not found:', validatedData.masterBatchId);
           return res.status(404).json({ message: "Master batch not found" });
         }
       }
       
-      console.log('POST /api/customer-products - Creating customer product...');
-      const customerProduct = await storage.createCustomerProduct(validatedData);
-      console.log('POST /api/customer-products - Customer product created successfully:', customerProduct.id);
+      // Clean up empty strings to null for numeric fields before database insertion
+      const cleanedData = {
+        ...validatedData,
+        width: validatedData.width === "" ? null : validatedData.width,
+        leftF: validatedData.leftF === "" ? null : validatedData.leftF,
+        rightF: validatedData.rightF === "" ? null : validatedData.rightF,
+        thickness: validatedData.thickness === "" ? null : validatedData.thickness,
+        thicknessOne: validatedData.thicknessOne === "" ? null : validatedData.thicknessOne,
+        printingCylinder: validatedData.printingCylinder === "" ? null : validatedData.printingCylinder,
+        lengthCm: validatedData.lengthCm === "" ? null : validatedData.lengthCm,
+        cuttingLength: validatedData.cuttingLength === "" ? null : validatedData.cuttingLength,
+        unitWeight: validatedData.unitWeight === "" ? null : validatedData.unitWeight,
+        unitQty: validatedData.unitQty === "" ? null : validatedData.unitQty,
+        packageKg: validatedData.packageKg === "" ? null : validatedData.packageKg,
+        volum: validatedData.volum === "" ? null : validatedData.volum,
+        // Clean up text fields that might have empty strings causing issues
+        packing: validatedData.packing === "" ? null : validatedData.packing,
+        cover: validatedData.cover === "" ? null : validatedData.cover,
+        knife: validatedData.knife === "" ? null : validatedData.knife,
+        notes: validatedData.notes === "" ? null : validatedData.notes,
+      };
+      
+      const customerProduct = await storage.createCustomerProduct(cleanedData);
       res.status(201).json(customerProduct);
     } catch (error) {
-      console.error('POST /api/customer-products - Error occurred:', error);
       if (error instanceof z.ZodError) {
-        console.error('POST /api/customer-products - Validation error:', error.errors);
         return res.status(400).json({ message: "Invalid customer product data", errors: error.errors });
       }
-      console.error('POST /api/customer-products - Unexpected error:', error);
-      res.status(500).json({ message: "Failed to create customer product", error: error.message });
+      res.status(500).json({ message: "Failed to create customer product" });
     }
   });
   
