@@ -251,6 +251,7 @@
             "analytics": "Analytics",
             "reports": "Reports",
             "quality_training": "Training",
+            "training_management": "Training Management",
             "checks": "Checks",
             "violations": "Violations",
             "penalties": "Penalties",

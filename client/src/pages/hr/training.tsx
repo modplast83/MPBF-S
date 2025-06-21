@@ -8,15 +8,19 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { Calendar, User, Clock, CheckCircle, XCircle, Briefcase, AlertTriangle, GraduationCap, FileText, Users, Trophy, Award, Printer, Download } from "lucide-react";
+import { Calendar, User, Clock, CheckCircle, XCircle, Briefcase, AlertTriangle, GraduationCap, FileText, Users, Trophy, Award, Printer, Download, Plus, Edit, Trash2, Eye } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
+import CertificateGenerator from "@/components/hr/certificate-generator";
+import CertificateList from "@/components/hr/certificate-list";
 
 interface Training {
   id: number;
@@ -50,6 +54,20 @@ interface TrainingEvaluation {
   evaluatedBy?: string;
 }
 
+interface TrainingCertificate {
+  id: number;
+  trainingId: number;
+  certificateNumber: string;
+  templateId: string;
+  issuedDate: string;
+  validUntil?: string;
+  issuerName: string;
+  issuerTitle: string;
+  companyName: string;
+  status: string;
+  customDesign?: any;
+}
+
 interface User {
   id: string;
   username: string;
@@ -77,6 +95,10 @@ export default function TrainingPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
   const [showEvaluationDialog, setShowEvaluationDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("trainings");
+  const [showTrainingPointDialog, setShowTrainingPointDialog] = useState(false);
+  const [showCertificateGenerator, setShowCertificateGenerator] = useState(false);
+  const [editingTrainingPoint, setEditingTrainingPoint] = useState<TrainingPoint | null>(null);
 
   const form = useForm<TrainingFormData>({
     resolver: zodResolver(trainingFormSchema),
@@ -102,6 +124,10 @@ export default function TrainingPage() {
 
   const { data: trainingPoints = [] } = useQuery<TrainingPoint[]>({
     queryKey: ['/api/training-points'],
+  });
+
+  const { data: trainingCertificates = [] } = useQuery<TrainingCertificate[]>({
+    queryKey: ['/api/training-certificates'],
   });
 
   const { data: evaluations = [] } = useQuery<TrainingEvaluation[]>({
@@ -184,6 +210,59 @@ export default function TrainingPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trainings'] });
       setSelectedTraining(null);
+    },
+  });
+
+  // Training Point mutations
+  const createTrainingPointMutation = useMutation({
+    mutationFn: async (data: { name: string; category: string }) => {
+      const response = await fetch('/api/training-points', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create training point');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/training-points'] });
+      setShowTrainingPointDialog(false);
+      setEditingTrainingPoint(null);
+      toast({ title: "Training point created successfully" });
+    },
+  });
+
+  const updateTrainingPointMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<TrainingPoint> }) => {
+      const response = await fetch(`/api/training-points/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update training point');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/training-points'] });
+      setShowTrainingPointDialog(false);
+      setEditingTrainingPoint(null);
+      toast({ title: "Training point updated successfully" });
+    },
+  });
+
+  const deleteTrainingPointMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/training-points/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to delete training point');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/training-points'] });
+      toast({ title: "Training point deleted successfully" });
     },
   });
 
@@ -579,7 +658,18 @@ export default function TrainingPage() {
         </div>
       </div>
 
-      {/* Training List */}
+      {/* Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="trainings">Training Sessions</TabsTrigger>
+          <TabsTrigger value="points">Training Points</TabsTrigger>
+          <TabsTrigger value="evaluations">Evaluations</TabsTrigger>
+          <TabsTrigger value="certificates">Certificates</TabsTrigger>
+        </TabsList>
+
+        {/* Training Sessions Tab */}
+        <TabsContent value="trainings" className="space-y-6">
+          {/* Training List */}
       <div className="grid gap-6">
         {trainingsLoading ? (
           <div className="text-center py-8">Loading trainings...</div>
@@ -665,7 +755,156 @@ export default function TrainingPage() {
             </Card>
           ))
         )}
-      </div>
+        </div>
+        </TabsContent>
+
+        {/* Training Points Tab */}
+        <TabsContent value="points" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-xl font-semibold">Training Points</h3>
+              <p className="text-gray-600">Manage training evaluation criteria and points</p>
+            </div>
+            <Button onClick={() => setShowTrainingPointDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Training Point
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {trainingPoints.map((point) => (
+                    <TableRow key={point.id}>
+                      <TableCell className="font-medium">{point.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{point.category}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={point.isActive ? "default" : "secondary"}>
+                          {point.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingTrainingPoint(point);
+                              setShowTrainingPointDialog(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => deleteTrainingPointMutation.mutate(point.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Training Evaluations Tab */}
+        <TabsContent value="evaluations" className="space-y-6">
+          <div>
+            <h3 className="text-xl font-semibold">Training Evaluations</h3>
+            <p className="text-gray-600">View and manage training evaluation results</p>
+          </div>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center py-8">
+                <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-600 mb-2">No Evaluations Selected</h3>
+                <p className="text-gray-500">
+                  Select a training session from the Training Sessions tab to view its evaluations.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Training Certificates Tab */}
+        <TabsContent value="certificates" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-xl font-semibold">Training Certificates</h3>
+              <p className="text-gray-600">Manage and generate training completion certificates</p>
+            </div>
+            <Button onClick={() => setShowCertificateGenerator(true)}>
+              <Award className="h-4 w-4 mr-2" />
+              Generate Certificate
+            </Button>
+          </div>
+
+          <CertificateList />
+        </TabsContent>
+      </Tabs>
+      
+      {/* Training Point Dialog */}
+      <Dialog open={showTrainingPointDialog} onOpenChange={setShowTrainingPointDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingTrainingPoint ? 'Edit Training Point' : 'Add Training Point'}
+            </DialogTitle>
+            <DialogDescription>
+              {editingTrainingPoint 
+                ? 'Update the training point details below.'
+                : 'Create a new training evaluation point.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <TrainingPointForm 
+            trainingPoint={editingTrainingPoint}
+            onSubmit={(data) => {
+              if (editingTrainingPoint) {
+                updateTrainingPointMutation.mutate({ id: editingTrainingPoint.id, data });
+              } else {
+                createTrainingPointMutation.mutate(data);
+              }
+            }}
+            onCancel={() => {
+              setShowTrainingPointDialog(false);
+              setEditingTrainingPoint(null);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Certificate Generator Dialog */}
+      <Dialog open={showCertificateGenerator} onOpenChange={setShowCertificateGenerator}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Generate Training Certificate</DialogTitle>
+            <DialogDescription>
+              Create a new training completion certificate
+            </DialogDescription>
+          </DialogHeader>
+          <CertificateGenerator 
+            onClose={() => setShowCertificateGenerator(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Training Evaluation Dialog */}
       <Dialog open={showEvaluationDialog} onOpenChange={setShowEvaluationDialog}>
@@ -812,4 +1051,60 @@ export default function TrainingPage() {
       </Dialog>
     </div>
   );
+
+  // Training Point Form Component
+  function TrainingPointForm({ 
+    trainingPoint, 
+    onSubmit, 
+    onCancel 
+  }: { 
+    trainingPoint: TrainingPoint | null; 
+    onSubmit: (data: { name: string; category: string }) => void;
+    onCancel: () => void;
+  }) {
+    const [name, setName] = useState(trainingPoint?.name || '');
+    const [category, setCategory] = useState(trainingPoint?.category || '');
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      onSubmit({ name, category });
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Name</label>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter training point name"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Category</label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="machine_operation">Machine Operation</SelectItem>
+              <SelectItem value="safety">Safety</SelectItem>
+              <SelectItem value="setup">Setup</SelectItem>
+              <SelectItem value="quality_control">Quality Control</SelectItem>
+              <SelectItem value="maintenance">Maintenance</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit">
+            {trainingPoint ? 'Update' : 'Create'}
+          </Button>
+        </div>
+      </form>
+    );
+  }
 }
