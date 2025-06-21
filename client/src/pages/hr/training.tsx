@@ -360,51 +360,97 @@ export default function TrainingPage() {
   };
 
   const printTrainingEvaluation = () => {
-    if (!selectedTraining) return;
-    
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    
-    // Header
-    doc.setFontSize(20);
-    doc.text('Training Evaluation Report', pageWidth / 2, 30, { align: 'center' });
-    
-    doc.setFontSize(12);
-    doc.text(`Training ID: ${selectedTraining.trainingId}`, 20, 50);
-    doc.text(`Date: ${selectedTraining.date ? format(new Date(selectedTraining.date), 'MMM dd, yyyy') : 'N/A'}`, 20, 60);
-    doc.text(`Trainee: ${getUserName(selectedTraining.traineeId)}`, 20, 70);
-    doc.text(`Supervisor: ${getUserName(selectedTraining.supervisorId)}`, 20, 80);
-    doc.text(`Section: ${selectedTraining.trainingSection}`, 20, 90);
-    doc.text(`Duration: ${selectedTraining.numberOfDays} days`, 20, 100);
-    
-    // Evaluation Results
-    doc.setFontSize(14);
-    doc.text('Training Point Evaluations:', 20, 120);
-    
-    let yPosition = 140;
-    trainingPoints.filter(point => point.isActive).forEach((point) => {
-      const evaluation = evaluations.find(e => e.trainingPointId === point.id);
-      doc.setFontSize(11);
-      doc.text(`${point.name}:`, 25, yPosition);
-      doc.text(`Status: ${evaluation?.status?.replace('_', ' ') || 'Not Evaluated'}`, 120, yPosition);
-      yPosition += 15;
-      
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 30;
-      }
-    });
-    
-    // Report section
-    if (selectedTraining.report) {
-      doc.setFontSize(14);
-      doc.text('Training Report:', 20, yPosition + 20);
-      doc.setFontSize(11);
-      const reportLines = doc.splitTextToSize(selectedTraining.report, pageWidth - 40);
-      doc.text(reportLines, 20, yPosition + 35);
+    if (!selectedTraining) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No training selected for printing.",
+      });
+      return;
     }
-    
-    doc.save(`Training_Evaluation_${selectedTraining.trainingId}.pdf`);
+
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      
+      // Header
+      doc.setFontSize(20);
+      doc.text('Training Evaluation Report', pageWidth / 2, 30, { align: 'center' });
+      
+      doc.setFontSize(12);
+      doc.text(`Training ID: ${selectedTraining.trainingId || 'N/A'}`, 20, 50);
+      doc.text(`Date: ${selectedTraining.date ? format(new Date(selectedTraining.date), 'MMM dd, yyyy') : 'N/A'}`, 20, 60);
+      doc.text(`Trainee: ${getUserName(selectedTraining.traineeId) || 'N/A'}`, 20, 70);
+      doc.text(`Supervisor: ${getUserName(selectedTraining.supervisorId) || 'N/A'}`, 20, 80);
+      doc.text(`Section: ${selectedTraining.trainingSection || 'N/A'}`, 20, 90);
+      doc.text(`Duration: ${selectedTraining.numberOfDays || 0} days`, 20, 100);
+      
+      // Evaluation Results
+      doc.setFontSize(14);
+      doc.text('Training Point Evaluations:', 20, 120);
+      
+      let yPosition = 140;
+      const activePoints = trainingPoints.filter(point => point.isActive);
+      
+      if (activePoints.length === 0) {
+        doc.setFontSize(11);
+        doc.text('No training points available', 25, yPosition);
+        yPosition += 15;
+      } else {
+        activePoints.forEach((point) => {
+          const evaluation = evaluations.find(e => 
+            e.trainingId === selectedTraining.id && e.trainingPointId === point.id
+          );
+          
+          doc.setFontSize(11);
+          doc.text(`${point.name || 'Unknown Point'}:`, 25, yPosition);
+          const status = evaluation?.status?.replace('_', ' ') || 'Not Evaluated';
+          doc.text(`Status: ${status}`, 120, yPosition);
+          
+          if (evaluation?.notes) {
+            yPosition += 10;
+            doc.setFontSize(9);
+            doc.text(`Notes: ${evaluation.notes}`, 25, yPosition);
+            doc.setFontSize(11);
+          }
+          
+          yPosition += 15;
+          
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 30;
+          }
+        });
+      }
+      
+      // Report section
+      if (selectedTraining.report) {
+        doc.setFontSize(14);
+        doc.text('Training Report:', 20, yPosition + 20);
+        doc.setFontSize(11);
+        const reportLines = doc.splitTextToSize(selectedTraining.report, pageWidth - 40);
+        doc.text(reportLines, 20, yPosition + 35);
+      }
+      
+      // Generate filename with timestamp
+      const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
+      const filename = `Training_Evaluation_${selectedTraining.trainingId || 'Unknown'}_${timestamp}.pdf`;
+      
+      doc.save(filename);
+      
+      toast({
+        title: "Success",
+        description: "Training evaluation report generated successfully.",
+      });
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to generate training evaluation report. Please try again.",
+      });
+    }
   };
 
   const printTrainingList = () => {
