@@ -100,7 +100,8 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <AuthProvider>
+      <DragDropContext onDragEnd={() => {}}>
+        <AuthProvider>
         {(authContext) => (
           <PermissionsProvider user={authContext.user}>
               <Switch>
