@@ -14,9 +14,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MixMaterialForm } from "@/components/production/mix-material-form";
 import { MixDetails } from "@/components/production/mix-details";
 import { AbaCalculator, AbaPrintTemplate } from "@/components/production/aba-calculator";
-import { AbaCalculatorConfig } from "@/components/production/aba-calculator-config";
+
 import { AbaMaterialsDnd } from "@/components/production/aba-materials-dnd";
-import type { MaterialDistribution as ConfigMaterialDistribution } from "@/components/production/aba-calculator-config";
+
 import type { MaterialDistribution as DndMaterialDistribution } from "@/components/production/aba-materials-dnd";
 import { FilterSummary } from "@/components/production/filter-summary";
 import { apiRequest } from "@/lib/queryClient";
@@ -44,36 +44,7 @@ interface PrintData {
   userData?: any[];
 }
 
-// Helper functions to convert between different MaterialDistribution types
-const convertConfigToDnd = (configMaterials: ConfigMaterialDistribution[]): DndMaterialDistribution[] => {
-  return configMaterials.map((item, index) => ({
-    id: `material-${index}`,
-    materialId: index + 1,
-    materialName: item.material,
-    screwAPercentage: item.aPercentage,
-    screwBPercentage: item.bPercentage,
-    totalPercentage: 100 * (item.totalKg / configMaterials.reduce((sum, m) => sum + m.totalKg, 0))
-  }));
-};
-
-const convertDndToConfig = (dndMaterials: DndMaterialDistribution[]): ConfigMaterialDistribution[] => {
-  // Assuming a total of 100kg for the base distribution
-  const total = 100; 
-  return dndMaterials.map(item => {
-    const totalKg = total * (item.totalPercentage / 100);
-    const aKg = totalKg * (item.screwAPercentage / 100);
-    const bKg = totalKg * (item.screwBPercentage / 100);
-    
-    return {
-      material: item.materialName,
-      aKg,
-      bKg,
-      totalKg,
-      aPercentage: item.screwAPercentage,
-      bPercentage: item.screwBPercentage
-    };
-  });
-};
+// Note: Material distribution conversion functions removed with ABA configs
 
 export default function MixMaterialsPage() {
   const { t } = useTranslation();
@@ -163,37 +134,9 @@ export default function MixMaterialsPage() {
   
   // Delete mix mutation
   const [abaCalculationData, setAbaCalculationData] = useState<any>(null);
-  // Define types directly to avoid circular references
-  type DndMaterialType = {
-    id: string;
-    materialId: number;
-    materialName: string;
-    screwAPercentage: number;
-    screwBPercentage: number;
-    totalPercentage: number;
-  };
+  // Note: ABA material types removed with config functionality
 
-  type ConfigMaterialType = {
-    material: string;
-    aKg: number;
-    bKg: number;
-    totalKg: number;
-    aPercentage: number;
-    bPercentage: number;
-    color?: string;
-  };
-
-  // Utility functions to convert between different material distribution formats
-  const convertConfigToDnd = (config: ConfigMaterialType[]): DndMaterialType[] => {
-    return config.map((item, index) => ({
-      id: `material-${index}`,
-      materialId: index,
-      materialName: item.material,
-      screwAPercentage: item.aPercentage,
-      screwBPercentage: item.bPercentage,
-      totalPercentage: (item.aKg + item.bKg) / (item.totalKg) * 100
-    }));
-  };
+  // Note: Material conversion functions removed with ABA config functionality
 
   const convertDndToConfig = (
     dnd: DndMaterialType[], 
@@ -884,41 +827,12 @@ export default function MixMaterialsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Use our improved professional ABA calculator component */}
-              <AbaCalculatorConfig 
-                rawMaterials={rawMaterials || []}
-                totalQuantity={1000}
-                onCalculate={(result) => {
-                  // Store the calculation result for display/printing
-                  setAbaCalculationData({
-                    mixId: `Mix${new Date().getTime().toString().slice(-6)}`,
-                    mixDate: formatDateString(new Date().toISOString()),
-                    customer: "Manual Calculation",
-                    quantity: result.totalQuantity,
-                    rawMaterial: "Custom Formula",
-                    items: result.items.map(item => ({
-                      material: item.material,
-                      screwA: item.aKg,
-                      screwB: item.bKg,
-                      total: item.totalKg,
-                      percentage: (item.totalKg / result.totalQuantity) * 100,
-                      screwAPercentage: item.aPercentage,
-                      screwBPercentage: item.bPercentage,
-                      screwAAbsPercentage: (item.aKg / result.totalQuantity) * 100,
-                      screwBAbsPercentage: (item.bKg / result.totalQuantity) * 100
-                    })),
-                    totals: {
-                      screwA: result.aTotalKg,
-                      screwB: result.bTotalKg,
-                      total: result.totalQuantity,
-                      screwAPercentage: result.aPercentage,
-                      screwBPercentage: result.bPercentage,
-                      screwAAbsPercentage: result.aPercentage,
-                      screwBAbsPercentage: result.bPercentage
-                    }
-                  });
-                }}
-              />
+              {/* ABA calculator component has been removed */}
+              <div className="text-center py-8 px-4 bg-gray-50 rounded-md">
+                <p className="text-gray-600">ABA Calculator has been removed from the system</p>
+              </div>
+
+
             </CardContent>
           </Card>
         </TabsContent>
@@ -1034,7 +948,9 @@ export default function MixMaterialsPage() {
                   />
                 </div>
                 <div className="lg:col-span-1">
-                  <AbaConfigSelector />
+                  <div className="text-center py-4 px-2 bg-gray-50 rounded-md">
+                    <p className="text-gray-500">ABA configurations have been removed</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
