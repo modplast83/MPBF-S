@@ -246,27 +246,7 @@ export default function MixMaterialsPage() {
     updatedAt: string | null;
   }
   
-  // Fetch saved ABA material configurations from the database
-  const { data: abaConfigs, isLoading: configsLoading, refetch: refetchConfigs } = useQuery<AbaConfig[]>({
-    queryKey: [API_ENDPOINTS.ABA_MATERIAL_CONFIGS],
-    initialData: [],
-  });
-  
-  // Fetch the default configuration if available
-  const { data: defaultConfig } = useQuery<AbaConfig>({
-    queryKey: [`${API_ENDPOINTS.ABA_MATERIAL_CONFIGS}/default`],
-    enabled: true,
-  });
-  
-  // Update state when default config is fetched
-  useEffect(() => {
-    if (defaultConfig && defaultConfig.configData) {
-      setMaterialDistributions(defaultConfig.configData);
-      setConfigName(defaultConfig.name);
-      setConfigDescription(defaultConfig.description || "");
-      setSelectedConfigId(defaultConfig.id);
-    }
-  }, [defaultConfig]);
+  // Note: ABA material configs have been removed from the database
 
   const deleteMixMutation = useMutation({
     mutationFn: async (mixId: number) => {

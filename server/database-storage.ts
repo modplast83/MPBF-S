@@ -1780,73 +1780,7 @@ export class DatabaseStorage implements IStorage {
     return true;
   }
 
-  // ABA Material Configurations methods
-  async getAbaMaterialConfigs(): Promise<AbaMaterialConfig[]> {
-    return await db.select().from(abaMaterialConfigs);
-  }
 
-  async getAbaMaterialConfigsByUser(createdBy: string): Promise<AbaMaterialConfig[]> {
-    return await db
-      .select()
-      .from(abaMaterialConfigs)
-      .where(eq(abaMaterialConfigs.createdBy, createdBy));
-  }
-
-  async getAbaMaterialConfig(id: number): Promise<AbaMaterialConfig | undefined> {
-    const [config] = await db
-      .select()
-      .from(abaMaterialConfigs)
-      .where(eq(abaMaterialConfigs.id, id));
-    return config;
-  }
-
-  async getDefaultAbaMaterialConfig(): Promise<AbaMaterialConfig | undefined> {
-    const [config] = await db
-      .select()
-      .from(abaMaterialConfigs)
-      .where(eq(abaMaterialConfigs.isDefault, true));
-    return config;
-  }
-
-  async createAbaMaterialConfig(config: InsertAbaMaterialConfig): Promise<AbaMaterialConfig> {
-    const [created] = await db
-      .insert(abaMaterialConfigs)
-      .values(config)
-      .returning();
-    return created;
-  }
-
-  async updateAbaMaterialConfig(id: number, update: Partial<AbaMaterialConfig>): Promise<AbaMaterialConfig | undefined> {
-    const [updated] = await db
-      .update(abaMaterialConfigs)
-      .set(update)
-      .where(eq(abaMaterialConfigs.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteAbaMaterialConfig(id: number): Promise<boolean> {
-    await db
-      .delete(abaMaterialConfigs)
-      .where(eq(abaMaterialConfigs.id, id));
-    return true;
-  }
-
-  async setDefaultAbaMaterialConfig(id: number): Promise<boolean> {
-    // First, set all configs to not default
-    await db
-      .update(abaMaterialConfigs)
-      .set({ isDefault: false });
-    
-    // Then set the specified one to default
-    const [updated] = await db
-      .update(abaMaterialConfigs)
-      .set({ isDefault: true })
-      .where(eq(abaMaterialConfigs.id, id))
-      .returning();
-    
-    return !!updated;
-  }
 
   // HR Module Methods
 

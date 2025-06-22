@@ -26,7 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { AbaMaterialConfig, RawMaterial, User } from "@shared/schema";
+import { RawMaterial, User } from "@shared/schema";
 import { formatNumber } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth-v2";
 
@@ -113,15 +113,7 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
     }
   ]);
 
-  // Fetch existing configurations
-  const { data: abaConfigs, isLoading: configsLoading } = useQuery<AbaMaterialConfig[]>({
-    queryKey: [API_ENDPOINTS.ABA_MATERIAL_CONFIGS],
-  });
-
-  // Fetch default configuration
-  const { data: defaultConfig, isLoading: defaultConfigLoading } = useQuery<AbaMaterialConfig>({
-    queryKey: [`${API_ENDPOINTS.ABA_MATERIAL_CONFIGS}/default`],
-  });
+  // Note: ABA material configs have been removed from the database
 
   // Process default config when it's loaded
   useEffect(() => {
