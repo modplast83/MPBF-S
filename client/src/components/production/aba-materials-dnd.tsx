@@ -228,38 +228,29 @@ export function AbaMaterialsDnd({
   };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="space-y-6">
-        <div className="grid md:grid-cols-3 gap-4">
-        {/* Unassigned Materials */}
-        <Card className="overflow-hidden">
-          <CardHeader className="bg-gray-50 p-4">
-            <CardTitle className="text-md flex items-center">
-              <span className="material-icons text-lg mr-2">view_list</span>
-              {t('production.aba_calculator.available_materials')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 min-h-[300px]">
-            <Droppable droppableId="unassigned">
-              {(provided, snapshot) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className={`min-h-[250px] p-2 rounded ${
-                    snapshot.isDraggingOver ? 'bg-gray-100' : ''
-                  }`}
-                >
-                  {unassignedMaterials.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <span className="material-icons text-gray-300 text-3xl mb-2">
-                        science
-                      </span>
-                      <p className="text-gray-500 text-center">
-                        {t('production.aba_calculator.no_available_materials')}
-                      </p>
-                    </div>
-                  ) : (
-                    unassignedMaterials.map((material, index) => (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-3 gap-4">
+      {/* Unassigned Materials */}
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-gray-50 p-4">
+          <CardTitle className="text-md flex items-center">
+            <span className="material-icons text-lg mr-2">view_list</span>
+            {t('production.aba_calculator.available_materials')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 min-h-[300px]">
+          <div className="min-h-[250px] p-2 rounded">
+            {unassignedMaterials.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full">
+                <span className="material-icons text-gray-300 text-3xl mb-2">
+                  science
+                </span>
+                <p className="text-gray-500 text-center">
+                  {t('production.aba_calculator.no_available_materials')}
+                </p>
+              </div>
+            ) : (
+              unassignedMaterials.map((material, index) => (
                       <Draggable
                         key={material.id}
                         draggableId={material.id}

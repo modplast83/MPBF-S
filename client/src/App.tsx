@@ -96,15 +96,7 @@ function App() {
     localStorage.removeItem('demoDataInitialized');
   }, []);
 
-  // Global drag end handler - delegates to specific handlers
-  const handleDragEnd = (result: DropResult) => {
-    // This will be handled by individual components via event delegation
-    // Each component can register its own drag end handler
-    const dragEndEvent = new CustomEvent('globalDragEnd', { 
-      detail: result 
-    });
-    window.dispatchEvent(dragEndEvent);
-  };
+
 
   return (
     <ErrorBoundary>

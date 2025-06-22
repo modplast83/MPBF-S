@@ -2,45 +2,32 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2015", "ES2017", "ES2018", "ES2019", "ES2020", "ES2021", "ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "allowJs": false,
     "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "strictBindCallApply": false,
-    "strictPropertyInitialization": false,
-    "noImplicitReturns": false,
-    "noFallthroughCasesInSwitch": false,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./client/src/*"],
       "@assets/*": ["./attached_assets/*"],
-      "@shared/*": ["./shared/*"]
+      "@shared/*": ["./shared/*"],
+      "@lib/*": ["./client/src/lib/*"]
     },
     "types": ["node", "vite/client"]
   },
   "include": [
     "client/src/**/*",
-    "server/**/*", 
     "shared/**/*",
-    "*.ts",
-    "*.js"
+    "vite.config.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build"
-  ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["node_modules", "dist", "server"]
 }

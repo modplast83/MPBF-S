@@ -246,43 +246,26 @@ export function WidgetCustomizer({ onSettingsChange, initialSettings }: WidgetCu
                   {t('dashboard.no_active_widgets')}
                 </div>
               ) : (
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="widgets">
-                    {(provided) => (
-                      <div
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        className="space-y-2"
-                      >
-                        {activeWidgets.map((widget, index) => (
-                          <Draggable key={widget.id} draggableId={widget.id} index={index}>
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="border rounded-md p-2 bg-background flex items-center justify-between"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div className="p-1 rounded-md bg-primary/10 text-primary">
-                                    {widget.icon}
-                                  </div>
-                                  <span className="text-sm">{t(`dashboard.widgets.${widget.id}.title`)}</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <span className="text-xs bg-secondary text-secondary-foreground rounded-md px-2 py-0.5">
-                                    {t(`dashboard.position`, { position: index + 1 })}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
+                <div className="space-y-2">
+                  {activeWidgets.map((widget, index) => (
+                    <div
+                      key={widget.id}
+                      className="border rounded-md p-2 bg-background flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="p-1 rounded-md bg-primary/10 text-primary">
+                          {widget.icon}
+                        </div>
+                        <span className="text-sm">{t(`dashboard.widgets.${widget.id}.title`)}</span>
                       </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
+                      <div className="flex items-center">
+                        <span className="text-xs bg-secondary text-secondary-foreground rounded-md px-2 py-0.5">
+                          {t(`dashboard.position`, { position: index + 1 })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
