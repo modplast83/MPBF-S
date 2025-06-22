@@ -239,50 +239,58 @@ export function AbaMaterialsDnd({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 min-h-[300px]">
-          <div className="min-h-[250px] p-2 rounded">
-            {unassignedMaterials.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full">
-                <span className="material-icons text-gray-300 text-3xl mb-2">
-                  science
-                </span>
-                <p className="text-gray-500 text-center">
-                  {t('production.aba_calculator.no_available_materials')}
-                </p>
-              </div>
-            ) : (
-              unassignedMaterials.map((material, index) => (
-                      <Draggable
-                        key={material.id}
-                        draggableId={material.id}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`p-3 mb-2 rounded border ${
-                              snapshot.isDragging
-                                ? 'bg-primary-50 border-primary-200'
-                                : 'bg-white border-gray-200'
-                            } shadow-sm`}
-                          >
-                            <div className="flex items-center">
-                              <span className="material-icons text-sm text-gray-500 mr-2">
-                                drag_indicator
-                              </span>
-                              <span>{material.materialName}</span>
-                            </div>
+          <Droppable droppableId="unassigned" type="material">
+            {(provided, snapshot) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className={`min-h-[250px] p-2 rounded ${
+                  snapshot.isDraggingOver ? 'bg-gray-100' : ''
+                }`}
+              >
+                {unassignedMaterials.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <span className="material-icons text-gray-300 text-3xl mb-2">
+                      science
+                    </span>
+                    <p className="text-gray-500 text-center">
+                      {t('production.aba_calculator.no_available_materials')}
+                    </p>
+                  </div>
+                ) : (
+                  unassignedMaterials.map((material, index) => (
+                    <Draggable
+                      key={material.id}
+                      draggableId={material.id}
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className={`p-3 mb-2 rounded border ${
+                            snapshot.isDragging
+                              ? 'bg-primary-50 border-primary-200'
+                              : 'bg-white border-gray-200'
+                          } shadow-sm`}
+                        >
+                          <div className="flex items-center">
+                            <span className="material-icons text-sm text-gray-500 mr-2">
+                              drag_indicator
+                            </span>
+                            <span>{material.materialName}</span>
                           </div>
-                        )}
-                      </Draggable>
-                    ))
-                  )}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </CardContent>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))
+                )}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </CardContent>
           <CardFooter className="border-t p-4 bg-gray-50">
             <div className="text-sm text-gray-500">
               {t('production.aba_calculator.drag_materials_here')}
