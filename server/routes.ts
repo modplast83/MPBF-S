@@ -18,7 +18,7 @@ import {
   insertPlatePricingParameterSchema, insertPlateCalculationSchema,
   plateCalculationRequestSchema, PlateCalculationRequest,
   User, upsertUserSchema, UpsertUser,
-  AbaMaterialConfig, insertAbaMaterialConfigSchema,
+
   insertTimeAttendanceSchema, insertEmployeeOfMonthSchema,
   insertHrViolationSchema, insertHrComplaintSchema,
   insertTrainingSchema, insertTrainingPointSchema,
@@ -29,7 +29,7 @@ import {
   InsertMasterBatch, InsertCustomerProduct, InsertOrder, InsertJobOrder,
   InsertRawMaterial, InsertFinalProduct, InsertSmsTemplate, InsertSmsNotificationRule,
   InsertMixMaterial, InsertMixItem, InsertPermission, InsertModule,
-  InsertMaterialInput, InsertMaterialInputItem, InsertAbaMaterialConfig,
+  InsertMaterialInput, InsertMaterialInputItem,
   InsertTimeAttendance, InsertEmployeeOfMonth, InsertHrViolation, InsertHrComplaint,
   InsertTraining, InsertTrainingPoint, InsertTrainingEvaluation
 } from "../shared/schema";

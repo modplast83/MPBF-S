@@ -13,7 +13,7 @@ import {
   MaterialInputItem, InsertMaterialInputItem,
   PlatePricingParameter, InsertPlatePricingParameter,
   PlateCalculation, InsertPlateCalculation,
-  AbaMaterialConfig, InsertAbaMaterialConfig,
+
 
   SmsTemplate, InsertSmsTemplate,
   SmsNotificationRule, InsertSmsNotificationRule,
@@ -249,15 +249,7 @@ export interface IStorage {
   updatePlateCalculation(id: number, update: Partial<PlateCalculation>): Promise<PlateCalculation | undefined>;
   deletePlateCalculation(id: number): Promise<boolean>;
   
-  // ABA Material Configurations methods
-  getAbaMaterialConfigs(): Promise<AbaMaterialConfig[]>;
-  getAbaMaterialConfigsByUser(createdBy: string): Promise<AbaMaterialConfig[]>;
-  getAbaMaterialConfig(id: number): Promise<AbaMaterialConfig | undefined>;
-  getDefaultAbaMaterialConfig(): Promise<AbaMaterialConfig | undefined>;
-  createAbaMaterialConfig(config: InsertAbaMaterialConfig): Promise<AbaMaterialConfig>;
-  updateAbaMaterialConfig(id: number, update: Partial<AbaMaterialConfig>): Promise<AbaMaterialConfig | undefined>;
-  deleteAbaMaterialConfig(id: number): Promise<boolean>;
-  setDefaultAbaMaterialConfig(id: number): Promise<boolean>;
+
   
   // HR Module methods
   getAllTimeAttendance(): Promise<TimeAttendance[]>;
