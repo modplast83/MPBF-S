@@ -228,8 +228,9 @@ export function AbaMaterialsDnd({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-3 gap-4">
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-3 gap-4">
         {/* Unassigned Materials */}
         <Card className="overflow-hidden">
           <CardHeader className="bg-gray-50 p-4">
@@ -239,59 +240,57 @@ export function AbaMaterialsDnd({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 min-h-[300px]">
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="unassigned">
-                {(provided, snapshot) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className={`min-h-[250px] p-2 rounded ${
-                      snapshot.isDraggingOver ? 'bg-gray-100' : ''
-                    }`}
-                  >
-                    {unassignedMaterials.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full">
-                        <span className="material-icons text-gray-300 text-3xl mb-2">
-                          science
-                        </span>
-                        <p className="text-gray-500 text-center">
-                          {t('production.aba_calculator.no_available_materials')}
-                        </p>
-                      </div>
-                    ) : (
-                      unassignedMaterials.map((material, index) => (
-                        <Draggable
-                          key={material.id}
-                          draggableId={material.id}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`p-3 mb-2 rounded border ${
-                                snapshot.isDragging
-                                  ? 'bg-primary-50 border-primary-200'
-                                  : 'bg-white border-gray-200'
-                              } shadow-sm`}
-                            >
-                              <div className="flex items-center">
-                                <span className="material-icons text-sm text-gray-500 mr-2">
-                                  drag_indicator
-                                </span>
-                                <span>{material.materialName}</span>
-                              </div>
+            <Droppable droppableId="unassigned">
+              {(provided, snapshot) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className={`min-h-[250px] p-2 rounded ${
+                    snapshot.isDraggingOver ? 'bg-gray-100' : ''
+                  }`}
+                >
+                  {unassignedMaterials.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <span className="material-icons text-gray-300 text-3xl mb-2">
+                        science
+                      </span>
+                      <p className="text-gray-500 text-center">
+                        {t('production.aba_calculator.no_available_materials')}
+                      </p>
+                    </div>
+                  ) : (
+                    unassignedMaterials.map((material, index) => (
+                      <Draggable
+                        key={material.id}
+                        draggableId={material.id}
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`p-3 mb-2 rounded border ${
+                              snapshot.isDragging
+                                ? 'bg-primary-50 border-primary-200'
+                                : 'bg-white border-gray-200'
+                            } shadow-sm`}
+                          >
+                            <div className="flex items-center">
+                              <span className="material-icons text-sm text-gray-500 mr-2">
+                                drag_indicator
+                              </span>
+                              <span>{material.materialName}</span>
                             </div>
-                          )}
-                        </Draggable>
-                      ))
-                    )}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))
+                  )}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
           </CardContent>
           <CardFooter className="border-t p-4 bg-gray-50">
             <div className="text-sm text-gray-500">
@@ -309,72 +308,70 @@ export function AbaMaterialsDnd({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 min-h-[300px]">
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="screwA">
-                {(provided, snapshot) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className={`min-h-[250px] p-2 rounded ${
-                      snapshot.isDraggingOver ? 'bg-primary-50' : ''
-                    }`}
-                  >
-                    {screwAMaterials.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full">
-                        <span className="material-icons text-gray-300 text-3xl mb-2">
-                          settings
-                        </span>
-                        <p className="text-gray-500 text-center">
-                          {t('production.aba_calculator.unassigned')}
-                        </p>
-                      </div>
-                    ) : (
-                      screwAMaterials.map((material, index) => (
-                        <Draggable
-                          key={material.id}
-                          draggableId={material.id}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`p-3 mb-4 rounded border ${
-                                snapshot.isDragging
-                                  ? 'bg-primary-100 border-primary-300'
-                                  : 'bg-white border-gray-200'
-                              } shadow-sm`}
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <span>{material.materialName}</span>
-                                <Badge variant="outline">
-                                  {material.screwAPercentage}%
-                                </Badge>
-                              </div>
-                              <div className="pt-2">
-                                <Label className="text-xs text-gray-500 mb-2 block">
-                                  {t('production.aba_calculator.percentage')}
-                                </Label>
-                                <Slider
-                                  value={[material.screwAPercentage]}
-                                  min={0}
-                                  max={100}
-                                  step={5}
-                                  className={`${isRTL ? 'rtl-slider' : ''}`}
-                                  onValueChange={(value) => handleScrewASliderChange(index, value)}
-                                />
-                              </div>
+            <Droppable droppableId="screwA">
+              {(provided, snapshot) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className={`min-h-[250px] p-2 rounded ${
+                    snapshot.isDraggingOver ? 'bg-primary-50' : ''
+                  }`}
+                >
+                  {screwAMaterials.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <span className="material-icons text-gray-300 text-3xl mb-2">
+                        settings
+                      </span>
+                      <p className="text-gray-500 text-center">
+                        {t('production.aba_calculator.unassigned')}
+                      </p>
+                    </div>
+                  ) : (
+                    screwAMaterials.map((material, index) => (
+                      <Draggable
+                        key={material.id}
+                        draggableId={material.id}
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`p-3 mb-4 rounded border ${
+                              snapshot.isDragging
+                                ? 'bg-primary-100 border-primary-300'
+                                : 'bg-white border-gray-200'
+                            } shadow-sm`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span>{material.materialName}</span>
+                              <Badge variant="outline">
+                                {material.screwAPercentage}%
+                              </Badge>
                             </div>
-                          )}
-                        </Draggable>
-                      ))
-                    )}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+                            <div className="pt-2">
+                              <Label className="text-xs text-gray-500 mb-2 block">
+                                {t('production.aba_calculator.percentage')}
+                              </Label>
+                              <Slider
+                                value={[material.screwAPercentage]}
+                                min={0}
+                                max={100}
+                                step={5}
+                                className={`${isRTL ? 'rtl-slider' : ''}`}
+                                onValueChange={(value) => handleScrewASliderChange(index, value)}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))
+                  )}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
           </CardContent>
           <CardFooter className="border-t p-4 bg-primary-50">
             <div className="text-sm text-primary-700">
@@ -392,8 +389,7 @@ export function AbaMaterialsDnd({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 min-h-[300px]">
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="screwB">
+            <Droppable droppableId="screwB">
                 {(provided, snapshot) => (
                   <div
                     {...provided.droppableProps}
@@ -457,7 +453,6 @@ export function AbaMaterialsDnd({
                   </div>
                 )}
               </Droppable>
-            </DragDropContext>
           </CardContent>
           <CardFooter className="border-t p-4 bg-secondary-50">
             <div className="text-sm text-secondary-700">
@@ -465,9 +460,9 @@ export function AbaMaterialsDnd({
             </div>
           </CardFooter>
         </Card>
-      </div>
+        </div>
 
-      <Separator />
+        <Separator />
 
       <div className="flex justify-between items-center">
         <TooltipProvider>
@@ -495,7 +490,8 @@ export function AbaMaterialsDnd({
           <span className="material-icons text-sm mr-1">save</span>
           {t('common.save')}
         </Button>
+        </div>
       </div>
-    </div>
+    </DragDropContext>
   );
 }
