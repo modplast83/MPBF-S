@@ -100,10 +100,9 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <AuthProvider>
-          {(authContext) => (
-            <PermissionsProvider user={authContext.user}>
+      <AuthProvider>
+        {(authContext) => (
+          <PermissionsProvider user={authContext.user}>
               <Switch>
                 <Route path="/auth" component={AuthPage} />
                 <Route path="*">
