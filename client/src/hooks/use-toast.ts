@@ -136,6 +136,10 @@ export const reducer = (state: State, action: Action): State => {
 }
 
 const listeners: Array<(state: State) => void> = []
+/**
+ * Export listeners for testing purposes to ensure cleanup works as expected.
+ */
+export const _listeners = listeners
 
 let memoryState: State = { toasts: [] }
 
