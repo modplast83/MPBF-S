@@ -361,18 +361,18 @@ export function CustomizableDashboardV2() {
 
       {/* Dashboard Grid */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="dashboard-grid" direction="horizontal">
-          {(provided, snapshot) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[400px] p-4 rounded-lg border-2 border-dashed transition-colors ${
-                snapshot.isDraggingOver 
-                  ? 'border-primary bg-primary/5' 
-                  : isEditMode 
-                    ? 'border-muted-foreground/30 bg-muted/20' 
-                    : 'border-transparent'
-              }`}
+        <Droppable droppableId="dashboard-widgets" direction="vertical">
+            {(provided, snapshot) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[400px] p-4 rounded-lg border-2 border-dashed transition-colors ${
+                  snapshot.isDraggingOver 
+                    ? 'border-primary bg-primary/5' 
+                    : isEditMode 
+                      ? 'border-muted-foreground/30 bg-muted/20' 
+                      : 'border-transparent'
+                }`}
             >
               {visibleWidgets.map((widget, index) => (
                 <Draggable
