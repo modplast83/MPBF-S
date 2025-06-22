@@ -208,7 +208,7 @@ export function setupMobileRoutes(app: Express) {
       }
       
       if (limit) {
-        jobOrders = jobOrders.slice(0, parseInt(limit as string));
+        jobOrders = jobOrders.slice(0, parseInt(limit as string, 10));
       }
       
       res.json(jobOrders);
@@ -232,7 +232,7 @@ export function setupMobileRoutes(app: Express) {
       });
       
       if (limit) {
-        qualityChecks = qualityChecks.slice(0, parseInt(limit as string));
+        qualityChecks = qualityChecks.slice(0, parseInt(limit as string, 10));
       }
       
       res.json(qualityChecks);
