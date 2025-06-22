@@ -17,7 +17,7 @@ import { AbaCalculator, AbaPrintTemplate } from "@/components/production/aba-cal
 
 import { AbaMaterialsDnd } from "@/components/production/aba-materials-dnd";
 
-import type { MaterialDistribution as DndMaterialDistribution } from "@/components/production/aba-materials-dnd";
+
 import { FilterSummary } from "@/components/production/filter-summary";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -138,35 +138,7 @@ export default function MixMaterialsPage() {
 
   // Note: Material conversion functions removed with ABA config functionality
 
-  const convertDndToConfig = (
-    dnd: DndMaterialType[], 
-    aTotalWeight: number = 155, 
-    bTotalWeight: number = 515
-  ): ConfigMaterialType[] => {
-    return dnd.map((item) => {
-      // Calculate kg values based on percentages and the provided total weights
-      const aKg = (item.screwAPercentage / 100) * aTotalWeight;
-      const bKg = (item.screwBPercentage / 100) * bTotalWeight;
-      
-      return {
-        material: item.materialName,
-        aKg: aKg,
-        bKg: bKg,
-        totalKg: aKg + bKg,
-        aPercentage: item.screwAPercentage,
-        bPercentage: item.screwBPercentage,
-        color: getRandomColor() // Generate a color for visual representation
-      };
-    });
-  };
-  
-  // Function to generate a random pastel color
-  const getRandomColor = (): string => {
-    const hue = Math.floor(Math.random() * 360);
-    return `hsl(${hue}, 70%, 80%)`;
-  };
-  
-  const [materialDistributions, setMaterialDistributions] = useState<DndMaterialType[]>([]);
+  const [materialDistributions, setMaterialDistributions] = useState<any[]>([]);
   const [configName, setConfigName] = useState<string>("");
   const [configDescription, setConfigDescription] = useState<string>("");
   const [selectedConfigId, setSelectedConfigId] = useState<number | null>(null);
@@ -565,7 +537,7 @@ export default function MixMaterialsPage() {
   // Note: ABA material config mutations have been removed
   
   // Handle saving ABA material configurations (disabled - configs removed)
-  const handleSaveAbaConfig = (distributions: DndMaterialDistribution[]) => {
+  const handleSaveAbaConfig = (distributions: any[]) => {
     setMaterialDistributions(distributions);
     // ABA config save functionality has been removed
   };
@@ -941,11 +913,9 @@ export default function MixMaterialsPage() {
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2">
-                  <AbaMaterialsDnd
-                    rawMaterials={rawMaterials || []}
-                    onSave={handleSaveAbaConfig}
-                    initialDistributions={materialDistributions}
-                  />
+                  <div className="text-center py-8 px-4 bg-gray-50 rounded-md">
+                    <p className="text-gray-600">ABA Materials component has been removed</p>
+                  </div>
                 </div>
                 <div className="lg:col-span-1">
                   <div className="text-center py-4 px-2 bg-gray-50 rounded-md">
