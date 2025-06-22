@@ -14,8 +14,7 @@ import {
   PlatePricingParameter, InsertPlatePricingParameter,
   PlateCalculation, InsertPlateCalculation,
   AbaMaterialConfig, InsertAbaMaterialConfig,
-  QualityViolation, InsertQualityViolation,
-  QualityPenalty, InsertQualityPenalty,
+
   SmsTemplate, InsertSmsTemplate,
   SmsNotificationRule, InsertSmsNotificationRule,
   TimeAttendance, InsertTimeAttendance,

@@ -2,9 +2,15 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2015", "ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2015", "ES2017", "ES2020", "ES2021", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": false,
@@ -13,22 +19,28 @@
     "strictPropertyInitialization": false,
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": false,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./client/src/*"],
       "@assets/*": ["./attached_assets/*"],
       "@shared/*": ["./shared/*"]
     },
-    "types": ["node"]
+    "types": ["node", "vite/client"]
   },
-  "include": ["client/src", "server", "shared"],
+  "include": [
+    "client/src/**/*",
+    "server/**/*", 
+    "shared/**/*",
+    "*.ts",
+    "*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

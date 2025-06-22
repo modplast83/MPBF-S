@@ -8,12 +8,14 @@
     "strict": false,
     "noEmit": true,
     "target": "ES2020",
-    "lib": ["ES2020", "ES2015", "DOM"],
+    "lib": ["ES2015", "ES2017", "ES2020", "ES2021", "DOM", "DOM.Iterable"],
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["./shared/*"]
-    }
+    },
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["vite.config.ts", "server", "shared"]
+  "include": ["vite.config.ts", "server/**/*", "shared/**/*", "drizzle.config.ts"]
 }
