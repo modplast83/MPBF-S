@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import Dashboard from "@/pages/dashboard";
 import SetupIndex from "@/pages/setup/index";
 import Categories from "@/pages/setup/categories";
@@ -95,16 +96,27 @@ function App() {
     localStorage.removeItem('demoDataInitialized');
   }, []);
 
+  // Global drag end handler - delegates to specific handlers
+  const handleDragEnd = (result: DropResult) => {
+    // This will be handled by individual components via event delegation
+    // Each component can register its own drag end handler
+    const dragEndEvent = new CustomEvent('globalDragEnd', { 
+      detail: result 
+    });
+    window.dispatchEvent(dragEndEvent);
+  };
+
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        {(authContext) => (
-          <PermissionsProvider user={authContext.user}>
-            <Switch>
-              <Route path="/auth" component={AuthPage} />
-              <Route path="*">
-                <MainLayout>
-                  <Switch>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <AuthProvider>
+          {(authContext) => (
+            <PermissionsProvider user={authContext.user}>
+              <Switch>
+                <Route path="/auth" component={AuthPage} />
+                <Route path="*">
+                  <MainLayout>
+                    <Switch>
                     <ProtectedRoute path="/" component={Dashboard} />
                     <ProtectedRoute path="/setup" component={SetupIndex} module="Setup" />
                     <ProtectedRoute path="/setup/categories" component={Categories} module="Categories" />
@@ -190,13 +202,14 @@ function App() {
                     {/* Mobile Operator Dashboard Route */}
                     <ProtectedRoute path="/mobile/operator-dashboard" component={OperatorDashboard} module="Operator Dashboard" />
                     <Route component={NotFound} />
-                  </Switch>
-                </MainLayout>
-              </Route>
-            </Switch>
-          </PermissionsProvider>
-        )}
-      </AuthProvider>
+                    </Switch>
+                  </MainLayout>
+                </Route>
+              </Switch>
+            </PermissionsProvider>
+          )}
+        </AuthProvider>
+      </DragDropContext>
     </ErrorBoundary>
   );
 }
