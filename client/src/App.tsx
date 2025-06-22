@@ -1,5 +1,4 @@
 import { Switch, Route } from "wouter";
-import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import Dashboard from "@/pages/dashboard";
 import SetupIndex from "@/pages/setup/index";
 import Categories from "@/pages/setup/categories";
@@ -100,8 +99,7 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <DragDropContext onDragEnd={() => {}}>
-        <AuthProvider>
+      <AuthProvider>
         {(authContext) => (
           <PermissionsProvider user={authContext.user}>
               <Switch>
@@ -201,7 +199,6 @@ function App() {
             </PermissionsProvider>
           )}
         </AuthProvider>
-      </DragDropContext>
     </ErrorBoundary>
   );
 }
