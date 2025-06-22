@@ -113,8 +113,15 @@ const WIDGET_TEMPLATES: WidgetTemplate[] = [
 ];
 
 // Widget Components
+interface DashboardStats {
+  totalOrders: number;
+  completedOrders: number;
+  pendingOrders: number;
+  qualityIssues: number;
+}
+
 function StatsOverviewWidget() {
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<DashboardStats>({
     queryKey: ['/api/dashboard-stats'],
     staleTime: 30000
   });
@@ -125,22 +132,22 @@ function StatsOverviewWidget() {
       <div className="grid grid-cols-2 gap-3">
         <div className="text-center p-2 bg-blue-50 rounded">
           <Package className="h-4 w-4 text-blue-600 mx-auto mb-1" />
-          <div className="text-xl font-bold text-blue-600">{(stats as any)?.totalOrders || 125}</div>
+          <div className="text-xl font-bold text-blue-600">{stats?.totalOrders ?? 0}</div>
           <div className="text-xs text-blue-600">Total Orders</div>
         </div>
         <div className="text-center p-2 bg-green-50 rounded">
           <TrendingUp className="h-4 w-4 text-green-600 mx-auto mb-1" />
-          <div className="text-xl font-bold text-green-600">{(stats as any)?.completedOrders || 98}</div>
+          <div className="text-xl font-bold text-green-600">{stats?.completedOrders ?? 0}</div>
           <div className="text-xs text-green-600">Completed</div>
         </div>
         <div className="text-center p-2 bg-yellow-50 rounded">
           <Clock className="h-4 w-4 text-yellow-600 mx-auto mb-1" />
-          <div className="text-xl font-bold text-yellow-600">{(stats as any)?.pendingOrders || 27}</div>
+          <div className="text-xl font-bold text-yellow-600">{stats?.pendingOrders ?? 0}</div>
           <div className="text-xs text-yellow-600">Pending</div>
         </div>
         <div className="text-center p-2 bg-red-50 rounded">
           <AlertTriangle className="h-4 w-4 text-red-600 mx-auto mb-1" />
-          <div className="text-xl font-bold text-red-600">{(stats as any)?.qualityIssues || 3}</div>
+          <div className="text-xl font-bold text-red-600">{stats?.qualityIssues ?? 0}</div>
           <div className="text-xs text-red-600">Quality Issues</div>
         </div>
       </div>
@@ -476,6 +483,9 @@ function WidgetLibraryModal({
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Widget Library</DialogTitle>
+          <DialogDescription>
+            Choose from available widgets to customize your dashboard
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-[60vh] p-2">
