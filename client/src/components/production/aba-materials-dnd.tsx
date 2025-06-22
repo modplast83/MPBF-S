@@ -228,8 +228,9 @@ export function AbaMaterialsDnd({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-3 gap-4">
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-3 gap-4">
       {/* Unassigned Materials */}
       <Card className="overflow-hidden">
         <CardHeader className="bg-gray-50 p-4">
@@ -489,7 +490,7 @@ export function AbaMaterialsDnd({
           <span className="material-icons text-sm mr-1">save</span>
           {t('common.save')}
         </Button>
-        </div>
+      </div>
       </div>
     </DragDropContext>
   );
