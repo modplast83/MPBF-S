@@ -1005,15 +1005,8 @@ export default function MixMaterialsPage() {
                             setConfigName(newName);
                             setConfigDescription(newDesc || "");
                             
-                            updateConfigMutation.mutate({
-                              id: selectedConfigId,
-                              data: {
-                                name: newName,
-                                description: newDesc || "",
-                                configData: materialDistributions,
-                                isDefault: false
-                              }
-                            });
+                            // ABA config update disabled - configs removed from database
+                            console.log("ABA config update disabled");
                           }
                         }}
                       >

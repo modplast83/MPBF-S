@@ -118,61 +118,6 @@ export function AbaCalculatorConfig({ rawMaterials, totalQuantity = 670, onCalcu
   // Note: Default config loading has been disabled
 
   // Note: ABA material config mutations have been removed
-    onSuccess: (data) => {
-      if (data && data.configData) {
-        try {
-          // Try to parse as new format first
-          const parsedData = JSON.parse(data.configData as string);
-          
-          if (parsedData.materials && Array.isArray(parsedData.materials)) {
-            // New format with materials and formula parameters
-            setMaterials(parsedData.materials);
-            
-            // Set formula parameters if they exist
-            if (parsedData.formulaParameters) {
-              setFormulaParameters(prev => ({
-                ...prev,
-                aTotalWeight: parsedData.formulaParameters.aTotalWeight || 155,
-                bTotalWeight: parsedData.formulaParameters.bTotalWeight || 515
-              }));
-            }
-            
-            recalculateDistribution(parsedData.materials);
-            toast({
-              title: "Success",
-              description: "Configuration loaded successfully!",
-              variant: "default",
-            });
-          } else if (Array.isArray(parsedData) && parsedData.length > 0) {
-            // Legacy format - just an array of materials
-            setMaterials(parsedData);
-            recalculateDistribution(parsedData);
-            toast({
-              title: "Success",
-              description: "Configuration loaded successfully (legacy format)!",
-              variant: "default",
-            });
-          } else {
-            throw new Error("Invalid configuration format");
-          }
-        } catch (err) {
-          console.error("Failed to parse config data", err);
-          toast({
-            title: "Error",
-            description: "Failed to parse configuration data",
-            variant: "destructive",
-          });
-        }
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to load configuration",
-        variant: "destructive",
-      });
-    },
-  });
 
   // Effect to update calculations when materials or quantity changes
   useEffect(() => {
