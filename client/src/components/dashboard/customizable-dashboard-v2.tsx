@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { useDragDropContext } from '@/hooks/use-drag-drop-context';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -207,7 +206,6 @@ export function CustomizableDashboardV2() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { registerHandler, unregisterHandler } = useDragDropContext();
   const [isEditMode, setIsEditMode] = useState(false);
   const [showWidgetLibrary, setShowWidgetLibrary] = useState(false);
   const [widgets, setWidgets] = useState<WidgetItem[]>([]);
@@ -231,12 +229,6 @@ export function CustomizableDashboardV2() {
     setHasUnsavedChanges(true);
   };
 
-  // Register drag handler
-  useEffect(() => {
-    registerHandler('dashboard', handleDragEnd);
-    return () => unregisterHandler('dashboard');
-  }, [widgets, registerHandler, unregisterHandler]);
-
   // Load saved dashboard layout
   useEffect(() => {
     const savedLayout = localStorage.getItem(`dashboard-layout-${user?.id}`);
@@ -259,24 +251,6 @@ export function CustomizableDashboardV2() {
       setHasUnsavedChanges(false);
       toast({ title: 'Dashboard layout saved successfully' });
     }
-  };
-
-  // Handle drag end
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-
-    const items = Array.from(widgets);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    // Update positions
-    const updatedWidgets = items.map((widget, index) => ({
-      ...widget,
-      position: index
-    }));
-
-    setWidgets(updatedWidgets);
-    setHasUnsavedChanges(true);
   };
 
   // Add widget
@@ -386,7 +360,8 @@ export function CustomizableDashboardV2() {
       </div>
 
       {/* Dashboard Grid */}
-      <Droppable droppableId="dashboard-grid" direction="horizontal">
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="dashboard-grid" direction="horizontal">
           {(provided, snapshot) => (
             <div
               {...provided.droppableProps}
@@ -477,6 +452,7 @@ export function CustomizableDashboardV2() {
             </div>
           )}
         </Droppable>
+      </DragDropContext>
 
       {/* Widget Library Modal */}
       {showWidgetLibrary && (
