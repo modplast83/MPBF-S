@@ -121,10 +121,46 @@ interface DashboardStats {
 }
 
 function StatsOverviewWidget() {
-  const { data: stats } = useQuery<DashboardStats>({
+  const { data: stats, isLoading, error } = useQuery<DashboardStats>({
     queryKey: ['/api/dashboard-stats'],
     staleTime: 30000
   });
+
+  if (isLoading) {
+    return (
+      <div>
+        <h3 className="font-semibold mb-3">Statistics Overview</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="text-center p-2 bg-gray-50 rounded">
+              <div className="h-4 w-4 bg-gray-200 rounded mx-auto mb-1 animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded mb-1 animate-pulse"></div>
+              <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <h3 className="font-semibold mb-3">Statistics Overview</h3>
+        <div className="text-center py-4 text-muted-foreground">
+          Unable to load statistics
+        </div>
+      </div>
+    );
+  }
+
+  // Ensure type safety with proper fallbacks
+  const safeStats = {
+    totalOrders: Number(stats?.totalOrders) || 0,
+    completedOrders: Number(stats?.completedOrders) || 0,
+    pendingOrders: Number(stats?.pendingOrders) || 0,
+    qualityIssues: Number(stats?.qualityIssues) || 0
+  };
 
   return (
     <div>
@@ -132,22 +168,22 @@ function StatsOverviewWidget() {
       <div className="grid grid-cols-2 gap-3">
         <div className="text-center p-2 bg-blue-50 rounded">
           <Package className="h-4 w-4 text-blue-600 mx-auto mb-1" />
-          <div className="text-xl font-bold text-blue-600">{stats?.totalOrders ?? 0}</div>
+          <div className="text-xl font-bold text-blue-600">{safeStats.totalOrders}</div>
           <div className="text-xs text-blue-600">Total Orders</div>
         </div>
         <div className="text-center p-2 bg-green-50 rounded">
           <TrendingUp className="h-4 w-4 text-green-600 mx-auto mb-1" />
-          <div className="text-xl font-bold text-green-600">{stats?.completedOrders ?? 0}</div>
+          <div className="text-xl font-bold text-green-600">{safeStats.completedOrders}</div>
           <div className="text-xs text-green-600">Completed</div>
         </div>
         <div className="text-center p-2 bg-yellow-50 rounded">
           <Clock className="h-4 w-4 text-yellow-600 mx-auto mb-1" />
-          <div className="text-xl font-bold text-yellow-600">{stats?.pendingOrders ?? 0}</div>
+          <div className="text-xl font-bold text-yellow-600">{safeStats.pendingOrders}</div>
           <div className="text-xs text-yellow-600">Pending</div>
         </div>
         <div className="text-center p-2 bg-red-50 rounded">
           <AlertTriangle className="h-4 w-4 text-red-600 mx-auto mb-1" />
-          <div className="text-xl font-bold text-red-600">{stats?.qualityIssues ?? 0}</div>
+          <div className="text-xl font-bold text-red-600">{safeStats.qualityIssues}</div>
           <div className="text-xs text-red-600">Quality Issues</div>
         </div>
       </div>
