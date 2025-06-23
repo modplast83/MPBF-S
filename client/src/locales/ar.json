@@ -2655,6 +2655,27 @@
         "absent": "غائب",
         "early_leave": "مغادرة مبكرة"
       }
+    },
+    "job_orders": {
+      "title": "أوامر العمل",
+      "description": "إدارة أوامر العمل لجدولة الإنتاج والمتابعة",
+      "for_production": "أوامر العمل للإنتاج",
+      "new_job_order": "أمر عمل جديد",
+      "job_order_id": "رقم أمر العمل",
+      "jo_id": "رقم أمر العمل",
+      "jo_qty": "كمية أمر العمل (كجم)",
+      "order_id": "رقم الطلب",
+      "no_production_orders": "لا توجد أوامر عمل للإنتاج",
+      "customer_product": "المنتج",
+      "quantity": "الكمية (كجم)",
+      "status": "الحالة",
+      "job_order_count": "أوامر العمل",
+      "pending": "معلق",
+      "in_progress": "قيد التنفيذ",
+      "extrusion_completed": "اكتمل البثق",
+      "completed": "مكتمل",
+      "cancelled": "ملغى",
+      "select_job_order": "اختر أمر عمل"
     }
   }
 }
