@@ -58,6 +58,7 @@ export default function JobOrdersPage() {
   
   const [searchTerm, setSearchTerm] = useState("");
   const [customerFilter, setCustomerFilter] = useState("all");
+  const [materialFilter, setMaterialFilter] = useState("all");
   const [masterbatchFilter, setMasterbatchFilter] = useState("all");
   const [productFilter, setProductFilter] = useState("all");
   const [sortField, setSortField] = useState<SortField>("orderId");
@@ -127,6 +128,13 @@ export default function JobOrdersPage() {
     if (customerFilter && customerFilter !== "all") {
       filtered = filtered.filter(jo => 
         jo.customer?.name.toLowerCase().includes(customerFilter.toLowerCase())
+      );
+    }
+
+    // Apply material filter
+    if (materialFilter && materialFilter !== "all") {
+      filtered = filtered.filter(jo => 
+        jo.customerProduct?.rawMaterial?.toLowerCase().includes(materialFilter.toLowerCase())
       );
     }
 
@@ -228,6 +236,14 @@ export default function JobOrdersPage() {
     return customerNames.sort();
   }, [productionJobOrders]);
 
+  const uniqueMaterials = useMemo(() => {
+    const materialNames = productionJobOrders
+      .map(jo => jo.customerProduct?.rawMaterial)
+      .filter(Boolean)
+      .filter((name, index, arr) => arr.indexOf(name) === index);
+    return materialNames.sort();
+  }, [productionJobOrders]);
+
   const uniqueMasterBatches = useMemo(() => {
     const mbNames = productionJobOrders
       .map(jo => jo.masterBatch?.name)
@@ -248,7 +264,7 @@ export default function JobOrdersPage() {
     <Button
       variant="ghost"
       size="sm"
-      className="h-8 data-[state=open]:bg-accent"
+      className="h-8 data-[state=open]:bg-accent pl-[0px] pr-[0px]"
       onClick={() => handleSort(field)}
     >
       {children}
@@ -299,7 +315,7 @@ export default function JobOrdersPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Order No Search */}
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("orders.order_no")}</label>
@@ -332,9 +348,27 @@ export default function JobOrdersPage() {
               </Select>
             </div>
 
-            {/* Masterbatch Filter */}
+            {/* Materials Filter */}
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("orders.material")}</label>
+              <Select value={materialFilter} onValueChange={setMaterialFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("common.all")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("common.all")}</SelectItem>
+                  {uniqueMaterials.map((material) => (
+                    <SelectItem key={material} value={material || "unknown"}>
+                      {material}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Master Batch Filter */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("common.batch")}</label>
               <Select value={masterbatchFilter} onValueChange={setMasterbatchFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder={t("common.all")} />
@@ -370,7 +404,7 @@ export default function JobOrdersPage() {
           </div>
 
           {/* Clear Filters */}
-          {(searchTerm || customerFilter !== "all" || masterbatchFilter !== "all" || productFilter !== "all") && (
+          {(searchTerm || customerFilter !== "all" || materialFilter !== "all" || masterbatchFilter !== "all" || productFilter !== "all") && (
             <div className="flex justify-end mt-4">
               <Button
                 variant="outline"
@@ -378,6 +412,7 @@ export default function JobOrdersPage() {
                 onClick={() => {
                   setSearchTerm("");
                   setCustomerFilter("all");
+                  setMaterialFilter("all");
                   setMasterbatchFilter("all");
                   setProductFilter("all");
                 }}
@@ -415,7 +450,7 @@ export default function JobOrdersPage() {
                       onCheckedChange={handleSelectAll}
                     />
                   </TableHead>
-                  <TableHead>
+                  <TableHead className="pl-[0px] pr-[0px]">
                     <SortButton field="orderId">{t("orders.order_id")}</SortButton>
                   </TableHead>
                   <TableHead>
@@ -481,7 +516,7 @@ export default function JobOrdersPage() {
                           {jobOrder.customerProduct?.rawMaterial || "-"}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         <Badge variant="secondary">
                           {jobOrder.masterBatch?.name || "-"}
                         </Badge>

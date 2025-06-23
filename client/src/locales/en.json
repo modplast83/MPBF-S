@@ -8,7 +8,13 @@
         },
         "common": {
             "length": "Length",
+            "total_records": "Total Records",
             "batch": "Batch",
+            "filters": "Filter",
+            "sort": "Sort",
+            "search": "Search",
+            "actions": "Actions",
+            "search_placeholder": "Search...",
             "item": "Item",
             "loading": "Loading...",
             "save": "Save",
@@ -1200,6 +1206,9 @@
         },
         "orders": {
             "title": "Orders",
+            "order_note": "Order Note",
+            "order_note_placeholder": "Enter order notes (optional)",
+            "order_details": "Order Details",            
             "new_order": "New Order",
             "create_new_order": "New Order",
             "order_id": "Order ID",
