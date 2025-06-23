@@ -108,7 +108,7 @@ export default function JobOrdersPage() {
           masterBatch
         };
       })
-      .filter(jo => jo.order?.status === "For Production");
+      .filter(jo => jo.order?.status === "processing");
   }, [jobOrders, orders, customers, customerProducts, items, masterBatches]);
 
   // Apply filters and sorting
