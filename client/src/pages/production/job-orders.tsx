@@ -134,21 +134,21 @@ export default function JobOrdersPage() {
     // Apply material filter
     if (materialFilter && materialFilter !== "all") {
       filtered = filtered.filter(jo => 
-        jo.customerProduct?.rawMaterial?.toLowerCase().includes(materialFilter.toLowerCase())
+        jo.customerProduct?.rawMaterial?.toLowerCase() === materialFilter.toLowerCase()
       );
     }
 
     // Apply masterbatch filter
     if (masterbatchFilter && masterbatchFilter !== "all") {
       filtered = filtered.filter(jo => 
-        jo.masterBatch?.name.toLowerCase().includes(masterbatchFilter.toLowerCase())
+        jo.masterBatch?.name?.toLowerCase() === masterbatchFilter.toLowerCase()
       );
     }
 
     // Apply product filter
     if (productFilter && productFilter !== "all") {
       filtered = filtered.filter(jo => 
-        jo.item?.name.toLowerCase().includes(productFilter.toLowerCase())
+        jo.item?.name?.toLowerCase() === productFilter.toLowerCase()
       );
     }
 
