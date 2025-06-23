@@ -7,6 +7,7 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle,
+  DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -578,6 +579,9 @@ export function QualityViolationsManagement() {
                 ? t("common.edit_item", { item: t("quality.violations") }) 
                 : t("common.add_new", { item: t("quality.violations") })}
             </DialogTitle>
+            <DialogDescription>
+              {currentViolation ? "Edit the quality violation details and status." : "Create a new quality violation record to track and manage quality issues."}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -752,6 +756,9 @@ export function QualityViolationsManagement() {
             <DialogTitle>
               {t("quality.violations")} #{currentViolation?.id}
             </DialogTitle>
+            <DialogDescription>
+              View detailed information about this quality violation including status, severity, and resolution notes.
+            </DialogDescription>
           </DialogHeader>
           {currentViolation && (
             <div className="space-y-6">

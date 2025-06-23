@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -121,6 +121,9 @@ export function RollDialog({ open, onOpenChange, jobOrder, onSubmit, isLoading }
               )}
             </Badge>
           </DialogTitle>
+          <DialogDescription>
+            Create a new roll for the selected job order during the extrusion process.
+          </DialogDescription>
         </DialogHeader>
 
         {jobOrder && (
