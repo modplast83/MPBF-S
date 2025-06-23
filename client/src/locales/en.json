@@ -8,6 +8,7 @@
         },
         "common": {
             "length": "Length",
+            "batch": "Batch",
             "item": "Item",
             "loading": "Loading...",
             "save": "Save",
@@ -1248,7 +1249,8 @@
             "order_created": "Order Created",
             "order_created_success": "Order {{id}} has been created successfully",
             "error": "Error",
-            "order_creation_failed": "Order creation failed: {{error}}"
+            "order_creation_failed": "Order creation failed: {{error}}",
+            "material": "Materials"
         },
         "job_orders": {
             "title": "Job Orders",

@@ -483,7 +483,7 @@ export default function JobOrdersPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
-                          {jobOrder.customerProduct?.id || "-"}
+                          {jobOrder.masterBatch?.name || "-"}
                         </Badge>
                       </TableCell>
                       <TableCell className="font-medium">
