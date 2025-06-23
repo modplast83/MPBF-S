@@ -57,9 +57,9 @@ export default function JobOrdersPage() {
   const { isRTL } = useLanguage();
   
   const [searchTerm, setSearchTerm] = useState("");
-  const [customerFilter, setCustomerFilter] = useState("");
-  const [masterbatchFilter, setMasterbatchFilter] = useState("");
-  const [productFilter, setProductFilter] = useState("");
+  const [customerFilter, setCustomerFilter] = useState("all");
+  const [masterbatchFilter, setMasterbatchFilter] = useState("all");
+  const [productFilter, setProductFilter] = useState("all");
   const [sortField, setSortField] = useState<SortField>("orderId");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [selectedJobOrders, setSelectedJobOrders] = useState<Set<number>>(new Set());
@@ -124,21 +124,21 @@ export default function JobOrdersPage() {
     }
 
     // Apply customer filter
-    if (customerFilter) {
+    if (customerFilter && customerFilter !== "all") {
       filtered = filtered.filter(jo => 
         jo.customer?.name.toLowerCase().includes(customerFilter.toLowerCase())
       );
     }
 
     // Apply masterbatch filter
-    if (masterbatchFilter) {
+    if (masterbatchFilter && masterbatchFilter !== "all") {
       filtered = filtered.filter(jo => 
         jo.masterBatch?.name.toLowerCase().includes(masterbatchFilter.toLowerCase())
       );
     }
 
     // Apply product filter
-    if (productFilter) {
+    if (productFilter && productFilter !== "all") {
       filtered = filtered.filter(jo => 
         jo.item?.name.toLowerCase().includes(productFilter.toLowerCase())
       );
@@ -322,9 +322,9 @@ export default function JobOrdersPage() {
                   <SelectValue placeholder={t("common.all")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("common.all")}</SelectItem>
+                  <SelectItem value="all">{t("common.all")}</SelectItem>
                   {uniqueCustomers.map((customer) => (
-                    <SelectItem key={customer} value={customer}>
+                    <SelectItem key={customer} value={customer || "unknown"}>
                       {customer}
                     </SelectItem>
                   ))}
@@ -340,9 +340,9 @@ export default function JobOrdersPage() {
                   <SelectValue placeholder={t("common.all")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("common.all")}</SelectItem>
+                  <SelectItem value="all">{t("common.all")}</SelectItem>
                   {uniqueMasterBatches.map((mb) => (
-                    <SelectItem key={mb} value={mb}>
+                    <SelectItem key={mb} value={mb || "unknown"}>
                       {mb}
                     </SelectItem>
                   ))}
@@ -358,9 +358,9 @@ export default function JobOrdersPage() {
                   <SelectValue placeholder={t("common.all")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("common.all")}</SelectItem>
+                  <SelectItem value="all">{t("common.all")}</SelectItem>
                   {uniqueProducts.map((product) => (
-                    <SelectItem key={product} value={product}>
+                    <SelectItem key={product} value={product || "unknown"}>
                       {product}
                     </SelectItem>
                   ))}
@@ -370,16 +370,16 @@ export default function JobOrdersPage() {
           </div>
 
           {/* Clear Filters */}
-          {(searchTerm || customerFilter || masterbatchFilter || productFilter) && (
+          {(searchTerm || customerFilter !== "all" || masterbatchFilter !== "all" || productFilter !== "all") && (
             <div className="flex justify-end mt-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   setSearchTerm("");
-                  setCustomerFilter("");
-                  setMasterbatchFilter("");
-                  setProductFilter("");
+                  setCustomerFilter("all");
+                  setMasterbatchFilter("all");
+                  setProductFilter("all");
                 }}
               >
                 {t("common.clear_filters")}
