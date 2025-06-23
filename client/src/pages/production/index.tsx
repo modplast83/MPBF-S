@@ -26,6 +26,13 @@ export default function ProductionIndex() {
       count: 24
     },
     {
+      title: t("job_orders.title"),
+      description: t("job_orders.description", "Manage job orders for production scheduling and tracking"),
+      icon: Factory,
+      path: "/production/job-orders",
+      color: "bg-gradient-to-br from-indigo-500 to-indigo-600",
+    },
+    {
       title: t("production.workflow.title"),
       description: t("production.workflow.description"),
       icon: Workflow,

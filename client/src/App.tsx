@@ -13,6 +13,7 @@ import OrderDetails from "@/pages/orders/[id]";
 import WorkflowIndex from "@/pages/workflow/index";
 import ProductionIndex from "@/pages/production/index";
 import MixMaterialsPage from "@/pages/production/mix-materials";
+import JobOrdersPage from "@/pages/production/job-orders";
 import WarehouseIndex from "@/pages/warehouse/index";
 import RawMaterials from "@/pages/warehouse/raw-materials";
 import FinalProducts from "@/pages/warehouse/final-products";
@@ -175,6 +176,7 @@ function App() {
                     <ProtectedRoute path="/maintenance/schedule" component={MaintenanceSchedulePage} module="Maintenance Schedule" />
                     <ProtectedRoute path="/maintenance/dashboard" component={MaintenanceDashboard} module="Dashboard" />
                     {/* Production Module Routes */}
+                    <ProtectedRoute path="/production/job-orders" component={JobOrdersPage} module="Job Orders" />
                     <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" />
                     <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
                     <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />
