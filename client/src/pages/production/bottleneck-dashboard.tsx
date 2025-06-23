@@ -233,13 +233,18 @@ export default function BottleneckDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex gap-4">
-              {Object.entries(dashboardData.alertsBySeverity).map(([severity, count]) => (
-                <div key={severity} className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${severityColors[severity as keyof typeof severityColors]}`}></div>
-                  <span className="text-sm font-medium capitalize">{severity}</span>
-                  <Badge variant="secondary">{count}</Badge>
-                </div>
-              ))}
+              {Object.entries(dashboardData.alertsBySeverity).map(([severity, count]) => {
+                const colorClass = severityColors[severity as keyof typeof severityColors] || 'bg-gray-500';
+                const safeCount = Number(count) || 0;
+                
+                return (
+                  <div key={severity} className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>
+                    <span className="text-sm font-medium capitalize">{severity}</span>
+                    <Badge variant="secondary">{safeCount}</Badge>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>

@@ -345,7 +345,7 @@ export default function ViolationTrendsPage() {
           <CardContent>
             <div className="text-2xl font-bold capitalize">{mostCommonType[0] || 'None'}</div>
             <p className="text-xs text-gray-600 mt-1">
-              {mostCommonType[1] || 0} incidents ({totalViolations > 0 && mostCommonType[1] > 0 ? ((mostCommonType[1] / totalViolations) * 100).toFixed(0) : '0'}%)
+              {Number(mostCommonType[1]) || 0} incidents ({totalViolations > 0 && Number(mostCommonType[1]) > 0 ? ((Number(mostCommonType[1]) / totalViolations) * 100).toFixed(0) : '0'}%)
             </p>
           </CardContent>
         </Card>
