@@ -106,6 +106,7 @@ export const SIDEBAR_ITEMS = [
         icon: "precision_manufacturing",
         subItems: [
           { title: "Orders", path: "/orders" },
+          { title: "Job Orders", path: "/production/job-orders" },
           { title: "Workflow", path: "/workflow" },
           { title: "Mix Materials", path: "/production/mix-materials" },
           { title: "Bottleneck Monitor", path: "/production/bottleneck-dashboard" },

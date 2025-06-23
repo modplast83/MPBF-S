@@ -232,6 +232,7 @@
             "mix_colors": "Mix Colors",
             "production": "Production",
             "orders": "Orders",
+            "job_orders": "Job Orders",
             "workflow": "Workflow",
             "mix_materials": "Mix Materials",
             "bottleneck_monitor": "Bottleneck Monitor",
