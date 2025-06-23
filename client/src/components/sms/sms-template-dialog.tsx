@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -145,6 +145,9 @@ export function SmsTemplateDialog({ children, template, onSuccess }: SmsTemplate
           <DialogTitle>
             {template ? "Edit SMS Template" : "Create SMS Template"}
           </DialogTitle>
+          <DialogDescription>
+            {template ? "Modify the SMS template configuration and content." : "Create reusable SMS templates with variables for automated messaging."}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -86,6 +86,9 @@ export function SmsMessageDetails({
             <MessageSquare className="h-5 w-5" />
             SMS Message Details
           </DialogTitle>
+          <DialogDescription>
+            View comprehensive details about this SMS message including delivery status, recipient information, and content.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
