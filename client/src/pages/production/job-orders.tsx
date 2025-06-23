@@ -196,7 +196,7 @@ export default function JobOrdersPage() {
     });
 
     return filtered;
-  }, [productionJobOrders, searchTerm, customerFilter, masterbatchFilter, productFilter, sortField, sortDirection]);
+  }, [productionJobOrders, searchTerm, customerFilter, materialFilter, masterbatchFilter, productFilter, sortField, sortDirection]);
 
   // Handle sorting
   const handleSort = (field: SortField) => {
@@ -353,7 +353,9 @@ export default function JobOrdersPage() {
               <label className="text-sm font-medium">{t("orders.material")}</label>
               <Select value={materialFilter} onValueChange={setMaterialFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t("common.all")} />
+                  <SelectValue placeholder={t("common.all")}>
+                    {materialFilter === "all" ? t("common.all") : materialFilter}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("common.all")}</SelectItem>
