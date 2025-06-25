@@ -103,8 +103,11 @@ This is a comprehensive production management system built with React, TypeScrip
 - Health check endpoints for monitoring
 
 ## Recent Changes
-- June 25, 2025: Fixed ABA Formula validation error message - changed misleading "All materials must be selected" to clearer guidance about selecting materials for each row
-- June 25, 2025: Fixed typo in ABA Formula validation code (Title → title)
+- June 25, 2025: Fixed ABA Formula creation issues:
+  - Changed misleading error message "All materials must be selected" to clearer guidance
+  - Fixed typo in validation code (Title → title)
+  - Fixed API request parameter order causing fetch errors
+  - Single material selection now works properly
 
 ## Changelog
 - June 25, 2025. Initial setup

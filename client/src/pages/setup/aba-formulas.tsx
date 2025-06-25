@@ -68,10 +68,7 @@ export default function AbaFormulas() {
   // Create formula mutation
   const createFormula = useMutation({
     mutationFn: async (data: Omit<FormulaFormData, 'materials'> & { materials: Omit<AbaFormulaMaterial, 'id' | 'rawMaterialName'>[] }) => {
-      return apiRequest("/api/aba-formulas", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return apiRequest("POST", "/api/aba-formulas", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/aba-formulas"] });
@@ -91,10 +88,7 @@ export default function AbaFormulas() {
   // Update formula mutation
   const updateFormula = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Omit<FormulaFormData, 'materials'> & { materials: Omit<AbaFormulaMaterial, 'rawMaterialName'>[] } }) => {
-      return apiRequest(`/api/aba-formulas/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
+      return apiRequest("PUT", `/api/aba-formulas/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/aba-formulas"] });
@@ -114,9 +108,7 @@ export default function AbaFormulas() {
   // Delete formula mutation
   const deleteFormula = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/aba-formulas/${id}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/aba-formulas/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/aba-formulas"] });
