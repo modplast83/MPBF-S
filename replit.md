@@ -139,6 +139,19 @@ This is a comprehensive production management system built with React, TypeScrip
   - Added Percent% column to JO Mixes table showing each mix percentage of total
   - Added percentage information to Mix Details dialog for each material
   - Updated database schema to store material percentages in JO mix materials
+- June 25, 2025: Fixed ABA Formula A:B Ratio field and material validation:
+  - Changed A:B Ratio to accept separate A and B values with real-time ratio calculation
+  - Added validation to prevent materials from having 0 values in percentages
+  - Updated material input fields to have minimum value of 0.01 instead of 0
+  - Enhanced form validation with clearer error messages for invalid material percentages
+- June 25, 2025: Fixed ABA formula ratio display formatting:
+  - Updated Select ABA Formula dropdown to show clean decimal format (0.43:1.00)
+  - Enhanced Mix Preview section to show properly formatted A:B ratios
+  - Applied consistent decimal formatting throughout JO Mix creation interface
+- June 25, 2025: Added comprehensive Arabic translation support:
+  - Added complete Arabic translation keys for ABA Formula, JO Mix, and Job Orders pages
+  - Included all table headers, form fields, validation messages, and action buttons
+  - Enhanced i18n support for production management workflows
 
 ## Changelog
 - June 25, 2025. Initial setup
