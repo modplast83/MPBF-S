@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
   MACHINES: "/api/machines",
   USERS: "/api/users",
   MASTER_BATCHES: "/api/master-batches",
+  ABA_FORMULAS: "/api/aba-formulas",
   
   // Production
   ORDERS: "/api/orders",
@@ -97,6 +98,7 @@ export const SIDEBAR_ITEMS = [
           { title: "Sections", path: "/setup/sections" },
           { title: "Machines", path: "/setup/machines" },
           { title: "Users", path: "/setup/users" },
+          { title: "ABA Formulas", path: "/setup/aba-formulas" },
           { title: "Quality Check Types", path: "/quality/check-types" },
         ],
       },

@@ -8,6 +8,7 @@ import Items from "@/pages/setup/items";
 import Sections from "@/pages/setup/sections";
 import Machines from "@/pages/setup/machines";
 import Users from "@/pages/setup/users";
+import AbaFormulas from "@/pages/setup/aba-formulas";
 import OrdersIndex from "@/pages/orders/index";
 import OrderDetails from "@/pages/orders/[id]";
 import WorkflowIndex from "@/pages/workflow/index";
@@ -117,6 +118,7 @@ function App() {
                     <ProtectedRoute path="/setup/sections" component={Sections} module="Sections" />
                     <ProtectedRoute path="/setup/machines" component={Machines} module="Machines" />
                     <ProtectedRoute path="/setup/users" component={Users} module="Users" />
+                    <ProtectedRoute path="/setup/aba-formulas" component={AbaFormulas} module="ABA Formulas" />
                     <ProtectedRoute path="/orders" component={OrdersIndex} module="Orders" />
                     <ProtectedRoute path="/orders/:id" component={OrderDetails} module="Orders" />
                     <ProtectedRoute path="/workflow" component={WorkflowIndex} module="Workflow" />

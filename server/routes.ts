@@ -82,6 +82,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
   
+  // ABA Formulas Routes
+  app.get("/api/aba-formulas", async (_req: Request, res: Response) => {
+    try {
+      const formulas = await storage.getAbaFormulas();
+      res.json(formulas);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get ABA formulas" });
+    }
+  });
+
+  app.get("/api/aba-formulas/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid formula ID" });
+      }
+      
+      const formula = await storage.getAbaFormula(id);
+      if (!formula) {
+        return res.status(404).json({ message: "ABA formula not found" });
+      }
+      res.json(formula);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get ABA formula" });
+    }
+  });
+
+  app.post("/api/aba-formulas", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertAbaFormulaSchema.parse(req.body);
+      const formula = await storage.createAbaFormula(validatedData);
+      res.status(201).json(formula);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid ABA formula data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create ABA formula" });
+    }
+  });
+
+  app.put("/api/aba-formulas/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid formula ID" });
+      }
+      
+      const existingFormula = await storage.getAbaFormula(id);
+      if (!existingFormula) {
+        return res.status(404).json({ message: "ABA formula not found" });
+      }
+      
+      const validatedData = insertAbaFormulaSchema.parse(req.body);
+      const formula = await storage.updateAbaFormula(id, validatedData);
+      res.json(formula);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid ABA formula data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update ABA formula" });
+    }
+  });
+
+  app.delete("/api/aba-formulas/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid formula ID" });
+      }
+      
+      const formula = await storage.getAbaFormula(id);
+      if (!formula) {
+        return res.status(404).json({ message: "ABA formula not found" });
+      }
+      
+      await storage.deleteAbaFormula(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete ABA formula" });
+    }
+  });
+
   // Setup HR module routes
   setupHRRoutes(app);
   
