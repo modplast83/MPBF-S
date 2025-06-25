@@ -81,12 +81,13 @@ export function OrderForm() {
   useEffect(() => {
     console.log('Customers data:', customers);
     if (customers && customers.length > 0) {
-      // Simplified Fuse.js configuration for debugging
+      // Enhanced Fuse.js configuration for bilingual search
       fuseRef.current = new Fuse(customers, {
-        keys: ['name'],
-        threshold: 0.6, // Very lenient matching
+        keys: ['name', 'nameAr', 'code'],
+        threshold: 0.4, // Balanced matching
         includeScore: true,
         ignoreLocation: true,
+        useExtendedSearch: true,
       });
     }
   }, [customers]);
@@ -108,24 +109,28 @@ export function OrderForm() {
     console.log('Search query:', trimmedQuery);
     
     try {
-      // Special cases: very short search terms might produce too many results
-      // For single characters, be more restrictive to avoid showing too many results
+      // Enhanced bilingual search for both Arabic and English
       if (trimmedQuery.length === 1) {
-        // For single character searches, only match start of words
+        // For single character searches, match start of words in both languages
         const char = trimmedQuery.toLowerCase();
         const filteredCustomers = customers.filter(customer => {
           if (!customer) return false;
           
-          // Match start of name words
+          // Match start of English name words
           const nameStartsWithMatch = customer.name && 
             (customer.name.toLowerCase().startsWith(char) || 
              customer.name.toLowerCase().split(' ').some(word => word.startsWith(char)));
+          
+          // Match start of Arabic name words
+          const nameArStartsWithMatch = customer.nameAr && 
+            (customer.nameAr.startsWith(trimmedQuery) || 
+             customer.nameAr.split(' ').some(word => word.startsWith(trimmedQuery)));
           
           // Match code
           const codeMatch = customer.code && 
             customer.code.toLowerCase().startsWith(char);
             
-          return nameStartsWithMatch || codeMatch;
+          return nameStartsWithMatch || nameArStartsWithMatch || codeMatch;
         });
         
         return filteredCustomers;

@@ -1255,7 +1255,7 @@
             "no_processing_orders": "No For Production orders found",
             "no_hold_orders": "No On Hold orders found",
             "no_pending_orders": "No Pending orders found",
-            "search_customer_placeholder": "Search customers...",
+            "search_customer_placeholder": "Search by English or Arabic name, or code...",
             "no_matching_customer": "No matching customers found",
             "try_different_search": "Try a different search term",
             "add_products_to_order": "Click 'Add Product' to add products to this order",

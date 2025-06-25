@@ -163,6 +163,11 @@ This is a comprehensive production management system built with React, TypeScrip
   - Added Material column to Select Job Orders table after Master Batch column
   - Displays item/material name for better visibility during mix creation
   - Applied consistent center alignment styling across all table elements
+- June 25, 2025: Enhanced customer search functionality for bilingual support:
+  - Updated customer search in New Order to search both English and Arabic names
+  - Improved Fuse.js configuration to include nameAr field for Arabic text search
+  - Enhanced search algorithm to handle Arabic text patterns and word matching
+  - Updated search placeholder text to indicate bilingual search capability
 
 ## Changelog
 - June 25, 2025. Initial setup
