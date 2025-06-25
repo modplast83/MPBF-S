@@ -851,7 +851,7 @@ export class DatabaseStorage implements IStorage {
           receivedBy: jobOrders.receivedBy,
           customerName: customers.name,
           masterBatch: masterBatches.name,
-          size: customerProducts.size,
+          size: sql<string>`CONCAT(${customerProducts.width}, 'x', ${customerProducts.lengthCm})`.as('size'),
           itemName: items.name,
         })
         .from(jobOrders)
