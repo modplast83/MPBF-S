@@ -534,6 +534,9 @@ export default function Permissions() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Custom Role</DialogTitle>
+            <DialogDescription>
+              Create a new custom role with specific permissions for users in your organization.
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">

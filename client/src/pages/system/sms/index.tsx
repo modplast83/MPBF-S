@@ -173,6 +173,9 @@ export default function SmsManagementPage() {
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Filter SMS Messages</DialogTitle>
+                  <DialogDescription>
+                    Filter SMS messages by status to view specific message types.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
@@ -235,6 +238,9 @@ export default function SmsManagementPage() {
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Send New SMS Message</DialogTitle>
+                <DialogDescription>
+                  Send a new SMS message to a recipient. The message will be delivered immediately.
+                </DialogDescription>
               </DialogHeader>
               <Form {...sendSmsForm}>
                 <form onSubmit={sendSmsForm.handleSubmit(onSubmitSendSms)} className="space-y-4">

@@ -439,6 +439,9 @@ export default function AbaFormulas() {
             <DialogTitle>
               {editingFormula ? "Edit ABA Formula" : "Create ABA Formula"}
             </DialogTitle>
+            <DialogDescription>
+              {editingFormula ? "Modify the ABA formula configuration and material percentages." : "Create a new ABA formula by defining the A:B ratio and material composition."}
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-6">
@@ -635,6 +638,9 @@ export default function AbaFormulas() {
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>View ABA Formula - {viewingFormula?.name}</DialogTitle>
+            <DialogDescription>
+              View detailed information about this ABA formula including material composition and percentages.
+            </DialogDescription>
           </DialogHeader>
           {viewingFormula && (
             <div className="space-y-6">
