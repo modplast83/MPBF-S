@@ -5176,6 +5176,155 @@ COMMIT;
     }
   });
 
+  // ABA Formulas API endpoints
+  app.get("/api/aba-formulas", async (req: Request, res: Response) => {
+    try {
+      const formulas = await storage.getAbaFormulas();
+      res.json(formulas);
+    } catch (error) {
+      console.error("Error fetching ABA formulas:", error);
+      res.status(500).json({ message: "Failed to fetch ABA formulas" });
+    }
+  });
+
+  app.get("/api/aba-formulas/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const formula = await storage.getAbaFormula(parseInt(id));
+      if (!formula) {
+        return res.status(404).json({ message: "ABA formula not found" });
+      }
+      res.json(formula);
+    } catch (error) {
+      console.error("Error fetching ABA formula:", error);
+      res.status(500).json({ message: "Failed to fetch ABA formula" });
+    }
+  });
+
+  app.post("/api/aba-formulas", async (req: Request, res: Response) => {
+    try {
+      const validation = insertAbaFormulaSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid ABA formula data",
+          errors: validation.error.issues 
+        });
+      }
+
+      const formula = await storage.createAbaFormula(validation.data);
+      res.status(201).json(formula);
+    } catch (error) {
+      console.error("Error creating ABA formula:", error);
+      res.status(500).json({ message: "Failed to create ABA formula" });
+    }
+  });
+
+  app.put("/api/aba-formulas/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const validation = insertAbaFormulaSchema.partial().safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid ABA formula data",
+          errors: validation.error.issues 
+        });
+      }
+
+      const formula = await storage.updateAbaFormula(parseInt(id), validation.data);
+      if (!formula) {
+        return res.status(404).json({ message: "ABA formula not found" });
+      }
+      res.json(formula);
+    } catch (error) {
+      console.error("Error updating ABA formula:", error);
+      res.status(500).json({ message: "Failed to update ABA formula" });
+    }
+  });
+
+  app.delete("/api/aba-formulas/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteAbaFormula(parseInt(id));
+      if (!success) {
+        return res.status(404).json({ message: "ABA formula not found" });
+      }
+      res.json({ message: "ABA formula deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting ABA formula:", error);
+      res.status(500).json({ message: "Failed to delete ABA formula" });
+    }
+  });
+
+  // ABA Formula Materials API endpoints
+  app.get("/api/aba-formulas/:formulaId/materials", async (req: Request, res: Response) => {
+    try {
+      const { formulaId } = req.params;
+      const materials = await storage.getAbaFormulaMaterials(parseInt(formulaId));
+      res.json(materials);
+    } catch (error) {
+      console.error("Error fetching ABA formula materials:", error);
+      res.status(500).json({ message: "Failed to fetch ABA formula materials" });
+    }
+  });
+
+  app.post("/api/aba-formulas/:formulaId/materials", async (req: Request, res: Response) => {
+    try {
+      const { formulaId } = req.params;
+      const validation = insertAbaFormulaMaterialSchema.safeParse({
+        ...req.body,
+        formulaId: parseInt(formulaId)
+      });
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid ABA formula material data",
+          errors: validation.error.issues 
+        });
+      }
+
+      const material = await storage.createAbaFormulaMaterial(validation.data);
+      res.status(201).json(material);
+    } catch (error) {
+      console.error("Error creating ABA formula material:", error);
+      res.status(500).json({ message: "Failed to create ABA formula material" });
+    }
+  });
+
+  app.put("/api/aba-formulas/:formulaId/materials/:materialId", async (req: Request, res: Response) => {
+    try {
+      const { materialId } = req.params;
+      const validation = insertAbaFormulaMaterialSchema.partial().safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid ABA formula material data",
+          errors: validation.error.issues 
+        });
+      }
+
+      const material = await storage.updateAbaFormulaMaterial(parseInt(materialId), validation.data);
+      if (!material) {
+        return res.status(404).json({ message: "ABA formula material not found" });
+      }
+      res.json(material);
+    } catch (error) {
+      console.error("Error updating ABA formula material:", error);
+      res.status(500).json({ message: "Failed to update ABA formula material" });
+    }
+  });
+
+  app.delete("/api/aba-formulas/:formulaId/materials/:materialId", async (req: Request, res: Response) => {
+    try {
+      const { materialId } = req.params;
+      const success = await storage.deleteAbaFormulaMaterial(parseInt(materialId));
+      if (!success) {
+        return res.status(404).json({ message: "ABA formula material not found" });
+      }
+      res.json({ message: "ABA formula material deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting ABA formula material:", error);  
+      res.status(500).json({ message: "Failed to delete ABA formula material" });
+    }
+  });
+
   // User Dashboard API endpoint
   app.get("/api/user-dashboard/:userId", async (req: Request, res: Response) => {
     try {
