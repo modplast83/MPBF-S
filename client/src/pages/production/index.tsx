@@ -47,6 +47,13 @@ export default function ProductionIndex() {
       color: "bg-gradient-to-br from-purple-500 to-purple-600",
     },
     {
+      title: "JO Mix",
+      description: "Create ABA mixing for job orders using predefined formulas",
+      icon: Settings,
+      path: "/production/jo-mix",
+      color: "bg-gradient-to-br from-teal-500 to-teal-600",
+    },
+    {
       title: t("production.bottleneck_monitor.title"),
       description: t("production.bottleneck_monitor.description"),
       icon: AlertTriangle,

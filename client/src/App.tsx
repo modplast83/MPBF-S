@@ -180,6 +180,7 @@ function App() {
                     <ProtectedRoute path="/maintenance/dashboard" component={MaintenanceDashboard} module="Dashboard" />
                     {/* Production Module Routes */}
                     <ProtectedRoute path="/production/job-orders" component={JobOrdersPage} module="Job Orders" />
+                    <ProtectedRoute path="/production/jo-mix" component={JoMixPage} module="JO Mix" />
                     <ProtectedRoute path="/production/mix-materials" component={MixMaterialsPage} module="Mix Materials" />
                     <ProtectedRoute path="/production/bottleneck-dashboard" component={BottleneckDashboard} module="Bottleneck Monitor" />
                     <ProtectedRoute path="/production/metrics-input" component={MetricsInputPage} module="Production Metrics" />
