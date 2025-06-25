@@ -2696,4 +2696,172 @@ export class DatabaseStorage implements IStorage {
     await db.delete(abaFormulaMaterials).where(eq(abaFormulaMaterials.formulaId, formulaId));
     return true;
   }
+
+  // JO Mix methods
+  async getJoMixes(): Promise<any[]> {
+    const mixes = await db
+      .select({
+        id: joMixes.id,
+        mixNumber: joMixes.mixNumber,
+        totalQuantity: joMixes.totalQuantity,
+        screwType: joMixes.screwType,
+        status: joMixes.status,
+        createdBy: joMixes.createdBy,
+        createdAt: joMixes.createdAt,
+        completedAt: joMixes.completedAt,
+        abaFormulaId: joMixes.abaFormulaId,
+        formulaName: abaFormulas.name,
+        createdByName: users.username,
+      })
+      .from(joMixes)
+      .leftJoin(abaFormulas, eq(joMixes.abaFormulaId, abaFormulas.id))
+      .leftJoin(users, eq(joMixes.createdBy, users.id))
+      .orderBy(joMixes.createdAt);
+
+    // Get mix items and materials for each mix
+    for (const mix of mixes) {
+      const items = await this.getJoMixItems(mix.id);
+      const materials = await this.getJoMixMaterials(mix.id);
+      mix.items = items;
+      mix.materials = materials;
+    }
+
+    return mixes;
+  }
+
+  async getJoMix(id: number): Promise<any | undefined> {
+    const [mix] = await db
+      .select({
+        id: joMixes.id,
+        mixNumber: joMixes.mixNumber,
+        totalQuantity: joMixes.totalQuantity,
+        screwType: joMixes.screwType,
+        status: joMixes.status,
+        createdBy: joMixes.createdBy,
+        createdAt: joMixes.createdAt,
+        completedAt: joMixes.completedAt,
+        abaFormulaId: joMixes.abaFormulaId,
+        formulaName: abaFormulas.name,
+        createdByName: users.username,
+      })
+      .from(joMixes)
+      .leftJoin(abaFormulas, eq(joMixes.abaFormulaId, abaFormulas.id))
+      .leftJoin(users, eq(joMixes.createdBy, users.id))
+      .where(eq(joMixes.id, id));
+
+    if (!mix) return undefined;
+
+    // Get mix items and materials
+    const items = await this.getJoMixItems(mix.id);
+    const materials = await this.getJoMixMaterials(mix.id);
+    
+    return {
+      ...mix,
+      items,
+      materials
+    };
+  }
+
+  async createJoMix(mix: InsertJoMix): Promise<JoMix> {
+    const [created] = await db
+      .insert(joMixes)
+      .values(mix)
+      .returning();
+    return created;
+  }
+
+  async updateJoMix(id: number, updates: Partial<InsertJoMix>): Promise<JoMix | undefined> {
+    const [updated] = await db
+      .update(joMixes)
+      .set(updates)
+      .where(eq(joMixes.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteJoMix(id: number): Promise<boolean> {
+    await db.delete(joMixes).where(eq(joMixes.id, id));
+    return true;
+  }
+
+  // JO Mix Items methods
+  async getJoMixItems(joMixId: number): Promise<any[]> {
+    return await db
+      .select({
+        id: joMixItems.id,
+        joMixId: joMixItems.joMixId,
+        jobOrderId: joMixItems.jobOrderId,
+        quantity: joMixItems.quantity,
+        createdAt: joMixItems.createdAt,
+        jobOrderNumber: jobOrders.id,
+        jobOrderQty: jobOrders.quantity,
+      })
+      .from(joMixItems)
+      .leftJoin(jobOrders, eq(joMixItems.jobOrderId, jobOrders.id))
+      .where(eq(joMixItems.joMixId, joMixId))
+      .orderBy(joMixItems.id);
+  }
+
+  async createJoMixItem(item: InsertJoMixItem): Promise<JoMixItem> {
+    const [created] = await db
+      .insert(joMixItems)
+      .values(item)
+      .returning();
+    return created;
+  }
+
+  async deleteJoMixItems(joMixId: number): Promise<boolean> {
+    await db.delete(joMixItems).where(eq(joMixItems.joMixId, joMixId));
+    return true;
+  }
+
+  // JO Mix Materials methods
+  async getJoMixMaterials(joMixId: number): Promise<any[]> {
+    return await db
+      .select({
+        id: joMixMaterials.id,
+        joMixId: joMixMaterials.joMixId,
+        materialId: joMixMaterials.materialId,
+        quantity: joMixMaterials.quantity,
+        createdAt: joMixMaterials.createdAt,
+        materialName: rawMaterials.name,
+        materialType: rawMaterials.type,
+        materialUnit: rawMaterials.unit,
+      })
+      .from(joMixMaterials)
+      .leftJoin(rawMaterials, eq(joMixMaterials.materialId, rawMaterials.id))
+      .where(eq(joMixMaterials.joMixId, joMixId))
+      .orderBy(joMixMaterials.id);
+  }
+
+  async createJoMixMaterial(material: InsertJoMixMaterial): Promise<JoMixMaterial> {
+    const [created] = await db
+      .insert(joMixMaterials)
+      .values(material)
+      .returning();
+    return created;
+  }
+
+  async deleteJoMixMaterials(joMixId: number): Promise<boolean> {
+    await db.delete(joMixMaterials).where(eq(joMixMaterials.joMixId, joMixId));
+    return true;
+  }
+
+  // Generate unique mix number
+  async generateMixNumber(): Promise<string> {
+    const today = new Date();
+    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
+    
+    // Get count of mixes created today
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+    
+    const todayMixes = await db
+      .select()
+      .from(joMixes)
+      .where(sql`${joMixes.createdAt} >= ${todayStart} AND ${joMixes.createdAt} < ${todayEnd}`);
+    
+    const sequenceNumber = (todayMixes.length + 1).toString().padStart(3, '0');
+    return `MIX${dateStr}${sequenceNumber}`;
+  }
 }

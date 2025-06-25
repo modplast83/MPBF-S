@@ -1400,3 +1400,46 @@ export type AbaFormula = typeof abaFormulas.$inferSelect;
 export const insertAbaFormulaMaterialSchema = createInsertSchema(abaFormulaMaterials).omit({ id: true, createdAt: true });
 export type InsertAbaFormulaMaterial = z.infer<typeof insertAbaFormulaMaterialSchema>;
 export type AbaFormulaMaterial = typeof abaFormulaMaterials.$inferSelect;
+
+// JO Mix table - for tracking mixing sessions
+export const joMixes = pgTable("jo_mixes", {
+  id: serial("id").primaryKey(),
+  abaFormulaId: integer("aba_formula_id").notNull().references(() => abaFormulas.id),
+  mixNumber: text("mix_number").notNull().unique(), // Auto-generated mix number
+  totalQuantity: doublePrecision("total_quantity").notNull(), // Total quantity of this mix
+  screwType: text("screw_type").notNull(), // 'A' or 'B'
+  status: text("status").default("pending").notNull(), // pending, in_progress, completed
+  createdBy: text("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const insertJoMixSchema = createInsertSchema(joMixes).omit({ id: true, createdAt: true, completedAt: true });
+export type InsertJoMix = z.infer<typeof insertJoMixSchema>;
+export type JoMix = typeof joMixes.$inferSelect;
+
+// JO Mix Items table - for tracking which job orders are included in each mix
+export const joMixItems = pgTable("jo_mix_items", {
+  id: serial("id").primaryKey(),
+  joMixId: integer("jo_mix_id").notNull().references(() => joMixes.id, { onDelete: "cascade" }),
+  jobOrderId: integer("job_order_id").notNull().references(() => jobOrders.id),
+  quantity: doublePrecision("quantity").notNull(), // Quantity from this job order used in the mix
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertJoMixItemSchema = createInsertSchema(joMixItems).omit({ id: true, createdAt: true });
+export type InsertJoMixItem = z.infer<typeof insertJoMixItemSchema>;
+export type JoMixItem = typeof joMixItems.$inferSelect;
+
+// JO Mix Materials table - for tracking actual material quantities in each mix
+export const joMixMaterials = pgTable("jo_mix_materials", {
+  id: serial("id").primaryKey(),
+  joMixId: integer("jo_mix_id").notNull().references(() => joMixes.id, { onDelete: "cascade" }),
+  materialId: integer("material_id").notNull().references(() => rawMaterials.id),
+  quantity: doublePrecision("quantity").notNull(), // Calculated quantity for this material
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertJoMixMaterialSchema = createInsertSchema(joMixMaterials).omit({ id: true, createdAt: true });
+export type InsertJoMixMaterial = z.infer<typeof insertJoMixMaterialSchema>;
+export type JoMixMaterial = typeof joMixMaterials.$inferSelect;
