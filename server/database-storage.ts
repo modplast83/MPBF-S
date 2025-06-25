@@ -2707,6 +2707,73 @@ export class DatabaseStorage implements IStorage {
   }
 
   // JO Mix methods
+  async getJoMixes(): Promise<JoMix[]> {
+    return await db.select().from(joMixes).orderBy(desc(joMixes.createdAt));
+  }
+
+  async getJoMix(id: number): Promise<JoMix | undefined> {
+    const [mix] = await db.select().from(joMixes).where(eq(joMixes.id, id));
+    return mix || undefined;
+  }
+
+  async createJoMix(mix: InsertJoMix): Promise<JoMix> {
+    const [created] = await db.insert(joMixes).values(mix).returning();
+    return created;
+  }
+
+  async updateJoMix(id: number, updates: Partial<InsertJoMix>): Promise<JoMix | undefined> {
+    const [updated] = await db.update(joMixes).set(updates).where(eq(joMixes.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async deleteJoMix(id: number): Promise<boolean> {
+    // Delete related items and materials first
+    await db.delete(joMixItems).where(eq(joMixItems.joMixId, id));
+    await db.delete(joMixMaterials).where(eq(joMixMaterials.joMixId, id));
+    // Then delete the mix
+    await db.delete(joMixes).where(eq(joMixes.id, id));
+    return true;
+  }
+
+  async generateMixNumber(): Promise<string> {
+    const today = new Date();
+    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
+    
+    // Get count of mixes created today
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    
+    const todayMixes = await db.select().from(joMixes)
+      .where(and(
+        gte(joMixes.createdAt, startOfDay),
+        lt(joMixes.createdAt, endOfDay)
+      ));
+    
+    const sequence = String(todayMixes.length + 1).padStart(3, '0');
+    return `MIX${dateStr}${sequence}`;
+  }
+
+  // JO Mix Items methods
+  async getJoMixItems(joMixId: number): Promise<JoMixItem[]> {
+    return await db.select().from(joMixItems).where(eq(joMixItems.joMixId, joMixId));
+  }
+
+  async createJoMixItem(item: InsertJoMixItem): Promise<JoMixItem> {
+    const [created] = await db.insert(joMixItems).values(item).returning();
+    return created;
+  }
+
+  // JO Mix Materials methods
+  async getJoMixMaterials(joMixId: number): Promise<JoMixMaterial[]> {
+    return await db.select().from(joMixMaterials).where(eq(joMixMaterials.joMixId, joMixId));
+  }
+
+  async createJoMixMaterial(material: InsertJoMixMaterial): Promise<JoMixMaterial> {
+    const [created] = await db.insert(joMixMaterials).values(material).returning();
+    return created;
+  }
+
+  // JO Mix methods
   async getJoMixes(): Promise<any[]> {
     const mixes = await db
       .select({
