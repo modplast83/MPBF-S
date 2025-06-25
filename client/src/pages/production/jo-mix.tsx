@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Calculator, Eye, Printer } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { apiRequest } from "@/lib/queryClient";
@@ -370,6 +370,9 @@ export default function JoMixPage() {
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New JO Mix</DialogTitle>
+              <DialogDescription>
+                Create a new JO mix by selecting job orders and ABA formula for material mixing.
+              </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-6">
@@ -607,6 +610,9 @@ export default function JoMixPage() {
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Mix Details - {viewingMix?.mixNumber}</DialogTitle>
+            <DialogDescription>
+              View detailed information about this JO mix including job orders and material composition.
+            </DialogDescription>
           </DialogHeader>
           
           {viewingMix && (
