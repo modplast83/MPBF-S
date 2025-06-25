@@ -5447,7 +5447,7 @@ COMMIT;
       }
 
       // Get the ABA formula with materials
-      const formula = await storage.getAbaFormulaWithMaterials(abaFormulaId);
+      const formula = await storage.getAbaFormula(abaFormulaId);
       if (!formula) {
         return res.status(404).json({ message: "ABA formula not found" });
       }
