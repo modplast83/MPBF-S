@@ -837,29 +837,32 @@ export class DatabaseStorage implements IStorage {
   // Job Orders methods
   async getJobOrders(): Promise<any[]> {
     try {
-      return await db
-        .select({
-          id: jobOrders.id,
-          orderId: jobOrders.orderId,
-          customerProductId: jobOrders.customerProductId,
-          quantity: jobOrders.quantity,
-          finishedQty: jobOrders.finishedQty,
-          receivedQty: jobOrders.receivedQty,
-          status: jobOrders.status,
-          customerId: jobOrders.customerId,
-          receiveDate: jobOrders.receiveDate,
-          receivedBy: jobOrders.receivedBy,
-          customerName: customers.name,
-          masterBatch: masterBatches.name,
-          size: sql<string>`CONCAT(${customerProducts.width}, 'x', ${customerProducts.lengthCm})`.as('size'),
-          itemName: items.name,
-        })
-        .from(jobOrders)
-        .leftJoin(customers, eq(jobOrders.customerId, customers.id))
-        .leftJoin(customerProducts, eq(jobOrders.customerProductId, customerProducts.id))
-        .leftJoin(masterBatches, eq(customerProducts.masterBatchId, masterBatches.id))
-        .leftJoin(items, eq(customerProducts.itemId, items.id))
-        .orderBy(jobOrders.id);
+      const result = await db.execute(sql`
+        SELECT 
+          jo.id,
+          jo.order_id as "orderId",
+          jo.customer_product_id as "customerProductId",
+          jo.quantity,
+          jo.finished_qty as "finishedQty",
+          jo.received_qty as "receivedQty",
+          jo.status,
+          jo.customer_id as "customerId",
+          jo.receive_date as "receiveDate",
+          jo.received_by as "receivedBy",
+          COALESCE(c1.name, c2.name) as "customerName",
+          mb.name as "masterBatch",
+          CONCAT(cp.width, 'x', cp.length_cm) as size,
+          i.name as "itemName"
+        FROM job_orders jo
+        LEFT JOIN customers c1 ON jo.customer_id = c1.id
+        LEFT JOIN customer_products cp ON jo.customer_product_id = cp.id
+        LEFT JOIN customers c2 ON cp.customer_id = c2.id
+        LEFT JOIN master_batches mb ON cp.master_batch_id = mb.id
+        LEFT JOIN items i ON cp.item_id = i.id
+        ORDER BY jo.id
+      `);
+      
+      return result.rows as any[];
     } catch (error) {
       console.error('Error fetching job orders:', error);
       // Fallback to basic query without joins
