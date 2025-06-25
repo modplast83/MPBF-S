@@ -21,7 +21,8 @@ interface RawMaterial {
 
 interface AbaFormulaMaterial {
   id?: number;
-  rawMaterialId: string;
+  materialId: number;
+  rawMaterialId?: string; // For backward compatibility
   rawMaterialName?: string;
   screwAPercentage: number;
   screwBPercentage: number;
@@ -161,8 +162,8 @@ export default function AbaFormulas() {
     if (!printWindow) return;
 
     const materialsList = formula.materials.map(material => {
-      const materialId = material.rawMaterialId || material.materialId;
-      const rawMaterial = rawMaterials.find(rm => rm.id === materialId?.toString());
+      const materialId = material.materialId || material.rawMaterialId;
+      const rawMaterial = rawMaterials.find(rm => rm.id === Number(materialId));
       return `
         <tr>
           <td style="border: 1px solid #ddd; padding: 8px;">${rawMaterial?.name || 'Unknown Material'}</td>
@@ -589,11 +590,11 @@ export default function AbaFormulas() {
                 </div>
                 <div>
                   <Label className="text-sm font-semibold text-gray-600">A:B Ratio</Label>
-                  <p className="text-lg">
+                  <div>
                     <Badge variant="outline" className="text-sm">
                       {viewingFormula.aToB}:1
                     </Badge>
-                  </p>
+                  </div>
                 </div>
                 <div className="col-span-2">
                   <Label className="text-sm font-semibold text-gray-600">Description</Label>
@@ -624,8 +625,8 @@ export default function AbaFormulas() {
                   </TableHeader>
                   <TableBody>
                     {viewingFormula.materials.map((material, index) => {
-                      const materialId = material.rawMaterialId || material.materialId;
-                      const rawMaterial = rawMaterials.find(rm => rm.id === materialId?.toString());
+                      const materialId = material.materialId || material.rawMaterialId;
+                      const rawMaterial = rawMaterials.find(rm => rm.id === Number(materialId));
                       return (
                         <TableRow key={index}>
                           <TableCell className="font-medium">
