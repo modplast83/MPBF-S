@@ -109,18 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/aba-formulas", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertAbaFormulaSchema.parse(req.body);
-      const formula = await storage.createAbaFormula(validatedData);
-      res.status(201).json(formula);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid ABA formula data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to create ABA formula" });
-    }
-  });
+
 
   app.put("/api/aba-formulas/:id", async (req: Request, res: Response) => {
     try {
@@ -5285,16 +5274,53 @@ COMMIT;
 
   app.post("/api/aba-formulas", async (req: Request, res: Response) => {
     try {
-      const validation = insertAbaFormulaSchema.safeParse(req.body);
-      if (!validation.success) {
-        return res.status(400).json({ 
-          message: "Invalid ABA formula data",
-          errors: validation.error.issues 
+      const { name, description, aToB, materials } = req.body;
+      
+      // Validate required fields
+      if (!name || typeof name !== 'string') {
+        return res.status(400).json({ message: "Formula name is required" });
+      }
+      
+      if (!aToB || typeof aToB !== 'number') {
+        return res.status(400).json({ message: "A:B ratio is required" });
+      }
+      
+      if (!materials || !Array.isArray(materials) || materials.length === 0) {
+        return res.status(400).json({ message: "At least one material is required" });
+      }
+      
+      // Validate materials
+      for (const material of materials) {
+        if (!material.rawMaterialId || !material.screwAPercentage || !material.screwBPercentage) {
+          return res.status(400).json({ message: "All material fields are required" });
+        }
+      }
+      
+      // Transform frontend format to database format
+      const formulaData = {
+        name: name.trim(),
+        description: description?.trim() || null,
+        abRatio: `${aToB}:1`, // Convert number to text format
+        createdBy: req.user?.id || "00U1", // Use current user or fallback to admin
+        isActive: true
+      };
+      
+      // Create the formula first
+      const formula = await storage.createAbaFormula(formulaData);
+      
+      // Then create all materials
+      for (const material of materials) {
+        await storage.createAbaFormulaMaterial({
+          formulaId: formula.id,
+          rawMaterialId: parseInt(material.rawMaterialId),
+          screwAPercentage: material.screwAPercentage,
+          screwBPercentage: material.screwBPercentage
         });
       }
-
-      const formula = await storage.createAbaFormula(validation.data);
-      res.status(201).json(formula);
+      
+      // Get the complete formula with materials
+      const completeFormula = await storage.getAbaFormula(formula.id);
+      res.status(201).json(completeFormula);
     } catch (error) {
       console.error("Error creating ABA formula:", error);
       res.status(500).json({ message: "Failed to create ABA formula" });

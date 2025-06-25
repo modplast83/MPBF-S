@@ -2598,13 +2598,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ABA Formulas methods
-  async getAbaFormulas(): Promise<AbaFormula[]> {
-    return await db.select().from(abaFormulas).orderBy(desc(abaFormulas.createdAt));
+  async getAbaFormulas(): Promise<any[]> {
+    const formulas = await db.select().from(abaFormulas).orderBy(desc(abaFormulas.createdAt));
+    
+    // Transform data to frontend format and include materials
+    const result = [];
+    for (const formula of formulas) {
+      const materials = await this.getAbaFormulaMaterials(formula.id);
+      result.push({
+        ...formula,
+        aToB: this.parseAbRatio(formula.abRatio), // Convert "2:1" to 2
+        materials
+      });
+    }
+    
+    return result;
+  }
+
+  async getAbaFormula(id: number): Promise<any | undefined> {
+    const [formula] = await db.select().from(abaFormulas).where(eq(abaFormulas.id, id));
+    if (!formula) return undefined;
+    
+    const materials = await this.getAbaFormulaMaterials(formula.id);
+    return {
+      ...formula,
+      aToB: this.parseAbRatio(formula.abRatio), // Convert "2:1" to 2
+      materials
+    };
   }
 
   async getAbaFormulaById(id: number): Promise<AbaFormula | undefined> {
     const [formula] = await db.select().from(abaFormulas).where(eq(abaFormulas.id, id));
     return formula || undefined;
+  }
+
+  private parseAbRatio(abRatio: string): number {
+    // Convert "2:1" format to number 2
+    const parts = abRatio.split(':');
+    return parseInt(parts[0]) || 1;
   }
 
   async createAbaFormula(formula: InsertAbaFormula): Promise<AbaFormula> {

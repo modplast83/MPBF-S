@@ -107,6 +107,8 @@ This is a comprehensive production management system built with React, TypeScrip
   - Changed misleading error message "All materials must be selected" to clearer guidance
   - Fixed typo in validation code (Title → title)
   - Fixed API request parameter order causing fetch errors
+  - Updated server-side validation to handle data transformation between frontend and database
+  - Added proper data format conversion (aToB number ↔ abRatio text)
   - Single material selection now works properly
 
 ## Changelog
