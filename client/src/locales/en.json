@@ -227,6 +227,7 @@
         "sidebar": {
             "main": "Main",
             "dashboard": "Dashboard",
+            "aba_formula": "ABA Formula",
             "setup": "Setup",
             "categories": "Categories",
             "products": "Products",
@@ -241,6 +242,7 @@
             "orders": "Orders",
             "job_orders": "Job Orders",
             "workflow": "Workflow",
+            "aba_calculator": "ABA Calculator",
             "mix_materials": "Mix Materials",
             "bottleneck_monitor": "Bottleneck Monitor",
             "production_metrics": "Production Metrics",

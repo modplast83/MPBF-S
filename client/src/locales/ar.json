@@ -683,6 +683,8 @@
     "sidebar": {
       "main": "الرئيسية",
       "dashboard": "لوحة التحكم",
+      "aba_formula": "صيغة ABA",
+      "aba_calculator": "حاسبة ABA",
       "setup": "التعريفات",
       "categories": "المجموعات",
       "products": "المنتجات",
