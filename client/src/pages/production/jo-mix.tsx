@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Calculator, Eye } from "lucide-react";
+import { Plus, Trash2, Calculator, Eye, Printer } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -204,6 +204,135 @@ export default function JoMixPage() {
         return <Badge variant="outline" className="bg-green-50 text-green-700">Completed</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const handlePrintMix = (mix: JoMix) => {
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>JO Mix Report - ${mix.mixNumber}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .section { margin-bottom: 25px; }
+            .section h3 { background-color: #f5f5f5; padding: 10px; margin: 0 0 15px 0; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .info-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+            .info-label { font-weight: bold; }
+            .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+            @media print { body { margin: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>JO Mix Production Report</h1>
+            <h2>Mix Number: ${mix.mixNumber}</h2>
+          </div>
+          
+          <div class="section">
+            <h3>Mix Information</h3>
+            <div class="info-grid">
+              <div>
+                <div class="info-item">
+                  <span class="info-label">Mix Number:</span>
+                  <span>${mix.mixNumber}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Total Quantity:</span>
+                  <span>${mix.totalQuantity} kg</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Screw Type:</span>
+                  <span>${mix.screwType}</span>
+                </div>
+              </div>
+              <div>
+                <div class="info-item">
+                  <span class="info-label">Formula:</span>
+                  <span>${mix.formulaName}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Status:</span>
+                  <span>${mix.status.toUpperCase()}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Created:</span>
+                  <span>${new Date(mix.createdAt).toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          ${mix.items && mix.items.length > 0 ? `
+          <div class="section">
+            <h3>Job Order Items</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Job Order ID</th>
+                  <th>Quantity</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${mix.items.map(item => `
+                  <tr>
+                    <td>${item.jobOrderId}</td>
+                    <td>${item.quantity} kg</td>
+                    <td>${item.status || 'Pending'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ` : ''}
+
+          ${mix.materials && mix.materials.length > 0 ? `
+          <div class="section">
+            <h3>Material Composition</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Material Name</th>
+                  <th>Type</th>
+                  <th>Quantity</th>
+                  <th>Unit</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${mix.materials.map(material => `
+                  <tr>
+                    <td>${material.materialName || 'Unknown Material'}</td>
+                    <td>${material.materialType || 'N/A'}</td>
+                    <td>${material.quantity}</td>
+                    <td>${material.materialUnit || 'kg'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ` : ''}
+
+          <div class="footer">
+            <p>Generated on ${new Date().toLocaleString()}</p>
+            <p>Production Management System - JO Mix Report</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
     }
   };
 
@@ -417,8 +546,17 @@ export default function JoMixPage() {
                               setViewingMix(mix);
                               setIsViewDialogOpen(true);
                             }}
+                            title="View Mix Details"
                           >
                             <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePrintMix(mix)}
+                            title="Print Mix Report"
+                          >
+                            <Printer className="h-4 w-4" />
                           </Button>
                           {mix.status === 'pending' && (
                             <Button
