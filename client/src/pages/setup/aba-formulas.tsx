@@ -220,7 +220,7 @@ export default function AbaFormulas() {
 
     // Check for empty material selections
     if (formData.materials.some(m => !m.rawMaterialId)) {
-      toast({ Title: "Error", description: "All materials must be selected", variant: "destructive" });
+      toast({ title: "Error", description: "Please select a material for each row or remove empty rows", variant: "destructive" });
       return;
     }
 

@@ -102,6 +102,10 @@ This is a comprehensive production management system built with React, TypeScrip
 - Multiple deployment scripts for different environments
 - Health check endpoints for monitoring
 
+## Recent Changes
+- June 25, 2025: Fixed ABA Formula validation error message - changed misleading "All materials must be selected" to clearer guidance about selecting materials for each row
+- June 25, 2025: Fixed typo in ABA Formula validation code (Title → title)
+
 ## Changelog
 - June 25, 2025. Initial setup
 
