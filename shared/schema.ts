@@ -1384,3 +1384,51 @@ export type DashboardWidget = typeof dashboardWidgets.$inferSelect;
 export const insertDashboardLayoutSchema = createInsertSchema(dashboardLayouts).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertDashboardLayout = z.infer<typeof insertDashboardLayoutSchema>;
 export type DashboardLayout = typeof dashboardLayouts.$inferSelect;
+
+// ABA Formulas Schema
+export const abaFormulas = pgTable('aba_formulas', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  abRatio: text('ab_ratio').notNull(),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+  createdBy: text('created_by').notNull().references(() => users.id),
+});
+
+export const abaFormulaMaterials = pgTable('aba_formula_materials', {
+  id: serial('id').primaryKey(),
+  formulaId: integer('formula_id').notNull().references(() => abaFormulas.id, { onDelete: "cascade" }),
+  rawMaterialId: integer('raw_material_id').notNull().references(() => rawMaterials.id),
+  screwAPercentage: doublePrecision('screw_a_percentage').notNull().default(0),
+  screwBPercentage: doublePrecision('screw_b_percentage').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const abaFormulasRelations = relations(abaFormulas, ({ many, one }) => ({
+  materials: many(abaFormulaMaterials),
+  creator: one(users, {
+    fields: [abaFormulas.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const abaFormulaMaterialsRelations = relations(abaFormulaMaterials, ({ one }) => ({
+  formula: one(abaFormulas, {
+    fields: [abaFormulaMaterials.formulaId],
+    references: [abaFormulas.id],
+  }),
+  material: one(rawMaterials, {
+    fields: [abaFormulaMaterials.rawMaterialId],
+    references: [rawMaterials.id],
+  }),
+}));
+
+export const insertAbaFormulaSchema = createInsertSchema(abaFormulas).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertAbaFormula = z.infer<typeof insertAbaFormulaSchema>;
+export type AbaFormula = typeof abaFormulas.$inferSelect;
+
+export const insertAbaFormulaMaterialSchema = createInsertSchema(abaFormulaMaterials).omit({ id: true, createdAt: true });
+export type InsertAbaFormulaMaterial = z.infer<typeof insertAbaFormulaMaterialSchema>;
+export type AbaFormulaMaterial = typeof abaFormulaMaterials.$inferSelect;
