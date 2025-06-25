@@ -383,7 +383,7 @@ export default function JoMixPage() {
                   <SelectContent>
                     {abaFormulas.map((formula) => (
                       <SelectItem key={formula.id} value={formula.id.toString()}>
-                        {formula.name} (A:B = {formula.abRatio})
+                        {formula.name} (A:B = {parseFloat(formula.abRatio.split(':')[0]).toFixed(2)}:{parseFloat(formula.abRatio.split(':')[1]).toFixed(2)})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -470,7 +470,7 @@ export default function JoMixPage() {
                         
                         return (
                           <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                            <p><strong>Formula:</strong> {formula.name} ({formula.abRatio})</p>
+                            <p><strong>Formula:</strong> {formula.name} ({parseFloat(formula.abRatio.split(':')[0]).toFixed(2)}:{parseFloat(formula.abRatio.split(':')[1]).toFixed(2)})</p>
                             <p><strong>Total Quantity:</strong> {totalQuantity.toLocaleString()} kg</p>
                             <p><strong>A Screw Total:</strong> {aQuantity.toLocaleString()} kg ({aMixes} mix{aMixes !== 1 ? 'es' : ''})</p>
                             <p><strong>B Screw Total:</strong> {bQuantity.toLocaleString()} kg ({bMixes} mix{bMixes !== 1 ? 'es' : ''})</p>
