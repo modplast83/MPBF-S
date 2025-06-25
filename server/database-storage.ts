@@ -2899,6 +2899,7 @@ export class DatabaseStorage implements IStorage {
         joMixId: joMixMaterials.joMixId,
         materialId: joMixMaterials.materialId,
         quantity: joMixMaterials.quantity,
+        percentage: joMixMaterials.percentage,
         createdAt: joMixMaterials.createdAt,
         materialName: rawMaterials.name,
         materialType: rawMaterials.type,

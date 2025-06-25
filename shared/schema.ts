@@ -1437,6 +1437,7 @@ export const joMixMaterials = pgTable("jo_mix_materials", {
   joMixId: integer("jo_mix_id").notNull().references(() => joMixes.id, { onDelete: "cascade" }),
   materialId: integer("material_id").notNull().references(() => rawMaterials.id),
   quantity: doublePrecision("quantity").notNull(), // Calculated quantity for this material
+  percentage: doublePrecision("percentage").notNull(), // Percentage of this material in the mix
   createdAt: timestamp("created_at").defaultNow(),
 });
 

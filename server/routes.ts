@@ -5559,7 +5559,8 @@ COMMIT;
           await storage.createJoMixMaterial({
             joMixId: mix.id,
             materialId: material.materialId,
-            quantity: materialQuantity
+            quantity: materialQuantity,
+            percentage: percentage
           });
         }
       }

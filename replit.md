@@ -135,6 +135,10 @@ This is a comprehensive production management system built with React, TypeScrip
   - Added professional print functionality for individual mix reports with detailed information
   - Updated mixer capacity flexibility from 550kg to 600kg for single mix optimization
   - Implemented material quantity rounding to nearest 25 or its multiples for practical mixing
+- June 25, 2025: Enhanced JO Mix tables with percentage display:
+  - Added Percent% column to JO Mixes table showing each mix percentage of total
+  - Added percentage information to Mix Details dialog for each material
+  - Updated database schema to store material percentages in JO mix materials
 
 ## Changelog
 - June 25, 2025. Initial setup

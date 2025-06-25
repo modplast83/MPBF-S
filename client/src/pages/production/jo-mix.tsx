@@ -586,7 +586,7 @@ export default function JoMixPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )}))
+                  )})
                 )}
               </TableBody>
             </Table>
@@ -656,19 +656,26 @@ export default function JoMixPage() {
                     <TableRow>
                       <TableHead>Material</TableHead>
                       <TableHead>Type</TableHead>
+                      <TableHead>Percent%</TableHead>
                       <TableHead>Quantity</TableHead>
                       <TableHead>Unit</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {viewingMix.materials.map((material: any) => (
-                      <TableRow key={material.id}>
-                        <TableCell className="font-medium">{material.materialName}</TableCell>
-                        <TableCell>{material.materialType}</TableCell>
-                        <TableCell>{material.quantity.toLocaleString()}</TableCell>
-                        <TableCell>{material.materialUnit}</TableCell>
-                      </TableRow>
-                    ))}
+                    {viewingMix.materials.map((material: any) => {
+                      // Get percentage from backend data
+                      const percentage = material.percentage ? material.percentage.toFixed(1) : '0.0';
+                      
+                      return (
+                        <TableRow key={material.id}>
+                          <TableCell className="font-medium">{material.materialName}</TableCell>
+                          <TableCell>{material.materialType}</TableCell>
+                          <TableCell>{percentage}%</TableCell>
+                          <TableCell>{material.quantity.toLocaleString()}</TableCell>
+                          <TableCell>{material.materialUnit}</TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
