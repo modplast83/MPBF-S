@@ -459,8 +459,8 @@ export default function JoMixPage() {
                         const totalRatio = aRatio + bRatio;
                         const aQuantity = (totalQuantity * aRatio) / totalRatio;
                         const bQuantity = (totalQuantity * bRatio) / totalRatio;
-                        const aMixes = Math.ceil(aQuantity / 550);
-                        const bMixes = Math.ceil(bQuantity / 550);
+                        const aMixes = Math.ceil(aQuantity / 600);
+                        const bMixes = Math.ceil(bQuantity / 600);
                         
                         return (
                           <div className="bg-gray-50 p-4 rounded-lg space-y-2">

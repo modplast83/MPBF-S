@@ -5471,7 +5471,7 @@ COMMIT;
       const bQuantity = (totalQuantity * bRatio) / totalRatio;
 
       const createdMixes = [];
-      const maxCapacity = 550; // kg
+      const maxCapacity = 600; // kg - flexible capacity up to 600kg
 
       // Create A mixes
       if (aQuantity > 0) {
@@ -5501,6 +5501,12 @@ COMMIT;
       res.status(500).json({ message: "Failed to create JO mix" });
     }
   });
+
+  // Function to round material quantities to nearest 25 or its multiples
+  function roundToNearest25(value: number): number {
+    const base = 25;
+    return Math.round(value / base) * base;
+  }
 
   async function createMixesForScrew(
     totalQuantity: number, 
@@ -5543,10 +5549,11 @@ COMMIT;
         }
       }
 
-      // Add material calculations
+      // Add material calculations with rounding to nearest 25 or its multiples
       for (const material of formula.materials) {
         const percentage = screwType === 'A' ? material.screwAPercentage : material.screwBPercentage;
-        const materialQuantity = (mixQuantity * percentage) / 100;
+        const rawMaterialQuantity = (mixQuantity * percentage) / 100;
+        const materialQuantity = roundToNearest25(rawMaterialQuantity);
         
         if (materialQuantity > 0) {
           await storage.createJoMixMaterial({
