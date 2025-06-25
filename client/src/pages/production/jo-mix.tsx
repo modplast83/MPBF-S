@@ -79,10 +79,7 @@ export default function JoMixPage() {
   // Create JO mix mutation
   const createJoMixMutation = useMutation({
     mutationFn: async (data: JoMixData) => {
-      return apiRequest("/api/jo-mixes", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return apiRequest("POST", "/api/jo-mixes", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/jo-mixes"] });
@@ -105,10 +102,7 @@ export default function JoMixPage() {
   // Update mix status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      return apiRequest(`/api/jo-mixes/${id}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status }),
-      });
+      return apiRequest("PUT", `/api/jo-mixes/${id}/status`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/jo-mixes"] });
