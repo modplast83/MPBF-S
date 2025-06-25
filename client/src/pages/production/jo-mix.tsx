@@ -399,21 +399,22 @@ export default function JoMixPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-12"></TableHead>
-                        <TableHead>JO #</TableHead>
-                        <TableHead>Order #</TableHead>
-                        <TableHead>Customer Name</TableHead>
-                        <TableHead>Master Batch</TableHead>
-                        <TableHead>Size</TableHead>
-                        <TableHead>Original Qty (kg)</TableHead>
-                        <TableHead>Mix Qty (kg)</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead className="w-12 text-center"></TableHead>
+                        <TableHead className="text-center">JO #</TableHead>
+                        <TableHead className="text-center">Order #</TableHead>
+                        <TableHead className="text-center">Customer Name</TableHead>
+                        <TableHead className="text-center">Master Batch</TableHead>
+                        <TableHead className="text-center">Material</TableHead>
+                        <TableHead className="text-center">Size</TableHead>
+                        <TableHead className="text-center">Original Qty (kg)</TableHead>
+                        <TableHead className="text-center">Mix Qty (kg)</TableHead>
+                        <TableHead className="text-center">Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {pendingJobOrders.map((jobOrder) => (
                         <TableRow key={jobOrder.id}>
-                          <TableCell>
+                          <TableCell className="text-center">
                             <Checkbox
                               checked={selectedJobOrders.has(jobOrder.id)}
                               onCheckedChange={(checked) => 
@@ -421,13 +422,14 @@ export default function JoMixPage() {
                               }
                             />
                           </TableCell>
-                          <TableCell>JO #{jobOrder.id}</TableCell>
-                          <TableCell>#{jobOrder.orderId}</TableCell>
-                          <TableCell>{jobOrder.customerName || 'N/A'}</TableCell>
-                          <TableCell>{jobOrder.masterBatch || 'N/A'}</TableCell>
-                          <TableCell>{jobOrder.size || 'N/A'}</TableCell>
-                          <TableCell>{jobOrder.quantity.toLocaleString()}</TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">JO #{jobOrder.id}</TableCell>
+                          <TableCell className="text-center">#{jobOrder.orderId}</TableCell>
+                          <TableCell className="text-center">{jobOrder.customerName || 'N/A'}</TableCell>
+                          <TableCell className="text-center">{jobOrder.masterBatch || 'N/A'}</TableCell>
+                          <TableCell className="text-center">{jobOrder.itemName || 'N/A'}</TableCell>
+                          <TableCell className="text-center">{jobOrder.size || 'N/A'}</TableCell>
+                          <TableCell className="text-center">{jobOrder.quantity.toLocaleString()}</TableCell>
+                          <TableCell className="text-center">
                             {selectedJobOrders.has(jobOrder.id) ? (
                               <Input
                                 type="number"
@@ -441,7 +443,7 @@ export default function JoMixPage() {
                               '-'
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">
                             {getStatusBadge(jobOrder.status)}
                           </TableCell>
                         </TableRow>

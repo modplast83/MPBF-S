@@ -152,6 +152,10 @@ This is a comprehensive production management system built with React, TypeScrip
   - Added complete Arabic translation keys for ABA Formula, JO Mix, and Job Orders pages
   - Included all table headers, form fields, validation messages, and action buttons
   - Enhanced i18n support for production management workflows
+- June 25, 2025: Enhanced JO Mix creation interface with Material column:
+  - Added Material column to Select Job Orders table after Master Batch column
+  - Displays item/material name for better visibility during mix creation
+  - Applied consistent center alignment styling across all table elements
 
 ## Changelog
 - June 25, 2025. Initial setup
