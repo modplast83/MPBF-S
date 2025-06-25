@@ -505,14 +505,14 @@ export default function JoMixPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Mix Number</TableHead>
-                  <TableHead>Formula</TableHead>
-                  <TableHead>Screw Type</TableHead>
-                  <TableHead>Quantity (kg)</TableHead>
-                  <TableHead>Percent%</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-center">Mix Number</TableHead>
+                  <TableHead className="text-center">Formula</TableHead>
+                  <TableHead className="text-center">Screw Type</TableHead>
+                  <TableHead className="text-center">Quantity (kg)</TableHead>
+                  <TableHead className="text-center">Percent%</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-center">Created</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -533,19 +533,19 @@ export default function JoMixPage() {
                     
                     return (
                       <TableRow key={mix.id}>
-                        <TableCell className="font-medium">{mix.mixNumber}</TableCell>
-                        <TableCell>{mix.formulaName}</TableCell>
-                        <TableCell>
+                        <TableCell className="font-medium text-center">{mix.mixNumber}</TableCell>
+                        <TableCell className="text-center">{mix.formulaName}</TableCell>
+                        <TableCell className="text-center">
                           <Badge variant={mix.screwType === 'A' ? 'default' : 'secondary'}>
                             Screw {mix.screwType}
                           </Badge>
                         </TableCell>
-                        <TableCell>{mix.totalQuantity.toLocaleString()}</TableCell>
-                        <TableCell>{percentage}%</TableCell>
-                        <TableCell>{getStatusBadge(mix.status)}</TableCell>
-                        <TableCell>{new Date(mix.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
+                        <TableCell className="text-center">{mix.totalQuantity.toLocaleString()}</TableCell>
+                        <TableCell className="text-center">{percentage}%</TableCell>
+                        <TableCell className="text-center">{getStatusBadge(mix.status)}</TableCell>
+                        <TableCell className="text-center">{new Date(mix.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center space-x-2">
                           <Button
                             variant="outline"
                             size="sm"
