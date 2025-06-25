@@ -123,13 +123,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "ABA formula not found" });
       }
       
-      const validatedData = insertAbaFormulaSchema.parse(req.body);
-      const formula = await storage.updateAbaFormula(id, validatedData);
-      res.json(formula);
+      // Transform frontend data format to backend format
+      const { name, description, aToB, materials, ...otherData } = req.body;
+      
+      // Handle the complete update scenario (with materials)
+      if (materials !== undefined) {
+        // Validate required fields
+        if (!name || typeof name !== 'string') {
+          return res.status(400).json({ message: "Formula name is required" });
+        }
+        
+        if (aToB === undefined || typeof aToB !== 'number') {
+          return res.status(400).json({ message: "A:B ratio is required" });
+        }
+        
+        if (!Array.isArray(materials)) {
+          return res.status(400).json({ message: "Materials must be an array" });
+        }
+        
+        // Transform frontend format to database format
+        const formulaData = {
+          name: name.trim(),
+          description: description?.trim() || null,
+          abRatio: `${aToB}:1`, // Convert number to text format
+          isActive: true,
+          ...otherData
+        };
+        
+        // Update the formula
+        const updatedFormula = await storage.updateAbaFormula(id, formulaData);
+        
+        // Update materials - first delete existing ones
+        await storage.deleteAbaFormulaMaterialsByFormula(id);
+        
+        // Then create new ones
+        for (const material of materials) {
+          if (!material.rawMaterialId || material.screwAPercentage === undefined || material.screwBPercentage === undefined) {
+            return res.status(400).json({ message: "All material fields are required" });
+          }
+          
+          await storage.createAbaFormulaMaterial({
+            formulaId: id,
+            materialId: parseInt(material.rawMaterialId),
+            screwAPercentage: material.screwAPercentage,
+            screwBPercentage: material.screwBPercentage
+          });
+        }
+        
+        // Get the complete updated formula with materials
+        const completeFormula = await storage.getAbaFormula(id);
+        res.json(completeFormula);
+      } else {
+        // Handle partial update scenario (without materials)
+        const updateData: any = { ...otherData };
+        
+        // Transform aToB to abRatio if provided
+        if (aToB !== undefined) {
+          updateData.abRatio = `${aToB}:1`;
+        }
+        
+        // Add other fields
+        if (name !== undefined) updateData.name = name.trim();
+        if (description !== undefined) updateData.description = description?.trim() || null;
+        
+        const validatedData = insertAbaFormulaSchema.partial().parse(updateData);
+        const formula = await storage.updateAbaFormula(id, validatedData);
+        res.json(formula);
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Zod validation error for ABA formula update:", error.errors);
+        console.error("Request body:", JSON.stringify(req.body, null, 2));
         return res.status(400).json({ message: "Invalid ABA formula data", errors: error.errors });
       }
+      console.error("Error updating ABA formula:", error);
       res.status(500).json({ message: "Failed to update ABA formula" });
     }
   });
@@ -5327,27 +5394,7 @@ COMMIT;
     }
   });
 
-  app.put("/api/aba-formulas/:id", async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const validation = insertAbaFormulaSchema.partial().safeParse(req.body);
-      if (!validation.success) {
-        return res.status(400).json({ 
-          message: "Invalid ABA formula data",
-          errors: validation.error.issues 
-        });
-      }
 
-      const formula = await storage.updateAbaFormula(parseInt(id), validation.data);
-      if (!formula) {
-        return res.status(404).json({ message: "ABA formula not found" });
-      }
-      res.json(formula);
-    } catch (error) {
-      console.error("Error updating ABA formula:", error);
-      res.status(500).json({ message: "Failed to update ABA formula" });
-    }
-  });
 
   app.delete("/api/aba-formulas/:id", async (req: Request, res: Response) => {
     try {

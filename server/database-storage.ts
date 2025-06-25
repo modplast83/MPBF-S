@@ -2691,4 +2691,9 @@ export class DatabaseStorage implements IStorage {
     await db.delete(abaFormulaMaterials).where(eq(abaFormulaMaterials.id, id));
     return true;
   }
+
+  async deleteAbaFormulaMaterialsByFormula(formulaId: number): Promise<boolean> {
+    await db.delete(abaFormulaMaterials).where(eq(abaFormulaMaterials.formulaId, formulaId));
+    return true;
+  }
 }
