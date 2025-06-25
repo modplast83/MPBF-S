@@ -41,6 +41,8 @@ interface FormulaFormData {
   name: string;
   description: string;
   aToB: number;
+  aValue: number;
+  bValue: number;
   materials: AbaFormulaMaterial[];
 }
 
@@ -53,6 +55,8 @@ export default function AbaFormulas() {
     name: "",
     description: "",
     aToB: 1,
+    aValue: 1,
+    bValue: 1,
     materials: []
   });
   const { toast } = useToast();
@@ -131,6 +135,8 @@ export default function AbaFormulas() {
       name: "",
       description: "",
       aToB: 1,
+      aValue: 1,
+      bValue: 1,
       materials: []
     });
     setEditingFormula(null);
@@ -143,10 +149,15 @@ export default function AbaFormulas() {
 
   const openEditDialog = (formula: AbaFormula) => {
     setEditingFormula(formula);
+    // Parse existing ratio back to A and B values (assuming B=1 for display)
+    const aValue = formula.aToB;
+    const bValue = 1;
     setFormData({
       name: formula.name,
       description: formula.description || "",
       aToB: formula.aToB,
+      aValue: aValue,
+      bValue: bValue,
       materials: formula.materials
     });
     setIsDialogOpen(true);
@@ -244,8 +255,8 @@ export default function AbaFormulas() {
       ...prev,
       materials: [...prev.materials, {
         rawMaterialId: "",
-        screwAPercentage: 0,
-        screwBPercentage: 0
+        screwAPercentage: 0.01,
+        screwBPercentage: 0.01
       }]
     }));
   };
@@ -306,10 +317,19 @@ export default function AbaFormulas() {
       return;
     }
 
+    // Check for zero values in material percentages
+    if (formData.materials.some(m => m.screwAPercentage <= 0 || m.screwBPercentage <= 0)) {
+      toast({ title: "Error", description: "Material percentages must be greater than 0", variant: "destructive" });
+      return;
+    }
+
+    // Calculate A:B ratio from separate A and B values
+    const calculatedRatio = formData.bValue !== 0 ? formData.aValue / formData.bValue : formData.aValue;
+
     const submitData = {
       name: formData.name,
       description: formData.description,
-      aToB: formData.aToB,
+      aToB: calculatedRatio,
       materials: formData.materials.map(({ rawMaterialName, ...material }) => material)
     };
 
@@ -434,15 +454,51 @@ export default function AbaFormulas() {
                 />
               </div>
               <div>
-                <Label htmlFor="aToB">A:B Ratio</Label>
-                <Input
-                  id="aToB"
-                  type="number"
-                  min="0.1"
-                  step="0.1"
-                  value={formData.aToB}
-                  onChange={(e) => setFormData(prev => ({ ...prev, aToB: parseFloat(e.target.value) || 1 }))}
-                />
+                <Label>A:B Ratio</Label>
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1">
+                    <Label htmlFor="aValue" className="text-sm text-muted-foreground">A Value</Label>
+                    <Input
+                      id="aValue"
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      value={formData.aValue}
+                      onChange={(e) => {
+                        const aValue = parseFloat(e.target.value) || 1;
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          aValue,
+                          aToB: formData.bValue !== 0 ? aValue / formData.bValue : aValue
+                        }));
+                      }}
+                      placeholder="A"
+                    />
+                  </div>
+                  <span className="text-lg font-semibold">:</span>
+                  <div className="flex-1">
+                    <Label htmlFor="bValue" className="text-sm text-muted-foreground">B Value</Label>
+                    <Input
+                      id="bValue"
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      value={formData.bValue}
+                      onChange={(e) => {
+                        const bValue = parseFloat(e.target.value) || 1;
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          bValue,
+                          aToB: bValue !== 0 ? formData.aValue / bValue : formData.aValue
+                        }));
+                      }}
+                      placeholder="B"
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Ratio: {formData.aValue}:{formData.bValue} = {(formData.aValue / formData.bValue).toFixed(2)}:1
+                </p>
               </div>
             </div>
 
@@ -499,22 +555,22 @@ export default function AbaFormulas() {
                           <Label>Screw A %</Label>
                           <Input
                             type="number"
-                            min="0"
+                            min="0.01"
                             max="100"
                             step="0.01"
                             value={material.screwAPercentage}
-                            onChange={(e) => updateMaterial(index, 'screwAPercentage', parseFloat(e.target.value) || 0)}
+                            onChange={(e) => updateMaterial(index, 'screwAPercentage', parseFloat(e.target.value) || 0.01)}
                           />
                         </div>
                         <div>
                           <Label>Screw B %</Label>
                           <Input
                             type="number"
-                            min="0"
+                            min="0.01"
                             max="100"
                             step="0.01"
                             value={material.screwBPercentage}
-                            onChange={(e) => updateMaterial(index, 'screwBPercentage', parseFloat(e.target.value) || 0)}
+                            onChange={(e) => updateMaterial(index, 'screwBPercentage', parseFloat(e.target.value) || 0.01)}
                           />
                         </div>
                         <Button
