@@ -139,7 +139,13 @@ import {
   type InsertPayrollRecord,
   performanceReviews,
   type PerformanceReview,
-  type InsertPerformanceReview
+  type InsertPerformanceReview,
+  abaFormulas,
+  type AbaFormula,
+  type InsertAbaFormula,
+  abaFormulaMaterials,
+  type AbaFormulaMaterial,
+  type InsertAbaFormulaMaterial
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { IStorage } from "./storage";
@@ -2589,5 +2595,69 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(trainingCertificates)
       .where(eq(trainingCertificates.status, "active"))
       .orderBy(desc(trainingCertificates.issuedDate));
+  }
+
+  // ABA Formulas methods
+  async getAbaFormulas(): Promise<AbaFormula[]> {
+    return await db.select().from(abaFormulas).orderBy(desc(abaFormulas.createdAt));
+  }
+
+  async getAbaFormulaById(id: number): Promise<AbaFormula | undefined> {
+    const [formula] = await db.select().from(abaFormulas).where(eq(abaFormulas.id, id));
+    return formula || undefined;
+  }
+
+  async createAbaFormula(formula: InsertAbaFormula): Promise<AbaFormula> {
+    const [created] = await db
+      .insert(abaFormulas)
+      .values(formula)
+      .returning();
+    return created;
+  }
+
+  async updateAbaFormula(id: number, updates: Partial<InsertAbaFormula>): Promise<AbaFormula | undefined> {
+    const [updated] = await db
+      .update(abaFormulas)
+      .set(updates)
+      .where(eq(abaFormulas.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteAbaFormula(id: number): Promise<boolean> {
+    // Delete related materials first
+    await db.delete(abaFormulaMaterials).where(eq(abaFormulaMaterials.formulaId, id));
+    // Then delete the formula
+    await db.delete(abaFormulas).where(eq(abaFormulas.id, id));
+    return true;
+  }
+
+  // ABA Formula Materials methods
+  async getAbaFormulaMaterials(formulaId: number): Promise<AbaFormulaMaterial[]> {
+    return await db.select().from(abaFormulaMaterials)
+      .where(eq(abaFormulaMaterials.formulaId, formulaId))
+      .orderBy(abaFormulaMaterials.id);
+  }
+
+  async createAbaFormulaMaterial(material: InsertAbaFormulaMaterial): Promise<AbaFormulaMaterial> {
+    const [created] = await db
+      .insert(abaFormulaMaterials)
+      .values(material)
+      .returning();
+    return created;
+  }
+
+  async updateAbaFormulaMaterial(id: number, updates: Partial<InsertAbaFormulaMaterial>): Promise<AbaFormulaMaterial | undefined> {
+    const [updated] = await db
+      .update(abaFormulaMaterials)
+      .set(updates)
+      .where(eq(abaFormulaMaterials.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteAbaFormulaMaterial(id: number): Promise<boolean> {
+    await db.delete(abaFormulaMaterials).where(eq(abaFormulaMaterials.id, id));
+    return true;
   }
 }
