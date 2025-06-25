@@ -509,6 +509,7 @@ export default function JoMixPage() {
                   <TableHead>Formula</TableHead>
                   <TableHead>Screw Type</TableHead>
                   <TableHead>Quantity (kg)</TableHead>
+                  <TableHead>Percent%</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead>Actions</TableHead>
@@ -517,7 +518,7 @@ export default function JoMixPage() {
               <TableBody>
                 {joMixes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
                         <Calculator className="h-8 w-8" />
                         <p>No JO mixes created yet</p>
@@ -525,18 +526,24 @@ export default function JoMixPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  joMixes.map((mix) => (
-                    <TableRow key={mix.id}>
-                      <TableCell className="font-medium">{mix.mixNumber}</TableCell>
-                      <TableCell>{mix.formulaName}</TableCell>
-                      <TableCell>
-                        <Badge variant={mix.screwType === 'A' ? 'default' : 'secondary'}>
-                          Screw {mix.screwType}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{mix.totalQuantity.toLocaleString()}</TableCell>
-                      <TableCell>{getStatusBadge(mix.status)}</TableCell>
-                      <TableCell>{new Date(mix.createdAt).toLocaleDateString()}</TableCell>
+                  joMixes.map((mix) => {
+                    // Calculate total quantity for all mixes to determine percentage
+                    const totalAllMixes = joMixes.reduce((sum, m) => sum + m.totalQuantity, 0);
+                    const percentage = totalAllMixes > 0 ? (mix.totalQuantity / totalAllMixes * 100).toFixed(1) : '0.0';
+                    
+                    return (
+                      <TableRow key={mix.id}>
+                        <TableCell className="font-medium">{mix.mixNumber}</TableCell>
+                        <TableCell>{mix.formulaName}</TableCell>
+                        <TableCell>
+                          <Badge variant={mix.screwType === 'A' ? 'default' : 'secondary'}>
+                            Screw {mix.screwType}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{mix.totalQuantity.toLocaleString()}</TableCell>
+                        <TableCell>{percentage}%</TableCell>
+                        <TableCell>{getStatusBadge(mix.status)}</TableCell>
+                        <TableCell>{new Date(mix.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button
@@ -579,7 +586,7 @@ export default function JoMixPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
+                  )}))
                 )}
               </TableBody>
             </Table>
