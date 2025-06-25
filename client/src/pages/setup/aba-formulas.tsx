@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Save, X } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Eye, Printer } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { apiRequest } from "@/lib/queryClient";
@@ -45,7 +45,9 @@ interface FormulaFormData {
 
 export default function AbaFormulas() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingFormula, setEditingFormula] = useState<AbaFormula | null>(null);
+  const [viewingFormula, setViewingFormula] = useState<AbaFormula | null>(null);
   const [formData, setFormData] = useState<FormulaFormData>({
     name: "",
     description: "",
@@ -147,6 +149,93 @@ export default function AbaFormulas() {
       materials: formula.materials
     });
     setIsDialogOpen(true);
+  };
+
+  const openViewDialog = (formula: AbaFormula) => {
+    setViewingFormula(formula);
+    setIsViewDialogOpen(true);
+  };
+
+  const printFormula = (formula: AbaFormula) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const materialsList = formula.materials.map(material => {
+      const materialId = material.rawMaterialId || material.materialId;
+      const rawMaterial = rawMaterials.find(rm => rm.id === materialId?.toString());
+      return `
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 8px;">${rawMaterial?.name || 'Unknown Material'}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${material.screwAPercentage}%</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${material.screwBPercentage}%</td>
+        </tr>
+      `;
+    }).join('');
+
+    const totalScrewA = formula.materials.reduce((sum, m) => sum + m.screwAPercentage, 0);
+    const totalScrewB = formula.materials.reduce((sum, m) => sum + m.screwBPercentage, 0);
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>ABA Formula - ${formula.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .info-section { margin-bottom: 20px; }
+            .info-label { font-weight: bold; display: inline-block; width: 120px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f5f5f5; font-weight: bold; }
+            .totals { margin-top: 15px; font-weight: bold; }
+            .print-date { margin-top: 30px; font-size: 12px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ABA Formula Report</h1>
+            <h2>${formula.name}</h2>
+          </div>
+          
+          <div class="info-section">
+            <div><span class="info-label">Formula Name:</span> ${formula.name}</div>
+            <div><span class="info-label">Description:</span> ${formula.description || 'N/A'}</div>
+            <div><span class="info-label">A:B Ratio:</span> ${formula.aToB}:1</div>
+            <div><span class="info-label">Created:</span> ${new Date(formula.createdAt).toLocaleDateString()}</div>
+            <div><span class="info-label">Total Materials:</span> ${formula.materials.length}</div>
+          </div>
+
+          <h3>Material Composition</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Material Name</th>
+                <th style="text-align: center;">Screw A (%)</th>
+                <th style="text-align: center;">Screw B (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${materialsList}
+            </tbody>
+          </table>
+
+          <div class="totals">
+            <div>Total Screw A: ${totalScrewA}%</div>
+            <div>Total Screw B: ${totalScrewB}%</div>
+          </div>
+
+          <div class="print-date">
+            Printed on: ${new Date().toLocaleString()}
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
   };
 
   const addMaterial = () => {
@@ -285,7 +374,24 @@ export default function AbaFormulas() {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => openViewDialog(formula)}
+                          title="View Formula"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => printFormula(formula)}
+                          title="Print Formula"
+                        >
+                          <Printer className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => openEditDialog(formula)}
+                          title="Edit Formula"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -464,6 +570,121 @@ export default function AbaFormulas() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Formula Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>View ABA Formula - {viewingFormula?.name}</DialogTitle>
+          </DialogHeader>
+          {viewingFormula && (
+            <div className="space-y-6">
+              {/* Formula Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-semibold text-gray-600">Formula Name</Label>
+                  <p className="text-lg">{viewingFormula.name}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-gray-600">A:B Ratio</Label>
+                  <p className="text-lg">
+                    <Badge variant="outline" className="text-sm">
+                      {viewingFormula.aToB}:1
+                    </Badge>
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-sm font-semibold text-gray-600">Description</Label>
+                  <p className="text-sm text-gray-700">{viewingFormula.description || "No description provided"}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-gray-600">Created Date</Label>
+                  <p className="text-sm">{new Date(viewingFormula.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-gray-600">Total Materials</Label>
+                  <p className="text-sm">{viewingFormula.materials.length} materials</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Materials Table */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Material Composition</h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Material Name</TableHead>
+                      <TableHead className="text-center">Screw A (%)</TableHead>
+                      <TableHead className="text-center">Screw B (%)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {viewingFormula.materials.map((material, index) => {
+                      const materialId = material.rawMaterialId || material.materialId;
+                      const rawMaterial = rawMaterials.find(rm => rm.id === materialId?.toString());
+                      return (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">
+                            {rawMaterial?.name || 'Unknown Material'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="secondary">{material.screwAPercentage}%</Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="secondary">{material.screwBPercentage}%</Badge>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Totals */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Total Percentages</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-gray-600">Total Screw A:</Label>
+                    <p className="text-lg font-semibold">
+                      {viewingFormula.materials.reduce((sum, m) => sum + m.screwAPercentage, 0)}%
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-600">Total Screw B:</Label>
+                    <p className="text-lg font-semibold">
+                      {viewingFormula.materials.reduce((sum, m) => sum + m.screwBPercentage, 0)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => printFormula(viewingFormula)}
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print Formula
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsViewDialogOpen(false);
+                    openEditDialog(viewingFormula);
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Formula
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

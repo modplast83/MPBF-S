@@ -109,7 +109,12 @@ This is a comprehensive production management system built with React, TypeScrip
   - Fixed API request parameter order causing fetch errors
   - Updated server-side validation to handle data transformation between frontend and database
   - Added proper data format conversion (aToB number ↔ abRatio text)
+  - Fixed database schema mismatch (raw_material_id → material_id)
   - Single material selection now works properly
+- June 25, 2025: Added view and print functionality to ABA Formulas:
+  - Added view dialog showing complete formula details and material composition
+  - Added print function generating formatted reports with formula information
+  - Enhanced table with view, print, and edit action buttons
 
 ## Changelog
 - June 25, 2025. Initial setup
