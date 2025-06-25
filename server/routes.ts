@@ -5312,7 +5312,7 @@ COMMIT;
       for (const material of materials) {
         await storage.createAbaFormulaMaterial({
           formulaId: formula.id,
-          rawMaterialId: parseInt(material.rawMaterialId),
+          materialId: parseInt(material.rawMaterialId),
           screwAPercentage: material.screwAPercentage,
           screwBPercentage: material.screwBPercentage
         });

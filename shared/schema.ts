@@ -1368,7 +1368,7 @@ export const abaFormulas = pgTable('aba_formulas', {
 export const abaFormulaMaterials = pgTable('aba_formula_materials', {
   id: serial('id').primaryKey(),
   formulaId: integer('formula_id').notNull().references(() => abaFormulas.id, { onDelete: "cascade" }),
-  rawMaterialId: integer('raw_material_id').notNull().references(() => rawMaterials.id),
+  materialId: integer('material_id').notNull().references(() => rawMaterials.id),
   screwAPercentage: doublePrecision('screw_a_percentage').notNull().default(0),
   screwBPercentage: doublePrecision('screw_b_percentage').notNull().default(0),
   createdAt: timestamp('created_at').defaultNow(),
@@ -1388,7 +1388,7 @@ export const abaFormulaMaterialsRelations = relations(abaFormulaMaterials, ({ on
     references: [abaFormulas.id],
   }),
   material: one(rawMaterials, {
-    fields: [abaFormulaMaterials.rawMaterialId],
+    fields: [abaFormulaMaterials.materialId],
     references: [rawMaterials.id],
   }),
 }));
