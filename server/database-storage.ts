@@ -835,8 +835,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Job Orders methods
-  async getJobOrders(): Promise<JobOrder[]> {
-    return await db.select().from(jobOrders);
+  async getJobOrders(): Promise<any[]> {
+    try {
+      return await db
+        .select({
+          id: jobOrders.id,
+          orderId: jobOrders.orderId,
+          customerProductId: jobOrders.customerProductId,
+          quantity: jobOrders.quantity,
+          finishedQty: jobOrders.finishedQty,
+          receivedQty: jobOrders.receivedQty,
+          status: jobOrders.status,
+          customerId: jobOrders.customerId,
+          receiveDate: jobOrders.receiveDate,
+          receivedBy: jobOrders.receivedBy,
+          customerName: customers.name,
+          masterBatch: masterBatches.name,
+          size: customerProducts.size,
+          itemName: items.name,
+        })
+        .from(jobOrders)
+        .leftJoin(customers, eq(jobOrders.customerId, customers.id))
+        .leftJoin(customerProducts, eq(jobOrders.customerProductId, customerProducts.id))
+        .leftJoin(masterBatches, eq(customerProducts.masterBatchId, masterBatches.id))
+        .leftJoin(items, eq(customerProducts.itemId, items.id))
+        .orderBy(jobOrders.id);
+    } catch (error) {
+      console.error('Error fetching job orders:', error);
+      // Fallback to basic query without joins
+      return await db.select().from(jobOrders).orderBy(jobOrders.id);
+    }
   }
 
   async getJobOrdersByOrder(orderId: number): Promise<JobOrder[]> {

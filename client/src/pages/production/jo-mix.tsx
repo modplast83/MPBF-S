@@ -402,6 +402,9 @@ export default function JoMixPage() {
                         <TableHead className="w-12"></TableHead>
                         <TableHead>JO #</TableHead>
                         <TableHead>Order #</TableHead>
+                        <TableHead>Customer Name</TableHead>
+                        <TableHead>Master Batch</TableHead>
+                        <TableHead>Size</TableHead>
                         <TableHead>Original Qty (kg)</TableHead>
                         <TableHead>Mix Qty (kg)</TableHead>
                         <TableHead>Status</TableHead>
@@ -420,6 +423,9 @@ export default function JoMixPage() {
                           </TableCell>
                           <TableCell>JO #{jobOrder.id}</TableCell>
                           <TableCell>#{jobOrder.orderId}</TableCell>
+                          <TableCell>{jobOrder.customerName || 'N/A'}</TableCell>
+                          <TableCell>{jobOrder.masterBatch || 'N/A'}</TableCell>
+                          <TableCell>{jobOrder.size || 'N/A'}</TableCell>
                           <TableCell>{jobOrder.quantity.toLocaleString()}</TableCell>
                           <TableCell>
                             {selectedJobOrders.has(jobOrder.id) ? (
