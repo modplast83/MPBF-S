@@ -109,6 +109,7 @@ export const SIDEBAR_ITEMS = [
         subItems: [
           { title: "Orders", path: "/orders" },
           { title: "Job Orders", path: "/production/job-orders" },
+          { title: "JO Mix", path: "/production/jo-mix" },
           { title: "Workflow", path: "/workflow" },
           { title: "Mix Materials", path: "/production/mix-materials" },
           { title: "Bottleneck Monitor", path: "/production/bottleneck-dashboard" },
