@@ -314,41 +314,9 @@ export const insertRawMaterialSchema = createInsertSchema(rawMaterials).omit({ i
 export type InsertRawMaterial = z.infer<typeof insertRawMaterialSchema>;
 export type RawMaterial = typeof rawMaterials.$inferSelect;
 
-// ABA Formulas table
-export const abaFormulas = pgTable("aba_formulas", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(), // Formula name for identification
-  screwAPercentage: doublePrecision("screw_a_percentage").notNull(), // Total qty% at screw A
-  screwBPercentage: doublePrecision("screw_b_percentage").notNull(), // Total qty% at screw B
-  abRatio: text("a_b_ratio").notNull(), // A:B Ratio (e.g., "60:40")
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const insertAbaFormulaSchema = createInsertSchema(abaFormulas).omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true 
-});
-export type InsertAbaFormula = z.infer<typeof insertAbaFormulaSchema>;
-export type AbaFormula = typeof abaFormulas.$inferSelect;
 
-// ABA Formula Materials table (many-to-many relationship with materials and percentages)
-export const abaFormulaMaterials = pgTable("aba_formula_materials", {
-  id: serial("id").primaryKey(),
-  formulaId: integer("formula_id").notNull().references(() => abaFormulas.id, { onDelete: "cascade" }),
-  rawMaterialId: integer("raw_material_id").notNull().references(() => rawMaterials.id),
-  screwAPercentage: doublePrecision("screw_a_percentage").notNull().default(0), // Material % at Screw A
-  screwBPercentage: doublePrecision("screw_b_percentage").notNull().default(0), // Material % at Screw B
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
-export const insertAbaFormulaMaterialSchema = createInsertSchema(abaFormulaMaterials).omit({ 
-  id: true, 
-  createdAt: true 
-});
-export type InsertAbaFormulaMaterial = z.infer<typeof insertAbaFormulaMaterialSchema>;
-export type AbaFormulaMaterial = typeof abaFormulaMaterials.$inferSelect;
 
 // Final Products table
 export const finalProducts = pgTable("final_products", {
