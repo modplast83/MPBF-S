@@ -33,7 +33,9 @@ import {
   InsertTimeAttendance, InsertEmployeeOfMonth, InsertHrViolation, InsertHrComplaint,
   InsertTraining, InsertTrainingPoint, InsertTrainingEvaluation,
   insertAbaFormulaSchema, insertAbaFormulaMaterialSchema,
-  InsertAbaFormula, InsertAbaFormulaMaterial
+  InsertAbaFormula, InsertAbaFormulaMaterial,
+  insertJoMixSchema, insertJoMixItemSchema, insertJoMixMaterialSchema,
+  InsertJoMix, InsertJoMixItem, InsertJoMixMaterial
 } from "../shared/schema";
 import { z } from "zod";
 import path from 'path';
@@ -5407,6 +5409,199 @@ COMMIT;
     } catch (error) {
       console.error("Error deleting ABA formula:", error);
       res.status(500).json({ message: "Failed to delete ABA formula" });
+    }
+  });
+
+  // JO Mix API endpoints
+  app.get("/api/jo-mixes", async (req: Request, res: Response) => {
+    try {
+      const mixes = await storage.getJoMixes();
+      res.json(mixes);
+    } catch (error) {
+      console.error("Error fetching JO mixes:", error);
+      res.status(500).json({ message: "Failed to fetch JO mixes" });
+    }
+  });
+
+  app.get("/api/jo-mixes/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const mix = await storage.getJoMix(parseInt(id));
+      if (!mix) {
+        return res.status(404).json({ message: "JO mix not found" });
+      }
+      res.json(mix);
+    } catch (error) {
+      console.error("Error fetching JO mix:", error);
+      res.status(500).json({ message: "Failed to fetch JO mix" });
+    }
+  });
+
+  app.post("/api/jo-mixes", async (req: Request, res: Response) => {
+    try {
+      const { abaFormulaId, jobOrderIds, jobOrderQuantities } = req.body;
+      
+      // Validate required fields
+      if (!abaFormulaId || !jobOrderIds || !Array.isArray(jobOrderIds) || jobOrderIds.length === 0) {
+        return res.status(400).json({ message: "ABA Formula and Job Orders are required" });
+      }
+
+      // Get the ABA formula with materials
+      const formula = await storage.getAbaFormula(abaFormulaId);
+      if (!formula) {
+        return res.status(404).json({ message: "ABA formula not found" });
+      }
+
+      // Calculate total quantity for all job orders
+      let totalQuantity = 0;
+      const jobOrderData = [];
+      for (let i = 0; i < jobOrderIds.length; i++) {
+        const jobOrderId = jobOrderIds[i];
+        const quantity = jobOrderQuantities[i] || 0;
+        totalQuantity += quantity;
+        jobOrderData.push({ jobOrderId, quantity });
+      }
+
+      // Parse A:B ratio
+      const [aRatio, bRatio] = formula.abRatio.split(':').map(Number);
+      const totalRatio = aRatio + bRatio;
+      
+      // Calculate A and B quantities
+      const aQuantity = (totalQuantity * aRatio) / totalRatio;
+      const bQuantity = (totalQuantity * bRatio) / totalRatio;
+
+      const createdMixes = [];
+      const maxCapacity = 550; // kg
+
+      // Create A mixes
+      if (aQuantity > 0) {
+        const aMixes = await createMixesForScrew(aQuantity, 'A', formula, jobOrderData, req.user?.id || '00U1', maxCapacity);
+        createdMixes.push(...aMixes);
+      }
+
+      // Create B mixes
+      if (bQuantity > 0) {
+        const bMixes = await createMixesForScrew(bQuantity, 'B', formula, jobOrderData, req.user?.id || '00U1', maxCapacity);
+        createdMixes.push(...bMixes);
+      }
+
+      res.status(201).json({ 
+        message: "JO mixes created successfully",
+        mixes: createdMixes,
+        summary: {
+          totalQuantity,
+          aQuantity,
+          bQuantity,
+          totalMixes: createdMixes.length
+        }
+      });
+
+    } catch (error) {
+      console.error("Error creating JO mix:", error);
+      res.status(500).json({ message: "Failed to create JO mix" });
+    }
+  });
+
+  async function createMixesForScrew(
+    totalQuantity: number, 
+    screwType: string, 
+    formula: any, 
+    jobOrderData: any[], 
+    userId: string,
+    maxCapacity: number
+  ) {
+    const mixes = [];
+    let remainingQuantity = totalQuantity;
+    let mixCount = 1;
+    
+    while (remainingQuantity > 0) {
+      const mixQuantity = Math.min(remainingQuantity, maxCapacity);
+      
+      // Generate mix number
+      const mixNumber = await storage.generateMixNumber();
+      
+      // Create mix
+      const mix = await storage.createJoMix({
+        abaFormulaId: formula.id,
+        mixNumber,
+        totalQuantity: mixQuantity,
+        screwType,
+        status: 'pending',
+        createdBy: userId
+      });
+
+      // Add job order items (distribute proportionally)
+      const proportion = mixQuantity / totalQuantity;
+      for (const jobOrderItem of jobOrderData) {
+        const itemQuantity = jobOrderItem.quantity * proportion;
+        if (itemQuantity > 0) {
+          await storage.createJoMixItem({
+            joMixId: mix.id,
+            jobOrderId: jobOrderItem.jobOrderId,
+            quantity: itemQuantity
+          });
+        }
+      }
+
+      // Add material calculations
+      for (const material of formula.materials) {
+        const percentage = screwType === 'A' ? material.screwAPercentage : material.screwBPercentage;
+        const materialQuantity = (mixQuantity * percentage) / 100;
+        
+        if (materialQuantity > 0) {
+          await storage.createJoMixMaterial({
+            joMixId: mix.id,
+            materialId: material.materialId,
+            quantity: materialQuantity
+          });
+        }
+      }
+
+      mixes.push(mix);
+      remainingQuantity -= mixQuantity;
+      mixCount++;
+    }
+    
+    return mixes;
+  }
+
+  app.put("/api/jo-mixes/:id/status", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+
+      const updateData: any = { status };
+      if (status === 'completed') {
+        updateData.completedAt = new Date();
+      }
+
+      const mix = await storage.updateJoMix(parseInt(id), updateData);
+      if (!mix) {
+        return res.status(404).json({ message: "JO mix not found" });
+      }
+      
+      res.json(mix);
+    } catch (error) {
+      console.error("Error updating JO mix status:", error);
+      res.status(500).json({ message: "Failed to update JO mix status" });
+    }
+  });
+
+  app.delete("/api/jo-mixes/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteJoMix(parseInt(id));
+      if (!success) {
+        return res.status(404).json({ message: "JO mix not found" });
+      }
+      res.json({ message: "JO mix deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting JO mix:", error);
+      res.status(500).json({ message: "Failed to delete JO mix" });
     }
   });
 

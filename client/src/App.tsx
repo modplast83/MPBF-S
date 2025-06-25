@@ -15,6 +15,7 @@ import WorkflowIndex from "@/pages/workflow/index";
 import ProductionIndex from "@/pages/production/index";
 import MixMaterialsPage from "@/pages/production/mix-materials";
 import JobOrdersPage from "@/pages/production/job-orders";
+import JoMixPage from "@/pages/production/jo-mix";
 import WarehouseIndex from "@/pages/warehouse/index";
 import RawMaterials from "@/pages/warehouse/raw-materials";
 import FinalProducts from "@/pages/warehouse/final-products";

@@ -145,7 +145,16 @@ import {
   type InsertAbaFormula,
   abaFormulaMaterials,
   type AbaFormulaMaterial,
-  type InsertAbaFormulaMaterial
+  type InsertAbaFormulaMaterial,
+  joMixes,
+  type JoMix,
+  type InsertJoMix,
+  joMixItems,
+  type JoMixItem,
+  type InsertJoMixItem,
+  joMixMaterials,
+  type JoMixMaterial,
+  type InsertJoMixMaterial
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { IStorage } from "./storage";
