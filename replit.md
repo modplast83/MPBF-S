@@ -115,6 +115,12 @@ This is a comprehensive production management system built with React, TypeScrip
   - Added view dialog showing complete formula details and material composition
   - Added print function generating formatted reports with formula information
   - Enhanced table with view, print, and edit action buttons
+- June 25, 2025: Fixed ABA Formula update validation errors:
+  - Resolved duplicate PUT routes causing "Invalid ABA formula data" errors
+  - Fixed data transformation between frontend (aToB number) and backend (abRatio text)
+  - Added missing deleteAbaFormulaMaterialsByFormula method to database storage
+  - Enhanced error logging with detailed validation messages
+  - Update route now handles both complete updates (with materials) and partial updates
 
 ## Changelog
 - June 25, 2025. Initial setup
