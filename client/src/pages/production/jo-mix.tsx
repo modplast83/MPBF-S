@@ -61,9 +61,9 @@ export default function JoMixPage() {
   // Table filtering and sorting state
   const [sortField, setSortField] = useState<string>('id');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [filterCustomer, setFilterCustomer] = useState<string>('');
-  const [filterStatus, setFilterStatus] = useState<string>('');
-  const [filterMaterial, setFilterMaterial] = useState<string>('');
+  const [filterCustomer, setFilterCustomer] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterMaterial, setFilterMaterial] = useState<string>('all');
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -403,9 +403,9 @@ export default function JoMixPage() {
   const pendingJobOrders = enrichedJobOrders
     .filter(jo => {
       // Apply filters
-      if (filterCustomer && !jo.customerName.toLowerCase().includes(filterCustomer.toLowerCase())) return false;
-      if (filterStatus && jo.status !== filterStatus) return false;
-      if (filterMaterial && !jo.rawMaterial.toLowerCase().includes(filterMaterial.toLowerCase())) return false;
+      if (filterCustomer !== 'all' && !jo.customerName.toLowerCase().includes(filterCustomer.toLowerCase())) return false;
+      if (filterStatus !== 'all' && jo.status !== filterStatus) return false;
+      if (filterMaterial !== 'all' && !jo.rawMaterial.toLowerCase().includes(filterMaterial.toLowerCase())) return false;
       return true;
     })
     .sort((a, b) => {
@@ -531,7 +531,7 @@ export default function JoMixPage() {
                         <SelectValue placeholder="All Customers" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Customers</SelectItem>
+                        <SelectItem value="all">All Customers</SelectItem>
                         {uniqueCustomers.map(customer => (
                           <SelectItem key={customer} value={customer}>{customer}</SelectItem>
                         ))}
@@ -546,7 +546,7 @@ export default function JoMixPage() {
                         <SelectValue placeholder="All Materials" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Materials</SelectItem>
+                        <SelectItem value="all">All Materials</SelectItem>
                         {uniqueMaterials.map(material => (
                           <SelectItem key={material} value={material}>{material}</SelectItem>
                         ))}
@@ -561,7 +561,7 @@ export default function JoMixPage() {
                         <SelectValue placeholder="All Statuses" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Statuses</SelectItem>
+                        <SelectItem value="all">All Statuses</SelectItem>
                         {uniqueStatuses.map(status => (
                           <SelectItem key={status} value={status}>{status}</SelectItem>
                         ))}
