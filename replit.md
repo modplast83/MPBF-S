@@ -173,6 +173,13 @@ This is a comprehensive production management system built with React, TypeScrip
   - Implemented comprehensive filtering system for Customer, Raw Material, and Status
   - Added sortable columns with visual indicators for all table headers
   - Enhanced table with interactive sorting and filtering for improved job order selection
+- June 26, 2025: Fixed JO Mix table data loading and display issues:
+  - Fixed Customer Name column to display actual company names instead of "Unknown Customer"
+  - Corrected data mapping to use customer ID from customer product relationship
+  - Fixed Raw Material column to show proper category names like "Roll Trash Bag", "T-Shirt Bag"
+  - Fixed Size column to display accurate dimension format like "9+9+32", "10+10+28"
+  - Resolved Select component error by replacing empty string values with "all"
+  - Enhanced data transformation logic to handle complex relationship mappings
 
 ## Changelog
 - June 25, 2025. Initial setup
