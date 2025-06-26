@@ -6163,7 +6163,14 @@ COMMIT;
 
   app.post("/api/hr-violations", async (req: Request, res: Response) => {
     try {
-      const data = insertHrViolationSchema.parse(req.body);
+      // Transform string dates to Date objects before validation
+      const requestData = {
+        ...req.body,
+        incidentDate: req.body.incidentDate ? new Date(req.body.incidentDate) : new Date(),
+        followUpDate: req.body.followUpDate ? new Date(req.body.followUpDate) : null
+      };
+      
+      const data = insertHrViolationSchema.parse(requestData);
       const violation = await storage.createHrViolation(data);
       res.json(violation);
     } catch (error) {
@@ -6179,7 +6186,13 @@ COMMIT;
         return res.status(400).json({ error: 'Invalid violation ID' });
       }
       
-      const data = req.body;
+      // Transform string dates to Date objects before updating
+      const data = {
+        ...req.body,
+        incidentDate: req.body.incidentDate ? new Date(req.body.incidentDate) : undefined,
+        followUpDate: req.body.followUpDate ? new Date(req.body.followUpDate) : null
+      };
+      
       const violation = await storage.updateHrViolation(id, data);
       if (!violation) {
         return res.status(404).json({ error: 'HR violation not found' });
