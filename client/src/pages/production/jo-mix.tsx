@@ -378,17 +378,34 @@ export default function JoMixPage() {
   const enrichedJobOrders = jobOrders
     .filter(jo => jo.status === 'pending' || jo.status === 'in_progress')
     .map(jo => {
-      const customerName = jo.customerId ? customers?.find(c => c.id === jo.customerId)?.name || 'Unknown' : 'Unknown';
+      // Find customer product information first
       const customerProduct = customerProducts?.find(cp => cp.id === jo.customerProductId);
+      
+      // Find customer information using customer ID from customer product
+      const customerId = jo.customerId || customerProduct?.customerId;
+      const customer = customers?.find(c => c.id === customerId);
+      const customerName = customer?.name || customer?.nameAr || 'Unknown Customer';
+      
+      // Find item information
       const item = customerProduct ? items?.find(i => i.id === customerProduct.itemId) : null;
+      
+      // Find master batch information
       const masterBatch = customerProduct ? masterBatches?.find(mb => mb.id === customerProduct.masterBatchId) : null;
+      
+      // Find category information for raw material
       const category = customerProduct ? categories?.find(cat => cat.id === customerProduct.categoryId) : null;
+      
+      // Create size caption from customer product dimensions
+      const sizeCaption = customerProduct?.sizeCaption || 
+        (customerProduct?.width && customerProduct?.leftF && customerProduct?.rightF 
+          ? `${customerProduct.leftF}+${customerProduct.rightF}+${customerProduct.width}`
+          : 'N/A');
       
       return {
         ...jo,
         customerName,
         itemName: item?.name || 'N/A',
-        size: customerProduct?.size || 'N/A',
+        size: sizeCaption,
         masterBatch: masterBatch?.name || 'N/A',
         rawMaterial: category?.name || 'N/A'
       };
