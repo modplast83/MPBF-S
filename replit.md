@@ -180,6 +180,20 @@ This is a comprehensive production management system built with React, TypeScrip
   - Implemented comprehensive filtering system for Customer, Raw Material, and Status
   - Added sortable columns with visual indicators for all table headers
   - Enhanced table with interactive sorting and filtering for improved job order selection
+- June 26, 2025: Completely redesigned HR Violations & Complaints system:
+  - Removed employee rank page and all related functionality as requested
+  - Implemented comprehensive professional violation management system with 6 violation types:
+    * Attendance Issues: absent without notice, excessive lateness, early departure, extended breaks, unauthorized leave
+    * Production Violations: quality defects, production targets missed, wrong specifications, material waste, process deviation
+    * Conduct Issues: insubordination, harassment, unprofessional behavior, conflict with colleagues, inappropriate language
+    * Safety Violations: PPE non-compliance, unsafe work practices, ignoring safety protocols, equipment misuse, creating hazards
+    * Policy Violations: dress code, mobile phone usage, smoking violations, unauthorized areas, data privacy breach
+    * Equipment/Property Damage: equipment damage, product damage, facility damage, vehicle damage, negligent handling
+  - Added professional action types: verbal warning, written warning, suspension, termination, additional training, counseling
+  - Implemented automatic repeat offense tracking with counting and escalation alerts
+  - Enhanced database schema with violation numbers (VIO-YYYY-NNNN), financial impact tracking, evidence documentation
+  - Added comprehensive filtering, search, professional print reports, and detailed violation view dialogs
+  - Integrated witness tracking, follow-up requirements, and resolution notes for complete case management
 - June 26, 2025: Fixed JO Mix table data loading and display issues:
   - Fixed Customer Name column to display actual company names instead of "Unknown Customer"
   - Corrected data mapping to use customer ID from customer product relationship
