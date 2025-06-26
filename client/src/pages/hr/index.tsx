@@ -102,8 +102,7 @@ export default function HRIndex() {
       icon: AlertTriangle,
       path: "/hr/violations-complaints",
       color: "bg-gradient-to-br from-red-500 to-red-600"
-    },
-
+    }
   ];
 
   return (
