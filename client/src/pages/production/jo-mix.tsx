@@ -58,6 +58,13 @@ export default function JoMixPage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [viewingMix, setViewingMix] = useState<JoMix | null>(null);
   
+  // Table filtering and sorting state
+  const [sortField, setSortField] = useState<string>('id');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [filterCustomer, setFilterCustomer] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<string>('');
+  const [filterMaterial, setFilterMaterial] = useState<string>('');
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -74,6 +81,27 @@ export default function JoMixPage() {
   // Fetch ABA formulas
   const { data: abaFormulas = [], isLoading: loadingFormulas } = useQuery<AbaFormula[]>({
     queryKey: ["/api/aba-formulas"],
+  });
+
+  // Fetch additional data for enhanced display
+  const { data: customers = [] } = useQuery({
+    queryKey: ["/api/customers"],
+  });
+
+  const { data: customerProducts = [] } = useQuery({
+    queryKey: ["/api/customer-products"],
+  });
+
+  const { data: items = [] } = useQuery({
+    queryKey: ["/api/items"],
+  });
+
+  const { data: masterBatches = [] } = useQuery({
+    queryKey: ["/api/master-batches"],
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"],
   });
 
   // Create JO mix mutation
@@ -336,7 +364,102 @@ export default function JoMixPage() {
     }
   };
 
-  const pendingJobOrders = jobOrders.filter(jo => jo.status === 'pending' || jo.status === 'in_progress');
+  // Handle sorting
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Transform job orders with additional data for display
+  const enrichedJobOrders = jobOrders
+    .filter(jo => jo.status === 'pending' || jo.status === 'in_progress')
+    .map(jo => {
+      const customerName = jo.customerId ? customers?.find(c => c.id === jo.customerId)?.name || 'Unknown' : 'Unknown';
+      const customerProduct = customerProducts?.find(cp => cp.id === jo.customerProductId);
+      const item = customerProduct ? items?.find(i => i.id === customerProduct.itemId) : null;
+      const masterBatch = customerProduct ? masterBatches?.find(mb => mb.id === customerProduct.masterBatchId) : null;
+      const category = customerProduct ? categories?.find(cat => cat.id === customerProduct.categoryId) : null;
+      
+      return {
+        ...jo,
+        customerName,
+        itemName: item?.name || 'N/A',
+        size: customerProduct?.size || 'N/A',
+        masterBatch: masterBatch?.name || 'N/A',
+        rawMaterial: category?.name || 'N/A'
+      };
+    });
+
+  // Get unique values for filter options
+  const uniqueCustomers = [...new Set(enrichedJobOrders.map(jo => jo.customerName).filter(Boolean))];
+  const uniqueStatuses = [...new Set(enrichedJobOrders.map(jo => jo.status))];
+  const uniqueMaterials = [...new Set(enrichedJobOrders.map(jo => jo.rawMaterial).filter(Boolean))];
+
+  // Apply filters and sorting
+  const pendingJobOrders = enrichedJobOrders
+    .filter(jo => {
+      // Apply filters
+      if (filterCustomer && !jo.customerName.toLowerCase().includes(filterCustomer.toLowerCase())) return false;
+      if (filterStatus && jo.status !== filterStatus) return false;
+      if (filterMaterial && !jo.rawMaterial.toLowerCase().includes(filterMaterial.toLowerCase())) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortField) {
+        case 'id':
+          aValue = a.id;
+          bValue = b.id;
+          break;
+        case 'orderId':
+          aValue = a.orderId;
+          bValue = b.orderId;
+          break;
+        case 'customerName':
+          aValue = a.customerName;
+          bValue = b.customerName;
+          break;
+        case 'masterBatch':
+          aValue = a.masterBatch;
+          bValue = b.masterBatch;
+          break;
+        case 'rawMaterial':
+          aValue = a.rawMaterial;
+          bValue = b.rawMaterial;
+          break;
+        case 'itemName':
+          aValue = a.itemName;
+          bValue = b.itemName;
+          break;
+        case 'size':
+          aValue = a.size;
+          bValue = b.size;
+          break;
+        case 'quantity':
+          aValue = a.quantity;
+          bValue = b.quantity;
+          break;
+        default:
+          aValue = a.id;
+          bValue = b.id;
+      }
+      
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+      
+      if (sortDirection === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
 
   if (loadingMixes || loadingJobOrders || loadingFormulas) {
     return (
@@ -398,18 +521,84 @@ export default function JoMixPage() {
               {/* Job Orders Selection */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Select Job Orders</h3>
+                
+                {/* Filters */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="space-y-2">
+                    <Label htmlFor="customer-filter">Filter by Customer</Label>
+                    <Select value={filterCustomer} onValueChange={setFilterCustomer}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Customers" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Customers</SelectItem>
+                        {uniqueCustomers.map(customer => (
+                          <SelectItem key={customer} value={customer}>{customer}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="material-filter">Filter by Raw Material</Label>
+                    <Select value={filterMaterial} onValueChange={setFilterMaterial}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Materials" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Materials</SelectItem>
+                        {uniqueMaterials.map(material => (
+                          <SelectItem key={material} value={material}>{material}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="status-filter">Filter by Status</Label>
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Statuses</SelectItem>
+                        {uniqueStatuses.map(status => (
+                          <SelectItem key={status} value={status}>{status}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
                 <div className="border rounded-lg p-4 max-h-96 overflow-y-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-12 text-center"></TableHead>
-                        <TableHead className="text-center">JO #</TableHead>
-                        <TableHead className="text-center">Order #</TableHead>
-                        <TableHead className="text-center">Customer Name</TableHead>
-                        <TableHead className="text-center">Master Batch</TableHead>
-                        <TableHead className="text-center">Material</TableHead>
-                        <TableHead className="text-center">Size</TableHead>
-                        <TableHead className="text-center">Original Qty (kg)</TableHead>
+                        <TableHead className="text-center cursor-pointer hover:bg-gray-100" onClick={() => handleSort('id')}>
+                          JO # {sortField === 'id' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead className="text-center cursor-pointer hover:bg-gray-100" onClick={() => handleSort('orderId')}>
+                          Order # {sortField === 'orderId' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead className="text-center cursor-pointer hover:bg-gray-100" onClick={() => handleSort('customerName')}>
+                          Customer Name {sortField === 'customerName' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead className="text-center cursor-pointer hover:bg-gray-100" onClick={() => handleSort('masterBatch')}>
+                          Master Batch {sortField === 'masterBatch' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead className="text-center cursor-pointer hover:bg-gray-100" onClick={() => handleSort('rawMaterial')}>
+                          Raw Material {sortField === 'rawMaterial' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead className="text-center cursor-pointer hover:bg-gray-100" onClick={() => handleSort('itemName')}>
+                          Material {sortField === 'itemName' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead className="text-center cursor-pointer hover:bg-gray-100" onClick={() => handleSort('size')}>
+                          Size {sortField === 'size' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead className="text-center cursor-pointer hover:bg-gray-100" onClick={() => handleSort('quantity')}>
+                          Original Qty (kg) {sortField === 'quantity' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
                         <TableHead className="text-center">Mix Qty (kg)</TableHead>
                         <TableHead className="text-center">Status</TableHead>
                       </TableRow>
@@ -429,6 +618,7 @@ export default function JoMixPage() {
                           <TableCell className="text-center">#{jobOrder.orderId}</TableCell>
                           <TableCell className="text-center">{jobOrder.customerName || 'N/A'}</TableCell>
                           <TableCell className="text-center">{jobOrder.masterBatch || 'N/A'}</TableCell>
+                          <TableCell className="text-center">{jobOrder.rawMaterial || 'N/A'}</TableCell>
                           <TableCell className="text-center">{jobOrder.itemName || 'N/A'}</TableCell>
                           <TableCell className="text-center">{jobOrder.size || 'N/A'}</TableCell>
                           <TableCell className="text-center">{jobOrder.quantity.toLocaleString()}</TableCell>

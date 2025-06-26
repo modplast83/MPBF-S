@@ -168,6 +168,11 @@ This is a comprehensive production management system built with React, TypeScrip
   - Improved Fuse.js configuration to include nameAr field for Arabic text search
   - Enhanced search algorithm to handle Arabic text patterns and word matching
   - Updated search placeholder text to indicate bilingual search capability
+- June 25, 2025: Enhanced JO Mix Select Job Orders table with advanced functionality:
+  - Added Raw Material column displaying category information for better material visibility
+  - Implemented comprehensive filtering system for Customer, Raw Material, and Status
+  - Added sortable columns with visual indicators for all table headers
+  - Enhanced table with interactive sorting and filtering for improved job order selection
 
 ## Changelog
 - June 25, 2025. Initial setup
