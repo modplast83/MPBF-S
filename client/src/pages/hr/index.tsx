@@ -67,13 +67,7 @@ export default function HRIndex() {
       path: "/hr/employee-management",
       color: "bg-gradient-to-br from-green-500 to-green-600"
     },
-    {
-      title: t("hr.employee_ranks.title"),
-      description: t("hr.employee_ranks.description"),
-      icon: Award,
-      path: "/hr/employee-ranks",
-      color: "bg-gradient-to-br from-purple-500 to-purple-600"
-    },
+
     {
       title: t("hr.overtime_leave.title"),
       description: t("hr.overtime_leave.description"),
