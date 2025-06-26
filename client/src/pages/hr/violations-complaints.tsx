@@ -18,7 +18,8 @@ import {
   XCircle,
   AlertCircle,
   RefreshCw,
-  UserX
+  UserX,
+  Trash2
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -197,6 +198,30 @@ export default function ViolationsComplaints() {
       toast({ title: "Failed to create violation", variant: "destructive" });
     },
   });
+
+  // Delete violation mutation
+  const deleteViolationMutation = useMutation({
+    mutationFn: async (violationId: number) => {
+      const response = await fetch(`/api/hr-violations/${violationId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete violation");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/hr-violations"] });
+      toast({ title: "Violation deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete violation", variant: "destructive" });
+    },
+  });
+
+  const handleDeleteViolation = (violation: HrViolation) => {
+    if (window.confirm(`Are you sure you want to delete violation ${violation.violationNumber || `VIO-${violation.id}`}? This action cannot be undone.`)) {
+      deleteViolationMutation.mutate(violation.id);
+    }
+  };
 
   const form = useForm<ViolationFormData>({
     resolver: zodResolver(violationFormSchema),
@@ -882,6 +907,15 @@ export default function ViolationsComplaints() {
                           onClick={() => handlePrintViolation(violation)}
                         >
                           <Printer className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteViolation(violation)}
+                          disabled={deleteViolationMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>

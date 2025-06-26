@@ -6205,6 +6205,26 @@ COMMIT;
     }
   });
 
+  // Delete HR violation
+  app.delete("/api/hr-violations/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: 'Invalid violation ID' });
+      }
+      
+      const deleted = await storage.deleteHrViolation(id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'HR violation not found' });
+      }
+      
+      res.json({ message: 'HR violation deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting HR violation:', error);
+      res.status(500).json({ error: 'Failed to delete HR violation' });
+    }
+  });
+
   // HR Violation Status Update Route
   app.patch("/api/hr-violations/:id/status", async (req: Request, res: Response) => {
     try {
