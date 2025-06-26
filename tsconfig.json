@@ -6,7 +6,6 @@
     "types": ["node"],
     "skipLibCheck": true,
     "module": "ESNext",
-    "skipLibCheck": true,
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,

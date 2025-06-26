@@ -17,6 +17,13 @@ async function buildProject() {
     // First run vite build for frontend
     console.log('Building frontend...');
     execSync('vite build', { stdio: 'inherit' });
+    
+    // Move assets from dist/public to dist if needed
+    if (existsSync('dist/public')) {
+      console.log('Moving frontend assets to correct location...');
+      execSync('cp -r dist/public/* dist/ 2>/dev/null || true', { stdio: 'inherit' });
+      execSync('rm -rf dist/public', { stdio: 'inherit' });
+    }
 
     // Build server for production with explicit ES module configuration
     console.log('Building server for production...');

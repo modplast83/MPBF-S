@@ -125,10 +125,14 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use environment port or default to 5000
-  const port = parseInt(process.env.PORT || "5000");
+  // Use environment port with fallback for deployment
+  const port = parseInt(process.env.PORT || process.env.REPL_PORT || "5000");
+  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '0.0.0.0';
   
-  server.listen(port, "0.0.0.0", () => {
+  server.listen(port, host, () => {
     log(`serving on port ${port}`);
+    if (process.env.NODE_ENV === 'production') {
+      console.log(`Production server running on ${host}:${port}`);
+    }
   });
 })();
