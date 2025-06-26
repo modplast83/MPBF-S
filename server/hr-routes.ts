@@ -381,6 +381,26 @@ export function setupHRRoutes(app: Express) {
     }
   });
 
+  // Employee Ranks endpoint (removed functionality)
+  app.get("/api/hr/employee-ranks", async (req, res) => {
+    try {
+      res.json([]); // Return empty array as functionality is removed
+    } catch (error) {
+      console.error("Error fetching employee ranks:", error);
+      res.status(500).json({ error: "Failed to fetch employee ranks" });
+    }
+  });
+
+  // Employee Profiles endpoint (integrated into users)
+  app.get("/api/hr/employee-profiles", async (req, res) => {
+    try {
+      res.json([]); // Return empty array as functionality is integrated into users
+    } catch (error) {
+      console.error("Error fetching employee profiles:", error);
+      res.status(500).json({ error: "Failed to fetch employee profiles" });
+    }
+  });
+
   // Employee of Month endpoints
   app.get("/api/hr/employee-of-month", async (req, res) => {
     try {

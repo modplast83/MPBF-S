@@ -2177,9 +2177,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createHrViolation(violationData: InsertHrViolation): Promise<HrViolation> {
+    // Generate violation number: VIO-YYYY-NNNN
+    const year = new Date().getFullYear();
+    const count = await db.select({ count: sql<number>`count(*)` }).from(hrViolations);
+    const violationNumber = `VIO-${year}-${String(count[0].count + 1).padStart(4, '0')}`;
+    
+    // Check for repeat offenses
+    const previousViolations = await this.getHrViolationsByUser(violationData.userId);
+    const sameTypeViolations = previousViolations.filter(v => v.violationType === violationData.violationType);
+    const previousViolationCount = sameTypeViolations.length;
+    const isRepeatOffense = previousViolationCount > 0;
+    const relatedViolationIds = sameTypeViolations.map(v => v.id.toString());
+    
     const [violation] = await db
       .insert(hrViolations)
-      .values(violationData)
+      .values({
+        ...violationData,
+        violationNumber,
+        previousViolationCount,
+        isRepeatOffense,
+        relatedViolationIds
+      })
       .returning();
     return violation;
   }

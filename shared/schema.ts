@@ -977,23 +977,65 @@ export const insertEmployeeOfMonthSchema = createInsertSchema(employeeOfMonth).o
 export type InsertEmployeeOfMonth = z.infer<typeof insertEmployeeOfMonthSchema>;
 export type EmployeeOfMonth = typeof employeeOfMonth.$inferSelect;
 
-// HR Violations and Complaints
+// Professional HR Violations System
 export const hrViolations = pgTable("hr_violations", {
   id: serial("id").primaryKey(),
+  violationNumber: text("violation_number").notNull().unique(), // Auto-generated: VIO-YYYY-NNNN
   userId: text("user_id").notNull().references(() => users.id), // Employee involved
   reportedBy: text("reported_by").notNull().references(() => users.id), // Who reported it
-  violationType: text("violation_type").notNull(), // "attendance", "conduct", "safety", "performance", "policy"
+  
+  // Comprehensive violation types
+  violationType: text("violation_type").notNull(), // "attendance", "production", "conduct", "safety", "policy", "damage"
+  violationSubtype: text("violation_subtype").notNull(), // Specific subtypes based on main type
+  
   severity: text("severity").notNull(), // "minor", "major", "critical"
   title: text("title").notNull(),
   description: text("description").notNull(),
-  actionTaken: text("action_taken"),
-  status: text("status").notNull().default("open"), // "open", "investigating", "resolved", "dismissed"
+  
+  // Repeat offense tracking
+  previousViolationCount: integer("previous_violation_count").default(0),
+  isRepeatOffense: boolean("is_repeat_offense").default(false),
+  relatedViolationIds: text("related_violation_ids").array().default(sql`'{}'`),
+  
+  // Action taken details
+  actionTaken: text("action_taken").notNull(), // "warning", "written_warning", "suspension", "termination", "training", "counseling"
+  actionDetails: text("action_details"),
+  disciplinaryPoints: integer("disciplinary_points").default(0),
+  
+  // Financial impact (for damage violations)
+  estimatedCost: doublePrecision("estimated_cost").default(0),
+  actualCost: doublePrecision("actual_cost").default(0),
+  costRecovered: boolean("cost_recovered").default(false),
+  
+  // Status and resolution
+  status: text("status").notNull().default("open"), // "open", "investigating", "resolved", "appealed", "dismissed"
+  resolutionDate: timestamp("resolution_date"),
+  resolutionNotes: text("resolution_notes"),
+  
+  // Evidence and documentation
+  evidenceFiles: jsonb("evidence_files"), // File attachments
+  witnessIds: text("witness_ids").array().default(sql`'{}'`), // Other employees who witnessed
+  
+  // Follow-up tracking
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: timestamp("follow_up_date"),
+  followUpNotes: text("follow_up_notes"),
+  
+  // Timestamps
+  incidentDate: timestamp("incident_date").notNull(),
   reportDate: timestamp("report_date").defaultNow(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertHrViolationSchema = createInsertSchema(hrViolations).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertHrViolationSchema = createInsertSchema(hrViolations).omit({ 
+  id: true, 
+  violationNumber: true, 
+  previousViolationCount: true,
+  isRepeatOffense: true,
+  createdAt: true, 
+  updatedAt: true 
+});
 export type InsertHrViolation = z.infer<typeof insertHrViolationSchema>;
 export type HrViolation = typeof hrViolations.$inferSelect;
 
