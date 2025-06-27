@@ -103,6 +103,13 @@ This is a comprehensive production management system built with React, TypeScrip
 - Health check endpoints for monitoring
 
 ## Recent Changes
+- June 27, 2025: Enhanced HR Violations system with delete functionality:
+  - Added delete action button to Violation Records table with red trash icon
+  - Implemented confirmation dialog for safe violation deletion
+  - Added DELETE API endpoint with proper validation and error handling
+  - Users can now permanently remove violation records with confirmation
+  - Fixed date validation issues in violation creation and updates
+  - Completely removed Employee Ranks from HR navigation sidebar
 - June 26, 2025: Applied comprehensive deployment fixes:
   - Fixed duplicate 'skipLibCheck' property in TypeScript configuration causing build warnings
   - Updated build.js to handle CSS asset path issues by moving files from dist/public to dist
