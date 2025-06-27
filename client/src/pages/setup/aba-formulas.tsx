@@ -12,6 +12,7 @@ import { Plus, Edit, Trash2, Save, X, Eye, Printer } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { apiRequest } from "@/lib/queryClient";
+import { generatePrintDocument } from "@/components/common/print-header";
 
 interface RawMaterial {
   id: string;
@@ -177,9 +178,9 @@ export default function AbaFormulas() {
       const rawMaterial = rawMaterials.find(rm => rm.id === Number(materialId));
       return `
         <tr>
-          <td style="border: 1px solid #ddd; padding: 8px;">${rawMaterial?.name || 'Unknown Material'}</td>
-          <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${material.screwAPercentage}%</td>
-          <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${material.screwBPercentage}%</td>
+          <td>${rawMaterial?.name || 'Unknown Material'}</td>
+          <td class="text-center">${material.screwAPercentage}%</td>
+          <td class="text-center">${material.screwBPercentage}%</td>
         </tr>
       `;
     }).join('');
@@ -187,64 +188,112 @@ export default function AbaFormulas() {
     const totalScrewA = formula.materials.reduce((sum, m) => sum + m.screwAPercentage, 0);
     const totalScrewB = formula.materials.reduce((sum, m) => sum + m.screwBPercentage, 0);
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>ABA Formula - ${formula.name}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .info-section { margin-bottom: 20px; }
-            .info-label { font-weight: bold; display: inline-block; width: 120px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f5f5f5; font-weight: bold; }
-            .totals { margin-top: 15px; font-weight: bold; }
-            .print-date { margin-top: 30px; font-size: 12px; color: #666; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>ABA Formula Report</h1>
-            <h2>${formula.name}</h2>
-          </div>
-          
-          <div class="info-section">
-            <div><span class="info-label">Formula Name:</span> ${formula.name}</div>
-            <div><span class="info-label">Description:</span> ${formula.description || 'N/A'}</div>
-            <div><span class="info-label">A:B Ratio:</span> ${formula.aToB}:1</div>
-            <div><span class="info-label">Created:</span> ${new Date(formula.createdAt).toLocaleDateString()}</div>
-            <div><span class="info-label">Total Materials:</span> ${formula.materials.length}</div>
-          </div>
+    const printContent = `
+      <div class="report-header">
+        <h1>ABA Formula Report</h1>
+        <h2>${formula.name}</h2>
+      </div>
+      
+      <div class="info-section">
+        <div class="info-item"><span class="info-label">Formula Name:</span> ${formula.name}</div>
+        <div class="info-item"><span class="info-label">Description:</span> ${formula.description || 'N/A'}</div>
+        <div class="info-item"><span class="info-label">A:B Ratio:</span> ${formula.aToB}:1</div>
+        <div class="info-item"><span class="info-label">Created:</span> ${new Date(formula.createdAt).toLocaleDateString()}</div>
+        <div class="info-item"><span class="info-label">Total Materials:</span> ${formula.materials.length}</div>
+      </div>
 
-          <h3>Material Composition</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Material Name</th>
-                <th style="text-align: center;">Screw A (%)</th>
-                <th style="text-align: center;">Screw B (%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${materialsList}
-            </tbody>
-          </table>
+      <h3 class="section-title">Material Composition</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Material Name</th>
+            <th class="text-center">Screw A (%)</th>
+            <th class="text-center">Screw B (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${materialsList}
+        </tbody>
+      </table>
 
-          <div class="totals">
-            <div>Total Screw A: ${totalScrewA}%</div>
-            <div>Total Screw B: ${totalScrewB}%</div>
-          </div>
-
-          <div class="print-date">
-            Printed on: ${new Date().toLocaleString()}
-          </div>
-        </body>
-      </html>
+      <div class="totals-section">
+        <div class="total-item">Total Screw A: ${totalScrewA}%</div>
+        <div class="total-item">Total Screw B: ${totalScrewB}%</div>
+      </div>
     `;
 
-    printWindow.document.write(htmlContent);
+    const additionalStyles = `
+      .report-header { 
+        text-align: center; 
+        margin-bottom: 30px; 
+      }
+      .report-header h1 { 
+        color: #065f46; 
+        margin: 0; 
+        font-size: 28px; 
+      }
+      .report-header h2 { 
+        color: #059669; 
+        margin: 10px 0 0 0; 
+        font-size: 22px; 
+        font-weight: normal; 
+      }
+      .info-section { 
+        margin-bottom: 30px; 
+      }
+      .info-item { 
+        margin: 8px 0; 
+        line-height: 1.5; 
+      }
+      .info-label { 
+        font-weight: bold; 
+        display: inline-block; 
+        width: 120px; 
+        color: #065f46; 
+      }
+      .section-title { 
+        color: #065f46; 
+        border-bottom: 2px solid #d1fae5; 
+        padding-bottom: 8px; 
+        margin: 25px 0 15px 0; 
+      }
+      .data-table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-bottom: 20px; 
+      }
+      .data-table th, .data-table td { 
+        border: 1px solid #d1fae5; 
+        padding: 12px 8px; 
+        text-align: left; 
+      }
+      .data-table th { 
+        background-color: #f0fdf4; 
+        font-weight: bold; 
+        color: #065f46; 
+      }
+      .text-center { 
+        text-align: center; 
+      }
+      .totals-section { 
+        margin-top: 20px; 
+        padding: 15px; 
+        background-color: #f0fdf4; 
+        border: 1px solid #d1fae5; 
+        border-radius: 4px; 
+      }
+      .total-item { 
+        font-weight: bold; 
+        margin: 5px 0; 
+        color: #065f46; 
+      }
+    `;
+
+    printWindow.document.write(generatePrintDocument(
+      `ABA Formula - ${formula.name}`,
+      printContent,
+      additionalStyles
+    ));
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();

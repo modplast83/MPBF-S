@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { generatePrintDocument } from "@/components/common/print-header";
 import {
   AlertTriangle,
   Plus,
@@ -291,22 +292,21 @@ export default function ViolationsComplaints() {
 
   const handlePrintViolation = (violation: HrViolation) => {
     const printContent = `
-      <div style="padding: 20px; font-family: Arial, sans-serif; max-width: 800px;">
-        <div style="text-align: center; border-bottom: 3px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">EMPLOYEE VIOLATION REPORT</h1>
-          <h2 style="color: #666; margin: 10px 0; font-weight: normal;">${violation.violationNumber || `VIO-${violation.id}`}</h2>
-        </div>
+      <div style="margin-bottom: 30px; text-align: center;">
+        <h1 style="color: #065f46; margin: 0; font-size: 28px; font-weight: bold;">EMPLOYEE VIOLATION REPORT</h1>
+        <h2 style="color: #059669; margin: 10px 0; font-size: 22px; font-weight: normal;">${violation.violationNumber || `VIO-${violation.id}`}</h2>
+      </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
-          <div>
-            <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px;">Employee Information</h3>
+        <div class="info-grid">
+          <div class="info-section">
+            <h3>Employee Information</h3>
             <p><strong>Employee:</strong> ${getUserName(violation.userId)}</p>
             <p><strong>Employee ID:</strong> ${violation.userId}</p>
             <p><strong>Reported By:</strong> ${getUserName(violation.reportedBy)}</p>
           </div>
           
-          <div>
-            <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px;">Violation Details</h3>
+          <div class="info-section">
+            <h3>Violation Details</h3>
             <p><strong>Type:</strong> ${VIOLATION_TYPES[violation.violationType as keyof typeof VIOLATION_TYPES]?.label || violation.violationType}</p>
             <p><strong>Subtype:</strong> ${violation.violationSubtype}</p>
             <p><strong>Severity:</strong> ${violation.severity}</p>
@@ -314,38 +314,38 @@ export default function ViolationsComplaints() {
           </div>
         </div>
 
-        <div style="margin-bottom: 30px;">
-          <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px;">Incident Information</h3>
+        <div class="info-section">
+          <h3>Incident Information</h3>
           <p><strong>Title:</strong> ${violation.title}</p>
           <p><strong>Incident Date:</strong> ${format(new Date(violation.incidentDate), 'PPP')}</p>
           <p><strong>Report Date:</strong> ${format(new Date(violation.reportDate), 'PPP')}</p>
         </div>
 
-        <div style="margin-bottom: 30px;">
-          <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px;">Description</h3>
-          <div style="border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9; line-height: 1.6;">
+        <div class="info-section">
+          <h3>Description</h3>
+          <div class="description-box">
             ${violation.description}
           </div>
         </div>
 
-        <div style="margin-bottom: 30px;">
-          <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px;">Action Taken</h3>
+        <div class="info-section">
+          <h3>Action Taken</h3>
           <p><strong>Action:</strong> ${ACTION_TYPES.find(a => a.value === violation.actionTaken)?.label || violation.actionTaken}</p>
-          ${violation.actionDetails ? `<div style="border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9; margin-top: 10px;">${violation.actionDetails}</div>` : ''}
+          ${violation.actionDetails ? `<div class="description-box" style="margin-top: 10px;">${violation.actionDetails}</div>` : ''}
           ${violation.disciplinaryPoints ? `<p><strong>Disciplinary Points:</strong> ${violation.disciplinaryPoints}</p>` : ''}
         </div>
 
         ${violation.isRepeatOffense ? `
-          <div style="margin-bottom: 30px; border: 2px solid #ff6b6b; padding: 15px; background-color: #ffe0e0;">
-            <h3 style="color: #d63031; margin-top: 0;">⚠️ REPEAT OFFENSE</h3>
+          <div class="repeat-offense">
+            <h3>⚠️ REPEAT OFFENSE</h3>
             <p><strong>Previous Violations:</strong> ${violation.previousViolationCount}</p>
             <p style="margin-bottom: 0;">This employee has committed similar violations before.</p>
           </div>
         ` : ''}
 
         ${(violation.estimatedCost > 0 || violation.actualCost > 0) ? `
-          <div style="margin-bottom: 30px;">
-            <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px;">Financial Impact</h3>
+          <div class="info-section">
+            <h3>Financial Impact</h3>
             ${violation.estimatedCost > 0 ? `<p><strong>Estimated Cost:</strong> $${violation.estimatedCost}</p>` : ''}
             ${violation.actualCost > 0 ? `<p><strong>Actual Cost:</strong> $${violation.actualCost}</p>` : ''}
             <p><strong>Cost Recovered:</strong> ${violation.costRecovered ? 'Yes' : 'No'}</p>
@@ -353,39 +353,58 @@ export default function ViolationsComplaints() {
         ` : ''}
 
         ${violation.resolutionNotes ? `
-          <div style="margin-bottom: 30px;">
-            <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px;">Resolution Notes</h3>
-            <div style="border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9;">
+          <div class="info-section">
+            <h3>Resolution Notes</h3>
+            <div class="description-box">
               ${violation.resolutionNotes}
             </div>
           </div>
         ` : ''}
 
-        <div style="margin-top: 50px; text-align: center; color: #666; font-size: 12px;">
-          <p>Generated on ${format(new Date(), 'PPP')} | Employee Violation Management System</p>
-        </div>
-      </div>
     `;
     
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Violation Report - ${violation.violationNumber}</title>
-            <style>
-              @media print {
-                body { margin: 0; }
-                @page { margin: 1in; }
-              }
-            </style>
-          </head>
-          <body>
-            ${printContent}
-          </body>
-        </html>
-      `);
+      printWindow.document.write(generatePrintDocument(
+        `Violation Report - ${violation.violationNumber}`,
+        printContent,
+        `
+          .info-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 30px; 
+            margin-bottom: 30px; 
+          }
+          .info-section h3 { 
+            color: #065f46; 
+            border-bottom: 2px solid #d1fae5; 
+            padding-bottom: 5px; 
+            margin-bottom: 15px;
+          }
+          .info-section p { 
+            margin: 8px 0; 
+            line-height: 1.5; 
+          }
+          .description-box { 
+            border: 1px solid #d1fae5; 
+            padding: 15px; 
+            background-color: #f0fdf4; 
+            line-height: 1.6; 
+            border-radius: 4px;
+          }
+          .repeat-offense { 
+            border: 2px solid #dc2626; 
+            padding: 15px; 
+            background-color: #fef2f2; 
+            border-radius: 4px;
+            margin-bottom: 30px;
+          }
+          .repeat-offense h3 { 
+            color: #dc2626; 
+            margin-top: 0; 
+          }
+        `
+      ));
       printWindow.document.close();
       printWindow.print();
     }
