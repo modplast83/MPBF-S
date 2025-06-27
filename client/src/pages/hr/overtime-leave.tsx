@@ -100,7 +100,9 @@ export default function OvertimeLeave() {
     resolver: zodResolver(overtimeRequestSchema),
     defaultValues: {
       userId: currentUser?.id || "",
-      requestedHours: 2
+      date: "",
+      requestedHours: 2,
+      reason: ""
     }
   });
 
@@ -109,7 +111,10 @@ export default function OvertimeLeave() {
     defaultValues: {
       userId: currentUser?.id || "",
       leaveType: "vacation",
-      totalDays: 1
+      startDate: "",
+      endDate: "",
+      totalDays: 1,
+      reason: ""
     }
   });
 
