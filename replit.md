@@ -103,6 +103,18 @@ This is a comprehensive production management system built with React, TypeScrip
 - Health check endpoints for monitoring
 
 ## Recent Changes
+- June 27, 2025: Added standardized print headers to all printed documents across the application:
+  - Created reusable print header component with company logo and bilingual company name
+  - Company logo (SVG): Modern green design with "MPBF" text
+  - Header format: Logo left, "Modern Plastic Bag Factory" / "مصنع أكياس البلاستيك الحديث" center
+  - Updated HR Violations print function with professional styling and standardized header
+  - Updated ABA Formulas print function with enhanced design and company branding
+  - Enhanced print document structure with consistent green color scheme (#065f46, #059669)
+  - Added professional print footer with generation timestamp and company name
+  - Applied standardized header to warehouse final products print functionality
+  - Applied standardized header to JO Mix production reports
+  - Applied standardized header to production materials and quality reports
+  - All print functions now follow consistent design language and branding
 - June 27, 2025: Enhanced HR Violations system with delete functionality:
   - Added delete action button to Violation Records table with red trash icon
   - Implemented confirmation dialog for safe violation deletion

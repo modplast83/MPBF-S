@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { apiRequest } from "@/lib/queryClient";
+import { generatePrintDocument } from "@/components/common/print-header";
 
 interface JobOrder {
   id: number;

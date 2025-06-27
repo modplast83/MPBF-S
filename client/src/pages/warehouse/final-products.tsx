@@ -14,6 +14,7 @@ import { formatDateString, formatNumber, cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { JobOrder, CustomerProduct, Order, Customer, Roll, Item, Category } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { generatePrintDocument } from "@/components/common/print-header";
 import { useLanguage } from "@/hooks/use-language";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/use-auth-v2";
