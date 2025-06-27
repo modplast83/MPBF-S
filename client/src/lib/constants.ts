@@ -143,7 +143,7 @@ export const SIDEBAR_ITEMS = [
         subItems: [
           { title: "attendance", path: "/hr/enhanced-attendance" },
           { title: "employee_management", path: "/hr/employee-management" },
-          { title: "employee_ranks", path: "/hr/employee-ranks" },
+
           { title: "overtime_leave", path: "/hr/overtime-leave" },
           { title: "geofence_management", path: "/hr/geofences" },
           { title: "employee_of_the_month", path: "/hr/employee-of-month" },

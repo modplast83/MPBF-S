@@ -543,7 +543,7 @@ export default function EmployeeManagement() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {getRankName(employee.rankId)}
+                          {employee.position || 'Employee'}
                         </Badge>
                       </TableCell>
                       <TableCell>{employee.department || '-'}</TableCell>
