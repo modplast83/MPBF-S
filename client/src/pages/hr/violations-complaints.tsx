@@ -855,14 +855,14 @@ export default function ViolationsComplaints() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Violation #</TableHead>
+                  <TableHead className="pl-[31px] pr-[31px]">Violation #</TableHead>
                   <TableHead>Employee</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Severity</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Incident Date</TableHead>
                   <TableHead>Repeat</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -886,7 +886,7 @@ export default function ViolationsComplaints() {
                         <Badge className="bg-green-100 text-green-800">First</Badge>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       <div className="flex space-x-2">
                         <Button
                           variant="outline"
