@@ -177,10 +177,7 @@ export default function EmployeeManagement() {
     setIsDialogOpen(true);
   };
 
-  const getRankName = (rankId: number) => {
-    const rank = ranks.find((r: any) => r.id === rankId);
-    return rank ? rank.name : "No Rank";
-  };
+  // Employee ranks functionality has been removed
 
   const getUserName = (employee: any) => {
     return `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || employee.username;

@@ -745,7 +745,7 @@
       "hr": "الموارد البشرية",
       "attendance": "الحضور والإنصراف",
       "employee_management": "إدارة الموظفين",
-      "employee_ranks": "الرتب الوظيفية",
+
       "overtime_leave": "الإضافي والإجازات",
       "geofence_management": "إدارة المواقع",
       "time_attendance": "الحضور والانصراف",
@@ -2262,24 +2262,7 @@
         "employee_directory": "دليل الموظفين",
         "organizational_chart": "الهيكل التنظيمي"
       },
-      "employee_ranks": {
-        "title": "رتب ومستويات الموظفين",
-        "description": "نظام تصنيف وترتيب الموظفين حسب المستوى والأداء",
-        "rank_system": "نظام الرتب",
-        "level_progression": "تطور المستويات",
-        "performance_tiers": "مستويات الأداء",
-        "promotion_criteria": "معايير الترقية",
-        "rank_benefits": "مزايا الرتب",
-        "level_requirements": "متطلبات المستوى",
-        "career_path": "المسار الوظيفي",
-        "skill_assessment": "تقييم المهارات",
-        "competency_matrix": "مصفوفة الكفاءات",
-        "leadership_levels": "مستويات القيادة",
-        "technical_grades": "الدرجات التقنية",
-        "evaluation_periods": "فترات التقييم",
-        "rank_history": "تاريخ الرتب",
-        "level_comparison": "مقارنة المستويات"
-      },
+
       "overtime_leave": {
         "title": "إدارة الوقت الإضافي والإجازات",
         "description": "نظام شامل لإدارة طلبات الوقت الإضافي والإجازات",

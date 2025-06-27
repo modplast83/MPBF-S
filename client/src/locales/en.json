@@ -1729,10 +1729,7 @@
                 "training_session": "Training Session",
                 "select_training": "Select training"
             },
-            "employee_ranks": {
-                "title": "Employee Ranks & Levels",
-                "description": "Define and manage employee ranks, levels, and career progression paths"
-            },
+
             "overtime_leave": {
                 "title": "Overtime & Leave Management",
                 "description": "Manage overtime requests, leave applications, and work schedule adjustments"

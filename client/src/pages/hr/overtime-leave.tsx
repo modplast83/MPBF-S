@@ -71,11 +71,7 @@ export default function OvertimeLeave() {
     queryFn: () => apiRequest('GET', '/api/users')
   });
 
-  // Fetch employee ranks for overtime limits
-  const { data: ranks = [] } = useQuery({
-    queryKey: ['/api/hr/employee-ranks'],
-    queryFn: () => apiRequest('GET', '/api/hr/employee-ranks')
-  });
+  // Employee ranks functionality has been removed - overtime limits now handled differently
 
   // Fetch employee profiles
   const { data: profiles = [] } = useQuery({
@@ -203,19 +199,7 @@ export default function OvertimeLeave() {
   });
 
   const handleOvertimeSubmit = (data: OvertimeRequestForm) => {
-    // Check overtime limits
-    const userProfile = profiles.find((p: any) => p.userId === data.userId);
-    const userRank = ranks.find((r: any) => r.id === userProfile?.rankId);
-    
-    if (userRank && data.requestedHours > userRank.maxOvertimeHours) {
-      toast({
-        title: "Overtime Limit Exceeded",
-        description: `Your rank allows maximum ${userRank.maxOvertimeHours} hours overtime per month`,
-        variant: "destructive"
-      });
-      return;
-    }
-
+    // Basic validation - overtime hours already limited in schema (max 12 hours)
     createOvertimeMutation.mutate(data);
   };
 
