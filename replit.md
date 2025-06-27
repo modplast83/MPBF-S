@@ -105,7 +105,7 @@ This is a comprehensive production management system built with React, TypeScrip
 ## Recent Changes
 - June 27, 2025: Added standardized print headers to all printed documents across the application:
   - Created reusable print header component with company logo and bilingual company name
-  - Company logo (SVG): Modern green design with "MPBF" text
+  - Company logo (PNG): Actual company logo with green circular design and "MODERN PLASTIC BAG FACTORY" text
   - Header format: Logo left, "Modern Plastic Bag Factory" / "مصنع أكياس البلاستيك الحديث" center
   - Updated HR Violations print function with professional styling and standardized header
   - Updated ABA Formulas print function with enhanced design and company branding
