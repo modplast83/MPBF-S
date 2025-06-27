@@ -272,7 +272,7 @@ export default function ViolationsComplaints() {
     
     const IconComponent = typeConfig.icon;
     return (
-      <Badge className={typeConfig.color}>
+      <Badge className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 bg-blue-100 text-blue-800 text-center">
         <IconComponent className="w-3 h-3 mr-1" />
         {typeConfig.label}
       </Badge>
@@ -718,7 +718,6 @@ export default function ViolationsComplaints() {
           </DialogContent>
         </Dialog>
       </div>
-
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -765,7 +764,6 @@ export default function ViolationsComplaints() {
           </CardContent>
         </Card>
       </div>
-
       {/* Filters */}
       <Card>
         <CardHeader>
@@ -842,7 +840,6 @@ export default function ViolationsComplaints() {
           </div>
         </CardContent>
       </Card>
-
       {/* Violations Table */}
       <Card>
         <CardHeader>
@@ -933,7 +930,6 @@ export default function ViolationsComplaints() {
           )}
         </CardContent>
       </Card>
-
       {/* View Violation Dialog */}
       {selectedViolation && (
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
